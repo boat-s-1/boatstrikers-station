@@ -106,6 +106,7 @@ export default async function LibraryPage() {
             <h2>{book.title}</h2>
             <p>{book.text}</p>
             <b>一覧を見る ›</b>
+    <span className="bookOpenText">📖 OPEN</span>
           </a>
         ))}
       </section>
