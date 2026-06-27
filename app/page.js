@@ -75,18 +75,20 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section">
-            <h2>---Boat Night Nippon---</h2>
-        <a href="/radio" className="bannerLink">
-          <Image
-            src="/radio-banner.jpg"
-            alt="BoatStrikers Radio"
-            width={1536}
-            height={864}
-            className="bannerImage"
-          />
-        </a>
-      </section>
+      <section className="homeSectionCard blue">
+  <h2 className="homeSectionTitle">🎙 BOAT NIGHT NIPPON</h2>
+  <p className="homeSectionLead">3人がお届けする競艇ラジオ♪</p>
+
+  <a href="/radio" className="bannerLink">
+    <Image
+      src="/radio-banner.jpg"
+      alt="BoatStrikers Radio"
+      width={1536}
+      height={864}
+      className="bannerImage"
+    />
+  </a>
+</section>
 
           <section className="section todayNewsSection">
   <h2>---今日の新聞---</h2>
