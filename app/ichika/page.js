@@ -27,7 +27,7 @@ return (
   {/* ヒーロー */}
   <section className="heroSection">
     <Image
-      src="/ichika-hero.jpg"
+      src="/ichika-hero.png"
       alt="一果"
       width={1536}
       height={2048}
