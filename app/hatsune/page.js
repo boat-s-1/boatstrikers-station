@@ -62,7 +62,7 @@ export default async function HatsunePage() {
 
       <section className="hero">
         <Image
-          src="/hatsune-hero.png"
+          src="8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png"
           alt="初音"
           width={1536}
           height={864}
