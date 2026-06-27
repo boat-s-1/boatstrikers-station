@@ -814,3 +814,30 @@ body {
   color: #ff2f86;
   font-size: 20px;
 }
+
+
+.radioLead {
+  text-align: center;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.8;
+}
+
+.radioPlayer {
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+
+.radioPlayer iframe {
+  display: block;
+  border: none;
+}
+
+.fullBtn {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+}
