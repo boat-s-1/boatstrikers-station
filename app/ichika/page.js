@@ -126,24 +126,58 @@ export default async function IchikaPage() {
   </a>
 </section>
     
-      <section className="sectionCard pinkCard">
-        <h2>🚤 一果のおすすめレース</h2>
+    <section className="sectionCard pinkCard">
+  <h2>🏆 今月の成績</h2>
+  <p className="recordLead">データが証明する、一果のイン逃げ力！</p>
 
-        <div className="raceItem">
-          <strong>丸亀 1R</strong>
-          <span>イン逃げ期待度 84%</span>
-        </div>
+  <div className="recordGrid">
+    <div className="recordCard">
+      <span>予想レース数</span>
+      <strong>42R</strong>
+      <p>今月の予想数</p>
+    </div>
 
-        <div className="raceItem">
-          <strong>戸田 2R</strong>
-          <span>イン逃げ期待度 78%</span>
-        </div>
+    <div className="recordCard">
+      <span>的中率</span>
+      <strong>71%</strong>
+      <p>的中レース数 30R</p>
+    </div>
 
-        <div className="raceItem">
-          <strong>若松 3R</strong>
-          <span>イン逃げ期待度 72%</span>
-        </div>
-      </section>
+    <div className="recordCard">
+      <span>回収率</span>
+      <strong>126%</strong>
+      <p>収支 +42,350円</p>
+    </div>
+
+    <div className="recordCard">
+      <span>最高配当</span>
+      <strong>18,430円</strong>
+      <p>6/27 若松4R</p>
+    </div>
+  </div>
+
+  <div className="hitRaceBox">
+    <h3>🎯 今月の主な的中</h3>
+
+    <div className="hitRace">
+      <span>6/27 若松4R</span>
+      <b>1-2-4</b>
+      <strong>18,430円</strong>
+    </div>
+
+    <div className="hitRace">
+      <span>6/22 丸亀7R</span>
+      <b>1-2-3</b>
+      <strong>12,760円</strong>
+    </div>
+
+    <div className="hitRace">
+      <span>6/25 住之江3R</span>
+      <b>1-3-2</b>
+      <strong>7,840円</strong>
+    </div>
+  </div>
+</section>
 
  <section className="sectionCard pinkCard">
   <div className="sectionTitleRow">
