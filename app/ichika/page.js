@@ -96,8 +96,41 @@ return (
     </div>
   </section>
   {/* イン飛び研究ラボ */}
-  <section className="sectionCard">
+  <section className="sectionCard pinkCard">
+  <div className="sectionTitleRow">
     <h2>🔬 イン飛び研究ラボ</h2>
+    <a
+      href="https://note.com/boat_strikers"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      noteで見る ›
+    </a>
+  </div>
+
+  <div className="labList">
+    {articles.map((article) => (
+      <a
+        href={article.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="labItem"
+        key={article.link}
+      >
+        {article.image && (
+          <img src={article.image} alt={article.title} />
+        )}
+
+        <div>
+          <h3>{article.title}</h3>
+          <small>
+            {new Date(article.date).toLocaleDateString("ja-JP")}
+          </small>
+        </div>
+      </a>
+    ))}
+  </div>
+</section>
     <div className="articleGrid">
       {articles.map((a) => (
         <div className="articleCard" key={a.title}>
