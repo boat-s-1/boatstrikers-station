@@ -76,25 +76,7 @@ export default async function IchikaPage() {
         />
       </section>
 
-<section className="sectionCard">
-  <a
-    href="https://www.boat-strike.com/tool"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <Image
-      src="/F7854611-D2F7-4CF6-B549-FDB9F581F530.png"
-      alt="一果鬼絞り判定所"
-      width={1536}
-      height={864}
-      style={{
-        width: "100%",
-        height: "auto",
-        borderRadius: "20px",
-      }}
-    />
-  </a>
-</section>
+
             
      <section className="sectionCard pinkCard">
   <h2>📰 今日の一果新聞（前日版）</h2>
@@ -123,6 +105,26 @@ export default async function IchikaPage() {
   )}
 </section>
 
+<section className="sectionCard">
+  <a
+    href="https://www.boat-strike.com/tool"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Image
+      src="/F7854611-D2F7-4CF6-B549-FDB9F581F530.png"
+      alt="一果鬼絞り判定所"
+      width={1536}
+      height={864}
+      style={{
+        width: "100%",
+        height: "auto",
+        borderRadius: "20px",
+      }}
+    />
+  </a>
+</section>
+    
       <section className="sectionCard pinkCard">
         <h2>🚤 一果のおすすめレース</h2>
 
