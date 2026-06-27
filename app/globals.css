@@ -979,3 +979,47 @@ body {
 .kiinaCount strong {
   color: #f6a800;
 }
+
+.homeSectionCard {
+  margin: 22px 14px;
+  padding: 18px;
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  border: 2px solid rgba(255, 180, 210, 0.45);
+}
+
+.homeSectionCard.blue {
+  border-color: #9ed8ff;
+}
+
+.homeSectionCard.pink {
+  border-color: #ff9ac4;
+}
+
+.homeSectionCard.purple {
+  border-color: #b99cff;
+}
+
+.homeSectionCard.yellow {
+  border-color: #ffc84d;
+}
+
+.homeSectionCard.green {
+  border-color: #25c76a;
+}
+
+.homeSectionTitle {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  color: #17345c;
+  margin: 0 0 16px;
+}
+
+.homeSectionLead {
+  text-align: center;
+  font-weight: 800;
+  color: #5d6b82;
+  margin: -6px 0 16px;
+}
