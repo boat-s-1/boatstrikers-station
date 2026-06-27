@@ -685,3 +685,86 @@ body {
 .labItem:hover{
   transform:translateY(-2px);
 }
+
+
+.recordLead {
+  text-align: center;
+  font-weight: 800;
+  color: #ff4f93;
+}
+
+.recordGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.recordCard {
+  background: #fff;
+  border: 1px solid #ffc6dc;
+  border-radius: 18px;
+  padding: 16px 8px;
+  text-align: center;
+  box-shadow: 0 5px 14px rgba(255, 79, 147, 0.12);
+}
+
+.recordCard span {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  background: #ffe4ef;
+  color: #17345c;
+  border-radius: 999px;
+  padding: 6px;
+  margin-bottom: 10px;
+}
+
+.recordCard strong {
+  display: block;
+  color: #ff2f86;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.recordCard p {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: #666;
+}
+
+.hitRaceBox {
+  background: #fff;
+  border: 1px solid #ffc6dc;
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 16px;
+}
+
+.hitRaceBox h3 {
+  margin: 0 0 12px;
+  color: #17345c;
+}
+
+.hitRace {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px dashed #ffd0e2;
+  font-weight: 900;
+}
+
+.hitRace:first-of-type {
+  border-top: 0;
+}
+
+.hitRace b {
+  color: #17345c;
+}
+
+.hitRace strong {
+  color: #ff2f86;
+}
