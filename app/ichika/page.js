@@ -91,50 +91,42 @@ export default async function IchikaPage() {
         </div>
       </section>
 
-      <section className="sectionCard pinkCard">
-        <div className="sectionTitleRow">
-          <h2>🔬 イン飛び研究ラボ</h2>
-          <a
-            href="https://note.com/boat_strikers"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            noteで見る ›
-          </a>
-        </div>
-
-        <div className="labList">
-  {articles.map((article) => (
+ <section className="sectionCard pinkCard">
+  <div className="sectionTitleRow">
+    <h2>🔬 イン飛び研究ラボ</h2>
     <a
-      key={article.link}
-      href={article.link}
+      href="https://note.com/boat_strikers"
       target="_blank"
       rel="noopener noreferrer"
-      className="labItem"
     >
-      <img
-        src={
-          article.image ||
-          "/ichika-banner.jpg"
-        }
-        alt={article.title}
-      />
-
-      <div>
-        <h3>{article.title}</h3>
-
-        <small>
-          {new Date(article.date)
-            .toLocaleDateString("ja-JP")}
-        </small>
-      </div>
+      noteで見る ›
     </a>
-  ))}
-</div>
-            </a>
-          ))}
+  </div>
+
+  <div className="labList">
+    {articles.map((article) => (
+      <a
+        key={article.link}
+        href={article.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="labItem"
+      >
+        <img
+          src={article.image || "/ichika-banner.jpg"}
+          alt={article.title}
+        />
+
+        <div>
+          <h3>{article.title}</h3>
+          <small>
+            {new Date(article.date).toLocaleDateString("ja-JP")}
+          </small>
         </div>
-      </section>
+      </a>
+    ))}
+  </div>
+</section>
 
       <section className="sectionCard pinkCard">
         <h2>📚 過去のバックナンバー</h2>
