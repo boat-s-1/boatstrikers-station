@@ -188,7 +188,7 @@ export default async function Home() {
 
   <a href="https://lin.ee/Pf3FEEQ" className="bannerLink">
     <img
-      src="/line-banner.jpg"
+      src="/EED67E49-6856-4A73-BFF4-60583A6B2835.png"
       alt="公式LINE登録"
       className="bannerImage"
     />
