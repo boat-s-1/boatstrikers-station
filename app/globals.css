@@ -921,3 +921,61 @@ body {
   color: #ff4f93;
   font-size: 13px;
 }
+
+.forecastCountGrid {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.forecastCountCard {
+  display: block;
+  text-decoration: none;
+  color: #17345c;
+  background: #fff;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
+}
+
+.forecastCountCard span {
+  display: block;
+  font-weight: 900;
+  font-size: 20px;
+}
+
+.forecastCountCard strong {
+  display: block;
+  font-size: 42px;
+  color: #ff4f93;
+  margin: 8px 0;
+}
+
+.forecastCountCard p {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.forecastCountCard b {
+  font-size: 14px;
+}
+
+.ichikaCount {
+  border: 2px solid #ff8fbd;
+}
+
+.hatsuneCount {
+  border: 2px solid #a983ff;
+}
+
+.hatsuneCount strong {
+  color: #8a55e6;
+}
+
+.kiinaCount {
+  border: 2px solid #ffc84d;
+}
+
+.kiinaCount strong {
+  color: #f6a800;
+}
