@@ -164,20 +164,32 @@ export default async function Home() {
       </section>
 
       <section className="resultBox">
-        <h2>🏆 的中実績</h2>
-        <p>今月も絶好調！</p>
-        <div className="stats">
-          <div>
-            <span>的中率</span>
-            <strong>72.4%</strong>
-          </div>
-          <div>
-            <span>回収率</span>
-            <strong>118.6%</strong>
-          </div>
-        </div>
-        <button>的中実績を見る</button>
-      </section>
+  <h2>🏆 今月の予想数</h2>
+  <p>一果・初音・キイナが今月も予想を更新中！</p>
+
+  <div className="forecastCountGrid">
+    <a href="/ichika" className="forecastCountCard ichikaCount">
+      <span>🌸 一果</span>
+      <strong>42R</strong>
+      <p>イン逃げ予想</p>
+      <b>一果の成績を見る ›</b>
+    </a>
+
+    <a href="/hatsune" className="forecastCountCard hatsuneCount">
+      <span>💜 初音</span>
+      <strong>38R</strong>
+      <p>女子戦予想</p>
+      <b>初音の成績を見る ›</b>
+    </a>
+
+    <a href="/kiina" className="forecastCountCard kiinaCount">
+      <span>⚡ キイナ</span>
+      <strong>35R</strong>
+      <p>5アタマ予想</p>
+      <b>キイナの成績を見る ›</b>
+    </a>
+  </div>
+</section>
 
       <section className="lineBox">
         <h2>LINE登録で<br />限定新聞をGET！</h2>
