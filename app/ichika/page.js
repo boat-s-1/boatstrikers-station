@@ -40,7 +40,8 @@ image: “/lab3.jpg”,
 },
 ];
 
-export default function IchikaPage() {
+export default async function IchikaPage() {
+  const articles = await getIchikaArticles();
 return (
   {/* ヘッダー */}
   <header className="pageHeader">
