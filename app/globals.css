@@ -1410,3 +1410,63 @@ body {
   color: #7b4a19;
   font-size: 13px;
 }
+
+.bookCard3d {
+  position: relative;
+  min-height: 190px;
+  border-radius: 18px;
+  text-decoration: none;
+  color: #fff8dd;
+  perspective: 900px;
+  transform-style: preserve-3d;
+  box-shadow: 0 10px 20px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+.bookCover,
+.bookPages {
+  position: absolute;
+  inset: 0;
+  padding: 18px;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  transition: transform .7s ease, opacity .4s ease;
+}
+
+.bookCover {
+  z-index: 2;
+  transform-origin: left center;
+  box-shadow: inset 12px 0 18px rgba(0,0,0,.25);
+}
+
+.bookPages {
+  background: #fff7df;
+  color: #4b2b12;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  opacity: 0;
+}
+
+.bookPages span {
+  font-size: 46px;
+}
+
+.bookPages p {
+  font-weight: 900;
+}
+
+.bookCard3d.isOpening .bookCover {
+  transform: rotateY(-105deg);
+}
+
+.bookCard3d.isOpening .bookPages {
+  opacity: 1;
+}
+
+.bookCard3d.greenBook .bookCover { background: linear-gradient(160deg, #285c33, #14351d); }
+.bookCard3d.blueBook .bookCover { background: linear-gradient(160deg, #193855, #0c2036); }
+.bookCard3d.purpleBook .bookCover { background: linear-gradient(160deg, #542e69, #2a1438); }
+.bookCard3d.redBook .bookCover { background: linear-gradient(160deg, #6b3026, #36150f); }
+.bookCard3d.brownBook .bookCover { background: linear-gradient(160deg, #7b4a19, #3d220b); }
+.bookCard3d.tealBook .bookCover { background: linear-gradient(160deg, #1d5d52, #0e302a); }
