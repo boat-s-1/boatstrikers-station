@@ -1140,3 +1140,182 @@ body {
   color: #f6a800;
 }
 
+.libraryPage {
+  min-height: 100vh;
+  padding-bottom: 90px;
+  background: linear-gradient(180deg, #3a2414, #1f1208);
+  color: #3b260f;
+}
+
+.libraryHero {
+  margin: 18px 14px;
+  padding: 24px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fff3d8, #e9c889);
+  border: 4px solid #8b5a25;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.libraryHero h1 {
+  margin: 0;
+  font-size: 34px;
+  color: #4b2b12;
+}
+
+.libraryHero p {
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.libraryHero span {
+  display: inline-block;
+  background: #174b2a;
+  color: #fff3d8;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 900;
+}
+
+.libraryHeroChar {
+  width: 130px;
+  height: auto;
+}
+
+.bookShelf {
+  margin: 20px 14px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.bookCard {
+  min-height: 190px;
+  padding: 18px;
+  border-radius: 18px;
+  color: #fff8dd;
+  text-decoration: none;
+  border: 2px solid rgba(255, 220, 150, .6);
+  box-shadow: inset 0 0 18px rgba(0,0,0,.25), 0 10px 20px rgba(0,0,0,.35);
+}
+
+.bookIcon {
+  font-size: 38px;
+}
+
+.bookCard h2 {
+  margin: 10px 0 8px;
+  font-size: 24px;
+}
+
+.bookCard p {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.bookCard b {
+  display: inline-block;
+  margin-top: 10px;
+  border: 1px solid #f8d98a;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.greenBook { background: linear-gradient(160deg, #285c33, #14351d); }
+.blueBook { background: linear-gradient(160deg, #193855, #0c2036); }
+.purpleBook { background: linear-gradient(160deg, #542e69, #2a1438); }
+.redBook { background: linear-gradient(160deg, #6b3026, #36150f); }
+.brownBook { background: linear-gradient(160deg, #7b4a19, #3d220b); }
+.tealBook { background: linear-gradient(160deg, #1d5d52, #0e302a); }
+
+.librarySection {
+  margin: 24px 14px;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(255, 238, 195, .95);
+  border: 2px solid #b98235;
+}
+
+.libraryTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.libraryTitleRow a {
+  color: #7b4a19;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.latestBooks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.latestBookCard {
+  background: #fffaf0;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #3b260f;
+  border: 1px solid #d8ad64;
+}
+
+.latestBookCard img {
+  width: 100%;
+  height: 95px;
+  object-fit: cover;
+}
+
+.latestBookCard h3 {
+  padding: 10px 10px 4px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.latestBookCard p {
+  padding: 0 10px 10px;
+  margin: 0;
+  color: #80603a;
+  font-weight: 800;
+}
+
+.rankingList {
+  display: grid;
+  gap: 12px;
+}
+
+.rankingItem {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  background: #fffaf0;
+  border-radius: 16px;
+  padding: 12px;
+  text-decoration: none;
+  color: #3b260f;
+}
+
+.rankingItem span {
+  font-size: 30px;
+}
+
+.rankingItem strong {
+  font-size: 16px;
+}
+
+.rankingItem p {
+  margin: 4px 0 0;
+  font-weight: 800;
+  color: #7a5a32;
+}
