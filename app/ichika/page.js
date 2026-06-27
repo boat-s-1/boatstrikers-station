@@ -104,24 +104,33 @@ export default async function IchikaPage() {
         </div>
 
         <div className="labList">
-          {articles.map((article) => (
-            <a
-              href={article.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="labItem"
-              key={article.link}
-            >
-              {article.image && (
-                <img src={article.image} alt={article.title} />
-              )}
+  {articles.map((article) => (
+    <a
+      key={article.link}
+      href={article.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="labItem"
+    >
+      <img
+        src={
+          article.image ||
+          "/ichika-banner.jpg"
+        }
+        alt={article.title}
+      />
 
-              <div>
-                <h3>{article.title}</h3>
-                <small>
-                  {new Date(article.date).toLocaleDateString("ja-JP")}
-                </small>
-              </div>
+      <div>
+        <h3>{article.title}</h3>
+
+        <small>
+          {new Date(article.date)
+            .toLocaleDateString("ja-JP")}
+        </small>
+      </div>
+    </a>
+  ))}
+</div>
             </a>
           ))}
         </div>
