@@ -6,13 +6,33 @@ async function getTodayNewspapers() {
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
   const targets = [
-    { name: "一果新聞 前日版", keyword: "【一果前日版】", tag: "イン逃げ", href: "/ichika", fallback: "/ichika-banner.jpg" },
-    { name: "初音新聞 女子戦版", keyword: "【初音前日版】", tag: "女子戦", href: "/hatsune", fallback: "/hatsune-banner.jpg" },
-    { name: "キイナ新聞 5アタマ版", keyword: "【キイナ前日版】", tag: "穴狙い", href: "/kiina", fallback: "/kiina-banner.jpg" },
+    {
+      name: "一果新聞 前日版",
+      keyword: "【一果前日版】",
+      tag: "イン逃げ",
+      href: "/ichika",
+      fallback: "/ichika-banner.jpg",
+    },
+    {
+      name: "初音新聞 女子戦版",
+      keyword: "【初音前日版】",
+      tag: "女子戦",
+      href: "/hatsune",
+      fallback: "/hatsune-banner.jpg",
+    },
+    {
+      name: "キイナ新聞 5アタマ版",
+      keyword: "【キイナ前日版】",
+      tag: "穴狙い",
+      href: "/kiina",
+      fallback: "/kiina-banner.jpg",
+    },
   ];
 
   return targets.map((t) => {
-    const item = feed.items.find((item) => item.title.includes(t.keyword));
+    const item = feed.items.find((feedItem) =>
+      feedItem.title.includes(t.keyword)
+    );
 
     const image =
       item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || t.fallback;
@@ -22,19 +42,7 @@ async function getTodayNewspapers() {
       date: item ? item.pubDate : "",
       link: item ? item.link : t.href,
       tag: t.tag,
-      image,
-    };
-  });
-}
-
-  return targets.map((t) => {
-    const item = feed.items.find((item) => item.title.includes(t.keyword));
-
-    return {
-      title: item ? item.title : t.name,
-      date: item ? item.pubDate : "",
-      link: item ? item.link : t.href,
-      tag: t.tag,
+      image: image,
     };
   });
 }
