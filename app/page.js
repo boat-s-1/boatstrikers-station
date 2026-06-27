@@ -88,7 +88,7 @@ export default async function Home() {
       </section>
 
           <section className="section todayNewsSection">
-  <h2>📰 今日の新聞</h2>
+  <h2>---今日の新聞---</h2>
   <p className="todayNewsLead">一果・初音・キイナの最新前日版をチェック！</p>
 
   <div className="todayNewsGrid">
@@ -118,6 +118,7 @@ export default async function Home() {
 </section>      
 
       <section className="section">
+      <h2>---メンバー---</h2>
         <a href="/ichika" className="bannerLink">
           <Image
             src="/ichika-banner.jpg"
