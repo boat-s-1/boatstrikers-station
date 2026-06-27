@@ -194,11 +194,20 @@ export default async function Home() {
   </div>
 </section>
 
-      <section className="lineBox">
-        <h2>LINE登録で<br />限定新聞をGET！</h2>
-        <p>前日版・直前版・ラジオ情報を無料でお届けします。</p>
-        <a href="https://lin.ee/Pf3FEEQ">LINEで受け取る</a>
-      </section>
+      <section className="sectionCard lineBannerCard">
+  <a
+    href="https://lin.ee/Pf3FEEQ"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="lineBannerLink"
+  >
+    <img
+      src="1946131E-2FFC-48F9-B850-AB6164F6220C.png"
+      alt="公式LINE登録"
+      className="lineBannerImage"
+    />
+  </a>
+</section>
 
       <nav className="bottomNav">
         <a href="/">ホーム</a>
