@@ -76,6 +76,7 @@ export default async function Home() {
       </section>
 
       <section className="section">
+            <h2>---Boat Night Nippon---</h2>
         <a href="/radio" className="bannerLink">
           <Image
             src="/radio-banner.jpg"
@@ -118,7 +119,7 @@ export default async function Home() {
 </section>      
 
       <section className="section">
-      <h2>---メンバー---</h2>
+      <h2>---メンバー紹介---</h2>
         <a href="/ichika" className="bannerLink">
           <Image
             src="/ichika-banner.jpg"
@@ -153,6 +154,7 @@ export default async function Home() {
  
 
       <section className="section">
+              <h2>---過去の新聞＆考察---</h2>
         <a href="/library" className="bannerLink">
           <Image
             src="/library-banner.jpg"
@@ -165,7 +167,7 @@ export default async function Home() {
       </section>
 
       <section className="resultBox">
-  <h2>🏆 今月の予想数</h2>
+  <h2>---今月の予想---</h2>
   <p>一果・初音・キイナが今月も予想を更新中！</p>
 
   <div className="forecastCountGrid">
