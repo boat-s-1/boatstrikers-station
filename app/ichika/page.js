@@ -106,8 +106,9 @@ export default async function IchikaPage() {
 </section>
 
 <section className="sectionCard">
+    <h2>一果のイン逃げツール（β版）</h2>
   <a
-    href="https://www.boat-strike.com/tool"
+    href="https://www.boat-strike.com/ichika"
     target="_blank"
     rel="noopener noreferrer"
   >
