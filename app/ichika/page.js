@@ -83,7 +83,7 @@ export default async function IchikaPage() {
     rel="noopener noreferrer"
   >
     <Image
-      src="/ichika-tool-banner.jpg"
+      src="/F7854611-D2F7-4CF6-B549-FDB9F581F530.png"
       alt="一果鬼絞り判定所"
       width={1536}
       height={864}
