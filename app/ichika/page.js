@@ -251,17 +251,45 @@ export default async function IchikaPage() {
   </div>
 </section>
 
-      <section className="sectionCard pinkCard">
-        <h2>📚 過去のバックナンバー</h2>
+    <section className="sectionCard pinkCard">
+  <div className="sectionTitleRow">
+    <h2>🎙 Boat Strikers Radio</h2>
 
-        <div className="monthGrid">
-          <a href="#">2026年6月</a>
-          <a href="#">2026年5月</a>
-          <a href="#">2026年4月</a>
-          <a href="#">2026年3月</a>
-        </div>
-      </section>
+    <a
+      href="https://www.youtube.com/@boatstrikers_official"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      YouTubeへ ›
+    </a>
+  </div>
 
+  <p className="radioLead">
+    一果・初音・キイナがお届けする競艇ラジオ♪
+    イン飛び研究や女子戦考察、穴党反省会を配信中！
+  </p>
+
+  <div className="radioPlayer">
+    <iframe
+      width="100%"
+      height="240"
+      src="https://www.youtube.com/embed/videoseries?list=プレイリストID"
+      title="Boat Strikers Radio"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+  </div>
+
+  <a
+    href="https://www.youtube.com/@boatstrikers_official"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="pinkBtn fullBtn"
+  >
+    🎙 ラジオ一覧を見る
+  </a>
+</section>
       <section className="lineBox">
         <h2>
           LINE登録で
