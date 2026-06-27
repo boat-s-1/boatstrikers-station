@@ -40,7 +40,7 @@ export default function KiinaPage() {
 
       <section className="hero">
         <Image
-          src="/kiina-hero.jpg"
+          src="/kiina-hero.png"
           alt="キイナの部屋"
           width={1536}
           height={864}
