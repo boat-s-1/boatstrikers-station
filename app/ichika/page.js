@@ -76,6 +76,26 @@ export default async function IchikaPage() {
         />
       </section>
 
+<section className="sectionCard">
+  <a
+    href="https://www.boat-strike.com/tool"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Image
+      src="/ichika-tool-banner.jpg"
+      alt="一果鬼絞り判定所"
+      width={1536}
+      height={864}
+      style={{
+        width: "100%",
+        height: "auto",
+        borderRadius: "20px",
+      }}
+    />
+  </a>
+</section>
+            
      <section className="sectionCard pinkCard">
   <h2>📰 今日の一果新聞（前日版）</h2>
 
