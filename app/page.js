@@ -1,13 +1,27 @@
-import Image from "next/image";
+import Parser from "rss-parser";
 
-const news = [
-  { title: "一果新聞 前日版", race: "6/26 丸亀1R", tag: "イン逃げ" },
-  { title: "初音新聞 女子戦版", race: "6/26 戸田2R", tag: "女子戦" },
-  { title: "キイナ新聞 5アタマ版", race: "6/26 若松4R", tag: "穴狙い" },
-];
+async function getTodayNewspapers() {
+  const parser = new Parser();
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-export default function Home() {
-  return (
+  const targets = [
+    { name: "一果新聞 前日版", keyword: "【一果前日版】", tag: "イン逃げ", href: "/ichika" },
+    { name: "初音新聞 女子戦版", keyword: "【初音前日版】", tag: "女子戦", href: "/hatsune" },
+    { name: "キイナ新聞 5アタマ版", keyword: "【キイナ前日版】", tag: "穴狙い", href: "/kiina" },
+  ];
+
+  return targets.map((t) => {
+    const item = feed.items.find((item) => item.title.includes(t.keyword));
+
+    return {
+      title: item ? item.title : t.name,
+      date: item ? item.pubDate : "",
+      link: item ? item.link : t.href,
+      tag: t.tag,
+    };
+  });
+}
+
     <main className="page">
       <header className="header">
         <div className="logo">BOAT<br /><span>STRIKERS</span></div>
@@ -76,19 +90,31 @@ export default function Home() {
         </a>
       </section>
 
-      <section className="section">
-        <h2>今日の新聞</h2>
-        {news.map((n) => (
-          <div className="newsItem" key={n.title}>
-            <div>
-              <strong>{n.title}</strong>
-              <p>{n.race}</p>
-            </div>
-            <span>{n.tag}</span>
-            <button>読む</button>
-          </div>
-        ))}
-      </section>
+    <section className="section">
+  <h2>今日の新聞</h2>
+
+  {news.map((n) => (
+    <a
+      className="newsItem"
+      key={n.title}
+      href={n.link}
+      target={n.link.startsWith("http") ? "_blank" : "_self"}
+      rel="noopener noreferrer"
+    >
+      <div>
+        <strong>{n.title}</strong>
+        <p>
+          {n.date
+            ? new Date(n.date).toLocaleDateString("ja-JP")
+            : "最新号をチェック"}
+        </p>
+      </div>
+
+      <span>{n.tag}</span>
+      <button>読む</button>
+    </a>
+  ))}
+</section>
 
       <section className="section">
         <a href="/library" className="bannerLink">
