@@ -37,7 +37,7 @@ export default function HatsunePage() {
 
       <section className="hero">
         <Image
-          src="/hatsune-hero.jpg"
+          src="/hatsune-hero.png"
           alt="初音の部屋"
           width={1536}
           height={864}
