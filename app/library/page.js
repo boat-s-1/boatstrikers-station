@@ -96,21 +96,14 @@ export default async function LibraryPage() {
         />
       </section>
 
-      <section className="bookShelf">
-        {books.map((book) => (
-          <a
-  href={book.href}
-  className={`bookCard bookOpen ${book.className}`}
-  key={book.title}
->
-            <div className="bookIcon">{book.icon}</div>
-            <h2>{book.title}</h2>
-            <p>{book.text}</p>
-            <b>一覧を見る ›</b>
-    <span className="bookOpenText">📖 OPEN</span>
-          </a>
-        ))}
-      </section>
+     <section className="bookShelf">
+  {books.map((book) => (
+    <BookCard
+      key={book.title}
+      book={book}
+    />
+  ))}
+</section>
 
       <section className="librarySection" id="free">
         <div className="libraryTitleRow">
