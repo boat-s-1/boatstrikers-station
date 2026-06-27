@@ -1023,3 +1023,46 @@ body {
   color: #5d6b82;
   margin: -6px 0 16px;
 }
+
+.forecastGrid{
+  display:grid;
+  gap:14px;
+}
+
+.forecastCard{
+  display:block;
+  text-decoration:none;
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+.forecastCard span{
+  display:block;
+  font-size:20px;
+  font-weight:900;
+  color:#17345c;
+}
+
+.forecastCard strong{
+  display:block;
+  font-size:42px;
+  margin-top:6px;
+}
+
+.forecastCard small{
+  color:#777;
+}
+
+.ichikaCard{
+  border-left:8px solid #ff6ca8;
+}
+
+.hatsuneCard{
+  border-left:8px solid #9b6cff;
+}
+
+.kiinaCard{
+  border-left:8px solid #ffbf3b;
+}
