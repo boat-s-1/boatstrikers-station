@@ -76,7 +76,7 @@ export default async function Home() {
       </section>
 
       <section className="homeSectionCard blue">
-  <h2 className="homeSectionTitle">🎙 BOAT NIGHT NIPPON</h2>
+  <h2 className="homeSectionTitle">🎙 BNN</h2>
   <p className="homeSectionLead">3人がお届けする競艇ラジオ♪</p>
 
   <a href="/radio" className="bannerLink">
@@ -90,9 +90,9 @@ export default async function Home() {
   </a>
 </section>
 
-          <section className="section todayNewsSection">
-  <h2>---今日の新聞---</h2>
-  <p className="todayNewsLead">一果・初音・キイナの最新前日版をチェック！</p>
+        <section className="homeSectionCard pink">
+  <h2 className="homeSectionTitle">📰 今日の新聞</h2>
+  <p className="homeSectionLead">最新の前日版をチェック！</p>
 
   <div className="todayNewsGrid">
     {news.map((n) => (
@@ -104,7 +104,6 @@ export default async function Home() {
         rel="noopener noreferrer"
       >
         <img src={n.image} alt={n.title} />
-
         <div className="todayNewsBody">
           <span>{n.tag}</span>
           <h3>{n.title}</h3>
@@ -118,95 +117,80 @@ export default async function Home() {
       </a>
     ))}
   </div>
-</section>      
+</section>   
 
-      <section className="section">
-      <h2>---メンバー紹介---</h2>
-        <a href="/ichika" className="bannerLink">
-          <Image
-            src="/ichika-banner.jpg"
-            alt="一果の部屋"
-            width={1536}
-            height={1080}
-            className="bannerImage"
-          />
-        </a>
+      <section className="homeSectionCard purple">
+  <h2 className="homeSectionTitle">👧 メンバー紹介</h2>
+  <p className="homeSectionLead">あなたに合った担当を見つけよう♪</p>
 
-        <a href="/hatsune" className="bannerLink">
-          <Image
-            src="/hatsune-banner.jpg"
-            alt="初音の部屋"
-            width={1536}
-            height={1080}
-            className="bannerImage"
-          />
-        </a>
+  <a href="/ichika" className="bannerLink">
+    <Image src="/ichika-banner.jpg" alt="一果の部屋" width={1536} height={1080} className="bannerImage" />
+  </a>
 
-        <a href="/kiina" className="bannerLink">
-          <Image
-            src="/kiina-banner.jpg"
-            alt="キイナの部屋"
-            width={1536}
-            height={1080}
-            className="bannerImage"
-          />
-        </a>
-      </section>
+  <a href="/hatsune" className="bannerLink">
+    <Image src="/hatsune-banner.jpg" alt="初音の部屋" width={1536} height={1080} className="bannerImage" />
+  </a>
+
+  <a href="/kiina" className="bannerLink">
+    <Image src="/kiina-banner.jpg" alt="キイナの部屋" width={1536} height={1080} className="bannerImage" />
+  </a>
+</section>
 
  
 
-      <section className="section">
-              <h2>---過去の新聞＆考察---</h2>
-        <a href="/library" className="bannerLink">
-          <Image
-            src="/library-banner.jpg"
-            alt="一果図書館"
-            width={1536}
-            height={864}
-            className="bannerImage"
-          />
-        </a>
-      </section>
+      <section className="homeSectionCard yellow">
+  <h2 className="homeSectionTitle">📚 一果図書館</h2>
+  <p className="homeSectionLead">過去新聞をチェック！</p>
 
-      <section className="resultBox">
-  <h2>---今月の予想---</h2>
-  <p>一果・初音・キイナが今月も予想を更新中！</p>
+  <a href="/library" className="bannerLink">
+    <Image
+      src="/library-banner.jpg"
+      alt="一果図書館"
+      width={1536}
+      height={864}
+      className="bannerImage"
+    />
+  </a>
+</section>
 
-  <div className="forecastCountGrid">
-    <a href="/ichika" className="forecastCountCard ichikaCount">
+      <section className="homeSectionCard yellow">
+  <h2 className="homeSectionTitle">🏆 今月の予想数</h2>
+  <p className="homeSectionLead">
+    今月も3人が予想を更新中！
+  </p>
+
+  <div className="forecastGrid">
+
+    <a href="/ichika" className="forecastCard ichikaCard">
       <span>🌸 一果</span>
       <strong>42R</strong>
-      <p>イン逃げ予想</p>
-      <b>一果の成績を見る ›</b>
+      <small>イン逃げ担当</small>
     </a>
 
-    <a href="/hatsune" className="forecastCountCard hatsuneCount">
+    <a href="/hatsune" className="forecastCard hatsuneCard">
       <span>💜 初音</span>
       <strong>38R</strong>
-      <p>女子戦予想</p>
-      <b>初音の成績を見る ›</b>
+      <small>女子戦担当</small>
     </a>
 
-    <a href="/kiina" className="forecastCountCard kiinaCount">
+    <a href="/kiina" className="forecastCard kiinaCard">
       <span>⚡ キイナ</span>
       <strong>35R</strong>
-      <p>5アタマ予想</p>
-      <b>キイナの成績を見る ›</b>
+      <small>5アタマ担当</small>
     </a>
+
   </div>
 </section>
 
-      <section className="sectionCard lineBannerCard">
-  <a
-    href="https://lin.ee/Pf3FEEQ"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="lineBannerLink"
-  >
+      <section className="homeSectionCard green">
+  <h2 className="homeSectionTitle">💚 LINE限定情報</h2>
+  <p className="homeSectionLead">前日版・直前版を最速配信中！</p>
+
+  <a href="https://lin.ee/Pf3FEEQ" className="bannerLink">
     <img
-      src="EED67E49-6856-4A73-BFF4-60583A6B2835.png"
+      src="/line-banner.jpg"
       alt="公式LINE登録"
-      className="lineBannerImage"
+      className="bannerImage"
     />
   </a>
 </section>
