@@ -1066,3 +1066,77 @@ body {
 .kiinaCard{
   border-left:8px solid #ffbf3b;
 }
+
+.forecastMemberList {
+  display: grid;
+  gap: 14px;
+}
+
+.forecastMemberCard {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  align-items: center;
+  text-decoration: none;
+  color: #17345c;
+  background: #fff;
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.1);
+  overflow: hidden;
+}
+
+.forecastMemberCard img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.forecastMemberCard span {
+  display: block;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.forecastMemberCard strong {
+  display: block;
+  font-size: 44px;
+  color: #ff4f93;
+  line-height: 1;
+  margin: 8px 0;
+}
+
+.forecastMemberCard p {
+  margin: 0 0 6px;
+  font-weight: 800;
+  color: #666;
+}
+
+.forecastMemberCard b {
+  color: #ff4f93;
+  font-size: 14px;
+}
+
+.ichikaMember {
+  border-left: 8px solid #ff6ca8;
+}
+
+.hatsuneMember {
+  border-left: 8px solid #9b6cff;
+}
+
+.hatsuneMember strong,
+.hatsuneMember b {
+  color: #8a55e6;
+}
+
+.kiinaMember {
+  border-left: 8px solid #ffbf3b;
+}
+
+.kiinaMember strong,
+.kiinaMember b {
+  color: #f6a800;
+}
+
