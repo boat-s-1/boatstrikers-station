@@ -106,7 +106,7 @@ export default async function HatsunePage() {
           rel="noopener noreferrer"
         >
           <Image
-            src="/hatsune-tool-banner.png"
+            src="A3494785-9903-43D3-9FDB-048D521B3008.png"
             alt="初音女子戦データツール"
             width={1536}
             height={864}
