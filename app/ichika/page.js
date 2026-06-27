@@ -1,6 +1,33 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 
+
+
+async function getIchikaNewspaper() {
+  const parser = new Parser();
+
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+
+  const item = feed.items.find((item) =>
+    item.title.includes("【一果前日版】")
+  );
+
+  if (!item) return null;
+
+  const image =
+    item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || "/ichika-banner.jpg";
+
+  return {
+    title: item.title,
+    link: item.link,
+    date: item.pubDate,
+    image,
+  };
+}
+
+const articles = await getIchikaArticles();
+const newspaper = await getIchikaNewspaper();
+
 async function getIchikaArticles() {
   const parser = new Parser();
 
@@ -49,28 +76,32 @@ export default async function IchikaPage() {
         />
       </section>
 
-      <section className="sectionCard pinkCard">
-        <h2>📰 今日の一果新聞（前日版）</h2>
+     <section className="sectionCard pinkCard">
+  <h2>📰 今日の一果新聞（前日版）</h2>
 
-        <div className="newsFeature">
-          <Image
-            src="/today-news.jpg"
-            alt="一果新聞"
-            width={600}
-            height={600}
-            className="featureImg"
-          />
+  {newspaper ? (
+    <a
+      href={newspaper.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="newsFeature"
+    >
+      <img
+        src={newspaper.image}
+        alt={newspaper.title}
+        className="featureImg"
+      />
 
-          <div>
-            <h3>6月27日 前日版</h3>
-            <p>一果が選んだイン逃げ注目レースを掲載！</p>
-
-            <a href="#" className="pinkBtn">
-              📖 新聞を読む
-            </a>
-          </div>
-        </div>
-      </section>
+      <div>
+        <h3>{newspaper.title}</h3>
+        <p>{new Date(newspaper.date).toLocaleDateString("ja-JP")}</p>
+        <span className="pinkBtn">📖 新聞を読む</span>
+      </div>
+    </a>
+  ) : (
+    <p>今日の一果新聞はまだありません。</p>
+  )}
+</section>
 
       <section className="sectionCard pinkCard">
         <h2>🚤 一果のおすすめレース</h2>
