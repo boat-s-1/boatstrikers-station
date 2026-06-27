@@ -24,7 +24,7 @@ const books = [
     title: "無料新聞",
     icon: "📰",
     text: "前日版を毎日更新！",
-    href: "#free",
+    href: "free",
     className: "greenBook",
   },
   {
