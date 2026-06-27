@@ -531,3 +531,117 @@ body {
   padding: 4px 8px;
   font-size: 11px;
 }
+.yellowCard {
+  border: 2px solid #ffc84d;
+  background: linear-gradient(180deg, #fff9e6, #fff);
+}
+
+.yellowBtn {
+  display: block;
+  width: 100%;
+  background: #f6a800;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  border: 0;
+  border-radius: 14px;
+  padding: 13px;
+  font-weight: 900;
+  margin-top: 10px;
+}
+
+.yellowOutline {
+  color: #f6a800;
+  border: 2px solid #f6a800;
+}
+
+.kiinaRace span {
+  background: #f6a800;
+}
+
+.kiinaRace b {
+  color: #f6a800;
+}
+
+.yellowText {
+  color: #f6a800 !important;
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.resultMini {
+  background: #fff4cf;
+  border: 1px solid #ffd86b;
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+}
+
+.resultMini .trophy {
+  font-size: 28px;
+}
+
+.resultMini strong {
+  display: block;
+  color: #f04444;
+  font-size: 28px;
+  margin: 6px 0;
+}
+
+.resultMini p {
+  margin: 0;
+  font-weight: 900;
+}
+
+.resultMini small {
+  color: #8a6a00;
+  font-weight: 700;
+}
+
+.yellowLab {
+  border: 1px solid #ffe08a;
+  background: #fffdf5;
+}
+
+.toolBox {
+  background: #fff4cf;
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+}
+
+.toolBox p {
+  font-weight: 900;
+}
+
+.boatNums {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.boatNums span {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  border: 1px solid #ddd;
+}
+
+.boatNums .active {
+  background: #f6a800;
+  color: white;
+}
+
+.yellowNew {
+  background: #f6a800 !important;
+}
