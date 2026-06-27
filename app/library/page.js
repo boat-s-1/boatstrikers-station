@@ -22,12 +22,13 @@ async function getLibraryItems() {
 
 const books = [
   {
-    title: "無料新聞",
-    icon: "📰",
-    text: "前日版を毎日更新！",
-    href: "/library/free",
-    className: "greenBook",
-  },
+  title: "無料新聞",
+  icon: "📰",
+  text: "前日版を毎日更新！",
+  href: "/library/free",
+  className: "greenBook",
+  cover: "/free-book-cover.jpg",
+},
   {
     title: "有料新聞",
     icon: "💎",
