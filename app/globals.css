@@ -645,3 +645,43 @@ body {
 .yellowNew {
   background: #f6a800 !important;
 }
+
+.labList{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.labItem{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border-radius:16px;
+  background:white;
+  text-decoration:none;
+  color:#222;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.labItem img{
+  width:120px;
+  height:70px;
+  object-fit:cover;
+  border-radius:12px;
+  flex-shrink:0;
+}
+
+.labItem h3{
+  margin:0;
+  font-size:15px;
+  line-height:1.4;
+  color:#222;
+}
+
+.labItem small{
+  color:#888;
+}
+
+.labItem:hover{
+  transform:translateY(-2px);
+}
