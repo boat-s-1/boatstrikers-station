@@ -27,7 +27,7 @@ const books = [
   text: "前日版を毎日更新！",
   href: "/library/free",
   className: "greenBook",
-  cover: "/free-book-cover.jpg",
+  cover: "EA10918E-477E-45A0-8360-0D22E7756B70.png",
 },
   {
     title: "有料新聞",
