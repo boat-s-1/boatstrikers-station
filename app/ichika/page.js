@@ -290,17 +290,20 @@ export default async function IchikaPage() {
     🎙 ラジオ一覧を見る
   </a>
 </section>
-      <section className="lineBox">
-        <h2>
-          LINE登録で
-          <br />
-          限定新聞GET！
-        </h2>
-
-        <p>前日版・直前版・ラジオ情報を無料配信中</p>
-
-        <a href="https://lin.ee/Pf3FEEQ">LINE登録はこちら</a>
-      </section>
+      <section className="sectionCard lineBannerCard">
+  <a
+    href="https://lin.ee/Pf3FEEQ"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="lineBannerLink"
+  >
+    <img
+      src="/line-banner.jpg"
+      alt="公式LINE登録"
+      className="lineBannerImage"
+    />
+  </a>
+</section>
 
       <nav className="bottomNav">
         <a href="/">ホーム</a>
