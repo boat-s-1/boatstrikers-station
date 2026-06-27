@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Parser from "rss-parser";
 
 async function getTodayNewspapers() {
@@ -22,6 +23,10 @@ async function getTodayNewspapers() {
   });
 }
 
+export default async function Home() {
+  const news = await getTodayNewspapers();
+
+  return (
     <main className="page">
       <header className="header">
         <div className="logo">BOAT<br /><span>STRIKERS</span></div>
@@ -90,31 +95,31 @@ async function getTodayNewspapers() {
         </a>
       </section>
 
-  <section className="section">
-  <h2>今日の新聞</h2>
+      <section className="section">
+        <h2>今日の新聞</h2>
 
-  {news.map((n) => (
-    <a
-      className="newsItem"
-      key={n.title}
-      href={n.link}
-      target={n.link.startsWith("http") ? "_blank" : "_self"}
-      rel="noopener noreferrer"
-    >
-      <div>
-        <strong>{n.title}</strong>
-        <p>
-          {n.date
-            ? new Date(n.date).toLocaleDateString("ja-JP")
-            : "最新号をチェック"}
-        </p>
-      </div>
+        {news.map((n) => (
+          <a
+            className="newsItem"
+            key={n.title}
+            href={n.link}
+            target={n.link.startsWith("http") ? "_blank" : "_self"}
+            rel="noopener noreferrer"
+          >
+            <div>
+              <strong>{n.title}</strong>
+              <p>
+                {n.date
+                  ? new Date(n.date).toLocaleDateString("ja-JP")
+                  : "最新号をチェック"}
+              </p>
+            </div>
 
-      <span>{n.tag}</span>
-      <button type="button">読む</button>
-    </a>
-  ))}
-</section>
+            <span>{n.tag}</span>
+            <button type="button">読む</button>
+          </a>
+        ))}
+      </section>
 
       <section className="section">
         <a href="/library" className="bannerLink">
