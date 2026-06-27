@@ -157,26 +157,61 @@ export default async function IchikaPage() {
   </div>
 
   <div className="hitRaceBox">
+  <div className="sectionTitleRow">
     <h3>🎯 今月の主な的中</h3>
-
-    <div className="hitRace">
-      <span>6/27 若松4R</span>
-      <b>1-2-4</b>
-      <strong>18,430円</strong>
-    </div>
-
-    <div className="hitRace">
-      <span>6/22 丸亀7R</span>
-      <b>1-2-3</b>
-      <strong>12,760円</strong>
-    </div>
-
-    <div className="hitRace">
-      <span>6/25 住之江3R</span>
-      <b>1-3-2</b>
-      <strong>7,840円</strong>
-    </div>
+    <a
+      href="https://x.com/Resort_Style_t"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Xで見る ›
+    </a>
   </div>
+
+  <div className="hitImageList">
+    <a
+      href="https://x.com/Resort_Style_t"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hitImageCard"
+    >
+      <img src="/hit-0627.jpg" alt="6/27 若松4R 的中" />
+      <div>
+        <span>6/27 若松4R</span>
+        <b>1-2-4</b>
+        <strong>18,430円</strong>
+      </div>
+    </a>
+
+    <a
+      href="https://x.com/Resort_Style_t"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hitImageCard"
+    >
+      <img src="/hit-0622.jpg" alt="6/22 丸亀7R 的中" />
+      <div>
+        <span>6/22 丸亀7R</span>
+        <b>1-2-3</b>
+        <strong>12,760円</strong>
+      </div>
+    </a>
+
+    <a
+      href="https://x.com/Resort_Style_t"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hitImageCard"
+    >
+      <img src="/hit-0625.jpg" alt="6/25 住之江3R 的中" />
+      <div>
+        <span>6/25 住之江3R</span>
+        <b>1-3-2</b>
+        <strong>7,840円</strong>
+      </div>
+    </a>
+  </div>
+</div>
 </section>
 
  <section className="sectionCard pinkCard">
