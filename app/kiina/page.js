@@ -106,7 +106,7 @@ export default async function KiinaPage() {
           rel="noopener noreferrer"
         >
           <Image
-            src="/kiina-tool-banner.png"
+            src="A81A852F-2EF6-4045-B5B9-EFBDB078636D.png"
             alt="キイナ5アタマ予想ツール"
             width={1536}
             height={864}
