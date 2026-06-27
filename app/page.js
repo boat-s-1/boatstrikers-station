@@ -90,7 +90,7 @@ async function getTodayNewspapers() {
         </a>
       </section>
 
-    <section className="section">
+  <section className="section">
   <h2>今日の新聞</h2>
 
   {news.map((n) => (
@@ -111,7 +111,7 @@ async function getTodayNewspapers() {
       </div>
 
       <span>{n.tag}</span>
-      <button>読む</button>
+      <button type="button">読む</button>
     </a>
   ))}
 </section>
