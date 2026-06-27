@@ -1,4 +1,26 @@
-import Image from “next/image”;
+import Image from "next/image";
+import Parser from "rss-parser";
+
+async function getIchikaArticles() {
+  const parser = new Parser();
+
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+
+  return feed.items
+    .filter((item) => item.title.includes("【一果ゼミ"))
+    .slice(0, 6)
+    .map((item) => {
+      const image =
+        item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || "";
+
+      return {
+        title: item.title,
+        link: item.link,
+        date: item.pubDate,
+        image,
+      };
+    });
+}
 
 const articles = [
 {
