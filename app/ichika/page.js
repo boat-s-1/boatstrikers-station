@@ -40,7 +40,7 @@ export default async function IchikaPage() {
 
       <section className="hero">
         <Image
-          src="/ichika-hero.png"
+          src="/7562660D-EB9C-4981-A1D1-789E6211DACA.png"
           alt="一果"
           width={1536}
           height={2048}
