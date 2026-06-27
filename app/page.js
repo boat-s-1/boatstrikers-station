@@ -153,32 +153,40 @@ export default async function Home() {
   </a>
 </section>
 
-      <section className="homeSectionCard yellow">
+   <section className="homeSectionCard yellow">
   <h2 className="homeSectionTitle">🏆 今月の予想数</h2>
-  <p className="homeSectionLead">
-    今月も3人が予想を更新中！
-  </p>
+  <p className="homeSectionLead">今月も3人が予想を更新中！</p>
 
-  <div className="forecastGrid">
-
-    <a href="/ichika" className="forecastCard ichikaCard">
-      <span>🌸 一果</span>
-      <strong>42R</strong>
-      <small>イン逃げ担当</small>
+  <div className="forecastMemberList">
+    <a href="/ichika" className="forecastMemberCard ichikaMember">
+      <img src="/ichika-icon.png" alt="一果" />
+      <div>
+        <span>🌸 一果</span>
+        <strong>42R</strong>
+        <p>イン逃げ担当</p>
+        <b>成績を見る ›</b>
+      </div>
     </a>
 
-    <a href="/hatsune" className="forecastCard hatsuneCard">
-      <span>💜 初音</span>
-      <strong>38R</strong>
-      <small>女子戦担当</small>
+    <a href="/hatsune" className="forecastMemberCard hatsuneMember">
+      <img src="/hatsune-icon.png" alt="初音" />
+      <div>
+        <span>💜 初音</span>
+        <strong>38R</strong>
+        <p>女子戦担当</p>
+        <b>成績を見る ›</b>
+      </div>
     </a>
 
-    <a href="/kiina" className="forecastCard kiinaCard">
-      <span>⚡ キイナ</span>
-      <strong>35R</strong>
-      <small>5アタマ担当</small>
+    <a href="/kiina" className="forecastMemberCard kiinaMember">
+      <img src="/kiina-icon.png" alt="キイナ" />
+      <div>
+        <span>⚡ キイナ</span>
+        <strong>35R</strong>
+        <p>5アタマ担当</p>
+        <b>成績を見る ›</b>
+      </div>
     </a>
-
   </div>
 </section>
 
