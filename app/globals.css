@@ -1353,3 +1353,60 @@ body {
 .bookOpen:active::before {
   transform: perspective(600px) rotateY(-22deg);
 }
+
+.freeNewsList {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.freeNewsCard {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: center;
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  padding: 12px;
+  text-decoration: none;
+  color: #3b260f;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.freeNewsCard img {
+  width: 110px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.freeNewsCard span {
+  display: inline-block;
+  background: #174b2a;
+  color: #fff3d8;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.freeNewsCard h3 {
+  margin: 7px 0 5px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.freeNewsCard p {
+  margin: 0;
+  color: #80603a;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.freeNewsCard b {
+  display: inline-block;
+  margin-top: 6px;
+  color: #7b4a19;
+  font-size: 13px;
+}
