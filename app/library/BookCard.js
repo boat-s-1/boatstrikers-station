@@ -7,31 +7,30 @@ export default function BookCard({ book }) {
   const router = useRouter();
   const [opening, setOpening] = useState(false);
 
-  const openBook = (e) => {
+  const handleClick = (e) => {
     e.preventDefault();
     setOpening(true);
 
     setTimeout(() => {
       router.push(book.href);
-    }, 700);
+    }, 750);
   };
 
   return (
     <a
       href={book.href}
-      onClick={openBook}
-      className={`bookCard3d ${book.className} ${opening ? "isOpening" : ""}`}
+      onClick={handleClick}
+      className={`shelfBook ${book.className} ${opening ? "openBook" : ""}`}
     >
-      <div className="bookCover">
-        <div className="bookIcon">{book.icon}</div>
+      <div className="bookSpine">
+        <span className="bookIcon">{book.icon}</span>
         <h2>{book.title}</h2>
         <p>{book.text}</p>
-        <b>本を開く ›</b>
       </div>
 
-      <div className="bookPages">
+      <div className="bookInside">
         <span>📖</span>
-        <p>Loading...</p>
+        <b>OPEN...</b>
       </div>
     </a>
   );
