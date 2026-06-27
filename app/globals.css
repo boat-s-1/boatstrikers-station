@@ -1470,3 +1470,130 @@ body {
 .bookCard3d.redBook .bookCover { background: linear-gradient(160deg, #6b3026, #36150f); }
 .bookCard3d.brownBook .bookCover { background: linear-gradient(160deg, #7b4a19, #3d220b); }
 .bookCard3d.tealBook .bookCover { background: linear-gradient(160deg, #1d5d52, #0e302a); }
+
+.woodShelfWrap {
+  margin: 24px 14px;
+  padding: 18px 14px 26px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #8a5728, #4a2a12);
+  border: 4px solid #2b1709;
+  box-shadow: 0 14px 30px rgba(0,0,0,.45);
+}
+
+.woodShelfTitle {
+  text-align: center;
+  color: #fff3d8;
+  font-weight: 900;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.woodShelf {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.shelfBoard {
+  height: 16px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d69a4b, #7b4318);
+  box-shadow: inset 0 3px 4px rgba(255,255,255,.25);
+}
+
+.shelfBook {
+  position: relative;
+  min-height: 170px;
+  border-radius: 12px 12px 6px 6px;
+  text-decoration: none;
+  color: #fff7dc;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.bookSpine {
+  position: absolute;
+  inset: 0;
+  padding: 12px 8px;
+  border-radius: 12px 12px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform-origin: left center;
+  transition: transform .7s ease;
+  box-shadow:
+    inset 8px 0 14px rgba(0,0,0,.3),
+    0 8px 16px rgba(0,0,0,.3);
+}
+
+.bookSpine::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.35);
+}
+
+.bookIcon {
+  font-size: 30px;
+}
+
+.bookSpine h2 {
+  writing-mode: vertical-rl;
+  margin: 8px 0;
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+.bookSpine p {
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.bookInside {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: #fff8e6;
+  color: #4a2a12;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.bookInside span {
+  font-size: 40px;
+}
+
+.bookInside b {
+  font-size: 12px;
+}
+
+.shelfBook.openBook .bookSpine {
+  transform: rotateY(-115deg);
+}
+
+.shelfBook.openBook .bookInside {
+  opacity: 1;
+}
+
+.shelfBook:active {
+  transform: scale(1.04);
+}
+
+.shelfBook.greenBook .bookSpine { background: linear-gradient(160deg, #2f7a3d, #14351d); }
+.shelfBook.blueBook .bookSpine { background: linear-gradient(160deg, #1f5f8f, #0c2036); }
+.shelfBook.purpleBook .bookSpine { background: linear-gradient(160deg, #7a3fa0, #2a1438); }
+.shelfBook.redBook .bookSpine { background: linear-gradient(160deg, #9a3a2d, #36150f); }
+.shelfBook.brownBook .bookSpine { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
+.shelfBook.tealBook .bookSpine { background: linear-gradient(160deg, #24796b, #0e302a); }
