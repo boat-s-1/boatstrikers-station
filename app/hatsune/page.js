@@ -294,7 +294,7 @@ export default async function HatsunePage() {
           className="lineBannerLink"
         >
           <img
-            src="/line-banner.jpg"
+            src="90F7EE0F-5EE8-4E71-BF86-D254BB00750D.png"
             alt="公式LINE登録"
             className="lineBannerImage"
           />
