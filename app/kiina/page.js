@@ -293,7 +293,7 @@ export default async function KiinaPage() {
           className="lineBannerLink"
         >
           <img
-            src="/line-banner.jpg"
+            src="C5AD4F38-3CAF-4C4D-9A4A-8313644E05BB.png"
             alt="公式LINE登録"
             className="lineBannerImage"
           />
