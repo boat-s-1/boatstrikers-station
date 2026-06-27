@@ -841,3 +841,21 @@ body {
   text-align: center;
   margin-top: 16px;
 }
+
+
+.lineBannerCard {
+  padding: 10px;
+  background: #fff;
+}
+
+.lineBannerLink {
+  display: block;
+}
+
+.lineBannerImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
