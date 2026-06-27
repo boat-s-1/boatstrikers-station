@@ -23,21 +23,21 @@ async function getIchikaArticles() {
 }
 
 const articles = [
-{
-title: “インが飛ぶ条件7選”,
-date: “2026.06.20”,
-image: “/lab1.jpg”,
-},
-{
-title: “モーター相場の見方”,
-date: “2026.06.18”,
-image: “/lab2.jpg”,
-},
-{
-title: “展示タイム活用法”,
-date: “2026.06.16”,
-image: “/lab3.jpg”,
-},
+  {
+    title: "インが飛ぶ条件7選",
+    date: "2026.06.20",
+    image: "/lab1.jpg",
+  },
+  {
+    title: "モーター相場の見方",
+    date: "2026.06.18",
+    image: "/lab2.jpg",
+  },
+  {
+    title: "展示タイム活用法",
+    date: "2026.06.16",
+    image: "/lab3.jpg",
+  },
 ];
 
 export default async function IchikaPage() {
