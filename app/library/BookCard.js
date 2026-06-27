@@ -23,9 +23,15 @@ export default function BookCard({ book }) {
       className={`shelfBook ${book.className} ${opening ? "openBook" : ""}`}
     >
       <div className="bookSpine">
-        <span className="bookIcon">{book.icon}</span>
-        <h2>{book.title}</h2>
-        <p>{book.text}</p>
+        {book.cover ? (
+          <img src={book.cover} alt={book.title} className="bookCoverImage" />
+        ) : (
+          <>
+            <span className="bookIcon">{book.icon}</span>
+            <h2>{book.title}</h2>
+            <p>{book.text}</p>
+          </>
+        )}
       </div>
 
       <div className="bookInside">
