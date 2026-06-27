@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
+import BookCard from "./BookCard";
 
 async function getLibraryItems() {
   const parser = new Parser();
