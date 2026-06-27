@@ -202,7 +202,7 @@ export default async function Home() {
     className="lineBannerLink"
   >
     <img
-      src="1946131E-2FFC-48F9-B850-AB6164F6220C.png"
+      src="EED67E49-6856-4A73-BFF4-60583A6B2835.png"
       alt="公式LINE登録"
       className="lineBannerImage"
     />
