@@ -1319,3 +1319,37 @@ body {
   font-weight: 800;
   color: #7a5a32;
 }
+
+.bookOpen {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.bookOpen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,.22),
+    rgba(255,255,255,.02)
+  );
+  transform-origin: left center;
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+.bookOpen:hover,
+.bookOpen:active {
+  transform: scale(1.03);
+  box-shadow:
+    inset 0 0 18px rgba(0,0,0,.25),
+    0 16px 30px rgba(0,0,0,.45);
+}
+
+.bookOpen:hover::before,
+.bookOpen:active::before {
+  transform: perspective(600px) rotateY(-22deg);
+}
