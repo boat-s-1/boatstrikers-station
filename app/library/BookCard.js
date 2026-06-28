@@ -13,7 +13,7 @@ export default function BookCard({ book }) {
 
     setTimeout(() => {
       router.push(book.href);
-    }, 650);
+    }, 1100);
   };
 
   return (
@@ -35,12 +35,19 @@ export default function BookCard({ book }) {
       </div>
 
       <div className="magazineOpen">
-  <img
-    src={book.inside || "/inside-default.jpg"}
-    alt=""
-    className="insideImage"
-  />
-</div>
+        {book.inside ? (
+          <img
+            src={book.inside}
+            alt={`${book.title}の中ページ`}
+            className="insideImage"
+          />
+        ) : (
+          <>
+            <span>📖</span>
+            <b>OPEN...</b>
+          </>
+        )}
+      </div>
     </a>
   );
 }
