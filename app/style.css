@@ -260,3 +260,12 @@ body {
 .newsItem button {
   cursor: pointer;
 }
+
+
+.magazineCover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 22px;
+  display: block;
+}
