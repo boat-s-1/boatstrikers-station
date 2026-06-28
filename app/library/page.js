@@ -64,7 +64,7 @@ const sections = [
         text: "場別攻略",
         href: "/library/stadiums",
         className: "blueBook",
-        cover: "/book-24-stadiums.jpg",
+        cover: "/9DB363E3-DA3D-44BE-BC88-26F3B23C6B3E.png",
       },
     ],
   },
