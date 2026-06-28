@@ -73,6 +73,7 @@ const sections = [
         href: "/library/stadiums",
         className: "blueBook",
         cover: "/9DB363E3-DA3D-44BE-BC88-26F3B23C6B3E.png",
+        inside: "/B40F322B-2661-475E-8F36-519CD91A4F52.png",
       },
     ],
   },
