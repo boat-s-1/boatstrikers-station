@@ -94,7 +94,7 @@ const sections = [
         text: "5アタマ新聞",
         href: "/library/kiina-news",
         className: "yellowBook",
-        cover: "/6716D6BF-80F0-415A-BC81-0270FB704655.png",
+        cover: "/1EFC4DE6-E17F-40BE-96CE-24C5C640DE24.png",
       },
     ],
   },
