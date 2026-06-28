@@ -158,6 +158,7 @@ export default async function LibraryPage() {
           <p>新聞・ゼミ・攻略本を本棚から探そう！</p>
           <span>知識があなたの勝率を変える</span>
         </div>
+
         <Image
           src="/ichika-icon.png"
           alt="一果図書館"
