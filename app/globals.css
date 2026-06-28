@@ -1889,3 +1889,117 @@ body {
   border-radius: 16px;
   display: block;
 }
+
+
+.woodShelf {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 10px 4px 18px;
+  scroll-snap-type: x mandatory;
+}
+
+.magazineBook {
+  position: relative;
+  flex: 0 0 135px;
+  height: 190px;
+  text-decoration: none;
+  scroll-snap-align: start;
+  perspective: 1000px;
+}
+
+.magazineCoverWrap {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  transform: rotate(-2deg);
+  transform-origin: left center;
+  transition: transform 0.65s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 18px rgba(0,0,0,.35);
+  z-index: 2;
+}
+
+.magazineBook:nth-child(2) .magazineCoverWrap {
+  transform: rotate(1.5deg);
+}
+
+.magazineBook:nth-child(3) .magazineCoverWrap {
+  transform: rotate(-1deg);
+}
+
+.magazineCoverWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 表紙画像がない本 */
+.magazineFallback {
+  width: 100%;
+  height: 100%;
+  color: #fff8dd;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 12px;
+}
+
+.magazineFallback span {
+  font-size: 34px;
+}
+
+.magazineFallback h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.magazineFallback p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.magazineOpen {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: #fff7df;
+  color: #4a2a12;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  z-index: 1;
+  box-shadow: inset 10px 0 16px rgba(120,70,20,.18);
+}
+
+.magazineOpen span {
+  font-size: 42px;
+}
+
+.magazineOpen b {
+  font-size: 12px;
+}
+
+.magazineBook.openBook .magazineCoverWrap {
+  transform: rotateY(-110deg) scale(1.03);
+}
+
+.magazineBook.openBook .magazineOpen {
+  opacity: 1;
+}
+
+.magazineBook:active .magazineCoverWrap {
+  transform: translateY(-8px) scale(1.04);
+}
+
+/* fallback色 */
+.magazineFallback.greenBook { background: linear-gradient(160deg, #2f7a3d, #14351d); }
+.magazineFallback.blueBook { background: linear-gradient(160deg, #1f5f8f, #0c2036); }
+.magazineFallback.purpleBook { background: linear-gradient(160deg, #7a3fa0, #2a1438); }
+.magazineFallback.yellowBook { background: linear-gradient(160deg, #f6a800, #8a5500); }
+.magazineFallback.redBook { background: linear-gradient(160deg, #9a3a2d, #36150f); }
+.magazineFallback.brownBook { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
+.magazineFallback.tealBook { background: linear-gradient(160deg, #24796b, #0e302a); }
