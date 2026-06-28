@@ -2267,3 +2267,156 @@ body {
   display: block;
   border-radius: 12px;
 }
+
+/* ===== 図書館：横スクロール大型マガジン棚 ===== */
+
+.woodShelf {
+  display: flex !important;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 14px 8px 26px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.magazineBook {
+  position: relative !important;
+  flex: 0 0 165px !important;
+  width: 165px !important;
+  height: 235px !important;
+  display: block !important;
+  text-decoration: none;
+  perspective: 1000px;
+  overflow: visible !important;
+  scroll-snap-align: start;
+}
+
+.magazineCoverWrap {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 165px !important;
+  height: 235px !important;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  transform-origin: left center;
+  transition: transform 0.75s ease, box-shadow 0.3s ease;
+  box-shadow: 0 12px 24px rgba(0,0,0,.4);
+  z-index: 2;
+}
+
+.magazineCoverWrap img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  display: block;
+}
+
+.magazineBook:active .magazineCoverWrap {
+  transform: translateY(-10px) scale(1.04);
+}
+
+.magazineBook.openBook .magazineCoverWrap {
+  transform: rotateY(-108deg) translateX(-4px) !important;
+}
+
+.magazineOpen {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 165px !important;
+  height: 235px !important;
+  border-radius: 16px;
+  background: #fff7df;
+  color: #4a2a12;
+  display: grid !important;
+  place-items: center;
+  text-align: center;
+  opacity: 0;
+  z-index: 1;
+  box-shadow: inset 10px 0 16px rgba(120,70,20,.18);
+  overflow: hidden;
+}
+
+.magazineBook.openBook .magazineOpen {
+  opacity: 1 !important;
+}
+
+.insideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* バッジ */
+.bookBadge {
+  position: absolute;
+  top: -8px;
+  left: -6px;
+  z-index: 5;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+}
+
+.bookBadge.new {
+  background: #ff2f86;
+}
+
+.bookBadge.popular {
+  background: #f6a800;
+}
+
+.bookBadge.free {
+  background: #06c755;
+}
+
+.bookBadge.premium {
+  background: #8a55e6;
+}
+
+/* 表紙画像がない本 */
+.magazineFallback {
+  width: 100%;
+  height: 100%;
+  color: #fff8dd;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 14px;
+}
+
+.magazineFallback span {
+  font-size: 40px;
+}
+
+.magazineFallback h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.magazineFallback p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.magazineFallback.greenBook { background: linear-gradient(160deg, #2f7a3d, #14351d); }
+.magazineFallback.blueBook { background: linear-gradient(160deg, #1f5f8f, #0c2036); }
+.magazineFallback.purpleBook { background: linear-gradient(160deg, #7a3fa0, #2a1438); }
+.magazineFallback.yellowBook { background: linear-gradient(160deg, #f6a800, #8a5500); }
+.magazineFallback.redBook { background: linear-gradient(160deg, #9a3a2d, #36150f); }
+.magazineFallback.brownBook { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
+.magazineFallback.tealBook { background: linear-gradient(160deg, #24796b, #0e302a); }
+
+.shelfBoard {
+  height: 18px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d69a4b, #7b4318);
+  box-shadow: inset 0 3px 4px rgba(255,255,255,.25);
+}
