@@ -1,3 +1,5 @@
+import Parser from "rss-parser";
+
 const stadiums = [
   "桐生", "戸田", "江戸川", "平和島", "多摩川", "浜名湖",
   "蒲郡", "常滑", "津", "三国", "びわこ", "住之江",
@@ -5,7 +7,36 @@ const stadiums = [
   "下関", "若松", "芦屋", "福岡", "唐津", "大村",
 ];
 
-export default function StadiumsPage() {
+async function getLatestStadiumArticles() {
+  const parser = new Parser();
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+
+  return feed.items
+    .filter((item) =>
+      stadiums.some((place) => item.title.includes(place))
+    )
+    .slice(0, 5)
+    .map((item) => {
+      const image =
+        item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
+        "/book-24-stadiums.jpg";
+
+      const place =
+        stadiums.find((s) => item.title.includes(s)) || "攻略";
+
+      return {
+        title: item.title,
+        link: item.link,
+        date: item.pubDate,
+        image,
+        place,
+      };
+    });
+}
+
+export default async function StadiumsPage() {
+  const latest = await getLatestStadiumArticles();
+
   return (
     <main className="libraryPage">
       <header className="header">
@@ -28,39 +59,49 @@ export default function StadiumsPage() {
         <div className="magazineInfo">
           <span>攻略本コーナー</span>
           <h1>24場攻略ノート</h1>
-          <p>
-            全国24場の特徴・イン有利度・荒れやすさをまとめて学べる攻略本です。
-          </p>
+          <p>全国24場の特徴・水面・荒れやすさを学べる攻略本棚です。</p>
         </div>
       </section>
 
       <section className="librarySection">
-        <h2>📖 この本で学べること</h2>
+        <h2>🆕 最新攻略記事</h2>
 
-        <div className="tocGrid">
-          <div>🚤 各場の水面特徴</div>
-          <div>🌪 風・うねりの影響</div>
-          <div>📊 イン有利度</div>
-          <div>💰 荒れやすい場の見分け方</div>
+        <div className="stadiumLatestScroll">
+          {latest.map((article) => (
+            <a
+              href={article.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="stadiumLatestCard"
+              key={article.link}
+            >
+              <img src={article.image} alt={article.title} />
+              <span>{article.place}</span>
+              <h3>{article.title}</h3>
+              <p>{new Date(article.date).toLocaleDateString("ja-JP")}</p>
+            </a>
+          ))}
         </div>
       </section>
 
-      <section className="librarySection">
-        <h2>🗾 全国24場一覧</h2>
+      <section className="libraryShelfSection">
+        <h2>📚 全国24場 本棚</h2>
+        <p>気になる場の攻略ノートを開こう！</p>
 
-        <div className="stadiumGrid">
+        <div className="stadiumSpineShelf">
           {stadiums.map((name, index) => (
             <a
-              href={`/library/stadiums/${index + 1}`}
-              className="stadiumCard"
+              href={`/library/stadium?place=${encodeURIComponent(name)}`}
+              className="stadiumSpineBook"
               key={name}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               <strong>{name}</strong>
-              <b>攻略を見る ›</b>
             </a>
           ))}
         </div>
+
+        <div className="shelfBoard"></div>
       </section>
 
       <nav className="bottomNav">
