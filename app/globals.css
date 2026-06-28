@@ -2034,6 +2034,66 @@ body {
   transform: scale(0.96) !important;
 }
 
+.magazineBook {
+  position: relative;
+  flex: 0 0 115px;
+  width: 115px;
+  height: 165px;
+  display: block;
+  perspective: 900px;
+  overflow: visible;
+}
+
+.magazineCoverWrap {
+  position: absolute;
+  inset: 0;
+  width: 115px;
+  height: 165px;
+  border-radius: 12px;
+  overflow: hidden;
+  transform-origin: left center;
+  transition: transform 0.65s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 18px rgba(0,0,0,.35);
+  z-index: 2;
+  background: #fff;
+}
+
+.magazineCoverWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 開いた中のページ */
 .magazineOpen {
-  display: none;
+  position: absolute;
+  inset: 0;
+  width: 115px;
+  height: 165px;
+  border-radius: 12px;
+  background: #fff7df;
+  color: #4a2a12;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  opacity: 0;
+  z-index: 1;
+  box-shadow: inset 10px 0 16px rgba(120,70,20,.18);
+}
+
+.magazineOpen span {
+  font-size: 32px;
+}
+
+.magazineOpen b {
+  font-size: 11px;
+}
+
+.magazineBook.openBook .magazineCoverWrap {
+  transform: rotateY(-105deg);
+}
+
+.magazineBook.openBook .magazineOpen {
+  opacity: 1;
 }
