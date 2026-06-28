@@ -2681,3 +2681,42 @@ body {
   color: #80603a;
   font-weight: 800;
 }
+
+.libraryPointCard {
+  margin: 18px 14px;
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fff7df, #e6c27a);
+  border: 3px solid #8b5a25;
+  box-shadow: 0 10px 22px rgba(0,0,0,.28);
+  text-align: center;
+}
+
+.libraryPointCard h2 {
+  margin: 0 0 8px;
+  color: #4b2b12;
+}
+
+.libraryPointCard strong {
+  font-size: 36px;
+  color: #174b2a;
+}
+
+.libraryPointCard p {
+  font-weight: 900;
+  color: #5a3518;
+}
+
+.pointBar {
+  height: 14px;
+  background: #fff3d8;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #8b5a25;
+}
+
+.pointBar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #06c755, #f6a800);
+}
