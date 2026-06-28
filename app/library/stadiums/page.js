@@ -13,7 +13,7 @@ async function getLatestStadiumArticles() {
 
   return feed.items
     .filter((item) =>
-      stadiums.some((place) => item.title.includes(place))
+      stadiums.some((place) => item.title.includes(`【${place}場攻略】`))
     )
     .slice(0, 5)
     .map((item) => {
@@ -22,7 +22,8 @@ async function getLatestStadiumArticles() {
         "/book-24-stadiums.jpg";
 
       const place =
-        stadiums.find((s) => item.title.includes(s)) || "攻略";
+        stadiums.find((s) => item.title.includes(`【${s}場攻略】`)) ||
+        "攻略";
 
       return {
         title: item.title,
@@ -91,7 +92,7 @@ export default async function StadiumsPage() {
         <div className="stadiumSpineShelf">
           {stadiums.map((name, index) => (
             <a
-              href={`/library/stadium?place=${encodeURIComponent(name)}`}
+              href={`/library/stadium/${encodeURIComponent(name)}`}
               className="stadiumSpineBook"
               key={name}
             >
