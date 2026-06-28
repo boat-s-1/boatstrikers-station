@@ -31,7 +31,7 @@ const sections = [
         text: "イン逃げ研究",
         href: "/library/ichika-seminar",
         className: "greenBook",
-        cover: "cover: "5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",",
+        cover: "cover: "/5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",",
       },
       {
         title: "初音ゼミ",
