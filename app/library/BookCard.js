@@ -13,28 +13,37 @@ export default function BookCard({ book }) {
 
     setTimeout(() => {
       router.push(book.href);
-    }, 750);
+    }, 850);
   };
 
   return (
     <a
       href={book.href}
       onClick={handleClick}
-      className={`shelfBook ${book.className} ${opening ? "openBook" : ""}`}
+      className={`shelfBookWithSpine ${book.className} ${
+        opening ? "openBook" : ""
+      }`}
     >
-      <div className="bookSpine">
-        {book.cover ? (
-          <img src={book.cover} alt={book.title} className="bookCoverImage" />
-        ) : (
-          <>
-            <span className="bookIcon">{book.icon}</span>
-            <h2>{book.title}</h2>
-            <p>{book.text}</p>
-          </>
-        )}
+      <div className="bookBody">
+        <div className="bookSpineSide">
+          <span>{book.icon}</span>
+          <b>{book.title}</b>
+        </div>
+
+        <div className="bookFrontCover">
+          {book.cover ? (
+            <img src={book.cover} alt={book.title} />
+          ) : (
+            <div className="fallbackCover">
+              <span>{book.icon}</span>
+              <h2>{book.title}</h2>
+              <p>{book.text}</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="bookInside">
+      <div className="bookInsidePage">
         <span>📖</span>
         <b>OPEN...</b>
       </div>
