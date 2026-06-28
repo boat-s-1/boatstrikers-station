@@ -2003,3 +2003,37 @@ body {
 .magazineFallback.redBook { background: linear-gradient(160deg, #9a3a2d, #36150f); }
 .magazineFallback.brownBook { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
 .magazineFallback.tealBook { background: linear-gradient(160deg, #24796b, #0e302a); }
+
+.magazineBook {
+  position: relative;
+  flex: 0 0 115px;
+  width: 115px;
+  height: 165px;
+  display: block;
+  overflow: hidden;
+}
+
+.magazineCoverWrap {
+  position: relative;
+  width: 115px;
+  height: 165px;
+  border-radius: 12px;
+  overflow: hidden;
+  transform: none !important;
+}
+
+.magazineCoverWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 開く演出は一旦控えめ */
+.magazineBook.openBook .magazineCoverWrap {
+  transform: scale(0.96) !important;
+}
+
+.magazineOpen {
+  display: none;
+}
