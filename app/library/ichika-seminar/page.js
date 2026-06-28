@@ -23,6 +23,8 @@ async function getIchikaSeminarArticles() {
 
 export default async function IchikaSeminarPage() {
   const articles = await getIchikaSeminarArticles();
+  const latest = articles[0];
+  const backNumbers = articles.slice(1);
 
   return (
     <main className="libraryPage">
@@ -47,46 +49,61 @@ export default async function IchikaSeminarPage() {
         <div className="magazineInfo">
           <span>週刊誌コーナー</span>
           <h1>一果ゼミ</h1>
-          <p>
-            イン逃げ・イン飛びの考え方を、一果がわかりやすく解説する研究マガジンです。
-          </p>
+          <p>毎週更新。イン逃げ・イン飛びの研究マガジンです。</p>
         </div>
       </section>
 
+      {latest && (
+        <section className="librarySection latestIssueBox">
+          <h2>🌸 最新号</h2>
+
+          <a
+            href={latest.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="latestIssueCard"
+          >
+            <img src={latest.image} alt={latest.title} />
+
+            <div>
+              <span>NEW</span>
+              <h3>{latest.title}</h3>
+              <p>{new Date(latest.date).toLocaleDateString("ja-JP")}</p>
+              <b>最新号を読む ›</b>
+            </div>
+          </a>
+        </section>
+      )}
+
       <section className="librarySection">
-        <h2>📖 この本で学べること</h2>
+        <h2>📑 今週の目次</h2>
 
         <div className="tocGrid">
-          <div>🌸 イン逃げの基本</div>
-          <div>🚤 1号艇の信頼度</div>
-          <div>📊 展示・モーター分析</div>
-          <div>🎯 買い目の組み立て</div>
+          <div>🌸 イン逃げ危険度チェック</div>
+          <div>🚤 展示タイムの見方</div>
+          <div>📊 モーター評価ポイント</div>
+          <div>🎯 今週の注目レース</div>
         </div>
       </section>
 
       <section className="librarySection">
         <div className="libraryTitleRow">
-          <h2>📑 一果ゼミ バックナンバー</h2>
+          <h2>📚 バックナンバー</h2>
           <a href="/library">図書館へ戻る ›</a>
         </div>
 
-        <div className="seminarArticleList">
-          {articles.map((article) => (
+        <div className="backNumberScroll">
+          {backNumbers.map((article) => (
             <a
               href={article.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="seminarArticleCard"
+              className="backNumberCard"
               key={article.link}
             >
               <img src={article.image} alt={article.title} />
-
-              <div>
-                <span>一果ゼミ</span>
-                <h3>{article.title}</h3>
-                <p>{new Date(article.date).toLocaleDateString("ja-JP")}</p>
-                <b>読む ›</b>
-              </div>
+              <h3>{article.title}</h3>
+              <p>{new Date(article.date).toLocaleDateString("ja-JP")}</p>
             </a>
           ))}
         </div>
