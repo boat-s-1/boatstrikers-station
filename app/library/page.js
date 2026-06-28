@@ -22,9 +22,14 @@ async function getLibraryItems() {
 
 const sections = [
   {
-    title: "📰 週刊誌コーナー",
-    lead: "3人のゼミをまとめてチェック！",
-    books: [
+
+  title: "週刊誌コーナー",
+
+  lead: "3人のゼミをまとめてチェック！",
+
+  titleImage: "/weekly-title.jpg",
+
+  books: [
       {
         title: "一果ゼミ",
         icon: "🌸",
@@ -170,8 +175,18 @@ export default async function LibraryPage() {
 
       {sections.map((section) => (
         <section className="libraryShelfSection" key={section.title}>
-          <h2>{section.title}</h2>
-          <p>{section.lead}</p>
+          {section.titleImage ? (
+  <img
+    src={section.titleImage}
+    alt={section.title}
+    className="shelfTitleImage"
+  />
+) : (
+  <>
+    <h2>{section.title}</h2>
+    <p>{section.lead}</p>
+  </>
+)}
 
           <div className="woodShelf">
             {section.books.map((book) => (
