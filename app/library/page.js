@@ -157,21 +157,13 @@ export default async function LibraryPage() {
         </a>
       </header>
 
-      <section className="libraryHero">
-        <div>
-          <h1>📚 一果図書館</h1>
-          <p>新聞・ゼミ・攻略本を本棚から探そう！</p>
-          <span>知識があなたの勝率を変える</span>
-        </div>
-
-        <Image
-          src="/ichika-icon.png"
-          alt="一果図書館"
-          width={300}
-          height={300}
-          className="libraryHeroChar"
-        />
-      </section>
+      <section className="libraryHeroImageBox">
+  <img
+    src="/library-hero.jpg"
+    alt="一果図書館"
+    className="libraryHeroImage"
+  />
+</section>
 
       {sections.map((section) => (
         <section className="libraryShelfSection" key={section.title}>
