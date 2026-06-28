@@ -78,7 +78,7 @@ const sections = [
   {
     title: "バックナンバー",
 
-    titleImage: "/title-backnumber.png",
+    titleImage: "/IMG_6095.jpeg",
 
     books: [
       {
