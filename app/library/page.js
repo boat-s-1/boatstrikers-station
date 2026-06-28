@@ -32,6 +32,7 @@ const sections = [
         href: "/library/ichika-seminar",
         className: "greenBook",
         cover: "/5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",
+        inside: "/ichika-inside.jpg",
       },
       {
         title: "初音ゼミ",
