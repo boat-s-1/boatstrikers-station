@@ -2282,9 +2282,9 @@ body {
 
 .magazineBook {
   position: relative !important;
-  flex: 0 0 165px !important;
-  width: 165px !important;
-  height: 235px !important;
+  flex: 0 0 190px !important;
+  width: 190px !important;
+  height: 270px !important;
   display: block !important;
   text-decoration: none;
   perspective: 1000px;
@@ -2295,8 +2295,8 @@ body {
 .magazineCoverWrap {
   position: absolute !important;
   inset: 0 !important;
-  width: 165px !important;
-  height: 235px !important;
+  width: 190px !important;
+  height:270px !important;
   border-radius: 16px;
   overflow: hidden;
   background: #fff;
@@ -2324,8 +2324,8 @@ body {
 .magazineOpen {
   position: absolute !important;
   inset: 0 !important;
-  width: 165px !important;
-  height: 235px !important;
+  width: 190px !important;
+  height: 270px !important;
   border-radius: 16px;
   background: #fff7df;
   color: #4a2a12;
