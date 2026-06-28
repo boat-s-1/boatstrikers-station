@@ -50,7 +50,7 @@ const sections = [
         href: "/library/kiina-seminar",
         className: "yellowBook",
         cover: "/6716D6BF-80F0-415A-BC81-0270FB704655.png",
-        inside: "/0624D4E1-6C05-4F40-9439-2A093A1B0F0D.png",
+        inside: "/2906B318-96E8-4CE9-AA58-2591BC5F6007.png",
       },
     ],
   },
