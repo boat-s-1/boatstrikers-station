@@ -1652,3 +1652,151 @@ body {
 .shelfBook.yellowBook .bookSpine {
   background: linear-gradient(160deg, #f6a800, #8a5500);
 }
+
+.shelfBookWithSpine {
+  position: relative;
+  min-height: 180px;
+  text-decoration: none;
+  perspective: 1000px;
+  display: block;
+}
+
+.bookBody {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  transform-origin: left center;
+  transition: transform 0.85s ease;
+  z-index: 2;
+  border-radius: 12px;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.38);
+}
+
+.bookSpineSide {
+  border-radius: 12px 0 0 12px;
+  color: #fff8dd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 2px;
+  box-shadow: inset -4px 0 8px rgba(0, 0, 0, 0.35);
+}
+
+.bookSpineSide span {
+  font-size: 17px;
+}
+
+.bookSpineSide b {
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.bookFrontCover {
+  border-radius: 0 12px 12px 0;
+  overflow: hidden;
+  background: #fff8e6;
+}
+
+.bookFrontCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 表紙画像がないとき */
+.fallbackCover {
+  height: 100%;
+  color: #fff8dd;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 10px;
+}
+
+.fallbackCover span {
+  font-size: 34px;
+}
+
+.fallbackCover h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.fallbackCover p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* 開いた中身 */
+.bookInsidePage {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #fff2cf, #fffaf0);
+  color: #4a2a12;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  opacity: 0;
+  z-index: 1;
+  box-shadow: inset 10px 0 16px rgba(120, 70, 20, 0.15);
+}
+
+.bookInsidePage span {
+  font-size: 42px;
+}
+
+.bookInsidePage b {
+  font-size: 12px;
+}
+
+.shelfBookWithSpine.openBook .bookBody {
+  transform: rotateY(-118deg);
+}
+
+.shelfBookWithSpine.openBook .bookInsidePage {
+  opacity: 1;
+}
+
+/* 背表紙の色 */
+.shelfBookWithSpine.greenBook .bookSpineSide,
+.shelfBookWithSpine.greenBook .fallbackCover {
+  background: linear-gradient(180deg, #2f7a3d, #14351d);
+}
+
+.shelfBookWithSpine.blueBook .bookSpineSide,
+.shelfBookWithSpine.blueBook .fallbackCover {
+  background: linear-gradient(180deg, #1f5f8f, #0c2036);
+}
+
+.shelfBookWithSpine.purpleBook .bookSpineSide,
+.shelfBookWithSpine.purpleBook .fallbackCover {
+  background: linear-gradient(180deg, #7a3fa0, #2a1438);
+}
+
+.shelfBookWithSpine.yellowBook .bookSpineSide,
+.shelfBookWithSpine.yellowBook .fallbackCover {
+  background: linear-gradient(180deg, #f6a800, #8a5500);
+}
+
+.shelfBookWithSpine.redBook .bookSpineSide,
+.shelfBookWithSpine.redBook .fallbackCover {
+  background: linear-gradient(180deg, #9a3a2d, #36150f);
+}
+
+.shelfBookWithSpine.brownBook .bookSpineSide,
+.shelfBookWithSpine.brownBook .fallbackCover {
+  background: linear-gradient(180deg, #9b5a1c, #3d220b);
+}
+
+.shelfBookWithSpine.tealBook .bookSpineSide,
+.shelfBookWithSpine.tealBook .fallbackCover {
+  background: linear-gradient(180deg, #24796b, #0e302a);
+}
