@@ -2572,3 +2572,16 @@ body {
 .hatsuneArticleCard span {
   background: #8a55e6;
 }
+
+.kiinaMagazineHero{
+  background:linear-gradient(180deg,#fff5cf,#ffd768);
+  border-color:#f6a800;
+}
+
+.kiinaArticleCard span{
+  background:#f6a800;
+}
+
+.kiinaArticleCard b{
+  color:#f6a800;
+}
