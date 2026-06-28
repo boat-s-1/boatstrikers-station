@@ -60,8 +60,10 @@ const sections = [
     ],
   },
   {
-    title: "📘 攻略本コーナー",
-    lead: "全国24場の特徴を学ぼう！",
+    title: "攻略本コーナー",
+
+    titleImage: "/title-guide.png",
+
     books: [
       {
         title: "24場攻略ノート",
@@ -74,8 +76,10 @@ const sections = [
     ],
   },
   {
-    title: "🗞 バックナンバー",
-    lead: "過去の予想新聞はこちら！",
+    title: "バックナンバー",
+
+    titleImage: "/title-backnumber.png",
+
     books: [
       {
         title: "一果予想新聞",
