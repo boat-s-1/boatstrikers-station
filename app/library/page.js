@@ -20,49 +20,116 @@ async function getLibraryItems() {
   });
 }
 
-const books = [
+const sections = [
   {
-  title: "無料新聞",
-  icon: "📰",
-  text: "前日版を毎日更新！",
-  href: "/library/free",
-  className: "greenBook",
-  cover: "EA10918E-477E-45A0-8360-0D22E7756B70.png",
-},
-  {
-    title: "有料新聞",
-    icon: "💎",
-    text: "前日版・直前版はこちら",
-    href: "#premium",
-    className: "blueBook",
+    title: "📰 週刊誌コーナー",
+    lead: "3人のゼミをまとめてチェック！",
+    books: [
+      {
+        title: "一果ゼミ",
+        icon: "🌸",
+        text: "イン逃げ研究",
+        href: "/library/ichika-seminar",
+        className: "greenBook",
+        cover: "/book-ichika-zemi.jpg",
+      },
+      {
+        title: "初音ゼミ",
+        icon: "💜",
+        text: "女子戦研究",
+        href: "/library/hatsune-seminar",
+        className: "purpleBook",
+        cover: "/book-hatsune-zemi.jpg",
+      },
+      {
+        title: "キイナゼミ",
+        icon: "⚡",
+        text: "穴党研究",
+        href: "/library/kiina-seminar",
+        className: "yellowBook",
+        cover: "/book-kiina-zemi.jpg",
+      },
+    ],
   },
   {
-    title: "一果ゼミ",
-    icon: "🔬",
-    text: "イン逃げ研究はこちら",
-    href: "#seminar",
-    className: "purpleBook",
+    title: "📘 攻略本コーナー",
+    lead: "全国24場の特徴を学ぼう！",
+    books: [
+      {
+        title: "24場攻略ノート",
+        icon: "📘",
+        text: "場別攻略",
+        href: "/library/stadiums",
+        className: "blueBook",
+        cover: "/book-24-stadiums.jpg",
+      },
+    ],
   },
   {
-    title: "Radio",
-    icon: "🎙",
-    text: "過去ラジオを聴く",
-    href: "/radio",
-    className: "redBook",
+    title: "🗞 バックナンバー",
+    lead: "過去の予想新聞はこちら！",
+    books: [
+      {
+        title: "一果予想新聞",
+        icon: "🌸",
+        text: "イン逃げ新聞",
+        href: "/library/ichika-news",
+        className: "greenBook",
+        cover: "/book-ichika-news.jpg",
+      },
+      {
+        title: "初音予想新聞",
+        icon: "💜",
+        text: "女子戦新聞",
+        href: "/library/hatsune-news",
+        className: "purpleBook",
+        cover: "/book-hatsune-news.jpg",
+      },
+      {
+        title: "キイナ予想新聞",
+        icon: "⚡",
+        text: "5アタマ新聞",
+        href: "/library/kiina-news",
+        className: "yellowBook",
+        cover: "/book-kiina-news.jpg",
+      },
+    ],
   },
   {
-    title: "成績・データ",
-    icon: "📊",
-    text: "的中実績をチェック",
-    href: "#results",
-    className: "brownBook",
+    title: "🎙 視聴覚コーナー",
+    lead: "Boat Strikers Radioを聴く！",
+    books: [
+      {
+        title: "Radio",
+        icon: "🎙",
+        text: "ラジオ一覧",
+        href: "/radio",
+        className: "redBook",
+        cover: "/book-radio.jpg",
+      },
+    ],
   },
   {
-    title: "特典資料",
-    icon: "🎁",
-    text: "PDF・チェックリスト",
-    href: "#bonus",
-    className: "tealBook",
+    title: "📊 資料室",
+    lead: "成績・データ・特典資料はこちら！",
+    books: [
+      {
+        title: "成績データ",
+        icon: "📊",
+        text: "的中実績",
+        href: "/library/results",
+        className: "brownBook",
+        cover: "/book-results.jpg",
+      },
+      {
+        title: "特典資料",
+        icon: "🎁",
+        text: "PDF資料",
+        href: "/library/bonus",
+        className: "tealBook",
+        cover: "/book-bonus.jpg",
+      },
+    ],
   },
 ];
 
@@ -85,7 +152,7 @@ export default async function LibraryPage() {
       <section className="libraryHero">
         <div>
           <h1>📚 一果図書館</h1>
-          <p>過去の新聞や研究記事をチェックしよう！</p>
+          <p>新聞・ゼミ・攻略本を本棚から探そう！</p>
           <span>知識があなたの勝率を変える</span>
         </div>
         <Image
@@ -97,22 +164,29 @@ export default async function LibraryPage() {
         />
       </section>
 
-     <section className="woodShelfWrap">
-  <div className="woodShelfTitle">📚 本棚から選んでね</div>
+      {sections.map((section) => (
+        <section className="libraryShelfSection" key={section.title}>
+          <h2>{section.title}</h2>
+          <p>{section.lead}</p>
 
-  <div className="woodShelf">
-    {books.map((book) => (
-      <BookCard key={book.title} book={book} />
-    ))}
-  </div>
+          <div className="woodShelf">
+            {section.books.map((book) => (
+              <BookCard key={book.title} book={book} />
+            ))}
+          </div>
 
-  <div className="shelfBoard"></div>
-</section>
+          <div className="shelfBoard"></div>
+        </section>
+      ))}
 
-      <section className="librarySection" id="free">
+      <section className="librarySection">
         <div className="libraryTitleRow">
           <h2>📖 最新追加</h2>
-          <a href="https://note.com/boat_strikers" target="_blank">
+          <a
+            href="https://note.com/boat_strikers"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             もっと見る ›
           </a>
         </div>
@@ -131,36 +205,6 @@ export default async function LibraryPage() {
               <p>{new Date(item.date).toLocaleDateString("ja-JP")}</p>
             </a>
           ))}
-        </div>
-      </section>
-
-      <section className="librarySection">
-        <h2>👑 人気ランキング</h2>
-
-        <div className="rankingList">
-          <a href="/ichika" className="rankingItem">
-            <span>🥇</span>
-            <div>
-              <strong>一果ゼミ 第1回</strong>
-              <p>イン逃げの基本を完全解説！</p>
-            </div>
-          </a>
-
-          <a href="/hatsune" className="rankingItem">
-            <span>🥈</span>
-            <div>
-              <strong>初音ゼミ 第3回</strong>
-              <p>女子戦の狙い方を徹底解説！</p>
-            </div>
-          </a>
-
-          <a href="/kiina" className="rankingItem">
-            <span>🥉</span>
-            <div>
-              <strong>キイナゼミ 第5回</strong>
-              <p>5アタマで高配当を狙う条件</p>
-            </div>
-          </a>
         </div>
       </section>
 
