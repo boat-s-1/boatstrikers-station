@@ -1872,3 +1872,12 @@ body {
 .shelfBookSimple.redBook .bookCoverSimple { background: linear-gradient(160deg, #9a3a2d, #36150f); }
 .shelfBookSimple.brownBook .bookCoverSimple { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
 .shelfBookSimple.tealBook .bookCoverSimple { background: linear-gradient(160deg, #24796b, #0e302a); }
+
+
+.bookCoverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+}
