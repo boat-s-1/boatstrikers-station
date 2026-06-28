@@ -47,7 +47,7 @@ const sections = [
         text: "穴党研究",
         href: "/library/kiina-seminar",
         className: "yellowBook",
-        cover: "/book-kiina-zemi.jpg",
+        cover: "/6716D6BF-80F0-415A-BC81-0270FB704655.png",
       },
     ],
   },
