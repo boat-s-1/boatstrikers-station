@@ -41,7 +41,7 @@ const sections = [
         href: "/library/hatsune-seminar",
         className: "purpleBook",
         cover: "/D5E40BCC-AA6E-4347-B86B-9D0FE4BF4833.png",
-        inside: "/0624D4E1-6C05-4F40-9439-2A093A1B0F0D.png",
+        inside: "/2906B318-96E8-4CE9-AA58-2591BC5F6007.png",
       },
       {
         title: "キイナゼミ",
