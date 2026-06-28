@@ -91,7 +91,7 @@ const sections = [
         text: "5アタマ新聞",
         href: "/library/kiina-news",
         className: "yellowBook",
-        cover: "/book-kiina-news.jpg",
+        cover: "/6716D6BF-80F0-415A-BC81-0270FB704655.png",
       },
     ],
   },
