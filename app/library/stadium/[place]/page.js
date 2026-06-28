@@ -2,6 +2,8 @@ import Parser from "rss-parser";
 
 export default async function StadiumPage({ params }) {
   const { place } = await params;
+  const rawPlace = params.place;
+const place = decodeURIComponent(rawPlace);
 
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
