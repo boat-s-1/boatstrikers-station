@@ -10,6 +10,8 @@ export default function BookCard({ book }) {
   const handleClick = (e) => {
     e.preventDefault();
     setOpening(true);
+    const current = Number(localStorage.getItem("libraryPoint") || 0);
+localStorage.setItem("libraryPoint", current + (book.point || 10));
 
     setTimeout(() => {
       router.push(book.href);
