@@ -3059,3 +3059,100 @@ body {
   color: #7b4a19;
   font-size: 13px;
 }
+
+.newsBackHero {
+  margin: 20px 14px;
+  padding: 18px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fff3d8, #e0b875);
+  border: 3px solid #8b5a25;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+  text-align: center;
+}
+
+.newsBackHero img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 22px;
+  display: block;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+}
+
+.newsBackHero span {
+  display: inline-block;
+  margin-top: 14px;
+  background: #174b2a;
+  color: #fff3d8;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.newsBackHero h1 {
+  margin: 10px 0;
+  font-size: 32px;
+  color: #4b2b12;
+}
+
+.newsBackHero p {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.7;
+  color: #5a3518;
+}
+
+.hatsuneNews {
+  background: linear-gradient(180deg, #f7efff, #d8c0ff);
+  border-color: #8a55e6;
+}
+
+.kiinaNews {
+  background: linear-gradient(180deg, #fff5cf, #ffd768);
+  border-color: #f6a800;
+}
+
+.newsBackGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.newsBackCard {
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #3b260f;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.newsBackCard img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+}
+
+.newsBackCard h3 {
+  margin: 10px 10px 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.newsBackCard p {
+  margin: 0 10px 6px;
+  color: #80603a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.newsBackCard b {
+  display: inline-block;
+  margin: 0 10px 12px;
+  color: #7b4a19;
+  font-size: 13px;
+}
