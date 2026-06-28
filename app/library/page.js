@@ -39,7 +39,7 @@ const sections = [
         text: "女子戦研究",
         href: "/library/hatsune-seminar",
         className: "purpleBook",
-        cover: "/book-hatsune-zemi.jpg",
+        cover: "/D5E40BCC-AA6E-4347-B86B-9D0FE4BF4833.png",
       },
       {
         title: "キイナゼミ",
