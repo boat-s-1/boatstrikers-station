@@ -62,7 +62,7 @@ const sections = [
   {
     title: "攻略本コーナー",
 
-    titleImage: "/title-guide.png",
+    titleImage: "/IMG_6094.jpeg",
 
     books: [
       {
