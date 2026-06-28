@@ -2720,3 +2720,42 @@ body {
   height: 100%;
   background: linear-gradient(90deg, #06c755, #f6a800);
 }
+
+.stadiumGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.stadiumCard {
+  display: block;
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  padding: 14px;
+  text-decoration: none;
+  color: #3b260f;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.stadiumCard span {
+  display: inline-block;
+  background: #1f5f8f;
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stadiumCard strong {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 22px;
+}
+
+.stadiumCard b {
+  color: #7b4a19;
+  font-size: 13px;
+}
