@@ -78,7 +78,7 @@ const sections = [
         text: "イン逃げ新聞",
         href: "/library/ichika-news",
         className: "greenBook",
-        cover: "/book-ichika-news.jpg",
+        cover: "/C53B3EAC-3CBA-411D-BCFF-4C67354CC424.png",
       },
       {
         title: "初音予想新聞",
