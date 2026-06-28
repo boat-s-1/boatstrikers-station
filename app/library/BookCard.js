@@ -35,9 +35,12 @@ export default function BookCard({ book }) {
       </div>
 
       <div className="magazineOpen">
-        <span>📖</span>
-        <b>OPEN...</b>
-      </div>
+  <img
+    src={book.inside || "/inside-default.jpg"}
+    alt=""
+    className="insideImage"
+  />
+</div>
     </a>
   );
 }
