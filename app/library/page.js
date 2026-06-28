@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import BookCard from "./BookCard";
+import LibraryPoint from "./LibraryPoint";
 
 async function getLibraryItems() {
   const parser = new Parser();
@@ -169,6 +170,10 @@ export default async function LibraryPage() {
   />
 </section>
 
+
+  <LibraryPoint />
+
+    
       {sections.map((section) => (
         <section className="libraryShelfSection" key={section.title}>
           {section.titleImage ? (
