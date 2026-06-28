@@ -27,7 +27,7 @@ const sections = [
 
   lead: "3人のゼミをまとめてチェック！",
 
-  titleImage: "/weekly-title.jpg",
+  titleImage: "/IMG_6091.jpeg",
 
   books: [
       {
