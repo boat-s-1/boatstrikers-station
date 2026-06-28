@@ -1800,3 +1800,75 @@ body {
 .shelfBookWithSpine.tealBook .fallbackCover {
   background: linear-gradient(180deg, #24796b, #0e302a);
 }
+
+.shelfBookSimple {
+  position: relative;
+  min-height: 220px;
+  display: block;
+  text-decoration: none;
+  color: #fff8dd;
+  perspective: 1000px;
+}
+
+.bookCoverSimple,
+.bookInsideSimple {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  transition: transform 0.7s ease, opacity 0.3s ease;
+}
+
+.bookCoverSimple {
+  z-index: 2;
+  transform-origin: left center;
+  box-shadow: inset 10px 0 18px rgba(0,0,0,.28), 0 12px 22px rgba(0,0,0,.35);
+}
+
+.bookCoverSimple span {
+  font-size: 36px;
+}
+
+.bookCoverSimple h2 {
+  margin: 6px 0;
+  font-size: 22px;
+}
+
+.bookCoverSimple p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bookCoverSimple b {
+  font-size: 12px;
+  border: 1px solid #f8d98a;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.bookInsideSimple {
+  background: #fff8e6;
+  color: #4a2a12;
+  opacity: 0;
+  z-index: 1;
+}
+
+.shelfBookSimple.openBook .bookCoverSimple {
+  transform: rotateY(-110deg);
+}
+
+.shelfBookSimple.openBook .bookInsideSimple {
+  opacity: 1;
+}
+
+.shelfBookSimple.greenBook .bookCoverSimple { background: linear-gradient(160deg, #2f7a3d, #14351d); }
+.shelfBookSimple.blueBook .bookCoverSimple { background: linear-gradient(160deg, #1f5f8f, #0c2036); }
+.shelfBookSimple.purpleBook .bookCoverSimple { background: linear-gradient(160deg, #7a3fa0, #2a1438); }
+.shelfBookSimple.yellowBook .bookCoverSimple { background: linear-gradient(160deg, #f6a800, #8a5500); }
+.shelfBookSimple.redBook .bookCoverSimple { background: linear-gradient(160deg, #9a3a2d, #36150f); }
+.shelfBookSimple.brownBook .bookCoverSimple { background: linear-gradient(160deg, #9b5a1c, #3d220b); }
+.shelfBookSimple.tealBook .bookCoverSimple { background: linear-gradient(160deg, #24796b, #0e302a); }
