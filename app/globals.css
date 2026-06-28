@@ -2759,3 +2759,153 @@ body {
   color: #7b4a19;
   font-size: 13px;
 }
+
+.stadiumLatestScroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 14px 2px 8px;
+  scroll-snap-type: x mandatory;
+}
+
+.stadiumLatestCard {
+  flex: 0 0 180px;
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #3b260f;
+  box-shadow: 0 6px 14px rgba(0,0,0,.14);
+  scroll-snap-align: start;
+}
+
+.stadiumLatestCard img {
+  width: 100%;
+  height: 105px;
+  object-fit: cover;
+  display: block;
+}
+
+.stadiumLatestCard span {
+  display: inline-block;
+  margin: 10px 10px 0;
+  background: #1f5f8f;
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stadiumLatestCard h3 {
+  margin: 8px 10px 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.stadiumLatestCard p {
+  margin: 0 10px 10px;
+  font-size: 12px;
+  color: #80603a;
+  font-weight: 800;
+}
+
+.stadiumSpineShelf {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 14px 6px 24px;
+}
+
+.stadiumSpineBook {
+  flex: 0 0 54px;
+  height: 190px;
+  border-radius: 10px 10px 6px 6px;
+  background: linear-gradient(180deg, #1f5f8f, #0c2036);
+  color: #fff8dd;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 6px 0 10px rgba(0,0,0,.25), 0 8px 16px rgba(0,0,0,.3);
+}
+
+.stadiumSpineBook span {
+  font-size: 11px;
+  font-weight: 900;
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+  padding: 4px 6px;
+  margin-bottom: 8px;
+}
+
+.stadiumSpineBook strong {
+  writing-mode: vertical-rl;
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+
+.stadiumLead {
+  text-align: center;
+  font-weight: 900;
+  color: #5a3518;
+}
+
+.stadiumArticleList {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.stadiumArticleCard {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: center;
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  padding: 12px;
+  text-decoration: none;
+  color: #3b260f;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.stadiumArticleCard img {
+  width: 110px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.stadiumArticleCard span {
+  display: inline-block;
+  background: #1f5f8f;
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stadiumArticleCard h3 {
+  margin: 7px 0 5px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.stadiumArticleCard p {
+  margin: 0;
+  color: #80603a;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.stadiumArticleCard b {
+  display: inline-block;
+  margin-top: 6px;
+  color: #7b4a19;
+  font-size: 13px;
+}
