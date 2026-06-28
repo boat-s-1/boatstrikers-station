@@ -13,37 +13,23 @@ export default function BookCard({ book }) {
 
     setTimeout(() => {
       router.push(book.href);
-    }, 850);
+    }, 700);
   };
 
   return (
     <a
       href={book.href}
       onClick={handleClick}
-      className={`shelfBookWithSpine ${book.className} ${
-        opening ? "openBook" : ""
-      }`}
+      className={`shelfBookSimple ${book.className} ${opening ? "openBook" : ""}`}
     >
-      <div className="bookBody">
-        <div className="bookSpineSide">
-          <span>{book.icon}</span>
-          <b>{book.title}</b>
-        </div>
-
-        <div className="bookFrontCover">
-          {book.cover ? (
-            <img src={book.cover} alt={book.title} />
-          ) : (
-            <div className="fallbackCover">
-              <span>{book.icon}</span>
-              <h2>{book.title}</h2>
-              <p>{book.text}</p>
-            </div>
-          )}
-        </div>
+      <div className="bookCoverSimple">
+        <span>{book.icon}</span>
+        <h2>{book.title}</h2>
+        <p>{book.text}</p>
+        <b>本を開く ›</b>
       </div>
 
-      <div className="bookInsidePage">
+      <div className="bookInsideSimple">
         <span>📖</span>
         <b>OPEN...</b>
       </div>
