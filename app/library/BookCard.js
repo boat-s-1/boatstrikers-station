@@ -13,7 +13,7 @@ export default function BookCard({ book }) {
 
     setTimeout(() => {
       router.push(book.href);
-    }, 1100);
+    }, 1200);
   };
 
   return (
@@ -22,6 +22,8 @@ export default function BookCard({ book }) {
       onClick={handleClick}
       className={`magazineBook ${opening ? "openBook" : ""}`}
     >
+      {book.badge && <span className={`bookBadge ${book.badgeType || ""}`}>{book.badge}</span>}
+
       <div className="magazineCoverWrap">
         {book.cover ? (
           <img src={book.cover} alt={book.title} />
@@ -36,11 +38,7 @@ export default function BookCard({ book }) {
 
       <div className="magazineOpen">
         {book.inside ? (
-          <img
-            src={book.inside}
-            alt={`${book.title}の中ページ`}
-            className="insideImage"
-          />
+          <img src={book.inside} alt={`${book.title}の目次`} className="insideImage" />
         ) : (
           <>
             <span>📖</span>
