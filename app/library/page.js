@@ -86,7 +86,7 @@ const sections = [
         text: "女子戦新聞",
         href: "/library/hatsune-news",
         className: "purpleBook",
-        cover: "/CEC84877-EB43-475D-91B3-191609F7E0FF.png",
+        cover: "/796A2BB9-A731-4038-9A83-D00FF5F80DFD.png",
       },
       {
         title: "キイナ予想新聞",
