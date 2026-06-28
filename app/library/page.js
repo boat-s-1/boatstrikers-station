@@ -159,7 +159,7 @@ export default async function LibraryPage() {
 
       <section className="libraryHeroImageBox">
   <img
-    src="/library-hero.jpg"
+    src="/IMG_6098.jpeg"
     alt="一果図書館"
     className="libraryHeroImage"
   />
