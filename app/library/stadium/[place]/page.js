@@ -1,13 +1,16 @@
 import Parser from "rss-parser";
 
 export default async function StadiumPage({ params }) {
-  const place = decodeURIComponent(params.place);
+  const resolvedParams = await params;
+  const place = decodeURIComponent(resolvedParams.place || "住之江");
 
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
+  const keyword = `【${place}場攻略】`;
+
   const articles = feed.items
-    .filter((item) => item.title.includes(`【${place}場攻略】`))
+    .filter((item) => item.title.includes(keyword))
     .slice(0, 30)
     .map((item) => {
       const image =
