@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
+import HitGallery from "../components/HitGallery";
 
 async function getResults() {
   const res = await fetch(
@@ -224,6 +225,7 @@ const result = results.find((r) => r.name === "ichika");
       </div>
     </>
   )}
+    <HitGallery hits={result.hits} />
 </section>
 
  <section className="sectionCard pinkCard">
