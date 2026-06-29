@@ -1,6 +1,38 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 
+async function getResults() {
+  const res = await fetch(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXTDYLkLLIXFG8zuoonKBfMOEEan5zlthcP0GXXbRj85e9JHcbZMZzIjEAXxjwEgS-lQTEOsqNbDdp/pub?output=csv",
+    { next: { revalidate: 300 } }
+  );
+
+  const text = await res.text();
+  const rows = text.trim().split("\n").slice(1);
+
+  return rows.map((row) => {
+    const [
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    ] = row.split(",");
+
+    return {
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    };
+  });
+}
+
 async function getKiinaNewspaper() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
@@ -46,6 +78,8 @@ async function getKiinaArticles() {
 export default async function KiinaPage() {
   const articles = await getKiinaArticles();
   const newspaper = await getKiinaNewspaper();
+  const results = await getResults();
+const result = results.find((r) => r.name === "kiina");
 
   return (
     <main className="page kiinaPage">
@@ -119,95 +153,37 @@ export default async function KiinaPage() {
         </a>
       </section>
 
-      <section className="sectionCard yellowCard">
-        <h2>🏆 今月の成績</h2>
-        <p className="recordLead yellowLead">
-          高配当をぶち抜く、キイナの穴党戦績！
-        </p>
+      {result && (
+  <section className="sectionCard purpleCard">
+    <h2>🏆 今月の成績</h2>
 
-        <div className="recordGrid">
-          <div className="recordCard">
-            <span>予想レース数</span>
-            <strong>35R</strong>
-            <p>今月の予想数</p>
-          </div>
+    <div className="recordGrid">
+      <div className="recordCard">
+        <span>予想レース数</span>
+        <strong>{result.raceCount}R</strong>
+        <p>今月の予想数</p>
+      </div>
 
-          <div className="recordCard">
-            <span>的中率</span>
-            <strong>42%</strong>
-            <p>的中レース数 15R</p>
-          </div>
+      <div className="recordCard">
+        <span>的中率</span>
+        <strong>{result.hitRate}%</strong>
+        <p>的中データ</p>
+      </div>
 
-          <div className="recordCard">
-            <span>回収率</span>
-            <strong>148%</strong>
-            <p>収支 +68,900円</p>
-          </div>
+      <div className="recordCard">
+        <span>回収率</span>
+        <strong>{result.returnRate}%</strong>
+        <p>回収データ</p>
+      </div>
 
-          <div className="recordCard">
-            <span>最高配当</span>
-            <strong>52,300円</strong>
-            <p>6/23 若松11R</p>
-          </div>
-        </div>
-
-        <div className="hitRaceBox">
-          <div className="sectionTitleRow">
-            <h3>🎯 今月の主な的中</h3>
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Xで見る ›
-            </a>
-          </div>
-
-          <div className="hitImageList">
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/kiina-hit-0623.jpg" alt="6/23 若松11R 的中" />
-              <div>
-                <span>6/23 若松11R</span>
-                <b>5-1-3</b>
-                <strong>52,300円</strong>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/kiina-hit-0619.jpg" alt="6/19 桐生10R 的中" />
-              <div>
-                <span>6/19 桐生10R</span>
-                <b>5-2-1</b>
-                <strong>24,380円</strong>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/kiina-hit-0615.jpg" alt="6/15 津9R 的中" />
-              <div>
-                <span>6/15 津9R</span>
-                <b>5-3-2</b>
-                <strong>18,650円</strong>
-              </div>
-            </a>
-          </div>
-        </div>
-      </section>
+      <div className="recordCard">
+        <span>最高配当</span>
+        <strong>{result.bestHit}</strong>
+        <p>今月最高配当</p>
+      </div>
+    </div>
+  </section>
+)}
 
       <section className="sectionCard yellowCard">
         <div className="sectionTitleRow">
