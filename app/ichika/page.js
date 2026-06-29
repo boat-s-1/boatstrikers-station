@@ -9,50 +9,46 @@ async function getResults() {
   );
 
   const text = await res.text();
-  const rows = text.trim().split("\n").slice(1);
+  const rows = text.trim().split(/\r?\n/).slice(1);
 
-  return rows.map((row) => {
-    const [
-      name,
-      raceCount,
-      hitRate,
-      returnRate,
-      profit,
-      bestHit,
-      updated,
-    ] = row.split(",");
+  return rows
+    .map((row) => {
+      const cols = row
+        .split(",")
+        .map((v) => v.trim().replace(/^"|"$/g, ""));
 
-    return {
-  name: cols[0],
-  raceCount: cols[1],
-  hitRate: cols[2],
-  returnRate: cols[3],
-  profit: cols[4],
-  bestHit: cols[5],
-  updated: cols[6],
+      return {
+        name: cols[0],
+        raceCount: cols[1],
+        hitRate: cols[2],
+        returnRate: cols[3],
+        profit: cols[4],
+        bestHit: cols[5],
+        updated: cols[6],
 
-  hits: [
-    {
-      image: cols[7],
-      title: cols[8],
-      race: cols[9],
-      note: cols[10],
-    },
-    {
-      image: cols[11],
-      title: cols[12],
-      race: cols[13],
-      note: cols[14],
-    },
-    {
-      image: cols[15],
-      title: cols[16],
-      race: cols[17],
-      note: cols[18],
-    },
-  ].filter((h) => h.image),
-};
-  });
+        hits: [
+          {
+            image: cols[7],
+            title: cols[8],
+            race: cols[9],
+            note: cols[10],
+          },
+          {
+            image: cols[11],
+            title: cols[12],
+            race: cols[13],
+            note: cols[14],
+          },
+          {
+            image: cols[15],
+            title: cols[16],
+            race: cols[17],
+            note: cols[18],
+          },
+        ].filter((h) => h.image),
+      };
+    })
+    .filter((r) => ["ichika", "hatsune", "kiina"].includes(r.name));
 }
 
 async function getIchikaNewspaper() {
