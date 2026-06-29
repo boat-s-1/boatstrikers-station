@@ -269,13 +269,7 @@ const result = results.find((r) => r.name === "ichika");
   className="homeTitleImage"
 />
 
-    <a
-      href="https://www.youtube.com/@boatstrikers_official"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      YouTubeへ ›
-    </a>
+
   </div>
 
   <p className="radioLead">
