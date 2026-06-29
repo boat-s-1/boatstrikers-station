@@ -154,43 +154,37 @@ const result = results.find((r) => r.name === "hatsune");
         </a>
       </section>
 
-      <section className="sectionCard pinkCard">
-  <h2>🏆 今月の成績</h2>
+      {result && (
+  <section className="sectionCard purpleCard">
+    <h2>🏆 今月の成績</h2>
 
-  {result && (
-    <>
-      <p className="recordLead">
-        最終更新：{result.updated}
-      </p>
-
-      <div className="recordGrid">
-        <div className="recordCard">
-          <span>予想レース数</span>
-          <strong>{result.raceCount}R</strong>
-          <p>今月の予想数</p>
-        </div>
-
-        <div className="recordCard">
-          <span>的中率</span>
-          <strong>{result.hitRate}%</strong>
-          <p>的中データ</p>
-        </div>
-
-        <div className="recordCard">
-          <span>回収率</span>
-          <strong>{result.returnRate}%</strong>
-          <p>回収データ</p>
-        </div>
-
-        <div className="recordCard">
-          <span>最高配当</span>
-          <strong>{result.bestHit}</strong>
-          <p>今月最高配当</p>
-        </div>
+    <div className="recordGrid">
+      <div className="recordCard">
+        <span>予想レース数</span>
+        <strong>{result.raceCount}R</strong>
+        <p>今月の予想数</p>
       </div>
-    </>
-  )}
-</section>
+
+      <div className="recordCard">
+        <span>的中率</span>
+        <strong>{result.hitRate}%</strong>
+        <p>的中データ</p>
+      </div>
+
+      <div className="recordCard">
+        <span>回収率</span>
+        <strong>{result.returnRate}%</strong>
+        <p>回収データ</p>
+      </div>
+
+      <div className="recordCard">
+        <span>最高配当</span>
+        <strong>{result.bestHit}</strong>
+        <p>今月最高配当</p>
+      </div>
+    </div>
+  </section>
+)}
 
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
