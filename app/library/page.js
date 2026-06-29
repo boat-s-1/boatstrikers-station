@@ -20,7 +20,29 @@ async function getLibraryItems() {
     };
   });
 }
+async function getLibraryNews() {
+  const parser = new Parser();
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
+  return feed.items.slice(0, 5).map((item) => {
+    let category = "note";
+
+    if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
+    if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
+    if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
+    if (item.title.includes("場攻略】")) category = "24場攻略note";
+    if (item.title.includes("【一果前日版】")) category = "一果新聞";
+    if (item.title.includes("【初音前日版】")) category = "初音新聞";
+    if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
+
+    return {
+      title: item.title,
+      link: item.link,
+      date: item.pubDate,
+      category,
+    };
+  });
+}
 const sections = [
   {
   title: "週刊誌コーナー",
@@ -148,6 +170,7 @@ const sections = [
 
 export default async function LibraryPage() {
   const items = await getLibraryItems();
+const news = await getLibraryNews();
 
   return (
     <main className="libraryPage">
