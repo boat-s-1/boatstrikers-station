@@ -2,6 +2,39 @@ import Image from "next/image";
 import Parser from "rss-parser";
 
 
+async function getResults() {
+  const res = await fetch(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXTDYLkLLIXFG8zuoonKBfMOEEan5zlthcP0GXXbRj85e9JHcbZMZzIjEAXxjwEgS-lQTEOsqNbDdp/pubhtml",
+    { next: { revalidate: 300 } }
+  );
+
+  const text = await res.text();
+
+  const rows = text.trim().split("\n").slice(1);
+
+  return rows.map((row) => {
+    const [
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    ] = row.split(",");
+
+    return {
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    };
+  });
+}
+
 async function getTodayNewspapers() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
@@ -75,6 +108,7 @@ async function getLatestInfo() {
 export default async function Home() {
   const news = await getTodayNewspapers();
   const latestInfo = await getLatestInfo();
+  const results = await getResults();
 
   return (
     <main className="page">
@@ -201,42 +235,47 @@ export default async function Home() {
 </section>
 
    <section className="homeSectionCard yellow">
-    <img
-  src="/IMG_6116.jpeg"
-  alt="予想"
-  className="homeTitleImage"
-/>
+  <img
+    src="/IMG_6116.jpeg"
+    alt="今月の予想数"
+    className="homeTitleImage"
+  />
 
   <div className="forecastMemberList">
-    <a href="/ichika" className="forecastMemberCard ichikaMember">
-      <img src="/ichika-icon.png" alt="一果" />
-      <div>
-        <span>🌸 一果</span>
-        <strong>42R</strong>
-        <p>イン逃げ担当</p>
-        <b>成績を見る ›</b>
-      </div>
-    </a>
+    {results.map((r) => {
+      const names = {
+        ichika: "一果",
+        hatsune: "初音",
+        kiina: "キイナ",
+      };
 
-    <a href="/hatsune" className="forecastMemberCard hatsuneMember">
-      <img src="/hatsune-icon.png" alt="初音" />
-      <div>
-        <span>💜 初音</span>
-        <strong>38R</strong>
-        <p>女子戦担当</p>
-        <b>成績を見る ›</b>
-      </div>
-    </a>
+      const roles = {
+        ichika: "イン逃げ担当",
+        hatsune: "女子戦担当",
+        kiina: "5アタマ担当",
+      };
 
-    <a href="/kiina" className="forecastMemberCard kiinaMember">
-      <img src="/kiina-icon.png" alt="キイナ" />
-      <div>
-        <span>⚡ キイナ</span>
-        <strong>35R</strong>
-        <p>5アタマ担当</p>
-        <b>成績を見る ›</b>
-      </div>
-    </a>
+      const classes = {
+        ichika: "ichikaMember",
+        hatsune: "hatsuneMember",
+        kiina: "kiinaMember",
+      };
+
+      return (
+        <a
+          href={`/${r.name}`}
+          className={`forecastMemberCard ${classes[r.name]}`}
+          key={r.name}
+        >
+          <div>
+            <span>{names[r.name]}</span>
+            <strong>{r.raceCount}R</strong>
+            <p>{roles[r.name]}</p>
+            <b>成績を見る ›</b>
+          </div>
+        </a>
+      );
+    })}
   </div>
 </section>
 
