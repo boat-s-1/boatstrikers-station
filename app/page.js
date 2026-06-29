@@ -76,15 +76,11 @@ export default async function Home() {
       </section>
 
       <section className="homeSectionCard blue">
-  <h2 className="homeSectionTitle">🎙 BNN</h2>
-  <p className="homeSectionLead">3人がお届けする競艇ラジオ♪</p>
 
   <a href="/radio" className="bannerLink">
     <Image
-      src="/radio-banner.jpg"
+      src="/6EDF5261-8C7D-49F6-9C79-F22A3AA172C1.png"
       alt="BoatStrikers Radio"
-      width={1536}
-      height={864}
       className="bannerImage"
     />
   </a>
