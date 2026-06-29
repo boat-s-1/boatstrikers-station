@@ -120,8 +120,11 @@ export default async function Home() {
 </section>   
 
       <section className="homeSectionCard purple">
-  <h2 className="homeSectionTitle">👧 メンバー紹介</h2>
-  <p className="homeSectionLead">あなたに合った担当を見つけよう♪</p>
+  <img
+  src="/member-title.png"
+  alt="メンバー紹介"
+  className="homeTitleImage"
+/>
 
   <a href="/ichika" className="bannerLink">
     <Image src="/ichika-banner.jpg" alt="一果の部屋" width={1536} height={1080} className="bannerImage" />
