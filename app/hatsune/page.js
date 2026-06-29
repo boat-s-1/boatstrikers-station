@@ -1,6 +1,39 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 
+async function getResults() {
+  const res = await fetch(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXTDYLkLLIXFG8zuoonKBfMOEEan5zlthcP0GXXbRj85e9JHcbZMZzIjEAXxjwEgS-lQTEOsqNbDdp/pub?output=csv",
+    { next: { revalidate: 300 } }
+  );
+
+  const text = await res.text();
+  const rows = text.trim().split("\n").slice(1);
+
+  return rows.map((row) => {
+    const [
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    ] = row.split(",");
+
+    return {
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    };
+  });
+}
+
+
 async function getHatsuneNewspaper() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
@@ -46,6 +79,7 @@ async function getHatsuneArticles() {
 export default async function HatsunePage() {
   const articles = await getHatsuneArticles();
   const newspaper = await getHatsuneNewspaper();
+  const result = results.find((r) => r.name === "hatsune");
 
   return (
     <main className="page hatsunePage">
@@ -119,95 +153,43 @@ export default async function HatsunePage() {
         </a>
       </section>
 
-      <section className="sectionCard purpleCard">
-        <h2>🏆 今月の成績</h2>
-        <p className="recordLead purpleLead">
-          データが証明する、初音の女子戦分析力！
-        </p>
+      <section className="sectionCard pinkCard">
+  <h2>🏆 今月の成績</h2>
 
-        <div className="recordGrid">
-          <div className="recordCard">
-            <span>予想レース数</span>
-            <strong>38R</strong>
-            <p>今月の予想数</p>
-          </div>
+  {result && (
+    <>
+      <p className="recordLead">
+        最終更新：{result.updated}
+      </p>
 
-          <div className="recordCard">
-            <span>的中率</span>
-            <strong>68%</strong>
-            <p>的中レース数 26R</p>
-          </div>
-
-          <div className="recordCard">
-            <span>回収率</span>
-            <strong>119%</strong>
-            <p>収支 +31,800円</p>
-          </div>
-
-          <div className="recordCard">
-            <span>最高配当</span>
-            <strong>21,560円</strong>
-            <p>6/24 戸田8R</p>
-          </div>
+      <div className="recordGrid">
+        <div className="recordCard">
+          <span>予想レース数</span>
+          <strong>{result.raceCount}R</strong>
+          <p>今月の予想数</p>
         </div>
 
-        <div className="hitRaceBox">
-          <div className="sectionTitleRow">
-            <h3>🎯 今月の主な的中</h3>
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Xで見る ›
-            </a>
-          </div>
-
-          <div className="hitImageList">
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/hatsune-hit-0624.jpg" alt="6/24 戸田8R 的中" />
-              <div>
-                <span>6/24 戸田8R</span>
-                <b>2-1-4</b>
-                <strong>21,560円</strong>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/hatsune-hit-0621.jpg" alt="6/21 尼崎5R 的中" />
-              <div>
-                <span>6/21 尼崎5R</span>
-                <b>1-3-5</b>
-                <strong>12,940円</strong>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/boatstrikers_official"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hitImageCard"
-            >
-              <img src="/hatsune-hit-0618.jpg" alt="6/18 多摩川6R 的中" />
-              <div>
-                <span>6/18 多摩川6R</span>
-                <b>3-1-2</b>
-                <strong>9,860円</strong>
-              </div>
-            </a>
-          </div>
+        <div className="recordCard">
+          <span>的中率</span>
+          <strong>{result.hitRate}%</strong>
+          <p>的中データ</p>
         </div>
-      </section>
+
+        <div className="recordCard">
+          <span>回収率</span>
+          <strong>{result.returnRate}%</strong>
+          <p>回収データ</p>
+        </div>
+
+        <div className="recordCard">
+          <span>最高配当</span>
+          <strong>{result.bestHit}</strong>
+          <p>今月最高配当</p>
+        </div>
+      </div>
+    </>
+  )}
+</section>
 
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
