@@ -169,7 +169,35 @@ export default async function LibraryPage() {
     className="libraryHeroImage"
   />
 </section>
+<section className="libraryNotice">
+  <div className="libraryNoticeTitle">
+    <h2>📢 新刊入荷のお知らせ</h2>
+    <span>NEW ARRIVALS</span>
+  </div>
 
+  <div className="libraryNoticeList">
+    {news.map((n) => (
+      <a
+        href={n.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="libraryNoticeItem"
+        key={n.link}
+      >
+        <span>
+          {new Date(n.date).toLocaleDateString("ja-JP", {
+            month: "numeric",
+            day: "numeric",
+          })}
+        </span>
+
+        <strong>{n.category}</strong>
+
+        <b>更新</b>
+      </a>
+    ))}
+  </div>
+</section>
 
   <LibraryPoint />
 
