@@ -164,7 +164,11 @@ const result = results.find((r) => r.name === "ichika");
 </section>
     
    <section className="sectionCard pinkCard">
-  <h2>🏆 今月の成績</h2>
+   <img
+  src="/IMG_6131.jpeg"
+  alt="一果成績"
+  className="homeTitleImage"
+/>
 
   {result && (
     <>
