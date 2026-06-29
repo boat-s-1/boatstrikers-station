@@ -120,7 +120,7 @@ export default async function Home() {
 
       <section className="homeSectionCard purple">
   <img
-  src="/IMG_6106.jpeg"
+  src="/IMG_6117.jpeg"
   alt="メンバー紹介"
   className="homeTitleImage"
 />
