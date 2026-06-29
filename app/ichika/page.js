@@ -22,14 +22,35 @@ async function getResults() {
     ] = row.split(",");
 
     return {
-      name,
-      raceCount,
-      hitRate,
-      returnRate,
-      profit,
-      bestHit,
-      updated,
-    };
+  name: cols[0],
+  raceCount: cols[1],
+  hitRate: cols[2],
+  returnRate: cols[3],
+  profit: cols[4],
+  bestHit: cols[5],
+  updated: cols[6],
+
+  hits: [
+    {
+      image: cols[7],
+      title: cols[8],
+      race: cols[9],
+      note: cols[10],
+    },
+    {
+      image: cols[11],
+      title: cols[12],
+      race: cols[13],
+      note: cols[14],
+    },
+    {
+      image: cols[15],
+      title: cols[16],
+      race: cols[17],
+      note: cols[18],
+    },
+  ].filter((h) => h.image),
+};
   });
 }
 
