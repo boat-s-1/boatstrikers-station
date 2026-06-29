@@ -111,7 +111,12 @@ const result = results.find((r) => r.name === "ichika");
 
             
      <section className="sectionCard pinkCard">
-  <h2>📰 今日の一果新聞（前日版）</h2>
+            
+   <img
+  src="/IMG_6130.jpeg"
+  alt="一果新聞"
+  className="homeTitleImage"
+/>
 
   {newspaper ? (
     <a
