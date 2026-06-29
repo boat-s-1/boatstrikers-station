@@ -132,12 +132,10 @@ export default async function Home() {
  
 
       <section className="homeSectionCard yellow">
-  <h2 className="homeSectionTitle">📚 一果図書館</h2>
-  <p className="homeSectionLead">過去新聞をチェック！</p>
 
   <a href="/library" className="bannerLink">
     <Image
-      src="/library-banner.jpg"
+      src="/52F3C280-21E1-4B16-B64A-B86F12BC3A03.png"
       alt="一果図書館"
       width={1536}
       height={864}
