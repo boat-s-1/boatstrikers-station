@@ -180,7 +180,13 @@ const result = results.find((r) => r.name === "ichika");
     />
   </a>
 </section>
-    
+    <section className="sectionCard todayCommentCard">
+  <div className="todayCommentIcon">🌸</div>
+  <div>
+    <span>今日の一言</span>
+    <p>今日はイン逃げ信頼度高めの日だよ♪</p>
+  </div>
+</section>
    <section className="sectionCard pinkCard">
    <img
   src="/IMG_6131.jpeg"
