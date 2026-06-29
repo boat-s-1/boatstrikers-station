@@ -88,7 +88,7 @@ export default async function Home() {
 
         <section className="homeSectionCard pink">
   <img
-  src="/IMG_6107.jpeg"
+  src="/IMG_6118.jpeg"
   alt="新聞"
   className="homeTitleImage"
 />
