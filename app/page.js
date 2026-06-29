@@ -47,8 +47,33 @@ async function getTodayNewspapers() {
   });
 }
 
+async function getLatestInfo() {
+  const parser = new Parser();
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+
+  return feed.items.slice(0, 5).map((item) => {
+    let category = "note";
+
+    if (item.title.includes("【一果前日版】")) category = "一果新聞";
+    if (item.title.includes("【初音前日版】")) category = "初音新聞";
+    if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
+    if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
+    if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
+    if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
+    if (item.title.includes("場攻略】")) category = "24場攻略";
+
+    return {
+      title: item.title,
+      link: item.link,
+      date: item.pubDate,
+      category,
+    };
+  });
+}
+
 export default async function Home() {
   const news = await getTodayNewspapers();
+  const latestInfo = await getLatestInfo();
 
   return (
     <main className="page">
@@ -74,6 +99,36 @@ export default async function Home() {
           </a>
         </div>
       </section>
+
+            <section className="homeLatestInfo">
+  <div className="homeLatestInfoTitle">
+    <h2>🆕 最新情報</h2>
+    <span>UPDATE</span>
+  </div>
+
+  <div className="homeLatestInfoList">
+    {latestInfo.map((item) => (
+      <a
+        href={item.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="homeLatestInfoItem"
+        key={item.link}
+      >
+        <span>
+          {new Date(item.date).toLocaleDateString("ja-JP", {
+            month: "numeric",
+            day: "numeric",
+          })}
+        </span>
+
+        <strong>{item.category}</strong>
+
+        <b>更新</b>
+      </a>
+    ))}
+  </div>
+</section>
 
       
 
