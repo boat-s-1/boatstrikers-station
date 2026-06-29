@@ -23,7 +23,6 @@ async function getLibraryItems() {
 
 const sections = [
   {
-
   title: "週刊誌コーナー",
 
   lead: "3人のゼミをまとめてチェック！",
