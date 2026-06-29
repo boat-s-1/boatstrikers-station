@@ -3221,3 +3221,104 @@ body {
   font-size: 12px;
   text-align: center;
 }
+
+.radioHero {
+  margin: 20px 14px;
+  padding: 18px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fff3d8, #e0b875);
+  border: 3px solid #8b5a25;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+  text-align: center;
+}
+
+.radioHeroImage {
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  display: block;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+}
+
+.radioHeroText span {
+  display: inline-block;
+  margin-top: 14px;
+  background: #7b4a19;
+  color: #fff3d8;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.radioHeroText h1 {
+  margin: 10px 0;
+  font-size: 32px;
+  color: #4b2b12;
+}
+
+.radioHeroText p {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.7;
+  color: #5a3518;
+}
+
+.radioYoutubeBtn {
+  display: block;
+  margin-top: 16px;
+  background: #ff2f86;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-weight: 900;
+}
+
+.radioProgramGrid {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.radioProgramCard {
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.radioProgramCard span {
+  font-size: 28px;
+}
+
+.radioProgramCard h3 {
+  margin: 8px 0 6px;
+  color: #3b260f;
+}
+
+.radioProgramCard p {
+  margin: 0;
+  color: #80603a;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.relatedBookList {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.relatedBookList a {
+  display: block;
+  background: #fffaf0;
+  border: 1px solid #d8ad64;
+  border-radius: 16px;
+  padding: 14px;
+  text-decoration: none;
+  color: #3b260f;
+  font-weight: 900;
+}
