@@ -79,7 +79,8 @@ async function getHatsuneArticles() {
 export default async function HatsunePage() {
   const articles = await getHatsuneArticles();
   const newspaper = await getHatsuneNewspaper();
-  const result = results.find((r) => r.name === "hatsune");
+  const results = await getResults();
+const result = results.find((r) => r.name === "hatsune");
 
   return (
     <main className="page hatsunePage">
