@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 
+
 async function getTodayNewspapers() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
