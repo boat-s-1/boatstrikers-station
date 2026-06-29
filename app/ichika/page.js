@@ -1,7 +1,37 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 
+async function getResults() {
+  const res = await fetch(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXTDYLkLLIXFG8zuoonKBfMOEEan5zlthcP0GXXbRj85e9JHcbZMZzIjEAXxjwEgS-lQTEOsqNbDdp/pub?output=csv",
+    { next: { revalidate: 300 } }
+  );
 
+  const text = await res.text();
+  const rows = text.trim().split("\n").slice(1);
+
+  return rows.map((row) => {
+    const [
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    ] = row.split(",");
+
+    return {
+      name,
+      raceCount,
+      hitRate,
+      returnRate,
+      profit,
+      bestHit,
+      updated,
+    };
+  });
+}
 
 async function getIchikaNewspaper() {
   const parser = new Parser();
@@ -51,6 +81,8 @@ async function getIchikaArticles() {
 
 export default async function IchikaPage() {
   const articles = await getIchikaArticles();
+  const results = await getResults();
+const result = results.find((r) => r.name === "ichika");
 
   return (
     <main className="page ichikaPage">
@@ -126,92 +158,42 @@ export default async function IchikaPage() {
   </a>
 </section>
     
-    <section className="sectionCard pinkCard">
+   <section className="sectionCard pinkCard">
   <h2>🏆 今月の成績</h2>
-  <p className="recordLead">データが証明する、一果のイン逃げ力！</p>
 
-  <div className="recordGrid">
-    <div className="recordCard">
-      <span>予想レース数</span>
-      <strong>42R</strong>
-      <p>今月の予想数</p>
-    </div>
+  {result && (
+    <>
+      <p className="recordLead">
+        最終更新：{result.updated}
+      </p>
 
-    <div className="recordCard">
-      <span>的中率</span>
-      <strong>71%</strong>
-      <p>的中レース数 30R</p>
-    </div>
+      <div className="recordGrid">
+        <div className="recordCard">
+          <span>予想レース数</span>
+          <strong>{result.raceCount}R</strong>
+          <p>今月の予想数</p>
+        </div>
 
-    <div className="recordCard">
-      <span>回収率</span>
-      <strong>126%</strong>
-      <p>収支 +42,350円</p>
-    </div>
+        <div className="recordCard">
+          <span>的中率</span>
+          <strong>{result.hitRate}%</strong>
+          <p>的中データ</p>
+        </div>
 
-    <div className="recordCard">
-      <span>最高配当</span>
-      <strong>18,430円</strong>
-      <p>6/27 若松4R</p>
-    </div>
-  </div>
+        <div className="recordCard">
+          <span>回収率</span>
+          <strong>{result.returnRate}%</strong>
+          <p>回収データ</p>
+        </div>
 
-  <div className="hitRaceBox">
-  <div className="sectionTitleRow">
-    <h3>🎯 今月の主な的中</h3>
-    <a
-      href="https://x.com/Resort_Style_t"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Xで見る ›
-    </a>
-  </div>
-
-  <div className="hitImageList">
-    <a
-      href="https://x.com/Resort_Style_t"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hitImageCard"
-    >
-      <img src="/hit-0627.jpg" alt="6/27 若松4R 的中" />
-      <div>
-        <span>6/27 若松4R</span>
-        <b>1-2-4</b>
-        <strong>18,430円</strong>
+        <div className="recordCard">
+          <span>最高配当</span>
+          <strong>{result.bestHit}</strong>
+          <p>今月最高配当</p>
+        </div>
       </div>
-    </a>
-
-    <a
-      href="https://x.com/Resort_Style_t"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hitImageCard"
-    >
-      <img src="/hit-0622.jpg" alt="6/22 丸亀7R 的中" />
-      <div>
-        <span>6/22 丸亀7R</span>
-        <b>1-2-3</b>
-        <strong>12,760円</strong>
-      </div>
-    </a>
-
-    <a
-      href="https://x.com/Resort_Style_t"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hitImageCard"
-    >
-      <img src="/hit-0625.jpg" alt="6/25 住之江3R 的中" />
-      <div>
-        <span>6/25 住之江3R</span>
-        <b>1-3-2</b>
-        <strong>7,840円</strong>
-      </div>
-    </a>
-  </div>
-</div>
+    </>
+  )}
 </section>
 
  <section className="sectionCard pinkCard">
