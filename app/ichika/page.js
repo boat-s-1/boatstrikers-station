@@ -226,7 +226,11 @@ const result = results.find((r) => r.name === "ichika");
 
  <section className="sectionCard pinkCard">
   <div className="sectionTitleRow">
-    <h2>🔬 イン飛び研究ラボ</h2>
+      <img
+  src="/IMG_6135.jpeg"
+  alt="一果ラボ"
+  className="homeTitleImage"
+/>
     <a
       href="https://note.com/boat_strikers"
       target="_blank"
