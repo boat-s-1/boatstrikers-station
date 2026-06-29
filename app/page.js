@@ -160,8 +160,11 @@ export default async function Home() {
 </section>
 
    <section className="homeSectionCard yellow">
-  <h2 className="homeSectionTitle">🏆 今月の予想数</h2>
-  <p className="homeSectionLead">今月も3人が予想を更新中！</p>
+    <img
+  src="/IMG_6107.jpeg"
+  alt="新聞"
+  className="homeTitleImage"
+/>
 
   <div className="forecastMemberList">
     <a href="/ichika" className="forecastMemberCard ichikaMember">
