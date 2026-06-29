@@ -91,8 +91,11 @@ export default async function Home() {
 </section>
 
         <section className="homeSectionCard pink">
-  <h2 className="homeSectionTitle">📰 今日の新聞</h2>
-  <p className="homeSectionLead">最新の前日版をチェック！</p>
+  <img
+  src="/IMG_6106.jpeg"
+  alt=新聞"
+  className="homeTitleImage"
+/>
 
   <div className="todayNewsGrid">
     {news.map((n) => (
