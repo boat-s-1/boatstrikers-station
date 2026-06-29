@@ -263,7 +263,11 @@ const result = results.find((r) => r.name === "ichika");
 
     <section className="sectionCard pinkCard">
   <div className="sectionTitleRow">
-    <h2>🎙 Boat Strikers Radio</h2>
+    <img
+  src="/IMG_6133.jpeg"
+  alt="一果ラジオ"
+  className="homeTitleImage"
+/>
 
     <a
       href="https://www.youtube.com/@boatstrikers_official"
