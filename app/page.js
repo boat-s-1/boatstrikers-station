@@ -75,16 +75,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="homeSectionCard blue">
-
-  <a href="/radio" className="bannerLink">
-    <Image
-      src="/6EDF5261-8C7D-49F6-9C79-F22A3AA172C1.png"
-      alt="BoatStrikers Radio"
-      className="bannerImage"
-    />
-  </a>
-</section>
+      
 
         <section className="homeSectionCard pink">
   <img
@@ -193,6 +184,17 @@ export default async function Home() {
       </div>
     </a>
   </div>
+</section>
+
+    <section className="homeSectionCard blue">
+
+  <a href="/radio" className="bannerLink">
+    <Image
+      src="/6EDF5261-8C7D-49F6-9C79-F22A3AA172C1.png"
+      alt="BoatStrikers Radio"
+      className="bannerImage"
+    />
+  </a>
 </section>
 
       <section className="homeSectionCard green">
