@@ -135,7 +135,7 @@ export default async function Home() {
 
   <a href="/library" className="bannerLink">
     <Image
-      src="/52F3C280-21E1-4B16-B64A-B86F12BC3A03.png"
+      src="/1C1FAE76-929A-4DEE-9D2D-816BBC47FA04.png"
       alt="一果図書館"
       width={1536}
       height={864}
