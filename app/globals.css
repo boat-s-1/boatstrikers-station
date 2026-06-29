@@ -3503,3 +3503,37 @@ body {
   padding: 13px;
   font-weight: 900;
 }
+
+.todayCommentCard {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  align-items: center;
+  background: linear-gradient(135deg, #fff7df, #fff);
+  border: 2px solid #e0b875;
+}
+
+.todayCommentIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff0f6;
+  font-size: 30px;
+}
+
+.todayCommentCard span {
+  display: inline-block;
+  font-weight: 900;
+  color: #8b5a25;
+  font-size: 13px;
+}
+
+.todayCommentCard p {
+  margin: 6px 0 0;
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 900;
+  color: #3b260f;
+}
