@@ -4,49 +4,91 @@ const lessons = {
   1: {
     id: 1,
     title: "競艇ってどんな競技？",
-    character: "🌸 一果",
-    text: "競艇は、6艇のボートが水面を走って順位を競うレースです。基本は1号艇〜6号艇までの6人で走ります。まずは『6艇で走る競技』ということを覚えましょう。",
     badge: "競艇入門",
-    questions: [
+    characterName: "一果",
+    characterImage: "/characters/ichika-talk.png",
+    steps: [
       {
+        type: "talk",
+        text: "BOAT STRIKERSへようこそ♪今日は競艇の基本を一緒に覚えよう！",
+      },
+      {
+        type: "talk",
+        text: "まず大事なのは、競艇は6艇で走るレースってことだよ。",
+      },
+      {
+        type: "quiz",
         question: "競艇は基本的に何艇で走る？",
         choices: ["4艇", "6艇", "8艇"],
         answer: 1,
+        correct: "正解！競艇は6艇で走るよ✨",
+        wrong: "惜しい！競艇は6艇で走るんだよ♪",
       },
       {
-        question: "競艇で使うのは？",
-        choices: ["ボート", "自転車", "馬"],
-        answer: 0,
+        type: "talk",
+        text: "次は、競艇がどこで行われるか確認してみよう！",
       },
       {
+        type: "quiz",
         question: "競艇はどこで行われる？",
         choices: ["水面", "芝生", "道路"],
         answer: 0,
+        correct: "ピンポーン！水面を走るレースだよ🚤",
+        wrong: "惜しい！競艇は水面で行われるよ。",
+      },
+      {
+        type: "talk",
+        text: "最後の確認だよ♪",
+      },
+      {
+        type: "quiz",
+        question: "競艇で使う乗り物は？",
+        choices: ["ボート", "自転車", "馬"],
+        answer: 0,
+        correct: "正解！これで基本はバッチリ♪",
+        wrong: "惜しい！競艇はボートで走る競技だよ。",
       },
     ],
   },
 
   2: {
     id: 2,
-    title: "6艇で走るってどういうこと？",
-    character: "🌸 一果",
-    text: "競艇では1号艇から6号艇までが出走します。色も決まっていて、1号艇は白、2号艇は黒、3号艇は赤、4号艇は青、5号艇は黄、6号艇は緑です。",
+    title: "6艇の色を覚えよう",
     badge: "6艇理解",
-    questions: [
+    characterName: "一果",
+    characterImage: "/characters/ichika-talk.png",
+    steps: [
       {
+        type: "talk",
+        text: "競艇には1号艇から6号艇まであって、それぞれ色が決まっているよ♪",
+      },
+      {
+        type: "talk",
+        text: "1号艇は白、2号艇は黒、3号艇は赤、4号艇は青、5号艇は黄、6号艇は緑だよ！",
+      },
+      {
+        type: "quiz",
         question: "1号艇の色は？",
         choices: ["白", "赤", "黄色"],
         answer: 0,
+        correct: "正解！1号艇は白だよ🌸",
+        wrong: "惜しい！1号艇は白だよ。",
       },
       {
+        type: "quiz",
         question: "5号艇の色は？",
         choices: ["青", "黄", "緑"],
         answer: 1,
+        correct: "正解！5号艇は黄色だよ⚡",
+        wrong: "惜しい！5号艇は黄色だよ。",
       },
       {
+        type: "quiz",
         question: "6号艇の色は？",
         choices: ["黒", "緑", "白"],
         answer: 1,
+        correct: "正解！6号艇は緑だよ！",
+        wrong: "惜しい！6号艇は緑だよ。",
       },
     ],
   },
@@ -54,74 +96,41 @@ const lessons = {
   3: {
     id: 3,
     title: "コースと枠番を学ぼう",
-    character: "💜 初音",
-    text: "枠番は1〜6号艇の番号です。コースは実際に走る位置のことです。基本は1号艇が内側、6号艇が外側になりやすいですが、進入が変わることもあります。",
     badge: "コース理解",
-    questions: [
+    characterName: "初音",
+    characterImage: "/characters/hatsune-talk.png",
+    steps: [
       {
+        type: "talk",
+        text: "ここでは枠番とコースの違いを覚えましょう♪",
+      },
+      {
+        type: "talk",
+        text: "枠番は1号艇〜6号艇の番号、コースは実際に走る位置のことです。",
+      },
+      {
+        type: "quiz",
+        question: "コースとは何のこと？",
+        choices: ["走る位置", "選手の年齢", "配当"],
+        answer: 0,
+        correct: "正解です♪ コースは実際に走る位置です。",
+        wrong: "惜しいです。コースは走る位置のことです。",
+      },
+      {
+        type: "quiz",
         question: "一番内側になりやすいのは？",
         choices: ["1号艇", "3号艇", "6号艇"],
         answer: 0,
+        correct: "正解♪ 1号艇は内側になりやすいです。",
+        wrong: "惜しいです。基本は1号艇が内側です。",
       },
       {
-        question: "コースとは？",
-        choices: ["走る位置", "選手の年齢", "配当"],
-        answer: 0,
-      },
-      {
+        type: "quiz",
         question: "進入は変わることがある？",
         choices: ["ある", "絶対ない", "天気だけで決まる"],
         answer: 0,
-      },
-    ],
-  },
-
-  4: {
-    id: 4,
-    title: "1号艇とイン逃げとは？",
-    character: "🌸 一果",
-    text: "イン逃げとは、1コースの選手が先にターンして、そのまま1着になることです。競艇では1号艇が有利と言われますが、必ず勝つわけではありません。",
-    badge: "イン逃げ初級",
-    questions: [
-      {
-        question: "イン逃げとは？",
-        choices: ["1コースが逃げて勝つ", "6号艇が勝つ", "全員同着"],
-        answer: 0,
-      },
-      {
-        question: "1号艇は必ず勝つ？",
-        choices: ["必ず勝つ", "必ず負ける", "勝ちやすいが絶対ではない"],
-        answer: 2,
-      },
-      {
-        question: "イン逃げを見る時に大切なのは？",
-        choices: ["スタートや展示", "選手の服装", "観客数"],
-        answer: 0,
-      },
-    ],
-  },
-
-  5: {
-    id: 5,
-    title: "スタート展示ってなに？",
-    character: "💜 初音",
-    text: "展示は、本番前に選手の気配を見る大事な時間です。スタート展示では進入やスタートの雰囲気、周回展示ではターンや足の良さを確認します。",
-    badge: "展示入門",
-    questions: [
-      {
-        question: "展示はいつ見る？",
-        choices: ["本番前", "レース後", "翌日"],
-        answer: 0,
-      },
-      {
-        question: "スタート展示で見るものは？",
-        choices: ["進入やスタート", "選手の身長", "天気予報だけ"],
-        answer: 0,
-      },
-      {
-        question: "展示は予想に役立つ？",
-        choices: ["役立つ", "まったく関係ない", "禁止されている"],
-        answer: 0,
+        correct: "正解です！進入が変わることもあります。",
+        wrong: "惜しいです。進入は変わることがあります。",
       },
     ],
   },
