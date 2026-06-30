@@ -6,11 +6,13 @@ export default function BscStatus() {
   const [point, setPoint] = useState(0);
   const [badges, setBadges] = useState([]);
   const [cleared, setCleared] = useState([]);
+  const [ichikaBond, setIchikaBond] = useState(0);
 
   useEffect(() => {
     setPoint(Number(localStorage.getItem("bscPoint") || 0));
     setBadges(JSON.parse(localStorage.getItem("bscBadge") || "[]"));
     setCleared(JSON.parse(localStorage.getItem("bscCleared") || "[]"));
+    setIchikaBond(Number(localStorage.getItem("bscBond_ichika") || 0));
   }, []);
 
   const level = Math.floor(point / 100) + 1;
@@ -34,6 +36,14 @@ export default function BscStatus() {
         <span style={{ width: `${progress}%` }} />
       </div>
 
+<div className="bscBondBox">
+  <span>🌸 一果との親密度</span>
+  <strong>{ichikaBond}%</strong>
+  <div className="bscBondBar">
+    <i style={{ width: `${ichikaBond}%` }} />
+  </div>
+</div>
+  
       <div className="bscGameStatusGrid">
         <b>⭐ {point}pt</b>
         <b>🏅 {badges.length}個</b>
