@@ -1,3 +1,5 @@
+import BscStatus from "./BscStatus";
+
 const lessons = [
   { id: 1, title: "競艇ってどんな競技？", badge: "競艇入門" },
   { id: 2, title: "6艇で走るってどういうこと？", badge: "6艇理解" },
@@ -26,6 +28,8 @@ export default function BscPage() {
         <b>Chapter1：競艇入門編</b>
       </section>
 
+<BscStatus />
+    
       <section className="librarySection">
         <h2>📘 レッスン一覧</h2>
 
