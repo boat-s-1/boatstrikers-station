@@ -19,7 +19,8 @@ export default function ChatEngine({
   const [showNext, setShowNext] = useState(false);
   const [finished, setFinished] = useState(false);
   const [mainCharacter, setMainCharacter] = useState(characters.ichika);
-
+　const [alreadyCleared, setAlreadyCleared] = useState(false);
+  
   useEffect(() => {
     runStep(0);
   }, []);
@@ -146,29 +147,31 @@ export default function ChatEngine({
   };
 
   const finishStory = () => {
-    const cleared = JSON.parse(localStorage.getItem("bscCleared") || "[]");
+  const cleared = JSON.parse(localStorage.getItem("bscCleared") || "[]");
+  const isAlreadyCleared = cleared.includes(storyId);
 
-    if (!cleared.includes(storyId)) {
-      cleared.push(storyId);
-      localStorage.setItem("bscCleared", JSON.stringify(cleared));
+  if (!isAlreadyCleared) {
+    cleared.push(storyId);
+    localStorage.setItem("bscCleared", JSON.stringify(cleared));
 
-      const point = Number(localStorage.getItem("bscPoint") || 0);
-      localStorage.setItem("bscPoint", point + rewardPoint);
+    const point = Number(localStorage.getItem("bscPoint") || 0);
+    localStorage.setItem("bscPoint", point + rewardPoint);
 
-      const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
+    const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
 
-      if (!badges.includes(badge)) {
-        badges.push(badge);
-        localStorage.setItem("bscBadge", JSON.stringify(badges));
-      }
-
-      setEffect(`+${rewardPoint}pt`);
-      setTimeout(() => setEffect(""), 900);
+    if (!badges.includes(badge)) {
+      badges.push(badge);
+      localStorage.setItem("bscBadge", JSON.stringify(badges));
     }
 
-    setFinished(true);
-    setShowNext(false);
-  };
+    setEffect(`+${rewardPoint}pt`);
+    setTimeout(() => setEffect(""), 900);
+  }
+
+  setAlreadyCleared(true);
+  setFinished(true);
+  setShowNext(false);
+};
 
   return (
     <GameLayout
@@ -182,6 +185,9 @@ export default function ChatEngine({
       showNext={showNext}
       effect={effect}
       finished={finished}
+        rewardPoint={rewardPoint}
+badge={badge}
+alreadyCleared={alreadyCleared}
     />
   );
 }
