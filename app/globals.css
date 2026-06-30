@@ -4563,3 +4563,80 @@ margin:8px 0;
   color: #999;
   filter: grayscale(1);
 }
+.bscMenuHero {
+  margin: 22px 14px;
+  padding: 26px 18px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #17345c, #0b2445);
+  color: #fff;
+  text-align: center;
+  border: 3px solid #ffd768;
+  box-shadow: 0 12px 28px rgba(0,0,0,.24);
+}
+
+.bscMenuHero span {
+  display: inline-block;
+  background: #ff4f93;
+  border-radius: 999px;
+  padding: 7px 15px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.bscMenuHero h1 {
+  margin: 12px 0 8px;
+  font-size: 28px;
+  line-height: 1.15;
+  color: #ffd768;
+}
+
+.bscMenuHero p {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.bscMenuList {
+  margin: 18px 14px 100px;
+  display: grid;
+  gap: 14px;
+}
+
+.bscMenuButton {
+  display: block;
+  text-decoration: none;
+  color: #17345c;
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px;
+  border: 2px solid #d8ad64;
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.bscMenuButton.main {
+  background: linear-gradient(135deg, #fff7df, #ffe3f0);
+  border-color: #ff8fbd;
+}
+
+.bscMenuButton span {
+  display: inline-block;
+  background: #17345c;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscMenuButton strong {
+  display: block;
+  margin: 10px 0 5px;
+  font-size: 19px;
+}
+
+.bscMenuButton p {
+  margin: 0;
+  color: #80603a;
+  font-weight: 900;
+  font-size: 13px;
+}
