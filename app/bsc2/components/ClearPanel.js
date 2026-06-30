@@ -21,7 +21,9 @@ export default function ClearPanel({
 
       <div className="bscClearButtons">
         <a href="/bsc2">もう一度プレイ</a>
+  
         <a href="/bsc">BSC一覧へ</a>
+        <a href="/bsc2/collection">バッジを見る ›</a>
       </div>
     </section>
   );
