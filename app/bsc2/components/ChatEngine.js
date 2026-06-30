@@ -193,7 +193,10 @@ export default function ChatEngine({
       localStorage.setItem("bscPoint", point + rewardPoint);
 
       const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
-
+　　　　const characterKey = story[0]?.character || "ichika";
+const bondKey = `bscBond_${characterKey}`;
+const currentBond = Number(localStorage.getItem(bondKey) || 0);
+localStorage.setItem(bondKey, Math.min(currentBond + 5, 100));
       if (!badges.includes(badge)) {
         badges.push(badge);
         localStorage.setItem("bscBadge", JSON.stringify(badges));
