@@ -1,6 +1,6 @@
-import TypeWriter from "./TypeWriter";
-
 "use client";
+
+import TypeWriter from "./TypeWriter";
 
 export default function GameLayout({
   title = "BSC",
@@ -11,8 +11,8 @@ export default function GameLayout({
   choices = [],
   onChoice,
   onNext,
-  nextLabel = "次へ ▶",
   showNext = true,
+  nextLabel = "次へ ▶",
   effect = "",
   status = null,
 }) {
@@ -21,9 +21,7 @@ export default function GameLayout({
       {effect && <div className="gameEffect">{effect}</div>}
 
       <header className="gameTopBar">
-        <a href="/bsc" className="gameBack">
-          ←
-        </a>
+        <a href="/bsc" className="gameBack">←</a>
 
         <div>
           <span>{chapter}</span>
@@ -41,10 +39,7 @@ export default function GameLayout({
           alt={characterName}
           className="gameMainCharacter"
         />
-
-        <div className="gameCharacterName">
-          {characterName}
-        </div>
+        <div className="gameCharacterName">{characterName}</div>
       </section>
 
       <section className="gameChatArea">
@@ -64,20 +59,18 @@ export default function GameLayout({
                 />
               )}
 
-              <div
-                className={`gameBubble ${isUser ? "userBubble" : "characterBubble"}`}
-              >
+              <div className={`gameBubble ${isUser ? "userBubble" : "characterBubble"}`}>
                 {msg.name && !isUser && (
                   <span className="gameBubbleName">{msg.name}</span>
                 )}
 
                 <p>
-  {msg.typing ? (
-    <TypeWriter text={msg.text} speed={msg.speed || 35} />
-  ) : (
-    msg.text
-  )}
-</p>
+                  {msg.typing ? (
+                    <TypeWriter text={msg.text} speed={msg.speed || 35} />
+                  ) : (
+                    msg.text
+                  )}
+                </p>
               </div>
             </div>
           );
@@ -101,11 +94,7 @@ export default function GameLayout({
           )}
 
           {showNext && choices.length === 0 && (
-            <button
-              type="button"
-              className="gameNextButton"
-              onClick={onNext}
-            >
+            <button type="button" className="gameNextButton" onClick={onNext}>
               {nextLabel}
             </button>
           )}
