@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GameLayout from "./GameLayout";
 import characters from "../data/characters";
 
@@ -18,11 +18,23 @@ export default function ChatEngine({
   const [effect, setEffect] = useState("");
   const [showNext, setShowNext] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [mainCharacter, setMainCharacter] = useState(characters.ichika);
-　const [alreadyCleared, setAlreadyCleared] = useState(false);
-  
+  const [alreadyCleared, setAlreadyCleared] = useState(false);
+  const [mainCharacter, setMainCharacter] = useState({
+    ...characters.ichika,
+    image: characters.ichika.images.normal,
+  });
+
+  const timerRef = useRef(null);
+
   useEffect(() => {
+    const cleared = JSON.parse(localStorage.getItem("bscCleared") || "[]");
+    setAlreadyCleared(cleared.includes(storyId));
+
     runStep(0);
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
 
   const getCharacter = (key = "ichika", face = "normal") => {
@@ -44,8 +56,8 @@ export default function ChatEngine({
         from: "character",
         name: chara.name,
         image: chara.image,
-        text: step.text || step.question,
-        typing: true,
+        text: step.text || step.question || "",
+        typing: step.typing !== false,
         speed: step.speed || 35,
       },
     ]);
@@ -65,13 +77,13 @@ export default function ChatEngine({
     setStepIndex(index);
 
     if (step.type === "talk") {
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         addCharacterMessage(step);
 
         if (step.autoNext) {
-          setTimeout(() => {
+          timerRef.current = setTimeout(() => {
             runStep(index + 1);
-          }, step.delay || 900);
+          }, step.nextDelay || 900);
         } else {
           setShowNext(true);
         }
@@ -81,7 +93,7 @@ export default function ChatEngine({
     }
 
     if (step.type === "quiz") {
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         addCharacterMessage(step);
         setChoices(step.choices || []);
       }, step.delay || 500);
@@ -89,10 +101,24 @@ export default function ChatEngine({
       return;
     }
 
+    if (step.type === "effect") {
+      setEffect(step.effect || "GOOD!!");
+
+      timerRef.current = setTimeout(() => {
+        setEffect("");
+        runStep(index + 1);
+      }, step.time || 900);
+
+      return;
+    }
+
     if (step.type === "clear") {
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         addCharacterMessage(step);
-        finishStory();
+
+        timerRef.current = setTimeout(() => {
+          finishStory();
+        }, step.nextDelay || 900);
       }, step.delay || 500);
 
       return;
@@ -107,10 +133,13 @@ export default function ChatEngine({
 
   const onChoice = (choiceIndex) => {
     const step = story[stepIndex];
+    if (!step || step.type !== "quiz") return;
+
     const choiceText = step.choices[choiceIndex];
     const isCorrect = choiceIndex === step.answer;
 
     setChoices([]);
+    setShowNext(false);
 
     setMessages((prev) => [
       ...prev,
@@ -123,55 +152,62 @@ export default function ChatEngine({
 
     const reaction = {
       type: "talk",
-      character: step.character,
+      character: step.character || "ichika",
       face: isCorrect ? "happy" : "thinking",
-      text: isCorrect ? step.correctText : step.wrongText,
+      text: isCorrect
+        ? step.correctText || "正解！すごい✨"
+        : step.wrongText || "惜しい！もう一度考えてみよう♪",
+      typing: true,
+      speed: step.speed || 35,
     };
 
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       addCharacterMessage(reaction);
 
       if (isCorrect) {
-        setEffect("GOOD!!");
+        timerRef.current = setTimeout(() => {
+          setEffect(step.correctEffect || "GOOD!!");
 
-        setTimeout(() => {
-          setEffect("");
-          runStep(stepIndex + 1);
-        }, 900);
+          timerRef.current = setTimeout(() => {
+            setEffect("");
+            runStep(stepIndex + 1);
+          }, step.effectTime || 900);
+        }, step.reactionDelay || 700);
       } else {
-        setTimeout(() => {
+        timerRef.current = setTimeout(() => {
           setChoices(step.choices || []);
-        }, 900);
+        }, step.retryDelay || 900);
       }
-    }, 500);
+    }, 400);
   };
 
   const finishStory = () => {
-  const cleared = JSON.parse(localStorage.getItem("bscCleared") || "[]");
-  const isAlreadyCleared = cleared.includes(storyId);
+    const cleared = JSON.parse(localStorage.getItem("bscCleared") || "[]");
+    const isAlreadyCleared = cleared.includes(storyId);
 
-  if (!isAlreadyCleared) {
-    cleared.push(storyId);
-    localStorage.setItem("bscCleared", JSON.stringify(cleared));
+    if (!isAlreadyCleared) {
+      cleared.push(storyId);
+      localStorage.setItem("bscCleared", JSON.stringify(cleared));
 
-    const point = Number(localStorage.getItem("bscPoint") || 0);
-    localStorage.setItem("bscPoint", point + rewardPoint);
+      const point = Number(localStorage.getItem("bscPoint") || 0);
+      localStorage.setItem("bscPoint", point + rewardPoint);
 
-    const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
+      const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
 
-    if (!badges.includes(badge)) {
-      badges.push(badge);
-      localStorage.setItem("bscBadge", JSON.stringify(badges));
+      if (!badges.includes(badge)) {
+        badges.push(badge);
+        localStorage.setItem("bscBadge", JSON.stringify(badges));
+      }
+
+      setEffect(`+${rewardPoint}pt`);
+      timerRef.current = setTimeout(() => setEffect(""), 900);
     }
 
-    setEffect(`+${rewardPoint}pt`);
-    setTimeout(() => setEffect(""), 900);
-  }
-
-  setAlreadyCleared(true);
-  setFinished(true);
-  setShowNext(false);
-};
+    setAlreadyCleared(true);
+    setFinished(true);
+    setChoices([]);
+    setShowNext(false);
+  };
 
   return (
     <GameLayout
@@ -185,9 +221,9 @@ export default function ChatEngine({
       showNext={showNext}
       effect={effect}
       finished={finished}
-        rewardPoint={rewardPoint}
-badge={badge}
-alreadyCleared={alreadyCleared}
+      rewardPoint={rewardPoint}
+      badge={badge}
+      alreadyCleared={alreadyCleared}
     />
   );
 }
