@@ -14,6 +14,15 @@ export default function LessonClient({ lesson }) {
   const passed = allAnswered && correctCount === lesson.questions.length;
 
   const handleClear = () => {
+    const missions = JSON.parse(
+  localStorage.getItem("bscMission") || "[]"
+);
+
+// すでにクリア済みなら何もしない
+if (missions.includes(lesson.id)) {
+  setFinished(true);
+  return;
+}
     const point = Number(localStorage.getItem("bscPoint") || 0);
     localStorage.setItem("bscPoint", point + 20);
 
