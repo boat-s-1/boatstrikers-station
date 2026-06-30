@@ -1,4 +1,5 @@
 import BscStatus from "./BscStatus";
+import BscLessonList from "./BscLessonList";
 
 const lessons = [
   { id: 1, title: "競艇ってどんな競技？", badge: "競艇入門" },
@@ -28,25 +29,11 @@ export default function BscPage() {
         <b>Chapter1：競艇入門編</b>
       </section>
 
-<BscStatus />
-    
+      <BscStatus />
+
       <section className="librarySection">
         <h2>📘 レッスン一覧</h2>
-
-        <div className="bscLessonList">
-          {lessons.map((lesson) => (
-            <a
-              href={`/bsc/lesson/${lesson.id}`}
-              className="bscLessonCard"
-              key={lesson.id}
-            >
-              <span>Mission {lesson.id}</span>
-              <h3>{lesson.title}</h3>
-              <p>クリア報酬：🏅{lesson.badge}</p>
-              <b>挑戦する ›</b>
-            </a>
-          ))}
-        </div>
+        <BscLessonList lessons={lessons} />
       </section>
 
       <nav className="bottomNav">
