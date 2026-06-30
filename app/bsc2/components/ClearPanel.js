@@ -20,10 +20,9 @@ export default function ClearPanel({
       <strong>🏅 {badge} GET!</strong>
 
       <div className="bscClearButtons">
-        <a href="/bsc2">もう一度プレイ</a>
-  
-        <a href="/bsc">BSC一覧へ</a>
-        <a href="/bsc2/collection">バッジを見る ›</a>
+        <a href="/bsc2/play/chapter1">もう一度プレイ</a>
+<a href="/bsc2">BSCメニューへ</a>
+<a href="/bsc2/collection">バッジを見る ›</a>
       </div>
     </section>
   );
