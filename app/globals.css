@@ -4494,3 +4494,72 @@ margin:8px 0;
     transform: scale(1.15);
   }
 }
+
+.bscCollectionHero {
+  margin: 20px 14px;
+  padding: 22px 18px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #17345c, #0b2445);
+  color: #fff;
+  text-align: center;
+  border: 3px solid #ffd768;
+}
+
+.bscCollectionHero h2 {
+  margin: 0 0 8px;
+  color: #ffd768;
+}
+
+.bscCollectionHero p {
+  margin: 0;
+  font-weight: 900;
+}
+
+.bscBadgeGrid {
+  margin: 18px 14px 100px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.bscBadgeCard {
+  min-height: 130px;
+  border-radius: 20px;
+  padding: 16px 10px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+  border: 2px solid #ddd;
+}
+
+.bscBadgeCard span {
+  display: block;
+  font-size: 34px;
+}
+
+.bscBadgeCard strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 15px;
+}
+
+.bscBadgeCard p {
+  margin: 0;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.bscBadgeCard.got {
+  background: linear-gradient(180deg, #fff7df, #ffe9f3);
+  border-color: #ff8fbd;
+  color: #17345c;
+}
+
+.bscBadgeCard.got p {
+  color: #ff2f86;
+}
+
+.bscBadgeCard.locked {
+  background: #f1f1f1;
+  color: #999;
+  filter: grayscale(1);
+}
