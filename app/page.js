@@ -221,15 +221,30 @@ export default async function Home() {
 
 <section className="homeSection bscSection">
 
-  <a href="/bsc">
+<a href="/bsc">
 
-    <img
-      src="/bsc-banner.jpg"
-      alt="BSC"
-      className="sectionBanner"
-    />
+<img
+src="/bsc-banner.jpg"
+className="sectionBanner"
+/>
 
-  </a>
+</a>
+
+<div className="bscInfo">
+
+<h3>🎮 BOAT STRIKERS CHALLENGE</h3>
+
+<p>
+競艇をゲーム感覚で学ぼう！
+</p>
+
+<div className="bscButton">
+
+Challenge Start ▶
+
+</div>
+
+</div>
 
 </section>
 
