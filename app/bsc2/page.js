@@ -1,15 +1,61 @@
-import ChatEngine from "./components/ChatEngine";
-import chapter1 from "./story/chapter1";
+"use client";
 
-export default function BSC2Page() {
+import { useEffect, useState } from "react";
+import BscStatus from "./components/BscStatus";
+
+export default function BSC2MenuPage() {
+  const [cleared, setCleared] = useState([]);
+
+  useEffect(() => {
+    setCleared(JSON.parse(localStorage.getItem("bscCleared") || "[]"));
+  }, []);
+
+  const chapter1Cleared = cleared.includes("chapter1-lesson1");
+
   return (
-    <ChatEngine
-      storyId="chapter1-lesson1"
-      title="BOAT STRIKERS CHALLENGE"
-      chapter="Chapter 1"
-      story={chapter1}
-      rewardPoint={20}
-      badge="競艇入門"
-    />
+    <main className="gamePage">
+      <header className="gameTopBar">
+        <a href="/" className="gameBack">←</a>
+        <div>
+          <span>BSC</span>
+          <h1>GAME MENU</h1>
+        </div>
+        <div className="gameStatusMini">START</div>
+      </header>
+
+      <section className="bscMenuHero">
+        <span>🎮 BSC</span>
+        <h1>BOAT STRIKERS CHALLENGE</h1>
+        <p>一果・初音・キイナと競艇を楽しく学ぼう！</p>
+      </section>
+
+      <BscStatus />
+
+      <section className="bscMenuList">
+        <a href="/bsc2/play/chapter1" className="bscMenuButton main">
+          <span>{chapter1Cleared ? "▶ 復習する" : "▶ START"}</span>
+          <strong>Chapter 1：競艇入門編</strong>
+          <p>{chapter1Cleared ? "CLEAR済み" : "まずはここから！"}</p>
+        </a>
+
+        <a href="/bsc2/collection" className="bscMenuButton">
+          <span>🏅 COLLECTION</span>
+          <strong>バッジコレクション</strong>
+          <p>集めた認定バッジを見る</p>
+        </a>
+
+        <a href="/library" className="bscMenuButton">
+          <span>📚 LIBRARY</span>
+          <strong>一果図書館へ</strong>
+          <p>攻略本・新聞を読む</p>
+        </a>
+
+        <a href="/" className="bscMenuButton">
+          <span>🏠 HOME</span>
+          <strong>トップへ戻る</strong>
+          <p>BOAT STRIKERSトップ</p>
+        </a>
+      </section>
+    </main>
   );
 }
