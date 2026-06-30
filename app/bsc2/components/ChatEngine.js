@@ -188,7 +188,9 @@ export default function ChatEngine({
     if (!isAlreadyCleared) {
       cleared.push(storyId);
       localStorage.setItem("bscCleared", JSON.stringify(cleared));
-
+const beforePoint = Number(localStorage.getItem("bscPoint") || 0);
+const beforeLevel = Math.floor(beforePoint / 100) + 1;
+localStorage.setItem("bscLastLevel", String(beforeLevel));
       const point = Number(localStorage.getItem("bscPoint") || 0);
       localStorage.setItem("bscPoint", point + rewardPoint);
 
