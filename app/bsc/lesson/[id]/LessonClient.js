@@ -14,15 +14,44 @@ export default function LessonClient({ lesson }) {
   const passed = allAnswered && correctCount === lesson.questions.length;
 
   const handleClear = () => {
-    const current = Number(localStorage.getItem("boatLibraryPoint") || 0);
-    localStorage.setItem("boatLibraryPoint", current + 20);
 
-    const badges = JSON.parse(localStorage.getItem("boatBadges") || "[]");
+  // ポイント
+  const point = Number(localStorage.getItem("bscPoint") || 0);
+  localStorage.setItem("bscPoint", point + 20);
 
-    if (!badges.includes(lesson.badge)) {
-      badges.push(lesson.badge);
-      localStorage.setItem("boatBadges", JSON.stringify(badges));
-    }
+  // Missionクリア
+  const missions = JSON.parse(
+    localStorage.getItem("bscMission") || "[]"
+  );
+
+  if (!missions.includes(lesson.id)) {
+    missions.push(lesson.id);
+
+    localStorage.setItem(
+      "bscMission",
+      JSON.stringify(missions)
+    );
+  }
+
+  // バッジ
+  const badges = JSON.parse(
+    localStorage.getItem("bscBadge") || "[]"
+  );
+
+  if (!badges.includes(lesson.badge)) {
+
+    badges.push(lesson.badge);
+
+    localStorage.setItem(
+      "bscBadge",
+      JSON.stringify(badges)
+    );
+
+  }
+
+  setFinished(true);
+
+};
 
     setFinished(true);
   };
