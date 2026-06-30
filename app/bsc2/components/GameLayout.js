@@ -1,3 +1,5 @@
+import TypeWriter from "./TypeWriter";
+
 "use client";
 
 export default function GameLayout({
@@ -69,7 +71,13 @@ export default function GameLayout({
                   <span className="gameBubbleName">{msg.name}</span>
                 )}
 
-                <p>{msg.text}</p>
+                <p>
+  {msg.typing ? (
+    <TypeWriter text={msg.text} speed={msg.speed || 35} />
+  ) : (
+    msg.text
+  )}
+</p>
               </div>
             </div>
           );
