@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-export default function TypeWriter({ text = "", speed = 35, onDone }) {
+export default function TypeWriter({ text = "", speed = 35 }) {
   const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
     setDisplayText("");
-
-    if (!text) return;
 
     let index = 0;
 
@@ -18,19 +16,16 @@ export default function TypeWriter({ text = "", speed = 35, onDone }) {
 
       if (index >= text.length) {
         clearInterval(timer);
-        if (onDone) onDone();
       }
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, speed, onDone]);
+  }, [text, speed]);
 
   return (
     <span>
       {displayText}
-      {displayText.length < text.length && (
-        <span className="typeCursor">|</span>
-      )}
+      {displayText.length < text.length && <span className="typeCursor">|</span>}
     </span>
   );
 }
