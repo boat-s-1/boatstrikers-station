@@ -1,6 +1,7 @@
+"use client";
 import BscStatus from "./BscStatus";
 import ClearPanel from "./ClearPanel";
-"use client";
+
 
 import { useEffect, useRef } from "react";
 import TypeWriter from "./TypeWriter";
