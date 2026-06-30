@@ -1,45 +1,46 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import TypeWriter from "./TypeWriter";
 
 export default function GameLayout({
-  title = "BSC",
-  chapter = "Chapter 1",
-  characterName = "一果",
-  characterImage = "/characters/ichika-talk.png",
-  messages = [],
-  choices = [],
+  title,
+  chapter,
+  character,
+  messages,
+  choices,
   onChoice,
   onNext,
-  showNext = true,
-  nextLabel = "次へ ▶",
-  effect = "",
-  status = null,
+  showNext,
+  effect,
+  finished,
 }) {
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, choices, effect, finished]);
+
   return (
     <main className="gamePage">
       {effect && <div className="gameEffect">{effect}</div>}
 
       <header className="gameTopBar">
         <a href="/bsc" className="gameBack">←</a>
-
         <div>
           <span>{chapter}</span>
           <h1>{title}</h1>
         </div>
-
-        <div className="gameStatusMini">
-          {status ? `Lv.${status.level}` : "BSC"}
-        </div>
+        <div className="gameStatusMini">BSC</div>
       </header>
 
       <section className="gameCharacterArea">
         <img
-          src={characterImage}
-          alt={characterName}
+          src={character.image}
+          alt={character.name}
           className="gameMainCharacter"
         />
-        <div className="gameCharacterName">{characterName}</div>
+        <div className="gameCharacterName">{character.name}</div>
       </section>
 
       <section className="gameChatArea">
@@ -53,17 +54,14 @@ export default function GameLayout({
             >
               {!isUser && (
                 <img
-                  src={msg.image || characterImage}
-                  alt={msg.name || characterName}
+                  src={msg.image}
+                  alt={msg.name}
                   className="gameMessageIcon"
                 />
               )}
 
               <div className={`gameBubble ${isUser ? "userBubble" : "characterBubble"}`}>
-                {msg.name && !isUser && (
-                  <span className="gameBubbleName">{msg.name}</span>
-                )}
-
+                {!isUser && <span className="gameBubbleName">{msg.name}</span>}
                 <p>
                   {msg.typing ? (
                     <TypeWriter text={msg.text} speed={msg.speed || 35} />
@@ -75,31 +73,27 @@ export default function GameLayout({
             </div>
           );
         })}
+
+        <div ref={bottomRef} />
       </section>
 
-      {(choices.length > 0 || showNext) && (
-        <section className="gameBottomArea">
-          {choices.length > 0 && (
-            <div className="gameChoices">
-              {choices.map((choice, index) => (
-                <button
-                  type="button"
-                  key={choice}
-                  onClick={() => onChoice?.(index)}
-                >
-                  {choice}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {showNext && choices.length === 0 && (
+      <section className="gameBottomArea">
+        {choices.length > 0 ? (
+          <div className="gameChoices">
+            {choices.map((choice, index) => (
+              <button type="button" key={choice} onClick={() => onChoice(index)}>
+                {choice}
+              </button>
+            ))}
+          </div>
+        ) : (
+          showNext && (
             <button type="button" className="gameNextButton" onClick={onNext}>
-              {nextLabel}
+              次へ ▶
             </button>
-          )}
-        </section>
-      )}
+          )
+        )}
+      </section>
     </main>
   );
 }
