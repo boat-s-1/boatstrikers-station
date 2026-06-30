@@ -14,44 +14,22 @@ export default function LessonClient({ lesson }) {
   const passed = allAnswered && correctCount === lesson.questions.length;
 
   const handleClear = () => {
+    const point = Number(localStorage.getItem("bscPoint") || 0);
+    localStorage.setItem("bscPoint", point + 20);
 
-  // ポイント
-  const point = Number(localStorage.getItem("bscPoint") || 0);
-  localStorage.setItem("bscPoint", point + 20);
+    const missions = JSON.parse(localStorage.getItem("bscMission") || "[]");
 
-  // Missionクリア
-  const missions = JSON.parse(
-    localStorage.getItem("bscMission") || "[]"
-  );
+    if (!missions.includes(lesson.id)) {
+      missions.push(lesson.id);
+      localStorage.setItem("bscMission", JSON.stringify(missions));
+    }
 
-  if (!missions.includes(lesson.id)) {
-    missions.push(lesson.id);
+    const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
 
-    localStorage.setItem(
-      "bscMission",
-      JSON.stringify(missions)
-    );
-  }
-
-  // バッジ
-  const badges = JSON.parse(
-    localStorage.getItem("bscBadge") || "[]"
-  );
-
-  if (!badges.includes(lesson.badge)) {
-
-    badges.push(lesson.badge);
-
-    localStorage.setItem(
-      "bscBadge",
-      JSON.stringify(badges)
-    );
-
-  }
-
-  setFinished(true);
-
-};
+    if (!badges.includes(lesson.badge)) {
+      badges.push(lesson.badge);
+      localStorage.setItem("bscBadge", JSON.stringify(badges));
+    }
 
     setFinished(true);
   };
@@ -60,9 +38,11 @@ export default function LessonClient({ lesson }) {
     <main className="libraryPage">
       <header className="header">
         <div className="logo">
-          BOAT<br />
+          BOAT
+          <br />
           <span>STRIKERS</span>
         </div>
+
         <a className="lineMini" href="https://lin.ee/Pf3FEEQ">
           LINE登録
         </a>
@@ -85,7 +65,9 @@ export default function LessonClient({ lesson }) {
         <div className="bscQuizList">
           {lesson.questions.map((q, qIndex) => (
             <div className="bscQuizBox" key={q.question}>
-              <h3>Q{qIndex + 1}. {q.question}</h3>
+              <h3>
+                Q{qIndex + 1}. {q.question}
+              </h3>
 
               <div className="bscChoices">
                 {q.choices.map((choice, cIndex) => (
@@ -109,7 +91,9 @@ export default function LessonClient({ lesson }) {
 
               {answers[qIndex] !== undefined && (
                 <p className="bscResultText">
-                  {answers[qIndex] === q.answer ? "正解！" : "もう一度考えてみよう"}
+                  {answers[qIndex] === q.answer
+                    ? "正解！"
+                    : "もう一度考えてみよう"}
                 </p>
               )}
             </div>
@@ -124,7 +108,7 @@ export default function LessonClient({ lesson }) {
         )}
 
         {passed && !finished && (
-          <button className="bscClearBtn" onClick={handleClear}>
+          <button type="button" className="bscClearBtn" onClick={handleClear}>
             MISSION CLEAR！
           </button>
         )}
