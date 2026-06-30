@@ -4724,3 +4724,35 @@ margin:8px 0;
     font-weight:900;
 
 }
+
+.bscNextPreview {
+  margin: 18px 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: #fff7df;
+  border: 2px dashed #f6a800;
+  text-align: center;
+}
+
+.bscNextPreview span {
+  display: inline-block;
+  background: #f6a800;
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscNextPreview strong {
+  display: block;
+  margin: 10px 0 4px;
+  color: #17345c;
+  font-size: 20px;
+}
+
+.bscNextPreview p {
+  margin: 0;
+  font-weight: 900;
+  color: #80603a;
+}
