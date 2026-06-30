@@ -38,11 +38,21 @@ export default function BSC2Page() {
   const current = story[step];
 
   const [messages, setMessages] = useState([
-    {
-      from: "character",
-      name: "一果",
-      text: story[0].text,
-    },
+  {
+    from: "character",
+    name: "一果",
+    text: story[0].text,
+    typing: true,
+    speed: 35,
+  },
+]);
+  {
+  from: "character",
+  name: "一果",
+  text: data.text,
+  typing: true,
+  speed: 35,
+},
   ]);
 
   const next = () => {
