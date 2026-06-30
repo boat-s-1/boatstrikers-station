@@ -4648,3 +4648,79 @@ margin:8px 0;
 .bscMenuButton.continue span {
   background: #06c755;
 }
+.bscClearReward{
+    font-size:22px;
+    font-weight:900;
+    color:#ff2f86;
+    margin:15px 0;
+}
+
+.bscClearBadgeName{
+    display:block;
+    margin-top:10px;
+    font-size:22px;
+    color:#17345c;
+}
+
+.bscClearBond{
+    margin-top:10px;
+    color:#ff4f93;
+    font-weight:900;
+}
+
+.bscAlreadyClear{
+    font-weight:900;
+    color:#666;
+}
+
+.bscClearMessage{
+
+    display:flex;
+    gap:15px;
+    align-items:center;
+
+    margin:30px 0;
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:18px;
+
+}
+
+.bscClearCharacter{
+
+    width:90px;
+
+}
+
+.bscClearSpeech{
+
+    flex:1;
+
+}
+
+.bscClearSpeech span{
+
+    display:block;
+
+    font-size:13px;
+
+    font-weight:900;
+
+    color:#ff4f93;
+
+    margin-bottom:6px;
+
+}
+
+.bscClearSpeech p{
+
+    margin:0;
+
+    line-height:1.8;
+
+    font-weight:900;
+
+}
