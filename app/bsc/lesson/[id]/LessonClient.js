@@ -1,45 +1,101 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function LessonClient({ lesson }) {
-  const [answers, setAnswers] = useState({});
+  const [stepIndex, setStepIndex] = useState(0);
+  const [messages, setMessages] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [finished, setFinished] = useState(false);
   const [alreadyCleared, setAlreadyCleared] = useState(false);
+  const bottomRef = useRef(null);
+
+  const currentStep = lesson.steps[stepIndex];
 
   useEffect(() => {
     const missions = JSON.parse(localStorage.getItem("bscMission") || "[]");
     setAlreadyCleared(missions.includes(lesson.id));
-  }, [lesson.id]);
 
-  const correctCount = lesson.questions.filter(
-    (q, index) => answers[index] === q.answer
-  ).length;
+    setMessages([
+      {
+        from: "character",
+        text: lesson.steps[0].text,
+      },
+    ]);
+  }, [lesson]);
 
-  const allAnswered = Object.keys(answers).length === lesson.questions.length;
-  const passed = allAnswered && correctCount === lesson.questions.length;
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, selected, finished]);
 
-  const handleClear = () => {
-    const missions = JSON.parse(localStorage.getItem("bscMission") || "[]");
+  const goNext = () => {
+    const nextIndex = stepIndex + 1;
 
-    // すでにクリア済みならポイント加算しない
-    if (missions.includes(lesson.id)) {
-      setAlreadyCleared(true);
-      setFinished(true);
+    if (nextIndex >= lesson.steps.length) {
+      clearMission();
       return;
     }
 
-    const point = Number(localStorage.getItem("bscPoint") || 0);
-    localStorage.setItem("bscPoint", point + 20);
+    setStepIndex(nextIndex);
+    setSelected(null);
 
-    missions.push(lesson.id);
-    localStorage.setItem("bscMission", JSON.stringify(missions));
+    const nextStep = lesson.steps[nextIndex];
 
-    const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
+    if (nextStep.type === "talk") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "character",
+          text: nextStep.text,
+        },
+      ]);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "character",
+          text: "じゃあ確認問題だよ♪",
+        },
+      ]);
+    }
+  };
 
-    if (!badges.includes(lesson.badge)) {
-      badges.push(lesson.badge);
-      localStorage.setItem("bscBadge", JSON.stringify(badges));
+  const answerQuiz = (choiceIndex) => {
+    if (selected !== null) return;
+
+    setSelected(choiceIndex);
+
+    const isCorrect = choiceIndex === currentStep.answer;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        from: "user",
+        text: currentStep.choices[choiceIndex],
+      },
+      {
+        from: "character",
+        text: isCorrect ? currentStep.correct : currentStep.wrong,
+      },
+    ]);
+  };
+
+  const clearMission = () => {
+    const missions = JSON.parse(localStorage.getItem("bscMission") || "[]");
+
+    if (!missions.includes(lesson.id)) {
+      const point = Number(localStorage.getItem("bscPoint") || 0);
+      localStorage.setItem("bscPoint", point + 20);
+
+      missions.push(lesson.id);
+      localStorage.setItem("bscMission", JSON.stringify(missions));
+
+      const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
+
+      if (!badges.includes(lesson.badge)) {
+        badges.push(lesson.badge);
+        localStorage.setItem("bscBadge", JSON.stringify(badges));
+      }
     }
 
     setAlreadyCleared(true);
@@ -50,7 +106,8 @@ export default function LessonClient({ lesson }) {
     <main className="libraryPage">
       <header className="header">
         <div className="logo">
-          BOAT<br />
+          BOAT
+          <br />
           <span>STRIKERS</span>
         </div>
 
@@ -59,85 +116,77 @@ export default function LessonClient({ lesson }) {
         </a>
       </header>
 
-      <section className="bscLessonHero">
+      <section className="bscChatHero">
         <span>Mission {lesson.id}</span>
         <h1>{lesson.title}</h1>
-        <p>{lesson.character} からの挑戦！</p>
-
-        {alreadyCleared && <b className="bscClearedBadge">✅ CLEAR済み</b>}
+        <p>{lesson.characterName}と一緒に学ぼう♪</p>
+        {alreadyCleared && <b>✅ CLEAR済み</b>}
       </section>
 
-      <section className="librarySection">
-        <h2>📖 まずは学ぼう</h2>
-        <p className="bscLessonText">{lesson.text}</p>
-      </section>
+      <section className="bscChatBox">
+        {messages.map((msg, index) => (
+          <div
+            className={`bscMessage ${
+              msg.from === "user" ? "userMessage" : "characterMessage"
+            }`}
+            key={index}
+          >
+            {msg.from === "character" && (
+              <img
+                src={lesson.characterImage}
+                alt={lesson.characterName}
+                className="bscCharacterIcon"
+              />
+            )}
 
-      <section className="librarySection">
-        <h2>📝 BSCチャレンジ</h2>
+            <div className="bscBubble">{msg.text}</div>
+          </div>
+        ))}
 
-        <div className="bscQuizList">
-          {lesson.questions.map((q, qIndex) => (
-            <div className="bscQuizBox" key={q.question}>
-              <h3>
-                Q{qIndex + 1}. {q.question}
-              </h3>
+        {currentStep?.type === "quiz" && !finished && (
+          <div className="bscQuizChat">
+            <h2>{currentStep.question}</h2>
 
-              <div className="bscChoices">
-                {q.choices.map((choice, cIndex) => (
-                  <button
-                    type="button"
-                    key={choice}
-                    onClick={() =>
-                      setAnswers({
-                        ...answers,
-                        [qIndex]: cIndex,
-                      })
-                    }
-                    className={
-                      answers[qIndex] === cIndex ? "selectedChoice" : ""
-                    }
-                  >
-                    {choice}
-                  </button>
-                ))}
-              </div>
-
-              {answers[qIndex] !== undefined && (
-                <p className="bscResultText">
-                  {answers[qIndex] === q.answer
-                    ? "正解！"
-                    : "もう一度考えてみよう"}
-                </p>
-              )}
+            <div className="bscChatChoices">
+              {currentStep.choices.map((choice, index) => (
+                <button
+                  type="button"
+                  key={choice}
+                  onClick={() => answerQuiz(index)}
+                  className={selected === index ? "selectedChoice" : ""}
+                >
+                  {choice}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-
-        {allAnswered && !passed && (
-          <div className="bscFailed">
-            <h3>惜しい！</h3>
-            <p>もう一度読み直して挑戦してみよう。</p>
           </div>
         )}
 
-        {passed && !finished && (
-          <button type="button" className="bscClearBtn" onClick={handleClear}>
-            {alreadyCleared ? "✅ CLEAR済み" : "MISSION CLEAR！"}
+        {!finished && (
+          <button
+            type="button"
+            className="bscNextBtn"
+            onClick={goNext}
+            disabled={currentStep?.type === "quiz" && selected === null}
+          >
+            {currentStep?.type === "quiz" ? "次へ進む ▶" : "わかった！ ▶"}
           </button>
         )}
 
         {finished && (
           <div className="bscClearBox">
-            <h2>{alreadyCleared ? "✅ CLEAR済み" : "🎉 CLEAR!"}</h2>
+            <h2>🎉 MISSION CLEAR!</h2>
             <p>
               {alreadyCleared
-                ? "このMissionはすでにクリア済みです。復習ありがとう！"
+                ? "復習完了！ポイントは初回クリア時のみ加算されます。"
                 : "+20pt 獲得！"}
             </p>
-            <strong>🏅 {lesson.badge}</strong>
-            <a href="/bsc">次のミッションへ ›</a>
+            <strong>🏅 {lesson.badge} GET!</strong>
+            <a href="/bsc">ミッション一覧へ戻る ›</a>
           </div>
         )}
+
+        <div ref={bottomRef} />
       </section>
 
       <nav className="bottomNav">
