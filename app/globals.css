@@ -3821,3 +3821,64 @@ font-weight:bold;
 margin:8px 0;
 
 }
+
+.bscClearedBadge {
+  display: inline-block;
+  margin-top: 10px;
+  background: #06c755;
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.bscLessonCard.isCleared {
+  border-color: #06c755;
+  background: #f1fff6;
+}
+
+.bscLessonCard.isCleared span {
+  background: #06c755;
+}
+
+.bscStatus {
+  margin: 20px 14px;
+  padding: 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #17345c, #0b2445);
+  color: white;
+  text-align: center;
+  border: 3px solid gold;
+  box-shadow: 0 10px 24px rgba(0,0,0,.3);
+}
+
+.bscStatus strong {
+  display: block;
+  font-size: 42px;
+  margin: 12px 0;
+  color: #ffd700;
+}
+
+.bscStatus h3 {
+  margin: 10px 0;
+  font-size: 24px;
+}
+
+.bscStatus p {
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.bscStatusBar {
+  height: 14px;
+  background: rgba(255,255,255,.2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.bscStatusBar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #06c755, #ffd700);
+}
