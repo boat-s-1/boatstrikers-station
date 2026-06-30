@@ -1,3 +1,5 @@
+import BscStatus from "./BscStatus";
+import ClearPanel from "./ClearPanel";
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -14,6 +16,11 @@ export default function GameLayout({
   showNext,
   effect,
   finished,
+
+  rewardPoint = 20,
+  badge = "BSC認定",
+  alreadyCleared = false,
+
 }) {
   const bottomRef = useRef(null);
 
@@ -35,15 +42,22 @@ export default function GameLayout({
       </header>
 
       <section className="gameCharacterArea">
-        <img
-          src={character.image}
-          alt={character.name}
-          className="gameMainCharacter"
-        />
-        <div className="gameCharacterName">{character.name}</div>
-      </section>
 
-      <section className="gameChatArea">
+  <img
+    src={character.image}
+    alt={character.name}
+    className="gameMainCharacter"
+  />
+
+  <div className="gameCharacterName">
+    {character.name}
+  </div>
+
+</section>
+
+<BscStatus />
+
+<section className="gameChatArea">
         {messages.map((msg, index) => {
           const isUser = msg.from === "user";
 
