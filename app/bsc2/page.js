@@ -5,9 +5,11 @@ import BscStatus from "./components/BscStatus";
 
 export default function BSC2MenuPage() {
   const [cleared, setCleared] = useState([]);
+  const [continueData, setContinueData] = useState(null);
 
   useEffect(() => {
     setCleared(JSON.parse(localStorage.getItem("bscCleared") || "[]"));
+    setContinueData(JSON.parse(localStorage.getItem("bscContinue") || "null"));
   }, []);
 
   const chapter1Cleared = cleared.includes("chapter1-lesson1");
@@ -32,6 +34,13 @@ export default function BSC2MenuPage() {
       <BscStatus />
 
       <section className="bscMenuList">
+    {continueData && (
+  <a href={continueData.url} className="bscMenuButton continue">
+    <span>▶ 続きから</span>
+    <strong>{continueData.chapter}</strong>
+    <p>{continueData.title}</p>
+  </a>
+)}
         <a href="/bsc2/play/chapter1" className="bscMenuButton main">
           <span>{chapter1Cleared ? "▶ 復習する" : "▶ START"}</span>
           <strong>Chapter 1：競艇入門編</strong>
