@@ -4640,3 +4640,11 @@ margin:8px 0;
   font-weight: 900;
   font-size: 13px;
 }
+.bscMenuButton.continue {
+  background: linear-gradient(135deg, #eaffef, #fff7df);
+  border-color: #06c755;
+}
+
+.bscMenuButton.continue span {
+  background: #06c755;
+}
