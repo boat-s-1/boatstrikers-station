@@ -3775,3 +3775,49 @@ font-size:18px;
 box-shadow:0 8px 20px rgba(0,0,0,.2);
 
 }
+
+.bscStatus{
+
+margin:20px 14px;
+
+padding:20px;
+
+border-radius:24px;
+
+background:linear-gradient(135deg,#17345c,#0b2445);
+
+color:white;
+
+text-align:center;
+
+border:3px solid gold;
+
+}
+
+.bscStatus strong{
+
+display:block;
+
+font-size:42px;
+
+margin:12px 0;
+
+color:#FFD700;
+
+}
+
+.bscStatus h3{
+
+margin:10px 0;
+
+font-size:24px;
+
+}
+
+.bscStatus p{
+
+font-weight:bold;
+
+margin:8px 0;
+
+}
