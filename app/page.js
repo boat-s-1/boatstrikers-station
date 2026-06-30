@@ -219,7 +219,21 @@ export default async function Home() {
   </a>
 </section>
 
- 
+<section className="homeSection bscSection">
+
+  <a href="/bsc">
+
+    <img
+      src="/bsc-banner.jpg"
+      alt="BSC"
+      className="sectionBanner"
+    />
+
+  </a>
+
+</section>
+
+    
 
       <section className="homeSectionCard yellow">
 
