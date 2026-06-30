@@ -4299,3 +4299,112 @@ margin:8px 0;
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
+
+.bscGameStatus {
+  margin: 12px 14px;
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #17345c, #0b2445);
+  color: #fff;
+  border: 2px solid #ffd768;
+  box-shadow: 0 8px 18px rgba(0,0,0,.16);
+}
+
+.bscGameStatus span {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffd768;
+}
+
+.bscGameStatus h2 {
+  margin: 4px 0;
+  font-size: 28px;
+  color: #ffd768;
+}
+
+.bscGameStatus p {
+  margin: 0 0 10px;
+  font-weight: 900;
+}
+
+.bscGameStatusBar {
+  height: 12px;
+  background: rgba(255,255,255,.2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.bscGameStatusBar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #06c755, #ffd768);
+}
+
+.bscGameStatusGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.bscGameStatusGrid b {
+  background: rgba(255,255,255,.13);
+  border-radius: 12px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.bscClearPanel {
+  margin: 18px 14px 110px;
+  padding: 22px 18px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #fff7df, #ffe3f0);
+  border: 3px solid #ff8fbd;
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+  text-align: center;
+}
+
+.bscClearBadge {
+  display: inline-block;
+  background: #17345c;
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscClearPanel h2 {
+  margin: 14px 0 6px;
+  font-size: 34px;
+  color: #ff2f86;
+}
+
+.bscClearPanel p {
+  margin: 0 0 10px;
+  font-weight: 900;
+  color: #3b260f;
+}
+
+.bscClearPanel strong {
+  display: block;
+  margin: 12px 0 18px;
+  font-size: 20px;
+  color: #17345c;
+}
+
+.bscClearButtons {
+  display: grid;
+  gap: 10px;
+}
+
+.bscClearButtons a {
+  display: block;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-weight: 900;
+}
