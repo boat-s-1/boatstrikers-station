@@ -4286,3 +4286,16 @@ margin:8px 0;
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
+
+.typeCursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blinkCursor 0.8s infinite;
+  color: #ff4f93;
+  font-weight: 900;
+}
+
+@keyframes blinkCursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
