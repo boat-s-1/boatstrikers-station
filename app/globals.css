@@ -4442,3 +4442,55 @@ margin:8px 0;
   height: 100%;
   background: linear-gradient(90deg, #ff4f93, #ffd768);
 }
+
+.bscLevelUpEffect {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: rgba(0,0,0,.72);
+  color: #fff;
+  animation: levelUpFade 1.8s ease forwards;
+  pointer-events: none;
+}
+
+.bscLevelUpEffect span {
+  display: block;
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffd768;
+}
+
+.bscLevelUpEffect strong {
+  display: block;
+  font-size: 58px;
+  color: #ff4f93;
+  text-shadow: 3px 3px 0 #fff;
+}
+
+.bscLevelUpEffect p {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+@keyframes levelUpFade {
+  0% {
+    opacity: 0;
+    transform: scale(.7);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
