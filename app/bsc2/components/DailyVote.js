@@ -62,6 +62,10 @@ export default function DailyVote() {
   };
 
   const loadVotes = async () => {
+    if (!supabase) {
+  setLoading(false);
+  return;
+}
     const { data, error } = await supabase
       .from("daily_votes")
       .select("candidate_key")
