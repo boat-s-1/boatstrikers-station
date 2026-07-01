@@ -5493,3 +5493,13 @@ margin:8px 0;
   font-weight: 900;
   font-size: 16px;
 }
+
+.hero{
+    width:100%;
+}
+
+.heroImage{
+    width:100%;
+    display:block;
+    border-radius:20px;
+}
