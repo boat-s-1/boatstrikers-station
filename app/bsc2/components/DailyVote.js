@@ -156,3 +156,95 @@ export default function DailyVote() {
 
     await loadVotes();
   };
+    return (
+    <section className="dailyVote">
+      <div className="dailyVoteHeader">
+        <span>🌸 TODAY&apos;S EVENT</span>
+        <h2>{TODAY_EVENT.title}</h2>
+        <p>投票締切 {TODAY_EVENT.deadline}</p>
+      </div>
+
+      <div className="dailyVoteCards">
+        {TODAY_EVENT.candidates.map((item) => (
+          <div className="voteCard" key={item.key}>
+            <h3>
+              {item.icon} {item.name}
+            </h3>
+
+            <p>
+              {item.label}
+              <br />
+              <b>{item.main}</b>
+            </p>
+
+            {item.sub && (
+              <p>
+                {item.subLabel}
+                <br />
+                <b>{item.sub}</b>
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {!voted ? (
+        <div className="voteButtons">
+          <h3>どれが来ると思う？</h3>
+
+          {TODAY_EVENT.candidates.map((item) => (
+            <button
+              type="button"
+              key={item.key}
+              onClick={() => vote(item)}
+              disabled={voting}
+            >
+              {voting ? "投票中..." : `${item.icon} ${item.name}に投票`}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="voteFinish">
+          <h3>投票ありがとう😊</h3>
+          <p>+2pt GET!!</p>
+          <p>
+            あなたは <b>{choice}</b> に投票しました。
+          </p>
+        </div>
+      )}
+
+      <div className="voteResultBox">
+        <h3>📊 リアルタイム投票率</h3>
+
+        {loading ? (
+          <p className="voteTotal">投票数を読み込み中...</p>
+        ) : (
+          <>
+            <p className="voteTotal">現在 {totalVotes}人が参加中</p>
+
+            {TODAY_EVENT.candidates.map((item) => {
+              const percent = getPercent(item.key);
+
+              return (
+                <div className="voteResultRow" key={item.key}>
+                  <div className="voteResultTop">
+                    <strong>
+                      {item.icon} {item.name}
+                    </strong>
+                    <span>
+                      {percent}% / {votes[item.key] || 0}票
+                    </span>
+                  </div>
+
+                  <div className="voteBar">
+                    <i style={{ width: `${percent}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
