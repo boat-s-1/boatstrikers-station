@@ -34,6 +34,7 @@ export default function BSC2MenuPage() {
     className="heroImage"
   />
 </div>
+      
 
       <BscStatus />
 <DailyVote />
