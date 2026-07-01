@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BscStatus from "./components/BscStatus";
+import DailyVote from "./components/DailyVote";
 
 export default function BSC2MenuPage() {
   const [cleared, setCleared] = useState([]);
@@ -32,7 +33,8 @@ export default function BSC2MenuPage() {
         <p>一果・初音・キイナと競艇を楽しく学ぼう！</p>
       </section>
 
-      <DailyVote />
+      <BscStatus />
+<DailyVote />
       <section className="bscMenuList">
         {continueData && (
           <a href={continueData.url} className="bscMenuButton continue">
