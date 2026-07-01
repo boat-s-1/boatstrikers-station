@@ -5453,3 +5453,43 @@ margin:8px 0;
 }
 
 }
+
+.bscAdminBox {
+  margin: 24px 14px;
+  padding: 22px;
+  border-radius: 26px;
+  background: #fff7df;
+  border: 3px solid #ffd768;
+  display: grid;
+  gap: 14px;
+}
+
+.bscAdminBox h1,
+.bscAdminBox h2 {
+  margin: 0;
+  color: #17345c;
+}
+
+.bscAdminBox label {
+  display: grid;
+  gap: 6px;
+  font-weight: 900;
+  color: #17345c;
+}
+
+.bscAdminBox input {
+  padding: 13px;
+  border-radius: 14px;
+  border: 2px solid #d8ad64;
+  font-size: 16px;
+}
+
+.bscAdminBox button {
+  border: 0;
+  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  color: #fff;
+  font-weight: 900;
+  font-size: 16px;
+}
