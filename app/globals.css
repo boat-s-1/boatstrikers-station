@@ -5088,3 +5088,367 @@ margin:8px 0;
   border-radius: 999px;
   background: linear-gradient(90deg, #ff4f93, #ffd768);
 }
+
+/* ===========================
+   Daily Vote
+=========================== */
+
+.dailyVote{
+
+    margin:24px 14px;
+
+    padding:22px;
+
+    border-radius:30px;
+
+    background:linear-gradient(
+        180deg,
+        #fff8e8,
+        #ffe8f3
+    );
+
+    border:3px solid #ffd768;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+
+}
+
+.dailyVoteHeader{
+
+    text-align:center;
+
+}
+
+.dailyVoteHeader span{
+
+    display:inline-block;
+
+    background:#ff4f93;
+
+    color:#fff;
+
+    padding:6px 16px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:.08em;
+
+}
+
+.dailyVoteHeader h2{
+
+    margin:14px 0 6px;
+
+    color:#17345c;
+
+    font-size:28px;
+
+    font-weight:900;
+
+}
+
+.dailyVoteHeader p{
+
+    color:#666;
+
+    font-weight:700;
+
+    margin:0;
+
+}
+
+/* ===========================
+   Card
+=========================== */
+
+.dailyVoteCards{
+
+    display:grid;
+
+    gap:16px;
+
+    margin-top:22px;
+
+}
+
+.voteCard{
+
+    background:#fff;
+
+    border-radius:24px;
+
+    padding:18px;
+
+    border:2px solid #ffd768;
+
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+
+    transition:.25s;
+
+}
+
+.voteCard:hover{
+
+    transform:translateY(-4px);
+
+}
+
+.voteCard h3{
+
+    margin:0 0 12px;
+
+    color:#17345c;
+
+    font-size:22px;
+
+}
+
+.voteCard p{
+
+    margin:10px 0;
+
+    line-height:1.7;
+
+    color:#555;
+
+    font-weight:700;
+
+}
+
+.voteCard b{
+
+    font-size:28px;
+
+    color:#ff2f86;
+
+}
+
+/* ===========================
+   Vote Buttons
+=========================== */
+
+.voteButtons{
+
+    display:grid;
+
+    gap:14px;
+
+    margin-top:22px;
+
+}
+
+.voteButtons h3{
+
+    text-align:center;
+
+    margin-bottom:6px;
+
+    color:#17345c;
+
+}
+
+.voteButtons button{
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:16px;
+
+    font-size:18px;
+
+    font-weight:900;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    background:linear-gradient(
+        135deg,
+        #ff4f93,
+        #f6a800
+    );
+
+    box-shadow:0 6px 0 #cc7b00;
+
+    transition:.2s;
+
+}
+
+.voteButtons button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.voteButtons button:active{
+
+    transform:translateY(3px);
+
+    box-shadow:0 2px 0 #cc7b00;
+
+}
+
+.voteButtons button:disabled{
+
+    opacity:.6;
+
+    cursor:default;
+
+}
+
+/* ===========================
+   Finish
+=========================== */
+
+.voteFinish{
+
+    margin-top:22px;
+
+    background:#fff;
+
+    border-radius:24px;
+
+    padding:24px;
+
+    text-align:center;
+
+    border:2px solid #06c755;
+
+}
+
+.voteFinish h3{
+
+    margin:0 0 12px;
+
+    color:#06c755;
+
+    font-size:24px;
+
+}
+
+.voteFinish p{
+
+    margin:6px 0;
+
+    font-weight:800;
+
+}
+
+.voteFinish b{
+
+    color:#ff2f86;
+
+}
+
+/* ===========================
+   Result
+=========================== */
+
+.voteResultBox{
+
+    margin-top:28px;
+
+    background:#17345c;
+
+    color:#fff;
+
+    padding:22px;
+
+    border-radius:26px;
+
+}
+
+.voteResultBox h3{
+
+    margin:0;
+
+    color:#ffd768;
+
+    font-size:22px;
+
+}
+
+.voteTotal{
+
+    margin:12px 0 18px;
+
+    color:#fff6d7;
+
+    font-weight:700;
+
+}
+
+.voteResultRow{
+
+    margin-bottom:18px;
+
+}
+
+.voteResultTop{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:8px;
+
+    font-weight:900;
+
+}
+
+.voteBar{
+
+    height:18px;
+
+    background:rgba(255,255,255,.15);
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+.voteBar i{
+
+    display:block;
+
+    height:100%;
+
+    border-radius:999px;
+
+    background:linear-gradient(
+        90deg,
+        #ff4f93,
+        #ffd768
+    );
+
+    transition:width .6s ease;
+
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (min-width:900px){
+
+.dailyVoteCards{
+
+    grid-template-columns:repeat(3,1fr);
+
+}
+
+.voteButtons{
+
+    grid-template-columns:repeat(3,1fr);
+
+}
+
+}
