@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 const allBadges = [
   "競艇入門",
+  "スタート展示入門",
   "6艇理解",
   "コース理解",
   "イン逃げ初級",
