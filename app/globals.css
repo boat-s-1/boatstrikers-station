@@ -4756,3 +4756,175 @@ margin:8px 0;
   font-weight: 900;
   color: #80603a;
 }
+
+.bscResultPanel {
+  position: relative;
+  margin: 20px 14px 110px;
+  padding: 24px 16px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #fff7df, #ffe3f0);
+  border: 4px solid #ffd768;
+  box-shadow: 0 16px 34px rgba(0,0,0,.24);
+  text-align: center;
+  overflow: hidden;
+}
+
+.bscResultGlow {
+  position: absolute;
+  inset: -80px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.9), transparent 28%),
+    radial-gradient(circle at 70% 10%, rgba(255,215,104,.8), transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(255,79,147,.35), transparent 35%);
+  animation: resultGlowMove 3s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.bscResultHeader,
+.bscResultCharacterBox,
+.bscRewardGrid,
+.bscNextPreview,
+.bscResultButtons {
+  position: relative;
+  z-index: 1;
+}
+
+.bscResultHeader span {
+  display: inline-block;
+  background: #17345c;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscResultHeader h2 {
+  margin: 12px 0 4px;
+  font-size: 34px;
+  color: #ff2f86;
+  text-shadow: 2px 2px 0 #fff, 4px 4px 0 #ffd768;
+}
+
+.bscResultHeader p {
+  margin: 0;
+  font-weight: 900;
+  color: #17345c;
+}
+
+.bscResultCharacterBox {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin: 22px 0;
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.bscResultCharacter {
+  width: 95px;
+  animation: resultCharacterJump 1.8s ease-in-out infinite;
+}
+
+.bscResultSpeech {
+  flex: 1;
+  text-align: left;
+}
+
+.bscResultSpeech span {
+  display: block;
+  color: #ff4f93;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.bscResultSpeech p {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.7;
+  color: #3b260f;
+}
+
+.bscRewardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.bscRewardCard {
+  padding: 16px;
+  border-radius: 22px;
+  background: #fff;
+  border: 2px solid #ffb6d3;
+  box-shadow: 0 8px 18px rgba(255,79,147,.12);
+}
+
+.bscRewardCard span {
+  display: block;
+  font-size: 30px;
+}
+
+.bscRewardCard strong {
+  display: block;
+  margin: 6px 0 4px;
+  color: #ff2f86;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.bscRewardCard p {
+  margin: 0;
+  color: #80603a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscResultButtons {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.bscResultButtons a {
+  display: block;
+  padding: 15px;
+  border-radius: 18px;
+  background: #fff;
+  color: #17345c;
+  text-decoration: none;
+  font-weight: 900;
+  box-shadow: 0 5px 0 rgba(0,0,0,.18);
+}
+
+.bscResultButtons a.primary {
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  color: #fff;
+  font-size: 17px;
+}
+
+.bscResultButtons a:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgba(0,0,0,.18);
+}
+
+@keyframes resultGlowMove {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    transform: rotate(8deg) scale(1.08);
+  }
+}
+
+@keyframes resultCharacterJump {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
