@@ -29,7 +29,7 @@ export default function BSC2MenuPage() {
 
       <div className="hero">
   <img
-    src="/7F8A183E-9648-4BB8-BA99-273EB637EC39.png"
+    src="/bsc/7F8A183E-9648-4BB8-BA99-273EB637EC39.png"
     alt="BSC"
     className="heroImage"
   />
