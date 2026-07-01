@@ -32,7 +32,7 @@ export default function BSC2MenuPage() {
         <p>一果・初音・キイナと競艇を楽しく学ぼう！</p>
       </section>
 
-      
+      <DailyVote />
       <section className="bscMenuList">
         {continueData && (
           <a href={continueData.url} className="bscMenuButton continue">
