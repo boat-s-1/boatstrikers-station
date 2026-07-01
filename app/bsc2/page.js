@@ -27,11 +27,13 @@ export default function BSC2MenuPage() {
         <div className="gameStatusMini">START</div>
       </header>
 
-      <section className="bscMenuHero">
-        <span>🎮 BSC</span>
-        <h1>BOAT STRIKERS CHALLENGE</h1>
-        <p>一果・初音・キイナと競艇を楽しく学ぼう！</p>
-      </section>
+      <div className="hero">
+  <img
+    src="/bsc/title.jpg"
+    alt="BSC"
+    className="heroImage"
+  />
+</div>
 
       <BscStatus />
 <DailyVote />
