@@ -38,17 +38,19 @@ const TODAY_EVENT = {
   ],
 };
 
-export default function DailyVote() {
-  const [votes, setVotes] = useState({
-    ichika: 0,
-    kiina: 0,
-    hatsune: 0,
-  });
+const initialVotes = {
+  ichika: 0,
+  kiina: 0,
+  hatsune: 0,
+};
 
+export default function DailyVote() {
+  const [votes, setVotes] = useState(initialVotes);
   const [voted, setVoted] = useState(false);
   const [choice, setChoice] = useState("");
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const voteKey = useMemo(() => {
     return `dailyVote_${TODAY_EVENT.id}`;
@@ -58,14 +60,18 @@ export default function DailyVote() {
 
   const getPercent = (key) => {
     if (!totalVotes) return 0;
-    return Math.round((votes[key] / totalVotes) * 100);
+    return Math.round(((votes[key] || 0) / totalVotes) * 100);
   };
 
   const loadVotes = async () => {
     if (!supabase) {
-  setLoading(false);
-  return;
-}
+      setIsReady(false);
+      setLoading(false);
+      return;
+    }
+
+    setIsReady(true);
+
     const { data, error } = await supabase
       .from("daily_votes")
       .select("candidate_key")
@@ -77,13 +83,9 @@ export default function DailyVote() {
       return;
     }
 
-    const counts = {
-      ichika: 0,
-      kiina: 0,
-      hatsune: 0,
-    };
+    const counts = { ...initialVotes };
 
-    data.forEach((row) => {
+    (data || []).forEach((row) => {
       if (counts[row.candidate_key] !== undefined) {
         counts[row.candidate_key] += 1;
       }
@@ -103,12 +105,12 @@ export default function DailyVote() {
 
     loadVotes();
 
-if (!supabase) {
-  return;
-}
+    if (!supabase) {
+      return undefined;
+    }
 
-const channel = supabase
-  .channel(`daily-votes-${TODAY_EVENT.id}`)
+    const channel = supabase
+      .channel(`daily-votes-${TODAY_EVENT.id}`)
       .on(
         "postgres_changes",
         {
@@ -129,12 +131,12 @@ const channel = supabase
   }, [voteKey]);
 
   const vote = async (candidate) => {
-  if (!supabase) {
-    alert("投票機能の準備中です。");
-    return;
-  }
+    if (!supabase) {
+      alert("投票機能の準備中です。");
+      return;
+    }
 
-  if (voted || voting) return;
+    if (voted || voting) return;
 
     setVoting(true);
 
@@ -169,7 +171,8 @@ const channel = supabase
 
     await loadVotes();
   };
-    return (
+
+  return (
     <section className="dailyVote">
       <div className="dailyVoteHeader">
         <span>🌸 TODAY&apos;S EVENT</span>
@@ -201,7 +204,14 @@ const channel = supabase
         ))}
       </div>
 
-      {!voted ? (
+      {!isReady && (
+        <div className="voteFinish">
+          <h3>投票機能の準備中です</h3>
+          <p>Supabase設定が反映されると投票できます。</p>
+        </div>
+      )}
+
+      {isReady && !voted ? (
         <div className="voteButtons">
           <h3>どれが来ると思う？</h3>
 
@@ -216,7 +226,9 @@ const channel = supabase
             </button>
           ))}
         </div>
-      ) : (
+      ) : null}
+
+      {isReady && voted ? (
         <div className="voteFinish">
           <h3>投票ありがとう😊</h3>
           <p>+2pt GET!!</p>
@@ -224,7 +236,7 @@ const channel = supabase
             あなたは <b>{choice}</b> に投票しました。
           </p>
         </div>
-      )}
+      ) : null}
 
       <div className="voteResultBox">
         <h3>📊 リアルタイム投票率</h3>
