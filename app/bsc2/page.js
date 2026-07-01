@@ -13,7 +13,8 @@ export default function BSC2MenuPage() {
   }, []);
 
   const chapter1Cleared = cleared.includes("chapter1-lesson1");
-
+　const chapter2Cleared = cleared.includes("chapter2-start-tenji");
+  
   return (
     <main className="gamePage">
       <header className="gameTopBar">
@@ -40,6 +41,11 @@ export default function BSC2MenuPage() {
     <strong>{continueData.chapter}</strong>
     <p>{continueData.title}</p>
   </a>
+  <a href="/bsc2/play/chapter2" className="bscMenuButton main">
+  <span>{chapter2Cleared ? "▶ 復習する" : "▶ START"}</span>
+  <strong>Chapter 2：スタート展示って何？</strong>
+  <p>{chapter2Cleared ? "CLEAR済み" : "スタート展示を学ぼう！"}</p>
+</a>
 )}
         <a href="/bsc2/play/chapter1" className="bscMenuButton main">
           <span>{chapter1Cleared ? "▶ 復習する" : "▶ START"}</span>
