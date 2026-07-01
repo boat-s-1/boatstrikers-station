@@ -103,8 +103,12 @@ export default function DailyVote() {
 
     loadVotes();
 
-    const channel = supabase
-      .channel(`daily-votes-${TODAY_EVENT.id}`)
+if (!supabase) {
+  return;
+}
+
+const channel = supabase
+  .channel(`daily-votes-${TODAY_EVENT.id}`)
       .on(
         "postgres_changes",
         {
@@ -125,7 +129,12 @@ export default function DailyVote() {
   }, [voteKey]);
 
   const vote = async (candidate) => {
-    if (voted || voting) return;
+  if (!supabase) {
+    alert("投票機能の準備中です。");
+    return;
+  }
+
+  if (voted || voting) return;
 
     setVoting(true);
 
