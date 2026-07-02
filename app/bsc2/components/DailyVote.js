@@ -72,8 +72,8 @@ export default function DailyVote() {
     candidates: [
       {
         key: "ichika",
-        name: "一果",
-        icon: "🌸",
+      
+    
         label: "一果の本命",
         main: row.ichika_main || "-",
         subLabel: "一果の押さえ",
