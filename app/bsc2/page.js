@@ -42,7 +42,7 @@ export default function BSC2MenuPage() {
 
     <section className="bscCourseGrid">
   <a href="/bsc2/play/chapter1" className="bscCourseCard">
-    <img src="/bsc/course-beginner.jpg" alt="初心者編" />
+    <img src="/B7049A8B-ED96-47BF-809F-382BB00416B0.png" alt="初心者編" />
     <div>
       <span>BEGINNER</span>
       <strong>初心者編</strong>
@@ -51,7 +51,7 @@ export default function BSC2MenuPage() {
   </a>
 
   <a href="/bsc2/play/chapter2" className="bscCourseCard">
-    <img src="/bsc/course-intermediate.jpg" alt="中級者編" />
+    <img src="/9A044E83-9FB1-401C-85FC-7C625977C6F3.png" alt="中級者編" />
     <div>
       <span>INTERMEDIATE</span>
       <strong>中級者編</strong>
@@ -60,7 +60,7 @@ export default function BSC2MenuPage() {
   </a>
 
   <a href="/bsc2/play/chapter3" className="bscCourseCard">
-    <img src="/bsc/course-advanced.jpg" alt="上級者編" />
+    <img src="/137BBD12-85F7-4496-A454-F7884D21BF41.png" alt="上級者編" />
     <div>
       <span>ADVANCED</span>
       <strong>上級者編</strong>
@@ -69,7 +69,7 @@ export default function BSC2MenuPage() {
   </a>
 
   <a href="/bsc2/practice" className="bscCourseCard">
-    <img src="/bsc/course-practice.jpg" alt="実践編" />
+    <img src="/9790A9E5-DBE8-4B73-9278-5690A49F93B5.png" alt="実践編" />
     <div>
       <span>PRACTICE</span>
       <strong>実践編</strong>
