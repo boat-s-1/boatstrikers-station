@@ -392,7 +392,7 @@ export default function AdvancedPage() {
 
       <section className="advancedGameMap">
         <img
-          src="/bsc/advanced-map.png"
+          src="/bsc/C12AC07F-9B8A-4749-BC96-3176CCB0CF39.png"
           alt="上級者ロード"
           className="advancedGameMapBg"
         />
