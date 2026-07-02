@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import TalkGame from "./TalkGame";
 import talkQuestions from "./questions";
+import "./talk.css";
 
 function TalkPageContent() {
   const searchParams = useSearchParams();
