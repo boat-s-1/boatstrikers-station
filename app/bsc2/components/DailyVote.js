@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-const TODAY_EVENT = {
-  id: "2026-07-01-gamagori-12",
+const DEFAULT_EVENT = {
+  id: "default-daily-event",
   title: "蒲郡12R ドリーム戦",
   deadline: "20:35",
   candidates: [
@@ -45,6 +45,7 @@ const initialVotes = {
 };
 
 export default function DailyVote() {
+  const [event, setEvent] = useState(DEFAULT_EVENT);
   const [votes, setVotes] = useState(initialVotes);
   const [voted, setVoted] = useState(false);
   const [choice, setChoice] = useState("");
@@ -55,8 +56,8 @@ export default function DailyVote() {
   const [isClosed, setIsClosed] = useState(false);
 
   const voteKey = useMemo(() => {
-    return `dailyVote_${TODAY_EVENT.id}`;
-  }, []);
+    return `dailyVote_${event.id}`;
+  }, [event.id]);
 
   const totalVotes = Object.values(votes).reduce((sum, num) => sum + num, 0);
 
@@ -65,9 +66,79 @@ export default function DailyVote() {
     return Math.round(((votes[key] || 0) / totalVotes) * 100);
   };
 
-  const updateCountdown = () => {
+  const makeEventFromRow = (row) => {
+    return {
+      id: row.id,
+      title: row.title,
+      deadline: row.deadline,
+      candidates: [
+        {
+          key: "ichika",
+          name: "一果",
+          icon: "🌸",
+          label: "一果の本命",
+          main: row.ichika_main || "-",
+          subLabel: "一果の押さえ",
+          sub: row.ichika_sub || "",
+        },
+        {
+          key: "kiina",
+          name: "キイナ",
+          icon: "⚡",
+          label: "キイナの穴",
+          main: row.kiina_main || "-",
+          subLabel: "",
+          sub: "",
+        },
+        {
+          key: "hatsune",
+          name: "初音",
+          icon: "💜",
+          label: "初音の狙い",
+          main: row.hatsune_main || "-",
+          subLabel: "",
+          sub: "",
+        },
+      ],
+    };
+  };
+
+  const loadActiveEvent = async () => {
+    if (!supabase) {
+      setIsReady(false);
+      setLoading(false);
+      return DEFAULT_EVENT;
+    }
+
+    const { data, error } = await supabase
+      .from("daily_events")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("イベント取得エラー:", error);
+      setIsReady(false);
+      setLoading(false);
+      return DEFAULT_EVENT;
+    }
+
+    if (!data) {
+      setIsReady(true);
+      return DEFAULT_EVENT;
+    }
+
+    const activeEvent = makeEventFromRow(data);
+    setEvent(activeEvent);
+    setIsReady(true);
+    return activeEvent;
+  };
+
+  const updateCountdown = (targetEvent = event) => {
     const now = new Date();
-    const [hour, minute] = TODAY_EVENT.deadline.split(":").map(Number);
+    const [hour, minute] = targetEvent.deadline.split(":").map(Number);
 
     const deadline = new Date();
     deadline.setHours(hour, minute, 0, 0);
@@ -93,19 +164,16 @@ export default function DailyVote() {
     setIsClosed(false);
   };
 
-  const loadVotes = async () => {
+  const loadVotes = async (targetEvent = event) => {
     if (!supabase) {
-      setIsReady(false);
       setLoading(false);
       return;
     }
 
-    setIsReady(true);
-
     const { data, error } = await supabase
       .from("daily_votes")
       .select("candidate_key")
-      .eq("event_id", TODAY_EVENT.id);
+      .eq("event_id", targetEvent.id);
 
     if (error) {
       console.error("投票取得エラー:", error);
@@ -126,49 +194,76 @@ export default function DailyVote() {
   };
 
   useEffect(() => {
-    updateCountdown();
+    let voteChannel;
+    let eventChannel;
+    let countdownTimer;
 
-    const timer = setInterval(() => {
-      updateCountdown();
-    }, 1000);
+    const start = async () => {
+      setLoading(true);
 
-    return () => clearInterval(timer);
-  }, []);
+      const activeEvent = await loadActiveEvent();
 
-  useEffect(() => {
-    const savedVote = JSON.parse(localStorage.getItem(voteKey) || "null");
+      const savedVote = JSON.parse(
+        localStorage.getItem(`dailyVote_${activeEvent.id}`) || "null"
+      );
 
-    if (savedVote) {
-      setVoted(true);
-      setChoice(savedVote.choice);
-    }
+      if (savedVote) {
+        setVoted(true);
+        setChoice(savedVote.choice);
+      } else {
+        setVoted(false);
+        setChoice("");
+      }
 
-    loadVotes();
+      updateCountdown(activeEvent);
+      countdownTimer = setInterval(() => {
+        updateCountdown(activeEvent);
+      }, 1000);
 
-    if (!supabase) {
-      return undefined;
-    }
+      await loadVotes(activeEvent);
 
-    const channel = supabase
-      .channel(`daily-votes-${TODAY_EVENT.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "daily_votes",
-          filter: `event_id=eq.${TODAY_EVENT.id}`,
-        },
-        () => {
-          loadVotes();
-        }
-      )
-      .subscribe();
+      if (!supabase) return;
+
+      voteChannel = supabase
+        .channel(`daily-votes-${activeEvent.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "daily_votes",
+            filter: `event_id=eq.${activeEvent.id}`,
+          },
+          () => {
+            loadVotes(activeEvent);
+          }
+        )
+        .subscribe();
+
+      eventChannel = supabase
+        .channel("daily-events-active")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "daily_events",
+          },
+          async () => {
+            window.location.reload();
+          }
+        )
+        .subscribe();
+    };
+
+    start();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (countdownTimer) clearInterval(countdownTimer);
+      if (voteChannel) supabase?.removeChannel(voteChannel);
+      if (eventChannel) supabase?.removeChannel(eventChannel);
     };
-  }, [voteKey]);
+  }, []);
 
   const vote = async (candidate) => {
     if (!supabase) {
@@ -186,7 +281,7 @@ export default function DailyVote() {
     setVoting(true);
 
     const { error } = await supabase.from("daily_votes").insert({
-      event_id: TODAY_EVENT.id,
+      event_id: event.id,
       candidate_key: candidate.key,
       candidate_name: candidate.name,
     });
@@ -201,7 +296,7 @@ export default function DailyVote() {
     localStorage.setItem(
       voteKey,
       JSON.stringify({
-        eventId: TODAY_EVENT.id,
+        eventId: event.id,
         choice: candidate.name,
         key: candidate.key,
       })
@@ -214,7 +309,7 @@ export default function DailyVote() {
     setVoted(true);
     setVoting(false);
 
-    await loadVotes();
+    await loadVotes(event);
   };
 
   return (
@@ -224,7 +319,7 @@ export default function DailyVote() {
       </div>
 
       <div className="dailyVoteInfo">
-        <h2>{TODAY_EVENT.title}</h2>
+        <h2>{event.title}</h2>
 
         <div className={`dailyVoteDeadline ${isClosed ? "closed" : ""}`}>
           ⏰ {isClosed ? "投票締切済み" : `締切まで ${timeLeft}`}
@@ -232,7 +327,7 @@ export default function DailyVote() {
       </div>
 
       <div className="dailyVoteCards">
-        {TODAY_EVENT.candidates.map((item) => (
+        {event.candidates.map((item) => (
           <div className="voteCard" key={item.key}>
             <h3>
               {item.icon} {item.name}
@@ -266,7 +361,7 @@ export default function DailyVote() {
         <div className="voteButtons">
           <h3>どれが来ると思う？</h3>
 
-          {TODAY_EVENT.candidates.map((item) => (
+          {event.candidates.map((item) => (
             <button
               type="button"
               key={item.key}
@@ -302,7 +397,7 @@ export default function DailyVote() {
           <>
             <p className="voteTotal">現在 {totalVotes}人が参加中</p>
 
-            {TODAY_EVENT.candidates.map((item) => {
+            {event.candidates.map((item) => {
               const percent = getPercent(item.key);
 
               return (
