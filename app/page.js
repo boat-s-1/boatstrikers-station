@@ -129,12 +129,17 @@ export default async function Home() {
         <div className="heroText">
           <p>一果・初音・キイナの競艇放送局</p>
           <h1>3人の力で<br />一緒に勝ちにいこう！</h1>
-          <a href="https://lin.ee/Pf3FEEQ" className="mainBtn">
-            LINEで最新情報を受け取る
-          </a>
+          <img
+  src="/F267AAC5-8E51-46DA-97D2-C03A242E2D74.png"
+  alt="トップ"
+  className="homeTitleImage"
+/>
         </div>
       </section>
 
+
+
+            
             <section className="homeLatestInfo">
   <div className="homeLatestInfoTitle">
     <h2>🆕 最新情報</h2>
