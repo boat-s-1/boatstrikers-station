@@ -31,7 +31,7 @@ const chapters = [
     href: "/bsc2/play/chapter3",
 
     // 真ん中
-    top: "40%",
+    top: "45%",
     left: "49%",
     locked: true,
   },
