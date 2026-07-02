@@ -180,6 +180,17 @@ export default function DailyVote() {
     alt="Today’s Event"
   />
 </div>
+      <div className="dailyVoteInfo">
+
+  <h2>
+    {TODAY_EVENT.title}
+  </h2>
+
+  <div className="dailyVoteDeadline">
+    ⏰ 投票締切 {TODAY_EVENT.deadline}
+  </div>
+
+</div>
 
       <div className="dailyVoteCards">
         {TODAY_EVENT.candidates.map((item) => (
