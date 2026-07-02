@@ -20,7 +20,7 @@ const chapters = [
     href: "/bsc2/play/chapter2",
 
     // 2つ目の島
-    top: "69%",
+    top: "57%",
     left: "51%",
   },
   {
@@ -41,7 +41,7 @@ const chapters = [
     href: "/bsc2/play/chapter4",
 
     // 上から2番目
-    top: "41%",
+    top: "46%",
     left: "51%",
     locked: true,
   },
