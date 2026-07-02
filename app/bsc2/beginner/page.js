@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+
 const chapters = [
   {
     id: "chapter1-lesson1",
