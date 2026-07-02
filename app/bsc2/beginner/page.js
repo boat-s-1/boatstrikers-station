@@ -4,41 +4,46 @@ import { useEffect, useState } from "react";
 
 const chapters = [
   {
+    id: "chapter1-lesson1",
     title: "Chapter 1",
     subtitle: "競艇入門編",
     href: "/bsc2/play/chapter1",
-    id: "chapter1-lesson1",
-    icon: "🚤",
+    top: "78%",
+    left: "50%",
   },
   {
-    title: "Chapter 2",
-    subtitle: "スタート展示って何？",
-    href: "/bsc2/play/chapter2",
     id: "chapter2-start-tenji",
-    icon: "🏁",
+    title: "Chapter 2",
+    subtitle: "スタート展示",
+    href: "/bsc2/play/chapter2",
+    top: "63%",
+    left: "48%",
   },
   {
-    title: "Chapter 3",
-    subtitle: "展示タイム入門",
-    href: "/bsc2/play/chapter3",
     id: "chapter3-tenji-time",
-    icon: "⏱",
+    title: "Chapter 3",
+    subtitle: "展示タイム",
+    href: "/bsc2/play/chapter3",
+    top: "50%",
+    left: "49%",
     locked: true,
   },
   {
+    id: "chapter4-ichigoutei",
     title: "Chapter 4",
     subtitle: "1号艇の基本",
     href: "/bsc2/play/chapter4",
-    id: "chapter4-ichigoutei",
-    icon: "1️⃣",
+    top: "36%",
+    left: "52%",
     locked: true,
   },
   {
-    title: "Chapter 5",
-    subtitle: "買い目の作り方",
-    href: "/bsc2/play/chapter5",
     id: "chapter5-kaime",
-    icon: "🎯",
+    title: "Chapter 5",
+    subtitle: "買い目作成",
+    href: "/bsc2/play/chapter5",
+    top: "22%",
+    left: "50%",
     locked: true,
   },
 ];
@@ -52,87 +57,61 @@ export default function BeginnerPage() {
 
   const clearCount = chapters.filter((c) => cleared.includes(c.id)).length;
   const currentIndex = Math.min(clearCount, chapters.length - 1);
-  const clearRate = Math.round((clearCount / chapters.length) * 100);
 
   return (
-    <main className="bscAreaPage beginnerArea">
-      <header className="areaTopBar">
+    <main className="beginnerMapPage">
+      <header className="areaTopBar mapTopBar">
         <a href="/bsc2" className="gameHomeBack">←</a>
         <div>
           <span>BSC AREA</span>
-          <h1>初心者エリア</h1>
+          <h1>初心者ロード</h1>
         </div>
         <b>🌸</b>
       </header>
 
-      <section className="areaHero">
-        <div className="areaHeroText">
-          <span>🌸 BEGINNER ROAD 🌸</span>
-          <h2>初心者ロード</h2>
-          <p>
-            一果
-            <br />
-            「まずはここから勉強しよう！」
-          </p>
-        </div>
+      <section className="beginnerMapWrap">
+        <img
+          src="/bsc/beginner-map.jpg"
+          alt="初心者ロード"
+          className="beginnerMapBg"
+        />
 
-        <img src="/bsc/status-ichika.png" alt="一果" />
-      </section>
-
-      <section className="areaProgress">
-        <div>
-          <span>CLEAR率</span>
-          <strong>{clearRate}%</strong>
-        </div>
-
-        <div className="areaStars">
-          {chapters.map((c) => (
-            <span key={c.id}>{cleared.includes(c.id) ? "★" : "☆"}</span>
-          ))}
-        </div>
-      </section>
-
-      <section className="bscRoadMap">
-        <div className="roadStart">START</div>
+        <div className="mapStart">START</div>
 
         {chapters.map((chapter, index) => {
           const isClear = cleared.includes(chapter.id);
           const isCurrent = index === currentIndex && !chapter.locked;
-          const isLocked = chapter.locked;
 
           return (
-            <div
+            <a
               key={chapter.id}
-              className={`roadStep ${isClear ? "clear" : ""} ${
+              href={chapter.locked ? "#" : chapter.href}
+              className={`mapChapterPoint ${isClear ? "clear" : ""} ${
                 isCurrent ? "current" : ""
-              } ${isLocked ? "locked" : ""}`}
+              } ${chapter.locked ? "locked" : ""}`}
+              style={{
+                top: chapter.top,
+                left: chapter.left,
+              }}
             >
               {isCurrent && (
                 <img
                   src="/bsc/status-ichika.png"
                   alt="一果"
-                  className="roadCharacter"
+                  className="mapIchika"
                 />
               )}
 
-              <a href={isLocked ? "#" : chapter.href}>
-                <div className="roadCircle">
-                  {isLocked ? "🔒" : isClear ? "✓" : chapter.icon}
-                </div>
-
-                <div className="roadCard">
-                  <span>
-                    {isClear ? "CLEAR" : isLocked ? "LOCKED" : "CHALLENGE"}
-                  </span>
-                  <strong>{chapter.title}</strong>
-                  <p>{chapter.subtitle}</p>
-                </div>
-              </a>
-            </div>
+              <div className="mapChapterBadge">
+                <span>{chapter.locked ? "🔒" : isClear ? "CLEAR" : "NEW"}</span>
+                <strong>{chapter.title}</strong>
+                <p>{chapter.subtitle}</p>
+              </div>
+            </a>
           );
         })}
 
-        <div className="roadGoal">🏆 初級卒業</div>
+        <div className="mapGoal">🏆 GOAL</div>
       </section>
     </main>
   );
