@@ -28,7 +28,7 @@ export default function BSC2MenuPage() {
       </header>
 
       <section className="gameHomeHero">
-        <img src="/bsc/title.jpg" alt="BSC" className="gameHomeTitleImage" />
+        <img src="/bsc/7F8A183E-9648-4BB8-BA99-273EB637EC39.png" alt="BSC" className="gameHomeTitleImage" />
 
         <div className="gameHomeCatch">
           <span>🎮 DAILY CHALLENGE</span>
