@@ -8,7 +8,7 @@ const chapters = [
     title: "Chapter 1",
     subtitle: "勝率の見方",
     href: "/bsc2/advanced/chapter1",
-    top: "78%",
+    top: "74%",
     left: "48%",
   },
   {
@@ -16,8 +16,8 @@ const chapters = [
     title: "Chapter 2",
     subtitle: "回収率",
     href: "/bsc2/advanced/chapter2",
-    top: "63%",
-    left: "50%",
+    top: "52%",
+    left: "54%",
     locked: true,
   },
   {
@@ -25,7 +25,7 @@ const chapters = [
     title: "Chapter 3",
     subtitle: "期待値",
     href: "/bsc2/advanced/chapter3",
-    top: "40%",
+    top: "38%",
     left: "50%",
     locked: true,
   },
