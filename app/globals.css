@@ -6790,3 +6790,35 @@ dailyVoteHeader h2 {
   background: linear-gradient(135deg, #ff4f93, #f6a800);
   color: #fff;
 }
+
+.areaHeroBlue{
+
+background:linear-gradient(
+135deg,
+rgba(225,245,255,.95),
+rgba(215,235,255,.95)
+);
+
+border-color:#57bfff;
+
+}
+
+.intermediateArea .areaProgress{
+
+border-color:#57bfff;
+
+}
+
+.intermediateArea .areaChapterCard span{
+
+background:#009dff;
+
+}
+
+.intermediateArea .chapterNumber{
+
+background:#0f4d88;
+
+color:white;
+
+}
