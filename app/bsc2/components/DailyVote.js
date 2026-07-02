@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
+
 const DEFAULT_EVENT = {
   id: "default-daily-event",
   title: "蒲郡12R ドリーム戦",
