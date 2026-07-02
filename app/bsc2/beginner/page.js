@@ -343,14 +343,16 @@ export default function BeginnerPage() {
               )}
 
               <div className="mapStageOrb">
-                {isLocked ? "🔒" : isClear ? "✓" : index + 1}
-              </div>
+  {isLocked ? "🔒" : isClear ? "✓" : isCurrent ? index + 1 : index + 1}
+</div>
 
-              <div className="mapStageCard">
-                <span>{isLocked ? "LOCK" : isClear ? "CLEAR" : "NOW"}</span>
-                <strong>{chapter.title}</strong>
-                <p>{chapter.subtitle}</p>
-              </div>
+              {isCurrent && (
+  <div className="mapStageCard">
+    <span>NOW</span>
+    <strong>{chapter.title}</strong>
+    <p>{chapter.subtitle}</p>
+  </div>
+)}
             </a>
           );
         })}
