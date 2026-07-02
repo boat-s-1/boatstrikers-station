@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-cconst chapters = [
+const chapters = [
   {
     id: "chapter1-lesson1",
     title: "Chapter 1",
