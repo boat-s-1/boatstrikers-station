@@ -93,7 +93,7 @@ export default function BSC2MenuPage() {
     </div>
   </a>
 </section>
-      </section>
+      
     </main>
   );
 }
