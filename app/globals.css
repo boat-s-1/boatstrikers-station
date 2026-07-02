@@ -5803,3 +5803,8 @@ dailyVoteHeader h2 {
     font-weight:900;
     font-size:18px;
 }
+
+.dailyVoteDeadline.closed {
+  background: #555;
+  color: #fff;
+}
