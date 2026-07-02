@@ -234,12 +234,6 @@ export default async function Home() {
 
 <div className="bscInfo">
 
-<h3>🎮 BOAT STRIKERS CHALLENGE</h3>
-
-<p>
-競艇をゲーム感覚で学ぼう！
-</p>
-
 <div className="bscButton">
 
 Challenge Start ▶
