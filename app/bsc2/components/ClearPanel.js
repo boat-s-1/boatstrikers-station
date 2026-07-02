@@ -4,86 +4,46 @@ export default function ClearPanel({
   rewardPoint = 20,
   badge = "BSC認定",
   alreadyCleared = false,
-  nextHref = "/bsc2/play/chapter2",
-  nextTitle = "Chapter2へ進む",
-  reviewHref = "/library",
+  nextHref = "/bsc2/beginner",
+  nextTitle = "次へ進む",
 }) {
   return (
-    <section className="bscResultPanel">
-      <div className="bscResultGlow" />
-
-      <div className="bscResultHeader">
+    <section className="bscResultSimple">
+      <div className="bscResultSimpleTop">
         <span>RESULT</span>
-        <h2>MISSION CLEAR!!</h2>
-        <p>おめでとうございます！</p>
+        <h2>CLEAR!!</h2>
+        <p>ミッション達成おめでとう！</p>
       </div>
 
-      <div className="bscResultCharacterBox">
-        <img
-          src="/characters/ichika-talk.png"
-          alt="一果"
-          className="bscResultCharacter"
-        />
-
-        <div className="bscResultSpeech">
-          <span>🌸 一果</span>
-          <p>
-            今日はここまで♪
-            <br />
-            次は...
-            <br />
-            「スタート展示って何？」
-            <br />
-            を勉強するよ😊
-          </p>
-        </div>
-      </div>
-
-      <div className="bscRewardGrid">
-        <div className="bscRewardCard">
+      <div className="bscResultSimpleReward">
+        <div>
           <span>⭐</span>
           <strong>{alreadyCleared ? "+0pt" : `+${rewardPoint}pt`}</strong>
           <p>獲得ポイント</p>
         </div>
 
-        <div className="bscRewardCard">
+        <div>
           <span>🏅</span>
           <strong>{badge}</strong>
           <p>認定バッジ</p>
         </div>
-
-        <div className="bscRewardCard">
-          <span>❤</span>
-          <strong>{alreadyCleared ? "+0" : "+5"}</strong>
-          <p>一果との親密度</p>
-        </div>
       </div>
 
-      <div className="bscNextPreview">
-        <span>NEXT MISSION</span>
-        <strong>{nextTitle}</strong>
-        <p>準備ができたら次のチャレンジへ進もう！</p>
+      <div className="bscResultSimpleMessage">
+        🌸 一果「お疲れ様！次も一緒に頑張ろう♪」
       </div>
 
-      <div className="bscResultButtons">
-        <a className="primary" href={nextHref}>
+      <div className="bscResultSimpleButtons">
+        <a href={nextHref} className="primary">
           ▶ {nextTitle}
         </a>
 
         <a href="/bsc2">
-          🏠 BSCメニューへ戻る
-        </a>
-
-        <a href="/bsc2/play/chapter1">
-          🔄 もう一度プレイ
+          🏠 メニューへ戻る
         </a>
 
         <a href="/bsc2/collection">
           🏅 バッジを見る
-        </a>
-
-        <a href={reviewHref}>
-          📚 図書館で復習
         </a>
       </div>
     </section>
