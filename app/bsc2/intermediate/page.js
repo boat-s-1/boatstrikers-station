@@ -16,7 +16,7 @@ const chapters = [
     title: "Chapter 2",
     subtitle: "展示タイム",
     href: "/bsc2/intermediate/chapter2",
-    top: "57%",
+    top: "52%",
     left: "51%",
     locked: true,
   },
@@ -25,8 +25,8 @@ const chapters = [
     title: "Chapter 3",
     subtitle: "モーター評価",
     href: "/bsc2/intermediate/chapter3",
-    top: "38%",
-    left: "54%",
+    top: "36%",
+    left: "55%",
     locked: true,
   },
   {
@@ -35,7 +35,7 @@ const chapters = [
     subtitle: "ST分析",
     href: "/bsc2/intermediate/chapter4",
     top: "23%",
-    left: "55%",
+    left: "57%",
     locked: true,
   },
   {
