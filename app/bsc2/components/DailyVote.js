@@ -174,11 +174,12 @@ export default function DailyVote() {
 
   return (
     <section className="dailyVote">
-      <div className="dailyVoteHeader">
-        <span>🌸 TODAY&apos;S EVENT</span>
-        <h2>{TODAY_EVENT.title}</h2>
-        <p>投票締切 {TODAY_EVENT.deadline}</p>
-      </div>
+     <div className="dailyVoteBanner">
+  <img
+    src="/bsc/today-event-banner.jpg"
+    alt="Today’s Event"
+  />
+</div>
 
       <div className="dailyVoteCards">
         {TODAY_EVENT.candidates.map((item) => (
