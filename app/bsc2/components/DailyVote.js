@@ -79,7 +79,7 @@ export default function DailyVote() {
         main: row.ichika_main || "-",
         subLabel: "一果の押さえ",
         sub: row.ichika_sub || "",
-        image: "/bsc/DDE679B0-6671-4154-84DE-980C1A45B089.png",
+        image: "/bsc/A763159D-37F0-452A-8157-62BEA88684DD.png",
       },
       {
         key: "kiina",
@@ -88,7 +88,7 @@ export default function DailyVote() {
         main: row.kiina_main || "-",
         subLabel: "",
         sub: "",
-        image: "/bsc/DE819073-38BC-4B82-AC8A-F74376A1DDFC.png",
+        image: "/bsc/7F747BFD-8638-4BD1-BE4F-3D518698373C.png",
       },
       {
         key: "hatsune",
@@ -97,7 +97,7 @@ export default function DailyVote() {
         main: row.hatsune_main || "-",
         subLabel: "",
         sub: "",
-        image: "/bsc/7E1B02E0-748D-4BB1-A0E8-A203C30DA492.png",
+        image: "/bsc/94D26747-247B-409B-90E7-B98BFB802C95.png",
       },
     ],
   });
