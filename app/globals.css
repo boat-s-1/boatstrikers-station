@@ -6137,3 +6137,119 @@ dailyVoteHeader h2 {
   line-height: 1.4;
   text-shadow: 0 2px 8px rgba(0,0,0,.65);
 }
+
+.bscStatusCompact {
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(14,44,96,.96), rgba(5,18,55,.96));
+  border: 3px solid #ffd768;
+  box-shadow: 0 12px 26px rgba(0,0,0,.28);
+  color: #fff;
+}
+
+.bscStatusCompactTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bscStatusCompactTop img {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 18px;
+  background: #fff;
+  border: 2px solid #ffd768;
+}
+
+.bscStatusCompactInfo {
+  flex: 1;
+}
+
+.bscStatusCompactInfo span {
+  display: block;
+  color: #ffd768;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.bscStatusCompactInfo h2 {
+  margin: 2px 0;
+  font-size: 26px;
+  line-height: 1;
+  color: #ffd768;
+}
+
+.bscStatusCompactInfo p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: #e9f7ff;
+}
+
+.bscStatusCompactBadge {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.bscStatusCompactExp {
+  margin-top: 12px;
+}
+
+.bscStatusCompactExp > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.bscStatusCompactExp b {
+  color: #ffd768;
+}
+
+.bscStatusCompactBar {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  overflow: hidden;
+}
+
+.bscStatusCompactBar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #06c755, #ffd768);
+}
+
+.bscStatusCompactGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.bscStatusCompactGrid div {
+  padding: 9px 4px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  text-align: center;
+}
+
+.bscStatusCompactGrid b {
+  display: block;
+  font-size: 13px;
+}
+
+.bscStatusCompactGrid span {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #cfe8ff;
+}
