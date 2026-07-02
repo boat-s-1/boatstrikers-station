@@ -10,7 +10,7 @@ const chapters = [
     href: "/bsc2/play/chapter1",
 
     // 一番下の島
-    top: "84%",
+    top: "80%",
     left: "50%",
   },
   {
