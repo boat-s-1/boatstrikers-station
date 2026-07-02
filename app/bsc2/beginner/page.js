@@ -41,7 +41,7 @@ const chapters = [
     href: "/bsc2/play/chapter4",
 
     // 上から2番目
-    top: "46%",
+    top: "30%",
     left: "51%",
     locked: true,
   },
@@ -52,7 +52,7 @@ const chapters = [
     href: "/bsc2/play/chapter5",
 
     // 一番上
-    top: "27%",
+    top: "18%",
     left: "50%",
     locked: true,
   },
