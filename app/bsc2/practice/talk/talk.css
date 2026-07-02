@@ -494,3 +494,308 @@
     box-shadow: 0 0 18px rgba(255,215,104,.9);
   }
 }
+
+/* ===========================
+   BSC Talk Engine V2
+=========================== */
+
+.talkGameBox.v2 {
+  overflow: hidden;
+}
+
+.talkCharacterStage {
+  position: relative;
+  margin: 0 auto 16px;
+  height: 170px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,.9), transparent 45%),
+    linear-gradient(135deg, #fff7df, #ffe3f0);
+  border: 3px solid #ffd768;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.talkCharacterAura {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,79,147,.35), transparent 70%);
+  animation: auraPulse 2s infinite;
+}
+
+.talkCharacterFace {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  z-index: 2;
+  animation: characterFloat 2.2s ease-in-out infinite;
+}
+
+.talkCharacterFace img {
+  width: 104px;
+  height: 104px;
+  object-fit: cover;
+  border-radius: 28px;
+  border: 4px solid #ffd768;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+}
+
+.talkCharacterFace.happy {
+  animation: characterHappy .6s ease-in-out 2;
+}
+
+.talkCharacterFace.sad {
+  animation: characterSad .45s ease-in-out 2;
+}
+
+.talkBlink {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 42%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.75);
+  opacity: 0;
+  animation: blink 4s infinite;
+}
+
+.talkSparkle {
+  position: absolute;
+  right: -12px;
+  top: -12px;
+  font-size: 24px;
+  opacity: 0;
+  animation: sparklePop 2.4s ease-in-out infinite;
+}
+
+.talkCharacterFace.happy .talkSparkle {
+  opacity: 1;
+  animation: sparkleHappy .7s ease-in-out 2;
+}
+
+.talkCharacterFace.sad .talkSparkle {
+  display: none;
+}
+
+.talkCharacterName {
+  position: absolute;
+  bottom: 12px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.92);
+  color: #fff;
+  font-weight: 900;
+  z-index: 3;
+}
+
+.talkProgress {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #17345c;
+  color: #fff;
+  font-weight: 900;
+}
+
+.talkProgress span {
+  color: #ffd768;
+  font-size: 12px;
+}
+
+.talkProgress b {
+  font-size: 12px;
+}
+
+.talkBubble.v2 {
+  animation: bubbleIn .35s ease-out;
+}
+
+.talkQuestion.v2 {
+  animation: questionIn .4s ease-out;
+}
+
+.talkChoices button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.talkChoices button span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #17345c;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.talkChoices button:active {
+  transform: scale(.97);
+}
+
+.talkAnswerBox {
+  animation: answerPop .35s ease-out;
+}
+
+.talkAnswerBox.correct {
+  border-color: #06c755;
+  background: #f0fff4;
+}
+
+.talkAnswerBox.wrong {
+  border-color: #ff4f93;
+  background: #fff0f6;
+}
+
+.talkRewardMini {
+  animation: rewardShine 1s ease-in-out infinite;
+}
+
+.resultConfetti {
+  font-size: 24px;
+  animation: confettiFloat 1.3s ease-in-out infinite;
+}
+
+@keyframes auraPulse {
+  0%, 100% {
+    transform: scale(.9);
+    opacity: .45;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: .85;
+  }
+}
+
+@keyframes characterFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(1deg);
+  }
+}
+
+@keyframes characterHappy {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-12px) scale(1.1);
+  }
+  70% {
+    transform: translateY(0) scale(1.02);
+  }
+}
+
+@keyframes characterSad {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-7px) rotate(-4deg);
+  }
+  50% {
+    transform: translateX(7px) rotate(4deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+}
+
+@keyframes blink {
+  0%, 92%, 100% {
+    opacity: 0;
+  }
+  94%, 96% {
+    opacity: 1;
+  }
+}
+
+@keyframes sparklePop {
+  0%, 70%, 100% {
+    opacity: 0;
+    transform: scale(.6) rotate(0deg);
+  }
+  78%, 88% {
+    opacity: 1;
+    transform: scale(1.15) rotate(12deg);
+  }
+}
+
+@keyframes sparkleHappy {
+  0% {
+    opacity: 0;
+    transform: scale(.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(18deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(.8) rotate(0deg);
+  }
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes questionIn {
+  from {
+    opacity: 0;
+    transform: scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes answerPop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rewardShine {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(255,215,104,0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255,215,104,.9);
+  }
+}
+
+@keyframes confettiFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
