@@ -71,7 +71,7 @@ export default function BeginnerPage() {
 
       <section className="beginnerMapWrap">
         <img
-          src="/bsc/beginner-map.jpg"
+          src="/bsc/91BF36BB-4E29-45F4-A933-0F8803425BD1.png"
           alt="初心者ロード"
           className="beginnerMapBg"
         />
