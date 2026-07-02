@@ -59,7 +59,7 @@ export default function BSC2MenuPage() {
     </div>
   </a>
 
-  <a href="/bsc2/play/chapter3" className="bscCourseCard">
+  <a href="/bsc2/advanced" className="bscCourseCard">
     <img src="/137BBD12-85F7-4496-A454-F7884D21BF41.png" alt="上級者編" />
     <div>
       <span>ADVANCED</span>
