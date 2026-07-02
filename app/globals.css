@@ -6454,3 +6454,242 @@ dailyVoteHeader h2 {
   font-size: 12px;
   font-weight: 900;
 }
+
+/* ===========================
+   BSC Play Game Chat UI
+=========================== */
+
+.bscPlayPage {
+  position: relative;
+  min-height: 100vh;
+  padding: 14px 14px 90px;
+  background:
+    linear-gradient(180deg, rgba(230, 248, 255, .95), rgba(255, 248, 225, .95));
+  overflow-x: hidden;
+}
+
+.bscPlayHeader {
+  height: 62px;
+  display: grid;
+  grid-template-columns: 42px 1fr 58px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 8px 22px rgba(0,0,0,.14);
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+}
+
+.bscPlayBack {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #17345c;
+  color: #fff;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.bscPlayTitle {
+  text-align: center;
+}
+
+.bscPlayTitle span {
+  display: block;
+  color: #ff4f93;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscPlayTitle h1 {
+  margin: 2px 0 0;
+  color: #17345c;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.bscPlayMini {
+  padding: 8px 4px;
+  border-radius: 999px;
+  background: #ffedf6;
+  color: #ff2f86;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscPlayCharacter {
+  position: relative;
+  margin: 14px 0;
+  height: 210px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,.85), transparent 45%),
+    linear-gradient(135deg, #b8edff, #fff1b8);
+  overflow: hidden;
+  border: 3px solid #ffd768;
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+}
+
+.bscPlayCharacterAura {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,79,147,.22), transparent 65%);
+}
+
+.bscPlayCharacterImg {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  height: 220px;
+  max-width: 92%;
+  object-fit: contain;
+}
+
+.bscPlayCharacterName {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.9);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+
+.bscTalkPanel {
+  border-radius: 30px;
+  background: rgba(255,255,255,.72);
+  border: 3px solid rgba(255,215,104,.9);
+  box-shadow: 0 14px 34px rgba(0,0,0,.16);
+  overflow: hidden;
+}
+
+.bscTalkHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #17345c, #0b1e48);
+  color: #fff;
+}
+
+.bscTalkHeader span {
+  color: #ffd768;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bscTalkHeader b {
+  font-size: 12px;
+}
+
+.bscChatScroll {
+  padding: 16px 12px 24px;
+}
+
+.bscMessageLine {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  align-items: flex-end;
+}
+
+.bscMessageLine.user {
+  justify-content: flex-end;
+}
+
+.bscMessageIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  border: 3px solid #ff8fbd;
+  flex: 0 0 auto;
+}
+
+.bscMessageBubble {
+  max-width: 78%;
+  padding: 14px 16px;
+  border-radius: 22px 22px 22px 6px;
+  background: #fff;
+  color: #3b2414;
+  box-shadow: 0 8px 18px rgba(0,0,0,.1);
+  font-weight: 900;
+  line-height: 1.7;
+}
+
+.bscMessageBubble.user {
+  border-radius: 22px 22px 6px 22px;
+  background: #dff1ff;
+  color: #17345c;
+}
+
+.bscMessageName {
+  margin-bottom: 4px;
+  color: #ff4f93;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.bscMessageBubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.bscChoiceInline {
+  margin: 22px 0 8px;
+  padding: 16px;
+  border-radius: 26px;
+  background: rgba(23,52,92,.92);
+  border: 3px solid #ffd768;
+  display: grid;
+  gap: 12px;
+}
+
+.bscChoiceTitle {
+  text-align: center;
+  color: #ffd768;
+  font-weight: 900;
+}
+
+.bscChoiceInline button {
+  border: 0;
+  border-radius: 18px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 6px 0 #a86900;
+}
+
+.bscChoiceInline button:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #a86900;
+}
+
+.bscNextInline {
+  margin: 20px 0 8px;
+  text-align: center;
+}
+
+.bscNextInline button {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 34px;
+  background: linear-gradient(135deg, #06c755, #00a7ff);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 900;
+  box-shadow: 0 6px 0 #006b8f;
+}
