@@ -2,88 +2,78 @@
 
 import { useEffect, useState } from "react";
 
-function getRank(level) {
-  if (level >= 20) return "👑 BOAT STRIKERS LEGEND";
-  if (level >= 15) return "🏆 一流ストライカー";
-  if (level >= 10) return "⚡ BOAT STRIKERS";
-  if (level >= 7) return "🎯 的中ハンター";
-  if (level >= 5) return "📖 データ分析員";
-  if (level >= 3) return "🚤 新人レーサー";
-  if (level >= 2) return "🌸 一果の教え子";
-  return "🌱 見習いクルー";
-}
-
 export default function BscStatus() {
   const [point, setPoint] = useState(0);
   const [badges, setBadges] = useState([]);
   const [cleared, setCleared] = useState([]);
-  const [ichikaBond, setIchikaBond] = useState(0);
-  const [levelUp, setLevelUp] = useState(null);
+  const [bond, setBond] = useState(0);
 
   useEffect(() => {
-    const currentPoint = Number(localStorage.getItem("bscPoint") || 0);
-    const currentLevel = Math.floor(currentPoint / 100) + 1;
-
-    const oldLevel = Number(localStorage.getItem("bscLastLevel") || currentLevel);
-
-    if (currentLevel > oldLevel) {
-      setLevelUp({
-        level: currentLevel,
-        rank: getRank(currentLevel),
-      });
-
-      setTimeout(() => {
-        setLevelUp(null);
-      }, 1800);
-    }
-
-    localStorage.setItem("bscLastLevel", String(currentLevel));
-
-    setPoint(currentPoint);
+    setPoint(Number(localStorage.getItem("bscPoint") || 0));
     setBadges(JSON.parse(localStorage.getItem("bscBadge") || "[]"));
     setCleared(JSON.parse(localStorage.getItem("bscCleared") || "[]"));
-    setIchikaBond(Number(localStorage.getItem("bscBond_ichika") || 0));
+    setBond(Number(localStorage.getItem("bscBond_ichika") || 0));
   }, []);
 
   const level = Math.floor(point / 100) + 1;
-  const progress = point % 100;
-  const rank = getRank(level);
+  const exp = point % 100;
+  const expPercent = Math.min(exp, 100);
+  const bondPercent = Math.min(bond, 100);
 
   return (
-    <>
-      {levelUp && (
-        <div className="bscLevelUpEffect">
-          <span>✨ LEVEL UP!! ✨</span>
-          <strong>Lv.{levelUp.level}</strong>
-          <p>{levelUp.rank}</p>
+    <section className="bscStatusPro">
+      <div className="bscStatusTop">
+        <div className="bscAvatar">
+          <img src="/bsc/status-ichika.png" alt="一果" />
         </div>
-      )}
 
-      <section className="bscGameStatus">
-        <div>
+        <div className="bscStatusMain">
           <span>BSC STATUS</span>
           <h2>LEVEL {level}</h2>
-          <p>{rank}</p>
+          <p>🌱 見習いクルー</p>
+        </div>
+      </div>
+
+      <div className="bscExpBox">
+        <div className="bscExpText">
+          <span>EXP</span>
+          <b>{exp}/100</b>
+        </div>
+        <div className="bscExpBar">
+          <i style={{ width: `${expPercent}%` }} />
+        </div>
+      </div>
+
+      <div className="bscStatusGrid">
+        <div>
+          <span>⭐</span>
+          <strong>{point}pt</strong>
+          <p>ポイント</p>
         </div>
 
-        <div className="bscGameStatusBar">
-          <span style={{ width: `${progress}%` }} />
+        <div>
+          <span>🏅</span>
+          <strong>{badges.length}個</strong>
+          <p>バッジ</p>
         </div>
 
-        <div className="bscGameStatusGrid">
-          <b>⭐ {point}pt</b>
-          <b>🏅 {badges.length}個</b>
-          <b>🎮 {cleared.length}CLEAR</b>
+        <div>
+          <span>🎮</span>
+          <strong>{cleared.length}CLEAR</strong>
+          <p>クリア数</p>
         </div>
+      </div>
 
-        <div className="bscBondBox">
+      <div className="bscBondBox">
+        <div className="bscBondTitle">
           <span>🌸 一果との親密度</span>
-          <strong>{ichikaBond}%</strong>
-          <div className="bscBondBar">
-            <i style={{ width: `${ichikaBond}%` }} />
-          </div>
+          <b>{bondPercent}%</b>
         </div>
-      </section>
-    </>
+
+        <div className="bscBondBar">
+          <i style={{ width: `${bondPercent}%` }} />
+        </div>
+      </div>
+    </section>
   );
 }
