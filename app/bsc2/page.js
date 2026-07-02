@@ -17,64 +17,60 @@ export default function BSC2MenuPage() {
   const chapter2Cleared = cleared.includes("chapter2-start-tenji");
 
   return (
-    <main className="gamePage">
-      <header className="gameTopBar">
-        <a href="/" className="gameBack">←</a>
+    <main className="gameHome">
+      <header className="gameHomeTop">
+        <a href="/" className="gameHomeBack">←</a>
         <div>
           <span>BSC</span>
-          <h1>GAME MENU</h1>
+          <h1>BOAT STRIKERS</h1>
         </div>
-        <div className="gameStatusMini">START</div>
+        <b>MENU</b>
       </header>
 
-      <div className="hero">
-  <img
-    src="/bsc/7F8A183E-9648-4BB8-BA99-273EB637EC39.png"
-    alt="BSC"
-    className="heroImage"
-  />
-</div>
-      
+      <section className="gameHomeHero">
+        <img src="/bsc/title.jpg" alt="BSC" className="gameHomeTitleImage" />
+
+        <div className="gameHomeCatch">
+          <span>🎮 DAILY CHALLENGE</span>
+          <p>一果たちと競艇を楽しく学ぼう！</p>
+        </div>
+      </section>
 
       <BscStatus />
-<DailyVote />
-      <section className="bscMenuList">
+
+      <DailyVote />
+
+      <section className="gameHomeMenu">
         {continueData && (
-          <a href={continueData.url} className="bscMenuButton continue">
-            <span>▶ 続きから</span>
+          <a href={continueData.url} className="gameStageCard continue">
+            <span>▶ CONTINUE</span>
             <strong>{continueData.chapter}</strong>
             <p>{continueData.title}</p>
           </a>
         )}
 
-        <a href="/bsc2/play/chapter1" className="bscMenuButton main">
-          <span>{chapter1Cleared ? "▶ 復習する" : "▶ START"}</span>
+        <a href="/bsc2/play/chapter1" className="gameStageCard story">
+          <span>{chapter1Cleared ? "CLEAR" : "STORY"}</span>
           <strong>Chapter 1：競艇入門編</strong>
-          <p>{chapter1Cleared ? "CLEAR済み" : "まずはここから！"}</p>
+          <p>{chapter1Cleared ? "復習する" : "まずはここから！"}</p>
         </a>
 
-        <a href="/bsc2/play/chapter2" className="bscMenuButton main">
-          <span>{chapter2Cleared ? "▶ 復習する" : "▶ START"}</span>
+        <a href="/bsc2/play/chapter2" className="gameStageCard story">
+          <span>{chapter2Cleared ? "CLEAR" : "NEW"}</span>
           <strong>Chapter 2：スタート展示って何？</strong>
-          <p>{chapter2Cleared ? "CLEAR済み" : "スタート展示を学ぼう！"}</p>
+          <p>{chapter2Cleared ? "復習する" : "展示の基本を学ぼう！"}</p>
         </a>
 
-        <a href="/bsc2/collection" className="bscMenuButton">
-          <span>🏅 COLLECTION</span>
-          <strong>バッジコレクション</strong>
+        <a href="/bsc2/collection" className="gameStageCard collection">
+          <span>COLLECTION</span>
+          <strong>🏅 バッジコレクション</strong>
           <p>集めた認定バッジを見る</p>
         </a>
 
-        <a href="/library" className="bscMenuButton">
-          <span>📚 LIBRARY</span>
-          <strong>一果図書館へ</strong>
-          <p>攻略本・新聞を読む</p>
-        </a>
-
-        <a href="/" className="bscMenuButton">
-          <span>🏠 HOME</span>
-          <strong>トップへ戻る</strong>
-          <p>BOAT STRIKERSトップ</p>
+        <a href="/library" className="gameStageCard library">
+          <span>LIBRARY</span>
+          <strong>📚 一果図書館</strong>
+          <p>攻略本・新聞で復習する</p>
         </a>
       </section>
     </main>
