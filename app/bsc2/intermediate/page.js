@@ -8,8 +8,8 @@ const chapters = [
     title: "Chapter 1",
     subtitle: "スタート展示",
     href: "/bsc2/intermediate/chapter1",
-    top: "78%",
-    left: "48%",
+    top: "85%",
+    left: "32%",
   },
   {
     id: "intermediate-2",
@@ -43,8 +43,8 @@ const chapters = [
     title: "Chapter 5",
     subtitle: "展示総合判断",
     href: "/bsc2/intermediate/chapter5",
-    top: "18%",
-    left: "51%",
+    top: "20%",
+    left: "55%",
     locked: true,
   },
 ];
