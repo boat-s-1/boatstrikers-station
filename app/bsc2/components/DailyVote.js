@@ -51,6 +51,8 @@ export default function DailyVote() {
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isClosed, setIsClosed] = useState(false);
 
   const voteKey = useMemo(() => {
     return `dailyVote_${TODAY_EVENT.id}`;
@@ -61,6 +63,34 @@ export default function DailyVote() {
   const getPercent = (key) => {
     if (!totalVotes) return 0;
     return Math.round(((votes[key] || 0) / totalVotes) * 100);
+  };
+
+  const updateCountdown = () => {
+    const now = new Date();
+    const [hour, minute] = TODAY_EVENT.deadline.split(":").map(Number);
+
+    const deadline = new Date();
+    deadline.setHours(hour, minute, 0, 0);
+
+    const diff = deadline.getTime() - now.getTime();
+
+    if (diff <= 0) {
+      setTimeLeft("00:00:00");
+      setIsClosed(true);
+      return;
+    }
+
+    const h = Math.floor(diff / 1000 / 60 / 60);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    setTimeLeft(
+      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+        s
+      ).padStart(2, "0")}`
+    );
+
+    setIsClosed(false);
   };
 
   const loadVotes = async () => {
@@ -94,6 +124,16 @@ export default function DailyVote() {
     setVotes(counts);
     setLoading(false);
   };
+
+  useEffect(() => {
+    updateCountdown();
+
+    const timer = setInterval(() => {
+      updateCountdown();
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const savedVote = JSON.parse(localStorage.getItem(voteKey) || "null");
@@ -136,6 +176,11 @@ export default function DailyVote() {
       return;
     }
 
+    if (isClosed) {
+      alert("投票は締め切りました。");
+      return;
+    }
+
     if (voted || voting) return;
 
     setVoting(true);
@@ -174,23 +219,17 @@ export default function DailyVote() {
 
   return (
     <section className="dailyVote">
-     <div className="dailyVoteBanner">
-  <img
-    src="/bsc/IMG_6178.jpeg"
-    alt="Today’s Event"
-  />
-</div>
+      <div className="dailyVoteBanner">
+        <img src="/bsc/IMG_6178.jpeg" alt="Today’s Event" />
+      </div>
+
       <div className="dailyVoteInfo">
+        <h2>{TODAY_EVENT.title}</h2>
 
-  <h2>
-    {TODAY_EVENT.title}
-  </h2>
-
-  <div className="dailyVoteDeadline">
-    ⏰ 投票締切 {TODAY_EVENT.deadline}
-  </div>
-
-</div>
+        <div className={`dailyVoteDeadline ${isClosed ? "closed" : ""}`}>
+          ⏰ {isClosed ? "投票締切済み" : `締切まで ${timeLeft}`}
+        </div>
+      </div>
 
       <div className="dailyVoteCards">
         {TODAY_EVENT.candidates.map((item) => (
@@ -232,9 +271,13 @@ export default function DailyVote() {
               type="button"
               key={item.key}
               onClick={() => vote(item)}
-              disabled={voting}
+              disabled={voting || isClosed}
             >
-              {voting ? "投票中..." : `${item.icon} ${item.name}に投票`}
+              {isClosed
+                ? "投票締切済み"
+                : voting
+                ? "投票中..."
+                : `${item.icon} ${item.name}に投票`}
             </button>
           ))}
         </div>
