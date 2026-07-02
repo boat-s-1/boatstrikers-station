@@ -54,7 +54,7 @@ const chapters = [
 
     // 一番上
     top: "20%",
-    left: "50%",
+    left: "54%",
     locked: true,
   },
 ];
