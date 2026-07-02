@@ -58,6 +58,7 @@ export default function BeginnerPage() {
   const clearCount = chapters.filter((c) => cleared.includes(c.id)).length;
   const currentIndex = Math.min(clearCount, chapters.length - 1);
   const clearRate = Math.round((clearCount / chapters.length) * 100);
+  const isComplete = clearRate >= 100;
 
   return (
     <main className="beginnerGameMapPage">
@@ -101,7 +102,6 @@ export default function BeginnerPage() {
         }
 
         .beginnerMapHeader span {
-          display: block;
           color: #ff4f93;
           font-size: 11px;
           font-weight: 900;
@@ -112,11 +112,6 @@ export default function BeginnerPage() {
           color: #17345c;
           font-size: 18px;
           font-weight: 900;
-        }
-
-        .beginnerMapHeader b {
-          text-align: center;
-          font-size: 24px;
         }
 
         .beginnerMapInfo {
@@ -152,6 +147,7 @@ export default function BeginnerPage() {
           border: 3px solid #ffd768;
           box-shadow: 0 18px 40px rgba(0,0,0,.38);
           background: #071f4f;
+          perspective: 900px;
         }
 
         .beginnerGameMapBg {
@@ -164,6 +160,11 @@ export default function BeginnerPage() {
           transform: translate(-50%, -50%);
           z-index: 10;
           text-decoration: none;
+          animation: islandFloat 4s ease-in-out infinite;
+        }
+
+        .mapStage:nth-of-type(odd) {
+          animation-delay: .4s;
         }
 
         .mapStageOrb {
@@ -211,7 +212,7 @@ export default function BeginnerPage() {
         .mapFireworks {
           position: absolute;
           left: 50%;
-          top: -24px;
+          top: -26px;
           transform: translateX(-50%);
           font-size: 24px;
           animation: fireworkPop 1.4s ease-in-out infinite;
@@ -220,17 +221,30 @@ export default function BeginnerPage() {
 
         .mapSparkle {
           position: absolute;
-          inset: -20px;
+          inset: -24px;
           border-radius: 50%;
           background: radial-gradient(circle, rgba(255,255,255,.9), transparent 65%);
           animation: sparklePulse 1.4s infinite;
           z-index: -1;
         }
 
+        .mapBoatIchika {
+          position: absolute;
+          left: 50%;
+          top: -86px;
+          width: 84px;
+          height: 84px;
+          object-fit: contain;
+          transform: translateX(-50%);
+          z-index: 25;
+          animation: boatMove 1.8s ease-in-out infinite;
+          filter: drop-shadow(0 8px 8px rgba(0,0,0,.35));
+        }
+
         .mapWoodBoard {
           position: absolute;
           left: 50%;
-          top: 62px;
+          top: 64px;
           transform: translateX(-50%);
           min-width: 132px;
           padding: 9px 10px 10px;
@@ -240,17 +254,6 @@ export default function BeginnerPage() {
           border: 3px solid #ffd768;
           text-align: center;
           box-shadow: 0 8px 18px rgba(0,0,0,.36);
-        }
-
-        .mapWoodBoard::before {
-          content: "";
-          position: absolute;
-          left: 18px;
-          right: 18px;
-          top: -8px;
-          height: 8px;
-          background: #5b3318;
-          border-radius: 8px 8px 0 0;
         }
 
         .mapWoodBoard span {
@@ -275,19 +278,6 @@ export default function BeginnerPage() {
           font-weight: 900;
         }
 
-        .mapBoatIchika {
-          position: absolute;
-          left: 50%;
-          top: -78px;
-          width: 78px;
-          height: 78px;
-          object-fit: contain;
-          transform: translateX(-50%);
-          z-index: 25;
-          animation: boatFloat 1.7s ease-in-out infinite;
-          filter: drop-shadow(0 8px 8px rgba(0,0,0,.35));
-        }
-
         .mapLabel {
           position: absolute;
           left: 50%;
@@ -310,12 +300,37 @@ export default function BeginnerPage() {
           top: 4%;
         }
 
-        @keyframes boatFloat {
+        .completeRibbon {
+          position: absolute;
+          top: 10%;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 40;
+          padding: 14px 22px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #ffd768, #ff4f93);
+          color: #fff;
+          font-size: 22px;
+          font-weight: 900;
+          box-shadow: 0 10px 26px rgba(0,0,0,.35);
+          animation: completePop 1.6s ease-in-out infinite;
+        }
+
+        @keyframes boatMove {
           0%, 100% {
-            transform: translateX(-50%) translateY(0) rotate(-2deg);
+            transform: translateX(-50%) translateY(0) rotate(-4deg);
           }
           50% {
-            transform: translateX(-50%) translateY(-8px) rotate(2deg);
+            transform: translateX(-50%) translateY(-10px) rotate(4deg);
+          }
+        }
+
+        @keyframes islandFloat {
+          0%, 100% {
+            scale: 1;
+          }
+          50% {
+            scale: 1.045;
           }
         }
 
@@ -360,6 +375,15 @@ export default function BeginnerPage() {
             transform: scale(1.2);
           }
         }
+
+        @keyframes completePop {
+          0%, 100% {
+            transform: translateX(-50%) scale(1);
+          }
+          50% {
+            transform: translateX(-50%) scale(1.08);
+          }
+        }
       `}</style>
 
       <header className="beginnerMapHeader">
@@ -373,7 +397,7 @@ export default function BeginnerPage() {
 
       <section className="beginnerMapInfo">
         <span>🌸 ICHIKA BEGINNER ROAD</span>
-        <strong>CLEAR率 {clearRate}%</strong>
+        <strong>{isComplete ? "COMPLETE 👑" : `CLEAR率 ${clearRate}%`}</strong>
       </section>
 
       <section className="beginnerGameMap">
@@ -382,6 +406,8 @@ export default function BeginnerPage() {
           alt="初心者ロード"
           className="beginnerGameMapBg"
         />
+
+        {isComplete && <div className="completeRibbon">👑 COMPLETE</div>}
 
         <div className="mapLabel mapStartLabel">START</div>
         <div className="mapLabel mapGoalLabel">🏆 GOAL</div>
@@ -404,16 +430,17 @@ export default function BeginnerPage() {
               }}
             >
               {isLocked && <div className="mapFog" />}
-
               {isClear && <div className="mapFireworks">🎆</div>}
-
               {isCurrent && <div className="mapSparkle" />}
 
               {isCurrent && (
                 <img
-                  src="/bsc/status-ichika.png"
+                  src="/bsc/ichika-boat.png"
                   alt="一果"
                   className="mapBoatIchika"
+                  onError={(e) => {
+                    e.currentTarget.src = "/bsc/status-ichika.png";
+                  }}
                 />
               )}
 
