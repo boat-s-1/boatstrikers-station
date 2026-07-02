@@ -25,7 +25,7 @@ const chapters = [
     title: "Chapter 3",
     subtitle: "モーター評価",
     href: "/bsc2/intermediate/chapter3",
-    top: "47%",
+    top: "48%",
     left: "50%",
     locked: true,
   },
