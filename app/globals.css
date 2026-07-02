@@ -5693,3 +5693,104 @@ margin:8px 0;
 .gameStageCard.library span {
   background: #17345c;
 }
+.bscImageLinkGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.bscImageLinkCard {
+  position: relative;
+  display: block;
+  min-height: 190px;
+  border-radius: 24px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  border: 3px solid rgba(255, 215, 104, .9);
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+}
+
+.bscImageLinkCard img {
+  width: 100%;
+  height: 100%;
+  min-height: 190px;
+  object-fit: cover;
+  display: block;
+  transition: .25s ease;
+}
+
+.bscImageLinkCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,.05),
+    rgba(0,0,0,.68)
+  );
+  z-index: 1;
+}
+
+.bscImageLinkOverlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+}
+
+.bscImageLinkOverlay span {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.9);
+  color: #17345c;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.bscImageLinkOverlay strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 900;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+}
+
+.bscImageLinkOverlay p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.4;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+}
+
+.bscImageLinkCard:active img {
+  transform: scale(1.04);
+}
+
+@media (max-width: 430px) {
+  .bscImageLinkGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .bscImageLinkCard {
+    min-height: 150px;
+    border-radius: 20px;
+  }
+
+  .bscImageLinkCard img {
+    min-height: 150px;
+  }
+
+  .bscImageLinkOverlay strong {
+    font-size: 14px;
+  }
+
+  .bscImageLinkOverlay p {
+    font-size: 11px;
+  }
+}
