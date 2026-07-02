@@ -82,8 +82,7 @@ export default function DailyVote() {
       },
       {
         key: "kiina",
-        name: "キイナ",
-        icon: "⚡",
+        
         label: "キイナの穴",
         main: row.kiina_main || "-",
         subLabel: "",
@@ -92,8 +91,7 @@ export default function DailyVote() {
       },
       {
         key: "hatsune",
-        name: "初音",
-        icon: "💜",
+        
         label: "初音の狙い",
         main: row.hatsune_main || "-",
         subLabel: "",
