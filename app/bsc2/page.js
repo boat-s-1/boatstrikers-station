@@ -65,18 +65,14 @@ export default function BSC2MenuPage() {
   <a href="/library" className="bscImageLinkCard">
     <img src="/bsc/A7311B2A-295A-4829-85BD-732FC3795C59.png" alt="一果図書館" />
     <div className="bscImageLinkOverlay">
-      <span>LIBRARY</span>
-      <strong>📚 一果図書館</strong>
-      <p>攻略本・新聞で復習する</p>
+  
     </div>
   </a>
 
   <a href="/bsc2/collection" className="bscImageLinkCard">
     <img src="/bsc/6A5C107D-6E92-4FCF-9F4A-C6D070855CC5.png" alt="バッジコレクション" />
     <div className="bscImageLinkOverlay">
-      <span>COLLECTION</span>
-      <strong>🏅 バッジコレクション</strong>
-      <p>集めた認定バッジを見る</p>
+    
     </div>
   </a>
 </section>
