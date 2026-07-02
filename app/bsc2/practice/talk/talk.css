@@ -308,3 +308,189 @@
   background: linear-gradient(135deg, #ff4f93, #f6a800);
   color: #fff;
 }
+
+/* ===========================
+   Talk Character Animation
+=========================== */
+
+.talkCharacterFace {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  flex: 0 0 auto;
+  animation: characterFloat 2.2s ease-in-out infinite;
+}
+
+.talkCharacterFace img {
+  width: 82px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 24px;
+  border: 3px solid #ffd768;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+}
+
+.talkCharacterFace.happy {
+  animation: characterHappy .6s ease-in-out 2;
+}
+
+.talkCharacterFace.sad {
+  animation: characterSad .45s ease-in-out 2;
+}
+
+.talkBlink {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 39%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.75);
+  opacity: 0;
+  animation: blink 4s infinite;
+  pointer-events: none;
+}
+
+.talkSparkle {
+  position: absolute;
+  right: -10px;
+  top: -12px;
+  font-size: 22px;
+  opacity: 0;
+  animation: sparklePop 2.4s ease-in-out infinite;
+}
+
+.talkCharacterFace.happy .talkSparkle {
+  opacity: 1;
+  animation: sparkleHappy .7s ease-in-out 2;
+}
+
+.talkCharacterFace.sad .talkSparkle {
+  display: none;
+}
+
+.talkChoices button {
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.talkChoices button:active {
+  transform: scale(.97);
+}
+
+.talkAnswerBox {
+  animation: answerPop .35s ease-out;
+}
+
+.talkAnswerBox h3 {
+  animation: resultBounce .45s ease-out;
+}
+
+.talkRewardMini {
+  animation: rewardShine 1s ease-in-out infinite;
+}
+
+@keyframes characterFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes characterHappy {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-10px) scale(1.08);
+  }
+  70% {
+    transform: translateY(0) scale(1.02);
+  }
+}
+
+@keyframes characterSad {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(6px) rotate(3deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+}
+
+@keyframes blink {
+  0%, 92%, 100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+  94%, 96% {
+    opacity: 1;
+    transform: scaleY(.7);
+  }
+}
+
+@keyframes sparklePop {
+  0%, 70%, 100% {
+    opacity: 0;
+    transform: scale(.6) rotate(0deg);
+  }
+  78%, 88% {
+    opacity: 1;
+    transform: scale(1.15) rotate(12deg);
+  }
+}
+
+@keyframes sparkleHappy {
+  0% {
+    opacity: 0;
+    transform: scale(.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(18deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(.8) rotate(0deg);
+  }
+}
+
+@keyframes answerPop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes resultBounce {
+  0% {
+    transform: scale(.8);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rewardShine {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(255,215,104,0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255,215,104,.9);
+  }
+}
