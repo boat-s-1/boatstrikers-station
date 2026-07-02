@@ -63,7 +63,7 @@ export default function BSC2MenuPage() {
 
         <section className="bscImageLinkGrid">
   <a href="/library" className="bscImageLinkCard">
-    <img src="/bsc/library-card.jpg" alt="一果図書館" />
+    <img src="/bsc/A7311B2A-295A-4829-85BD-732FC3795C59.png" alt="一果図書館" />
     <div className="bscImageLinkOverlay">
       <span>LIBRARY</span>
       <strong>📚 一果図書館</strong>
