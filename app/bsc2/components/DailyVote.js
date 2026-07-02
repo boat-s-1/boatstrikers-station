@@ -176,7 +176,7 @@ export default function DailyVote() {
     <section className="dailyVote">
      <div className="dailyVoteBanner">
   <img
-    src="/bsc/today-event-banner.jpg"
+    src="/bsc/IMG_6178.jpeg"
     alt="Today’s Event"
   />
 </div>
