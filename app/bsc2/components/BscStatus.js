@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+function getRank(level) {
+  if (level >= 20) return "👑 レジェンド";
+  if (level >= 15) return "🏆 一流ストライカー";
+  if (level >= 10) return "⚡ BOAT STRIKERS";
+  if (level >= 7) return "🎯 的中ハンター";
+  if (level >= 5) return "📖 データ分析員";
+  if (level >= 3) return "🚤 新人レーサー";
+  if (level >= 2) return "🌸 一果の教え子";
+  return "🌱 見習いクルー";
+}
+
 export default function BscStatus() {
   const [point, setPoint] = useState(0);
   const [badges, setBadges] = useState([]);
@@ -17,61 +28,52 @@ export default function BscStatus() {
 
   const level = Math.floor(point / 100) + 1;
   const exp = point % 100;
-  const expPercent = Math.min(exp, 100);
   const bondPercent = Math.min(bond, 100);
+  const rank = getRank(level);
 
   return (
-    <section className="bscStatusPro">
-      <div className="bscStatusTop">
-        <div className="bscAvatar">
-          <img src="/bsc/status-ichika.png" alt="一果" />
-        </div>
+    <section className="bscStatusCompact">
+      <div className="bscStatusCompactTop">
+        <img src="/bsc/status-ichika.png" alt="一果" />
 
-        <div className="bscStatusMain">
+        <div className="bscStatusCompactInfo">
           <span>BSC STATUS</span>
           <h2>LEVEL {level}</h2>
-          <p>🌱 見習いクルー</p>
+          <p>{rank}</p>
         </div>
+
+        <div className="bscStatusCompactBadge">LvUP</div>
       </div>
 
-      <div className="bscExpBox">
-        <div className="bscExpText">
+      <div className="bscStatusCompactExp">
+        <div>
           <span>EXP</span>
           <b>{exp}/100</b>
         </div>
-        <div className="bscExpBar">
-          <i style={{ width: `${expPercent}%` }} />
+        <div className="bscStatusCompactBar">
+          <i style={{ width: `${exp}%` }} />
         </div>
       </div>
 
-      <div className="bscStatusGrid">
+      <div className="bscStatusCompactGrid">
         <div>
-          <span>⭐</span>
-          <strong>{point}pt</strong>
-          <p>ポイント</p>
-        </div>
-
-        <div>
-          <span>🏅</span>
-          <strong>{badges.length}個</strong>
-          <p>バッジ</p>
+          <b>⭐ {point}</b>
+          <span>POINT</span>
         </div>
 
         <div>
-          <span>🎮</span>
-          <strong>{cleared.length}CLEAR</strong>
-          <p>クリア数</p>
-        </div>
-      </div>
-
-      <div className="bscBondBox">
-        <div className="bscBondTitle">
-          <span>🌸 一果との親密度</span>
-          <b>{bondPercent}%</b>
+          <b>🏅 {badges.length}</b>
+          <span>BADGE</span>
         </div>
 
-        <div className="bscBondBar">
-          <i style={{ width: `${bondPercent}%` }} />
+        <div>
+          <b>🎮 {cleared.length}</b>
+          <span>CLEAR</span>
+        </div>
+
+        <div>
+          <b>🌸 {bondPercent}%</b>
+          <span>LOVE</span>
         </div>
       </div>
     </section>
