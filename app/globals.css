@@ -5094,343 +5094,316 @@ margin:8px 0;
    Daily Vote
 =========================== */
 
-.dailyVote{
+.dailyVote {
 
-    margin:24px 14px;
+  margin: 18px 0;
 
-    padding:22px;
+  padding: 14px;
 
-    border-radius:30px;
+  border-radius: 26px;
 
-    background:linear-gradient(
-        180deg,
-        #fff8e8,
-        #ffe8f3
-    );
+  background: linear-gradient(135deg, rgba(0,45,120,.94), rgba(0,16,70,.96));
 
-    border:3px solid #ffd768;
+  border: 3px solid rgba(120,210,255,.9);
 
-    box-shadow:0 12px 30px rgba(0,0,0,.18);
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+
+  color: #fff;
+}
+
+.dailyVoteHeader {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 14px;
 
 }
 
-.dailyVoteHeader{
+.dailyVoteHeader span {
 
-    text-align:center;
+  background: linear-gradient(135deg, #ff4f93, #ff7aa8);
 
-}
+  color: #fff;
 
-.dailyVoteHeader span{
+  border-radius: 10px;
 
-    display:inline-block;
+  padding: 7px 12px;
 
-    background:#ff4f93;
+  font-size: 13px;
 
-    color:#fff;
+  font-weight: 900;
 
-    padding:6px 16px;
-
-    border-radius:999px;
-
-    font-size:12px;
-
-    font-weight:900;
-
-    letter-spacing:.08em;
+  white-space: nowrap;
 
 }
 
-.dailyVoteHeader h2{
+dailyVoteHeader h2 {
 
-    margin:14px 0 6px;
+  margin: 0;
 
-    color:#17345c;
+  font-size: 22px;
 
-    font-size:28px;
+  font-weight: 900;
 
-    font-weight:900;
+  color: #fff;
 
-}
-
-.dailyVoteHeader p{
-
-    color:#666;
-
-    font-weight:700;
-
-    margin:0;
+  text-shadow: 0 2px 6px rgba(0,0,0,.5);
 
 }
 
-/* ===========================
-   Card
-=========================== */
+.dailyVoteHeader p {
 
-.dailyVoteCards{
+  margin-left: auto;
 
-    display:grid;
+  font-size: 12px;
 
-    gap:16px;
+  font-weight: 900;
 
-    margin-top:22px;
+  color: #ffe76b;
 
 }
 
-.voteCard{
+.dailyVoteCards {
 
-    background:#fff;
+  display: grid;
 
-    border-radius:24px;
+  grid-template-columns: repeat(3, 1fr);
 
-    padding:18px;
+  gap: 8px;
 
-    border:2px solid #ffd768;
-
-    box-shadow:0 6px 16px rgba(0,0,0,.08);
-
-    transition:.25s;
+  margin-top: 12px;
 
 }
 
-.voteCard:hover{
+.voteCard {
 
-    transform:translateY(-4px);
+  position: relative;
 
-}
+  padding: 10px 8px;
 
-.voteCard h3{
+  border-radius: 16px;
 
-    margin:0 0 12px;
+  background: rgba(255,255,255,.12);
 
-    color:#17345c;
+  border: 2px solid rgba(255,255,255,.22);
 
-    font-size:22px;
+  text-align: center;
 
-}
-
-.voteCard p{
-
-    margin:10px 0;
-
-    line-height:1.7;
-
-    color:#555;
-
-    font-weight:700;
+  overflow: hidden;
 
 }
 
-.voteCard b{
+.voteCard h3 {
 
-    font-size:28px;
+  margin: 0 0 6px;
 
-    color:#ff2f86;
+  font-size: 15px;
 
-}
-
-/* ===========================
-   Vote Buttons
-=========================== */
-
-.voteButtons{
-
-    display:grid;
-
-    gap:14px;
-
-    margin-top:22px;
+  color: #fff;
 
 }
 
-.voteButtons h3{
+.voteCard p {
 
-    text-align:center;
+  margin: 4px 0;
 
-    margin-bottom:6px;
+  font-size: 11px;
 
-    color:#17345c;
+  font-weight: 800;
 
-}
-
-.voteButtons button{
-
-    border:none;
-
-    border-radius:18px;
-
-    padding:16px;
-
-    font-size:18px;
-
-    font-weight:900;
-
-    color:#fff;
-
-    cursor:pointer;
-
-    background:linear-gradient(
-        135deg,
-        #ff4f93,
-        #f6a800
-    );
-
-    box-shadow:0 6px 0 #cc7b00;
-
-    transition:.2s;
+  color: rgba(255,255,255,.85);
 
 }
 
-.voteButtons button:hover{
+.voteCard b {
 
-    transform:translateY(-2px);
+  display: block;
 
-}
+  margin-top: 3px;
 
-.voteButtons button:active{
+  font-size: 20px;
 
-    transform:translateY(3px);
+  color: #fff;
 
-    box-shadow:0 2px 0 #cc7b00;
-
-}
-
-.voteButtons button:disabled{
-
-    opacity:.6;
-
-    cursor:default;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
 
 }
 
-/* ===========================
-   Finish
-=========================== */
+.voteButtons {
 
-.voteFinish{
+  display: grid;
 
-    margin-top:22px;
+  grid-template-columns: 1fr;
 
-    background:#fff;
+  gap: 10px;
 
-    border-radius:24px;
-
-    padding:24px;
-
-    text-align:center;
-
-    border:2px solid #06c755;
+  margin: 14px 0;
 
 }
 
-.voteFinish h3{
+.voteButtons h3 {
 
-    margin:0 0 12px;
+  margin: 0;
 
-    color:#06c755;
+  text-align: center;
 
-    font-size:24px;
+  font-size: 15px;
 
-}
-
-.voteFinish p{
-
-    margin:6px 0;
-
-    font-weight:800;
+  color: #fff;
 
 }
 
-.voteFinish b{
+.voteButtons button {
 
-    color:#ff2f86;
+  border: 0;
 
-}
+  border-radius: 999px;
 
-/* ===========================
-   Result
-=========================== */
+  padding: 15px;
 
-.voteResultBox{
+  background: linear-gradient(135deg, #ff4f93, #ff2f86);
 
-    margin-top:28px;
+  color: #fff;
 
-    background:#17345c;
+  font-size: 20px;
 
-    color:#fff;
+  font-weight: 900;
 
-    padding:22px;
-
-    border-radius:26px;
+  box-shadow: 0 6px 0 #a8004e, 0 0 18px rgba(255,79,147,.55);
 
 }
 
-.voteResultBox h3{
+.voteFinish {
 
-    margin:0;
+  margin: 14px 0;
 
-    color:#ffd768;
+  padding: 12px;
 
-    font-size:22px;
+  border-radius: 18px;
 
-}
+  background: rgba(255,255,255,.12);
 
-.voteTotal{
+  border: 2px solid rgba(255,255,255,.25);
 
-    margin:12px 0 18px;
-
-    color:#fff6d7;
-
-    font-weight:700;
+  text-align: center;
 
 }
 
-.voteResultRow{
+.voteFinish h3 {
 
-    margin-bottom:18px;
+  margin: 0 0 6px;
 
-}
-
-.voteResultTop{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:8px;
-
-    font-weight:900;
+  color: #ffe76b;
 
 }
 
-.voteBar{
+.voteFinish p {
 
-    height:18px;
+  margin: 4px 0;
 
-    background:rgba(255,255,255,.15);
-
-    border-radius:999px;
-
-    overflow:hidden;
+  font-weight: 900;
 
 }
 
-.voteBar i{
+.voteFinish b {
 
-    display:block;
+  color: #ff9ac5;
 
-    height:100%;
+}
 
-    border-radius:999px;
+.voteResultBox {
 
-    background:linear-gradient(
-        90deg,
-        #ff4f93,
-        #ffd768
-    );
+  margin-top: 14px;
 
-    transition:width .6s ease;
+  padding: 12px;
+
+  border-radius: 20px;
+
+  background: rgba(0,0,0,.22);
+
+}
+
+.voteResultBox h3 {
+
+  margin: 0 0 8px;
+
+  text-align: center;
+
+  color: #fff;
+
+  font-size: 15px;
+
+}
+
+.voteTotal {
+
+  margin: 8px 0 0;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  color: #dff5ff;
+
+}
+
+.voteResultRow {
+
+  margin-top: 10px;
+
+}
+
+.voteResultTop {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  font-weight: 900;
+
+  font-size: 13px;
+
+}
+
+.voteResultTop span {
+
+  color: #ffe76b;
+
+}
+
+.voteBar {
+
+  height: 10px;
+
+  margin-top: 6px;
+
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.18);
+
+  overflow: hidden;
+
+}
+
+.voteBar i {
+
+  display: block;
+
+  height: 100%;
+
+  border-radius: 999px;
+
+  background: linear-gradient(90deg, #ff4f93, #ffd768);
+
+  transition: width .45s ease;
 
 }
 
