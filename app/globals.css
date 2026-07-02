@@ -6976,6 +6976,285 @@ color:white;
     box-shadow: 0 0 0 0 rgba(255,79,147,.6);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(255,79,147,0);
+    box-shadow: 0 0 0 10px rgba(.beginnerMapPage {
+  min-height: 100vh;
+  background: #071f4f;
+  padding-bottom: 80px;
+}
+
+.mapTopBar {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  margin: 12px;
+}
+
+.beginnerMapWrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 3px solid #ffd768;
+  box-shadow: 0 16px 36px rgba(0,0,0,.32);
+}
+
+.beginnerMapBg {
+  width: 100%;
+  display: block;
+}
+
+.mapChapterPoint {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-decoration: none;
+  z-index: 5;
+}
+
+.mapChapterBadge {
+  min-width: 124px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.94);
+  color: #17345c;
+  text-align: center;
+  border: 3px solid #ffd768;
+  box-shadow: 0 8px 18px rgba(0,0,0,.28);
+}
+
+.mapChapterBadge span {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ff4f93;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.mapChapterBadge strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.mapChapterBadge p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.mapChapterPoint.clear .mapChapterBadge {
+  border-color: #06c755;
+}
+
+.mapChapterPoint.clear .mapChapterBadge span {
+  background: #06c755;
+}
+
+.mapChapterPoint.current .mapChapterBadge {
+  animation: mapPulse 1.4s infinite;
+}
+
+.mapChapterPoint.locked {
+  opacity: .55;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.mapIchika {
+  position: absolute;
+  left: 50%;
+  top: -58px;
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 3px solid #ff4f93;
+  background: #fff;
+  animation: mapBounce 1.3s ease-in-out infinite;
+}
+
+.mapStart,
+.mapGoal {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.92);
+  color: #ffd768;
+  border: 2px solid #ffd768;
+  font-weight: 900;
+  z-index: 4;
+}
+
+.mapStart {
+  bottom: 5%;
+}
+
+.mapGoal {
+  top: 5%;
+}
+
+@keyframes mapBounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+@keyframes mapPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255,79,147,.55);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(255,79,147,0);
+  }
+}
+.beginnerMapPage {
+  min-height: 100vh;
+  background: #071f4f;
+  padding-bottom: 80px;
+}
+
+.mapTopBar {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  margin: 12px;
+}
+
+.beginnerMapWrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 3px solid #ffd768;
+  box-shadow: 0 16px 36px rgba(0,0,0,.32);
+}
+
+.beginnerMapBg {
+  width: 100%;
+  display: block;
+}
+
+.mapChapterPoint {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-decoration: none;
+  z-index: 5;
+}
+
+.mapChapterBadge {
+  min-width: 124px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.94);
+  color: #17345c;
+  text-align: center;
+  border: 3px solid #ffd768;
+  box-shadow: 0 8px 18px rgba(0,0,0,.28);
+}
+
+.mapChapterBadge span {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ff4f93;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.mapChapterBadge strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.mapChapterBadge p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.mapChapterPoint.clear .mapChapterBadge {
+  border-color: #06c755;
+}
+
+.mapChapterPoint.clear .mapChapterBadge span {
+  background: #06c755;
+}
+
+.mapChapterPoint.current .mapChapterBadge {
+  animation: mapPulse 1.4s infinite;
+}
+
+.mapChapterPoint.locked {
+  opacity: .55;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.mapIchika {
+  position: absolute;
+  left: 50%;
+  top: -58px;
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 3px solid #ff4f93;
+  background: #fff;
+  animation: mapBounce 1.3s ease-in-out infinite;
+}
+
+.mapStart,
+.mapGoal {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(23,52,92,.92);
+  color: #ffd768;
+  border: 2px solid #ffd768;
+  font-weight: 900;
+  z-index: 4;
+}
+
+.mapStart {
+  bottom: 5%;
+}
+
+.mapGoal {
+  top: 5%;
+}
+
+@keyframes mapBounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+@keyframes mapPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255,79,147,.55);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(255,79,147,0);
   }
 }
