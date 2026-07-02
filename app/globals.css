@@ -5779,3 +5779,27 @@ dailyVoteHeader h2 {
   width: 100%;
   display: block;
 }
+
+.dailyVoteInfo{
+    margin:16px 0 18px;
+    text-align:center;
+}
+
+.dailyVoteInfo h2{
+    margin:0;
+    font-size:32px;
+    font-weight:900;
+    color:white;
+    text-shadow:0 3px 8px rgba(0,0,0,.45);
+}
+
+.dailyVoteDeadline{
+    margin-top:8px;
+    display:inline-block;
+    padding:8px 18px;
+    border-radius:999px;
+    background:#143d88;
+    color:#ffe96b;
+    font-weight:900;
+    font-size:18px;
+}
