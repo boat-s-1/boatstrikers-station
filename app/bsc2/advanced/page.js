@@ -8,7 +8,7 @@ const chapters = [
     title: "Chapter 1",
     subtitle: "勝率の見方",
     href: "/bsc2/advanced/chapter1",
-    top: "74%",
+    top: "68%",
     left: "48%",
   },
   {
