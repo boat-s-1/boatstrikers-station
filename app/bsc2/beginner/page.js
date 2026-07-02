@@ -10,8 +10,8 @@ const chapters = [
     href: "/bsc2/play/chapter1",
 
     // 一番下の島
-    top: "80%",
-    left: "50%",
+    top: "78%",
+    left: "43%",
   },
   {
     id: "chapter2-start-tenji",
