@@ -96,7 +96,7 @@ export default function BeginnerPage() {
             >
               {isCurrent && (
                 <img
-                  src="/bsc/91BF36BB-4E29-45F4-A933-0F8803425BD1.png"
+                  src="/bsc/.png"
                   alt="一果"
                   className="mapIchika"
                 />
