@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-const chapters = [
+cconst chapters = [
   {
     id: "chapter1-lesson1",
     title: "Chapter 1",
     subtitle: "競艇入門編",
     href: "/bsc2/play/chapter1",
-    top: "82%",
-    left: "47%",
+    top: "83%",
+    left: "48%",
   },
   {
     id: "chapter2-start-tenji",
@@ -17,7 +17,7 @@ const chapters = [
     subtitle: "スタート展示",
     href: "/bsc2/play/chapter2",
     top: "68%",
-    left: "54%",
+    left: "52%",
   },
   {
     id: "chapter3-tenji-time",
@@ -25,7 +25,7 @@ const chapters = [
     subtitle: "展示タイム",
     href: "/bsc2/play/chapter3",
     top: "54%",
-    left: "47%",
+    left: "48%",
     locked: true,
   },
   {
@@ -33,8 +33,8 @@ const chapters = [
     title: "Chapter 4",
     subtitle: "1号艇の基本",
     href: "/bsc2/play/chapter4",
-    top: "40%",
-    left: "54%",
+    top: "41%",
+    left: "53%",
     locked: true,
   },
   {
@@ -42,8 +42,8 @@ const chapters = [
     title: "Chapter 5",
     subtitle: "買い目作成",
     href: "/bsc2/play/chapter5",
-    top: "26%",
-    left: "48%",
+    top: "28%",
+    left: "50%",
     locked: true,
   },
 ];
