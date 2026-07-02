@@ -5808,3 +5808,114 @@ dailyVoteHeader h2 {
   background: #555;
   color: #fff;
 }
+
+.voteImageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.voteImageButton {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.28);
+  cursor: pointer;
+}
+
+.voteImageButton img {
+  width: 100%;
+  display: block;
+}
+
+.voteImageButton:disabled {
+  cursor: default;
+}
+
+.voteImageButton.selected {
+  outline: 4px solid #ff4f93;
+}
+
+.voteImageMeta {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(0, 20, 60, .82);
+  color: #fff;
+  text-align: center;
+}
+
+.voteImageMeta strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.voteImageMeta span {
+  display: block;
+  margin-top: 3px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffe76b;
+}
+
+.voteImageMeta em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.voteImagePercent {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+}
+
+.voteImageBar {
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.25);
+  overflow: hidden;
+}
+
+.voteImageBar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff4f93, #ffd768);
+}
+
+.voteSelectedMark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #ff4f93;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.voteTapGuide {
+  margin: 12px 0 0;
+  text-align: center;
+  color: #fff;
+  font-weight: 900;
+}
+
+.voteResultBox.compact {
+  text-align: center;
+}
