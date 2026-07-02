@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 const DEFAULT_EVENT = {
@@ -16,6 +16,7 @@ const DEFAULT_EVENT = {
       main: "1-2-3",
       subLabel: "一果の押さえ",
       sub: "1-2-56",
+      image: "/bsc/vote-ichika.jpg",
     },
     {
       key: "kiina",
@@ -25,6 +26,7 @@ const DEFAULT_EVENT = {
       main: "5-1-4",
       subLabel: "",
       sub: "",
+      image: "/bsc/vote-kiina.jpg",
     },
     {
       key: "hatsune",
@@ -34,6 +36,7 @@ const DEFAULT_EVENT = {
       main: "2-1-3",
       subLabel: "",
       sub: "",
+      image: "/bsc/vote-hatsune.jpg",
     },
   ],
 };
@@ -55,10 +58,6 @@ export default function DailyVote() {
   const [timeLeft, setTimeLeft] = useState("");
   const [isClosed, setIsClosed] = useState(false);
 
-  const voteKey = useMemo(() => {
-    return `dailyVote_${event.id}`;
-  }, [event.id]);
-
   const totalVotes = Object.values(votes).reduce((sum, num) => sum + num, 0);
 
   const getPercent = (key) => {
@@ -66,42 +65,43 @@ export default function DailyVote() {
     return Math.round(((votes[key] || 0) / totalVotes) * 100);
   };
 
-  const makeEventFromRow = (row) => {
-    return {
-      id: row.id,
-      title: row.title,
-      deadline: row.deadline,
-      candidates: [
-        {
-          key: "ichika",
-          name: "一果",
-          icon: "🌸",
-          label: "一果の本命",
-          main: row.ichika_main || "-",
-          subLabel: "一果の押さえ",
-          sub: row.ichika_sub || "",
-        },
-        {
-          key: "kiina",
-          name: "キイナ",
-          icon: "⚡",
-          label: "キイナの穴",
-          main: row.kiina_main || "-",
-          subLabel: "",
-          sub: "",
-        },
-        {
-          key: "hatsune",
-          name: "初音",
-          icon: "💜",
-          label: "初音の狙い",
-          main: row.hatsune_main || "-",
-          subLabel: "",
-          sub: "",
-        },
-      ],
-    };
-  };
+  const makeEventFromRow = (row) => ({
+    id: row.id,
+    title: row.title,
+    deadline: row.deadline,
+    candidates: [
+      {
+        key: "ichika",
+        name: "一果",
+        icon: "🌸",
+        label: "一果の本命",
+        main: row.ichika_main || "-",
+        subLabel: "一果の押さえ",
+        sub: row.ichika_sub || "",
+        image: "/bsc/vote-ichika.jpg",
+      },
+      {
+        key: "kiina",
+        name: "キイナ",
+        icon: "⚡",
+        label: "キイナの穴",
+        main: row.kiina_main || "-",
+        subLabel: "",
+        sub: "",
+        image: "/bsc/vote-kiina.jpg",
+      },
+      {
+        key: "hatsune",
+        name: "初音",
+        icon: "💜",
+        label: "初音の狙い",
+        main: row.hatsune_main || "-",
+        subLabel: "",
+        sub: "",
+        image: "/bsc/vote-hatsune.jpg",
+      },
+    ],
+  });
 
   const loadActiveEvent = async () => {
     if (!supabase) {
@@ -118,14 +118,7 @@ export default function DailyVote() {
       .limit(1)
       .maybeSingle();
 
-    if (error) {
-      console.error("イベント取得エラー:", error);
-      setIsReady(false);
-      setLoading(false);
-      return DEFAULT_EVENT;
-    }
-
-    if (!data) {
+    if (error || !data) {
       setIsReady(true);
       return DEFAULT_EVENT;
     }
@@ -136,7 +129,7 @@ export default function DailyVote() {
     return activeEvent;
   };
 
-  const updateCountdown = (targetEvent = event) => {
+  const updateCountdown = (targetEvent) => {
     const now = new Date();
     const [hour, minute] = targetEvent.deadline.split(":").map(Number);
 
@@ -164,7 +157,7 @@ export default function DailyVote() {
     setIsClosed(false);
   };
 
-  const loadVotes = async (targetEvent = event) => {
+  const loadVotes = async (targetEvent) => {
     if (!supabase) {
       setLoading(false);
       return;
@@ -196,7 +189,7 @@ export default function DailyVote() {
   useEffect(() => {
     let voteChannel;
     let eventChannel;
-    let countdownTimer;
+    let timer;
 
     const start = async () => {
       setLoading(true);
@@ -210,15 +203,10 @@ export default function DailyVote() {
       if (savedVote) {
         setVoted(true);
         setChoice(savedVote.choice);
-      } else {
-        setVoted(false);
-        setChoice("");
       }
 
       updateCountdown(activeEvent);
-      countdownTimer = setInterval(() => {
-        updateCountdown(activeEvent);
-      }, 1000);
+      timer = setInterval(() => updateCountdown(activeEvent), 1000);
 
       await loadVotes(activeEvent);
 
@@ -234,9 +222,7 @@ export default function DailyVote() {
             table: "daily_votes",
             filter: `event_id=eq.${activeEvent.id}`,
           },
-          () => {
-            loadVotes(activeEvent);
-          }
+          () => loadVotes(activeEvent)
         )
         .subscribe();
 
@@ -249,9 +235,7 @@ export default function DailyVote() {
             schema: "public",
             table: "daily_events",
           },
-          async () => {
-            window.location.reload();
-          }
+          () => window.location.reload()
         )
         .subscribe();
     };
@@ -259,7 +243,7 @@ export default function DailyVote() {
     start();
 
     return () => {
-      if (countdownTimer) clearInterval(countdownTimer);
+      if (timer) clearInterval(timer);
       if (voteChannel) supabase?.removeChannel(voteChannel);
       if (eventChannel) supabase?.removeChannel(eventChannel);
     };
@@ -294,7 +278,7 @@ export default function DailyVote() {
     }
 
     localStorage.setItem(
-      voteKey,
+      `dailyVote_${event.id}`,
       JSON.stringify({
         eventId: event.id,
         choice: candidate.name,
@@ -326,30 +310,6 @@ export default function DailyVote() {
         </div>
       </div>
 
-      <div className="dailyVoteCards">
-        {event.candidates.map((item) => (
-          <div className="voteCard" key={item.key}>
-            <h3>
-              {item.icon} {item.name}
-            </h3>
-
-            <p>
-              {item.label}
-              <br />
-              <b>{item.main}</b>
-            </p>
-
-            {item.sub && (
-              <p>
-                {item.subLabel}
-                <br />
-                <b>{item.sub}</b>
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-
       {!isReady && (
         <div className="voteFinish">
           <h3>投票機能の準備中です</h3>
@@ -357,28 +317,52 @@ export default function DailyVote() {
         </div>
       )}
 
-      {isReady && !voted ? (
-        <div className="voteButtons">
-          <h3>どれが来ると思う？</h3>
+      {isReady && (
+        <div className="voteImageGrid">
+          {event.candidates.map((item) => {
+            const percent = getPercent(item.key);
+            const selected = choice === item.name;
 
-          {event.candidates.map((item) => (
-            <button
-              type="button"
-              key={item.key}
-              onClick={() => vote(item)}
-              disabled={voting || isClosed}
-            >
-              {isClosed
-                ? "投票締切済み"
-                : voting
-                ? "投票中..."
-                : `${item.icon} ${item.name}に投票`}
-            </button>
-          ))}
+            return (
+              <button
+                type="button"
+                key={item.key}
+                className={`voteImageButton ${selected ? "selected" : ""}`}
+                onClick={() => vote(item)}
+                disabled={voting || voted || isClosed}
+              >
+                <img src={item.image} alt={`${item.name}に投票`} />
+
+                <div className="voteImageMeta">
+                  <strong>
+                    {item.icon} {item.name}
+                  </strong>
+
+                  <span>{item.main}</span>
+
+                  {item.sub && <em>押さえ {item.sub}</em>}
+
+                  <div className="voteImagePercent">
+                    {loading ? "--" : `${percent}%`}
+                  </div>
+
+                  <div className="voteImageBar">
+                    <i style={{ width: `${percent}%` }} />
+                  </div>
+                </div>
+
+                {selected && <div className="voteSelectedMark">投票済み</div>}
+              </button>
+            );
+          })}
         </div>
-      ) : null}
+      )}
 
-      {isReady && voted ? (
+      {isReady && !voted && !isClosed && (
+        <p className="voteTapGuide">画像をタップして投票できます</p>
+      )}
+
+      {isReady && voted && (
         <div className="voteFinish">
           <h3>投票ありがとう😊</h3>
           <p>+2pt GET!!</p>
@@ -386,38 +370,15 @@ export default function DailyVote() {
             あなたは <b>{choice}</b> に投票しました。
           </p>
         </div>
-      ) : null}
+      )}
 
-      <div className="voteResultBox">
+      <div className="voteResultBox compact">
         <h3>📊 リアルタイム投票率</h3>
 
         {loading ? (
           <p className="voteTotal">投票数を読み込み中...</p>
         ) : (
-          <>
-            <p className="voteTotal">現在 {totalVotes}人が参加中</p>
-
-            {event.candidates.map((item) => {
-              const percent = getPercent(item.key);
-
-              return (
-                <div className="voteResultRow" key={item.key}>
-                  <div className="voteResultTop">
-                    <strong>
-                      {item.icon} {item.name}
-                    </strong>
-                    <span>
-                      {percent}% / {votes[item.key] || 0}票
-                    </span>
-                  </div>
-
-                  <div className="voteBar">
-                    <i style={{ width: `${percent}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </>
+          <p className="voteTotal">現在 {totalVotes}人が参加中</p>
         )}
       </div>
     </section>
