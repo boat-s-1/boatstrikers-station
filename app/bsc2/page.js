@@ -40,26 +40,43 @@ export default function BSC2MenuPage() {
 
       <DailyVote />
 
-      <section className="gameHomeMenu">
-        {continueData && (
-          <a href={continueData.url} className="gameStageCard continue">
-            <span>▶ CONTINUE</span>
-            <strong>{continueData.chapter}</strong>
-            <p>{continueData.title}</p>
-          </a>
-        )}
+    <section className="bscCourseGrid">
+  <a href="/bsc2/play/chapter1" className="bscCourseCard">
+    <img src="/bsc/course-beginner.jpg" alt="初心者編" />
+    <div>
+      <span>BEGINNER</span>
+      <strong>初心者編</strong>
+      <p>ボートレースの基礎を学ぼう</p>
+    </div>
+  </a>
 
-        <a href="/bsc2/play/chapter1" className="gameStageCard story">
-          <span>{chapter1Cleared ? "CLEAR" : "STORY"}</span>
-          <strong>Chapter 1：競艇入門編</strong>
-          <p>{chapter1Cleared ? "復習する" : "まずはここから！"}</p>
-        </a>
+  <a href="/bsc2/play/chapter2" className="bscCourseCard">
+    <img src="/bsc/course-intermediate.jpg" alt="中級者編" />
+    <div>
+      <span>INTERMEDIATE</span>
+      <strong>中級者編</strong>
+      <p>展示・データ分析を学ぼう</p>
+    </div>
+  </a>
 
-        <a href="/bsc2/play/chapter2" className="gameStageCard story">
-          <span>{chapter2Cleared ? "CLEAR" : "NEW"}</span>
-          <strong>Chapter 2：スタート展示って何？</strong>
-          <p>{chapter2Cleared ? "復習する" : "展示の基本を学ぼう！"}</p>
-        </a>
+  <a href="/bsc2/play/chapter3" className="bscCourseCard">
+    <img src="/bsc/course-advanced.jpg" alt="上級者編" />
+    <div>
+      <span>ADVANCED</span>
+      <strong>上級者編</strong>
+      <p>勝率・回収率を高めよう</p>
+    </div>
+  </a>
+
+  <a href="/bsc2/practice" className="bscCourseCard">
+    <img src="/bsc/course-practice.jpg" alt="実践編" />
+    <div>
+      <span>PRACTICE</span>
+      <strong>実践編</strong>
+      <p>3人と実戦形式で挑戦</p>
+    </div>
+  </a>
+</section>
 
         <section className="bscImageLinkGrid">
   <a href="/library" className="bscImageLinkCard">
