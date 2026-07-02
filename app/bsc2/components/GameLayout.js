@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import TypeWriter from "./TypeWriter";
 import BscStatus from "./BscStatus";
 import ClearPanel from "./ClearPanel";
+import TypeWriter from "./TypeWriter";
 
 export default function GameLayout({
   title,
@@ -16,123 +16,124 @@ export default function GameLayout({
   showNext,
   effect,
   finished,
-
   rewardPoint = 20,
   badge = "BSC認定",
   alreadyCleared = false,
-
-  nextHref = "/bsc2/play/chapter2",
-  nextTitle = "Chapter2へ進む",
-  reviewHref = "/library",
 }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, choices, effect, finished]);
 
   return (
-    <main className="gamePage">
+    <main className="bscPlayPage">
       {effect && <div className="gameEffect">{effect}</div>}
 
-      <header className="gameTopBar">
-        <a href="/bsc2" className="gameBack">
-          ←
-        </a>
+      <header className="bscPlayHeader">
+        <a href="/bsc2" className="bscPlayBack">←</a>
 
-        <div>
+        <div className="bscPlayTitle">
           <span>{chapter}</span>
           <h1>{title}</h1>
         </div>
 
-        <div className="gameStatusMini">BSC</div>
+        <div className="bscPlayMini">BSC</div>
       </header>
-
-      <section className="gameCharacterArea">
-        <img
-          src={character.image}
-          alt={character.name}
-          className="gameMainCharacter"
-        />
-
-        <div className="gameCharacterName">{character.name}</div>
-      </section>
 
       <BscStatus />
 
-      <section className="gameChatArea">
-        {messages.map((msg, index) => {
-          const isUser = msg.from === "user";
+      <section className="bscPlayCharacter">
+        <div className="bscPlayCharacterAura" />
 
-          return (
-            <div
-              className={`gameMessageRow ${isUser ? "user" : "character"}`}
-              key={index}
-            >
-              {!isUser && (
-                <img
-                  src={msg.image}
-                  alt={msg.name}
-                  className="gameMessageIcon"
-                />
-              )}
+        <img
+          src={character.image}
+          alt={character.name}
+          className="bscPlayCharacterImg"
+        />
 
-              <div
-                className={`gameBubble ${
-                  isUser ? "userBubble" : "characterBubble"
-                }`}
-              >
-                {!isUser && <span className="gameBubbleName">{msg.name}</span>}
-
-                <p>
-                  {msg.typing ? (
-                    <TypeWriter text={msg.text} speed={msg.speed || 35} />
-                  ) : (
-                    msg.text
-                  )}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-
-        <div ref={bottomRef} />
+        <div className="bscPlayCharacterName">
+          {character.name}
+        </div>
       </section>
 
-      {finished && (
-        <ClearPanel
-          rewardPoint={rewardPoint}
-          badge={badge}
-          alreadyCleared={alreadyCleared}
-          nextHref={nextHref}
-          nextTitle={nextTitle}
-          reviewHref={reviewHref}
-        />
-      )}
+      <section className="bscTalkPanel">
+        <div className="bscTalkHeader">
+          <span>STORY MODE</span>
+          <b>{chapter}</b>
+        </div>
 
-      {!finished && (
-        <section className="gameBottomArea">
-          {choices.length > 0 ? (
-            <div className="gameChoices">
+        <div className="bscChatScroll">
+          {messages.map((msg, index) => {
+            const isUser = msg.from === "user";
+
+            return (
+              <div
+                className={`bscMessageLine ${isUser ? "user" : "character"}`}
+                key={index}
+              >
+                {!isUser && (
+                  <img
+                    src={msg.image || character.image}
+                    alt={msg.name || character.name}
+                    className="bscMessageIcon"
+                  />
+                )}
+
+                <div className={`bscMessageBubble ${isUser ? "user" : ""}`}>
+                  {!isUser && (
+                    <div className="bscMessageName">
+                      {msg.name || character.name}
+                    </div>
+                  )}
+
+                  <p>
+                    {msg.typing ? (
+                      <TypeWriter text={msg.text} speed={msg.speed || 35} />
+                    ) : (
+                      msg.text
+                    )}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
+          {finished && (
+            <ClearPanel
+              rewardPoint={rewardPoint}
+              badge={badge}
+              alreadyCleared={alreadyCleared}
+            />
+          )}
+
+          {choices.length > 0 && (
+            <div className="bscChoiceInline">
+              <div className="bscChoiceTitle">答えを選んでね</div>
+
               {choices.map((choice, index) => (
                 <button
                   type="button"
-                  key={choice}
+                  key={`${choice}-${index}`}
                   onClick={() => onChoice(index)}
                 >
                   {choice}
                 </button>
               ))}
             </div>
-          ) : (
-            showNext && (
-              <button type="button" className="gameNextButton" onClick={onNext}>
+          )}
+
+          {showNext && !finished && choices.length === 0 && (
+            <div className="bscNextInline">
+              <button type="button" onClick={onNext}>
                 次へ ▶
               </button>
-            )
+            </div>
           )}
-        </section>
-      )}
+
+          <div ref={bottomRef} />
+        </div>
+      </section>
     </main>
   );
 }
