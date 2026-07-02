@@ -72,7 +72,7 @@ export default function BSC2MenuPage() {
   </a>
 
   <a href="/bsc2/collection" className="bscImageLinkCard">
-    <img src="/bsc/collection-card.jpg" alt="バッジコレクション" />
+    <img src="/bsc/6A5C107D-6E92-4FCF-9F4A-C6D070855CC5.png" alt="バッジコレクション" />
     <div className="bscImageLinkOverlay">
       <span>COLLECTION</span>
       <strong>🏅 バッジコレクション</strong>
