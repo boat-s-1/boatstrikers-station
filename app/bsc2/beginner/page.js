@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-
 const chapters = [
   {
     id: "chapter1-lesson1",
     title: "Chapter 1",
     subtitle: "競艇入門編",
     href: "/bsc2/play/chapter1",
-
-    // 一番下の島
     top: "78%",
     left: "43%",
   },
@@ -19,8 +16,6 @@ const chapters = [
     title: "Chapter 2",
     subtitle: "スタート展示",
     href: "/bsc2/play/chapter2",
-
-    // 2つ目の島
     top: "57%",
     left: "51%",
   },
@@ -29,8 +24,6 @@ const chapters = [
     title: "Chapter 3",
     subtitle: "展示タイム",
     href: "/bsc2/play/chapter3",
-
-    // 真ん中
     top: "45%",
     left: "49%",
     locked: true,
@@ -40,8 +33,6 @@ const chapters = [
     title: "Chapter 4",
     subtitle: "1号艇の基本",
     href: "/bsc2/play/chapter4",
-
-    // 上から2番目
     top: "32%",
     left: "51%",
     locked: true,
@@ -51,8 +42,6 @@ const chapters = [
     title: "Chapter 5",
     subtitle: "買い目作成",
     href: "/bsc2/play/chapter5",
-
-    // 一番上
     top: "20%",
     left: "54%",
     locked: true,
@@ -178,89 +167,125 @@ export default function BeginnerPage() {
         }
 
         .mapStageOrb {
-          width: 48px;
-          height: 48px;
-          margin: 0 auto 5px;
+          width: 54px;
+          height: 54px;
           display: grid;
           place-items: center;
           border-radius: 50%;
           background: linear-gradient(135deg, #ff4f93, #f6a800);
           color: #fff;
           border: 4px solid #fff;
-          font-size: 18px;
+          font-size: 22px;
           font-weight: 900;
           box-shadow: 0 0 18px rgba(255,255,255,.9), 0 8px 18px rgba(0,0,0,.35);
-        }
-
-        .mapStageCard {
-          min-width: 104px;
-          padding: 7px 8px;
-          border-radius: 15px;
-          background: rgba(255,255,255,.95);
-          color: #17345c;
-          border: 3px solid #ffd768;
-          text-align: center;
-          box-shadow: 0 8px 18px rgba(0,0,0,.3);
-        }
-
-        .mapStageCard span {
-          display: inline-block;
-          padding: 3px 8px;
-          border-radius: 999px;
-          background: #ff4f93;
-          color: #fff;
-          font-size: 9px;
-          font-weight: 900;
-        }
-
-        .mapStageCard strong {
-          display: block;
-          margin-top: 4px;
-          font-size: 12px;
-          font-weight: 900;
-        }
-
-        .mapStageCard p {
-          margin: 2px 0 0;
-          font-size: 9px;
-          font-weight: 900;
         }
 
         .mapStage.clear .mapStageOrb {
           background: #06c755;
         }
 
-        .mapStage.clear .mapStageCard {
-          border-color: #06c755;
-        }
-
-        .mapStage.clear .mapStageCard span {
-          background: #06c755;
+        .mapStage.locked .mapStageOrb {
+          background: rgba(0,0,0,.42);
+          backdrop-filter: blur(6px);
+          opacity: .78;
         }
 
         .mapStage.current .mapStageOrb {
+          background: linear-gradient(135deg, #ff4f93, #f6a800);
           animation: mapStagePulse 1.4s infinite;
         }
 
         .mapStage.locked {
-          opacity: .52;
-          filter: grayscale(1);
           pointer-events: none;
         }
 
-        .mapCurrentCharacter {
+        .mapFog {
+          position: absolute;
+          inset: -34px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,.08), transparent 70%);
+          z-index: -1;
+          animation: fogMove 3s ease-in-out infinite;
+        }
+
+        .mapFireworks {
           position: absolute;
           left: 50%;
-          top: -56px;
-          width: 52px;
-          height: 52px;
-          object-fit: cover;
+          top: -24px;
           transform: translateX(-50%);
+          font-size: 24px;
+          animation: fireworkPop 1.4s ease-in-out infinite;
+          z-index: 30;
+        }
+
+        .mapSparkle {
+          position: absolute;
+          inset: -20px;
           border-radius: 50%;
-          border: 3px solid #ff4f93;
-          background: #fff;
-          z-index: 20;
-          animation: mapCharacterBounce 1.2s ease-in-out infinite;
+          background: radial-gradient(circle, rgba(255,255,255,.9), transparent 65%);
+          animation: sparklePulse 1.4s infinite;
+          z-index: -1;
+        }
+
+        .mapWoodBoard {
+          position: absolute;
+          left: 50%;
+          top: 62px;
+          transform: translateX(-50%);
+          min-width: 132px;
+          padding: 9px 10px 10px;
+          border-radius: 12px;
+          background: linear-gradient(180deg, #8a5329, #5b3318);
+          color: #fff7d6;
+          border: 3px solid #ffd768;
+          text-align: center;
+          box-shadow: 0 8px 18px rgba(0,0,0,.36);
+        }
+
+        .mapWoodBoard::before {
+          content: "";
+          position: absolute;
+          left: 18px;
+          right: 18px;
+          top: -8px;
+          height: 8px;
+          background: #5b3318;
+          border-radius: 8px 8px 0 0;
+        }
+
+        .mapWoodBoard span {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 999px;
+          background: rgba(255,255,255,.18);
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .mapWoodBoard strong {
+          display: block;
+          margin-top: 4px;
+          font-size: 14px;
+          font-weight: 900;
+        }
+
+        .mapWoodBoard p {
+          margin: 2px 0 0;
+          font-size: 10px;
+          font-weight: 900;
+        }
+
+        .mapBoatIchika {
+          position: absolute;
+          left: 50%;
+          top: -78px;
+          width: 78px;
+          height: 78px;
+          object-fit: contain;
+          transform: translateX(-50%);
+          z-index: 25;
+          animation: boatFloat 1.7s ease-in-out infinite;
+          filter: drop-shadow(0 8px 8px rgba(0,0,0,.35));
         }
 
         .mapLabel {
@@ -285,12 +310,12 @@ export default function BeginnerPage() {
           top: 4%;
         }
 
-        @keyframes mapCharacterBounce {
+        @keyframes boatFloat {
           0%, 100% {
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0) rotate(-2deg);
           }
           50% {
-            transform: translateX(-50%) translateY(-8px);
+            transform: translateX(-50%) translateY(-8px) rotate(2deg);
           }
         }
 
@@ -299,7 +324,40 @@ export default function BeginnerPage() {
             box-shadow: 0 0 0 0 rgba(255,79,147,.65), 0 8px 18px rgba(0,0,0,.35);
           }
           50% {
-            box-shadow: 0 0 0 12px rgba(255,79,147,0), 0 8px 18px rgba(0,0,0,.35);
+            box-shadow: 0 0 0 14px rgba(255,79,147,0), 0 8px 18px rgba(0,0,0,.35);
+          }
+        }
+
+        @keyframes fogMove {
+          0%, 100% {
+            opacity: .55;
+            transform: scale(1);
+          }
+          50% {
+            opacity: .85;
+            transform: scale(1.12);
+          }
+        }
+
+        @keyframes fireworkPop {
+          0%, 100% {
+            transform: translateX(-50%) scale(.9);
+            opacity: .8;
+          }
+          50% {
+            transform: translateX(-50%) scale(1.25);
+            opacity: 1;
+          }
+        }
+
+        @keyframes sparklePulse {
+          0%, 100% {
+            opacity: .35;
+            transform: scale(.9);
+          }
+          50% {
+            opacity: .8;
+            transform: scale(1.2);
           }
         }
       `}</style>
@@ -345,25 +403,31 @@ export default function BeginnerPage() {
                 left: chapter.left,
               }}
             >
+              {isLocked && <div className="mapFog" />}
+
+              {isClear && <div className="mapFireworks">🎆</div>}
+
+              {isCurrent && <div className="mapSparkle" />}
+
               {isCurrent && (
                 <img
                   src="/bsc/status-ichika.png"
                   alt="一果"
-                  className="mapCurrentCharacter"
+                  className="mapBoatIchika"
                 />
               )}
 
               <div className="mapStageOrb">
-  {isLocked ? "🔒" : isClear ? "✓" : isCurrent ? index + 1 : index + 1}
-</div>
+                {isLocked ? "🔒" : isClear ? "✓" : index + 1}
+              </div>
 
-              {isCurrent && (
-  <div className="mapStageCard">
-    <span>NOW</span>
-    <strong>{chapter.title}</strong>
-    <p>{chapter.subtitle}</p>
-  </div>
-)}
+              {(isCurrent || isClear) && (
+                <div className="mapWoodBoard">
+                  <span>{isClear ? "CLEAR" : "NOW"}</span>
+                  <strong>{chapter.title}</strong>
+                  <p>{chapter.subtitle}</p>
+                </div>
+              )}
             </a>
           );
         })}
