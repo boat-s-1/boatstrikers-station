@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import TypeWriter from "./TypeWriter";
+import CharacterStage from "./CharacterStage";
 
 export default function TalkGame({ characterData }) {
   const questions = characterData?.questions || [];
@@ -11,28 +13,41 @@ export default function TalkGame({ characterData }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [earnedPoint, setEarnedPoint] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [combo, setCombo] = useState(0);
 
   const current = questions[index];
 
   const characterKey = useMemo(() => {
-    if (!characterData?.bondKey) return "";
+    if (!characterData?.bondKey) return "ichika";
     return characterData.bondKey.replace("bscBond_", "");
   }, [characterData]);
 
   const characterImage = `/bsc/status-${characterKey}.png`;
 
+  const isCorrect = answered && selected === current?.answer;
+  const isWrong = answered && selected !== current?.answer;
+
+  const mood = finished
+    ? "happy"
+    : isCorrect
+    ? "happy"
+    : isWrong
+    ? "sad"
+    : "idle";
+
   const answer = (choiceIndex) => {
     if (answered) return;
 
-    const isCorrect = choiceIndex === current.answer;
-    const addPoint = isCorrect ? current.point || 5 : 0;
+    const correct = choiceIndex === current.answer;
+    const addPoint = correct ? current.point || 5 : 0;
 
     setSelected(choiceIndex);
     setAnswered(true);
 
-    if (isCorrect) {
+    if (correct) {
       setCorrectCount((prev) => prev + 1);
       setEarnedPoint((prev) => prev + addPoint);
+      setCombo((prev) => prev + 1);
 
       const point = Number(localStorage.getItem("bscPoint") || 0);
       localStorage.setItem("bscPoint", String(point + addPoint));
@@ -42,6 +57,8 @@ export default function TalkGame({ characterData }) {
         characterData.bondKey,
         String(Math.min(bond + 3, 100))
       );
+    } else {
+      setCombo(0);
     }
   };
 
@@ -69,9 +86,17 @@ export default function TalkGame({ characterData }) {
     const perfect = correctCount === questions.length;
 
     return (
-      <section className="talkResult">
+      <section className="talkResult v2">
+        <div className="resultConfetti">🎉 ✨ 🎊 ✨ 🎉</div>
+
         <span>RESULT</span>
         <h2>{perfect ? "PERFECT!!" : "CLEAR!!"}</h2>
+
+        <CharacterStage
+          characterData={characterData}
+          characterImage={characterImage}
+          mood="happy"
+        />
 
         <div className="talkResultScore">
           <strong>
@@ -109,44 +134,43 @@ export default function TalkGame({ characterData }) {
   }
 
   return (
-    <section className="talkGameBox">
-      <div className="talkGameHeader">
-        <div className={`talkCharacterFace ${answered ? (selected === current.answer ? "happy" : "sad") : "idle"}`}>
-  <img src={characterImage} alt={characterData.name} />
-  <span className="talkBlink" />
-  <span className="talkSparkle">✨</span>
-</div>
+    <section className="talkGameBox v2">
+      <CharacterStage
+        characterData={characterData}
+        characterImage={characterImage}
+        mood={mood}
+      />
 
-        <div>
-          <span>
-            {characterData.icon} {characterData.name}
-          </span>
-          <h2>{characterData.theme}</h2>
-          <p>
-            Question {index + 1} / {questions.length}
-          </p>
-        </div>
+      <div className="talkProgress">
+        <span>
+          Question {index + 1} / {questions.length}
+        </span>
+        <b>{combo > 1 ? `🔥 ${combo} COMBO` : characterData.theme}</b>
       </div>
 
-      <div className="talkBubble">
+      <div className="talkBubble v2">
         <strong>{characterData.name}</strong>
-        <p>{current.talk}</p>
+        <p>
+          <TypeWriter text={current.talk} />
+        </p>
       </div>
 
-      <div className="talkQuestion">
+      <div className="talkQuestion v2">
         <span>QUESTION</span>
-        <h3>{current.question}</h3>
+        <h3>
+          <TypeWriter text={current.question} speed={18} />
+        </h3>
       </div>
 
       <div className="talkChoices">
         {current.choices.map((choice, choiceIndex) => {
-          const isCorrectChoice = choiceIndex === current.answer;
-          const isSelected = selected === choiceIndex;
+          const correctChoice = choiceIndex === current.answer;
+          const chosen = selected === choiceIndex;
 
           let className = "";
 
-          if (answered && isCorrectChoice) className = "correct";
-          if (answered && isSelected && !isCorrectChoice) className = "wrong";
+          if (answered && correctChoice) className = "correct";
+          if (answered && chosen && !correctChoice) className = "wrong";
 
           return (
             <button
@@ -156,6 +180,7 @@ export default function TalkGame({ characterData }) {
               onClick={() => answer(choiceIndex)}
               disabled={answered}
             >
+              <span>{choiceIndex + 1}</span>
               {choice}
             </button>
           );
@@ -163,17 +188,15 @@ export default function TalkGame({ characterData }) {
       </div>
 
       {answered && (
-        <div className="talkAnswerBox">
-          <h3>
-            {selected === current.answer ? "🎉 正解！" : "💡 解説"}
-          </h3>
+        <div className={`talkAnswerBox ${isCorrect ? "correct" : "wrong"}`}>
+          <h3>{isCorrect ? "🎉 正解！" : "💡 解説"}</h3>
 
-          <p>
-            {selected === current.answer ? current.correct : current.wrong}
-          </p>
+          <p>{isCorrect ? current.correct : current.wrong}</p>
 
-          {selected === current.answer && (
-            <div className="talkRewardMini">⭐ +{current.point || 5}pt</div>
+          {isCorrect && (
+            <div className="talkRewardMini">
+              ⭐ +{current.point || 5}pt　{characterData.icon} 親密度 +3
+            </div>
           )}
 
           <button type="button" onClick={next}>
