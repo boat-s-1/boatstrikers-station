@@ -111,7 +111,11 @@ export default function TalkGame({ characterData }) {
   return (
     <section className="talkGameBox">
       <div className="talkGameHeader">
-        <img src={characterImage} alt={characterData.name} />
+        <div className={`talkCharacterFace ${answered ? (selected === current.answer ? "happy" : "sad") : "idle"}`}>
+  <img src={characterImage} alt={characterData.name} />
+  <span className="talkBlink" />
+  <span className="talkSparkle">✨</span>
+</div>
 
         <div>
           <span>
