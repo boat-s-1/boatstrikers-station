@@ -387,7 +387,7 @@ export default function IntermediatePage() {
 
       <section className="intermediateGameMap">
         <img
-          src="/bsc/intermediate-map.png"
+          src="/bsc/24D7EEF1-05AD-43D0-858B-97E739210A1D.png"
           alt="中級者ロード"
           className="intermediateGameMapBg"
         />
