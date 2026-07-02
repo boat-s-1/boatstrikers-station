@@ -16,7 +16,7 @@ const DEFAULT_EVENT = {
       main: "1-2-3",
       subLabel: "一果の押さえ",
       sub: "1-2-56",
-      image: "/bsc/vote-ichika.jpg",
+      image: "/bsc/A763159D-37F0-452A-8157-62BEA88684DD.png",
     },
     {
       key: "kiina",
@@ -26,7 +26,7 @@ const DEFAULT_EVENT = {
       main: "5-1-4",
       subLabel: "",
       sub: "",
-      image: "/bsc/vote-kiina.jpg",
+      image: "/bsc/7F747BFD-8638-4BD1-BE4F-3D518698373C.png",
     },
     {
       key: "hatsune",
@@ -36,7 +36,7 @@ const DEFAULT_EVENT = {
       main: "2-1-3",
       subLabel: "",
       sub: "",
-      image: "/bsc/vote-hatsune.jpg",
+      image: "/bsc/94D26747-247B-409B-90E7-B98BFB802C95.png",
     },
   ],
 };
