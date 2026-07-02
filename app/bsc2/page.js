@@ -61,17 +61,25 @@ export default function BSC2MenuPage() {
           <p>{chapter2Cleared ? "復習する" : "展示の基本を学ぼう！"}</p>
         </a>
 
-        <a href="/bsc2/collection" className="gameStageCard collection">
-          <span>COLLECTION</span>
-          <strong>🏅 バッジコレクション</strong>
-          <p>集めた認定バッジを見る</p>
-        </a>
+        <section className="bscImageLinkGrid">
+  <a href="/library" className="bscImageLinkCard">
+    <img src="/bsc/library-card.jpg" alt="一果図書館" />
+    <div className="bscImageLinkOverlay">
+      <span>LIBRARY</span>
+      <strong>📚 一果図書館</strong>
+      <p>攻略本・新聞で復習する</p>
+    </div>
+  </a>
 
-        <a href="/library" className="gameStageCard library">
-          <span>LIBRARY</span>
-          <strong>📚 一果図書館</strong>
-          <p>攻略本・新聞で復習する</p>
-        </a>
+  <a href="/bsc2/collection" className="bscImageLinkCard">
+    <img src="/bsc/collection-card.jpg" alt="バッジコレクション" />
+    <div className="bscImageLinkOverlay">
+      <span>COLLECTION</span>
+      <strong>🏅 バッジコレクション</strong>
+      <p>集めた認定バッジを見る</p>
+    </div>
+  </a>
+</section>
       </section>
     </main>
   );
