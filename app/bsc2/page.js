@@ -41,7 +41,7 @@ export default function BSC2MenuPage() {
       <DailyVote />
 
     <section className="bscCourseGrid">
-  <a href="/bsc2/play/chapter1" className="bscCourseCard">
+  <a href="/bsc2/beginner" className="bscCourseCard">
     <img src="/B7049A8B-ED96-47BF-809F-382BB00416B0.png" alt="初心者編" />
     <div>
       <span>BEGINNER</span>
