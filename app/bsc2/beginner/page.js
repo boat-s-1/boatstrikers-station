@@ -8,24 +8,30 @@ const chapters = [
     title: "Chapter 1",
     subtitle: "競艇入門編",
     href: "/bsc2/play/chapter1",
-    top: "83%",
-    left: "48%",
+
+    // 一番下の島
+    top: "84%",
+    left: "50%",
   },
   {
     id: "chapter2-start-tenji",
     title: "Chapter 2",
     subtitle: "スタート展示",
     href: "/bsc2/play/chapter2",
-    top: "68%",
-    left: "52%",
+
+    // 2つ目の島
+    top: "69%",
+    left: "51%",
   },
   {
     id: "chapter3-tenji-time",
     title: "Chapter 3",
     subtitle: "展示タイム",
     href: "/bsc2/play/chapter3",
-    top: "54%",
-    left: "48%",
+
+    // 真ん中
+    top: "55%",
+    left: "49%",
     locked: true,
   },
   {
@@ -33,8 +39,10 @@ const chapters = [
     title: "Chapter 4",
     subtitle: "1号艇の基本",
     href: "/bsc2/play/chapter4",
+
+    // 上から2番目
     top: "41%",
-    left: "53%",
+    left: "51%",
     locked: true,
   },
   {
@@ -42,7 +50,9 @@ const chapters = [
     title: "Chapter 5",
     subtitle: "買い目作成",
     href: "/bsc2/play/chapter5",
-    top: "28%",
+
+    // 一番上
+    top: "27%",
     left: "50%",
     locked: true,
   },
