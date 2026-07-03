@@ -5,6 +5,7 @@ import {
   getRedirectResult,
   onAuthStateChanged,
   signInWithRedirect,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -86,15 +87,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loginWithGoogle = async () => {
-    try {
-      setLoading(true);
-      await signInWithRedirect(auth, googleProvider);
-    } catch (error) {
-      setLoading(false);
-      console.error("login error:", error);
-      alert(`ログインエラー: ${error.code || ""}\n${error.message || error}`);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const result = await signInWithPopup(auth, googleProvider);
+
+    setUser(result.user);
+    await createOrLoadUser(result.user);
+
+    alert("ログイン成功しました");
+  } catch (error) {
+    setLoading(false);
+    console.error("login error:", error);
+    alert(`ログインエラー: ${error.code || ""}\n${error.message || error}`);
+  }
+};
 
   const logout = async () => {
     await signOut(auth);
