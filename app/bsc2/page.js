@@ -6,6 +6,7 @@ import DailyVote from "./components/DailyVote";
 import HomeCharacter from "./components/HomeCharacter";
 import LoginBonus from "./components/LoginBonus";
 import DailyMission from "./components/DailyMission";
+import Link from "next/link";
 
 export default function BSC2MenuPage() {
   const [cleared, setCleared] = useState([]);
@@ -38,6 +39,11 @@ export default function BSC2MenuPage() {
           <p>一果たちと競艇を楽しく学ぼう！</p>
         </div>
       </section>
+
+<Link href="/bsc2/login" className="bscBtn bscBtnGold">
+  🔐 ログイン
+</Link>
+    
 　　　　<HomeCharacter />
 <LoginBonus />
 <DailyMission />
