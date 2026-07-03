@@ -230,6 +230,6 @@ export default function HomeCharacter() {
         </button>
       </div>
     </section>
-  </>
+
   );
 }
