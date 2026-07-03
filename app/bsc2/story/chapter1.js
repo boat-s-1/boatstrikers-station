@@ -51,6 +51,16 @@ const chapter1 = [
     correctText: "ピンポーン！\n水面を走るレースだよ😊",
     wrongText: "惜しい！\n競艇は水面で行われるよ♪",
   },
+    {
+    type: "quiz",
+    character: "ichika",
+    face: "thinking",
+    question: "競艇は何周する？",
+    choices: ["2周", "3周", "4周"],
+    answer: 1,
+    correctText: "ピンポーン！\n水面を走るレースだよ😊",
+    wrongText: "惜しい！\n競艇は水面で行われるよ♪",
+  },
   {
     type: "talk",
     character: "ichika",
