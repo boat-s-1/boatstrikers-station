@@ -56,11 +56,7 @@ export default function LoginPage() {
                 BSCホームへ
               </button>
 
-              <button
-                className="bscBtn bscBtnBlue"
-                type="button"
-                onClick={logout}
-              >
+              <button className="bscBtn bscBtnBlue" type="button" onClick={logout}>
                 ログアウト
               </button>
             </div>
