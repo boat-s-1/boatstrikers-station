@@ -1,7 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
+} from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "../lib/firebase";
 
@@ -36,31 +41,53 @@ export function AuthProvider({ children }) {
 
       await setDoc(ref, newPlayer);
       setPlayer(newPlayer);
-      return;
+      return newPlayer;
     }
 
-    setPlayer(snap.data());
+    const data = snap.data();
+    setPlayer(data);
+    return data;
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-
-      if (firebaseUser) {
-        await createOrLoadUser(firebaseUser);
-      } else {
-        setPlayer(null);
+    const initAuth = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setUser(result.user);
+          await createOrLoadUser(result.user);
+        }
+      } catch (error) {
+        console.error("redirect login error:", error);
       }
 
-      setLoading(false);
+      const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+        setUser(firebaseUser);
+
+        if (firebaseUser) {
+          await createOrLoadUser(firebaseUser);
+        } else {
+          setPlayer(null);
+        }
+
+        setLoading(false);
+      });
+
+      return unsub;
+    };
+
+    let unsubscribe;
+    initAuth().then((unsub) => {
+      unsubscribe = unsub;
     });
 
-    return () => unsub();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const loginWithGoogle = async () => {
-    const result = await signInWithPopup(auth, googleProvider);
-    await createOrLoadUser(result.user);
+    await signInWithRedirect(auth, googleProvider);
   };
 
   const logout = async () => {
@@ -70,15 +97,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        player,
-        loading,
-        loginWithGoogle,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, player, loading, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
