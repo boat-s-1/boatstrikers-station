@@ -87,8 +87,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loginWithGoogle = async () => {
+  try {
+    alert("Googleログインを開始します");
     await signInWithRedirect(auth, googleProvider);
-  };
+  } catch (error) {
+    console.error(error);
+    alert(`ログインエラー: ${error.code || ""}\n${error.message || error}`);
+  }
+};
 
   const logout = async () => {
     await signOut(auth);
