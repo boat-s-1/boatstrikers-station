@@ -43,7 +43,9 @@ export default function BSC2MenuPage() {
 <Link href="/bsc2/login" className="bscBtn bscBtnGold">
   🔐 ログイン
 </Link>
-    
+    <a href="/bsc2/profile" className="bscBtn bscBtnGold">
+  👤 マイページ
+</a>
 　　　　<HomeCharacter />
 <LoginBonus />
 <DailyMission />
