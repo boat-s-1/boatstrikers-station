@@ -36,7 +36,7 @@ export default function BSC2MenuPage() {
           <p>一果たちと競艇を楽しく学ぼう！</p>
         </div>
       </section>
-
+　　　　<HomeCharacter />
       <BscStatus />
 
       <DailyVote />
