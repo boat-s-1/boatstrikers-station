@@ -4,12 +4,14 @@ import chapter1 from "../../story/chapter1";
 export default function Chapter1Page() {
   return (
     <ChatEngine
-      storyId="chapter1-lesson1"
+      storyId={chapter1.id}
       title="BOAT STRIKERS CHALLENGE"
-      chapter="Chapter 1"
-      story={chapter1}
-      rewardPoint={20}
-      badge="競艇入門"
+      chapter={chapter1.title}
+      subtitle={chapter1.subtitle}
+      story={chapter1.steps}
+      rewardPoint={chapter1.reward.point}
+      badge={chapter1.reward.badge.name}
+      reward={chapter1.reward}
     />
   );
 }
