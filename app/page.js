@@ -138,8 +138,11 @@ export default async function Home() {
             
             <section className="homeLatestInfo">
   <div className="homeLatestInfoTitle">
-    <h2>🆕 最新情報</h2>
-    <span>UPDATE</span>
+    <img
+  src="/IMG_6217.jpeg"
+  alt="最新情報"
+  className="homeTitleImage"
+/>
   </div>
 
   <div className="homeLatestInfoList">
