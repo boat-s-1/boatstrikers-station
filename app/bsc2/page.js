@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import BscStatus from "./components/BscStatus";
 import DailyVote from "./components/DailyVote";
 import HomeCharacter from "./components/HomeCharacter";
+import LoginBonus from "./components/LoginBonus";
+import DailyMission from "./components/DailyMission";
 
 export default function BSC2MenuPage() {
   const [cleared, setCleared] = useState([]);
@@ -37,6 +39,8 @@ export default function BSC2MenuPage() {
         </div>
       </section>
 　　　　<HomeCharacter />
+<LoginBonus />
+<DailyMission />
       <BscStatus />
 
       <DailyVote />
