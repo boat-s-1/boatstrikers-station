@@ -6,24 +6,9 @@ import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const characters = {
-  ichika: {
-    name: "一果",
-    icon: "🌸",
-    image: "/bsc/status-ichika.png",
-    color: "#ff4f93",
-  },
-  kiina: {
-    name: "キイナ",
-    icon: "⚡",
-    image: "/bsc/status-kiina.png",
-    color: "#f6a800",
-  },
-  hatsune: {
-    name: "初音",
-    icon: "💜",
-    image: "/bsc/status-hatsune.png",
-    color: "#9b5cff",
-  },
+  ichika: { name: "一果", icon: "🌸", image: "/bsc/status-ichika.png", color: "#ff4f93" },
+  kiina: { name: "キイナ", icon: "⚡", image: "/bsc/status-kiina.png", color: "#f6a800" },
+  hatsune: { name: "初音", icon: "💜", image: "/bsc/status-hatsune.png", color: "#9b5cff" },
 };
 
 export default function ChapterChatEngine({ chapterData }) {
@@ -84,10 +69,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
       if (current.type === "talk") {
         setReaction("talk");
-
-        setTimeout(() => {
-          goNext();
-        }, current.delay || 1200);
+        setTimeout(goNext, current.delay || 1200);
       }
 
       if (current.type === "quiz") {
@@ -96,10 +78,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
       if (current.type === "clear") {
         setReaction("clear");
-
-        setTimeout(() => {
-          setShowResult(true);
-        }, 1500);
+        setTimeout(() => setShowResult(true), 1500);
       }
     }, 450);
 
@@ -133,10 +112,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
     setMessages((prev) => [
       ...prev,
-      {
-        type: "userAnswer",
-        text: quizStep.choices[choiceIndex],
-      },
+      { type: "userAnswer", text: quizStep.choices[choiceIndex] },
       {
         type: "result",
         character: quizStep.character,
@@ -174,19 +150,13 @@ export default function ChapterChatEngine({ chapterData }) {
       if (badgeName) {
         const localBadges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
         if (!localBadges.includes(badgeName)) {
-          localStorage.setItem(
-            "bscBadge",
-            JSON.stringify([...localBadges, badgeName])
-          );
+          localStorage.setItem("bscBadge", JSON.stringify([...localBadges, badgeName]));
         }
       }
 
       Object.keys(bond).forEach((key) => {
         const now = Number(localStorage.getItem(`bscBond_${key}`) || 0);
-        localStorage.setItem(
-          `bscBond_${key}`,
-          String(Math.min(now + bond[key], 100))
-        );
+        localStorage.setItem(`bscBond_${key}`, String(Math.min(now + bond[key], 100)));
       });
     }
 
@@ -199,9 +169,7 @@ export default function ChapterChatEngine({ chapterData }) {
         updatedAt: new Date(),
       };
 
-      if (badgeName) {
-        updateData.badges = arrayUnion(badgeName);
-      }
+      if (badgeName) updateData.badges = arrayUnion(badgeName);
 
       Object.keys(bond).forEach((key) => {
         updateData[`bonds.${key}`] = increment(bond[key]);
@@ -219,45 +187,111 @@ export default function ChapterChatEngine({ chapterData }) {
       <style>{`
         .chapterGamePage {
           min-height: 100vh;
-          padding: 10px 10px 100px;
+          padding: 8px 10px 100px;
           background:
-            radial-gradient(circle at top, rgba(255,215,104,.45), transparent 35%),
+            radial-gradient(circle at top, rgba(255,215,104,.35), transparent 35%),
             linear-gradient(180deg, #eaf8ff 0%, #fff7df 70%, #fff1c8 100%);
           overflow-x: hidden;
         }
 
-        .gameHeader {
-
-  position: sticky;
-
-  top: 8px;
-
-  z-index: 60;
-
-  max-width: 640px;
-
-  margin: 0 auto 8px;
-
-  padding: 10px 12px;
-
-  border-radius: 26px;
-
-  background: rgba(255,255,255,.97);
-
-  border: 3px solid #ffd768;
-
-  box-shadow: 0 12px 28px rgba(0,0,0,.2);
+        .fixedGameTop {
+          position: sticky;
+          top: 0;
+          z-index: 60;
+          max-width: 640px;
+          margin: 0 auto 12px;
         }
 
-        .gameHeaderTop {
+        .statusFrame {
+          position: relative;
+          width: 100%;
+          height: 72px;
+          overflow: hidden;
+          border-radius: 12px;
+        }
+
+        .statusFrame img {
+          width: 100%;
+          height: 100%;
+          object-fit: fill;
+          display: block;
+        }
+
+        .statusOverlay {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          grid-template-columns: 1fr 1.1fr 1fr;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 18px;
+          color: #fff;
+          font-weight: 900;
+          text-shadow: 0 2px 4px rgba(0,0,0,.75);
+        }
+
+        .statusLogo {
+          font-size: 12px;
+          line-height: 1.1;
+          color: #ffd768;
+        }
+
+        .statusCenter {
+          text-align: center;
+        }
+
+        .statusLevel {
+          font-size: 18px;
+          color: #fff;
+        }
+
+        .expBar {
+          height: 10px;
+          margin-top: 5px;
+          border-radius: 999px;
+          background: rgba(0,0,0,.55);
+          border: 1px solid rgba(255,255,255,.45);
+          overflow: hidden;
+        }
+
+        .expFill {
+          height: 100%;
+          background: linear-gradient(90deg, #06c755, #ffd768);
+        }
+
+        .statusRight {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4px;
+          font-size: 12px;
+          text-align: center;
+        }
+
+        .miniStatus {
+          padding: 4px 6px;
+          border-radius: 999px;
+          background: rgba(0,0,0,.35);
+          border: 1px solid rgba(255,215,104,.55);
+        }
+
+        .chapterInfo {
+          margin-top: 6px;
+          padding: 8px 10px;
+          border-radius: 16px;
+          background: rgba(255,255,255,.92);
+          border: 2px solid #ffd768;
+          box-shadow: 0 8px 18px rgba(0,0,0,.18);
+        }
+
+        .chapterInfoTop {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
         }
 
         .backBtn {
-          width: 40px;
-          height: 40px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
           background: #17345c;
           color: #fff;
@@ -267,33 +301,33 @@ export default function ChapterChatEngine({ chapterData }) {
           font-weight: 900;
         }
 
-        .gameHeaderTitle {
+        .chapterText {
           flex: 1;
           text-align: center;
+          color: #17345c;
+          font-weight: 900;
         }
 
-        .gameHeaderTitle span {
+        .chapterText span {
+          display: block;
+          font-size: 11px;
           color: #ff4f93;
+        }
+
+        .chapterText h1 {
+          margin: 1px 0 0;
+          font-size: 15px;
+        }
+
+        .progressText {
+          color: #17345c;
           font-size: 12px;
           font-weight: 900;
         }
 
-        .gameHeaderTitle h1 {
-          margin: 2px 0 0;
-          color: #17345c;
-          font-size: 18px;
-          font-weight: 900;
-        }
-
-        .gameProgressText {
-          color: #17345c;
-          font-size: 13px;
-          font-weight: 900;
-        }
-
         .gameProgress {
-          margin-top: 8px;
-          height: 10px;
+          margin-top: 6px;
+          height: 8px;
           border-radius: 999px;
           background: #d8e5f6;
           overflow: hidden;
@@ -302,141 +336,49 @@ export default function ChapterChatEngine({ chapterData }) {
         .gameProgress span {
           display: block;
           height: 100%;
-          border-radius: 999px;
           background: linear-gradient(90deg,#06c755,#ffd768);
         }
 
-        .statusBar {
-
-  position: sticky;
-
-  top: 86px;
-
-  z-index: 55;
-
-  max-width: 640px;
-
-  margin: 0 auto 8px;
-
-  display: grid;
-
-  grid-template-columns: repeat(4, 1fr);
-
-  gap: 8px;
-        }
-
-        .statusItem {
-          padding: 9px 6px;
-          border-radius: 18px;
-          background: rgba(23,52,92,.96);
-          color: #fff;
-          text-align: center;
-          font-size: 11px;
-          font-weight: 900;
-          border: 2px solid #ffd768;
-          box-shadow: 0 8px 18px rgba(0,0,0,.16);
-        }
-
         .heroArea {
-
-  position: sticky;
-
-  top: 142px;
-
-  z-index: 50;
-
-  max-width: 640px;
-
-  margin: 0 auto 12px;
-
-  padding: 12px;
-
-  border-radius: 26px;
-
-  background:
-
-    linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,247,223,.95));
-
-  border: 3px solid #ffd768;
-
-  box-shadow: 0 14px 32px rgba(0,0,0,.22);
-
-  text-align: center;
-
-  overflow: hidden;
-        }
-
-        .heroArea::before {
-          content: "✨";
-          position: absolute;
-          font-size: 80px;
-          right: -8px;
-          top: -18px;
-          opacity: .22;
-          animation: sparkleFloat 2s infinite;
+          margin-top: 6px;
+          padding: 10px;
+          border-radius: 22px;
+          background: rgba(255,255,255,.94);
+          border: 2px solid #ffd768;
+          text-align: center;
+          box-shadow: 0 10px 24px rgba(0,0,0,.18);
+          position: relative;
+          overflow: hidden;
         }
 
         .heroCharacter {
-
-  width: 96px;
-
-  height: 96px;
-
-  object-fit: cover;
-
-  border-radius: 28px;
-
-  border: 5px solid #ff4f93;
-
-  background: #fff;
-
-  box-shadow: 0 14px 28px rgba(0,0,0,.24);
-
-  animation: charFloat 2.2s ease-in-out infinite;
+          width: 86px;
+          height: 86px;
+          object-fit: cover;
+          border-radius: 24px;
+          border: 4px solid ${currentChar.color};
+          background: #fff;
+          box-shadow: 0 10px 22px rgba(0,0,0,.22);
+          animation: charFloat 2.2s ease-in-out infinite;
         }
 
         .heroName {
           display: inline-block;
-          margin-top: 8px;
-          padding: 7px 18px;
+          margin-top: 6px;
+          padding: 5px 14px;
           border-radius: 999px;
           background: #17345c;
           color: #fff;
+          font-size: 13px;
           font-weight: 900;
         }
 
         .heroReaction {
-
-  margin-top: 8px;
-
-  color: #17345c;
-
-  font-weight: 900;
-
-  font-size: 14px;
-
-  min-height: 22px;
-        }
-
-        .reactionOverlay {
-          position: fixed;
-          inset: 0;
-          z-index: 80;
-          display: grid;
-          place-items: center;
-          pointer-events: none;
-          animation: overlayPop .75s ease-out forwards;
-        }
-
-        .reactionText {
-          padding: 22px 30px;
-          border-radius: 28px;
-          background: rgba(255,255,255,.96);
-          border: 4px solid #ffd768;
-          color: #ff4f93;
-          font-size: 34px;
+          margin-top: 6px;
+          color: #17345c;
           font-weight: 900;
-          box-shadow: 0 20px 50px rgba(0,0,0,.28);
+          font-size: 13px;
+          min-height: 20px;
         }
 
         .chatArea {
@@ -500,33 +442,38 @@ export default function ChapterChatEngine({ chapterData }) {
           color: #fff;
         }
 
-        .quizBox {
-          margin-left: 62px;
-          padding: 16px;
-          border-radius: 26px;
-          background: #17345c;
-          border: 3px solid #ffd768;
-          box-shadow: 0 12px 28px rgba(0,0,0,.24);
+        .quizFrame {
+          position: relative;
+          margin: 0 auto;
+          width: 100%;
+          max-width: 640px;
+          min-height: 330px;
           animation: questionIn .28s ease-out;
         }
 
-        .quizLabel {
-          text-align: center;
-          color: #ffd768;
-          font-size: 22px;
-          font-weight: 900;
-          margin-bottom: 10px;
+        .quizFrameBg {
+          width: 100%;
+          height: 100%;
+          min-height: 330px;
+          object-fit: fill;
+          display: block;
+        }
+
+        .quizContent {
+          position: absolute;
+          inset: 70px 26px 26px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .quizQuestion {
-          background: #fff;
           color: #17345c;
-          padding: 15px;
-          border-radius: 20px;
+          font-size: 18px;
           font-weight: 900;
-          line-height: 1.6;
-          margin-bottom: 14px;
-          font-size: 17px;
+          text-align: center;
+          line-height: 1.55;
+          margin-bottom: 18px;
         }
 
         .quizChoices {
@@ -537,22 +484,43 @@ export default function ChapterChatEngine({ chapterData }) {
         .quizChoices button {
           border: 0;
           border-radius: 18px;
-          padding: 15px;
+          padding: 13px;
           background: linear-gradient(135deg, #ff4f93, #f6a800);
           color: #fff;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 900;
-          box-shadow: 0 6px 0 rgba(120,80,0,.55);
+          box-shadow: 0 5px 0 rgba(120,80,0,.55);
         }
 
         .quizChoices button.correct {
           background: #06c755;
-          box-shadow: 0 6px 0 #038b3d;
+          box-shadow: 0 5px 0 #038b3d;
         }
 
         .quizChoices button.wrong {
           background: #ff5252;
-          box-shadow: 0 6px 0 #b52222;
+          box-shadow: 0 5px 0 #b52222;
+        }
+
+        .reactionOverlay {
+          position: fixed;
+          inset: 0;
+          z-index: 90;
+          display: grid;
+          place-items: center;
+          pointer-events: none;
+          animation: overlayPop .75s ease-out forwards;
+        }
+
+        .reactionText {
+          padding: 22px 30px;
+          border-radius: 28px;
+          background: rgba(255,255,255,.96);
+          border: 4px solid #ffd768;
+          color: #ff4f93;
+          font-size: 32px;
+          font-weight: 900;
+          box-shadow: 0 20px 50px rgba(0,0,0,.28);
         }
 
         .resultScreen {
@@ -620,12 +588,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
         @keyframes charFloat {
           0%,100% { transform: translateY(0) rotate(-1deg); }
-          50% { transform: translateY(-8px) rotate(1deg); }
-        }
-
-        @keyframes sparkleFloat {
-          0%,100% { transform: scale(.95) rotate(0); }
-          50% { transform: scale(1.15) rotate(10deg); }
+          50% { transform: translateY(-7px) rotate(1deg); }
         }
 
         @keyframes chatIn {
@@ -674,48 +637,65 @@ export default function ChapterChatEngine({ chapterData }) {
         </div>
       )}
 
-      <header className="gameHeader">
-        <div className="gameHeaderTop">
-          <a className="backBtn" href={`/bsc2/${chapterData.area || "beginner"}`}>
-            ←
-          </a>
+      <section className="fixedGameTop">
+        <div className="statusFrame">
+          <img src="/bsc/status-bar.png" alt="" />
 
-          <div className="gameHeaderTitle">
-            <span>{chapterData.title}</span>
-            <h1>{chapterData.subtitle}</h1>
+          <div className="statusOverlay">
+            <div className="statusLogo">
+              BOAT<br />STRIKERS
+            </div>
+
+            <div className="statusCenter">
+              <div className="statusLevel">Lv.{level}</div>
+              <div className="expBar">
+                <div className="expFill" style={{ width: `${exp}%` }} />
+              </div>
+            </div>
+
+            <div className="statusRight">
+              <div className="miniStatus">❤️ {bondValue}%</div>
+              <div className="miniStatus">⭐ {point}</div>
+              <div className="miniStatus">🏅 {badges.length}</div>
+              <div className="miniStatus">{showResult ? "CLEAR" : `${progress}%`}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="chapterInfo">
+          <div className="chapterInfoTop">
+            <a className="backBtn" href={`/bsc2/${chapterData.area || "beginner"}`}>
+              ←
+            </a>
+
+            <div className="chapterText">
+              <span>{chapterData.title}</span>
+              <h1>{chapterData.subtitle}</h1>
+            </div>
+
+            <b className="progressText">{showResult ? "CLEAR" : `${progress}%`}</b>
           </div>
 
-          <b className="gameProgressText">
-            {showResult ? "CLEAR" : `${progress}%`}
-          </b>
+          <div className="gameProgress">
+            <span style={{ width: showResult ? "100%" : `${progress}%` }} />
+          </div>
         </div>
 
-        <div className="gameProgress">
-          <span style={{ width: showResult ? "100%" : `${progress}%` }} />
-        </div>
-      </header>
+        <div className="heroArea">
+          <img className="heroCharacter" src={currentChar.image} alt={currentChar.name} />
+          <div className="heroName">
+            {currentChar.icon} {currentChar.name}
+          </div>
 
-      <section className="statusBar">
-        <div className="statusItem">Lv.{level}</div>
-        <div className="statusItem">EXP {exp}/100</div>
-        <div className="statusItem">⭐ {point}</div>
-        <div className="statusItem">❤️ {bondValue}%</div>
-      </section>
-
-      <section className="heroArea">
-        <img className="heroCharacter" src={currentChar.image} alt={currentChar.name} />
-        <div className="heroName">
-          {currentChar.icon} {currentChar.name}
-        </div>
-
-        <div className="heroReaction">
-          {reaction === "correct"
-            ? "すごーーい！大正解✨"
-            : reaction === "wrong"
-            ? "惜しい！でも大丈夫😊"
-            : reaction === "clear"
-            ? "クリアおめでとう🎉"
-            : "一緒に進めていこう♪"}
+          <div className="heroReaction">
+            {reaction === "correct"
+              ? "すごーーい！大正解✨"
+              : reaction === "wrong"
+              ? "惜しい！でも大丈夫😊"
+              : reaction === "clear"
+              ? "クリアおめでとう🎉"
+              : "一緒に進めていこう♪"}
+          </div>
         </div>
       </section>
 
@@ -800,31 +780,34 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   const isAnswered = answeredQuizId === quizKey;
 
   return (
-    <div className="quizBox">
-      <div className="quizLabel">QUESTION</div>
-      <div className="quizQuestion">{message.question}</div>
+    <div className="quizFrame">
+      <img src="/bsc/question-frame.png" alt="" className="quizFrameBg" />
 
-      <div className="quizChoices">
-        {message.choices.map((choice, index) => {
-          let className = "";
+      <div className="quizContent">
+        <div className="quizQuestion">{message.question}</div>
 
-          if (isAnswered && index === message.answer) className = "correct";
-          if (isAnswered && selected === index && index !== message.answer) {
-            className = "wrong";
-          }
+        <div className="quizChoices">
+          {message.choices.map((choice, index) => {
+            let className = "";
 
-          return (
-            <button
-              key={choice}
-              type="button"
-              className={className}
-              disabled={isAnswered}
-              onClick={() => onAnswer(index, message, quizKey)}
-            >
-              {choice}
-            </button>
-          );
-        })}
+            if (isAnswered && index === message.answer) className = "correct";
+            if (isAnswered && selected === index && index !== message.answer) {
+              className = "wrong";
+            }
+
+            return (
+              <button
+                key={choice}
+                type="button"
+                className={className}
+                disabled={isAnswered}
+                onClick={() => onAnswer(index, message, quizKey)}
+              >
+                {choice}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
