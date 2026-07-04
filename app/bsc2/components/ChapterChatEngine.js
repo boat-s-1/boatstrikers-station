@@ -418,8 +418,8 @@ export default function ChapterChatEngine({ chapterData }) {
   max-width: 640px;
   margin: 0 auto;
   display: grid;
-  gap: 14px;
-  padding-top: 8px;
+  gap: 18px;
+  padding-top: 16px;
 }
 
         .chatRow {
@@ -477,21 +477,20 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .quizFrame {
-          position: relative;
-          margin: 0 auto;
-          width: 100%;
-          max-width: 640px;
-          min-height: 330px;
-          animation: questionIn .28s ease-out;
-        }
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 18px auto 0;
+  min-height: 360px;
+  z-index: 1;
+}
 
         .quizFrameBg {
-          width: 100%;
-          height: 100%;
-          min-height: 330px;
-          object-fit: fill;
-          display: block;
-        }
+  width: 100%;
+  height: 360px;
+  object-fit: fill;
+  display: block;
+}
 
         .quizContent {
           position: absolute;
