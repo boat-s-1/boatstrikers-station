@@ -227,16 +227,26 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .gameHeader {
-          position: sticky;
-          top: 8px;
-          z-index: 30;
-          max-width: 640px;
-          margin: 0 auto 10px;
-          padding: 10px 12px;
-          border-radius: 26px;
-          background: rgba(255,255,255,.97);
-          border: 3px solid #ffd768;
-          box-shadow: 0 12px 28px rgba(0,0,0,.2);
+
+  position: sticky;
+
+  top: 8px;
+
+  z-index: 60;
+
+  max-width: 640px;
+
+  margin: 0 auto 8px;
+
+  padding: 10px 12px;
+
+  border-radius: 26px;
+
+  background: rgba(255,255,255,.97);
+
+  border: 3px solid #ffd768;
+
+  box-shadow: 0 12px 28px rgba(0,0,0,.2);
         }
 
         .gameHeaderTop {
@@ -297,11 +307,22 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .statusBar {
-          max-width: 640px;
-          margin: 0 auto 10px;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 8px;
+
+  position: sticky;
+
+  top: 86px;
+
+  z-index: 55;
+
+  max-width: 640px;
+
+  margin: 0 auto 8px;
+
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 8px;
         }
 
         .statusItem {
@@ -317,17 +338,32 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .heroArea {
-          max-width: 640px;
-          margin: 0 auto 12px;
-          padding: 14px;
-          border-radius: 30px;
-          background:
-            linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,247,223,.95));
-          border: 3px solid #ffd768;
-          box-shadow: 0 14px 32px rgba(0,0,0,.22);
-          text-align: center;
-          position: relative;
-          overflow: hidden;
+
+  position: sticky;
+
+  top: 142px;
+
+  z-index: 50;
+
+  max-width: 640px;
+
+  margin: 0 auto 12px;
+
+  padding: 12px;
+
+  border-radius: 26px;
+
+  background:
+
+    linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,247,223,.95));
+
+  border: 3px solid #ffd768;
+
+  box-shadow: 0 14px 32px rgba(0,0,0,.22);
+
+  text-align: center;
+
+  overflow: hidden;
         }
 
         .heroArea::before {
@@ -341,14 +377,22 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .heroCharacter {
-          width: 132px;
-          height: 132px;
-          object-fit: cover;
-          border-radius: 36px;
-          border: 5px solid ${currentChar.color};
-          background: #fff;
-          box-shadow: 0 14px 28px rgba(0,0,0,.24);
-          animation: charFloat 2.2s ease-in-out infinite;
+
+  width: 96px;
+
+  height: 96px;
+
+  object-fit: cover;
+
+  border-radius: 28px;
+
+  border: 5px solid #ff4f93;
+
+  background: #fff;
+
+  box-shadow: 0 14px 28px rgba(0,0,0,.24);
+
+  animation: charFloat 2.2s ease-in-out infinite;
         }
 
         .heroName {
@@ -362,11 +406,16 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .heroReaction {
-          margin-top: 10px;
-          color: #17345c;
-          font-weight: 900;
-          font-size: 17px;
-          min-height: 28px;
+
+  margin-top: 8px;
+
+  color: #17345c;
+
+  font-weight: 900;
+
+  font-size: 14px;
+
+  min-height: 22px;
         }
 
         .reactionOverlay {
