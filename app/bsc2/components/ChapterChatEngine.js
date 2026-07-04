@@ -509,42 +509,56 @@ function QuizMessage({
   const isAnswered = answeredQuizId === quizKey;
 
   return (
-    <>
-      <div className="quizBox">
-        <p className="quizBoxTitle">答えを選んでね</p>
+    <div className="quizBox">
+      <p className="quizBoxTitle">QUESTION</p>
 
-        <div className="quizChoices">
-          {message.choices.map((choice, index) => {
-            let className = "";
-
-            if (isAnswered && index === message.answer) {
-              className = "correct";
-            }
-
-            if (isAnswered && selected === index && index !== message.answer) {
-              className = "wrong";
-            }
-
-            return (
-              <button
-                key={choice}
-                type="button"
-                className={className}
-                disabled={isAnswered}
-                onClick={() => onAnswer(index, message, quizKey)}
-              >
-                {choice}
-              </button>
-            );
-          })}
-        </div>
-
-        {isAnswered && (
-          <button type="button" className="nextButton" onClick={onNext}>
-            次へ ▶
-          </button>
-        )}
+      <div
+        style={{
+          background: "#fff",
+          color: "#17345c",
+          padding: "14px",
+          borderRadius: "18px",
+          fontWeight: 900,
+          lineHeight: 1.6,
+          marginBottom: "14px",
+        }}
+      >
+        {message.question}
       </div>
-    </>
+
+      <p className="quizBoxTitle">答えを選んでね</p>
+
+      <div className="quizChoices">
+        {message.choices.map((choice, index) => {
+          let className = "";
+
+          if (isAnswered && index === message.answer) {
+            className = "correct";
+          }
+
+          if (isAnswered && selected === index && index !== message.answer) {
+            className = "wrong";
+          }
+
+          return (
+            <button
+              key={choice}
+              type="button"
+              className={className}
+              disabled={isAnswered}
+              onClick={() => onAnswer(index, message, quizKey)}
+            >
+              {choice}
+            </button>
+          );
+        })}
+      </div>
+
+      {isAnswered && (
+        <button type="button" className="nextButton" onClick={onNext}>
+          次へ ▶
+        </button>
+      )}
+    </div>
   );
 }
