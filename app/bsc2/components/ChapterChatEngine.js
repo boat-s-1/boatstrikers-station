@@ -441,6 +441,32 @@ export default function ChapterChatEngine({ chapterData }) {
           }
 
           if (message.type === "userAnswer") {
+            if (message.type === "clear") {
+  const char = characters[message.character] || characters.ichika;
+
+  return (
+    <div className="chatRow" key={`clear-${i}`}>
+      <div className="chatAvatarWrap">
+        <img className="chatAvatar" src={char.image} alt={char.name} />
+      </div>
+
+      <div className="chatBubble">
+        <span className="chatName">
+          {char.icon} {char.name}
+        </span>
+        {message.text}
+
+        <button
+          type="button"
+          className="nextButton"
+          onClick={() => setCleared(true)}
+        >
+          リザルトへ ▶
+        </button>
+      </div>
+    </div>
+  );
+}
             return (
               <div className="chatRow user" key={`user-${i}`}>
                 <div className="chatBubble">{message.text}</div>
