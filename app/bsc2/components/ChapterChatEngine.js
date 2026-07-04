@@ -191,7 +191,7 @@ export default function ChapterChatEngine({ chapterData }) {
           background:
             radial-gradient(circle at top, rgba(255,215,104,.35), transparent 35%),
             linear-gradient(180deg, #eaf8ff 0%, #fff7df 70%, #fff1c8 100%);
-          overflow-x: hidden;
+          overflow-x: clip;
         }
 
         .fixedGameTop {
