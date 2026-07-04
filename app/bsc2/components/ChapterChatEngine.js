@@ -6,7 +6,7 @@ import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const characters = {
-  ichika: { name: "一果", icon: "🌸", image: "/bsc/status-ichika.png", color: "#ff4f93" },
+  ichika: { name: "一果", icon: "🌸", image: "/bsc/characters/IMG_5965.png", color: "#ff4f93" },
   kiina: { name: "キイナ", icon: "⚡", image: "/bsc/status-kiina.png", color: "#f6a800" },
   hatsune: { name: "初音", icon: "💜", image: "/bsc/status-hatsune.png", color: "#9b5cff" },
 };
