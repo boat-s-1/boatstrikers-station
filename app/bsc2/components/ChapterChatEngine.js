@@ -343,20 +343,29 @@ export default function ChapterChatEngine({ chapterData }) {
 
         .heroArea {
   margin-top: 6px;
-  padding: 12px 12px 14px;
+  padding: 12px;
   border-radius: 22px;
+
   background:
-    linear-gradient(90deg, rgba(255,255,255,.96), rgba(255,247,223,.9)),
+    linear-gradient(
+      rgba(0,0,0,.15),
+      rgba(0,0,0,.15)
+    ),
     url("/bsc/084A6245-60BC-43B8-9CA2-CF700D7FC24E.png");
+
   background-size: cover;
   background-position: center;
+
   border: 2px solid #ffd768;
   box-shadow: 0 10px 24px rgba(0,0,0,.18);
+
   position: relative;
   overflow: hidden;
-  min-height: 190px;
+
+  min-height: 230px;
+
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .heroCharacter {
