@@ -351,7 +351,7 @@ export default function ChapterChatEngine({ chapterData }) {
       rgba(0,0,0,.15),
       rgba(0,0,0,.15)
     ),
-    url("/bsc/084A6245-60BC-43B8-9CA2-CF700D7FC24E.png");
+    url("/bsc/IMG_6261.jpeg");
 
   background-size: cover;
   background-position: center;
