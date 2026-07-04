@@ -347,7 +347,7 @@ export default function ChapterChatEngine({ chapterData }) {
   border-radius: 22px;
   background:
     linear-gradient(90deg, rgba(255,255,255,.96), rgba(255,247,223,.9)),
-    url("/bsc/race-bg.png");
+    url("/bsc/084A6245-60BC-43B8-9CA2-CF700D7FC24E.png");
   background-size: cover;
   background-position: center;
   border: 2px solid #ffd768;
