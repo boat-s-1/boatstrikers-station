@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useEffect, useRef, useState } from "react";
 import { doc, updateDoc, arrayUnion, increment } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -32,6 +31,7 @@ export default function ChapterChatEngine({ chapterData }) {
   const bottomRef = useRef(null);
 
   const steps = chapterData?.steps || [];
+
   const [index, setIndex] = useState(0);
   const [messages, setMessages] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -40,15 +40,37 @@ export default function ChapterChatEngine({ chapterData }) {
   const [showResult, setShowResult] = useState(false);
   const [rewarded, setRewarded] = useState(false);
 
-  const current = steps[index];
-  const currentChar =
-    characters[current?.character || chapterData?.teacher] || characters.ichika;
+  const [localData, setLocalData] = useState({
+    point: 0,
+    badges: [],
+    bonds: {},
+  });
 
-  const point = player?.point || Number(localStorage.getItem("bscPoint") || 0);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    setLocalData({
+      point: Number(localStorage.getItem("bscPoint") || 0),
+      badges: JSON.parse(localStorage.getItem("bscBadge") || "[]"),
+      bonds: {
+        ichika: Number(localStorage.getItem("bscBond_ichika") || 0),
+        kiina: Number(localStorage.getItem("bscBond_kiina") || 0),
+        hatsune: Number(localStorage.getItem("bscBond_hatsune") || 0),
+      },
+    });
+  }, []);
+
+  const current = steps[index];
+  const currentKey = current?.character || chapterData?.teacher || "ichika";
+  const currentChar = characters[currentKey] || characters.ichika;
+
+  const point = player?.point ?? localData.point;
+  const badges = player?.badges ?? localData.badges;
+  const bonds = player?.bonds ?? localData.bonds;
+
   const level = Math.floor(point / 100) + 1;
   const exp = point % 100;
-  const bonds = player?.bonds || {};
-  const bondValue = bonds[chapterData?.teacher] || 0;
+  const bondValue = bonds?.[chapterData?.teacher] || 0;
 
   const progress = steps.length
     ? Math.round(((index + 1) / steps.length) * 100)
@@ -66,6 +88,10 @@ export default function ChapterChatEngine({ chapterData }) {
         setTimeout(() => {
           goNext();
         }, current.delay || 1200);
+      }
+
+      if (current.type === "quiz") {
+        setReaction("question");
       }
 
       if (current.type === "clear") {
@@ -122,7 +148,7 @@ export default function ChapterChatEngine({ chapterData }) {
     setTimeout(() => {
       setReaction(null);
       goNext();
-    }, 1600);
+    }, 1700);
   };
 
   const receiveReward = async () => {
@@ -133,31 +159,36 @@ export default function ChapterChatEngine({ chapterData }) {
     const badgeName = reward.badge?.name;
     const bond = reward.bond || {};
 
-    const localPoint = Number(localStorage.getItem("bscPoint") || 0);
-    localStorage.setItem("bscPoint", String(localPoint + pointReward));
+    if (typeof window !== "undefined") {
+      const localPoint = Number(localStorage.getItem("bscPoint") || 0);
+      localStorage.setItem("bscPoint", String(localPoint + pointReward));
 
-    const clearedList = JSON.parse(localStorage.getItem("bscCleared") || "[]");
-    if (!clearedList.includes(chapterData.id)) {
-      localStorage.setItem(
-        "bscCleared",
-        JSON.stringify([...clearedList, chapterData.id])
-      );
-    }
-
-    if (badgeName) {
-      const badges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
-      if (!badges.includes(badgeName)) {
-        localStorage.setItem("bscBadge", JSON.stringify([...badges, badgeName]));
+      const clearedList = JSON.parse(localStorage.getItem("bscCleared") || "[]");
+      if (!clearedList.includes(chapterData.id)) {
+        localStorage.setItem(
+          "bscCleared",
+          JSON.stringify([...clearedList, chapterData.id])
+        );
       }
-    }
 
-    Object.keys(bond).forEach((key) => {
-      const now = Number(localStorage.getItem(`bscBond_${key}`) || 0);
-      localStorage.setItem(
-        `bscBond_${key}`,
-        String(Math.min(now + bond[key], 100))
-      );
-    });
+      if (badgeName) {
+        const localBadges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
+        if (!localBadges.includes(badgeName)) {
+          localStorage.setItem(
+            "bscBadge",
+            JSON.stringify([...localBadges, badgeName])
+          );
+        }
+      }
+
+      Object.keys(bond).forEach((key) => {
+        const now = Number(localStorage.getItem(`bscBond_${key}`) || 0);
+        localStorage.setItem(
+          `bscBond_${key}`,
+          String(Math.min(now + bond[key], 100))
+        );
+      });
+    }
 
     if (user) {
       const ref = doc(db, "bsc_users", user.uid);
@@ -291,8 +322,7 @@ export default function ChapterChatEngine({ chapterData }) {
           padding: 14px;
           border-radius: 30px;
           background:
-            linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,247,223,.95)),
-            radial-gradient(circle at center, ${currentChar.color}, transparent 55%);
+            linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,247,223,.95));
           border: 3px solid #ffd768;
           box-shadow: 0 14px 32px rgba(0,0,0,.22);
           text-align: center;
@@ -355,7 +385,7 @@ export default function ChapterChatEngine({ chapterData }) {
           background: rgba(255,255,255,.96);
           border: 4px solid #ffd768;
           color: #ff4f93;
-          font-size: 36px;
+          font-size: 34px;
           font-weight: 900;
           box-shadow: 0 20px 50px rgba(0,0,0,.28);
         }
@@ -437,7 +467,6 @@ export default function ChapterChatEngine({ chapterData }) {
           font-size: 22px;
           font-weight: 900;
           margin-bottom: 10px;
-          letter-spacing: 1px;
         }
 
         .quizQuestion {
@@ -482,9 +511,7 @@ export default function ChapterChatEngine({ chapterData }) {
           margin: 18px auto 0;
           padding: 24px 18px;
           border-radius: 34px;
-          background:
-            radial-gradient(circle at top, rgba(255,215,104,.6), transparent 45%),
-            rgba(255,255,255,.98);
+          background: rgba(255,255,255,.98);
           border: 4px solid #ffd768;
           box-shadow: 0 20px 50px rgba(0,0,0,.28);
           text-align: center;
@@ -696,7 +723,9 @@ export default function ChapterChatEngine({ chapterData }) {
                 {chapterData.reward?.badge?.icon || "🏅"} バッジ：
                 {chapterData.reward?.badge?.name || "クリアバッジ"}
               </p>
-              <p>❤️ 親密度 +{chapterData.reward?.bond?.[chapterData.teacher] || 0}</p>
+              <p>
+                ❤️ 親密度 +{chapterData.reward?.bond?.[chapterData.teacher] || 0}
+              </p>
               <p>🔓 次のチャプター解放！</p>
             </div>
 
