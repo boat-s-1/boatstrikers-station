@@ -639,7 +639,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
       <section className="fixedGameTop">
         <div className="statusFrame">
-          <img src="/bsc/status-bar.png" alt="" />
+          <img src="/bsc/IMG_6252.jpeg" alt="" />
 
           <div className="statusOverlay">
             <div className="statusLogo">
@@ -781,7 +781,7 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
 
   return (
     <div className="quizFrame">
-      <img src="/bsc/question-frame.png" alt="" className="quizFrameBg" />
+      <img src="/bsc/IMG_6254.jpeg" alt="" className="quizFrameBg" />
 
       <div className="quizContent">
         <div className="quizQuestion">{message.question}</div>
