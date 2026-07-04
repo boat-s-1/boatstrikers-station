@@ -10,19 +10,16 @@ const characters = {
     name: "一果",
     icon: "🌸",
     image: "/bsc/status-ichika.png",
-    color: "#ff4f93",
   },
   kiina: {
     name: "キイナ",
     icon: "⚡",
     image: "/bsc/status-kiina.png",
-    color: "#f6a800",
   },
   hatsune: {
     name: "初音",
     icon: "💜",
     image: "/bsc/status-hatsune.png",
-    color: "#9b5cff",
   },
 };
 
@@ -36,40 +33,47 @@ export default function ChapterChatEngine({ chapterData }) {
   const [messages, setMessages] = useState([]);
   const [answeredQuizId, setAnsweredQuizId] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [cleared, setCleared] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const [rewarded, setRewarded] = useState(false);
 
   const current = steps[index];
+
   const progress = steps.length
     ? Math.round(((index + 1) / steps.length) * 100)
     : 0;
 
   useEffect(() => {
-    if (!current || cleared) return;
+    if (!current || showResult) return;
 
     const timer = setTimeout(() => {
       setMessages((prev) => [...prev, current]);
 
-      if (current.type === "talk" && current.autoNext) {
+      if (current.type === "talk") {
         setTimeout(() => {
-          nextStep();
+          goNext();
         }, current.delay || 900);
       }
-    }, current.type === "talk" ? current.delay || 500 : 300);
+
+      if (current.type === "clear") {
+        setTimeout(() => {
+          setShowResult(true);
+        }, 1200);
+      }
+    }, 400);
 
     return () => clearTimeout(timer);
-  }, [index]);
+  }, [index, showResult]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, selected, cleared]);
+  }, [messages, selected, showResult]);
 
-  const nextStep = () => {
+  const goNext = () => {
     setAnsweredQuizId(null);
     setSelected(null);
 
     if (index + 1 >= steps.length) {
-      setCleared(true);
+      setShowResult(true);
       return;
     }
 
@@ -96,6 +100,10 @@ export default function ChapterChatEngine({ chapterData }) {
         text: isCorrect ? quizStep.correctText : quizStep.wrongText,
       },
     ]);
+
+    setTimeout(() => {
+      goNext();
+    }, 1400);
   };
 
   const receiveReward = async () => {
@@ -303,6 +311,16 @@ export default function ChapterChatEngine({ chapterData }) {
           animation: chatIn .22s ease-out;
         }
 
+        .quizQuestion {
+          background: #fff;
+          color: #17345c;
+          padding: 14px;
+          border-radius: 18px;
+          font-weight: 900;
+          line-height: 1.6;
+          margin-bottom: 14px;
+        }
+
         .quizBoxTitle {
           margin: 0 0 12px;
           text-align: center;
@@ -334,51 +352,48 @@ export default function ChapterChatEngine({ chapterData }) {
           background: #ff5252;
         }
 
-        .nextButton {
-          width: 100%;
-          margin-top: 12px;
-          border: 0;
-          border-radius: 18px;
-          padding: 14px;
-          background: #ffd768;
-          color: #17345c;
-          font-weight: 900;
-        }
-
-        .clearBox {
+        .resultBox {
           max-width: 640px;
           margin: 16px auto 0;
-          padding: 18px;
-          border-radius: 28px;
-          background: rgba(255,255,255,.97);
-          border: 3px solid #ffd768;
+          padding: 22px 18px;
+          border-radius: 30px;
+          background: rgba(255,255,255,.98);
+          border: 4px solid #ffd768;
           text-align: center;
-          box-shadow: 0 16px 34px rgba(0,0,0,.22);
+          box-shadow: 0 18px 40px rgba(0,0,0,.25);
+          animation: chatIn .3s ease-out;
         }
 
-        .clearBox h2 {
-          margin: 0 0 10px;
+        .resultBox h2 {
+          margin: 0 0 8px;
           font-size: 30px;
           color: #ff4f93;
         }
 
+        .resultChapter {
+          color: #17345c;
+          font-weight: 900;
+          font-size: 18px;
+        }
+
         .rewardBox {
-          margin: 14px 0;
-          padding: 14px;
+          margin: 16px 0;
+          padding: 16px;
           border-radius: 22px;
           background: #fff7df;
           border: 2px solid #ffd768;
           color: #17345c;
           font-weight: 900;
+          text-align: left;
         }
 
-        .clearActions {
+        .resultActions {
           display: grid;
           gap: 10px;
         }
 
-        .clearActions button,
-        .clearActions a {
+        .resultActions button,
+        .resultActions a {
           display: block;
           border: 0;
           border-radius: 18px;
@@ -389,7 +404,7 @@ export default function ChapterChatEngine({ chapterData }) {
           background: linear-gradient(135deg, #ff4f93, #f6a800);
         }
 
-        .clearActions a {
+        .resultActions a {
           background: #17345c;
         }
 
@@ -416,11 +431,11 @@ export default function ChapterChatEngine({ chapterData }) {
             <h1>{chapterData.subtitle}</h1>
           </div>
 
-          <b className="chapterPercent">{progress}%</b>
+          <b className="chapterPercent">{showResult ? "CLEAR" : `${progress}%`}</b>
         </div>
 
         <div className="chapterProgress">
-          <span style={{ width: `${progress}%` }} />
+          <span style={{ width: showResult ? "100%" : `${progress}%` }} />
         </div>
       </header>
 
@@ -435,38 +450,11 @@ export default function ChapterChatEngine({ chapterData }) {
                 selected={selected}
                 answeredQuizId={answeredQuizId}
                 onAnswer={answerQuiz}
-                onNext={nextStep}
               />
             );
           }
 
           if (message.type === "userAnswer") {
-            if (message.type === "clear") {
-  const char = characters[message.character] || characters.ichika;
-
-  return (
-    <div className="chatRow" key={`clear-${i}`}>
-      <div className="chatAvatarWrap">
-        <img className="chatAvatar" src={char.image} alt={char.name} />
-      </div>
-
-      <div className="chatBubble">
-        <span className="chatName">
-          {char.icon} {char.name}
-        </span>
-        {message.text}
-
-        <button
-          type="button"
-          className="nextButton"
-          onClick={() => setCleared(true)}
-        >
-          リザルトへ ▶
-        </button>
-      </div>
-    </div>
-  );
-}
             return (
               <div className="chatRow user" key={`user-${i}`}>
                 <div className="chatBubble">{message.text}</div>
@@ -492,21 +480,23 @@ export default function ChapterChatEngine({ chapterData }) {
           );
         })}
 
-        {cleared && (
-          <div className="clearBox">
+        {showResult && (
+          <div className="resultBox">
             <h2>🎉 MISSION CLEAR!</h2>
-            <p>{chapterData.subtitle}</p>
+            <p className="resultChapter">
+              {chapterData.title} Complete!
+            </p>
 
             <div className="rewardBox">
-              <p>⭐ +{chapterData.reward?.point || 0}pt</p>
+              <p>⭐ ポイント +{chapterData.reward?.point || 0}</p>
               <p>
-                {chapterData.reward?.badge?.icon || "🏅"}{" "}
+                {chapterData.reward?.badge?.icon || "🏅"} バッジ：
                 {chapterData.reward?.badge?.name || "クリアバッジ"}
               </p>
               <p>❤️ 親密度UP</p>
             </div>
 
-            <div className="clearActions">
+            <div className="resultActions">
               <button type="button" onClick={receiveReward} disabled={rewarded}>
                 {rewarded ? "受取済み" : "報酬を受け取る"}
               </button>
@@ -524,33 +514,14 @@ export default function ChapterChatEngine({ chapterData }) {
   );
 }
 
-function QuizMessage({
-  message,
-  quizKey,
-  selected,
-  answeredQuizId,
-  onAnswer,
-  onNext,
-}) {
+function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   const isAnswered = answeredQuizId === quizKey;
 
   return (
     <div className="quizBox">
       <p className="quizBoxTitle">QUESTION</p>
 
-      <div
-        style={{
-          background: "#fff",
-          color: "#17345c",
-          padding: "14px",
-          borderRadius: "18px",
-          fontWeight: 900,
-          lineHeight: 1.6,
-          marginBottom: "14px",
-        }}
-      >
-        {message.question}
-      </div>
+      <div className="quizQuestion">{message.question}</div>
 
       <p className="quizBoxTitle">答えを選んでね</p>
 
@@ -558,9 +529,7 @@ function QuizMessage({
         {message.choices.map((choice, index) => {
           let className = "";
 
-          if (isAnswered && index === message.answer) {
-            className = "correct";
-          }
+          if (isAnswered && index === message.answer) className = "correct";
 
           if (isAnswered && selected === index && index !== message.answer) {
             className = "wrong";
@@ -579,12 +548,6 @@ function QuizMessage({
           );
         })}
       </div>
-
-      {isAnswered && (
-        <button type="button" className="nextButton" onClick={onNext}>
-          次へ ▶
-        </button>
-      )}
     </div>
   );
 }
