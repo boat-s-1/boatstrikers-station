@@ -1,6 +1,6 @@
-import ChapterRpgEngine from "../../components/ChapterRpgEngine";
+import ChapterChatEngine from "../../components/ChapterChatEngine";
 import chapter1 from "../../story/chapter1";
 
 export default function Chapter1Page() {
-  return <ChapterRpgEngine chapterData={chapter1} />;
+  return <ChapterChatEngine chapterData={chapter1} />;
 }
