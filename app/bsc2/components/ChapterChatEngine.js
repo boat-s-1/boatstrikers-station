@@ -342,46 +342,68 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .heroArea {
-          margin-top: 6px;
-          padding: 10px;
-          border-radius: 22px;
-          background: rgba(255,255,255,.94);
-          border: 2px solid #ffd768;
-          text-align: center;
-          box-shadow: 0 10px 24px rgba(0,0,0,.18);
-          position: relative;
-          overflow: hidden;
-        }
+  margin-top: 6px;
+  padding: 12px 12px 14px;
+  border-radius: 22px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.96), rgba(255,247,223,.9)),
+    url("/bsc/race-bg.png");
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #ffd768;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+}
 
-        .heroCharacter {
-          width: 86px;
-          height: 86px;
-          object-fit: cover;
-          border-radius: 24px;
-          border: 4px solid ${currentChar.color};
-          background: #fff;
-          box-shadow: 0 10px 22px rgba(0,0,0,.22);
-          animation: charFloat 2.2s ease-in-out infinite;
-        }
+.heroCharacter {
+  position: absolute;
+  left: -18px;
+  bottom: -10px;
+  width: 165px;
+  height: 165px;
+  object-fit: contain;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  z-index: 2;
+  animation: charFloat 2.2s ease-in-out infinite;
+}
 
-        .heroName {
-          display: inline-block;
-          margin-top: 6px;
-          padding: 5px 14px;
-          border-radius: 999px;
-          background: #17345c;
-          color: #fff;
-          font-size: 13px;
-          font-weight: 900;
-        }
+.heroName {
+  position: absolute;
+  left: 118px;
+  top: 34px;
+  z-index: 3;
+  display: inline-block;
+  padding: 7px 18px;
+  border-radius: 999px;
+  background: #17345c;
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 8px 16px rgba(0,0,0,.2);
+}
 
-        .heroReaction {
-          margin-top: 6px;
-          color: #17345c;
-          font-weight: 900;
-          font-size: 13px;
-          min-height: 20px;
-        }
+.heroReaction {
+  margin-left: 130px;
+  width: calc(100% - 130px);
+  padding: 18px 16px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.96);
+  color: #17345c;
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 70px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+}
 
         .chatArea {
   max-width: 640px;
