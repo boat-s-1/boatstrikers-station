@@ -537,25 +537,27 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .reactionOverlay {
-          position: fixed;
-          inset: 0;
-          z-index: 90;
-          display: grid;
-          place-items: center;
-          pointer-events: none;
-          animation: overlayPop .75s ease-out forwards;
-        }
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  animation: overlayPop .9s ease-out forwards;
+}
 
-        .reactionText {
-          padding: 22px 30px;
-          border-radius: 28px;
-          background: rgba(255,255,255,.96);
-          border: 4px solid #ffd768;
-          color: #ff4f93;
-          font-size: 32px;
-          font-weight: 900;
-          box-shadow: 0 20px 50px rgba(0,0,0,.28);
-        }
+.reactionText {
+  position: relative;
+  z-index: 100000;
+  padding: 22px 30px;
+  border-radius: 28px;
+  background: rgba(255,255,255,.96);
+  border: 4px solid #ffd768;
+  color: #ff4f93;
+  font-size: 34px;
+  font-weight: 900;
+  box-shadow: 0 20px 50px rgba(0,0,0,.28);
+}
 
         .resultScreen {
           max-width: 640px;
