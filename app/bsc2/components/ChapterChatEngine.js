@@ -195,12 +195,14 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .fixedGameTop {
-          position: sticky;
-          top: 0;
-          z-index: 60;
-          max-width: 640px;
-          margin: 0 auto 12px;
-        }
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  max-width: 640px;
+  margin: 0 auto 12px;
+  padding: 6px 0 8px;
+  background: linear-gradient(180deg, #eaf8ff 0%, rgba(234,248,255,.96) 75%, rgba(234,248,255,0) 100%);
+  }
 
         .statusFrame {
           position: relative;
@@ -382,11 +384,12 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .chatArea {
-          max-width: 640px;
-          margin: 0 auto;
-          display: grid;
-          gap: 14px;
-        }
+  max-width: 640px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  padding-top: 8px;
+}
 
         .chatRow {
           display: flex;
