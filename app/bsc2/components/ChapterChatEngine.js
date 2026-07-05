@@ -232,77 +232,76 @@ export default function ChapterChatEngine({ chapterData }) {
           );
         }
 
-        .statusFrame {
-          position: relative;
-          width: 100%;
-          height: 72px;
-          overflow: hidden;
-          border-radius: 12px;
-        }
+       .statusFrame {
+  position: relative;
+  width: 100%;
+  height: 92px;
+  overflow: hidden;
+  border-radius: 12px;
+}
 
-        .statusFrame img {
-          width: 100%;
-          height: 100%;
-          object-fit: fill;
-          display: block;
-        }
+.statusFrame img {
+  width: 100%;
+  height: 92px;
+  object-fit: fill;
+  display: block;
+}
 
-        .statusOverlay {
-          position: absolute;
-          inset: 0;
-          display: grid;
-          grid-template-columns: 1fr 1.1fr 1fr;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 18px;
-          color: #fff;
-          font-weight: 900;
-          text-shadow: 0 2px 4px rgba(0,0,0,.75);
-        }
+.statusOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1.15fr;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px 14px;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 2px 4px rgba(0,0,0,.75);
+}
 
-        .statusLogo {
-          font-size: 12px;
-          line-height: 1.1;
-          color: #ffd768;
-        }
+.statusLogo {
+  font-size: 12px;
+  line-height: 1.1;
+  color: #ffd768;
+}
 
-        .statusCenter {
-          text-align: center;
-        }
+.statusCenter {
+  text-align: center;
+  transform: translateY(-2px);
+}
 
-        .statusLevel {
-          font-size: 18px;
-          color: #fff;
-        }
+.statusLevel {
+  font-size: 22px;
+  color: #fff;
+  line-height: 1;
+}
 
-        .expBar {
-          height: 10px;
-          margin-top: 5px;
-          border-radius: 999px;
-          background: rgba(0,0,0,.55);
-          border: 1px solid rgba(255,255,255,.45);
-          overflow: hidden;
-        }
+.expBar {
+  height: 9px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.45);
+  overflow: hidden;
+}
 
-        .expFill {
-          height: 100%;
-          background: linear-gradient(90deg, #06c755, #ffd768);
-        }
+.statusRight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  font-size: 11px;
+  text-align: center;
+  transform: translateY(-2px);
+}
 
-        .statusRight {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4px;
-          font-size: 12px;
-          text-align: center;
-        }
-
-        .miniStatus {
-          padding: 4px 6px;
-          border-radius: 999px;
-          background: rgba(0,0,0,.35);
-          border: 1px solid rgba(255,215,104,.55);
-        }
+.miniStatus {
+  padding: 3px 5px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,215,104,.55);
+  line-height: 1.15;
+}
 
         .chapterInfo {
           margin-top: 6px;
