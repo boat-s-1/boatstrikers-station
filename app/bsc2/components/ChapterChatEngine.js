@@ -822,7 +822,7 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   const isAnswered = answeredQuizId === quizKey;
 
   return (
-    <div style={{ marginTop: "70px" }}>
+    <div style={{ marginTop: "110px" }}>
       <div className="quizFrame">
         <img src="/bsc/question-frame.png" alt="" className="quizFrameBg" />
 
