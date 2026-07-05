@@ -203,18 +203,198 @@ const [gachaOpened, setGachaOpened] = useState(false);
       await updateDoc(ref, updateData);
     }
 
-    setRewarded(true);
+   setRewarded(true);
 setShowGacha(true);
-
-setTimeout(() => {
-  setGachaOpened(true);
-  setReaction("reward");
-}, 1400);
+setGachaOpened(false);
+setReaction(null);
   };
 
   return (
     <main className={`chapterGamePage ${isQuizMode ? "quizMode" : ""}`}>
       <style>{`
+
+.gachaOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120000;
+  background:
+    radial-gradient(circle at center, rgba(255,215,104,.5), transparent 28%),
+    radial-gradient(circle at center, rgba(255,79,147,.25), transparent 46%),
+    rgba(0,0,0,.88);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.gachaOverlay::before,
+.gachaOverlay::after {
+  content: "✨";
+  position: absolute;
+  font-size: 34px;
+  animation: sparkleRain 1.4s linear infinite;
+}
+
+.gachaOverlay::before {
+  left: 18%;
+  top: -10%;
+}
+
+.gachaOverlay::after {
+  right: 20%;
+  top: -20%;
+  animation-delay: .45s;
+}
+
+.gachaBox {
+  width: min(88vw, 420px);
+  min-height: 420px;
+  padding: 28px 20px;
+  border-radius: 34px;
+  text-align: center;
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,.96), rgba(255,247,223,.96)),
+    linear-gradient(135deg, rgba(255,215,104,.55), rgba(255,79,147,.35));
+  border: 5px solid #ffd768;
+  box-shadow:
+    0 0 35px rgba(255,215,104,.9),
+    0 0 80px rgba(255,79,147,.45);
+  position: relative;
+  animation: gachaBoxIn .28s ease-out;
+}
+
+.gachaBox.opened {
+  animation: rewardBurst .55s ease-out;
+}
+
+.rarityText {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
+}
+
+.gachaCapsule {
+  width: 150px;
+  height: 150px;
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 25%, #fff, transparent 25%),
+    linear-gradient(135deg, #ff4f93 0%, #ff4f93 48%, #fff 49%, #fff 52%, #ffd768 53%, #f6a800 100%);
+  font-size: 78px;
+  display: grid;
+  place-items: center;
+  margin: 10px auto 18px;
+  box-shadow:
+    0 0 30px rgba(255,215,104,.9),
+    0 14px 28px rgba(0,0,0,.35);
+  animation: capsuleSpin 1.1s linear infinite, capsuleGlow 1.4s ease-in-out infinite;
+}
+
+.tapText {
+  color: #17345c;
+  font-size: 22px;
+  font-weight: 900;
+  animation: tapPulse 1s ease-in-out infinite;
+}
+
+.sparkles {
+  margin-top: 12px;
+  font-size: 28px;
+  animation: sparklePulse 1s infinite;
+}
+
+.rewardReveal {
+  animation: rewardPop .45s ease-out;
+}
+
+.rarityResult {
+  width: fit-content;
+  margin: 0 auto 12px;
+  padding: 8px 24px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4f93, #ffd768, #7a5cff);
+  font-size: 38px;
+  font-weight: 900;
+  text-shadow: 0 3px 10px rgba(0,0,0,.35);
+  box-shadow: 0 0 28px rgba(255,215,104,.9);
+}
+
+.rewardBadgeBig {
+  font-size: 82px;
+  margin-bottom: 8px;
+}
+
+.rewardName {
+  color: #ff4f93;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.rewardDetail {
+  margin-top: 12px;
+  color: #17345c;
+  font-weight: 900;
+  line-height: 1.8;
+}
+
+.gachaClose {
+  margin-top: 18px;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 26px;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+}
+
+@keyframes capsuleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes capsuleGlow {
+  0%,100% { box-shadow: 0 0 25px rgba(255,215,104,.8), 0 14px 28px rgba(0,0,0,.35); }
+  50% { box-shadow: 0 0 60px rgba(255,215,104,1), 0 0 90px rgba(255,79,147,.7); }
+}
+
+@keyframes tapPulse {
+  0%,100% { transform: scale(1); opacity: .75; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes sparklePulse {
+  0%,100% { transform: scale(1); opacity: .6; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+@keyframes sparkleRain {
+  from { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes rewardPop {
+  from { opacity: 0; transform: scale(.45) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes rewardBurst {
+  0% { transform: scale(.92); filter: brightness(1); }
+  45% { transform: scale(1.08); filter: brightness(1.6); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes gachaBoxIn {
+  from { opacity: 0; transform: scale(.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
         
         .gachaOverlay {
   position: fixed;
@@ -813,22 +993,32 @@ setTimeout(() => {
 
 {showGacha && (
   <div className="gachaOverlay">
-    <div className="gachaBox">
+    <div className={`gachaBox ${gachaOpened ? "opened" : ""}`}>
       {!gachaOpened ? (
         <>
-          <div className="treasure">🎁</div>
-          <div className="gachaOpenText">報酬箱 OPEN...</div>
+          <div className="rarityText">SSR CHANCE!!</div>
+          <button
+            type="button"
+            className="gachaCapsule"
+            onClick={() => {
+              setGachaOpened(true);
+              setReaction("reward");
+            }}
+          >
+            💊
+          </button>
+          <div className="tapText">TAP TO OPEN</div>
+          <div className="sparkles">✨ ✨ ✨</div>
         </>
       ) : (
         <div className="rewardReveal">
+          <div className="rarityResult">SSR</div>
           <div className="rewardBadgeBig">
             {chapterData.reward?.badge?.icon || "🏅"}
           </div>
-
           <div className="rewardName">
             {chapterData.reward?.badge?.name || "クリアバッジ"} GET!!
           </div>
-
           <div className="rewardDetail">
             <div>⭐ +{chapterData.reward?.point || 0}pt</div>
             <div>
@@ -836,7 +1026,6 @@ setTimeout(() => {
               {chapterData.reward?.bond?.[chapterData.teacher] || 0}
             </div>
           </div>
-
           <button
             type="button"
             className="gachaClose"
