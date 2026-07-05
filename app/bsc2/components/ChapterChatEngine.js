@@ -197,12 +197,17 @@ export default function ChapterChatEngine({ chapterData }) {
         .fixedGameTop {
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 500;
   max-width: 640px;
   margin: 0 auto 12px;
-  padding: 6px 0 8px;
-  background: linear-gradient(180deg, #eaf8ff 0%, rgba(234,248,255,.96) 75%, rgba(234,248,255,0) 100%);
-  }
+  padding: 6px 0 10px;
+  background: linear-gradient(
+    180deg,
+    #eaf8ff 0%,
+    rgba(234,248,255,.96) 85%,
+    rgba(234,248,255,0) 100%
+  );
+}
 
         .statusFrame {
           position: relative;
@@ -419,7 +424,9 @@ export default function ChapterChatEngine({ chapterData }) {
   margin: 0 auto;
   display: grid;
   gap: 18px;
-  padding-top: 16px;
+
+  /* ここが重要：固定された上部に潜り込まないようにする */
+  padding-top: 28px;
 }
 
         .chatRow {
@@ -480,8 +487,8 @@ export default function ChapterChatEngine({ chapterData }) {
   position: relative;
   width: 100%;
   max-width: 640px;
-  margin: 18px auto 0;
-  min-height: 360px;
+  margin: 28px auto 0;
+  min-height: 370px;
   z-index: 1;
 }
 
