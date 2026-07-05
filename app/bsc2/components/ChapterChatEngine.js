@@ -487,7 +487,7 @@ export default function ChapterChatEngine({ chapterData }) {
   position: relative;
   width: 100%;
   max-width: 640px;
-  margin: 28px auto 0;
+  margin: 44px auto 0;
   min-height: 370px;
   z-index: 1;
 }
