@@ -722,7 +722,7 @@ export default function ChapterChatEngine({ chapterData }) {
 
       <section className="fixedGameTop">
         <div className="statusFrame">
-          <img src="/bsc/IMG_6252.jpeg" alt="" />
+          <img src="/bsc/2CE2E182-B36D-4783-BC10-0F7E22E4EC49.png" alt="" />
 
           <div className="statusOverlay">
             <div className="statusLogo">
