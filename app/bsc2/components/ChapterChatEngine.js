@@ -822,33 +822,35 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   const isAnswered = answeredQuizId === quizKey;
 
   return (
-    <div className="quizFrame">
-      <img src="/bsc/IMG_6254.jpeg" alt="" className="quizFrameBg" />
+    <div style={{ marginTop: "70px" }}>
+      <div className="quizFrame">
+        <img src="/bsc/question-frame.png" alt="" className="quizFrameBg" />
 
-      <div className="quizContent">
-        <div className="quizQuestion">{message.question}</div>
+        <div className="quizContent">
+          <div className="quizQuestion">{message.question}</div>
 
-        <div className="quizChoices">
-          {message.choices.map((choice, index) => {
-            let className = "";
+          <div className="quizChoices">
+            {message.choices.map((choice, index) => {
+              let className = "";
 
-            if (isAnswered && index === message.answer) className = "correct";
-            if (isAnswered && selected === index && index !== message.answer) {
-              className = "wrong";
-            }
+              if (isAnswered && index === message.answer) className = "correct";
+              if (isAnswered && selected === index && index !== message.answer) {
+                className = "wrong";
+              }
 
-            return (
-              <button
-                key={choice}
-                type="button"
-                className={className}
-                disabled={isAnswered}
-                onClick={() => onAnswer(index, message, quizKey)}
-              >
-                {choice}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={choice}
+                  type="button"
+                  className={className}
+                  disabled={isAnswered}
+                  onClick={() => onAnswer(index, message, quizKey)}
+                >
+                  {choice}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
