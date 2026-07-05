@@ -6,9 +6,24 @@ import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const characters = {
-  ichika: { name: "一果", icon: "🌸", image: "/bsc/characters/IMG_5965.png", color: "#ff4f93" },
-  kiina: { name: "キイナ", icon: "⚡", image: "/bsc/status-kiina.png", color: "#f6a800" },
-  hatsune: { name: "初音", icon: "💜", image: "/bsc/status-hatsune.png", color: "#9b5cff" },
+  ichika: {
+    name: "一果",
+    icon: "🌸",
+    image: "/bsc/characters/IMG_5965.png",
+    color: "#ff4f93",
+  },
+  kiina: {
+    name: "キイナ",
+    icon: "⚡",
+    image: "/bsc/status-kiina.png",
+    color: "#f6a800",
+  },
+  hatsune: {
+    name: "初音",
+    icon: "💜",
+    image: "/bsc/status-hatsune.png",
+    color: "#9b5cff",
+  },
 };
 
 export default function ChapterChatEngine({ chapterData }) {
@@ -61,6 +76,8 @@ export default function ChapterChatEngine({ chapterData }) {
     ? Math.round(((index + 1) / steps.length) * 100)
     : 0;
 
+  const isQuizMode = current?.type === "quiz" && !showResult;
+
   useEffect(() => {
     if (!current || showResult) return;
 
@@ -86,7 +103,7 @@ export default function ChapterChatEngine({ chapterData }) {
   }, [index, showResult]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, selected, showResult]);
 
   const goNext = () => {
@@ -150,13 +167,19 @@ export default function ChapterChatEngine({ chapterData }) {
       if (badgeName) {
         const localBadges = JSON.parse(localStorage.getItem("bscBadge") || "[]");
         if (!localBadges.includes(badgeName)) {
-          localStorage.setItem("bscBadge", JSON.stringify([...localBadges, badgeName]));
+          localStorage.setItem(
+            "bscBadge",
+            JSON.stringify([...localBadges, badgeName])
+          );
         }
       }
 
       Object.keys(bond).forEach((key) => {
         const now = Number(localStorage.getItem(`bscBond_${key}`) || 0);
-        localStorage.setItem(`bscBond_${key}`, String(Math.min(now + bond[key], 100)));
+        localStorage.setItem(
+          `bscBond_${key}`,
+          String(Math.min(now + bond[key], 100))
+        );
       });
     }
 
@@ -183,7 +206,7 @@ export default function ChapterChatEngine({ chapterData }) {
   };
 
   return (
-    <main className="chapterGamePage">
+    <main className={`chapterGamePage ${isQuizMode ? "quizMode" : ""}`}>
       <style>{`
         .chapterGamePage {
           min-height: 100vh;
@@ -195,19 +218,19 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .fixedGameTop {
-  position: sticky;
-  top: 0;
-  z-index: 500;
-  max-width: 640px;
-  margin: 0 auto 12px;
-  padding: 6px 0 10px;
-  background: linear-gradient(
-    180deg,
-    #eaf8ff 0%,
-    rgba(234,248,255,.96) 85%,
-    rgba(234,248,255,0) 100%
-  );
-}
+          position: sticky;
+          top: 0;
+          z-index: 500;
+          max-width: 640px;
+          margin: 0 auto 10px;
+          padding: 6px 0 8px;
+          background: linear-gradient(
+            180deg,
+            #eaf8ff 0%,
+            rgba(234,248,255,.96) 88%,
+            rgba(234,248,255,0) 100%
+          );
+        }
 
         .statusFrame {
           position: relative;
@@ -347,87 +370,104 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .heroArea {
-  margin-top: 6px;
-  padding: 12px;
-  border-radius: 22px;
+          margin-top: 6px;
+          padding: 12px;
+          border-radius: 22px;
+          background:
+            linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.15)),
+            url("/bsc/IMG_6261.jpeg");
+          background-size: cover;
+          background-position: center;
+          border: 2px solid #ffd768;
+          box-shadow: 0 10px 24px rgba(0,0,0,.18);
+          position: relative;
+          overflow: hidden;
+          min-height: 230px;
+          display: flex;
+          align-items: flex-end;
+          transition: .25s ease;
+        }
 
-  background:
-    linear-gradient(
-      rgba(0,0,0,.15),
-      rgba(0,0,0,.15)
-    ),
-    url("/bsc/IMG_6261.jpeg");
+        .heroCharacter {
+          position: absolute;
+          left: -18px;
+          bottom: -10px;
+          width: 165px;
+          height: 165px;
+          object-fit: contain;
+          border: none;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+          z-index: 2;
+          animation: charFloat 2.2s ease-in-out infinite;
+        }
 
-  background-size: cover;
-  background-position: center;
+        .heroName {
+          position: absolute;
+          left: 118px;
+          top: 34px;
+          z-index: 3;
+          display: inline-block;
+          padding: 7px 18px;
+          border-radius: 999px;
+          background: #17345c;
+          color: #fff;
+          font-weight: 900;
+          box-shadow: 0 8px 16px rgba(0,0,0,.2);
+        }
 
-  border: 2px solid #ffd768;
-  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+        .heroReaction {
+          margin-left: 130px;
+          width: calc(100% - 130px);
+          padding: 18px 16px;
+          border-radius: 22px;
+          background: rgba(255,255,255,.96);
+          color: #17345c;
+          font-weight: 900;
+          font-size: 16px;
+          line-height: 1.7;
+          min-height: 70px;
+          display: grid;
+          place-items: center;
+          text-align: center;
+          box-shadow: 0 8px 20px rgba(0,0,0,.12);
+        }
 
-  position: relative;
-  overflow: hidden;
+        .quizMode .heroArea {
+          min-height: 145px;
+          padding: 8px 10px;
+        }
 
-  min-height: 230px;
+        .quizMode .heroCharacter {
+          width: 118px;
+          height: 118px;
+          left: -6px;
+          bottom: -8px;
+        }
 
-  display: flex;
-  align-items: flex-end;
-}
+        .quizMode .heroName {
+          left: 92px;
+          top: 18px;
+          padding: 5px 14px;
+          font-size: 13px;
+        }
 
-.heroCharacter {
-  position: absolute;
-  left: -18px;
-  bottom: -10px;
-  width: 165px;
-  height: 165px;
-  object-fit: contain;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  z-index: 2;
-  animation: charFloat 2.2s ease-in-out infinite;
-}
-
-.heroName {
-  position: absolute;
-  left: 118px;
-  top: 34px;
-  z-index: 3;
-  display: inline-block;
-  padding: 7px 18px;
-  border-radius: 999px;
-  background: #17345c;
-  color: #fff;
-  font-weight: 900;
-  box-shadow: 0 8px 16px rgba(0,0,0,.2);
-}
-
-.heroReaction {
-  margin-left: 130px;
-  width: calc(100% - 130px);
-  padding: 18px 16px;
-  border-radius: 22px;
-  background: rgba(255,255,255,.96);
-  color: #17345c;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1.7;
-  min-height: 70px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  box-shadow: 0 8px 20px rgba(0,0,0,.12);
-}
+        .quizMode .heroReaction {
+          margin-left: 108px;
+          width: calc(100% - 108px);
+          min-height: 50px;
+          padding: 12px;
+          font-size: 14px;
+        }
 
         .chatArea {
-  max-width: 640px;
-  margin: 0 auto;
-  display: grid;
-  gap: 18px;
-
-  /* ここが重要：固定された上部に潜り込まないようにする */
-  padding-top: 28px;
-}
+          max-width: 640px;
+          margin: 0 auto;
+          display: grid;
+          gap: 16px;
+          padding-top: 8px;
+        }
 
         .chatRow {
           display: flex;
@@ -484,24 +524,25 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .quizFrame {
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  margin: 44px auto 0;
-  min-height: 370px;
-  z-index: 1;
-}
+          position: relative;
+          width: 100%;
+          max-width: 640px;
+          margin: 8px auto 0;
+          height: 360px;
+          z-index: 1;
+          animation: questionIn .28s ease-out;
+        }
 
         .quizFrameBg {
-  width: 100%;
-  height: 360px;
-  object-fit: fill;
-  display: block;
-}
+          width: 100%;
+          height: 360px;
+          object-fit: fill;
+          display: block;
+        }
 
         .quizContent {
           position: absolute;
-          inset: 70px 26px 26px;
+          inset: 72px 26px 26px;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -543,27 +584,27 @@ export default function ChapterChatEngine({ chapterData }) {
         }
 
         .reactionOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  animation: overlayPop .9s ease-out forwards;
-}
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          display: grid;
+          place-items: center;
+          pointer-events: none;
+          animation: overlayPop .9s ease-out forwards;
+        }
 
-.reactionText {
-  position: relative;
-  z-index: 100000;
-  padding: 22px 30px;
-  border-radius: 28px;
-  background: rgba(255,255,255,.96);
-  border: 4px solid #ffd768;
-  color: #ff4f93;
-  font-size: 34px;
-  font-weight: 900;
-  box-shadow: 0 20px 50px rgba(0,0,0,.28);
-}
+        .reactionText {
+          position: relative;
+          z-index: 100000;
+          padding: 22px 30px;
+          border-radius: 28px;
+          background: rgba(255,255,255,.96);
+          border: 4px solid #ffd768;
+          color: #ff4f93;
+          font-size: 34px;
+          font-weight: 900;
+          box-shadow: 0 20px 50px rgba(0,0,0,.28);
+        }
 
         .resultScreen {
           max-width: 640px;
@@ -822,35 +863,33 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   const isAnswered = answeredQuizId === quizKey;
 
   return (
-    <div style={{ marginTop: "110px" }}>
-      <div className="quizFrame">
-        <img src="/bsc/IMG_6254.jpeg" alt="" className="quizFrameBg" />
+    <div className="quizFrame">
+      <img src="/bsc/IMG_6254.jpeg" alt="" className="quizFrameBg" />
 
-        <div className="quizContent">
-          <div className="quizQuestion">{message.question}</div>
+      <div className="quizContent">
+        <div className="quizQuestion">{message.question}</div>
 
-          <div className="quizChoices">
-            {message.choices.map((choice, index) => {
-              let className = "";
+        <div className="quizChoices">
+          {message.choices.map((choice, index) => {
+            let className = "";
 
-              if (isAnswered && index === message.answer) className = "correct";
-              if (isAnswered && selected === index && index !== message.answer) {
-                className = "wrong";
-              }
+            if (isAnswered && index === message.answer) className = "correct";
+            if (isAnswered && selected === index && index !== message.answer) {
+              className = "wrong";
+            }
 
-              return (
-                <button
-                  key={choice}
-                  type="button"
-                  className={className}
-                  disabled={isAnswered}
-                  onClick={() => onAnswer(index, message, quizKey)}
-                >
-                  {choice}
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={choice}
+                type="button"
+                className={className}
+                disabled={isAnswered}
+                onClick={() => onAnswer(index, message, quizKey)}
+              >
+                {choice}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
