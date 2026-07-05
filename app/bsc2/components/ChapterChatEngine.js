@@ -824,7 +824,7 @@ function QuizMessage({ message, quizKey, selected, answeredQuizId, onAnswer }) {
   return (
     <div style={{ marginTop: "110px" }}>
       <div className="quizFrame">
-        <img src="/bsc/question-frame.png" alt="" className="quizFrameBg" />
+        <img src="/bsc/IMG_6254.jpeg" alt="" className="quizFrameBg" />
 
         <div className="quizContent">
           <div className="quizQuestion">{message.question}</div>
