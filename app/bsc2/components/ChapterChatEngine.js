@@ -39,7 +39,9 @@ export default function ChapterChatEngine({ chapterData }) {
   const [reaction, setReaction] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [rewarded, setRewarded] = useState(false);
-
+　const [showGacha, setShowGacha] = useState(false);
+const [gachaOpened, setGachaOpened] = useState(false);
+  
   const [localData, setLocalData] = useState({
     point: 0,
     badges: [],
@@ -202,13 +204,103 @@ export default function ChapterChatEngine({ chapterData }) {
     }
 
     setRewarded(true);
-    setReaction("reward");
+setShowGacha(true);
+
+setTimeout(() => {
+  setGachaOpened(true);
+  setReaction("reward");
+}, 1400);
   };
 
   return (
     <main className={`chapterGamePage ${isQuizMode ? "quizMode" : ""}`}>
       <style>{`
-        .chapterGamePage {
+        
+        .gachaOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120000;
+  background: radial-gradient(circle, rgba(255,215,104,.35), rgba(0,0,0,.86));
+  display: grid;
+  place-items: center;
+  animation: gachaFade .25s ease-out;
+}
+
+.gachaBox {
+  width: min(88vw, 420px);
+  padding: 28px 20px;
+  border-radius: 32px;
+  text-align: center;
+  background: rgba(255,255,255,.96);
+  border: 4px solid #ffd768;
+  box-shadow: 0 0 40px rgba(255,215,104,.8);
+}
+
+.treasure {
+  font-size: 92px;
+  animation: treasureShake .9s ease-in-out infinite;
+}
+
+.gachaOpenText {
+  margin-top: 12px;
+  color: #17345c;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.rewardReveal {
+  animation: rewardPop .45s ease-out;
+}
+
+.rewardBadgeBig {
+  font-size: 74px;
+  margin-bottom: 8px;
+}
+
+.rewardName {
+  color: #ff4f93;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.rewardDetail {
+  margin-top: 10px;
+  color: #17345c;
+  font-weight: 900;
+  line-height: 1.8;
+}
+
+.gachaClose {
+  margin-top: 18px;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px 22px;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff4f93, #f6a800);
+}
+
+@keyframes treasureShake {
+  0%,100% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-8deg) scale(1.06); }
+  40% { transform: rotate(8deg) scale(1.08); }
+  60% { transform: rotate(-5deg) scale(1.06); }
+  80% { transform: rotate(5deg) scale(1.04); }
+}
+
+@keyframes rewardPop {
+  from { opacity: 0; transform: scale(.5) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes gachaFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+        
+
+
+　　　　　.chapterGamePage {
           min-height: 100vh;
           padding: 8px 10px 100px;
           background:
@@ -718,6 +810,45 @@ export default function ChapterChatEngine({ chapterData }) {
           <div className="reactionText">REWARD GET!! 🎁</div>
         </div>
       )}
+
+{showGacha && (
+  <div className="gachaOverlay">
+    <div className="gachaBox">
+      {!gachaOpened ? (
+        <>
+          <div className="treasure">🎁</div>
+          <div className="gachaOpenText">報酬箱 OPEN...</div>
+        </>
+      ) : (
+        <div className="rewardReveal">
+          <div className="rewardBadgeBig">
+            {chapterData.reward?.badge?.icon || "🏅"}
+          </div>
+
+          <div className="rewardName">
+            {chapterData.reward?.badge?.name || "クリアバッジ"} GET!!
+          </div>
+
+          <div className="rewardDetail">
+            <div>⭐ +{chapterData.reward?.point || 0}pt</div>
+            <div>
+              ❤️ 親密度 +
+              {chapterData.reward?.bond?.[chapterData.teacher] || 0}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="gachaClose"
+            onClick={() => setShowGacha(false)}
+          >
+            OK
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
       <section className="fixedGameTop">
         <div className="statusFrame">
