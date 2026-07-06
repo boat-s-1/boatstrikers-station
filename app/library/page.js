@@ -202,6 +202,7 @@ export default async function LibraryPage() {
           <img
           src="IMG_6319.jpeg"
             alt="新刊"
+              className="libraryHeroImage"
               />
           
         </div>
