@@ -199,8 +199,11 @@ export default async function LibraryPage() {
 
       <section className="libraryNotice">
         <div className="libraryNoticeTitle">
-          <h2>📢 新刊入荷のお知らせ</h2>
-          <span>NEW ARRIVALS</span>
+          <img
+          src="IMG_6319.jpeg"
+            alt="新刊"
+              />
+          
         </div>
 
         <div className="libraryNoticeList">
