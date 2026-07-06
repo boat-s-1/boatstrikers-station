@@ -20,38 +20,46 @@ async function getLibraryItems() {
     };
   });
 }
+
 async function getLibraryNews() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-  return feed.items.slice(0, 5).map((item) => {
-    let category = "note";
+  return feed.items
+    .slice(0, 20)
+    .map((item) => {
+      let category = "";
 
-    if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
-    if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
-    if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
-    if (item.title.includes("場攻略】")) category = "24場攻略note";
-    if (item.title.includes("【一果前日版】")) category = "一果新聞";
-    if (item.title.includes("【初音前日版】")) category = "初音新聞";
-    if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
+      if (item.title.includes("【一果ゼミ")) category = "🌸 一果ゼミ";
+      if (item.title.includes("【初音ゼミ")) category = "💜 初音ゼミ";
+      if (item.title.includes("【キイナゼミ")) category = "⚡ キイナゼミ";
 
-    return {
-      title: item.title,
-      link: item.link,
-      date: item.pubDate,
-      category,
-    };
-  });
+      if (item.title.includes("場攻略】")) {
+        const match = item.title.match(/【(.+?)場攻略】/);
+        category = match ? `📘 ${match[1]}攻略` : "📘 24場攻略";
+      }
+
+      if (item.title.includes("【一果前日版】")) category = "🌸 一果新聞";
+      if (item.title.includes("【初音前日版】")) category = "💜 初音新聞";
+      if (item.title.includes("【キイナ前日版】")) category = "⚡ キイナ新聞";
+
+      return {
+        title: item.title,
+        link: item.link,
+        date: item.pubDate,
+        category,
+      };
+    })
+    .filter((item) => item.category !== "")
+    .slice(0, 5);
 }
+
 const sections = [
   {
-  title: "週刊誌コーナー",
-
-  lead: "3人のゼミをまとめてチェック！",
-
-  titleImage: "/IMG_6091.jpeg",
-
-  books: [
+    title: "週刊誌コーナー",
+    lead: "3人のゼミをまとめてチェック！",
+    titleImage: "/IMG_6091.jpeg",
+    books: [
       {
         title: "一果ゼミ",
         icon: "🌸",
@@ -83,9 +91,7 @@ const sections = [
   },
   {
     title: "攻略本コーナー",
-
     titleImage: "/IMG_6094.jpeg",
-
     books: [
       {
         title: "24場攻略ノート",
@@ -100,9 +106,7 @@ const sections = [
   },
   {
     title: "バックナンバー",
-
     titleImage: "/IMG_6095.jpeg",
-
     books: [
       {
         title: "一果予想新聞",
@@ -170,7 +174,7 @@ const sections = [
 
 export default async function LibraryPage() {
   const items = await getLibraryItems();
-const news = await getLibraryNews();
+  const news = await getLibraryNews();
 
   return (
     <main className="libraryPage">
@@ -186,59 +190,59 @@ const news = await getLibraryNews();
       </header>
 
       <section className="libraryHeroImageBox">
-  <img
-    src="/IMG_6098.jpeg"
-    alt="一果図書館"
-    className="libraryHeroImage"
-  />
-</section>
-<section className="libraryNotice">
-  <div className="libraryNoticeTitle">
-    <h2>📢 新刊入荷のお知らせ</h2>
-    <span>NEW ARRIVALS</span>
-  </div>
+        <img
+          src="/IMG_6098.jpeg"
+          alt="一果図書館"
+          className="libraryHeroImage"
+        />
+      </section>
 
-  <div className="libraryNoticeList">
-    {news.map((n) => (
-      <a
-        href={n.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="libraryNoticeItem"
-        key={n.link}
-      >
-        <span>
-          {new Date(n.date).toLocaleDateString("ja-JP", {
-            month: "numeric",
-            day: "numeric",
-          })}
-        </span>
+      <section className="libraryNotice">
+        <div className="libraryNoticeTitle">
+          <h2>📢 新刊入荷のお知らせ</h2>
+          <span>NEW ARRIVALS</span>
+        </div>
 
-        <strong>{n.category}</strong>
+        <div className="libraryNoticeList">
+          {news.map((n) => (
+            <a
+              href={n.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="libraryNoticeItem"
+              key={n.link}
+            >
+              <span>
+                {new Date(n.date).toLocaleDateString("ja-JP", {
+                  month: "numeric",
+                  day: "numeric",
+                })}
+              </span>
 
-        <b>更新</b>
-      </a>
-    ))}
-  </div>
-</section>
+              <strong>{n.category}</strong>
 
-  <LibraryPoint />
+              <b>更新</b>
+            </a>
+          ))}
+        </div>
+      </section>
 
-    
+      <LibraryPoint />
+
       {sections.map((section) => (
         <section className="libraryShelfSection" key={section.title}>
           {section.titleImage ? (
-  <img
-    src={section.titleImage}
-    alt={section.title}
-    className="shelfTitleImage"
-  />
-) : (
-  <>
-    <h2>{section.title}</h2>
-    <p>{section.lead}</p>
-  </>
-)}
+            <img
+              src={section.titleImage}
+              alt={section.title}
+              className="shelfTitleImage"
+            />
+          ) : (
+            <>
+              <h2>{section.title}</h2>
+              <p>{section.lead}</p>
+            </>
+          )}
 
           <div className="woodShelf">
             {section.books.map((book) => (
