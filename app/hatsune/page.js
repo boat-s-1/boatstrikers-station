@@ -161,7 +161,7 @@ const result = results.find((r) => r.name === "hatsune");
       {result && (
   <section className="sectionCard purpleCard">
     <img
-  src="/CD2CB810-B702-49DE-85AD-5927730A753A.png"
+  src="/CE8FD370-10F1-4A75-BA44-04E1CBA0D52D.png"
   alt="初音成績"
   className="homeTitleImage"
 />
