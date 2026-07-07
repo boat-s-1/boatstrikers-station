@@ -138,7 +138,7 @@ const result = results.find((r) => r.name === "hatsune");
       </section>
 
       <section className="sectionCard">
-        <h2>初音の女子戦データツール（β版）</h2>
+        <h2>女子戦データツール（β版）</h2>
         <a
           href="https://www.boat-strike.com/hastune"
           target="_blank"
@@ -201,13 +201,7 @@ const result = results.find((r) => r.name === "hatsune");
   alt="初音ラボ"
   className="homeTitleImage"
 />
-          <a
-            href="https://note.com/boat_strikers"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            noteで見る ›
-          </a>
+          
         </div>
 
         <div className="labList">
@@ -242,14 +236,6 @@ const result = results.find((r) => r.name === "hatsune");
   alt="初音ラジオ"
   className="homeTitleImage"
 />
-
-          <a
-            href="https://www.youtube.com/@boatstrikers_official"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            YouTubeへ ›
-          </a>
         </div>
 
         <p className="radioLead">
