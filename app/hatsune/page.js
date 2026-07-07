@@ -107,7 +107,11 @@ const result = results.find((r) => r.name === "hatsune");
       </section>
 
       <section className="sectionCard purpleCard">
-        <h2>📰 今日の初音新聞（前日版）</h2>
+      <img
+  src="/CD2CB810-B702-49DE-85AD-5927730A753A.png"
+  alt="初音新聞"
+  className="homeTitleImage"
+/>
 
         {newspaper ? (
           <a
