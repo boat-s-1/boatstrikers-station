@@ -160,7 +160,11 @@ const result = results.find((r) => r.name === "hatsune");
 
       {result && (
   <section className="sectionCard purpleCard">
-    <h2>🏆 今月の成績</h2>
+    <img
+  src="/CD2CB810-B702-49DE-85AD-5927730A753A.png"
+  alt="初音成績"
+  className="homeTitleImage"
+/>
 
     <div className="recordGrid">
       <div className="recordCard">
@@ -192,7 +196,11 @@ const result = results.find((r) => r.name === "hatsune");
 
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
-          <h2>🔬 女子戦研究ラボ</h2>
+          <img
+  src="/BFCC135A-C4EE-4AEB-B2E0-176AF51FFBD8.png"
+  alt="初音ラボ"
+  className="homeTitleImage"
+/>
           <a
             href="https://note.com/boat_strikers"
             target="_blank"
@@ -229,7 +237,11 @@ const result = results.find((r) => r.name === "hatsune");
 
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
-          <h2>🎙 Boat Strikers Radio</h2>
+          <img
+  src="/691DC1E8-DDE7-4F33-A245-939DBA4BCDC2.png"
+  alt="初音ラジオ"
+  className="homeTitleImage"
+/>
 
           <a
             href="https://www.youtube.com/@boatstrikers_official"
