@@ -50,26 +50,39 @@ function getCurrentMonthRange() {
 ========================= */
 
 async function getIchikaResults() {
+  const emptyResult = {
+    raceCount: 0,
+    hitCount: 0,
+    hitRate: 0,
+    returnRate: 0,
+    profit: 0,
+    bestHit: 0,
+    updated: "",
+    hits: [],
+    errorMessage: "",
+  };
+
   if (!supabase) {
+    console.error("Supabaseクライアントが作成されていません");
+
     return {
-      raceCount: 0,
-      hitCount: 0,
-      hitRate: 0,
-      returnRate: 0,
-      profit: 0,
-      bestHit: 0,
-      updated: "",
-      hits: [],
+      ...emptyResult,
+      errorMessage: "Supabase未接続",
     };
   }
 
-  const { monthStart, nextMonthStart } =
-    getCurrentMonthRange();
+  try {
+    const { monthStart, nextMonthStart } =
+      getCurrentMonthRange();
 
-  const { data, error } = await supabase
-    .from("bsc_results")
-    .select(
-      `
+    console.log("一果成績取得範囲", {
+      monthStart,
+      nextMonthStart,
+    });
+
+    const { data, error } = await supabase
+      .from("bsc_results")
+      .select(`
         id,
         race_date,
         place,
@@ -80,118 +93,97 @@ async function getIchikaResults() {
         payout,
         hit,
         memo,
-        hit_image_url,
-        hit_title,
-        hit_note,
         created_at
-      `
-    )
-    .eq("category", "一果")
-    .gte("race_date", monthStart)
-    .lt("race_date", nextMonthStart)
-    .order("race_date", {
-      ascending: false,
-    })
-    .order("race_no", {
-      ascending: false,
+      `)
+      .eq("category", "一果")
+      .gte("race_date", monthStart)
+      .lt("race_date", nextMonthStart)
+      .order("race_date", {
+        ascending: false,
+      })
+      .order("race_no", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error("一果成績取得エラー", error);
+
+      return {
+        ...emptyResult,
+        errorMessage:
+          `${error.message} / ${error.code || "コードなし"}`,
+      };
+    }
+
+    const rows = Array.isArray(data) ? data : [];
+
+    console.log("一果成績取得結果", rows);
+
+    const raceCount = rows.length;
+
+    const hitRows = rows.filter((row) => {
+      return (
+        row.hit === true ||
+        Number(row.payout || 0) > 0
+      );
     });
 
-  if (error) {
-    console.error("一果成績取得エラー:", error);
+    const hitCount = hitRows.length;
+
+    const totalInvest = rows.reduce((sum, row) => {
+      return sum + Number(row.invest || 0);
+    }, 0);
+
+    const totalPayout = rows.reduce((sum, row) => {
+      return sum + Number(row.payout || 0);
+    }, 0);
+
+    const bestHit = rows.reduce((max, row) => {
+      return Math.max(
+        max,
+        Number(row.payout || 0)
+      );
+    }, 0);
+
+    const hitRate =
+      raceCount > 0
+        ? Math.round((hitCount / raceCount) * 100)
+        : 0;
+
+    const returnRate =
+      totalInvest > 0
+        ? Math.round(
+            (totalPayout / totalInvest) * 100
+          )
+        : 0;
+
+    const newestRow = rows[0];
+
+    const updated = newestRow?.race_date
+      ? newestRow.race_date.replaceAll("-", "/")
+      : "";
 
     return {
-      raceCount: 0,
-      hitCount: 0,
-      hitRate: 0,
-      returnRate: 0,
-      profit: 0,
-      bestHit: 0,
-      updated: "",
+      raceCount,
+      hitCount,
+      hitRate,
+      returnRate,
+      profit: totalPayout - totalInvest,
+      bestHit,
+      updated,
       hits: [],
+      errorMessage: "",
+    };
+  } catch (error) {
+    console.error("一果成績の予期しないエラー", error);
+
+    return {
+      ...emptyResult,
+      errorMessage:
+        error?.message || "不明な取得エラー",
     };
   }
-
-  const rows = Array.isArray(data) ? data : [];
-
-  const raceCount = rows.length;
-
-  const hitRows = rows.filter((row) => {
-    return (
-      row.hit === true ||
-      Number(row.payout || 0) > 0
-    );
-  });
-
-  const hitCount = hitRows.length;
-
-  const totalInvest = rows.reduce((sum, row) => {
-    return sum + Number(row.invest || 0);
-  }, 0);
-
-  const totalPayout = rows.reduce((sum, row) => {
-    return sum + Number(row.payout || 0);
-  }, 0);
-
-  const bestHit = rows.reduce((max, row) => {
-    return Math.max(
-      max,
-      Number(row.payout || 0)
-    );
-  }, 0);
-
-  const hitRate =
-    raceCount > 0
-      ? Math.round((hitCount / raceCount) * 100)
-      : 0;
-
-  const returnRate =
-    totalInvest > 0
-      ? Math.round(
-          (totalPayout / totalInvest) * 100
-        )
-      : 0;
-
-  const newestRow = rows[0];
-
-  const updated = newestRow?.race_date
-    ? new Date(
-        `${newestRow.race_date}T00:00:00+09:00`
-      ).toLocaleDateString("ja-JP")
-    : "";
-
-  const hits = hitRows
-    .filter((row) => row.hit_image_url)
-    .slice(0, 6)
-    .map((row) => ({
-      image: row.hit_image_url,
-
-      title:
-        row.hit_title ||
-        `${row.place}${row.race_no}R 的中`,
-
-      race:
-        `${row.race_date} ${row.place}${row.race_no}R`,
-
-      note:
-        row.hit_note ||
-        row.memo ||
-        `払戻 ${Number(
-          row.payout || 0
-        ).toLocaleString()}円`,
-    }));
-
-  return {
-    raceCount,
-    hitCount,
-    hitRate,
-    returnRate,
-    profit: totalPayout - totalInvest,
-    bestHit,
-    updated,
-    hits,
-  };
 }
-
 /* =========================
    一果新聞
 ========================= */
