@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../bsc2/lib/supabaseClient";
 
 /* =========================
    日本時間基準の今月範囲
