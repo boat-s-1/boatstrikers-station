@@ -428,7 +428,7 @@ export default async function KiinaPage() {
       <section className="sectionCard yellowCard">
                   <img
             src="/1B69AC06-7A4F-40A9-A199-AD15FC0AD5FB.png"
-            alt=キイナ新聞"
+            alt="キイナ新聞"
             className="homeTitleImage"
           />
 
