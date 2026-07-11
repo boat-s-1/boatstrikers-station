@@ -39,22 +39,22 @@ const ichikaCharacters = [
   {
     id: "ichika-01",
     name: "一果・基本",
-    src: "/bsc/characters/ichika/797e612d-792c-4bc6-ba4a-2ea3d2db6103",
+    src: "/bsc/characters/ichika/797e612d-792c-4bc6-ba4a-2ea3d2db6103.png",
   },
   {
     id: "ichika-02",
     name: "一果・笑顔",
-    src: "/bsc/characters/ichika/名称未設定のデザイン (59)",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (59).png",
   },
   {
     id: "ichika-03",
     name: "一果・腕組み",
-    src: "/bsc/characters/ichika/名称未設定のデザイン (60)",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (60).png",
   },
   {
     id: "ichika-04",
     name: "一果・指差し",
-    src: "/bsc/characters/ichika/名称未設定のデザイン (61)",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (61).png",
   },
 ];
 
