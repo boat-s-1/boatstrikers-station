@@ -505,7 +505,7 @@ export default async function KiinaPage() {
       <section className="sectionCard purpleCard">
         <img
             src="/7356D909-4CCD-4D17-AA82-6173A350D2DC.png"
-            alt=キイナ成績"
+            alt="キイナ成績"
             className="homeTitleImage"
           />
 
@@ -602,7 +602,7 @@ export default async function KiinaPage() {
         <div className="sectionTitleRow">
           <img
             src="/4879FC8D-D7D5-43FA-A5AB-EA44F595846D.png"
-            alt=キイナラボ"
+            alt="キイナラボ"
             className="homeTitleImage"
           />
 
@@ -667,7 +667,7 @@ export default async function KiinaPage() {
         <div className="sectionTitleRow">
           <img
             src="/C339D52D-DD8D-4C57-AE7C-98B215DE002C.png"
-            alt=キイナラジオ"
+            alt="キイナラジオ"
             className="homeTitleImage"
           />
         </div>
