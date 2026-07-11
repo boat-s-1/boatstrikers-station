@@ -35,6 +35,29 @@ const places = [
 
 const boats = ["1", "2", "3", "4", "5", "6"];
 
+const ichikaCharacters = [
+  {
+    id: "ichika-01",
+    name: "一果・基本",
+    src: "/bsc/characters/ichika/797e612d-792c-4bc6-ba4a-2ea3d2db6103",
+  },
+  {
+    id: "ichika-02",
+    name: "一果・笑顔",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (59)",
+  },
+  {
+    id: "ichika-03",
+    name: "一果・腕組み",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (60)",
+  },
+  {
+    id: "ichika-04",
+    name: "一果・指差し",
+    src: "/bsc/characters/ichika/名称未設定のデザイン (61)",
+  },
+];
+
 const boatColors = {
   1: "#f5f5f5",
   2: "#222222",
@@ -845,44 +868,49 @@ export default function IchikaZennjitsuPage() {
       <section className={styles.formCard}>
         <h2>画像設定</h2>
 
-        <div className={styles.field}>
-          <label htmlFor="characterImage">
-            一果のキャラクター画像
-          </label>
+       <div className={styles.field}>
+  <label>
+    一果のキャラクター画像
+  </label>
 
-          <input
-            id="characterImage"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(event) =>
-              handleImageChange(
-                event,
-                "characterImage"
-              )
-            }
-          />
+  <div className={styles.characterGrid}>
+    {ichikaCharacters.map((character) => {
+      const selected =
+        form.characterImage === character.src;
 
-          {form.characterImage && (
-            <div className={styles.imagePreview}>
-              <img
-                src={form.characterImage}
-                alt="キャラクター画像"
-              />
+      return (
+        <button
+          type="button"
+          key={character.id}
+          className={`${styles.characterCard} ${
+            selected
+              ? styles.characterCardActive
+              : ""
+          }`}
+          onClick={() =>
+            updateField(
+              "characterImage",
+              character.src
+            )
+          }
+        >
+          <div className={styles.characterThumb}>
+            <img
+              src={character.src}
+              alt={character.name}
+            />
+          </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  updateField(
-                    "characterImage",
-                    ""
-                  )
-                }
-              >
-                画像を外す
-              </button>
-            </div>
+          <span>{character.name}</span>
+
+          {selected && (
+            <strong>選択中</strong>
           )}
-        </div>
+        </button>
+      );
+    })}
+  </div>
+</div>
 
         <div className={styles.field}>
           <label htmlFor="backgroundImage">
