@@ -144,7 +144,7 @@ const sections = [
         text: "ラジオ一覧",
         href: "/radio",
         className: "redBook",
-        cover: "/book-radio.jpg",
+        cover: "/F49CB336-9539-4E68-B14F-460BB467597E.png",
       },
     ],
   },
