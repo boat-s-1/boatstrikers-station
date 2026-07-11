@@ -131,6 +131,7 @@ const sections = [
         href: "/library/news/kiina",
         className: "yellowBook",
         cover: "/736ED09D-025E-4BF8-8215-81C0C0B9EA18.png",
+        inside: "/433B2F45-DD7A-4503-A09E-309840D7E591.png",
       },
     ],
   },
