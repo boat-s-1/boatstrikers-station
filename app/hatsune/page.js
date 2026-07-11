@@ -593,13 +593,6 @@ export default async function HatsunePage() {
             className="homeTitleImage"
           />
 
-          <a
-            href="https://note.com/boat_strikers"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            noteで見る ›
-          </a>
         </div>
 
         {articles.length > 0 ? (
@@ -658,13 +651,6 @@ export default async function HatsunePage() {
             className="homeTitleImage"
           />
 
-          <a
-            href="https://www.youtube.com/@boatstrikers_official"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            YouTubeへ ›
-          </a>
         </div>
 
         <p className="radioLead">
