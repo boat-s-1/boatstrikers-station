@@ -810,13 +810,17 @@ export default function BscAdminPage() {
   ========================= */
 
   const deleteResult = async (id) => {
+  if (!id) {
+    alert("削除対象のIDが取得できません");
+    console.error("削除IDがありません:", id);
+    return;
+  }
+
   const confirmed = window.confirm(
     "この成績を削除しますか？\n削除後は元に戻せません。"
   );
 
-  if (!confirmed) {
-    return;
-  }
+  if (!confirmed) return;
 
   if (!supabase) {
     alert("Supabase未接続です");
@@ -826,11 +830,18 @@ export default function BscAdminPage() {
   setDeletingId(id);
 
   try {
+    console.log("削除するID:", id, typeof id);
+
     const { data, error } = await supabase
       .from("bsc_results")
       .delete()
       .eq("id", id)
       .select("id");
+
+    console.log("削除結果:", {
+      data,
+      error,
+    });
 
     if (error) {
       throw error;
@@ -838,32 +849,33 @@ export default function BscAdminPage() {
 
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error(
-        "削除対象が見つからないか、DELETE権限がありません"
+        `削除対象が見つかりませんでした。\n対象ID：${id}\nRLSのDELETEポリシーも確認してください。`
       );
     }
 
-    // 先に画面から削除
-    setResultRows((previous) =>
-      previous.filter((row) => row.id !== id)
+    // まず画面から即時削除
+    setResultRows((previousRows) =>
+      previousRows.filter(
+        (row) => String(row.id) !== String(id)
+      )
     );
 
-    if (editingId === id) {
+    if (String(editingId) === String(id)) {
       cancelEditResult();
     }
 
-    // 成績集計も更新
+    // 集計を更新
     await loadStats();
-
-    // 念のためDBから一覧を再取得
-    await loadResultRows();
 
     alert("成績を削除しました");
   } catch (error) {
-    console.error("成績削除エラー", error);
+    console.error("成績削除エラー:", error);
 
     alert(
       `成績の削除に失敗しました\n\n` +
-        getErrorMessage(error)
+        `message: ${error?.message || "不明なエラー"}\n` +
+        `code: ${error?.code || "なし"}\n` +
+        `details: ${error?.details || "なし"}`
     );
   } finally {
     setDeletingId(null);
