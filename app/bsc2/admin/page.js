@@ -999,20 +999,19 @@ export default function BscAdminPage() {
           🌸 一果
         </h3>
 
-        <Link
-          href="/bsc2/admin/newspaper/ichika/zenjitsu"
-          className="bscNewspaperCard ichikaCard"
-        >
-          <div>
-            <strong>一果 前日版</strong>
-            <span>
-              本命候補・展開予想・各艇評価
-            </span>
-          </div>
+      <Link
+  href="/bsc2/admin/newspaper/ichika/zenjitsu"
+  className="bscNewspaperCard ichikaCard"
+>
+  <div>
+    <strong>一果 前日版</strong>
+    <span>
+      本命候補・展開予想・各艇評価
+    </span>
+  </div>
 
-          <b>›</b>
-        </Link>
-
+  <b>›</b>
+</Link>
         <Link
           href="/bsc2/admin/newspaper/ichika/live"
           className="bscNewspaperCard ichikaCard"
