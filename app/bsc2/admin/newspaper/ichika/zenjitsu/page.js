@@ -416,24 +416,26 @@ export default function IchikaZennjitsuPage() {
 
       <section className={styles.formCard}>
         <h2>レース基本情報</h2>
+<div className={styles.field}>
+  <label htmlFor="raceDate">
+    日付
+  </label>
 
-        <div className={styles.field}>
-          <label htmlFor="raceDate">
-            日付
-          </label>
-
-          <input
-            id="raceDate"
-            type="date"
-            value={form.raceDate}
-            onChange={(event) =>
-              updateField(
-                "raceDate",
-                event.target.value
-              )
-            }
-          />
-        </div>
+  <div className={styles.dateInputWrap}>
+    <input
+      id="raceDate"
+      type="date"
+      className={styles.dateInput}
+      value={form.raceDate}
+      onChange={(event) =>
+        updateField(
+          "raceDate",
+          event.target.value
+        )
+      }
+    />
+  </div>
+</div>
 
         <div className={styles.field}>
           <label htmlFor="place">
