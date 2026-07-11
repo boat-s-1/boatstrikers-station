@@ -2,8 +2,27 @@ import Image from "next/image";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
+
+/* ページを常に最新状態で表示 */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+/* =========================
+   初期成績
+========================= */
+
+const emptyIchikaResult = {
+  raceCount: 0,
+  hitCount: 0,
+  hitRate: 0,
+  returnRate: 0,
+  profit: 0,
+  bestHit: 0,
+  updated: "",
+  hits: [],
+  errorMessage: "",
+};
+
 /* =========================
    日本時間基準の今月範囲
 ========================= */
@@ -46,39 +65,36 @@ function getCurrentMonthRange() {
 }
 
 /* =========================
+   日付表示
+========================= */
+
+function formatRaceDate(dateString) {
+  if (!dateString) {
+    return "";
+  }
+
+  return dateString.replaceAll("-", "/");
+}
+
+/* =========================
    一果の今月成績を取得
 ========================= */
 
 async function getIchikaResults() {
-  const emptyResult = {
-    raceCount: 0,
-    hitCount: 0,
-    hitRate: 0,
-    returnRate: 0,
-    profit: 0,
-    bestHit: 0,
-    updated: "",
-    hits: [],
-    errorMessage: "",
-  };
-
   if (!supabase) {
-    console.error("Supabaseクライアントが作成されていません");
+    console.error(
+      "Supabaseクライアントが作成されていません"
+    );
 
     return {
-      ...emptyResult,
-      errorMessage: "Supabase未接続",
+      ...emptyIchikaResult,
+      errorMessage: "Supabase未接続です",
     };
   }
 
   try {
     const { monthStart, nextMonthStart } =
       getCurrentMonthRange();
-
-    console.log("一果成績取得範囲", {
-      monthStart,
-      nextMonthStart,
-    });
 
     const { data, error } = await supabase
       .from("bsc_results")
@@ -93,6 +109,9 @@ async function getIchikaResults() {
         payout,
         hit,
         memo,
+        hit_image_url,
+        hit_title,
+        hit_note,
         created_at
       `)
       .eq("category", "一果")
@@ -103,21 +122,28 @@ async function getIchikaResults() {
       })
       .order("race_no", {
         ascending: false,
+      })
+      .order("created_at", {
+        ascending: false,
       });
 
     if (error) {
-      console.error("一果成績取得エラー", error);
+      console.error(
+        "一果成績取得エラー:",
+        error
+      );
 
       return {
-        ...emptyResult,
+        ...emptyIchikaResult,
         errorMessage:
-          `${error.message} / ${error.code || "コードなし"}`,
+          `${error.message} / ` +
+          `${error.code || "コードなし"}`,
       };
     }
 
-    const rows = Array.isArray(data) ? data : [];
-
-    console.log("一果成績取得結果", rows);
+    const rows = Array.isArray(data)
+      ? data
+      : [];
 
     const raceCount = rows.length;
 
@@ -130,60 +156,141 @@ async function getIchikaResults() {
 
     const hitCount = hitRows.length;
 
-    const totalInvest = rows.reduce((sum, row) => {
-      return sum + Number(row.invest || 0);
-    }, 0);
+    const totalInvest = rows.reduce(
+      (sum, row) => {
+        return (
+          sum +
+          Number(row.invest || 0)
+        );
+      },
+      0
+    );
 
-    const totalPayout = rows.reduce((sum, row) => {
-      return sum + Number(row.payout || 0);
-    }, 0);
+    const totalPayout = rows.reduce(
+      (sum, row) => {
+        return (
+          sum +
+          Number(row.payout || 0)
+        );
+      },
+      0
+    );
 
-    const bestHit = rows.reduce((max, row) => {
-      return Math.max(
-        max,
-        Number(row.payout || 0)
-      );
-    }, 0);
+    const bestHit = rows.reduce(
+      (maximum, row) => {
+        return Math.max(
+          maximum,
+          Number(row.payout || 0)
+        );
+      },
+      0
+    );
 
     const hitRate =
       raceCount > 0
-        ? Math.round((hitCount / raceCount) * 100)
+        ? Math.round(
+            (hitCount / raceCount) * 100
+          )
         : 0;
 
     const returnRate =
       totalInvest > 0
         ? Math.round(
-            (totalPayout / totalInvest) * 100
+            (totalPayout /
+              totalInvest) *
+              100
           )
         : 0;
 
+    const profit =
+      totalPayout - totalInvest;
+
     const newestRow = rows[0];
 
-    const updated = newestRow?.race_date
-      ? newestRow.race_date.replaceAll("-", "/")
-      : "";
+    const updated =
+      newestRow?.race_date
+        ? formatRaceDate(
+            newestRow.race_date
+          )
+        : "";
+
+    /*
+     * 画像が登録されている的中レースのみ表示
+     * 最大6件
+     */
+    const hits = hitRows
+      .filter((row) => {
+        return Boolean(
+          row.hit_image_url
+        );
+      })
+      .slice(0, 6)
+      .map((row) => {
+        const payout = Number(
+          row.payout || 0
+        );
+
+        return {
+          image: row.hit_image_url,
+
+          title:
+            row.hit_title ||
+            `${row.place}${row.race_no}R 的中`,
+
+          race:
+            `${formatRaceDate(
+              row.race_date
+            )} ` +
+            `${row.place}${row.race_no}R`,
+
+          note:
+            row.hit_note ||
+            row.memo ||
+            `払戻 ${payout.toLocaleString()}円`,
+        };
+      });
 
     return {
       raceCount,
       hitCount,
       hitRate,
       returnRate,
-      profit: totalPayout - totalInvest,
+      profit,
       bestHit,
       updated,
-      hits: [],
+      hits,
       errorMessage: "",
     };
   } catch (error) {
-    console.error("一果成績の予期しないエラー", error);
+    console.error(
+      "一果成績の予期しないエラー:",
+      error
+    );
 
     return {
-      ...emptyResult,
+      ...emptyIchikaResult,
       errorMessage:
-        error?.message || "不明な取得エラー",
+        error?.message ||
+        "不明な取得エラー",
     };
   }
 }
+
+/* =========================
+   RSS内の最初の画像を取得
+========================= */
+
+function getRssImage(
+  item,
+  fallbackImage
+) {
+  return (
+    item?.content?.match(
+      /<img[^>]+src="([^">]+)"/
+    )?.[1] || fallbackImage
+  );
+}
+
 /* =========================
    一果新聞
 ========================= */
@@ -192,31 +299,39 @@ async function getIchikaNewspaper() {
   try {
     const parser = new Parser();
 
-    const feed = await parser.parseURL(
-      "https://note.com/boat_strikers/rss"
-    );
+    const feed =
+      await parser.parseURL(
+        "https://note.com/boat_strikers/rss"
+      );
 
-    const item = feed.items.find((feedItem) =>
-      feedItem.title?.includes("【一果前日版】")
+    const item = feed.items.find(
+      (feedItem) =>
+        feedItem.title?.includes(
+          "【一果前日版】"
+        )
     );
 
     if (!item) {
       return null;
     }
 
-    const image =
-      item.content?.match(
-        /<img[^>]+src="([^">]+)"/
-      )?.[1] || "/ichika-banner.jpg";
-
     return {
-      title: item.title,
-      link: item.link,
-      date: item.pubDate,
-      image,
+      title:
+        item.title ||
+        "一果前日版",
+      link: item.link || "",
+      date: item.pubDate || "",
+      image: getRssImage(
+        item,
+        "/ichika-banner.jpg"
+      ),
     };
   } catch (error) {
-    console.error("一果新聞取得エラー:", error);
+    console.error(
+      "一果新聞取得エラー:",
+      error
+    );
+
     return null;
   }
 }
@@ -229,30 +344,35 @@ async function getIchikaArticles() {
   try {
     const parser = new Parser();
 
-    const feed = await parser.parseURL(
-      "https://note.com/boat_strikers/rss"
-    );
+    const feed =
+      await parser.parseURL(
+        "https://note.com/boat_strikers/rss"
+      );
 
     return feed.items
       .filter((item) =>
-        item.title?.includes("【一果ゼミ")
+        item.title?.includes(
+          "【一果ゼミ"
+        )
       )
       .slice(0, 6)
-      .map((item) => {
-        const image =
-          item.content?.match(
-            /<img[^>]+src="([^">]+)"/
-          )?.[1] || "";
-
-        return {
-          title: item.title,
-          link: item.link,
-          date: item.pubDate,
-          image,
-        };
-      });
+      .map((item) => ({
+        title:
+          item.title ||
+          "一果ゼミ",
+        link: item.link || "",
+        date: item.pubDate || "",
+        image: getRssImage(
+          item,
+          "/ichika-banner.jpg"
+        ),
+      }));
   } catch (error) {
-    console.error("一果ゼミ取得エラー:", error);
+    console.error(
+      "一果ゼミ取得エラー:",
+      error
+    );
+
     return [];
   }
 }
@@ -262,15 +382,20 @@ async function getIchikaArticles() {
 ========================= */
 
 export default async function IchikaPage() {
-  const [articles, newspaper, result] =
-    await Promise.all([
-      getIchikaArticles(),
-      getIchikaNewspaper(),
-      getIchikaResults(),
-    ]);
+  const [
+    articles,
+    newspaper,
+    result,
+  ] = await Promise.all([
+    getIchikaArticles(),
+    getIchikaNewspaper(),
+    getIchikaResults(),
+  ]);
 
   return (
     <main className="page ichikaPage">
+      {/* ヘッダー */}
+
       <header className="header">
         <div className="logo">
           BOAT
@@ -287,6 +412,8 @@ export default async function IchikaPage() {
           LINE登録
         </a>
       </header>
+
+      {/* ヒーロー */}
 
       <section className="hero">
         <Image
@@ -322,13 +449,17 @@ export default async function IchikaPage() {
             />
 
             <div>
-              <h3>{newspaper.title}</h3>
+              <h3>
+                {newspaper.title}
+              </h3>
 
               <p>
                 {newspaper.date
                   ? new Date(
                       newspaper.date
-                    ).toLocaleDateString("ja-JP")
+                    ).toLocaleDateString(
+                      "ja-JP"
+                    )
                   : ""}
               </p>
 
@@ -339,15 +470,19 @@ export default async function IchikaPage() {
           </a>
         ) : (
           <p>
-            今日の一果新聞はまだありません。
+            今日の一果新聞は
+            まだありません。
           </p>
         )}
       </section>
 
-      {/* ツール */}
+      {/* イン逃げツール */}
 
       <section className="sectionCard">
-        <h2>一果のイン逃げツール（β版）</h2>
+        <h2>
+          一果のイン逃げツール
+          （β版）
+        </h2>
 
         <a
           href="https://www.boat-strike.com/ichika"
@@ -377,8 +512,10 @@ export default async function IchikaPage() {
 
         <div>
           <span>今日の一言</span>
+
           <p>
-            今日はイン逃げ信頼度高めの日だよ♪
+            今日はイン逃げ信頼度
+            高めの日だよ♪
           </p>
         </div>
       </section>
@@ -394,12 +531,28 @@ export default async function IchikaPage() {
 
         <p className="recordLead">
           最終更新：
-          {result.updated || "まだ登録がありません"}
+          {result.updated ||
+            "まだ登録がありません"}
         </p>
+
+        {result.errorMessage && (
+          <p
+            className="recordLead"
+            style={{
+              color: "#d93025",
+              wordBreak: "break-word",
+            }}
+          >
+            成績取得エラー：
+            {result.errorMessage}
+          </p>
+        )}
 
         <div className="recordGrid">
           <div className="recordCard">
-            <span>予想レース数</span>
+            <span>
+              予想レース数
+            </span>
 
             <strong>
               {result.raceCount}R
@@ -429,8 +582,11 @@ export default async function IchikaPage() {
 
             <p>
               収支
-              {result.profit > 0 ? "+" : ""}
-              {result.profit.toLocaleString()}円
+              {result.profit > 0
+                ? "+"
+                : ""}
+              {result.profit.toLocaleString()}
+              円
             </p>
           </div>
 
@@ -438,18 +594,24 @@ export default async function IchikaPage() {
             <span>最高配当</span>
 
             <strong>
-              {result.bestHit.toLocaleString()}円
+              {result.bestHit.toLocaleString()}
+              円
             </strong>
 
             <p>今月最高払戻</p>
           </div>
         </div>
 
+        {/* 的中画像 */}
+
         {result.hits.length > 0 ? (
-          <HitGallery hits={result.hits} />
+          <HitGallery
+            hits={result.hits}
+          />
         ) : (
           <p className="recordLead">
-            的中画像はまだ登録されていません。
+            的中画像は
+            まだ登録されていません。
           </p>
         )}
       </section>
@@ -473,39 +635,50 @@ export default async function IchikaPage() {
           </a>
         </div>
 
-        <div className="labList">
-          {articles.map((article) => (
-            <a
-              key={article.link}
-              href={article.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="labItem"
-            >
-              <img
-                src={
-                  article.image ||
-                  "/ichika-banner.jpg"
-                }
-                alt={article.title}
-              />
+        {articles.length > 0 ? (
+          <div className="labList">
+            {articles.map(
+              (article) => (
+                <a
+                  key={article.link}
+                  href={article.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="labItem"
+                >
+                  <img
+                    src={
+                      article.image ||
+                      "/ichika-banner.jpg"
+                    }
+                    alt={article.title}
+                  />
 
-              <div>
-                <h3>{article.title}</h3>
+                  <div>
+                    <h3>
+                      {article.title}
+                    </h3>
 
-                <small>
-                  {article.date
-                    ? new Date(
-                        article.date
-                      ).toLocaleDateString(
-                        "ja-JP"
-                      )
-                    : ""}
-                </small>
-              </div>
-            </a>
-          ))}
-        </div>
+                    <small>
+                      {article.date
+                        ? new Date(
+                            article.date
+                          ).toLocaleDateString(
+                            "ja-JP"
+                          )
+                        : ""}
+                    </small>
+                  </div>
+                </a>
+              )
+            )}
+          </div>
+        ) : (
+          <p>
+            一果ラボの記事は
+            まだありません。
+          </p>
+        )}
       </section>
 
       {/* ラジオ */}
@@ -520,8 +693,10 @@ export default async function IchikaPage() {
         </div>
 
         <p className="radioLead">
-          一果・初音・キイナがお届けする競艇ラジオ♪
-          イン飛び研究や女子戦考察、穴党反省会を配信中！
+          一果・初音・キイナがお届けする
+          競艇ラジオ♪
+          イン飛び研究や女子戦考察、
+          穴党反省会を配信中！
         </p>
 
         <div className="radioPlayer">
@@ -546,7 +721,7 @@ export default async function IchikaPage() {
         </a>
       </section>
 
-      {/* LINE */}
+      {/* LINE登録 */}
 
       <section className="sectionCard lineBannerCard">
         <a
@@ -563,12 +738,20 @@ export default async function IchikaPage() {
         </a>
       </section>
 
+      {/* 下部メニュー */}
+
       <nav className="bottomNav">
         <a href="/">ホーム</a>
         <a href="/ichika">一果</a>
-        <a href="/hatsune">初音</a>
-        <a href="/kiina">キイナ</a>
-        <a href="/library">図書館</a>
+        <a href="/hatsune">
+          初音
+        </a>
+        <a href="/kiina">
+          キイナ
+        </a>
+        <a href="/library">
+          図書館
+        </a>
       </nav>
     </main>
   );
