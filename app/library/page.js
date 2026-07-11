@@ -115,6 +115,7 @@ const sections = [
         href: "/library/news/ichika",
         className: "greenBook",
         cover: "/C53B3EAC-3CBA-411D-BCFF-4C67354CC424.png",
+        inside: "/50A928E2-55B4-4FEC-BE0E-6B890A37C4A4.png"'
       },
       {
         title: "初音予想新聞",
