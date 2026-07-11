@@ -626,13 +626,6 @@ export default async function IchikaPage() {
             className="homeTitleImage"
           />
 
-          <a
-            href="https://note.com/boat_strikers"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            noteで見る ›
-          </a>
         </div>
 
         {articles.length > 0 ? (
