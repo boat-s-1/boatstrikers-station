@@ -1098,13 +1098,14 @@ export default function BscAdminPage() {
       {/* 新規収支・画像入力 */}
 
       {menu === "result" && (
-        <section className="bscAdminBox">
-          <button
-            type="button"
-            onClick={() => setMenu("top")}
-          >
-            ← 管理画面トップへ
-          </button>
+  <section className="bscAdminBox bscResultInputBox">
+         <button
+  type="button"
+  className="bscAdminBackButton"
+  onClick={() => setMenu("top")}
+>
+  ← 管理画面トップへ
+</button>
 
           <h2>収支・的中画像入力</h2>
 
