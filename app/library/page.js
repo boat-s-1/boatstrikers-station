@@ -146,6 +146,7 @@ const sections = [
         href: "/radio",
         className: "redBook",
         cover: "/F49CB336-9539-4E68-B14F-460BB467597E.png",
+        inside: "/433B2F45-DD7A-4503-A09E-309840D7E591.png",
       },
     ],
   },
