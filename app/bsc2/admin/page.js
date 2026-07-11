@@ -74,89 +74,65 @@ export default function BscAdminPage() {
   };
 
   const saveResult = async () => {
-    if (!supabase) return alert("Supabase未接続です");
-
-    setSaving(true);
-
-    const { error } = await supabase.from("bsc_results").insert({
-      ...result,
-      invest: Number(result.invest),
-      payout: Number(result.payout),
-      race_no: Number(result.race_no),
-      hit: Number(result.payout) > 0,
-    });
-
-    setSaving(false);
-
-    if (error) {
-      console.error(error);
-      alert("保存に失敗しました");
-      return;
-    }
-
-    alert("レース結果を保存しました！");
-    loadStats();
-  };
-
-  const loadStats = async () => {
-    if (!supabase) return;
-
-    const start = new Date();
-    start.setDate(1);
-    const monthStart = start.toISOString().slice(0, 10);
-
-    const { data, error } = await supabase
-      .from("bsc_results")
-      .select("*")
-      .gte("race_date", monthStart);
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const totalRace = data.length;
-    const hitRace = data.filter((r) => r.hit).length;
-    const invest = data.reduce((sum, r) => sum + Number(r.invest || 0), 0);
-    const payout = data.reduce((sum, r) => sum + Number(r.payout || 0), 0);
-    const maxPayout = data.reduce(
-      (max, r) => Math.max(max, Number(r.payout || 0)),
-      0
-    );
-
-    setStats({
-      totalRace,
-      hitRace,
-      hitRate: totalRace ? Math.round((hitRace / totalRace) * 100) : 0,
-      invest,
-      payout,
-      profit: payout - invest,
-      recovery: invest ? Math.round((payout / invest) * 100) : 0,
-      maxPayout,
-    });
-  };
-
-  useEffect(() => {
-    if (ok) loadStats();
-  }, [ok]);
-
-  if (!ok) {
-    return (
-      <main className="gamePage">
-        <section className="bscAdminBox">
-          <h1>BSC Admin</h1>
-          <input
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            placeholder="PIN"
-            type="password"
-          />
-          <button onClick={login}>ログイン</button>
-        </section>
-      </main>
-    );
+  if (!supabase) {
+    alert("Supabase未接続です");
+    return;
   }
 
+  if (!result.race_date || !result.place || !result.race_no) {
+    alert("日付・場名・レース番号を入力してください");
+    return;
+  }
+
+  setSaving(true);
+
+  const insertData = {
+    race_date: result.race_date,
+    place: result.place.trim(),
+    race_no: Number(result.race_no),
+    category: result.category,
+    bet_text: result.bet_text.trim(),
+    invest: Number(result.invest || 0),
+    payout: Number(result.payout || 0),
+    hit: Number(result.payout || 0) > 0,
+    memo: result.memo.trim(),
+  };
+
+  console.log("保存データ", insertData);
+
+  const { data, error } = await supabase
+    .from("bsc_results")
+    .insert([insertData])
+    .select();
+
+  setSaving(false);
+
+  if (error) {
+    console.error("Supabase保存エラー", error);
+
+    alert(
+      `保存に失敗しました\n\n` +
+      `message: ${error.message}\n` +
+      `code: ${error.code || "なし"}\n` +
+      `details: ${error.details || "なし"}`
+    );
+
+    return;
+  }
+
+  console.log("保存成功", data);
+  alert("レース結果を保存しました！");
+
+  setResult((prev) => ({
+    ...prev,
+    bet_text: "",
+    invest: 0,
+    payout: 0,
+    memo: "",
+  }));
+
+  await loadStats();
+};
   return (
     <main className="gamePage">
       <header className="gameTopBar">
