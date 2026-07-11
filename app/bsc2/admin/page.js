@@ -810,52 +810,65 @@ export default function BscAdminPage() {
   ========================= */
 
   const deleteResult = async (id) => {
-    const confirmed = window.confirm(
-      "この成績を削除しますか？\n削除後は元に戻せません。"
+  const confirmed = window.confirm(
+    "この成績を削除しますか？\n削除後は元に戻せません。"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  if (!supabase) {
+    alert("Supabase未接続です");
+    return;
+  }
+
+  setDeletingId(id);
+
+  try {
+    const { data, error } = await supabase
+      .from("bsc_results")
+      .delete()
+      .eq("id", id)
+      .select("id");
+
+    if (error) {
+      throw error;
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error(
+        "削除対象が見つからないか、DELETE権限がありません"
+      );
+    }
+
+    // 先に画面から削除
+    setResultRows((previous) =>
+      previous.filter((row) => row.id !== id)
     );
 
-    if (!confirmed) {
-      return;
+    if (editingId === id) {
+      cancelEditResult();
     }
 
-    if (!supabase) {
-      alert("Supabase未接続です");
-      return;
-    }
+    // 成績集計も更新
+    await loadStats();
 
-    setDeletingId(id);
+    // 念のためDBから一覧を再取得
+    await loadResultRows();
 
-    try {
-      const { error } = await supabase
-        .from("bsc_results")
-        .delete()
-        .eq("id", id);
+    alert("成績を削除しました");
+  } catch (error) {
+    console.error("成績削除エラー", error);
 
-      if (error) {
-        throw error;
-      }
-
-      if (editingId === id) {
-        cancelEditResult();
-      }
-
-      alert("成績を削除しました");
-
-      await Promise.all([
-        loadResultRows(),
-        loadStats(),
-      ]);
-    } catch (error) {
-      console.error("成績削除エラー", error);
-
-      alert(
-        `成績の削除に失敗しました\n\n` +
-          getErrorMessage(error)
-      );
-    } finally {
-      setDeletingId(null);
-    }
-  };
+    alert(
+      `成績の削除に失敗しました\n\n` +
+        getErrorMessage(error)
+    );
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   /* =========================
      ログイン後の初期取得
