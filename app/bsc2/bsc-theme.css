@@ -642,3 +642,196 @@ text-align:center;
   margin-left: auto;
   padding: 8px;
 }
+
+/* =========================
+   新聞作成メニュー
+========================= */
+
+.bscAdminMainMenu {
+  display: grid;
+  gap: 12px;
+}
+
+.bscNewspaperMenu {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 3px dashed rgba(23, 63, 114, 0.18);
+}
+
+.bscNewspaperHeading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  margin-bottom: 24px;
+}
+
+.bscNewspaperHeading span {
+  color: #ff4f93;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.bscNewspaperHeading strong {
+  margin-top: 5px;
+  color: #173f72;
+  font-size: 32px;
+  letter-spacing: 0.04em;
+}
+
+.bscNewspaperTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      135deg,
+      #173f72,
+      #28619f
+    );
+  color: #fff;
+  box-shadow:
+    0 10px 24px
+    rgba(23, 63, 114, 0.18);
+}
+
+.bscNewspaperTitle > span {
+  font-size: 34px;
+}
+
+.bscNewspaperTitle h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+}
+
+.bscNewspaperTitle p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: #d9e9ff;
+}
+
+.bscNewspaperGroup {
+  margin-top: 24px;
+}
+
+.bscNewspaperGroup h3 {
+  margin: 0 0 10px;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.ichikaHeading {
+  color: #e84b8b;
+}
+
+.kiinaHeading {
+  color: #a97900;
+}
+
+.hatsuneHeading {
+  color: #8550ba;
+}
+
+.bscNewspaperCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 82px;
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  border: 3px solid transparent;
+  border-radius: 20px;
+  background: #fff;
+  color: #173f72;
+  text-decoration: none;
+  box-shadow:
+    0 7px 20px
+    rgba(23, 63, 114, 0.08);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.bscNewspaperCard:active {
+  transform: scale(0.98);
+}
+
+.bscNewspaperCard div {
+  min-width: 0;
+}
+
+.bscNewspaperCard strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.bscNewspaperCard span {
+  display: block;
+  margin-top: 6px;
+  color: #71839a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.bscNewspaperCard b {
+  flex-shrink: 0;
+  color: #9bacc0;
+  font-size: 38px;
+  line-height: 1;
+}
+
+.ichikaCard {
+  border-color: #ffd1e3;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #fff6fa
+    );
+}
+
+.kiinaCard {
+  border-color: #ffe18a;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #fffbed
+    );
+}
+
+.hatsuneCard {
+  border-color: #e1c9fa;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #fbf6ff
+    );
+}
+
+@media (max-width: 600px) {
+  .bscNewspaperMenu {
+    margin-top: 28px;
+    padding-top: 24px;
+  }
+
+  .bscNewspaperCard {
+    min-height: 78px;
+    padding: 15px;
+  }
+
+  .bscNewspaperCard strong {
+    font-size: 17px;
+  }
+
+  .bscNewspaperCard span {
+    font-size: 12px;
+  }
+}
