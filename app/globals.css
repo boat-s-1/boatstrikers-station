@@ -7899,3 +7899,177 @@ color:white;
     padding: 16px 12px;
   }
 }
+
+/* =========================
+   収支・的中画像入力だけ調整
+========================= */
+
+.bscResultInputBox {
+  width: calc(100% - 24px);
+  max-width: 720px;
+  margin: 24px auto 120px;
+  padding: 24px 18px 32px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bscResultInputBox *,
+.bscResultInputBox *::before,
+.bscResultInputBox *::after {
+  box-sizing: border-box;
+}
+
+.bscResultInputBox h2,
+.bscResultInputBox h3,
+.bscResultInputBox p {
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.bscResultInputBox label {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 22px;
+}
+
+.bscResultInputBox label > span {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.bscResultInputBox input,
+.bscResultInputBox select,
+.bscResultInputBox textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.bscResultInputBox input[type="date"],
+.bscResultInputBox input[type="number"],
+.bscResultInputBox input[type="text"],
+.bscResultInputBox select,
+.bscResultInputBox textarea {
+  padding: 16px;
+  border: 3px solid #d5a44c;
+  border-radius: 18px;
+  background: #fff;
+  font-size: 18px;
+}
+
+/* ファイル入力は通常入力と分ける */
+.bscResultInputBox input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  border: 2px dashed #d5a44c;
+  border-radius: 16px;
+  background: #fffaf0;
+  font-size: 15px;
+  overflow: hidden;
+}
+
+/* Safariでファイルボタンが横にはみ出す対策 */
+.bscResultInputBox input[type="file"]::file-selector-button {
+  max-width: 100%;
+  margin-right: 10px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ff5d8f, #ff9f0a);
+  color: #fff;
+  font-weight: 700;
+}
+
+.bscResultInputBox hr {
+  width: 100%;
+  max-width: 100%;
+  margin: 28px 0;
+  border: 0;
+  border-top: 2px solid rgba(213, 164, 76, 0.35);
+}
+
+.bscResultInputBox .bscImagePreview {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 22px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.bscResultInputBox .bscImagePreview img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.bscResultInputBox .bscImagePreview button {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 12px;
+}
+
+.bscResultInputBox > button:last-child {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 12px 0 0;
+  padding: 18px 16px;
+}
+
+.bscAdminBackButton {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 30px;
+  padding: 18px 16px;
+  border: none;
+  border-radius: 22px;
+  background: linear-gradient(90deg, #ff4f87, #ff9f0a);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .bscResultInputBox {
+    width: calc(100% - 20px);
+    margin: 18px auto 110px;
+    padding: 20px 14px 28px;
+    border-radius: 24px;
+  }
+
+  .bscResultInputBox h2 {
+    font-size: 27px;
+    line-height: 1.3;
+  }
+
+  .bscResultInputBox h3 {
+    font-size: 21px;
+  }
+
+  .bscResultInputBox input,
+  .bscResultInputBox select,
+  .bscResultInputBox textarea {
+    font-size: 16px;
+  }
+
+  .bscResultInputBox input[type="file"] {
+    font-size: 13px;
+  }
+
+  .bscAdminBackButton {
+    font-size: 18px;
+    padding: 16px 12px;
+  }
+}
