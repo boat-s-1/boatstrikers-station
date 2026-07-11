@@ -1,38 +1,139 @@
 import Image from "next/image";
 import Parser from "rss-parser";
+import { supabase } from "./bsc2/lib/supabaseClient";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 
-async function getResults() {
-  const res = await fetch(
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXTDYLkLLIXFG8zuoonKBfMOEEan5zlthcP0GXXbRj85e9JHcbZMZzIjEAXxjwEgS-lQTEOsqNbDdp/pub?output=csv",
-    { next: { revalidate: 300 } }
+/* =========================
+   日本時間基準の今月範囲
+========================= */
+
+function getCurrentMonthRange() {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "numeric",
+  });
+
+  const parts = formatter.formatToParts(new Date());
+
+  const year = Number(
+    parts.find((part) => part.type === "year")?.value
   );
 
-  const text = await res.text();
+  const month = Number(
+    parts.find((part) => part.type === "month")?.value
+  );
 
-  const rows = text.trim().split("\n").slice(1);
+  const monthStart =
+    `${year}-${String(month).padStart(2, "0")}-01`;
 
-  return rows.map((row) => {
-    const [
-      name,
-      raceCount,
-      hitRate,
-      returnRate,
-      profit,
-      bestHit,
-      updated,
-    ] = row.split(",");
+  let nextYear = year;
+  let nextMonth = month + 1;
 
-    return {
-      name,
-      raceCount,
-      hitRate,
-      returnRate,
-      profit,
-      bestHit,
-      updated,
+  if (nextMonth === 13) {
+    nextYear += 1;
+    nextMonth = 1;
+  }
+
+  const nextMonthStart =
+    `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
+  return {
+    monthStart,
+    nextMonthStart,
+  };
+}
+
+/* =========================
+   3人の今月の予想数を取得
+========================= */
+
+async function getMonthlyForecastCounts() {
+  const defaultResults = [
+    {
+      name: "ichika",
+      raceCount: 0,
+    },
+    {
+      name: "hatsune",
+      raceCount: 0,
+    },
+    {
+      name: "kiina",
+      raceCount: 0,
+    },
+  ];
+
+  if (!supabase) {
+    console.error("Supabase未接続です");
+    return defaultResults;
+  }
+
+  try {
+    const { monthStart, nextMonthStart } =
+      getCurrentMonthRange();
+
+    const { data, error } = await supabase
+      .from("bsc_results")
+      .select("category")
+      .gte("race_date", monthStart)
+      .lt("race_date", nextMonthStart)
+      .in("category", [
+        "一果",
+        "初音",
+        "キイナ",
+      ]);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = Array.isArray(data)
+      ? data
+      : [];
+
+    const counts = {
+      一果: 0,
+      初音: 0,
+      キイナ: 0,
     };
-  });
+
+    rows.forEach((row) => {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          counts,
+          row.category
+        )
+      ) {
+        counts[row.category] += 1;
+      }
+    });
+
+    return [
+      {
+        name: "ichika",
+        raceCount: counts["一果"],
+      },
+      {
+        name: "hatsune",
+        raceCount: counts["初音"],
+      },
+      {
+        name: "kiina",
+        raceCount: counts["キイナ"],
+      },
+    ];
+  } catch (error) {
+    console.error(
+      "トップページ成績取得エラー:",
+      error
+    );
+
+    return defaultResults;
+  }
 }
 
 async function getTodayNewspapers() {
@@ -106,9 +207,15 @@ async function getLatestInfo() {
 }
 
 export default async function Home() {
-  const news = await getTodayNewspapers();
-  const latestInfo = await getLatestInfo();
-  const results = await getResults();
+  const [
+    news,
+    latestInfo,
+    results,
+  ] = await Promise.all([
+    getTodayNewspapers(),
+    getLatestInfo(),
+    getMonthlyForecastCounts(),
+  ]);
 
   return (
     <main className="page">
