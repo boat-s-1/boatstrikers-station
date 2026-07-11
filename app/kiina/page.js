@@ -426,10 +426,11 @@ export default async function KiinaPage() {
       {/* キイナ新聞 */}
 
       <section className="sectionCard yellowCard">
-        <h2>
-          📰 今日のキイナ新聞
-          （前日版）
-        </h2>
+                  <img
+            src="/1B69AC06-7A4F-40A9-A199-AD15FC0AD5FB.png"
+            alt=キイナ新聞"
+            className="homeTitleImage"
+          />
 
         {newspaper ? (
           <a
@@ -502,7 +503,11 @@ export default async function KiinaPage() {
       {/* 今月の成績 */}
 
       <section className="sectionCard purpleCard">
-        <h2>🏆 今月の成績</h2>
+        <img
+            src="/7356D909-4CCD-4D17-AA82-6173A350D2DC.png"
+            alt=キイナ成績"
+            className="homeTitleImage"
+          />
 
         <p className="recordLead">
           最終更新：
@@ -595,7 +600,11 @@ export default async function KiinaPage() {
 
       <section className="sectionCard yellowCard">
         <div className="sectionTitleRow">
-          <h2>🔬 穴党ラボ</h2>
+          <img
+            src="/4879FC8D-D7D5-43FA-A5AB-EA44F595846D.png"
+            alt=キイナラボ"
+            className="homeTitleImage"
+          />
 
           <a
             href="https://note.com/boat_strikers"
@@ -656,17 +665,11 @@ export default async function KiinaPage() {
 
       <section className="sectionCard yellowCard">
         <div className="sectionTitleRow">
-          <h2>
-            🎙 Boat Strikers Radio
-          </h2>
-
-          <a
-            href="https://www.youtube.com/@boatstrikers_official"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            YouTubeへ ›
-          </a>
+          <img
+            src="/C339D52D-DD8D-4C57-AE7C-98B215DE002C.png"
+            alt=キイナラジオ"
+            className="homeTitleImage"
+          />
         </div>
 
         <p className="radioLead">
