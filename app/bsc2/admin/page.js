@@ -1,23 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 /* =========================
-   日本時間の日付を取得
+   基本設定
 ========================= */
 
-function getJapanDateString() {
+const STORAGE_BUCKET = "bsc-hit-images";
+
+const initialStats = {
+  totalRace: 0,
+  hitRace: 0,
+  hitRate: 0,
+  invest: 0,
+  payout: 0,
+  profit: 0,
+  recovery: 0,
+  maxPayout: 0,
+};
+
+const initialEditResult = {
+  race_date: "",
+  place: "",
+  race_no: 1,
+  category: "一果",
+  bet_text: "",
+  invest: 0,
+  payout: 0,
+  memo: "",
+  hit_image_url: "",
+  hit_title: "",
+  hit_note: "",
+};
+
+/* =========================
+   日本時間の日付
+========================= */
+
+function getJapanDateString(date = new Date()) {
   return new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(date);
 }
 
 /* =========================
-   日本時間基準で今月の範囲を取得
+   日本時間基準の今月範囲
 ========================= */
 
 function getCurrentMonthRange() {
@@ -57,34 +88,15 @@ function getCurrentMonthRange() {
 }
 
 /* =========================
-   初期成績
+   ファイル名用カテゴリ
 ========================= */
 
-const initialStats = {
-  totalRace: 0,
-  hitRace: 0,
-  hitRate: 0,
-  invest: 0,
-  payout: 0,
-  profit: 0,
-  recovery: 0,
-  maxPayout: 0,
-};
-
-/* =========================
-   初期編集フォーム
-========================= */
-
-const initialEditResult = {
-  race_date: "",
-  place: "",
-  race_no: 1,
-  category: "一果",
-  bet_text: "",
-  invest: 0,
-  payout: 0,
-  memo: "",
-};
+function getCategorySlug(category) {
+  if (category === "一果") return "ichika";
+  if (category === "初音") return "hatsune";
+  if (category === "キイナ") return "kiina";
+  return "bsc";
+}
 
 /* =========================
    管理画面
@@ -99,12 +111,24 @@ export default function BscAdminPage() {
 
   const [savingEvent, setSavingEvent] = useState(false);
   const [savingResult, setSavingResult] = useState(false);
+  const [updatingResult, setUpdatingResult] = useState(false);
+
   const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingRows, setLoadingRows] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [resultRows, setResultRows] = useState([]);
-  const [loadingRows, setLoadingRows] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
+
+  /* 新規登録用画像 */
+  const [hitImageFile, setHitImageFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageInputKey, setImageInputKey] = useState(0);
+
+  /* 編集用画像 */
+  const [editHitImageFile, setEditHitImageFile] = useState(null);
+  const [uploadingEditImage, setUploadingEditImage] = useState(false);
+  const [editImageInputKey, setEditImageInputKey] = useState(0);
 
   const [form, setForm] = useState({
     id: `${today}-daily`,
@@ -125,6 +149,9 @@ export default function BscAdminPage() {
     invest: 1000,
     payout: 0,
     memo: "",
+    hit_image_url: "",
+    hit_title: "",
+    hit_note: "",
   });
 
   const [editResult, setEditResult] = useState(
@@ -134,7 +161,37 @@ export default function BscAdminPage() {
   const [stats, setStats] = useState(initialStats);
 
   /* =========================
-     エラー文作成
+     画像プレビューURL
+  ========================= */
+
+  const newImagePreview = useMemo(() => {
+    if (!hitImageFile) return "";
+    return URL.createObjectURL(hitImageFile);
+  }, [hitImageFile]);
+
+  const editImagePreview = useMemo(() => {
+    if (!editHitImageFile) return "";
+    return URL.createObjectURL(editHitImageFile);
+  }, [editHitImageFile]);
+
+  useEffect(() => {
+    return () => {
+      if (newImagePreview) {
+        URL.revokeObjectURL(newImagePreview);
+      }
+    };
+  }, [newImagePreview]);
+
+  useEffect(() => {
+    return () => {
+      if (editImagePreview) {
+        URL.revokeObjectURL(editImagePreview);
+      }
+    };
+  }, [editImagePreview]);
+
+  /* =========================
+     エラー表示
   ========================= */
 
   const getErrorMessage = (error) => {
@@ -156,6 +213,99 @@ export default function BscAdminPage() {
     }
 
     alert("PINが違います");
+  };
+
+  /* =========================
+     画像アップロード
+  ========================= */
+
+  const uploadHitImage = async ({
+    file,
+    category,
+    raceDate,
+    setUploading,
+  }) => {
+    if (!file) {
+      return "";
+    }
+
+    if (!supabase) {
+      throw new Error("Supabase未接続です");
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error(
+        "JPEG・PNG・WebP画像を選択してください"
+      );
+    }
+
+    const maxSize = 8 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      throw new Error(
+        "画像サイズは8MB以下にしてください"
+      );
+    }
+
+    setUploading(true);
+
+    try {
+      const originalExtension =
+        file.name.split(".").pop()?.toLowerCase();
+
+      const extension =
+        originalExtension === "jpeg"
+          ? "jpg"
+          : originalExtension || "jpg";
+
+      const categorySlug = getCategorySlug(category);
+
+      const uniqueId =
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2)}`;
+
+      const filePath =
+        `${categorySlug}/` +
+        `${raceDate || today}/` +
+        `${Date.now()}-${uniqueId}.${extension}`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type,
+          });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(filePath);
+
+      if (!data?.publicUrl) {
+        throw new Error(
+          "画像の公開URLを取得できませんでした"
+        );
+      }
+
+      return data.publicUrl;
+    } finally {
+      setUploading(false);
+    }
   };
 
   /* =========================
@@ -181,12 +331,13 @@ export default function BscAdminPage() {
     setSavingEvent(true);
 
     try {
-      const { error: deactivateError } = await supabase
-        .from("daily_events")
-        .update({
-          is_active: false,
-        })
-        .eq("is_active", true);
+      const { error: deactivateError } =
+        await supabase
+          .from("daily_events")
+          .update({
+            is_active: false,
+          })
+          .eq("is_active", true);
 
       if (deactivateError) {
         throw deactivateError;
@@ -242,21 +393,19 @@ export default function BscAdminPage() {
 
       const { data, error } = await supabase
         .from("bsc_results")
-        .select(
-          `
-            id,
-            race_date,
-            place,
-            race_no,
-            category,
-            bet_text,
-            invest,
-            payout,
-            hit,
-            memo,
-            created_at
-          `
-        )
+        .select(`
+          id,
+          race_date,
+          place,
+          race_no,
+          category,
+          bet_text,
+          invest,
+          payout,
+          hit,
+          memo,
+          created_at
+        `)
         .gte("race_date", monthStart)
         .lt("race_date", nextMonthStart);
 
@@ -327,7 +476,7 @@ export default function BscAdminPage() {
   };
 
   /* =========================
-     収支データ保存
+     新規成績保存
   ========================= */
 
   const saveResult = async () => {
@@ -378,6 +527,18 @@ export default function BscAdminPage() {
     setSavingResult(true);
 
     try {
+      let hitImageUrl =
+        result.hit_image_url?.trim() || "";
+
+      if (hitImageFile) {
+        hitImageUrl = await uploadHitImage({
+          file: hitImageFile,
+          category: result.category,
+          raceDate: result.race_date,
+          setUploading: setUploadingImage,
+        });
+      }
+
       const insertData = {
         race_date: result.race_date,
         place: result.place.trim(),
@@ -388,6 +549,9 @@ export default function BscAdminPage() {
         payout: payoutAmount,
         hit: payoutAmount > 0,
         memo: result.memo.trim(),
+        hit_image_url: hitImageUrl,
+        hit_title: result.hit_title.trim(),
+        hit_note: result.hit_note.trim(),
       };
 
       const { error } = await supabase
@@ -406,7 +570,13 @@ export default function BscAdminPage() {
         invest: 0,
         payout: 0,
         memo: "",
+        hit_image_url: "",
+        hit_title: "",
+        hit_note: "",
       }));
+
+      setHitImageFile(null);
+      setImageInputKey((previous) => previous + 1);
 
       await loadStats();
     } catch (error) {
@@ -439,21 +609,22 @@ export default function BscAdminPage() {
 
       const { data, error } = await supabase
         .from("bsc_results")
-        .select(
-          `
-            id,
-            race_date,
-            place,
-            race_no,
-            category,
-            bet_text,
-            invest,
-            payout,
-            hit,
-            memo,
-            created_at
-          `
-        )
+        .select(`
+          id,
+          race_date,
+          place,
+          race_no,
+          category,
+          bet_text,
+          invest,
+          payout,
+          hit,
+          memo,
+          hit_image_url,
+          hit_title,
+          hit_note,
+          created_at
+        `)
         .gte("race_date", monthStart)
         .lt("race_date", nextMonthStart)
         .order("race_date", {
@@ -488,6 +659,8 @@ export default function BscAdminPage() {
 
   const startEditResult = (row) => {
     setEditingId(row.id);
+    setEditHitImageFile(null);
+    setEditImageInputKey((previous) => previous + 1);
 
     setEditResult({
       race_date: row.race_date || "",
@@ -498,6 +671,9 @@ export default function BscAdminPage() {
       invest: Number(row.invest || 0),
       payout: Number(row.payout || 0),
       memo: row.memo || "",
+      hit_image_url: row.hit_image_url || "",
+      hit_title: row.hit_title || "",
+      hit_note: row.hit_note || "",
     });
   };
 
@@ -508,6 +684,8 @@ export default function BscAdminPage() {
   const cancelEditResult = () => {
     setEditingId(null);
     setEditResult(initialEditResult);
+    setEditHitImageFile(null);
+    setEditImageInputKey((previous) => previous + 1);
   };
 
   /* =========================
@@ -568,9 +746,21 @@ export default function BscAdminPage() {
       return;
     }
 
-    setSavingResult(true);
+    setUpdatingResult(true);
 
     try {
+      let hitImageUrl =
+        editResult.hit_image_url?.trim() || "";
+
+      if (editHitImageFile) {
+        hitImageUrl = await uploadHitImage({
+          file: editHitImageFile,
+          category: editResult.category,
+          raceDate: editResult.race_date,
+          setUploading: setUploadingEditImage,
+        });
+      }
+
       const updateData = {
         race_date: editResult.race_date,
         place: editResult.place.trim(),
@@ -581,6 +771,9 @@ export default function BscAdminPage() {
         payout: payoutAmount,
         hit: payoutAmount > 0,
         memo: editResult.memo.trim(),
+        hit_image_url: hitImageUrl,
+        hit_title: editResult.hit_title.trim(),
+        hit_note: editResult.hit_note.trim(),
       };
 
       const { error } = await supabase
@@ -608,7 +801,7 @@ export default function BscAdminPage() {
           getErrorMessage(error)
       );
     } finally {
-      setSavingResult(false);
+      setUpdatingResult(false);
     }
   };
 
@@ -665,7 +858,7 @@ export default function BscAdminPage() {
   };
 
   /* =========================
-     ログイン後に成績取得
+     ログイン後の初期取得
   ========================= */
 
   useEffect(() => {
@@ -756,7 +949,7 @@ export default function BscAdminPage() {
             type="button"
             onClick={() => setMenu("result")}
           >
-            収支入力
+            収支・的中画像入力
           </button>
 
           <button
@@ -772,8 +965,8 @@ export default function BscAdminPage() {
           <button
             type="button"
             onClick={async () => {
-              setMenu("edit");
               cancelEditResult();
+              setMenu("edit");
               await loadResultRows();
             }}
           >
@@ -899,7 +1092,7 @@ export default function BscAdminPage() {
         </section>
       )}
 
-      {/* 収支入力 */}
+      {/* 新規収支・画像入力 */}
 
       {menu === "result" && (
         <section className="bscAdminBox">
@@ -910,7 +1103,7 @@ export default function BscAdminPage() {
             ← 管理画面トップへ
           </button>
 
-          <h2>収支入力</h2>
+          <h2>収支・的中画像入力</h2>
 
           <label>
             <span>日付</span>
@@ -1035,12 +1228,97 @@ export default function BscAdminPage() {
             />
           </label>
 
+          <hr />
+
+          <h3>的中画像</h3>
+
+          <p>
+            画像を登録しない場合は、そのまま空欄で保存できます。
+          </p>
+
+          <label>
+            <span>画像ファイル</span>
+            <input
+              key={imageInputKey}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                const file =
+                  event.target.files?.[0] || null;
+
+                setHitImageFile(file);
+              }}
+            />
+          </label>
+
+          {newImagePreview && (
+            <div className="bscImagePreview">
+              <img
+                src={newImagePreview}
+                alt="的中画像プレビュー"
+                style={{
+                  width: "100%",
+                  maxHeight: "360px",
+                  objectFit: "contain",
+                  borderRadius: "16px",
+                }}
+              />
+
+              <p>{hitImageFile?.name}</p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setHitImageFile(null);
+                  setImageInputKey(
+                    (previous) => previous + 1
+                  );
+                }}
+              >
+                選択画像を取り消す
+              </button>
+            </div>
+          )}
+
+          <label>
+            <span>画像タイトル</span>
+            <input
+              value={result.hit_title}
+              placeholder="例：住之江11R 的中！"
+              onChange={(event) =>
+                setResult((previous) => ({
+                  ...previous,
+                  hit_title: event.target.value,
+                }))
+              }
+            />
+          </label>
+
+          <label>
+            <span>画像コメント</span>
+            <textarea
+              rows={2}
+              value={result.hit_note}
+              placeholder="例：イン逃げ本線で的中しました！"
+              onChange={(event) =>
+                setResult((previous) => ({
+                  ...previous,
+                  hit_note: event.target.value,
+                }))
+              }
+            />
+          </label>
+
           <button
             type="button"
             onClick={saveResult}
-            disabled={savingResult}
+            disabled={
+              savingResult || uploadingImage
+            }
           >
-            {savingResult
+            {uploadingImage
+              ? "画像アップロード中..."
+              : savingResult
               ? "保存中..."
               : "レース結果を保存"}
           </button>
@@ -1229,9 +1507,7 @@ export default function BscAdminPage() {
                             type="number"
                             min="1"
                             max="12"
-                            value={
-                              editResult.race_no
-                            }
+                            value={editResult.race_no}
                             onChange={(event) =>
                               setEditResult(
                                 (previous) => ({
@@ -1348,13 +1624,150 @@ export default function BscAdminPage() {
                           />
                         </label>
 
+                        <hr />
+
+                        <h3>的中画像を編集</h3>
+
+                        {editResult.hit_image_url &&
+                          !editImagePreview && (
+                            <div className="bscImagePreview">
+                              <p>現在の画像</p>
+
+                              <img
+                                src={
+                                  editResult.hit_image_url
+                                }
+                                alt={
+                                  editResult.hit_title ||
+                                  "登録済み的中画像"
+                                }
+                                style={{
+                                  width: "100%",
+                                  maxHeight: "360px",
+                                  objectFit: "contain",
+                                  borderRadius: "16px",
+                                }}
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setEditResult(
+                                    (previous) => ({
+                                      ...previous,
+                                      hit_image_url: "",
+                                    })
+                                  )
+                                }
+                              >
+                                現在の画像を外す
+                              </button>
+                            </div>
+                          )}
+
+                        <label>
+                          <span>
+                            新しい画像に変更
+                          </span>
+
+                          <input
+                            key={editImageInputKey}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={(event) => {
+                              const file =
+                                event.target.files?.[0] ||
+                                null;
+
+                              setEditHitImageFile(file);
+                            }}
+                          />
+                        </label>
+
+                        {editImagePreview && (
+                          <div className="bscImagePreview">
+                            <p>新しい画像</p>
+
+                            <img
+                              src={editImagePreview}
+                              alt="新しい画像プレビュー"
+                              style={{
+                                width: "100%",
+                                maxHeight: "360px",
+                                objectFit: "contain",
+                                borderRadius: "16px",
+                              }}
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditHitImageFile(
+                                  null
+                                );
+
+                                setEditImageInputKey(
+                                  (previous) =>
+                                    previous + 1
+                                );
+                              }}
+                            >
+                              新しい画像を取り消す
+                            </button>
+                          </div>
+                        )}
+
+                        <label>
+                          <span>画像タイトル</span>
+                          <input
+                            value={
+                              editResult.hit_title
+                            }
+                            placeholder="例：住之江11R 的中！"
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  hit_title:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>画像コメント</span>
+                          <textarea
+                            rows={2}
+                            value={
+                              editResult.hit_note
+                            }
+                            placeholder="画像コメント"
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  hit_note:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
                         <div className="bscResultActions">
                           <button
                             type="button"
                             onClick={updateResult}
-                            disabled={savingResult}
+                            disabled={
+                              updatingResult ||
+                              uploadingEditImage
+                            }
                           >
-                            {savingResult
+                            {uploadingEditImage
+                              ? "画像アップロード中..."
+                              : updatingResult
                               ? "修正中..."
                               : "修正を保存"}
                           </button>
@@ -1364,7 +1777,10 @@ export default function BscAdminPage() {
                             onClick={
                               cancelEditResult
                             }
-                            disabled={savingResult}
+                            disabled={
+                              updatingResult ||
+                              uploadingEditImage
+                            }
                           >
                             キャンセル
                           </button>
@@ -1421,6 +1837,38 @@ export default function BscAdminPage() {
 
                         {row.memo && (
                           <p>メモ：{row.memo}</p>
+                        )}
+
+                        {row.hit_image_url && (
+                          <div className="bscImagePreview">
+                            <img
+                              src={row.hit_image_url}
+                              alt={
+                                row.hit_title ||
+                                `${row.place}${row.race_no}R`
+                              }
+                              style={{
+                                width: "100%",
+                                maxHeight: "300px",
+                                objectFit: "contain",
+                                borderRadius: "16px",
+                              }}
+                            />
+
+                            {row.hit_title && (
+                              <p>
+                                タイトル：
+                                {row.hit_title}
+                              </p>
+                            )}
+
+                            {row.hit_note && (
+                              <p>
+                                コメント：
+                                {row.hit_note}
+                              </p>
+                            )}
+                          </div>
                         )}
 
                         <div className="bscResultActions">
