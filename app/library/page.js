@@ -115,7 +115,7 @@ const sections = [
         href: "/library/news/ichika",
         className: "greenBook",
         cover: "/C53B3EAC-3CBA-411D-BCFF-4C67354CC424.png",
-        inside: "/50A928E2-55B4-4FEC-BE0E-6B890A37C4A4.png"'
+        inside: "/50A928E2-55B4-4FEC-BE0E-6B890A37C4A4.png",
       },
       {
         title: "初音予想新聞",
@@ -124,6 +124,7 @@ const sections = [
         href: "/library/news/hatsune",
         className: "purpleBook",
         cover: "/796A2BB9-A731-4038-9A83-D00FF5F80DFD.png",
+        inside: "/A8A98454-7463-489D-AF73-D23E8C3D9E98.png",
       },
       {
         title: "キイナ予想新聞",
