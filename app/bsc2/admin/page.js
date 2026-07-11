@@ -810,12 +810,6 @@ export default function BscAdminPage() {
   ========================= */
 
   const deleteResult = async (id) => {
-  if (!id) {
-    alert("削除対象のIDが取得できません");
-    console.error("削除IDがありません:", id);
-    return;
-  }
-
   const confirmed = window.confirm(
     "この成績を削除しますか？\n削除後は元に戻せません。"
   );
@@ -830,30 +824,15 @@ export default function BscAdminPage() {
   setDeletingId(id);
 
   try {
-    console.log("削除するID:", id, typeof id);
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("bsc_results")
       .delete()
-      .eq("id", id)
-      .select("id");
-
-    console.log("削除結果:", {
-      data,
-      error,
-    });
+      .eq("id", id);
 
     if (error) {
       throw error;
     }
 
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error(
-        `削除対象が見つかりませんでした。\n対象ID：${id}\nRLSのDELETEポリシーも確認してください。`
-      );
-    }
-
-    // まず画面から即時削除
     setResultRows((previousRows) =>
       previousRows.filter(
         (row) => String(row.id) !== String(id)
@@ -864,12 +843,11 @@ export default function BscAdminPage() {
       cancelEditResult();
     }
 
-    // 集計を更新
     await loadStats();
 
     alert("成績を削除しました");
   } catch (error) {
-    console.error("成績削除エラー:", error);
+    console.error("成績削除エラー", error);
 
     alert(
       `成績の削除に失敗しました\n\n` +
