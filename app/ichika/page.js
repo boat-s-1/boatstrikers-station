@@ -2,7 +2,8 @@ import Image from "next/image";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 /* =========================
    日本時間基準の今月範囲
 ========================= */
