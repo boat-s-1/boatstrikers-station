@@ -144,6 +144,9 @@ export default function IchikaZennjitsuPage() {
   const [loaded, setLoaded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState("");
+  const [generationError, setGenerationError] = useState("");
 
   /* =========================
      下書き読み込み
@@ -346,6 +349,74 @@ export default function IchikaZennjitsuPage() {
   };
 
   /* =========================
+     Python APIで新聞生成
+  ========================= */
+
+  const generateNewspaper = async () => {
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_IMAGE_API_URL;
+
+    if (!apiUrl) {
+      alert("NEXT_PUBLIC_IMAGE_API_URLが設定されていません");
+      return;
+    }
+
+    setGenerating(true);
+    setGenerationError("");
+
+    try {
+      const response = await fetch(
+        `${apiUrl.replace(/\/$/, "")}/generate/ichika/zenjitsu`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.detail || "画像生成に失敗しました"
+        );
+      }
+
+      const blob = await response.blob();
+
+      if (!blob.type.startsWith("image/")) {
+        throw new Error("画像データを取得できませんでした");
+      }
+
+      setGeneratedImage((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return URL.createObjectURL(blob);
+      });
+
+      window.setTimeout(() => {
+        document
+          .getElementById("generated-newspaper")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
+    } catch (error) {
+      console.error("新聞生成エラー", error);
+      const message = error?.message || "画像生成に失敗しました";
+      setGenerationError(message);
+      alert(message);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /* =========================
      下書き削除
   ========================= */
 
@@ -360,6 +431,14 @@ export default function IchikaZennjitsuPage() {
     setForm(createInitialForm());
     setShowPreview(false);
   };
+
+  useEffect(() => {
+    return () => {
+      if (generatedImage) {
+        URL.revokeObjectURL(generatedImage);
+      }
+    };
+  }, [generatedImage]);
 
   if (!loaded) {
     return (
@@ -1053,14 +1132,42 @@ export default function IchikaZennjitsuPage() {
           <button
             type="button"
             className={styles.generateButton}
-            onClick={() => {
-              alert(
-                "入力画面は完成しています。次にPython画像生成APIと接続します。"
-              );
-            }}
+            onClick={generateNewspaper}
+            disabled={generating}
           >
-            一果前日新聞を生成する
+            {generating
+              ? "一果前日新聞を生成中..."
+              : "一果前日新聞を生成する"}
           </button>
+        </section>
+      )}
+
+      {generationError && (
+        <p className={styles.errorMessage}>
+          {generationError}
+        </p>
+      )}
+
+      {generatedImage && (
+        <section
+          id="generated-newspaper"
+          className={styles.generatedArea}
+        >
+          <h2>完成した新聞</h2>
+
+          <img
+            src={generatedImage}
+            alt="一果前日新聞"
+            className={styles.generatedImage}
+          />
+
+          <a
+            href={generatedImage}
+            download={`${form.raceDate}-${form.place}-${form.raceNo}R-ichika.png`}
+            className={styles.downloadButton}
+          >
+            画像を保存する
+          </a>
         </section>
       )}
     </main>
