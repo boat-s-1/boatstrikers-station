@@ -72,6 +72,21 @@ const initialStats = {
 };
 
 /* =========================
+   初期編集フォーム
+========================= */
+
+const initialEditResult = {
+  race_date: "",
+  place: "",
+  race_no: 1,
+  category: "一果",
+  bet_text: "",
+  invest: 0,
+  payout: 0,
+  memo: "",
+};
+
+/* =========================
    管理画面
 ========================= */
 
@@ -85,6 +100,11 @@ export default function BscAdminPage() {
   const [savingEvent, setSavingEvent] = useState(false);
   const [savingResult, setSavingResult] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);
+
+  const [resultRows, setResultRows] = useState([]);
+  const [loadingRows, setLoadingRows] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [form, setForm] = useState({
     id: `${today}-daily`,
@@ -107,7 +127,23 @@ export default function BscAdminPage() {
     memo: "",
   });
 
+  const [editResult, setEditResult] = useState(
+    initialEditResult
+  );
+
   const [stats, setStats] = useState(initialStats);
+
+  /* =========================
+     エラー文作成
+  ========================= */
+
+  const getErrorMessage = (error) => {
+    return (
+      `message: ${error?.message || "不明なエラー"}\n` +
+      `code: ${error?.code || "なし"}\n` +
+      `details: ${error?.details || "なし"}`
+    );
+  };
 
   /* =========================
      PINログイン
@@ -181,9 +217,7 @@ export default function BscAdminPage() {
 
       alert(
         `イベントの保存に失敗しました\n\n` +
-          `message: ${error?.message || "不明なエラー"}\n` +
-          `code: ${error?.code || "なし"}\n` +
-          `details: ${error?.details || "なし"}`
+          getErrorMessage(error)
       );
     } finally {
       setSavingEvent(false);
@@ -224,13 +258,7 @@ export default function BscAdminPage() {
           `
         )
         .gte("race_date", monthStart)
-        .lt("race_date", nextMonthStart)
-        .order("race_date", {
-          ascending: false,
-        })
-        .order("race_no", {
-          ascending: false,
-        });
+        .lt("race_date", nextMonthStart);
 
       if (error) {
         throw error;
@@ -291,9 +319,7 @@ export default function BscAdminPage() {
 
       alert(
         `今月の成績を取得できませんでした\n\n` +
-          `message: ${error?.message || "不明なエラー"}\n` +
-          `code: ${error?.code || "なし"}\n` +
-          `details: ${error?.details || "なし"}`
+          getErrorMessage(error)
       );
     } finally {
       setLoadingStats(false);
@@ -364,8 +390,6 @@ export default function BscAdminPage() {
         memo: result.memo.trim(),
       };
 
-      console.log("保存データ", insertData);
-
       const { error } = await supabase
         .from("bsc_results")
         .insert([insertData]);
@@ -390,9 +414,7 @@ export default function BscAdminPage() {
 
       alert(
         `保存に失敗しました\n\n` +
-          `message: ${error?.message || "不明なエラー"}\n` +
-          `code: ${error?.code || "なし"}\n` +
-          `details: ${error?.details || "なし"}`
+          getErrorMessage(error)
       );
     } finally {
       setSavingResult(false);
@@ -400,7 +422,250 @@ export default function BscAdminPage() {
   };
 
   /* =========================
-     ログイン後に成績を取得
+     成績一覧取得
+  ========================= */
+
+  const loadResultRows = async () => {
+    if (!supabase) {
+      alert("Supabase未接続です");
+      return;
+    }
+
+    setLoadingRows(true);
+
+    try {
+      const { monthStart, nextMonthStart } =
+        getCurrentMonthRange();
+
+      const { data, error } = await supabase
+        .from("bsc_results")
+        .select(
+          `
+            id,
+            race_date,
+            place,
+            race_no,
+            category,
+            bet_text,
+            invest,
+            payout,
+            hit,
+            memo,
+            created_at
+          `
+        )
+        .gte("race_date", monthStart)
+        .lt("race_date", nextMonthStart)
+        .order("race_date", {
+          ascending: false,
+        })
+        .order("race_no", {
+          ascending: false,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      setResultRows(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error("成績一覧取得エラー", error);
+
+      alert(
+        `成績一覧を取得できませんでした\n\n` +
+          getErrorMessage(error)
+      );
+    } finally {
+      setLoadingRows(false);
+    }
+  };
+
+  /* =========================
+     編集開始
+  ========================= */
+
+  const startEditResult = (row) => {
+    setEditingId(row.id);
+
+    setEditResult({
+      race_date: row.race_date || "",
+      place: row.place || "",
+      race_no: Number(row.race_no || 1),
+      category: row.category || "一果",
+      bet_text: row.bet_text || "",
+      invest: Number(row.invest || 0),
+      payout: Number(row.payout || 0),
+      memo: row.memo || "",
+    });
+  };
+
+  /* =========================
+     編集キャンセル
+  ========================= */
+
+  const cancelEditResult = () => {
+    setEditingId(null);
+    setEditResult(initialEditResult);
+  };
+
+  /* =========================
+     成績修正保存
+  ========================= */
+
+  const updateResult = async () => {
+    if (!supabase) {
+      alert("Supabase未接続です");
+      return;
+    }
+
+    if (!editingId) {
+      alert("編集対象がありません");
+      return;
+    }
+
+    if (!editResult.race_date) {
+      alert("日付を入力してください");
+      return;
+    }
+
+    if (!editResult.place.trim()) {
+      alert("場名を入力してください");
+      return;
+    }
+
+    const raceNumber = Number(editResult.race_no);
+    const investAmount = Number(
+      editResult.invest || 0
+    );
+    const payoutAmount = Number(
+      editResult.payout || 0
+    );
+
+    if (
+      !Number.isInteger(raceNumber) ||
+      raceNumber < 1 ||
+      raceNumber > 12
+    ) {
+      alert("レース番号は1〜12で入力してください");
+      return;
+    }
+
+    if (
+      !Number.isFinite(investAmount) ||
+      investAmount < 0
+    ) {
+      alert("投資金額を正しく入力してください");
+      return;
+    }
+
+    if (
+      !Number.isFinite(payoutAmount) ||
+      payoutAmount < 0
+    ) {
+      alert("払戻金額を正しく入力してください");
+      return;
+    }
+
+    setSavingResult(true);
+
+    try {
+      const updateData = {
+        race_date: editResult.race_date,
+        place: editResult.place.trim(),
+        race_no: raceNumber,
+        category: editResult.category,
+        bet_text: editResult.bet_text.trim(),
+        invest: investAmount,
+        payout: payoutAmount,
+        hit: payoutAmount > 0,
+        memo: editResult.memo.trim(),
+      };
+
+      const { error } = await supabase
+        .from("bsc_results")
+        .update(updateData)
+        .eq("id", editingId);
+
+      if (error) {
+        throw error;
+      }
+
+      alert("成績を修正しました！");
+
+      cancelEditResult();
+
+      await Promise.all([
+        loadResultRows(),
+        loadStats(),
+      ]);
+    } catch (error) {
+      console.error("成績修正エラー", error);
+
+      alert(
+        `成績の修正に失敗しました\n\n` +
+          getErrorMessage(error)
+      );
+    } finally {
+      setSavingResult(false);
+    }
+  };
+
+  /* =========================
+     成績削除
+  ========================= */
+
+  const deleteResult = async (id) => {
+    const confirmed = window.confirm(
+      "この成績を削除しますか？\n削除後は元に戻せません。"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    if (!supabase) {
+      alert("Supabase未接続です");
+      return;
+    }
+
+    setDeletingId(id);
+
+    try {
+      const { error } = await supabase
+        .from("bsc_results")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+
+      if (editingId === id) {
+        cancelEditResult();
+      }
+
+      alert("成績を削除しました");
+
+      await Promise.all([
+        loadResultRows(),
+        loadStats(),
+      ]);
+    } catch (error) {
+      console.error("成績削除エラー", error);
+
+      alert(
+        `成績の削除に失敗しました\n\n` +
+          getErrorMessage(error)
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  /* =========================
+     ログイン後に成績取得
   ========================= */
 
   useEffect(() => {
@@ -491,7 +756,7 @@ export default function BscAdminPage() {
             type="button"
             onClick={() => setMenu("result")}
           >
-            収支管理
+            収支入力
           </button>
 
           <button
@@ -502,6 +767,17 @@ export default function BscAdminPage() {
             }}
           >
             今月の成績
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              setMenu("edit");
+              cancelEditResult();
+              await loadResultRows();
+            }}
+          >
+            成績修正・削除
           </button>
         </section>
       )}
@@ -521,7 +797,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>ID</span>
-
             <input
               value={form.id}
               onChange={(event) =>
@@ -535,7 +810,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>タイトル</span>
-
             <input
               value={form.title}
               onChange={(event) =>
@@ -549,7 +823,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>締切時刻</span>
-
             <input
               type="time"
               value={form.deadline}
@@ -564,7 +837,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>一果・本命</span>
-
             <input
               value={form.ichika_main}
               onChange={(event) =>
@@ -578,7 +850,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>一果・押さえ</span>
-
             <input
               value={form.ichika_sub}
               onChange={(event) =>
@@ -592,7 +863,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>キイナ・本命</span>
-
             <input
               value={form.kiina_main}
               onChange={(event) =>
@@ -606,7 +876,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>初音・本命</span>
-
             <input
               value={form.hatsune_main}
               onChange={(event) =>
@@ -630,7 +899,7 @@ export default function BscAdminPage() {
         </section>
       )}
 
-      {/* 収支管理 */}
+      {/* 収支入力 */}
 
       {menu === "result" && (
         <section className="bscAdminBox">
@@ -641,11 +910,10 @@ export default function BscAdminPage() {
             ← 管理画面トップへ
           </button>
 
-          <h2>収支管理</h2>
+          <h2>収支入力</h2>
 
           <label>
             <span>日付</span>
-
             <input
               type="date"
               value={result.race_date}
@@ -660,7 +928,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>場名</span>
-
             <input
               value={result.place}
               placeholder="例：住之江"
@@ -675,7 +942,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>レース番号</span>
-
             <input
               type="number"
               min="1"
@@ -692,7 +958,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>カテゴリ</span>
-
             <select
               value={result.category}
               onChange={(event) =>
@@ -711,7 +976,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>買い目</span>
-
             <input
               value={result.bet_text}
               placeholder="例：1-245-245"
@@ -726,7 +990,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>投資金額</span>
-
             <input
               type="number"
               min="0"
@@ -743,7 +1006,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>払戻金額</span>
-
             <input
               type="number"
               min="0"
@@ -760,7 +1022,6 @@ export default function BscAdminPage() {
 
           <label>
             <span>メモ</span>
-
             <textarea
               value={result.memo}
               rows={3}
@@ -884,6 +1145,324 @@ export default function BscAdminPage() {
             {loadingStats
               ? "読み込み中..."
               : "成績を再読み込み"}
+          </button>
+        </section>
+      )}
+
+      {/* 成績修正・削除 */}
+
+      {menu === "edit" && (
+        <section className="bscAdminBox">
+          <button
+            type="button"
+            onClick={() => {
+              cancelEditResult();
+              setMenu("top");
+            }}
+          >
+            ← 管理画面トップへ
+          </button>
+
+          <h2>成績修正・削除</h2>
+
+          {loadingRows ? (
+            <p>成績を読み込み中...</p>
+          ) : resultRows.length === 0 ? (
+            <p>今月の成績はまだありません。</p>
+          ) : (
+            <div className="bscResultList">
+              {resultRows.map((row) => {
+                const rowProfit =
+                  Number(row.payout || 0) -
+                  Number(row.invest || 0);
+
+                const isEditing =
+                  editingId === row.id;
+
+                return (
+                  <article
+                    key={row.id}
+                    className="bscResultCard"
+                  >
+                    {isEditing ? (
+                      <>
+                        <h3>成績を編集</h3>
+
+                        <label>
+                          <span>日付</span>
+                          <input
+                            type="date"
+                            value={
+                              editResult.race_date
+                            }
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  race_date:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>場名</span>
+                          <input
+                            value={editResult.place}
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  place:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>レース番号</span>
+                          <input
+                            type="number"
+                            min="1"
+                            max="12"
+                            value={
+                              editResult.race_no
+                            }
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  race_no:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>カテゴリ</span>
+                          <select
+                            value={
+                              editResult.category
+                            }
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  category:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          >
+                            <option value="一果">
+                              一果
+                            </option>
+                            <option value="初音">
+                              初音
+                            </option>
+                            <option value="キイナ">
+                              キイナ
+                            </option>
+                            <option value="BSC">
+                              BSC
+                            </option>
+                          </select>
+                        </label>
+
+                        <label>
+                          <span>買い目</span>
+                          <input
+                            value={
+                              editResult.bet_text
+                            }
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  bet_text:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>投資金額</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="100"
+                            value={editResult.invest}
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  invest:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>払戻金額</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="100"
+                            value={editResult.payout}
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  payout:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label>
+                          <span>メモ</span>
+                          <textarea
+                            rows={3}
+                            value={editResult.memo}
+                            onChange={(event) =>
+                              setEditResult(
+                                (previous) => ({
+                                  ...previous,
+                                  memo:
+                                    event.target.value,
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <div className="bscResultActions">
+                          <button
+                            type="button"
+                            onClick={updateResult}
+                            disabled={savingResult}
+                          >
+                            {savingResult
+                              ? "修正中..."
+                              : "修正を保存"}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={
+                              cancelEditResult
+                            }
+                            disabled={savingResult}
+                          >
+                            キャンセル
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h3>
+                          {row.race_date}　
+                          {row.place}
+                          {row.race_no}R
+                        </h3>
+
+                        <p>
+                          カテゴリ：
+                          {row.category || "未設定"}
+                        </p>
+
+                        <p>
+                          買い目：
+                          {row.bet_text || "なし"}
+                        </p>
+
+                        <p>
+                          投資：
+                          {Number(
+                            row.invest || 0
+                          ).toLocaleString()}
+                          円
+                        </p>
+
+                        <p>
+                          払戻：
+                          {Number(
+                            row.payout || 0
+                          ).toLocaleString()}
+                          円
+                        </p>
+
+                        <p>
+                          的中：
+                          {Number(row.payout || 0) >
+                          0
+                            ? "的中"
+                            : "不的中"}
+                        </p>
+
+                        <p>
+                          収支：
+                          {rowProfit > 0 ? "+" : ""}
+                          {rowProfit.toLocaleString()}
+                          円
+                        </p>
+
+                        {row.memo && (
+                          <p>メモ：{row.memo}</p>
+                        )}
+
+                        <div className="bscResultActions">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              startEditResult(row)
+                            }
+                          >
+                            編集
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              deleteResult(row.id)
+                            }
+                            disabled={
+                              deletingId === row.id
+                            }
+                          >
+                            {deletingId === row.id
+                              ? "削除中..."
+                              : "削除"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={loadResultRows}
+            disabled={loadingRows}
+          >
+            {loadingRows
+              ? "読み込み中..."
+              : "一覧を再読み込み"}
           </button>
         </section>
       )}
