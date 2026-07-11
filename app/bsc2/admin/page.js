@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -938,45 +939,165 @@ export default function BscAdminPage() {
       {/* 管理画面トップ */}
 
       {menu === "top" && (
-        <section className="bscAdminBox">
-          <h2>管理画面トップ</h2>
+  <section className="bscAdminBox">
+    <h2>管理画面トップ</h2>
 
-          <button
-            type="button"
-            onClick={() => setMenu("event")}
-          >
-            BSCレース入力
-          </button>
+    <div className="bscAdminMainMenu">
+      <button
+        type="button"
+        onClick={() => setMenu("event")}
+      >
+        BSCレース入力
+      </button>
 
-          <button
-            type="button"
-            onClick={() => setMenu("result")}
-          >
-            収支・的中画像入力
-          </button>
+      <button
+        type="button"
+        onClick={() => setMenu("result")}
+      >
+        収支・的中画像入力
+      </button>
 
-          <button
-            type="button"
-            onClick={async () => {
-              setMenu("stats");
-              await loadStats();
-            }}
-          >
-            今月の成績
-          </button>
+      <button
+        type="button"
+        onClick={async () => {
+          setMenu("stats");
+          await loadStats();
+        }}
+      >
+        今月の成績
+      </button>
 
-          <button
-            type="button"
-            onClick={async () => {
-              cancelEditResult();
-              setMenu("edit");
-              await loadResultRows();
-            }}
-          >
-            成績修正・削除
-          </button>
-        </section>
-      )}
+      <button
+        type="button"
+        onClick={async () => {
+          cancelEditResult();
+          setMenu("edit");
+          await loadResultRows();
+        }}
+      >
+        成績修正・削除
+      </button>
+    </div>
+
+    <div className="bscNewspaperMenu">
+      <div className="bscNewspaperHeading">
+        <span>BSC</span>
+        <strong>ADMIN</strong>
+      </div>
+
+      <div className="bscNewspaperTitle">
+        <span>📰</span>
+
+        <div>
+          <h2>新聞を作成</h2>
+          <p>作成したい新聞を選んでください</p>
+        </div>
+      </div>
+
+      <div className="bscNewspaperGroup">
+        <h3 className="ichikaHeading">
+          🌸 一果
+        </h3>
+
+        <Link
+          href="/bsc2/admin/newspaper/ichika/zenjitsu"
+          className="bscNewspaperCard ichikaCard"
+        >
+          <div>
+            <strong>一果 前日版</strong>
+            <span>
+              本命候補・展開予想・各艇評価
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+
+        <Link
+          href="/bsc2/admin/newspaper/ichika/live"
+          className="bscNewspaperCard ichikaCard"
+        >
+          <div>
+            <strong>一果 直前版</strong>
+            <span>
+              展示評価・直前判定・最終買い目
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+      </div>
+
+      <div className="bscNewspaperGroup">
+        <h3 className="kiinaHeading">
+          ⚡ キイナ
+        </h3>
+
+        <Link
+          href="/bsc2/admin/newspaper/kiina/zenjitsu"
+          className="bscNewspaperCard kiinaCard"
+        >
+          <div>
+            <strong>キイナ 前日版</strong>
+            <span>
+              5アタマ期待度・穴候補・スリット予想
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+
+        <Link
+          href="/bsc2/admin/newspaper/kiina/live"
+          className="bscNewspaperCard kiinaCard"
+        >
+          <div>
+            <strong>キイナ 直前版</strong>
+            <span>
+              展示気配・直前チェック・買い目
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+      </div>
+
+      <div className="bscNewspaperGroup">
+        <h3 className="hatsuneHeading">
+          👗 初音
+        </h3>
+
+        <Link
+          href="/bsc2/admin/newspaper/hatsune/zenjitsu"
+          className="bscNewspaperCard hatsuneCard"
+        >
+          <div>
+            <strong>初音 前日版</strong>
+            <span>
+              女子戦本命・近況リズム・注目選手
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+
+        <Link
+          href="/bsc2/admin/newspaper/hatsune/live"
+          className="bscNewspaperCard hatsuneCard"
+        >
+          <div>
+            <strong>初音 直前版</strong>
+            <span>
+              展示評価・選手比較・最終買い目
+            </span>
+          </div>
+
+          <b>›</b>
+        </Link>
+      </div>
+    </div>
+  </section>
+)}
 
       {/* 今日の予想イベント */}
 
