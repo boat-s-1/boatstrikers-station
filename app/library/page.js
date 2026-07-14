@@ -173,7 +173,7 @@ const sections = [
         text: "PDF資料",
         href: "/library/bonus",
         className: "tealBook",
-        cover: "/book-bonus.jpg",
+        cover: "/FC167F92-CB82-4EB4-8712-A19C9F50535D.png",
       },
     ],
   },
