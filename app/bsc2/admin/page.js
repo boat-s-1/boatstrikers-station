@@ -977,6 +977,20 @@ export default function BscAdminPage() {
       >
         成績修正・削除
       </button>
+           <Link
+  href="/bsc2/admin/ai"
+  className="bscAiAdminMenuButton"
+>
+  <div>
+    <strong>🤖 Boat Strikers AI</strong>
+
+    <span>
+      CSV取込・AI学習・前日版・直前版・モデル成績
+    </span>
+  </div>
+
+  <b>›</b>
+</Link>
     </div>
 
     <div className="bscNewspaperMenu">
