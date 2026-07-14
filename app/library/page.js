@@ -139,6 +139,7 @@ const sections = [
   },
   {
     title: "🎙 視聴覚コーナー",
+    titleImage: "/IMG_6424.jpeg",
     lead: "Boat Strikers Radioを聴く！",
     books: [
       {
@@ -154,6 +155,7 @@ const sections = [
   },
   {
     title: "📊 資料室",
+    titleImage: "/IMG_6425.jpeg",
     lead: "成績・データ・特典資料はこちら！",
     books: [
       {
