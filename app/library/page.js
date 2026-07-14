@@ -156,6 +156,7 @@ const sections = [
   {
     title: "📊 資料室",
     titleImage: "/IMG_6425.jpeg",
+  
     lead: "成績・データ・特典資料はこちら！",
     books: [
       {
@@ -164,7 +165,7 @@ const sections = [
         text: "的中実績",
         href: "/library/results",
         className: "brownBook",
-        cover: "/book-results.jpg",
+        cover: "/A0021C32-58D9-488E-B0E2-F99E8718DB03.png",
       },
       {
         title: "特典資料",
