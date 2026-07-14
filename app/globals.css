@@ -8055,418 +8055,58 @@ color:white;
   }
 }
 /* ========================================
-   BOAT STRIKERS ガラス風フッターメニュー
+   BOAT STRIKERS ガラス風フッター
 ======================================== */
 
-.glassBottomNav {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  z-index: 1000;
-
-  width: min(100%, 720px);
-
-  transform: translateX(-50%);
-
-  padding:
-    7px
-    10px
-    calc(7px + env(safe-area-inset-bottom));
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.88) 0%,
-      rgba(241, 249, 255, 0.94) 100%
-    );
-
-  border-top:
-    1px solid rgba(255, 255, 255, 0.95);
-
-  border-left:
-    1px solid rgba(120, 200, 255, 0.28);
-
-  border-right:
-    1px solid rgba(120, 200, 255, 0.28);
-
-  border-radius: 24px 24px 0 0;
-
-  box-shadow:
-    0 -10px 35px rgba(26, 105, 175, 0.15),
-    0 -2px 10px rgba(17, 105, 183, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-
-  -webkit-backdrop-filter: blur(20px) saturate(165%);
-  backdrop-filter: blur(20px) saturate(165%);
-}
-
-.glassBottomNav::before {
-  content: "";
-
-  position: absolute;
-  top: 0;
-  left: 50%;
-
-  width: 72px;
-  height: 3px;
-
-  transform: translateX(-50%);
-
-  border-radius: 0 0 999px 999px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(21, 144, 255, 0.7),
-      transparent
-    );
-}
-
-.glassBottomNavInner {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-
-  width: 100%;
-  min-height: 58px;
-}
-
-.glassBottomNavItem {
-  position: relative;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  min-width: 0;
-  min-height: 54px;
-
-  padding: 4px 2px;
-
-  color: #596273;
-
-  text-decoration: none;
-
-  border-radius: 17px;
-
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease,
-    background 0.2s ease;
-}
-
-.glassBottomNavItem:active {
-  transform: scale(0.94);
-}
-
-.bottomNavIconArea {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 34px;
-  height: 30px;
-}
-
-.bottomNavIcon {
-  position: relative;
-  z-index: 2;
-
-  width: 23px;
-  height: 23px;
-
-  transition:
-    transform 0.22s ease,
-    filter 0.22s ease;
-}
-
-.bottomNavLabel {
-  position: relative;
-  z-index: 2;
-
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.15;
-
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-
-  transition:
-    transform 0.2s ease,
-    color 0.2s ease;
-}
-
-.bottomNavActiveLight {
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  z-index: 1;
-
-  width: 32px;
-  height: 22px;
-
-  transform:
-    translateX(-50%)
-    scale(0.5);
-
-  opacity: 0;
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(49, 165, 255, 0.5) 0%,
-      rgba(49, 165, 255, 0.12) 50%,
-      transparent 75%
-    );
-
-  filter: blur(3px);
-
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
-/* 選択中 */
-
-.glassBottomNavItem.isActive {
-  color: #0877d1;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(226, 245, 255, 0.9),
-      rgba(255, 255, 255, 0.3)
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 5px 16px rgba(20, 135, 220, 0.12);
-}
-
-.glassBottomNavItem.isActive::before {
-  content: "";
-
-  position: absolute;
-  top: -7px;
-  left: 50%;
-
-  width: 28px;
-  height: 4px;
-
-  transform: translateX(-50%);
-
-  border-radius: 999px;
-
-  background:
-    linear-gradient(
-      90deg,
-      #4bc4ff,
-      #0877d1
-    );
-
-  box-shadow:
-    0 0 12px rgba(17, 151, 242, 0.75);
-}
-
-.glassBottomNavItem.isActive .bottomNavIcon {
-  transform: translateY(-1px) scale(1.08);
-
-  filter:
-    drop-shadow(
-      0 3px 5px rgba(0, 111, 196, 0.22)
-    );
-}
-
-.glassBottomNavItem.isActive .bottomNavLabel {
-  transform: translateY(-1px);
-}
-
-.glassBottomNavItem.isActive .bottomNavActiveLight {
-  opacity: 1;
-
-  transform:
-    translateX(-50%)
-    scale(1);
-}
-
-/* ========================================
-   キャラクターごとの選択色
-======================================== */
-
-/* ホーム */
-
-.glassBottomNavItem.navHome.isActive {
-  color: #0877d1;
-}
-
-/* 一果 */
-
-.glassBottomNavItem.navIchika.isActive {
-  color: #d96838;
-}
-
-.glassBottomNavItem.navIchika.isActive::before {
-  background:
-    linear-gradient(
-      90deg,
-      #ffc16b,
-      #e8743c
-    );
-
-  box-shadow:
-    0 0 12px rgba(232, 116, 60, 0.55);
-}
-
-/* 初音 */
-
-.glassBottomNavItem.navHatsune.isActive {
-  color: #7651d6;
-}
-
-.glassBottomNavItem.navHatsune.isActive::before {
-  background:
-    linear-gradient(
-      90deg,
-      #bc9dff,
-      #7651d6
-    );
-
-  box-shadow:
-    0 0 12px rgba(118, 81, 214, 0.55);
-}
-
-/* キイナ */
-
-.glassBottomNavItem.navKiina.isActive {
-  color: #e39200;
-}
-
-.glassBottomNavItem.navKiina.isActive::before {
-  background:
-    linear-gradient(
-      90deg,
-      #ffd85a,
-      #f2a000
-    );
-
-  box-shadow:
-    0 0 12px rgba(242, 160, 0, 0.58);
-}
-
-/* 図書館 */
-
-.glassBottomNavItem.navLibrary.isActive {
-  color: #249767;
-}
-
-.glassBottomNavItem.navLibrary.isActive::before {
-  background:
-    linear-gradient(
-      90deg,
-      #6ce0ae,
-      #249767
-    );
-
-  box-shadow:
-    0 0 12px rgba(36, 151, 103, 0.55);
-}
-
-/* ========================================
-   本文がメニューに隠れないための余白
-======================================== */
-
-.page {
-  padding-bottom:
-    calc(98px + env(safe-area-inset-bottom));
-}
-
-/* ========================================
-   PC表示
-======================================== */
-
-@media (min-width: 768px) {
-  .glassBottomNav {
-    bottom: 14px;
-
-    width: min(calc(100% - 28px), 680px);
-
-    padding: 7px 12px;
-
-    border:
-      1px solid rgba(123, 197, 243, 0.38);
-
-    border-radius: 24px;
-  }
-
-  .page {
-    padding-bottom: 110px;
-  }
-
-  .glassBottomNavItem:hover {
-    color: #0877d1;
-
-    background:
-      rgba(226, 245, 255, 0.7);
-
-    transform: translateY(-2px);
-  }
-}
-
-/* ========================================
-   小さいスマホ
-======================================== */
-
-@media (max-width: 370px) {
-  .glassBottomNav {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-
-  .bottomNavIcon {
-    width: 21px;
-    height: 21px;
-  }
-
-  .bottomNavLabel {
-    font-size: 10px;
-  }
-}
-/* フッター表示確認用 */
 .glassBottomNav {
   position: fixed !important;
   left: 50% !important;
+  right: auto !important;
   bottom: 0 !important;
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+
+  display: block !important;
 
   width: min(100%, 720px) !important;
+
+  margin: 0 !important;
+  padding:
+    7px
+    10px
+    calc(7px + env(safe-area-inset-bottom)) !important;
+
   transform: translateX(-50%) !important;
 
-  padding: 8px 10px
-    calc(8px + env(safe-area-inset-bottom)) !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(235, 247, 255, 0.96)
+    ) !important;
 
-  background: rgba(255, 255, 255, 0.9) !important;
+  border-top:
+    1px solid rgba(110, 190, 245, 0.45) !important;
+
   border-radius: 24px 24px 0 0 !important;
 
-  box-shadow: 0 -8px 30px rgba(0, 92, 170, 0.18) !important;
+  box-shadow:
+    0 -10px 35px rgba(25, 100, 165, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
 
-  -webkit-backdrop-filter: blur(18px) !important;
-  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter:
+    blur(20px) saturate(160%) !important;
+
+  backdrop-filter:
+    blur(20px) saturate(160%) !important;
 }
 
 .glassBottomNavInner {
   display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   align-items: center !important;
+
+  width: 100% !important;
+  min-height: 58px !important;
 }
 
 .glassBottomNavItem {
@@ -8476,10 +8116,16 @@ color:white;
   justify-content: center !important;
 
   min-width: 0 !important;
-  min-height: 58px !important;
+  min-height: 56px !important;
 
-  color: #536174 !important;
+  margin: 0 !important;
+  padding: 4px 2px !important;
+
+  color: #596274 !important;
+  text-align: center !important;
   text-decoration: none !important;
+
+  border-radius: 16px !important;
 }
 
 .bottomNavIconArea {
@@ -8487,124 +8133,80 @@ color:white;
   align-items: center !important;
   justify-content: center !important;
 
-  width: 32px !important;
-  height: 30px !important;
+  width: 34px !important;
+  height: 29px !important;
 }
 
 .bottomNavIcon {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-  width: 23px !important;
-  height: 23px !important;
+  width: 25px !important;
+  height: 25px !important;
 
-  max-width: 23px !important;
-  max-height: 23px !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+
+  color: currentColor !important;
 }
 
 .bottomNavLabel {
+  display: block !important;
+
   margin-top: 2px !important;
 
   font-size: 11px !important;
   font-weight: 800 !important;
   line-height: 1.2 !important;
 
+  color: currentColor !important;
   white-space: nowrap !important;
 }
 
 .glassBottomNavItem.isActive {
   color: #0877d1 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(220, 242, 255, 0.95),
+      rgba(255, 255, 255, 0.38)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 12px rgba(15, 125, 210, 0.12) !important;
 }
 
-.page {
-  padding-bottom: calc(
-    100px + env(safe-area-inset-bottom)
-  ) !important;
-}
+.glassBottomNavItem.isActive::before {
+  content: "";
 
-/* =========================
-   新フッターメニュー
-========================= */
+  position: absolute;
+  top: 0;
 
-.glassBottomNav {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  z-index: 9999;
+  width: 28px;
+  height: 3px;
 
-  width: min(100%, 720px);
-  transform: translateX(-50%);
+  border-radius: 999px;
 
-  padding:
-    7px 10px
-    calc(7px + env(safe-area-inset-bottom));
+  background:
+    linear-gradient(
+      90deg,
+      #4ac5ff,
+      #0877d1
+    );
 
-  background: rgba(255, 255, 255, 0.9);
-
-  border-top: 1px solid rgba(100, 180, 240, 0.3);
-  border-radius: 24px 24px 0 0;
-
-  box-shadow: 0 -8px 30px rgba(20, 100, 170, 0.18);
-
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-
-.glassBottomNavInner {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: center;
+  box-shadow:
+    0 0 10px rgba(8, 119, 209, 0.55);
 }
 
 .glassBottomNavItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  min-width: 0;
-  min-height: 56px;
-
-  color: #526070;
-  text-decoration: none;
-
-  border-radius: 16px;
-}
-
-.bottomNavIconArea {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 32px;
-  height: 30px;
-}
-
-.bottomNavIcon {
-  display: block;
-
-  width: 23px;
-  height: 23px;
-  max-width: 23px;
-  max-height: 23px;
-}
-
-.bottomNavLabel {
-  margin-top: 2px;
-
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.2;
-
-  white-space: nowrap;
-}
-
-.glassBottomNavItem.isActive {
-  color: #0877d1;
-
-  background: rgba(226, 245, 255, 0.9);
+  position: relative !important;
 }
 
 .page {
   padding-bottom:
-    calc(100px + env(safe-area-inset-bottom));
+    calc(100px + env(safe-area-inset-bottom)) !important;
 }
