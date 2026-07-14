@@ -8520,3 +8520,91 @@ color:white;
     100px + env(safe-area-inset-bottom)
   ) !important;
 }
+
+/* =========================
+   新フッターメニュー
+========================= */
+
+.glassBottomNav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 9999;
+
+  width: min(100%, 720px);
+  transform: translateX(-50%);
+
+  padding:
+    7px 10px
+    calc(7px + env(safe-area-inset-bottom));
+
+  background: rgba(255, 255, 255, 0.9);
+
+  border-top: 1px solid rgba(100, 180, 240, 0.3);
+  border-radius: 24px 24px 0 0;
+
+  box-shadow: 0 -8px 30px rgba(20, 100, 170, 0.18);
+
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.glassBottomNavInner {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+}
+
+.glassBottomNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 56px;
+
+  color: #526070;
+  text-decoration: none;
+
+  border-radius: 16px;
+}
+
+.bottomNavIconArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 30px;
+}
+
+.bottomNavIcon {
+  display: block;
+
+  width: 23px;
+  height: 23px;
+  max-width: 23px;
+  max-height: 23px;
+}
+
+.bottomNavLabel {
+  margin-top: 2px;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+.glassBottomNavItem.isActive {
+  color: #0877d1;
+
+  background: rgba(226, 245, 255, 0.9);
+}
+
+.page {
+  padding-bottom:
+    calc(100px + env(safe-area-inset-bottom));
+}
