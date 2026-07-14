@@ -835,3 +835,74 @@ text-align:center;
     font-size: 12px;
   }
 }
+.bscAiAdminMenuButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 88px;
+  padding: 17px 18px;
+
+  border: 3px solid #8bd7ff;
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #071f4f,
+      #0d5aa7 62%,
+      #1387d1
+    );
+
+  color: #ffffff;
+  text-decoration: none;
+
+  box-shadow:
+    0 10px 24px
+    rgba(7, 31, 79, 0.24);
+}
+
+.bscAiAdminMenuButton div {
+  min-width: 0;
+}
+
+.bscAiAdminMenuButton strong {
+  display: block;
+
+  color: #ffd768;
+
+  font-size: 19px;
+  font-weight: 1000;
+}
+
+.bscAiAdminMenuButton span {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #d8ecff;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bscAiAdminMenuButton b {
+  flex-shrink: 0;
+
+  color: #ffffff;
+
+  font-size: 38px;
+  line-height: 1;
+}
+
+.bscAiAdminMenuButton:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 30px
+    rgba(7, 31, 79, 0.32);
+}
+
+.bscAiAdminMenuButton:active {
+  transform: translateY(0);
+}
