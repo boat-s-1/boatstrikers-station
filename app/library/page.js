@@ -166,6 +166,7 @@ const sections = [
         href: "/library/results",
         className: "brownBook",
         cover: "/A0021C32-58D9-488E-B0E2-F99E8718DB03.png",
+        inside: "/F8A10D72-9BB2-41B3-943E-54C1CB5D122D.png",
       },
       {
         title: "特典資料",
@@ -174,6 +175,7 @@ const sections = [
         href: "/library/bonus",
         className: "tealBook",
         cover: "/FC167F92-CB82-4EB4-8712-A19C9F50535D.png",
+        inside: "/F8A10D72-9BB2-41B3-943E-54C1CB5D122D.png",
       },
     ],
   },
