@@ -335,22 +335,13 @@ export default async function Home() {
 <a href="/bsc2">
 
      <img
-  src="/F267AAC5-8E51-46DA-97D2-C03A242E2D74.png"
+  src="/88D8F192-324A-4FD9-8F3A-A2AF27E35C9F.png"
   alt="トップ"
   className="homeTitleImage"
 />
 
 </a>
 
-<div className="bscInfo">
-
-<div className="bscButton">
-
-Challenge Start ▶
-
-</div>
-
-</div>
 
 </section>
 
