@@ -1,0 +1,669 @@
+.aiAdminPage {
+  min-height: 100vh;
+  padding: 18px 16px 120px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 215, 104, 0.22), transparent 28%),
+    linear-gradient(180deg, #071f4f 0%, #0d5aa7 55%, #7fd9ff 100%);
+  color: #17345c;
+}
+
+.aiAdminPage *,
+.aiAdminPage *::before,
+.aiAdminPage *::after {
+  box-sizing: border-box;
+}
+
+.aiAdminHeader {
+  width: min(1100px, 100%);
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  color: white;
+}
+
+.aiAdminHeader p,
+.aiAdminHeader h1 {
+  margin: 0;
+}
+
+.aiAdminHeader p {
+  color: #ffd768;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.aiAdminHeader h1 {
+  margin-top: 3px;
+  font-size: clamp(22px, 5vw, 34px);
+  font-weight: 1000;
+}
+
+.aiBack,
+.aiLogout {
+  border: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+  backdrop-filter: blur(12px);
+}
+
+.aiBack {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  font-size: 24px;
+}
+
+.aiLogout {
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.aiHero,
+.aiSection,
+.aiStatsGrid,
+.aiErrorBanner {
+  width: min(1100px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.aiHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 24px;
+  border: 3px solid #ffd768;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+}
+
+.aiHero h2,
+.aiHero p {
+  margin: 0;
+}
+
+.aiHero h2 {
+  margin-top: 8px;
+  font-size: clamp(28px, 5vw, 42px);
+}
+
+.aiHero p {
+  margin-top: 8px;
+  color: #60738c;
+  line-height: 1.6;
+}
+
+.aiHero button,
+.aiUploadCard button {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ff4f93, #ff8d58);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.aiHero button:disabled,
+.aiUploadCard button:disabled,
+.aiActionButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.aiOnline,
+.aiOffline {
+  display: inline-flex;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.aiOnline {
+  background: #dff9ea;
+  color: #087d3b;
+}
+
+.aiOffline {
+  background: #ffe5e5;
+  color: #b91c1c;
+}
+
+.aiStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.aiStatsGrid article {
+  min-width: 0;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 10px 24px rgba(7, 31, 79, 0.16);
+}
+
+.aiStatsGrid span,
+.aiMetricGrid span,
+.aiTrustGrid span {
+  display: block;
+  color: #70839a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.aiStatsGrid strong {
+  display: block;
+  margin-top: 8px;
+  color: #17345c;
+  font-size: 25px;
+  font-weight: 1000;
+}
+
+.aiStatsGrid .aiSmallValue {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.aiSection {
+  margin-bottom: 18px;
+  padding: 22px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 14px 34px rgba(7, 31, 79, 0.18);
+}
+
+.aiSectionTitle {
+  margin-bottom: 18px;
+}
+
+.aiSectionTitle span {
+  color: #ff4f93;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+}
+
+.aiSectionTitle h2 {
+  margin: 5px 0 0;
+  color: #17345c;
+  font-size: 25px;
+}
+
+.aiModelGrid,
+.aiUploadGrid,
+.aiActionGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.aiModelGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.aiUploadGrid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.aiActionGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.aiModelCard,
+.aiUploadCard,
+.aiPredictionCard,
+.aiJobCard {
+  padding: 18px;
+  border: 2px solid #e2ebf6;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #ffffff, #f6faff);
+}
+
+.aiModelHead,
+.aiRaceTitle,
+.aiJobTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.aiModelHead span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ffe6f0;
+  color: #d82e73;
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.aiModelHead b {
+  color: #60738c;
+  font-size: 12px;
+}
+
+.aiModelCard h3 {
+  min-height: 42px;
+  margin: 14px 0;
+  color: #17345c;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.aiMetricGrid,
+.aiTrustGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.aiMetricGrid div,
+.aiTrustGrid div {
+  padding: 10px;
+  border-radius: 14px;
+  background: #eef5ff;
+}
+
+.aiMetricGrid strong,
+.aiTrustGrid strong {
+  display: block;
+  margin-top: 5px;
+  color: #17345c;
+  font-size: 18px;
+}
+
+.aiUploadCard h3,
+.aiUploadCard p {
+  margin: 0;
+}
+
+.aiUploadCard p {
+  min-height: 48px;
+  margin-top: 8px;
+  color: #6b7d92;
+  line-height: 1.5;
+}
+
+.aiUploadCard label {
+  display: block;
+  margin: 16px 0;
+}
+
+.aiUploadCard label span {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.aiUploadCard input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #b7c9df;
+  border-radius: 14px;
+  background: white;
+}
+
+.aiUploadCard button {
+  width: 100%;
+}
+
+.aiSelectedFile {
+  margin: -4px 0 14px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #edf8f1;
+  color: #17683a;
+  overflow-wrap: anywhere;
+}
+
+.aiSelectedFile span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.aiActionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-height: 96px;
+  padding: 18px;
+  border: 2px solid #cfdef0;
+  border-radius: 20px;
+  background: #fff;
+  color: #17345c;
+  text-align: left;
+  cursor: pointer;
+}
+
+.aiActionButton strong {
+  font-size: 17px;
+}
+
+.aiActionButton span {
+  color: #71839a;
+  line-height: 1.45;
+}
+
+.aiActionPrimary {
+  border-color: #ffd768;
+  background: linear-gradient(135deg, #fff8d7, #ffeeb0);
+}
+
+.aiPredictionList,
+.aiJobList {
+  display: grid;
+  gap: 12px;
+}
+
+.aiRaceTitle span,
+.aiJobTop span {
+  color: #71839a;
+  font-size: 12px;
+}
+
+.aiRaceTitle h3 {
+  margin: 3px 0 0;
+  font-size: 22px;
+}
+
+.aiRank {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  color: white;
+  font-size: 22px;
+  font-weight: 1000;
+}
+
+.aiRank-SS,
+.aiRank-S {
+  background: linear-gradient(135deg, #ff4f93, #ff8d58);
+}
+
+.aiRank-A {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+}
+
+.aiRank-B {
+  background: linear-gradient(135deg, #0d5aa7, #2d8ee5);
+}
+
+.aiRank-C {
+  background: linear-gradient(135deg, #06c755, #34d399);
+}
+
+.aiRank-D {
+  background: linear-gradient(135deg, #77869a, #9eabb9);
+}
+
+.aiTrustGrid {
+  margin-top: 14px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.aiUp {
+  color: #d72f72 !important;
+}
+
+.aiDown {
+  color: #146bb5 !important;
+}
+
+.aiFactors {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 15px;
+}
+
+.aiFactorsPositive {
+  background: #eaf9f0;
+  color: #17683a;
+}
+
+.aiFactorsNegative {
+  background: #fff1f1;
+  color: #a32929;
+}
+
+.aiFactors strong {
+  font-size: 13px;
+}
+
+.aiFactors ul {
+  margin: 7px 0 0;
+  padding-left: 20px;
+}
+
+.aiFactors li {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.aiJobTop strong {
+  display: block;
+  color: #17345c;
+}
+
+.aiJobTop span {
+  display: block;
+  margin-top: 4px;
+}
+
+.aiStatus {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.aiStatus-pending {
+  background: #fff5cf;
+  color: #856500;
+}
+
+.aiStatus-running {
+  background: #deefff;
+  color: #135f9e;
+}
+
+.aiStatus-completed {
+  background: #daf7e5;
+  color: #16703d;
+}
+
+.aiStatus-failed {
+  background: #ffe0e0;
+  color: #a32020;
+}
+
+.aiProgress {
+  height: 9px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: #dfe9f5;
+  overflow: hidden;
+}
+
+.aiProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #06c755, #ffd768, #ff4f93);
+  transition: width 0.3s ease;
+}
+
+.aiJobCard p {
+  margin: 10px 0 0;
+  color: #60738c;
+  font-size: 13px;
+}
+
+.aiJobCard small {
+  display: block;
+  margin-top: 8px;
+  color: #8a98a8;
+}
+
+.aiEmpty {
+  padding: 30px 18px;
+  border: 2px dashed #c8d6e7;
+  border-radius: 18px;
+  color: #70839a;
+  text-align: center;
+}
+
+.aiErrorBanner,
+.aiError {
+  color: #b42323;
+}
+
+.aiErrorBanner {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffe3e3;
+  font-weight: 800;
+}
+
+.aiLoginCard {
+  width: min(460px, calc(100% - 24px));
+  margin: 10vh auto 0;
+  padding: 30px;
+  border: 3px solid #ffd768;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.98);
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.aiLogo {
+  font-size: 56px;
+}
+
+.aiEyebrow {
+  margin: 8px 0 0;
+  color: #ff4f93;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+}
+
+.aiLoginCard h1 {
+  margin: 5px 0;
+  font-size: 32px;
+}
+
+.aiLoginCard p {
+  color: #687a90;
+  line-height: 1.6;
+}
+
+.aiLoginCard input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 16px;
+  border: 3px solid #d6a94c;
+  border-radius: 17px;
+  font-size: 17px;
+}
+
+.aiLoginCard button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 16px;
+  border: 0;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #17345c, #0d5aa7);
+  color: white;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.aiLoginCard a {
+  display: inline-block;
+  margin-top: 18px;
+  color: #17345c;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 780px) {
+  .aiStatsGrid,
+  .aiUploadGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .aiUploadGrid > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .aiAdminPage {
+    padding: 12px 10px 100px;
+  }
+
+  .aiAdminHeader {
+    grid-template-columns: 46px 1fr;
+  }
+
+  .aiAdminHeader h1 {
+    font-size: 20px;
+  }
+
+  .aiLogout {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .aiHero {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .aiHero button {
+    width: 100%;
+  }
+
+  .aiStatsGrid,
+  .aiModelGrid,
+  .aiUploadGrid,
+  .aiActionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .aiUploadGrid > :last-child {
+    grid-column: auto;
+  }
+
+  .aiSection {
+    padding: 17px 14px;
+    border-radius: 24px;
+  }
+
+  .aiMetricGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .aiTrustGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
