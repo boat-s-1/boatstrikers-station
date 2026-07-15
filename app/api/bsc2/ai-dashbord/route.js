@@ -90,8 +90,13 @@ export async function GET(request) {
     }
 
     const races = data || [];
+
     const maxScore = races.length
-      ? Math.max(...races.map((race) => Number(race.total_score || 0)))
+      ? Math.max(
+          ...races.map((race) =>
+            Number(race.total_score || 0),
+          ),
+        )
       : 0;
 
     const summary = {
@@ -105,8 +110,10 @@ export async function GET(request) {
           race.diagnosis_code === "skip" ||
           Number(race.star_count) === 1,
       ).length,
-      diagnosisVersion: races[0]?.diagnosis_version || null,
-      generatedAt: races[0]?.generated_at || null,
+      diagnosisVersion:
+        races[0]?.diagnosis_version || null,
+      generatedAt:
+        races[0]?.generated_at || null,
     };
 
     return NextResponse.json({
