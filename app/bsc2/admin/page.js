@@ -991,6 +991,22 @@ export default function BscAdminPage() {
 
   <b>›</b>
 </Link>
+     <Link
+  href="/bsc2/admin/ai-v8"
+  className="bscAiAdminMenuButton"
+>
+  <div>
+    <strong>
+      🤖 Boat Strikers AI Ultimate v8
+    </strong>
+
+    <span>
+      3AI総合判定・製品版
+    </span>
+  </div>
+
+  <b>›</b>
+</Link>
     </div>
 
     <div className="bscNewspaperMenu">
