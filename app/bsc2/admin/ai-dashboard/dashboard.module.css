@@ -1,0 +1,667 @@
+
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  color: #17365f;
+  background:
+    radial-gradient(circle at top left, rgba(53, 161, 223, 0.24), transparent 35%),
+    linear-gradient(180deg, #0e315b 0%, #0f4f86 42%, #eaf5ff 42%, #f7fbff 100%);
+}
+
+.header,
+.summaryGrid,
+.dailyMessage,
+.heroCard,
+.rankingSection {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-end;
+  color: #fff;
+  padding: 12px 4px 28px;
+}
+
+.header h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.05;
+}
+
+.header p {
+  margin: 0;
+  opacity: 0.82;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: #ffd76b;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.headerActions input,
+.headerActions button {
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.headerActions input {
+  background: #fff;
+  color: #17365f;
+}
+
+.headerActions button {
+  background: linear-gradient(135deg, #ff4d8d, #ff865b);
+  color: #fff;
+  cursor: pointer;
+}
+
+.headerActions button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.summaryCard {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 14px 38px rgba(7, 42, 80, 0.16);
+}
+
+.summaryCard span {
+  color: #71849e;
+  font-weight: 800;
+}
+
+.summaryCard strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 34px;
+  color: #113b6c;
+}
+
+.dailyMessage {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  border-radius: 18px;
+  background: #fff8d9;
+  border: 1px solid #f2d36a;
+}
+
+.dailyMessage span {
+  font-size: 13px;
+  color: #8c6a00;
+  font-weight: 900;
+}
+
+.dailyMessage strong {
+  color: #6e5200;
+}
+
+.heroCard {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 24px;
+  align-items: center;
+  padding: 28px;
+  margin-bottom: 22px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #fff, #f8fbff);
+  border: 3px solid #ffd76b;
+  box-shadow: 0 18px 48px rgba(11, 49, 90, 0.2);
+}
+
+.heroRank {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #ed3f82;
+  font-weight: 900;
+}
+
+.heroCard h2 {
+  margin: 0 0 14px;
+  font-size: 34px;
+}
+
+.heroScore {
+  text-align: right;
+}
+
+.heroScore span {
+  display: block;
+  color: #ffb000;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}
+
+.heroScore strong {
+  display: inline-block;
+  font-size: 42px;
+  margin-top: 4px;
+}
+
+.heroScore small {
+  display: block;
+  color: #71849e;
+  font-weight: 800;
+}
+
+.heroCard > button {
+  border: 0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #143e70, #1777bd);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.rankingSection {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 16px 44px rgba(14, 54, 95, 0.14);
+}
+
+.sectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.sectionTitle h2 {
+  margin: 4px 0 0;
+  font-size: 28px;
+}
+
+.sectionTitle > span {
+  color: #71849e;
+  font-weight: 900;
+}
+
+.raceList {
+  display: grid;
+  gap: 12px;
+}
+
+.raceCard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto 130px;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #dce8f5;
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.raceCard:hover {
+  transform: translateY(-2px);
+  border-color: #8bc5eb;
+  box-shadow: 0 10px 24px rgba(11, 71, 120, 0.12);
+}
+
+.listRank,
+.rankBadge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #123f70;
+  color: #fff;
+  font-weight: 900;
+}
+
+.raceMain {
+  min-width: 0;
+}
+
+.raceMain small {
+  display: block;
+  color: #7d8fa7;
+}
+
+.raceMain > strong {
+  display: block;
+  font-size: 20px;
+  margin: 3px 0 8px;
+}
+
+.listProbabilities {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.listProbabilities span {
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #eef6ff;
+  font-size: 12px;
+  font-weight: 800;
+  color: #496985;
+}
+
+.listScore {
+  text-align: right;
+}
+
+.listScore span {
+  display: block;
+  color: #ffb000;
+  font-size: 16px;
+}
+
+.listScore strong {
+  font-size: 28px;
+}
+
+.listScore small {
+  margin-left: 3px;
+  color: #7d8fa7;
+}
+
+.diagnosisLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.labelIron { background: #fff2c3; color: #865900; }
+.labelInside { background: #dff1ff; color: #075c95; }
+.labelFemale { background: #ffe1ee; color: #ad1d5d; }
+.labelHole { background: #e9e3ff; color: #5f35a8; }
+.labelAlert { background: #ffe9d5; color: #aa4d00; }
+.labelDanger { background: #ffe0e0; color: #ad2222; }
+.labelSkip { background: #e7ebf0; color: #566579; }
+.labelWatch { background: #e9f4ef; color: #317156; }
+
+.loadingBox,
+.errorBox {
+  width: min(1120px, 100%);
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  padding: 18px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.loadingBox {
+  background: #f4f8fc;
+  color: #647a94;
+}
+
+.errorBox {
+  background: #ffe1e1;
+  color: #a82929;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 25, 48, 0.72);
+  overflow-y: auto;
+}
+
+.modal {
+  position: relative;
+  width: min(860px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: 28px;
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+}
+
+.closeButton {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: #edf3f9;
+  color: #17365f;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.detailTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding-right: 48px;
+}
+
+.detailTop h2 {
+  margin: 12px 0;
+  font-size: 32px;
+}
+
+.detailScore {
+  text-align: right;
+}
+
+.detailScore span {
+  display: block;
+  color: #ffb000;
+  font-size: 22px;
+}
+
+.detailScore strong {
+  display: block;
+  font-size: 36px;
+}
+
+.probabilityGrid,
+.metricGrid {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.probabilityGrid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.metricGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.probabilityBox {
+  display: grid;
+  gap: 4px;
+  border-radius: 16px;
+  padding: 15px;
+  background: #f3f8fd;
+}
+
+.probabilityIcon {
+  font-size: 20px;
+}
+
+.probabilityName {
+  color: #71849e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.probabilityBox strong {
+  font-size: 22px;
+}
+
+.metric {
+  border-radius: 16px;
+  padding: 15px;
+  border: 1px solid #dbe8f4;
+}
+
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.metricHeader span {
+  font-weight: 800;
+  color: #71849e;
+}
+
+.metricTrack {
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e9f0f7;
+}
+
+.metricBar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1c6fae, #43b8dc);
+}
+
+.detailSection {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e3ebf4;
+}
+
+.detailSection h3 {
+  margin: 0 0 14px;
+}
+
+.commentList {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ticketGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.ticketCard {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f6f9fc;
+}
+
+.ticketMark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #123f70;
+  color: #fff;
+  font-weight: 900;
+}
+
+.ticketCard small,
+.ticketCard p {
+  display: block;
+  margin: 0;
+  color: #71849e;
+}
+
+.ticketCard strong {
+  display: block;
+  margin: 2px 0;
+  font-size: 22px;
+}
+
+.breakdownList {
+  display: grid;
+  gap: 9px;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f6f9fc;
+}
+
+.breakdownRow strong,
+.breakdownRow small {
+  display: block;
+}
+
+.breakdownRow small {
+  margin-top: 3px;
+  color: #71849e;
+}
+
+.plus {
+  color: #167548;
+  font-weight: 900;
+}
+
+.minus {
+  color: #bd3333;
+  font-weight: 900;
+}
+
+.emptyText {
+  color: #7d8fa7;
+}
+
+.loginCard {
+  width: min(560px, calc(100% - 24px));
+  margin: 10vh auto 0;
+  padding: 34px;
+  border-radius: 28px;
+  background: #fff;
+  border: 3px solid #ffd76b;
+  box-shadow: 0 24px 70px rgba(5, 36, 70, 0.3);
+}
+
+.loginCard h1 {
+  margin: 8px 0;
+}
+
+.loginCard p {
+  color: #71849e;
+}
+
+.loginCard input,
+.loginCard button {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+}
+
+.loginCard input {
+  margin: 18px 0 10px;
+  border: 2px solid #d4ad42;
+  padding: 0 15px;
+  font-size: 16px;
+}
+
+.loginCard button {
+  border: 0;
+  background: linear-gradient(135deg, #143e70, #1777bd);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 780px) {
+  .page {
+    padding: 14px;
+  }
+
+  .header {
+    display: block;
+    padding-bottom: 18px;
+  }
+
+  .headerActions {
+    margin-top: 16px;
+  }
+
+  .headerActions input,
+  .headerActions button {
+    flex: 1 1 150px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .heroCard {
+    grid-template-columns: 1fr;
+  }
+
+  .heroScore {
+    text-align: left;
+  }
+
+  .raceCard {
+    grid-template-columns: 42px 1fr auto;
+  }
+
+  .raceCard > .diagnosisLabel {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .listScore {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .probabilityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailTop {
+    display: block;
+  }
+
+  .detailScore {
+    text-align: left;
+  }
+}
