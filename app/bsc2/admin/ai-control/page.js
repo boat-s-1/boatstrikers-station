@@ -120,7 +120,22 @@ function UploadCard({
         body: formData,
       });
 
-      const body = await response.json();
+      const responseText = await response.text();
+
+let body;
+
+try {
+  body = JSON.parse(responseText);
+} catch {
+  throw new Error(
+    response.status === 413
+      ? "CSVがVercelのアップロード上限を超えています。"
+      : `サーバーからJSON以外の応答が返りました。HTTP ${response.status}: ${responseText.slice(
+          0,
+          200,
+        )}`,
+  );
+}
 
       if (!response.ok) {
         throw new Error(body.error || "アップロードに失敗しました");
