@@ -169,41 +169,41 @@ function RaceCard({ race, courseCode }) {
       </div>
 
       <div className="raceActionGrid">
-        <Link
-          href={`/races/${courseCode}/${race.raceNo}`}
-          className="raceActionButton entry"
-        >
-          <span className="actionIcon">📋</span>
+       <Link
+  href={`/races/${courseCode}/${race.raceNo}?tab=basic`}
+  className="raceActionButton entry"
+>
+  <span className="actionIcon">📋</span>
 
-          <span>
-            <small>基本情報</small>
-            出走表
-          </span>
-        </Link>
+  <span>
+    <small>基本情報</small>
+    出走表
+  </span>
+</Link>
 
-        <Link
-          href={`/races/${courseCode}/${race.raceNo}/previous-day`}
-          className="raceActionButton previous"
-        >
-          <span className="actionIcon">📰</span>
+<Link
+  href={`/races/${courseCode}/${race.raceNo}?tab=previous`}
+  className="raceActionButton previous"
+>
+  <span className="actionIcon">📰</span>
 
-          <span>
-            <small>AI予想</small>
-            前日版
-          </span>
-        </Link>
+  <span>
+    <small>AI予想</small>
+    前日版
+  </span>
+</Link>
 
-        <Link
-          href={`/races/${courseCode}/${race.raceNo}/live`}
-          className="raceActionButton live"
-        >
-          <span className="actionIcon">⚡</span>
+<Link
+  href={`/races/${courseCode}/${race.raceNo}?tab=live`}
+  className="raceActionButton live"
+>
+  <span className="actionIcon">⚡</span>
 
-          <span>
-            <small>展示後更新</small>
-            直前版
-          </span>
-        </Link>
+  <span>
+    <small>展示後更新</small>
+    直前版
+  </span>
+</Link>
       </div>
 
       <div className="raceCardFooter">
