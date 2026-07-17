@@ -1,0 +1,1412 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.raceDetailPage {
+  min-height: 100vh;
+  padding-bottom: 105px;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(65, 177, 240, 0.15),
+      transparent 340px
+    ),
+    linear-gradient(
+      180deg,
+      #edf8ff 0%,
+      #f8fbfd 38%,
+      #f1f5f8 100%
+    );
+  color: #27384b;
+}
+
+/* =========================
+   ヘッダー
+========================= */
+
+.raceDetailHero {
+  padding: 16px 15px 27px;
+  border-radius: 0 0 29px 29px;
+  background: linear-gradient(
+    135deg,
+    #1479dc,
+    #25aaed
+  );
+  color: #ffffff;
+  box-shadow: 0 9px 26px
+    rgba(26, 107, 178, 0.21);
+}
+
+.raceDetailHero.night {
+  background:
+    radial-gradient(
+      circle at 88% 10%,
+      rgba(255, 255, 255, 0.17),
+      transparent 110px
+    ),
+    linear-gradient(
+      135deg,
+      #263d91,
+      #4f55c3 48%,
+      #239bdc
+    );
+}
+
+.raceDetailHero.morning {
+  background:
+    radial-gradient(
+      circle at 88% 10%,
+      rgba(255, 255, 255, 0.2),
+      transparent 110px
+    ),
+    linear-gradient(
+      135deg,
+      #ee9838,
+      #e6bd47 50%,
+      #35a8d7
+    );
+}
+
+.raceDetailHeroInner {
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.raceDetailTopNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.raceDetailBack,
+.raceDetailCourseList {
+  border: 1px solid
+    rgba(255, 255, 255, 0.29);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.raceDetailBack {
+  padding: 7px 10px;
+}
+
+.raceDetailCourseList {
+  padding: 7px 11px;
+}
+
+.raceDetailTitleArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.raceDetailRaceNumber {
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-top: 9px;
+  border: 2px solid
+    rgba(255, 255, 255, 0.33);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0
+    rgba(255, 255, 255, 0.2);
+}
+
+.raceDetailRaceNumber strong {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.raceDetailRaceNumber span {
+  margin-left: 3px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.raceDetailTitle {
+  min-width: 0;
+  flex: 1;
+}
+
+.raceDetailCourseRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.raceDetailCourseRow h1 {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.raceDetailGrade {
+  padding: 4px 8px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.68);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.raceDetailGrade.sg,
+.raceDetailGrade.g1 {
+  background: #d52d36;
+}
+
+.raceDetailGrade.g2 {
+  background: #30a458;
+}
+
+.raceDetailGrade.g3 {
+  background: #1472d5;
+}
+
+.raceDetailGrade.general {
+  background: rgba(255, 255, 255, 0.17);
+}
+
+.raceDetailTitle h2 {
+  margin: 7px 0 0;
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.raceDetailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.raceDetailMeta span {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.raceDetailStatus {
+  min-width: max-content;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.raceDetailStatus.before {
+  background: #e2f7e7;
+  color: #168046;
+}
+
+.raceDetailStatus.soon {
+  background: #fff0d8;
+  color: #b86610;
+}
+
+.raceDetailStatus.closed {
+  background: #e6eaed;
+  color: #747f87;
+}
+
+/* =========================
+   タブ
+========================= */
+
+.raceDetailTabs {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 9px 10px;
+  border-bottom: 1px solid
+    rgba(158, 183, 202, 0.42);
+  background: rgba(248, 252, 255, 0.95);
+  box-shadow: 0 5px 16px
+    rgba(44, 81, 111, 0.09);
+  backdrop-filter: blur(12px);
+}
+
+.raceDetailTabsInner {
+  width: min(920px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin: 0 auto;
+}
+
+.raceDetailTab {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 50px;
+  padding: 6px 4px;
+  border: 1px solid #d4e0e8;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #5c6d7d;
+  cursor: pointer;
+}
+
+.raceDetailTab > span {
+  font-size: 18px;
+}
+
+.raceDetailTab div {
+  min-width: 0;
+  text-align: left;
+}
+
+.raceDetailTab small {
+  display: block;
+  font-size: 7px;
+  font-weight: 800;
+  opacity: 0.72;
+}
+
+.raceDetailTab strong {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+}
+
+.raceDetailTab.active {
+  border-color: #197bd4;
+  background: linear-gradient(
+    135deg,
+    #1979dc,
+    #27a8ec
+  );
+  color: #ffffff;
+  box-shadow: 0 5px 13px
+    rgba(27, 126, 209, 0.21);
+}
+
+.raceDetailTab.previous.active {
+  border-color: #df7d33;
+  background: linear-gradient(
+    135deg,
+    #ed8e35,
+    #f6af4e
+  );
+}
+
+.raceDetailTab.live.active {
+  border-color: #d74771;
+  background: linear-gradient(
+    135deg,
+    #db4776,
+    #f0648d
+  );
+}
+
+/* =========================
+   メインコンテンツ
+========================= */
+
+.raceDetailContent {
+  width: min(920px, calc(100% - 26px));
+  margin: 20px auto 0;
+}
+
+.tabPanel {
+  display: grid;
+  gap: 14px;
+  animation: tabFadeIn 0.28s ease;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panelHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.panelEnglish {
+  margin: 0 0 3px;
+  color: #1682cf;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.panelHeading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.panelBadge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #dcefff;
+  color: #1776c3;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.basicGuide {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid #d3e5f0;
+  border-radius: 14px;
+  background: #f5fbff;
+}
+
+.basicGuide > span {
+  font-size: 20px;
+}
+
+.basicGuide p {
+  margin: 0;
+  color: #62778a;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* =========================
+   出走選手カード
+========================= */
+
+.entryCardList {
+  display: grid;
+  gap: 10px;
+}
+
+.entryRacerCard {
+  overflow: hidden;
+  border: 1px solid
+    rgba(151, 181, 203, 0.48);
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 7px 18px
+    rgba(48, 83, 111, 0.09);
+}
+
+.entryRacerTop {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+}
+
+.detailBoatBadge {
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid
+    rgba(20, 30, 40, 0.17);
+  border-radius: 13px;
+  font-size: 23px;
+  font-weight: 900;
+  box-shadow: 0 3px 8px
+    rgba(50, 70, 90, 0.12);
+}
+
+.detailBoatBadge.small {
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.detailBoatBadge.boat1 {
+  background: #ffffff;
+  color: #151515;
+}
+
+.detailBoatBadge.boat2 {
+  background: #383d43;
+  color: #ffffff;
+}
+
+.detailBoatBadge.boat3 {
+  background: #e64742;
+  color: #ffffff;
+}
+
+.detailBoatBadge.boat4 {
+  background: #368fe0;
+  color: #ffffff;
+}
+
+.detailBoatBadge.boat5 {
+  background: #f0d747;
+  color: #252525;
+}
+
+.detailBoatBadge.boat6 {
+  background: #58b466;
+  color: #ffffff;
+}
+
+.entryRacerName {
+  min-width: 0;
+  flex: 1;
+}
+
+.entryRacerName > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.boatColorName {
+  color: #8a97a2;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.entryClassBadge {
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.entryClassBadge.a1 {
+  background: #ffe8dc;
+  color: #c35624;
+}
+
+.entryClassBadge.a2 {
+  background: #e2efff;
+  color: #3471b8;
+}
+
+.entryClassBadge.b1 {
+  background: #edf1f4;
+  color: #697b89;
+}
+
+.entryRacerName h3 {
+  margin: 4px 0 0;
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entryRacerName p {
+  margin: 3px 0 0;
+  color: #8c99a4;
+  font-size: 9px;
+}
+
+.firstBoatLabel {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff0df;
+  color: #d36a1f;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.entryStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #e7edf1;
+  border-bottom: 1px solid #e7edf1;
+  background: #f8fbfd;
+}
+
+.entryStatsGrid > div {
+  padding: 10px 4px;
+  border-right: 1px solid #e2eaef;
+  text-align: center;
+}
+
+.entryStatsGrid > div:last-child {
+  border-right: 0;
+}
+
+.entryStatsGrid span {
+  display: block;
+  color: #8997a3;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.entryStatsGrid strong {
+  display: block;
+  margin-top: 3px;
+  color: #334a5e;
+  font-size: 13px;
+}
+
+.entryExtraRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 9px 10px;
+}
+
+.entryExtraRow span {
+  color: #8996a1;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.entryExtraRow b {
+  margin-left: 4px;
+  color: #42586b;
+  font-size: 10px;
+}
+
+/* =========================
+   新聞ヘッダー
+========================= */
+
+.newspaperHero {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: 20px;
+  color: #ffffff;
+  box-shadow: 0 8px 20px
+    rgba(137, 81, 28, 0.17);
+}
+
+.previousNewspaper {
+  background:
+    radial-gradient(
+      circle at 95% 0,
+      rgba(255, 255, 255, 0.18),
+      transparent 100px
+    ),
+    linear-gradient(
+      135deg,
+      #e87b2a,
+      #f3ac48
+    );
+}
+
+.liveNewspaper {
+  background:
+    radial-gradient(
+      circle at 95% 0,
+      rgba(255, 255, 255, 0.18),
+      transparent 100px
+    ),
+    linear-gradient(
+      135deg,
+      #cd3f72,
+      #f05c88
+    );
+  box-shadow: 0 8px 20px
+    rgba(167, 48, 92, 0.18);
+}
+
+.newspaperCharacter {
+  width: 59px;
+  height: 59px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 2px solid
+    rgba(255, 255, 255, 0.29);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 30px;
+}
+
+.newspaperHero p {
+  margin: 0;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  opacity: 0.82;
+}
+
+.newspaperHero h2 {
+  margin: 3px 0 0;
+  font-size: 20px;
+}
+
+.newspaperHero span {
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  opacity: 0.88;
+}
+
+/* =========================
+   AI評価
+========================= */
+
+.predictionMainCard,
+.liveUpdateCard,
+.marksCard,
+.analysisCard,
+.betCard,
+.exhibitionCard {
+  border: 1px solid
+    rgba(151, 181, 203, 0.48);
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 7px 18px
+    rgba(48, 83, 111, 0.09);
+}
+
+.predictionMainCard,
+.liveUpdateCard {
+  padding: 15px;
+}
+
+.predictionMainTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.predictionSmallTitle {
+  margin: 0 0 8px;
+  color: #8694a0;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.predictionRankRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.predictionRank {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  font-size: 27px;
+  font-weight: 1000;
+}
+
+.rankS {
+  background: #ffe3a9;
+  color: #bd6b00;
+}
+
+.rankA {
+  background: #ffe4d7;
+  color: #c65524;
+}
+
+.rankB {
+  background: #dcecff;
+  color: #3273bd;
+}
+
+.rankC {
+  background: #e9eef2;
+  color: #647583;
+}
+
+.rankD {
+  background: #eee9f2;
+  color: #745e83;
+}
+
+.predictionRankRow > div strong {
+  font-size: 14px;
+}
+
+.predictionRankRow p {
+  margin: 4px 0 0;
+  color: #86939f;
+  font-size: 9px;
+}
+
+.predictionRankRow p b {
+  color: #d56824;
+}
+
+.predictionBoatOne {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.predictionBoatOne span {
+  color: #d36b24;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.probabilityMeter {
+  margin-top: 16px;
+}
+
+.probabilityMeterHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.probabilityMeterHeader span {
+  color: #687b8d;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.probabilityMeterHeader strong {
+  color: #e17029;
+  font-size: 25px;
+}
+
+.probabilityTrack {
+  height: 12px;
+  overflow: hidden;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: #e9eef2;
+}
+
+.probabilityFill {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #f0a53f,
+    #ef6e34
+  );
+  transition: width 0.45s ease;
+}
+
+/* =========================
+   共通カード見出し
+========================= */
+
+.smallCardHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #e6edf1;
+}
+
+.smallCardHeading > span {
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #eff7fd;
+  font-size: 20px;
+}
+
+.smallCardHeading p {
+  margin: 0;
+  color: #2585c8;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.smallCardHeading h3 {
+  margin: 2px 0 0;
+  font-size: 15px;
+}
+
+/* =========================
+   AI印
+========================= */
+
+.marksGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  padding: 13px;
+}
+
+.predictionMarkItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 4px;
+  border: 1px solid #e0e8ed;
+  border-radius: 12px;
+  background: #fafcfd;
+}
+
+.markSymbol {
+  font-size: 17px;
+  font-weight: 1000;
+}
+
+.mark◎ {
+  color: #d84931;
+}
+
+.mark○ {
+  color: #e17c27;
+}
+
+.mark▲ {
+  color: #347ec2;
+}
+
+.mark△ {
+  color: #677887;
+}
+
+/* =========================
+   分析コメント
+========================= */
+
+.analysisList {
+  display: grid;
+  gap: 8px;
+  padding: 13px;
+}
+
+.analysisItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f6f9fb;
+}
+
+.analysisItem > span {
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: #dceeff;
+  color: #1975bd;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.analysisItem p {
+  margin: 0;
+  color: #53687a;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+/* =========================
+   買い目
+========================= */
+
+.betCard {
+  overflow: hidden;
+}
+
+.betCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 14px;
+  background: linear-gradient(
+    90deg,
+    #fff7ef,
+    #ffffff
+  );
+}
+
+.liveBetCard .betCardHeader {
+  background: linear-gradient(
+    90deg,
+    #fff0f5,
+    #ffffff
+  );
+}
+
+.betCardHeader p {
+  margin: 0;
+  color: #dc752e;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.liveBetCard .betCardHeader p {
+  color: #cf4772;
+}
+
+.betCardHeader h3 {
+  margin: 2px 0 0;
+  font-size: 15px;
+}
+
+.betCardHeader > span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #ffeadb;
+  color: #ca6526;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.betTicketGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+  padding: 13px;
+}
+
+.betTicket {
+  position: relative;
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  border: 1px solid #e0e8ed;
+  border-radius: 12px;
+  background: #f9fbfc;
+}
+
+.betTicket.mainBet {
+  border-color: #f0a76d;
+  background: #fff4e9;
+}
+
+.liveBetCard .betTicket.mainBet {
+  border-color: #e38baa;
+  background: #fff0f5;
+}
+
+.betTicket small {
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #e7782e;
+  color: #ffffff;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.liveBetCard .betTicket small {
+  background: #d94c76;
+}
+
+.betTicket strong {
+  color: #31495c;
+  font-size: 17px;
+  letter-spacing: 0.04em;
+}
+
+.betNotice {
+  margin: 0;
+  padding: 0 13px 13px;
+  color: #929da6;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+/* =========================
+   直前版
+========================= */
+
+.liveUpdateTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.liveUpdateTop p {
+  margin: 0 0 5px;
+  color: #83919c;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.scoreComparison {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.scoreComparison span {
+  color: #87949f;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.scoreComparison b {
+  color: #a1abb3;
+}
+
+.scoreComparison strong {
+  color: #d74773;
+  font-size: 25px;
+}
+
+.scoreChange {
+  min-width: 48px;
+  padding: 8px 9px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.scoreUp {
+  background: #ffe7ef;
+  color: #cf406d;
+}
+
+.scoreDown {
+  background: #e8eef5;
+  color: #4f6f8d;
+}
+
+.liveUpdateCard .probabilityFill {
+  background: linear-gradient(
+    90deg,
+    #e95a8a,
+    #cd3c70
+  );
+}
+
+.liveUpdateCard
+  .probabilityMeterHeader
+  strong {
+  color: #d44471;
+}
+
+.liveInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.liveInfoGrid > div {
+  padding: 10px;
+  border-radius: 12px;
+  background: #f6f9fb;
+}
+
+.liveInfoGrid span {
+  display: block;
+  color: #8996a1;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.liveInfoGrid strong {
+  display: block;
+  margin-top: 4px;
+  color: #3b5367;
+  font-size: 12px;
+}
+
+/* =========================
+   展示一覧
+========================= */
+
+.exhibitionTable {
+  padding: 8px 12px 12px;
+}
+
+.exhibitionHeader,
+.exhibitionRow {
+  display: grid;
+  grid-template-columns: 46px 1fr 1fr 56px;
+  align-items: center;
+  gap: 5px;
+}
+
+.exhibitionHeader {
+  padding: 7px 0;
+  color: #8996a1;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.exhibitionRow {
+  padding: 8px 0;
+  border-top: 1px dashed #e0e7ec;
+  text-align: center;
+}
+
+.exhibitionRow strong {
+  color: #42576a;
+  font-size: 11px;
+}
+
+.exhibitionRank {
+  display: inline-grid;
+  width: 33px;
+  height: 30px;
+  place-items: center;
+  justify-self: center;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+/* =========================
+   前後レース
+========================= */
+
+.raceMoveSection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.raceMoveButton {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 55px;
+  padding: 10px 12px;
+  border: 1px solid #d4e1e9;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #476074;
+  text-decoration: none;
+}
+
+.raceMoveButton.nextRace {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.raceMoveButton > span {
+  color: #1880d2;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.raceMoveButton small {
+  display: block;
+  color: #8a97a2;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.raceMoveButton strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+.raceMoveSpacer {
+  min-height: 1px;
+}
+
+/* =========================
+   下部メニュー
+========================= */
+
+.raceDetailBottomNav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #d3dee6;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -6px 20px
+    rgba(48, 77, 101, 0.1);
+  backdrop-filter: blur(13px);
+}
+
+.raceDetailBottomNav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 9px 5px
+    max(10px, env(safe-area-inset-bottom));
+  color: #4c5e6f;
+  text-decoration: none;
+}
+
+.raceDetailBottomNav span {
+  font-size: 20px;
+}
+
+.raceDetailBottomNav small {
+  margin-top: 3px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+/* =========================
+   404
+========================= */
+
+.raceDetailNotFound {
+  width: min(600px, calc(100% - 30px));
+  margin: 80px auto;
+  padding: 52px 20px;
+  border: 1px dashed #cad9e3;
+  border-radius: 20px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.raceDetailNotFound > span {
+  font-size: 40px;
+}
+
+.raceDetailNotFound h1 {
+  margin: 12px 0 0;
+}
+
+.raceDetailNotFound p {
+  margin: 7px 0 0;
+  color: #81909c;
+  font-size: 12px;
+}
+
+.raceDetailNotFound a {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  background: #1979d5;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* =========================
+   PC・タブレット
+========================= */
+
+@media (min-width: 720px) {
+  .raceDetailPage {
+    padding-bottom: 65px;
+  }
+
+  .raceDetailHero {
+    padding-top: 23px;
+    padding-bottom: 34px;
+  }
+
+  .entryCardList {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .tabPanel {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .panelHeading,
+  .basicGuide,
+  .newspaperHero {
+    grid-column: 1 / -1;
+  }
+
+  .predictionMainCard,
+  .liveUpdateCard,
+  .betCard {
+    grid-column: 1 / -1;
+  }
+
+  .entryCardList,
+  .raceMoveSection {
+    grid-column: 1 / -1;
+  }
+
+  .raceDetailBottomNav {
+    display: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .raceDetailRaceNumber {
+    width: 59px;
+    height: 59px;
+    border-radius: 17px;
+  }
+
+  .raceDetailRaceNumber strong {
+    font-size: 29px;
+  }
+
+  .raceDetailCourseRow h1 {
+    font-size: 22px;
+  }
+
+  .raceDetailTitle h2 {
+    font-size: 14px;
+  }
+
+  .raceDetailStatus {
+    padding-right: 6px;
+    padding-left: 6px;
+    font-size: 8px;
+  }
+
+  .raceDetailTab > span {
+    font-size: 15px;
+  }
+
+  .raceDetailTab strong {
+    font-size: 10px;
+  }
+
+  .entryStatsGrid strong {
+    font-size: 11px;
+  }
+
+  .marksGrid {
+    gap: 5px;
+  }
+}
