@@ -1,0 +1,885 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.coursePage {
+  min-height: 100vh;
+  padding-bottom: 105px;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(67, 173, 235, 0.16),
+      transparent 350px
+    ),
+    linear-gradient(
+      180deg,
+      #edf8ff 0%,
+      #f8fbfe 42%,
+      #f1f5f8 100%
+    );
+  color: #25374c;
+}
+
+.courseHero {
+  padding: 17px 16px 26px;
+  border-radius: 0 0 28px 28px;
+  background:
+    linear-gradient(
+      135deg,
+      #1175dc 0%,
+      #25a8ed 100%
+    );
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(24, 107, 180, 0.2);
+}
+
+.courseHero.night {
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(255, 255, 255, 0.18),
+      transparent 120px
+    ),
+    linear-gradient(
+      135deg,
+      #253d91 0%,
+      #4e55c5 48%,
+      #239bdc 100%
+    );
+}
+
+.courseHero.morning {
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(255, 255, 255, 0.22),
+      transparent 120px
+    ),
+    linear-gradient(
+      135deg,
+      #f29d38 0%,
+      #e9bd43 52%,
+      #38abd9 100%
+    );
+}
+
+.courseHeroInner {
+  width: min(1050px, 100%);
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.courseHeroMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 19px;
+}
+
+.heroEnglish {
+  margin: 0 0 5px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+  opacity: 0.8;
+}
+
+.courseTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.courseTitleRow h1 {
+  margin: 0;
+  font-size: clamp(32px, 8vw, 46px);
+  line-height: 1;
+}
+
+.gradeBadge {
+  padding: 5px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.gradeBadge.sg,
+.gradeBadge.g1 {
+  background: #d52d34;
+}
+
+.gradeBadge.g2 {
+  background: #32a756;
+}
+
+.gradeBadge.g3 {
+  background: #166fd2;
+}
+
+.gradeBadge.general {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.courseMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.courseMeta span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.courseHeroIcon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.13);
+  font-size: 37px;
+  transform: rotate(4deg);
+}
+
+.courseTimeBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 13px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.23);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.courseTimeBar > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.courseTimeBar span {
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.courseTimeBar strong {
+  font-size: 19px;
+}
+
+.courseTimeBar .timeArrow {
+  font-size: 17px;
+}
+
+.raceNumberNavigation {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(157, 183, 203, 0.4);
+  background: rgba(248, 252, 255, 0.94);
+  box-shadow: 0 5px 15px rgba(54, 92, 121, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.raceNumberNavigationInner {
+  width: min(1050px, 100%);
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin: 0 auto;
+  padding: 0 14px 2px;
+  scrollbar-width: none;
+}
+
+.raceNumberNavigationInner::-webkit-scrollbar {
+  display: none;
+}
+
+.raceNumberLink {
+  min-width: 46px;
+  height: 44px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid #d2e0ea;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #4d6174;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(45, 78, 104, 0.07);
+}
+
+.raceNumberLink strong {
+  font-size: 18px;
+}
+
+.raceNumberLink span {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.raceNumberLink.soon {
+  border-color: #f5a23f;
+  background: #fff3df;
+  color: #b76811;
+}
+
+.raceNumberLink.closed {
+  background: #eef1f3;
+  color: #9ca7ae;
+}
+
+.courseContent {
+  width: min(1050px, calc(100% - 26px));
+  margin: 28px auto 0;
+}
+
+.courseIntro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.sectionEnglish {
+  margin: 0 0 3px;
+  color: #1780cf;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.courseIntro h2 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.courseIntro p:not(.sectionEnglish) {
+  margin: 6px 0 0;
+  color: #78899a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.raceCount {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #dfefff;
+  color: #1973bd;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.raceControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.filterTabs button,
+.displayButtons button {
+  border: 1px solid #d4e1e9;
+  background: #ffffff;
+  color: #677889;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.filterTabs button {
+  min-width: max-content;
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.filterTabs button.active,
+.displayButtons button.active {
+  border-color: #1879d5;
+  background: #1879d5;
+  color: #ffffff;
+}
+
+.displayButtons {
+  display: flex;
+  gap: 5px;
+}
+
+.displayButtons button {
+  width: 37px;
+  height: 37px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.raceList {
+  display: grid;
+  gap: 15px;
+  margin-top: 16px;
+}
+
+.raceList.card {
+  grid-template-columns: 1fr;
+}
+
+.raceCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(149, 180, 203, 0.48);
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 22px rgba(48, 83, 111, 0.1);
+  scroll-margin-top: 75px;
+}
+
+.raceCard.soon {
+  border-color: rgba(239, 159, 55, 0.8);
+  box-shadow: 0 8px 23px rgba(219, 138, 40, 0.16);
+}
+
+.raceCard.closed {
+  opacity: 0.76;
+}
+
+.raceCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px;
+  border-bottom: 1px solid #e7eef3;
+  background:
+    linear-gradient(
+      90deg,
+      #f5faff 0%,
+      #ffffff 100%
+    );
+}
+
+.raceNumberBox {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-top: 7px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #1478da, #24a8ec);
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(26, 125, 206, 0.2);
+}
+
+.raceNumberBox strong {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.raceNumberBox span {
+  margin-left: 2px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.raceTitleArea {
+  min-width: 0;
+  flex: 1;
+}
+
+.raceTitleArea h2 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.raceDeadline {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.raceDeadline span {
+  color: #83919d;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.raceDeadline strong {
+  color: #31465a;
+  font-size: 16px;
+}
+
+.raceStatus {
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.raceStatus.before {
+  background: #def5e5;
+  color: #198247;
+}
+
+.raceStatus.soon {
+  background: #ffedd4;
+  color: #be6b10;
+}
+
+.raceStatus.closed {
+  background: #e8ecef;
+  color: #7d8992;
+}
+
+.racerMiniList {
+  padding: 7px 12px;
+}
+
+.racerMiniRow {
+  min-height: 51px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 2px;
+  border-bottom: 1px dashed #e1e8ed;
+}
+
+.racerMiniRow:last-child {
+  border-bottom: 0;
+}
+
+.boatNumber {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(20, 30, 40, 0.14);
+  border-radius: 9px;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.boat1 {
+  background: #ffffff;
+  color: #111111;
+}
+
+.boat2 {
+  background: #3e4248;
+  color: #ffffff;
+}
+
+.boat3 {
+  background: #e74a42;
+  color: #ffffff;
+}
+
+.boat4 {
+  background: #4296e5;
+  color: #ffffff;
+}
+
+.boat5 {
+  background: #f1d747;
+  color: #282828;
+}
+
+.boat6 {
+  background: #61b967;
+  color: #ffffff;
+}
+
+.racerMiniMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.racerNameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.racerNameRow strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.classBadge {
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.classBadge.a1 {
+  background: #ffeadf;
+  color: #c15324;
+}
+
+.classBadge.a2 {
+  background: #e4efff;
+  color: #3774bd;
+}
+
+.classBadge.b1 {
+  background: #eef1f3;
+  color: #6f7e89;
+}
+
+.racerStats {
+  display: flex;
+  gap: 11px;
+  margin-top: 4px;
+}
+
+.racerStats span {
+  color: #8a97a2;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.racerStats b {
+  margin-left: 3px;
+  color: #405368;
+  font-size: 10px;
+}
+
+.ichikaMark {
+  padding: 5px 7px;
+  border-radius: 8px;
+  background: #fff0e4;
+  color: #d56720;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.predictionArea {
+  margin: 4px 12px 12px;
+  padding: 11px;
+  border: 1px dashed #c8ddeb;
+  border-radius: 14px;
+  background: #f8fcff;
+}
+
+.predictionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.predictionHeader span {
+  color: #2790d7;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.predictionHeader strong {
+  color: #657687;
+  font-size: 10px;
+}
+
+.predictionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.predictionTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.predictionTag b {
+  font-size: 9px;
+}
+
+.predictionTag.ichika {
+  background: #fff0e3;
+  color: #c86223;
+}
+
+.predictionTag.hatsune {
+  background: #ffe8f2;
+  color: #bd497a;
+}
+
+.predictionTag.kiina {
+  background: #e9eeff;
+  color: #4f66bd;
+}
+
+.noPrediction {
+  color: #8896a1;
+  font-size: 10px;
+}
+
+.raceActionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  padding: 0 12px 12px;
+}
+
+.raceActionButton {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 5px;
+  border-radius: 12px;
+  text-align: left;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.raceActionButton small {
+  display: block;
+  margin-bottom: 1px;
+  font-size: 7px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.actionIcon {
+  font-size: 17px;
+}
+
+.raceActionButton.entry {
+  border: 1px solid #c9ddea;
+  background: #f5fbff;
+  color: #31739f;
+}
+
+.raceActionButton.previous {
+  border: 1px solid #f2d0b8;
+  background: #fff8f1;
+  color: #c86c28;
+}
+
+.raceActionButton.live {
+  border: 1px solid #edd0da;
+  background: #fff5f8;
+  color: #c74770;
+}
+
+.raceCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 10px 13px;
+  border-top: 1px solid #e6edf1;
+  background: #fbfdfe;
+}
+
+.raceCardFooter span {
+  color: #8996a0;
+  font-size: 9px;
+}
+
+.raceCardFooter span strong {
+  margin-left: 5px;
+  color: #4b5c6d;
+  font-size: 10px;
+}
+
+.raceCardFooter a {
+  color: #1979c9;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.raceList.compact .racerMiniList,
+.raceList.compact .predictionArea,
+.raceList.compact .raceCardFooter {
+  display: none;
+}
+
+.raceList.compact .raceCardHeader {
+  border-bottom: 0;
+}
+
+.raceList.compact .raceActionGrid {
+  padding-top: 3px;
+}
+
+.emptyRaceBox,
+.courseNotFound {
+  padding: 55px 20px;
+  border: 1px dashed #cad9e3;
+  border-radius: 20px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.emptyRaceBox {
+  margin-top: 17px;
+}
+
+.emptyRaceBox span,
+.notFoundIcon {
+  font-size: 38px;
+}
+
+.emptyRaceBox h3,
+.courseNotFound h1 {
+  margin: 12px 0 0;
+}
+
+.emptyRaceBox p,
+.courseNotFound p {
+  margin: 6px 0 0;
+  color: #81909c;
+  font-size: 12px;
+}
+
+.courseNotFound {
+  width: min(600px, calc(100% - 30px));
+  margin: 80px auto;
+}
+
+.courseNotFound a {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  background: #1979d5;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.courseBottomNav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #d3dee6;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -6px 20px rgba(48, 77, 101, 0.1);
+  backdrop-filter: blur(13px);
+}
+
+.courseBottomNav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 5px max(10px, env(safe-area-inset-bottom));
+  color: #4c5e6f;
+  text-decoration: none;
+}
+
+.courseBottomNav span {
+  font-size: 20px;
+}
+
+.courseBottomNav small {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+@media (min-width: 720px) {
+  .raceList.card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .courseHero {
+    padding-top: 24px;
+    padding-bottom: 32px;
+  }
+
+  .courseBottomNav {
+    display: none;
+  }
+
+  .coursePage {
+    padding-bottom: 70px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .raceList.card {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .courseHeroIcon {
+    width: 59px;
+    height: 59px;
+    border-radius: 18px;
+    font-size: 29px;
+  }
+
+  .courseTitleRow h1 {
+    font-size: 30px;
+  }
+
+  .raceActionButton {
+    gap: 3px;
+    font-size: 10px;
+  }
+
+  .actionIcon {
+    font-size: 14px;
+  }
+
+  .racerStats {
+    gap: 6px;
+  }
+}
