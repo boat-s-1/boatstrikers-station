@@ -1,0 +1,518 @@
+* {
+  box-sizing: border-box;
+}
+
+.racesPage {
+  min-height: 100vh;
+  padding-bottom: 80px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(102, 202, 255, 0.22),
+      transparent 320px
+    ),
+    linear-gradient(180deg, #eef9ff 0%, #f9fcff 45%, #f4f8fb 100%);
+  color: #243247;
+}
+
+.racesHero {
+  padding: 28px 18px 24px;
+  background: linear-gradient(135deg, #1676df 0%, #26a9ed 100%);
+  border-radius: 0 0 30px 30px;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(29, 112, 189, 0.2);
+}
+
+.racesHeroInner {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.heroIcon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 30px;
+}
+
+.heroSub {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  opacity: 0.85;
+}
+
+.racesHero h1 {
+  margin: 0;
+  font-size: clamp(25px, 5vw, 38px);
+  line-height: 1.2;
+}
+
+.todayText {
+  margin: 7px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.heroMessage {
+  width: min(1100px, 100%);
+  margin: 18px auto 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.13);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.filterSection,
+.courseSection,
+.closedSection {
+  width: min(1100px, calc(100% - 28px));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.filterSection {
+  margin-top: 22px;
+}
+
+.filterButtons {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.filterButtons::-webkit-scrollbar {
+  display: none;
+}
+
+.filterButton {
+  min-width: max-content;
+  padding: 11px 16px;
+  border: 1px solid #d4e2ed;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #526174;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(50, 90, 120, 0.06);
+}
+
+.filterButton.active {
+  border-color: #1676df;
+  background: #1676df;
+  color: #ffffff;
+}
+
+.courseSection {
+  margin-top: 28px;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.sectionMiniTitle {
+  margin: 0 0 3px;
+  color: #2586d5;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.sectionTitleRow h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.courseCount {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #dcefff;
+  color: #1474c9;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.courseCard {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid rgba(149, 182, 207, 0.42);
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 7px 20px rgba(40, 82, 116, 0.1);
+}
+
+.courseCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 75px;
+  height: 75px;
+  border-radius: 0 0 0 75px;
+  background: rgba(34, 153, 228, 0.08);
+}
+
+.courseCard.night::before {
+  background: rgba(82, 78, 193, 0.1);
+}
+
+.courseCard.morning::before {
+  background: rgba(255, 173, 56, 0.12);
+}
+
+.courseCardTop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.courseNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.courseNumber {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 8px;
+  background: #edf6ff;
+  color: #1978c8;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.courseNameRow h3 {
+  margin: 0;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.courseArea {
+  margin: 6px 0 0 36px;
+  color: #8a97a5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.favoriteButton {
+  color: #f2bd1d;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.grade,
+.dayBadge,
+.raceTypeBadge {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.grade.general {
+  background: #edf1f5;
+  color: #5f6d79;
+}
+
+.grade.sg {
+  background: #e52929;
+  color: #ffffff;
+}
+
+.grade.g1 {
+  background: #db2b2b;
+  color: #ffffff;
+}
+
+.grade.g2 {
+  background: #36a756;
+  color: #ffffff;
+}
+
+.grade.g3 {
+  background: #1977d8;
+  color: #ffffff;
+}
+
+.dayBadge {
+  background: #fff2ca;
+  color: #8e6500;
+}
+
+.raceTypeBadge.day {
+  background: #e2f5ff;
+  color: #1681bb;
+}
+
+.raceTypeBadge.night {
+  background: #e8e7ff;
+  color: #5551b8;
+}
+
+.raceTypeBadge.morning {
+  background: #fff0df;
+  color: #c77715;
+}
+
+.raceTimeBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  padding: 11px 8px;
+  border-radius: 14px;
+  background: #f5f9fc;
+}
+
+.raceTimeBox > div:not(.timeDivider) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.raceTimeBox span {
+  color: #8a98a7;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.raceTimeBox strong {
+  margin-top: 2px;
+  color: #33465b;
+  font-size: 15px;
+}
+
+.timeDivider {
+  width: 1px;
+  height: 28px;
+  background: #d9e4ec;
+}
+
+.aiPickupBox {
+  min-height: 70px;
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px dashed #c9dce9;
+  border-radius: 14px;
+  background: #fcfeff;
+}
+
+.aiPickupTitle {
+  margin: 0 0 7px;
+  color: #738396;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.characterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.characterTag,
+.noPickup {
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.characterTag.ichika {
+  background: #fff0e5;
+  color: #d26924;
+}
+
+.characterTag.hatsune {
+  background: #ffe9f2;
+  color: #c64c81;
+}
+
+.characterTag.kiina {
+  background: #ebf0ff;
+  color: #536dcc;
+}
+
+.noPickup {
+  background: #eff3f6;
+  color: #7b8995;
+}
+
+.courseLinkButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13px;
+  padding: 12px 14px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #1978df, #24a8ed);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 5px 13px rgba(30, 130, 215, 0.24);
+}
+
+.emptyBox {
+  padding: 45px 20px;
+  border: 1px dashed #c8d7e2;
+  border-radius: 20px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.emptyBox span {
+  font-size: 36px;
+}
+
+.emptyBox p {
+  margin: 10px 0 0;
+  color: #7a8998;
+  font-weight: 700;
+}
+
+.closedSection {
+  margin-top: 27px;
+}
+
+.closedToggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 17px;
+  border: 1px solid #d8e2e9;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #5a6877;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.closedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.closedCard {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid #e0e7ec;
+  border-radius: 13px;
+  background: rgba(238, 242, 245, 0.8);
+  color: #71808d;
+}
+
+.closedNumber {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 7px;
+  background: #dde4e9;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.closedCard strong {
+  font-size: 13px;
+}
+
+.closedCard p {
+  margin: 2px 0 0;
+  font-size: 9px;
+}
+
+@media (min-width: 700px) {
+  .courseGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .racesHero {
+    padding-top: 38px;
+    padding-bottom: 32px;
+  }
+}
+
+@media (max-width: 420px) {
+  .courseGrid {
+    gap: 9px;
+  }
+
+  .courseCard {
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .courseNameRow h3 {
+    font-size: 20px;
+  }
+
+  .courseArea {
+    margin-left: 35px;
+  }
+
+  .raceTimeBox strong {
+    font-size: 13px;
+  }
+
+  .courseLinkButton {
+    padding-right: 12px;
+    padding-left: 12px;
+    font-size: 12px;
+  }
+
+  .closedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 350px) {
+  .courseGrid {
+    grid-template-columns: 1fr;
+  }
+}
