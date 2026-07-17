@@ -3,10 +3,17 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./control.module.css";
+import { createClient } from "@supabase/supabase-js";
 
 const STORAGE_KEY = "bsc_ai_admin_key";
 
-const JOB_TYPES = {
+
+
+
+const JOB_TYPES = {const supabaseBrowser = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+);
   history_import: {
     title: "過去データ",
     description: "学習用の過去レースCSVを取り込みます。",
@@ -89,71 +96,157 @@ function UploadCard({
   }, [defaultDate]);
 
   async function upload(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    if (!file) {
-      setMessage("CSVファイルを選択してください。");
-      return;
-    }
+  if (!file) {
+    setMessage("CSVファイルを選択してください。");
+    return;
+  }
 
-    if (config.dateRequired && !raceDate) {
-      setMessage("対象日を選択してください。");
-      return;
-    }
+  if (config.dateRequired && !raceDate) {
+    setMessage("対象日を選択してください。");
+    return;
+  }
 
-    setUploading(true);
-    setMessage("");
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    setMessage("CSV形式のみアップロードできます。");
+    return;
+  }
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("jobType", type);
-      formData.append("raceDate", raceDate || "");
-      formData.append("runCalibration", String(runCalibration));
-      formData.append("runDiagnosis", String(runDiagnosis));
+  if (file.size > 50 * 1024 * 1024) {
+    setMessage("CSVは50MB以下にしてください。");
+    return;
+  }
 
-      const response = await fetch("/api/bsc2/ai-control/upload", {
+  setUploading(true);
+  setMessage("アップロード準備中…");
+
+  try {
+    // 1. Vercelから署名付きアップロード情報を取得
+    const urlResponse = await fetch(
+      "/api/bsc2/ai-control/upload-url",
+      {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "x-bsc-ai-key": adminKey,
         },
-        body: formData,
-      });
+        body: JSON.stringify({
+          jobType: type,
+          raceDate: raceDate || null,
+          filename: file.name,
+        }),
+      },
+    );
 
-      const responseText = await response.text();
+    const urlText = await urlResponse.text();
 
-let body;
+    let urlBody;
 
-try {
-  body = JSON.parse(responseText);
-} catch {
-  throw new Error(
-    response.status === 413
-      ? "CSVがVercelのアップロード上限を超えています。"
-      : `サーバーからJSON以外の応答が返りました。HTTP ${response.status}: ${responseText.slice(
-          0,
-          200,
-        )}`,
-  );
-}
-
-      if (!response.ok) {
-        throw new Error(body.error || "アップロードに失敗しました");
-      }
-
-      setMessage(`登録完了：ジョブ ${body.job.id.slice(0, 8)}`);
-      setFile(null);
-
-      const input = document.getElementById(`file-${type}`);
-      if (input) input.value = "";
-
-      onUploaded?.();
-    } catch (error) {
-      setMessage(error.message || "アップロードに失敗しました");
-    } finally {
-      setUploading(false);
+    try {
+      urlBody = JSON.parse(urlText);
+    } catch {
+      throw new Error(
+        `アップロード準備APIの応答が不正です。HTTP ${urlResponse.status}`,
+      );
     }
+
+    if (!urlResponse.ok) {
+      throw new Error(
+        urlBody.error ||
+          "アップロード準備に失敗しました",
+      );
+    }
+
+    setMessage("SupabaseへCSVを送信中…");
+
+    // 2. CSV本体はVercelを通さずSupabaseへ直接送信
+    const { error: uploadError } =
+      await supabaseBrowser.storage
+        .from(urlBody.bucket)
+        .uploadToSignedUrl(
+          urlBody.storagePath,
+          urlBody.token,
+          file,
+          {
+            contentType:
+              file.type || "text/csv",
+          },
+        );
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    setMessage("処理ジョブを登録中…");
+
+    // 3. アップロード完了後、ジョブだけを登録
+    const finalizeResponse = await fetch(
+      "/api/bsc2/ai-control/finalize-upload",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-bsc-ai-key": adminKey,
+        },
+        body: JSON.stringify({
+          jobType: type,
+          raceDate: raceDate || null,
+          sourceFilename: file.name,
+          storagePath: urlBody.storagePath,
+          runCalibration,
+          runDiagnosis,
+        }),
+      },
+    );
+
+    const finalizeText =
+      await finalizeResponse.text();
+
+    let finalizeBody;
+
+    try {
+      finalizeBody = JSON.parse(finalizeText);
+    } catch {
+      throw new Error(
+        `ジョブ登録APIの応答が不正です。HTTP ${finalizeResponse.status}`,
+      );
+    }
+
+    if (!finalizeResponse.ok) {
+      throw new Error(
+        finalizeBody.error ||
+          "ジョブ登録に失敗しました",
+      );
+    }
+
+    setMessage(
+      `登録完了：ジョブ ${finalizeBody.job.id.slice(
+        0,
+        8,
+      )}`,
+    );
+
+    setFile(null);
+
+    const input = document.getElementById(
+      `file-${type}`,
+    );
+
+    if (input) {
+      input.value = "";
+    }
+
+    onUploaded?.();
+  } catch (error) {
+    setMessage(
+      error?.message ||
+        "アップロードに失敗しました",
+    );
+  } finally {
+    setUploading(false);
   }
+}
 
   return (
     <form className={styles.uploadCard} onSubmit={upload}>
