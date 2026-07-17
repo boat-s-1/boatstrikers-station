@@ -14,6 +14,10 @@ const JOB_TYPES = {const supabaseBrowser = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 );
+const supabaseBrowser = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
   history_import: {
     title: "過去データ",
     description: "学習用の過去レースCSVを取り込みます。",
