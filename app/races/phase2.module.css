@@ -830,3 +830,496 @@
     display: none;
   }
 }
+/* =========================================================
+   BoatStrikers Phase 3.1 AI Dashboard
+   phase2.module.css の末尾へ追加
+========================================================= */
+
+.aiDashboard {
+  display: grid;
+  gap: 12px;
+}
+
+.liveUpdateBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d9e8f2;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eef9ff, #ffffff);
+}
+
+.liveUpdateBar > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.liveUpdateBar strong {
+  color: #186fae;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+
+.liveUpdateBar small {
+  color: #718697;
+  text-align: right;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #20bf6b;
+  box-shadow: 0 0 0 4px rgba(32, 191, 107, .14);
+  animation: bsLivePulse 1.5s infinite;
+}
+
+@keyframes bsLivePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(.76); opacity: .55; }
+}
+
+.escapeCard {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 17px;
+  color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(35, 93, 130, .18);
+}
+
+.escapeCard p {
+  margin: 0 0 3px;
+  font-size: 7px;
+  font-weight: 1000;
+  letter-spacing: .14em;
+  opacity: .8;
+}
+
+.escapeCard h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.escapeStrong {
+  background: linear-gradient(135deg, #16a467, #42c982);
+}
+
+.escapeGood {
+  background: linear-gradient(135deg, #1979dc, #28a9ed);
+}
+
+.escapeCaution {
+  background: linear-gradient(135deg, #ed8b34, #f3b145);
+}
+
+.escapeDanger {
+  background: linear-gradient(135deg, #dd426e, #ef668c);
+}
+
+.escapeLabel {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 4px 8px;
+  font-size: 8px;
+  font-weight: 1000;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+}
+
+.escapeCircle {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 78px;
+  height: 78px;
+  padding-top: 18px;
+  border: 2px solid rgba(255,255,255,.36);
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+}
+
+.escapeCircle strong {
+  font-size: 31px;
+  line-height: 1;
+}
+
+.escapeCircle span {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.escapeTrack {
+  grid-column: 1 / -1;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.22);
+}
+
+.escapeTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+}
+
+.aiDashboardCard,
+.ichikaCommentCard,
+.dangerCard {
+  overflow: hidden;
+  padding: 13px;
+  border: 1px solid #dce7ee;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(48, 83, 111, .07);
+}
+
+.aiSectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.aiSectionHeading p,
+.ichikaCommentHead p,
+.dangerBody > p {
+  margin: 0 0 2px;
+  color: #1778bd;
+  font-size: 7px;
+  font-weight: 1000;
+  letter-spacing: .14em;
+}
+
+.aiSectionHeading h2,
+.ichikaCommentHead h2,
+.dangerBody h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.aiSectionHeading > span {
+  padding: 5px 8px;
+  color: #b26b18;
+  font-size: 7px;
+  font-weight: 900;
+  border-radius: 999px;
+  background: #fff0d8;
+}
+
+.aiBoatList {
+  display: grid;
+  gap: 7px;
+}
+
+.aiBoatRow {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) minmax(95px, 1.25fr) 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #e2eaf0;
+  border-radius: 12px;
+  background: #fbfdfe;
+}
+
+.aiBoatTop {
+  border-color: #9ed3f7;
+  background: linear-gradient(90deg, #edf8ff, #fff);
+  box-shadow: 0 4px 11px rgba(37, 135, 202, .1);
+}
+
+.aiBoatIdentity {
+  min-width: 0;
+}
+
+.aiBoatIdentity strong {
+  display: block;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiBoatIdentity span {
+  display: block;
+  margin-top: 2px;
+  color: #8494a0;
+  font-size: 7px;
+}
+
+.aiBoatScoreHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.aiBoatScoreHeader small {
+  color: #8394a1;
+  font-size: 6px;
+}
+
+.aiBoatScoreHeader strong {
+  color: #1678bd;
+  font-size: 13px;
+}
+
+.aiScoreTrack {
+  height: 6px;
+  overflow: hidden;
+  margin-top: 3px;
+  border-radius: 999px;
+  background: #e6edf2;
+}
+
+.aiScoreFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1978d9, #27acee);
+}
+
+.aiGrade {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 1000;
+  border-radius: 8px;
+}
+
+.aiGradeS { color: #a96800; background: #fff0b5; }
+.aiGradeA { color: #1d8552; background: #dcf5e7; }
+.aiGradeB { color: #2776b4; background: #e2f1fc; }
+.aiGradeC { color: #7b6a4d; background: #eee8de; }
+.aiGradeD { color: #a14d5e; background: #f5e1e6; }
+
+.aiTwoColumn {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.aiRankingList {
+  display: grid;
+  gap: 6px;
+}
+
+.aiRankingRow {
+  display: grid;
+  grid-template-columns: 32px 31px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px;
+  border-radius: 10px;
+  background: #f6fafc;
+}
+
+.aiRankingRow > span {
+  color: #637b8f;
+  font-size: 8px;
+  font-weight: 1000;
+}
+
+.aiRankingRow > strong {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiRankingRow > b {
+  color: #176fae;
+  font-size: 11px;
+}
+
+.aiWaiting {
+  padding: 25px 10px;
+  text-align: center;
+}
+
+.aiWaiting > span {
+  font-size: 29px;
+}
+
+.aiWaiting strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.aiWaiting p {
+  margin: 5px 0 0;
+  color: #8495a2;
+  font-size: 8px;
+}
+
+.ichikaCommentCard {
+  background:
+    radial-gradient(circle at 100% 0, rgba(255, 143, 173, .14), transparent 150px),
+    #fff;
+}
+
+.ichikaCommentHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ichikaCommentHead > span {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 12px;
+  background: #fff0f4;
+}
+
+.ichikaCommentHead p {
+  color: #db557a;
+}
+
+.ichikaCommentText {
+  margin: 11px 0 0;
+  padding: 11px;
+  font-size: 10px;
+  line-height: 1.8;
+  border-radius: 12px;
+  background: #fff8fa;
+}
+
+.focusGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.focusGrid div {
+  padding: 9px 4px;
+  text-align: center;
+  border: 1px solid #f1dce3;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.focusGrid span {
+  display: block;
+  color: #db557a;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.focusGrid strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.focusGrid small {
+  display: block;
+  margin-top: 2px;
+  color: #81919d;
+  font-size: 7px;
+}
+
+.dangerCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-color: #f1d9de;
+  background: #fff9fa;
+}
+
+.dangerIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  flex: 0 0 auto;
+  font-size: 21px;
+  border-radius: 12px;
+  background: #ffe8ed;
+}
+
+.dangerBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.dangerBody > p {
+  color: #d94e69;
+}
+
+.dangerBody > strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+}
+
+.dangerBody ul {
+  margin: 6px 0 0;
+  padding-left: 17px;
+  color: #7d5d65;
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+.aiDisclaimer {
+  margin: 0;
+  color: #8797a3;
+  text-align: center;
+  font-size: 7px;
+  line-height: 1.7;
+}
+
+@media (min-width: 760px) {
+  .aiTwoColumn {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .liveUpdateBar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .liveUpdateBar small {
+    text-align: left;
+  }
+
+  .aiBoatRow {
+    grid-template-columns: 31px minmax(0, 1fr) 78px 27px;
+    gap: 6px;
+  }
+
+  .aiGrade {
+    width: 27px;
+    height: 27px;
+  }
+
+  .escapeCircle {
+    width: 68px;
+    height: 68px;
+    padding-top: 16px;
+  }
+
+  .escapeCircle strong {
+    font-size: 27px;
+  }
+}
