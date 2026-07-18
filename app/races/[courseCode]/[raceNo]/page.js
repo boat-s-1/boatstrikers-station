@@ -84,10 +84,11 @@ export default async function RaceDetailPage({ params, searchParams }) {
         ) : (
           <>
             <RaceDetailTabs
-              entries={data.entries}
-              previousPrediction={data.previousPrediction}
-              livePrediction={data.livePrediction}
-            />
+  entries={data.entries}
+  previousPrediction={data.previousPrediction}
+  livePrediction={data.livePrediction}
+  syncedAt={formatJstDateTime(data?.event?.synced_at)}
+/>
 
             <nav className={styles.moveNav}>
               {raceNo > 1 ? (
