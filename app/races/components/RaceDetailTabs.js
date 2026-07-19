@@ -324,7 +324,7 @@ export default function RaceDetailTabs({
               </span>
             </div>
 
-         
+          <AnimatedStartSlit entries={entries} />
 
             {exhibitionRows.every(
               (entry) =>
@@ -382,7 +382,7 @@ export default function RaceDetailTabs({
 
                      
                   </article>
- <AnimatedStartSlit entries={entries} />
+
                 ))}
               </div>
 
