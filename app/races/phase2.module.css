@@ -1780,7 +1780,7 @@
   .racesHeroMain {
     min-height: 0 !important;
     height: auto !important;
-    padding-top: 54px !important;
+    padding-top: 20px !important;
     align-items: flex-start;
   }
 
