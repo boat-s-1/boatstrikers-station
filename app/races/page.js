@@ -24,30 +24,99 @@ export default async function RacesPage({ searchParams }) {
     ]);
   } catch (error) {
     console.error(error);
-    loadError = error.message;
+    loadError =
+      error instanceof Error
+        ? error.message
+        : "データの取得中にエラーが発生しました。";
   }
 
   return (
     <main className={styles.page}>
-      <header className={styles.hero}>
-        <div className={styles.heroInner}>
-          <Link href="/" className={styles.backPill}>← ホーム</Link>
+      {/* =====================================================
+          トップバナー
+      ===================================================== */}
+      <header className={styles.racesHero}>
+        {/* 背景画像 */}
+        <div className={styles.racesHeroBackground} />
 
-          <div className={styles.heroMain}>
-            <div className={styles.heroIcon}>🚤</div>
-            <div>
-              <p className={styles.eyebrow}>BOATSTRIKERS LIVE</p>
+        {/* 文字を見やすくする暗いレイヤー */}
+        <div className={styles.racesHeroOverlay} />
+
+        {/* AIスキャンライン */}
+        <div className={styles.racesHeroScanLine} />
+
+        {/* 装飾の光 */}
+        <div className={styles.racesHeroGlow} />
+
+        <div className={styles.racesHeroInner}>
+          <Link href="/" className={styles.racesBackPill}>
+            <span>←</span>
+            <span>ホーム</span>
+          </Link>
+
+          <div className={styles.racesHeroMain}>
+            <div className={styles.racesHeroText}>
+              <p className={styles.racesHeroEyebrow}>
+                BOATSTRIKERS LIVE DATABASE
+              </p>
+
               <h1>本日の開催場</h1>
-              <p>PC-KYOTEIから5分ごとに自動更新</p>
-              <div className={styles.heroMeta}>
-                <span>{raceDate}</span>
-                <span>{courses.length}場開催</span>
+
+              <p className={styles.racesHeroDescription}>
+                全国の出走表・展示・結果を
+                <br className={styles.mobileBreak} />
+                PC-KYOTEIから5分ごとに自動更新
+              </p>
+
+              <div className={styles.racesHeroMeta}>
+                <span>
+                  <small>RACE DATE</small>
+                  <strong>{raceDate}</strong>
+                </span>
+
+                <span>
+                  <small>TODAY&apos;S COURSES</small>
+                  <strong>{courses.length}場開催</strong>
+                </span>
+
+                <span className={styles.racesHeroLive}>
+                  <i />
+                  <strong>自動更新中</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* 右下のAIステータス */}
+            <div className={styles.racesHeroStatus}>
+              <div className={styles.racesHeroStatusHeader}>
+                <span>AI RACE CENTER</span>
+                <b>ONLINE</b>
+              </div>
+
+              <div className={styles.racesHeroStatusBody}>
+                <div>
+                  <small>開催場</small>
+                  <strong>{courses.length}</strong>
+                </div>
+
+                <div>
+                  <small>更新間隔</small>
+                  <strong>5分</strong>
+                </div>
+
+                <div>
+                  <small>システム</small>
+                  <strong>稼働中</strong>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
+      {/* =====================================================
+          開催場一覧
+      ===================================================== */}
       <section className={styles.content}>
         {dates.length > 0 && (
           <nav className={styles.dateNav}>
@@ -70,6 +139,7 @@ export default async function RacesPage({ searchParams }) {
             <p>TODAY&apos;S COURSES</p>
             <h2>開催場を選択</h2>
           </div>
+
           <span>{courses.length}場</span>
         </div>
 
@@ -85,43 +155,56 @@ export default async function RacesPage({ searchParams }) {
           </div>
         ) : (
           <div className={styles.courseGrid}>
-            {courses.map((course) => (
-              <article className={styles.courseCard} key={course.courseCode}>
-                <div className={styles.courseCardTop}>
-                  <div className={styles.courseTitle}>
-                    <span>{String(course.courseCode).padStart(2, "0")}</span>
-                    <h2>{course.courseName}</h2>
-                  </div>
-                  <b>出走表公開</b>
-                </div>
+            {courses.map((course) => {
+              const courseCode = String(
+                course.courseCode
+              ).padStart(2, "0");
 
-                <div className={styles.courseStats}>
-                  <div>
-                    <span>レース</span>
-                    <strong>{course.raceCount}R</strong>
-                  </div>
-                  <div>
-                    <span>展示公開</span>
-                    <strong>{course.exhibitionCount}R</strong>
-                  </div>
-                  <div>
-                    <span>最終同期</span>
-                    <strong>{formatJstDateTime(course.syncedAt)}</strong>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/races/${String(course.courseCode).padStart(
-                    2,
-                    "0"
-                  )}?date=${raceDate}`}
-                  className={styles.primaryButton}
+              return (
+                <article
+                  className={styles.courseCard}
+                  key={course.courseCode}
                 >
-                  <span>1R〜12Rを見る</span>
-                  <span>→</span>
-                </Link>
-              </article>
-            ))}
+                  <div className={styles.courseCardTop}>
+                    <div className={styles.courseTitle}>
+                      <span>{courseCode}</span>
+                      <h2>{course.courseName}</h2>
+                    </div>
+
+                    <b>出走表公開</b>
+                  </div>
+
+                  <div className={styles.courseStats}>
+                    <div>
+                      <span>レース</span>
+                      <strong>{course.raceCount}R</strong>
+                    </div>
+
+                    <div>
+                      <span>展示公開</span>
+                      <strong>
+                        {course.exhibitionCount}R
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>最終同期</span>
+                      <strong>
+                        {formatJstDateTime(course.syncedAt)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/races/${courseCode}?date=${raceDate}`}
+                    className={styles.primaryButton}
+                  >
+                    <span>1R〜12Rを見る</span>
+                    <span>→</span>
+                  </Link>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
