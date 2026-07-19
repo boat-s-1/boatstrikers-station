@@ -379,11 +379,13 @@ export default function RaceDetailTabs({
                         ? `${entry.exhibitionRank}位`
                         : "-"}
                     </span>
+
+                      <AnimatedStartSlit entries={entries} />
                   </article>
                 ))}
               </div>
 
-<AnimatedStartSlit entries={entries} />
+
                   
             )}
           </>
