@@ -380,8 +380,9 @@ export default function RaceDetailTabs({
                         : "-"}
                     </span>
 
-                      <AnimatedStartSlit entries={entries} />
+                     
                   </article>
+ <AnimatedStartSlit entries={entries} />
                 ))}
               </div>
 
