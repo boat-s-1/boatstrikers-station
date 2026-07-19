@@ -62,12 +62,6 @@ export default async function RacesPage({ searchParams }) {
 
               <h1>本日の開催場</h1>
 
-              <p className={styles.racesHeroDescription}>
-                全国の出走表・展示・結果を
-                <br className={styles.mobileBreak} />
-                PC-KYOTEIから5分ごとに自動更新
-              </p>
-
               <div className={styles.racesHeroMeta}>
                 <span>
                   <small>RACE DATE</small>
