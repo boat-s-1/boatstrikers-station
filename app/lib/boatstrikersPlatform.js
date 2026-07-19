@@ -210,7 +210,10 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
     { data: event, error: eventError },
     { data: entries, error: entryError },
     { data: predictions, error: predictionError },
+    { data: result, error: resultError },
+    { data: resultEntries, error: resultEntriesError },
   ] = await Promise.all([
+    // レース基本情報
     supabase
       .from("bs_race_events")
       .select("*")
@@ -219,6 +222,7 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", raceNo)
       .maybeSingle(),
 
+    // 出走艇情報
     supabase
       .from("bs_race_entries")
       .select("*")
@@ -227,6 +231,7 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", raceNo)
       .order("boat_no", { ascending: true }),
 
+    // 一果AI予測
     supabase
       .from("bs_ai_predictions")
       .select("*")
@@ -235,18 +240,61 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", raceNo)
       .eq("character_code", "ichika")
       .eq("published", true),
+
+    // レース単位の結果
+    supabase
+      .from("bs_race_results")
+      .select("*")
+      .eq("race_date", raceDate)
+      .eq("course_code", courseCode)
+      .eq("race_no", raceNo)
+      .maybeSingle(),
+
+    // 艇別の着順・進入・ST
+    supabase
+      .from("bs_race_result_entries")
+      .select("*")
+      .eq("race_date", raceDate)
+      .eq("course_code", courseCode)
+      .eq("race_no", raceNo)
+      .order("boat_no", { ascending: true }),
   ]);
 
   if (eventError) {
-    throw new Error(`レース情報の取得に失敗しました: ${eventError.message}`);
+    throw new Error(
+      `レース情報の取得に失敗しました: ${eventError.message}`
+    );
   }
 
   if (entryError) {
-    throw new Error(`出走表の取得に失敗しました: ${entryError.message}`);
+    throw new Error(
+      `出走表の取得に失敗しました: ${entryError.message}`
+    );
   }
 
   if (predictionError) {
-    console.error("AI予測取得エラー:", predictionError.message);
+    console.error(
+      "AI予測取得エラー:",
+      predictionError.message
+    );
+  }
+
+  /*
+   * レース前は結果テーブルにデータがないため、
+   * maybeSingle()がnullを返すのは正常です。
+   */
+  if (resultError) {
+    console.error(
+      "レース結果取得エラー:",
+      resultError.message
+    );
+  }
+
+  if (resultEntriesError) {
+    console.error(
+      "艇別結果取得エラー:",
+      resultEntriesError.message
+    );
   }
 
   const predictionMap = Object.fromEntries(
@@ -259,7 +307,15 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
   return {
     event,
     entries: entries || [],
-    previousPrediction: predictionMap.previous_day || null,
-    livePrediction: predictionMap.after_exhibition || null,
+
+    previousPrediction:
+      predictionMap.previous_day || null,
+
+    livePrediction:
+      predictionMap.after_exhibition || null,
+
+    // 今回追加
+    result: result || null,
+    resultEntries: resultEntries || [],
   };
 }
