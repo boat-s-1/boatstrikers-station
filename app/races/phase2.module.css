@@ -1805,3 +1805,218 @@
     display: none;
   }
 }
+/* =========================================================
+   開催場カード：デイ・ナイター振り分け
+========================================================= */
+
+.courseCard {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-3px);
+}
+
+/* デイレース */
+.courseCardDay {
+  border-color: #c8ddeb;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(99, 196, 255, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f5fbff 58%,
+      #e8f6ff 100%
+    );
+
+  box-shadow:
+    0 10px 26px rgba(64, 113, 146, 0.09);
+}
+
+/* ナイターレース */
+.courseCardNight {
+  border-color: rgba(72, 170, 255, 0.6);
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(76, 92, 255, 0.38),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 203, 255, 0.16),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #06172f 0%,
+      #092b57 55%,
+      #15194f 100%
+    );
+
+  box-shadow:
+    0 13px 32px rgba(5, 31, 79, 0.28),
+    inset 0 0 25px rgba(46, 172, 255, 0.08);
+}
+
+/* ナイターカードの装飾 */
+.courseCardNight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 43%,
+      rgba(105, 212, 255, 0.08) 50%,
+      transparent 57%,
+      transparent 100%
+    );
+}
+
+/* ナイター時の文字色 */
+.courseCardNight .courseTitle h2 {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(78, 190, 255, 0.35);
+}
+
+.courseCardNight .courseTitle > span {
+  color: #78d9ff;
+  background: rgba(32, 136, 219, 0.18);
+  border: 1px solid rgba(91, 200, 255, 0.35);
+}
+
+.courseCardNight .courseStats {
+  border-color: rgba(111, 195, 255, 0.28);
+  background: rgba(2, 20, 55, 0.42);
+}
+
+.courseCardNight .courseStats > div + div {
+  border-left-color: rgba(111, 195, 255, 0.22);
+}
+
+.courseCardNight .courseStats span {
+  color: #81b7d7;
+}
+
+.courseCardNight .courseStats strong {
+  color: #ffffff;
+}
+
+/* デイ・ナイターの英字ラベル */
+.dayTypeLabel,
+.nightTypeLabel {
+  display: block;
+  margin-top: 2px;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+}
+
+.dayTypeLabel {
+  color: #4d9bc7;
+}
+
+.nightTypeLabel {
+  color: #6fdcff;
+  text-shadow: 0 0 8px rgba(77, 202, 255, 0.5);
+}
+
+/* 右上のバッジを並べる */
+.courseBadges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.courseBadges > b {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #24915c;
+  background: #e0f7e9;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.dayBadge,
+.nightBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.dayBadge {
+  color: #1d7da9;
+  background: #e4f5ff;
+  border: 1px solid #c5e8fa;
+}
+
+.nightBadge {
+  color: #b8edff;
+  background: rgba(50, 145, 255, 0.18);
+  border: 1px solid rgba(96, 203, 255, 0.36);
+
+  box-shadow:
+    inset 0 0 12px rgba(73, 186, 255, 0.08),
+    0 0 12px rgba(44, 141, 255, 0.12);
+}
+
+/* ボタン */
+.primaryButtonDay {
+  background: linear-gradient(
+    135deg,
+    #147fe4,
+    #25afe8
+  );
+}
+
+.primaryButtonNight {
+  border: 1px solid rgba(91, 205, 255, 0.4);
+
+  background:
+    linear-gradient(
+      135deg,
+      #134a9c,
+      #2138a4 50%,
+      #097dcc
+    );
+
+  box-shadow:
+    0 8px 22px rgba(0, 84, 190, 0.3),
+    inset 0 0 18px rgba(74, 204, 255, 0.11);
+}
+
+/* スマホ調整 */
+@media (max-width: 700px) {
+  .courseBadges {
+    gap: 4px;
+  }
+
+  .courseBadges > b {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .dayBadge,
+  .nightBadge {
+    padding: 4px 7px;
+    font-size: 8px;
+  }
+}
