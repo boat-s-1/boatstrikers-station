@@ -7,6 +7,22 @@ import {
 } from "../lib/boatstrikersPlatform";
 import styles from "./phase2.module.css";
 
+const NIGHT_COURSE_CODES = new Set([
+  1,  // 桐生
+  7,  // 蒲郡
+  12, // 住之江
+  15, // 丸亀
+  19, // 下関
+  20, // 若松
+  24, // 大村
+]);
+
+function getCourseRaceType(courseCode) {
+  return NIGHT_COURSE_CODES.has(Number(courseCode))
+    ? "night"
+    : "day";
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function RacesPage({ searchParams }) {
@@ -150,55 +166,94 @@ export default async function RacesPage({ searchParams }) {
         ) : (
           <div className={styles.courseGrid}>
             {courses.map((course) => {
-              const courseCode = String(
-                course.courseCode
-              ).padStart(2, "0");
+  const courseCode = String(
+    course.courseCode
+  ).padStart(2, "0");
 
-              return (
-                <article
-                  className={styles.courseCard}
-                  key={course.courseCode}
-                >
-                  <div className={styles.courseCardTop}>
-                    <div className={styles.courseTitle}>
-                      <span>{courseCode}</span>
-                      <h2>{course.courseName}</h2>
-                    </div>
+  const raceType = getCourseRaceType(
+    course.courseCode
+  );
 
-                    <b>出走表公開</b>
-                  </div>
+  const isNight = raceType === "night";
 
-                  <div className={styles.courseStats}>
-                    <div>
-                      <span>レース</span>
-                      <strong>{course.raceCount}R</strong>
-                    </div>
+  return (
+    <article
+      className={`${styles.courseCard} ${
+        isNight
+          ? styles.courseCardNight
+          : styles.courseCardDay
+      }`}
+      key={course.courseCode}
+    >
+      <div className={styles.courseCardTop}>
+        <div className={styles.courseTitle}>
+          <span>{courseCode}</span>
 
-                    <div>
-                      <span>展示公開</span>
-                      <strong>
-                        {course.exhibitionCount}R
-                      </strong>
-                    </div>
+          <div>
+            <h2>{course.courseName}</h2>
 
-                    <div>
-                      <span>最終同期</span>
-                      <strong>
-                        {formatJstDateTime(course.syncedAt)}
-                      </strong>
-                    </div>
-                  </div>
+            <small
+              className={
+                isNight
+                  ? styles.nightTypeLabel
+                  : styles.dayTypeLabel
+              }
+            >
+              {isNight ? "NIGHT RACE" : "DAY RACE"}
+            </small>
+          </div>
+        </div>
 
-                  <Link
-                    href={`/races/${courseCode}?date=${raceDate}`}
-                    className={styles.primaryButton}
-                  >
-                    <span>1R〜12Rを見る</span>
-                    <span>→</span>
-                  </Link>
-                </article>
-              );
-            })}
+        <div className={styles.courseBadges}>
+          <b>出走表公開</b>
+
+          <span
+            className={
+              isNight
+                ? styles.nightBadge
+                : styles.dayBadge
+            }
+          >
+            {isNight ? "🌙 ナイター" : "☀️ デイ"}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.courseStats}>
+        <div>
+          <span>レース</span>
+          <strong>{course.raceCount}R</strong>
+        </div>
+
+        <div>
+          <span>展示公開</span>
+          <strong>
+            {course.exhibitionCount}R
+          </strong>
+        </div>
+
+        <div>
+          <span>最終同期</span>
+          <strong>
+            {formatJstDateTime(course.syncedAt)}
+          </strong>
+        </div>
+      </div>
+
+      <Link
+        href={`/races/${courseCode}?date=${raceDate}`}
+        className={`${styles.primaryButton} ${
+          isNight
+            ? styles.primaryButtonNight
+            : styles.primaryButtonDay
+        }`}
+      >
+        <span>1R〜12Rを見る</span>
+        <span>→</span>
+      </Link>
+    </article>
+  );
+})}
           </div>
         )}
       </section>
