@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import RaceNumberNav from "./RaceNumberNav";
 import AiDashboard from "./AiDashboard";
 import BscExhibitionPanel from "./BscExhibitionPanel";
 import RaceResultPanel from "./RaceResultPanel";
@@ -154,6 +155,9 @@ export default function RaceDetailTabs({
   // 今回追加
   result,
   resultEntries,
+   courseCode,
+  raceNo,
+  raceDate,
 }) {
   const [activeTab, setActiveTab] = useState("entries");
 
@@ -202,6 +206,12 @@ export default function RaceDetailTabs({
           </button>
         ))}
       </nav>
+
+          <RaceNumberNav
+  courseCode={courseCode}
+  currentRaceNo={raceNo}
+  raceDate={raceDate}
+/>
 
       <section className={styles.detailPanel}>
         {activeTab === "entries" && (
