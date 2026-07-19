@@ -6,6 +6,7 @@ import AiDashboard from "./AiDashboard";
 import BscExhibitionPanel from "./BscExhibitionPanel";
 import RaceResultPanel from "./RaceResultPanel";
 import styles from "../phase2.module.css";
+import AnimatedStartSlit from "./AnimatedStartSlit";
 
 const TABS = [
   { key: "entries", icon: "📋", label: "出走表" },
@@ -322,6 +323,8 @@ export default function RaceDetailTabs({
                 自動順位
               </span>
             </div>
+
+         <AnimatedStartSlit entries={entries} />
 
             {exhibitionRows.every(
               (entry) =>
