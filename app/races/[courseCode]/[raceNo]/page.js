@@ -83,11 +83,16 @@ export default async function RaceDetailPage({ params, searchParams }) {
           </div>
         ) : (
           <>
-            <RaceDetailTabs
+          <RaceDetailTabs
   entries={data.entries}
   previousPrediction={data.previousPrediction}
   livePrediction={data.livePrediction}
-  syncedAt={formatJstDateTime(data?.event?.synced_at)}
+  syncedAt={formatJstDateTime(
+    data?.event?.synced_at
+  )}
+
+  result={data.result}
+  resultEntries={data.resultEntries}
 />
 
             <nav className={styles.moveNav}>
