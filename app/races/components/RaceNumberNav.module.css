@@ -1,19 +1,20 @@
 .wrapper {
   width: 100%;
-  margin: 12px 0 14px;
-  padding: 6px;
+  margin: 10px 0 12px;
+  padding: 4px;
   border: 1px solid rgba(157, 184, 202, 0.45);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow:
-    0 6px 18px rgba(39, 79, 109, 0.08),
+    0 5px 15px rgba(39, 79, 109, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
   overflow: hidden;
 }
 
 .scroller {
   display: flex;
-  gap: 0;
+  align-items: stretch;
+  gap: 4px;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -29,17 +30,21 @@
 .raceLink {
   position: relative;
   display: flex;
-  flex: 0 0 58px;
-  align-items: baseline;
+  flex: 0 0 46px;
+  align-items: center;
   justify-content: center;
   gap: 1px;
-  min-height: 52px;
-  padding: 0 7px;
-  border-right: 1px solid #e2ebf1;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  border: 1px solid #e2ebf1;
   border-radius: 11px;
+  background: #ffffff;
   color: #29455f;
   text-decoration: none;
   font-weight: 900;
+  line-height: 1;
+  box-sizing: border-box;
   transition:
     color 0.18s ease,
     background 0.18s ease,
@@ -47,16 +52,14 @@
     transform 0.18s ease;
 }
 
-.raceLink:last-child {
-  border-right: none;
-}
-
 .raceLink span {
-  font-size: 16px;
+  display: block;
+  font-size: 18px;
   line-height: 1;
 }
 
 .raceLink small {
+  display: block;
   font-size: 10px;
   line-height: 1;
 }
@@ -71,11 +74,11 @@
 }
 
 .active {
-  z-index: 2;
   color: #ffffff;
+  border-color: transparent;
   background: linear-gradient(145deg, #187bd9, #29a9e6);
   box-shadow:
-    0 6px 14px rgba(19, 126, 208, 0.3),
+    0 5px 12px rgba(19, 126, 208, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -87,7 +90,7 @@
 .active::after {
   position: absolute;
   right: 10px;
-  bottom: 6px;
+  bottom: 4px;
   left: 10px;
   height: 3px;
   border-radius: 999px;
@@ -98,6 +101,6 @@
 @media (min-width: 760px) {
   .raceLink {
     flex: 1 1 0;
-    min-width: 58px;
+    min-width: 46px;
   }
 }
