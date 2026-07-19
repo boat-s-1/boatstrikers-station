@@ -2,15 +2,28 @@
 
 import { useMemo, useState } from "react";
 import AiDashboard from "./AiDashboard";
+import BscExhibitionPanel from "./BscExhibitionPanel";
+import RaceResultPanel from "./RaceResultPanel";
 import styles from "../phase2.module.css";
 
 const TABS = [
   { key: "entries", icon: "📋", label: "出走表" },
   { key: "exhibition", icon: "⏱️", label: "展示" },
+
+  // 今回追加
+  {
+    key: "bscExhibition",
+    icon: "📊",
+    label: "BSC展示",
+  },
+
   { key: "ai", icon: "🧠", label: "AI分析" },
   { key: "previous", icon: "📰", label: "前日版" },
   { key: "live", icon: "⚡", label: "直前版" },
   { key: "bets", icon: "🎯", label: "買い目" },
+
+  // 今回追加
+  { key: "result", icon: "🏁", label: "結果" },
 ];
 
 function number(value, digits = 2) {
@@ -137,6 +150,10 @@ export default function RaceDetailTabs({
   previousPrediction,
   livePrediction,
   syncedAt,
+
+  // 今回追加
+  result,
+  resultEntries,
 }) {
   const [activeTab, setActiveTab] = useState("entries");
 
@@ -356,6 +373,11 @@ export default function RaceDetailTabs({
           </>
         )}
 
+　　　　{activeTab === "bscExhibition" && (
+  <BscExhibitionPanel entries={entries} />
+)}
+
+
         {activeTab === "ai" && (
           <AiDashboard
             entries={entries}
@@ -407,6 +429,13 @@ export default function RaceDetailTabs({
             )}
           </>
         )}
+          {activeTab === "result" && (
+  <RaceResultPanel
+    result={result}
+    resultEntries={resultEntries}
+    entries={entries}
+  />
+)}
       </section>
     </>
   );
