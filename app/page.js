@@ -3,6 +3,7 @@ import Parser from "rss-parser";
 import { supabase } from "./bsc2/lib/supabaseClient";
 import BottomNav from "./BottomNav";
 
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
