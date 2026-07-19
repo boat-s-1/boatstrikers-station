@@ -1767,7 +1767,7 @@
 @media (max-width: 700px) {
   .racesHero {
     min-height: 0 !important;
-    height: 310px !important;
+    height: 280px !important;
     border-radius: 0 0 28px 28px;
   }
 
