@@ -1,0 +1,103 @@
+.wrapper {
+  width: 100%;
+  margin: 12px 0 14px;
+  padding: 6px;
+  border: 1px solid rgba(157, 184, 202, 0.45);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 6px 18px rgba(39, 79, 109, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.scroller {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.raceLink {
+  position: relative;
+  display: flex;
+  flex: 0 0 58px;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  min-height: 52px;
+  padding: 0 7px;
+  border-right: 1px solid #e2ebf1;
+  border-radius: 11px;
+  color: #29455f;
+  text-decoration: none;
+  font-weight: 900;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.raceLink:last-child {
+  border-right: none;
+}
+
+.raceLink span {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.raceLink small {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.raceLink:hover {
+  color: #0879c7;
+  background: #eef8ff;
+}
+
+.raceLink:active {
+  transform: scale(0.96);
+}
+
+.active {
+  z-index: 2;
+  color: #ffffff;
+  background: linear-gradient(145deg, #187bd9, #29a9e6);
+  box-shadow:
+    0 6px 14px rgba(19, 126, 208, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.active:hover {
+  color: #ffffff;
+  background: linear-gradient(145deg, #187bd9, #29a9e6);
+}
+
+.active::after {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  left: 10px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  content: "";
+}
+
+@media (min-width: 760px) {
+  .raceLink {
+    flex: 1 1 0;
+    min-width: 58px;
+  }
+}
