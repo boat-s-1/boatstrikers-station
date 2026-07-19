@@ -1484,7 +1484,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 28px;
+  gap: 24px;
 
   min-height: 280px;
   padding-top: 58px;
@@ -1692,7 +1692,7 @@
       スマホでは中央から少し右側を見せます。
       日本地図と競艇場の両方が残りやすい位置です。
     */
-    background-position: 58% center;
+    background-position: 65% center;
   }
 
   .racesHeroOverlay {
