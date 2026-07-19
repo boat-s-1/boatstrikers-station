@@ -410,13 +410,16 @@
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+
+  /* 4列×2段 */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
   gap: 5px;
   padding: 7px;
-  border: 1px solid rgba(157, 184, 202, .42);
+  border: 1px solid rgba(157, 184, 202, 0.42);
   border-radius: 16px;
-  background: rgba(249,252,254,.95);
-  box-shadow: 0 5px 15px rgba(48, 80, 105, .08);
+  background: rgba(249, 252, 254, 0.95);
+  box-shadow: 0 5px 15px rgba(48, 80, 105, 0.08);
   backdrop-filter: blur(12px);
 }
 
@@ -1321,5 +1324,10 @@
 
   .escapeCircle strong {
     font-size: 27px;
+  }
+}
+@media (min-width: 900px) {
+  .tabs {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 }
