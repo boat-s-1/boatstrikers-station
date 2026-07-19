@@ -1339,7 +1339,7 @@
 .racesHero {
   position: relative;
   width: 100%;
-  min-height: 390px;
+  min-height: 280px;
   overflow: hidden;
   isolation: isolate;
   border-radius: 0 0 38px 38px;
@@ -1441,7 +1441,7 @@
   position: relative;
   z-index: 2;
   width: min(1180px, calc(100% - 36px));
-  min-height: 390px;
+  min-height: 280px;
   margin: 0 auto;
   padding: 32px 0 30px;
 }
