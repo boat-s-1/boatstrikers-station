@@ -204,14 +204,18 @@ export default async function RacesPage({ searchParams }) {
   const isNight = raceType === "night";
 
   return (
-    <article
-      className={`${styles.courseCard} ${
-        isNight
-          ? styles.courseCardNight
-          : styles.courseCardDay
-      }`}
-      key={course.courseCode}
-    >
+   <article
+    className={styles.courseCard}
+    style={{
+        backgroundImage:`
+        linear-gradient(
+            rgba(5,18,45,.45),
+            rgba(5,18,45,.45)
+        ),
+        url(${background})
+        `
+    }}
+>
       <div className={styles.courseCardTop}>
         <div className={styles.courseTitle}>
           <span>{courseCode}</span>
