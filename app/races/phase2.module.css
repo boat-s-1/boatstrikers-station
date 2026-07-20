@@ -2020,3 +2020,123 @@
     font-size: 8px;
   }
 }
+/* =====================================================
+   展示比較 セクション
+===================================================== */
+
+.exhibitionSection {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(157, 184, 202, 0.42);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fbfd 100%
+  );
+  box-shadow:
+    0 6px 18px rgba(48, 80, 105, 0.07);
+}
+
+/* セクション見出し */
+
+.exhibitionSectionHeading {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 11px;
+  border-bottom:
+    1px solid rgba(157, 184, 202, 0.32);
+}
+
+/* アイコン */
+
+.exhibitionSectionIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(
+    135deg,
+    #e8f6ff,
+    #d8ecf8
+  );
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(62, 126, 168, 0.12);
+  font-size: 21px;
+}
+
+/* 英語見出し */
+
+.exhibitionSectionHeading p {
+  margin: 0 0 2px;
+  color: #7890a3;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+/* 日本語見出し */
+
+.exhibitionSectionHeading h3 {
+  margin: 0;
+  color: #17395a;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+/* 右側バッジ */
+
+.exhibitionSectionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid #cfe0eb;
+  border-radius: 999px;
+  background: #eef7fc;
+  color: #36749b;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* スマホ */
+
+@media (max-width: 600px) {
+  .exhibitionSection {
+    margin-top: 12px;
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  .exhibitionSectionHeading {
+    grid-template-columns:
+      auto minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .exhibitionSectionIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .exhibitionSectionHeading h3 {
+    font-size: 15px;
+  }
+
+  .exhibitionSectionBadge {
+    min-height: 23px;
+    padding: 0 7px;
+    font-size: 8px;
+  }
+}
