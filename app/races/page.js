@@ -25,6 +25,33 @@ function getCourseRaceType(courseCode) {
 
 export const dynamic = "force-dynamic";
 
+const COURSE_BACKGROUNDS = {
+  1: "/backgrounds/01.jpg",
+  2: "/backgrounds/02.jpg",
+  3: "/backgrounds/03.jpg",
+  4: "/backgrounds/04.jpg",
+  5: "/backgrounds/05.jpg",
+  6: "/backgrounds/06.jpg",
+  7: "/backgrounds/07.jpg",
+  8: "/backgrounds/08.jpg",
+  9: "/backgrounds/09.jpg",
+  10: "/backgrounds/10.jpg",
+  11: "/backgrounds/11.jpg",
+  12: "/backgrounds/12.jpg",
+  13: "/backgrounds/13.jpg",
+  14: "/backgrounds/14.jpg",
+  15: "/backgrounds/15.jpg",
+  16: "/backgrounds/16.jpg",
+  17: "/backgrounds/17.jpg",
+  18: "/backgrounds/18.jpg",
+  19: "/backgrounds/19.jpg",
+  20: "/backgrounds/20.jpg",
+  21: "/backgrounds/21.jpg",
+  22: "/backgrounds/22.jpg",
+  23: "/backgrounds/23.jpg",
+  24: "/backgrounds/24.jpg",
+};
+
 export default async function RacesPage({ searchParams }) {
   const query = await searchParams;
   const raceDate = normalizeDate(query?.date);
