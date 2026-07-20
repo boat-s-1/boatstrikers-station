@@ -537,7 +537,7 @@ export default function RaceDetailTabs({
     </div>
   </>
 )}
-)}
+
       </section>
     </>
   );
