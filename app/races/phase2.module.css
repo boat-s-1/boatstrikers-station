@@ -205,7 +205,17 @@
 }
 
 .courseCard {
-  padding: 15px;
+  position: relative;
+  overflow: hidden;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.courseCard > * {
+  position: relative;
+  z-index: 2;
 }
 
 .courseCardTop,
