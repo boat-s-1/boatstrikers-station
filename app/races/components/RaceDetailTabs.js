@@ -35,22 +35,16 @@ function number(value, digits = 2) {
 }
 
 function formatDisplayST(value) {
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
+  if (value == null) return "-";
 
   const st = Number(value);
 
-  if (!Number.isFinite(st)) {
-    return "-";
-  }
+  if (!Number.isFinite(st)) return "-";
 
-  // フライング
   if (st < 0) {
     return `F${Math.abs(st).toFixed(2).replace(/^0/, "")}`;
   }
 
-  // 正常スタート
   return st.toFixed(2).replace(/^0/, "");
 }
 function racerName(value) {
