@@ -392,68 +392,151 @@ export default function RaceDetailTabs({
           </>
         )}
 
-　　　　{activeTab === "bscExhibition" && (
-  <BscExhibitionPanel entries={entries} />
+　　　{activeTab === "exhibition" && (
+  <>
+    {/* =========================================
+        展示比較 全体タイトル
+    ========================================= */}
+    <div className={styles.panelHeading}>
+      <div>
+        <p>EXHIBITION COMPARISON</p>
+        <h2>展示比較</h2>
+      </div>
+
+      <span className={styles.panelBadge}>
+        自動順位
+      </span>
+    </div>
+
+    {/* =========================================
+        ① 展示タイム比較
+    ========================================= */}
+    <div className={styles.exhibitionSection}>
+      <div className={styles.exhibitionSectionHeading}>
+        <div className={styles.exhibitionSectionIcon}>
+          ⏱
+        </div>
+
+        <div>
+          <p>EXHIBITION TIME RANKING</p>
+          <h3>展示タイム比較</h3>
+        </div>
+
+        <span className={styles.exhibitionSectionBadge}>
+          タイム順
+        </span>
+      </div>
+
+      {exhibitionRows.every(
+        (entry) => entry.exhibition_time === null
+      ) ? (
+        <div className={styles.emptyAi}>
+          <div className={styles.emptyAiIcon}>
+            ⏱️
+          </div>
+
+          <h3>展示情報はまだありません</h3>
+
+          <p>
+            展示発表後、次回の5分同期で
+            自動表示されます。
+          </p>
+        </div>
+      ) : (
+        <div className={styles.exhibitionList}>
+          {[...exhibitionRows]
+            .sort((a, b) => {
+              const rankA =
+                a.exhibitionRank ?? 999;
+
+              const rankB =
+                b.exhibitionRank ?? 999;
+
+              return rankA - rankB;
+            })
+            .map((entry) => (
+              <article
+                className={styles.exhibitionRow}
+                key={entry.boat_no}
+              >
+                <BoatBadge
+                  boatNo={entry.boat_no}
+                />
+
+                <div
+                  className={styles.exhibitionRacer}
+                >
+                  <strong>
+                    {racerName(entry.racer_name)}
+                  </strong>
+
+                  <span>
+                    {entry.racer_class || "-"}
+                  </span>
+                </div>
+
+                <div
+                  className={styles.exhibitionValue}
+                >
+                  <small>展示タイム</small>
+
+                  <strong>
+                    {number(
+                      entry.exhibition_time
+                    )}
+                  </strong>
+                </div>
+
+                <div
+                  className={styles.exhibitionValue}
+                >
+                  <small>展示ST</small>
+
+                  <strong>
+                    {number(
+                      entry.exhibition_st
+                    )}
+                  </strong>
+                </div>
+
+                <span
+                  className={styles.rankBadge}
+                >
+                  {entry.exhibitionRank
+                    ? `${entry.exhibitionRank}位`
+                    : "-"}
+                </span>
+              </article>
+            ))}
+        </div>
+      )}
+    </div>
+
+    {/* =========================================
+        ② スタート展示
+    ========================================= */}
+    <div className={styles.exhibitionSection}>
+      <div className={styles.exhibitionSectionHeading}>
+        <div className={styles.exhibitionSectionIcon}>
+          🚤
+        </div>
+
+        <div>
+          <p>START EXHIBITION</p>
+          <h3>スタート展示</h3>
+        </div>
+
+        <span className={styles.exhibitionSectionBadge}>
+          スリット
+        </span>
+      </div>
+
+      <AnimatedStartSlit
+        entries={entries}
+      />
+    </div>
+  </>
 )}
-
-
-        {activeTab === "ai" && (
-          <AiDashboard
-            entries={entries}
-            syncedAt={syncedAt}
-          />
-        )}
-
-        {activeTab === "previous" && (
-          <PredictionPanel
-            prediction={previousPrediction}
-            title="一果 前日版"
-          />
-        )}
-
-        {activeTab === "live" && (
-          <PredictionPanel
-            prediction={livePrediction}
-            title="一果 直前版"
-          />
-        )}
-
-        {activeTab === "bets" && (
-          <>
-            <div className={styles.panelHeading}>
-              <div>
-                <p>AI RECOMMENDATION</p>
-                <h2>おすすめ買い目</h2>
-              </div>
-              <span className={styles.panelBadge}>
-                {livePrediction
-                  ? "直前版"
-                  : previousPrediction
-                    ? "前日版"
-                    : "準備中"}
-              </span>
-            </div>
-
-            {currentPrediction ? (
-              <PredictionPanel
-                prediction={currentPrediction}
-                title={
-                  livePrediction
-                    ? "最終買い目"
-                    : "前日買い目"
-                }
-              />
-            ) : (
-              <EmptyAi type="previous" />
-            )}
-          </>
-        )}
-          {activeTab === "result" && (
-  <RaceResultPanel
-    result={result}
-    resultEntries={resultEntries}
-    entries={entries}
-  />
 )}
       </section>
     </>
