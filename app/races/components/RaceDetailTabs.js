@@ -34,6 +34,25 @@ function number(value, digits = 2) {
   return Number.isFinite(parsed) ? parsed.toFixed(digits) : "-";
 }
 
+function formatDisplayST(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const st = Number(value);
+
+  if (!Number.isFinite(st)) {
+    return "-";
+  }
+
+  // フライング
+  if (st < 0) {
+    return `F${Math.abs(st).toFixed(2).replace(/^0/, "")}`;
+  }
+
+  // 正常スタート
+  return st.toFixed(2).replace(/^0/, "");
+}
 function racerName(value) {
   return String(value || "選手名未取得")
     .replace(/\u3000/g, " ")
@@ -272,8 +291,8 @@ export default function RaceDetailTabs({
                     <div>
                       <span>展示ST</span>
                       <strong>
-                        {number(entry.exhibition_st)}
-                      </strong>
+  {formatDisplayST(entry.exhibition_st)}
+</strong>
                     </div>
                   </div>
 
@@ -415,10 +434,8 @@ export default function RaceDetailTabs({
                   <small>展示ST</small>
 
                   <strong>
-                    {number(
-                      entry.exhibition_st
-                    )}
-                  </strong>
+  {formatDisplayST(entry.exhibition_st)}
+</strong>
                 </div>
 
                 <span
