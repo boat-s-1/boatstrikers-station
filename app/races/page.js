@@ -26,7 +26,7 @@ function getCourseRaceType(courseCode) {
 export const dynamic = "force-dynamic";
 
 const COURSE_BACKGROUNDS = {
-  1: "/backgrounds/01.jpg",
+  1: "/backgrounds/9895D71D-A576-4C79-8735-DAA1FEADD612.png",
   2: "/backgrounds/02.jpg",
   3: "/backgrounds/03.jpg",
   4: "/backgrounds/04.jpg",
