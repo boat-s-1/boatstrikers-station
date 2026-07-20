@@ -192,100 +192,108 @@ export default async function RacesPage({ searchParams }) {
           </div>
         ) : (
           <div className={styles.courseGrid}>
-            {courses.map((course) => {
-  const courseCode = String(
-    course.courseCode
-  ).padStart(2, "0");
+  {courses.map((course) => {
+    const numericCourseCode = Number(course.courseCode);
 
-  const raceType = getCourseRaceType(
-    course.courseCode
-  );
+    const courseCode = String(numericCourseCode).padStart(
+      2,
+      "0"
+    );
 
-  const isNight = raceType === "night";
+    const raceType = getCourseRaceType(numericCourseCode);
+    const isNight = raceType === "night";
 
-  return (
-   <article
-    className={styles.courseCard}
-    style={{
-        backgroundImage:`
-        linear-gradient(
-            rgba(5,18,45,.45),
-            rgba(5,18,45,.45)
-        ),
-        url(${background})
-        `
-    }}
->
-      <div className={styles.courseCardTop}>
-        <div className={styles.courseTitle}>
-          <span>{courseCode}</span>
+    // 各場専用背景
+    const background =
+      COURSE_BACKGROUNDS[numericCourseCode] ??
+      "/backgrounds/default.jpg";
 
-          <div>
-            <h2>{course.courseName}</h2>
+    return (
+      <article
+        key={course.courseCode}
+        className={`${styles.courseCard} ${
+          isNight
+            ? styles.courseCardNight
+            : styles.courseCardDay
+        }`}
+        style={{
+          backgroundImage: `
+            linear-gradient(
+              rgba(5, 18, 45, 0.48),
+              rgba(5, 18, 45, 0.68)
+            ),
+            url("${background}")
+          `,
+        }}
+      >
+        <div className={styles.courseCardTop}>
+          <div className={styles.courseTitle}>
+            <span>{courseCode}</span>
 
-            <small
+            <div>
+              <h2>{course.courseName}</h2>
+
+              <small
+                className={
+                  isNight
+                    ? styles.nightTypeLabel
+                    : styles.dayTypeLabel
+                }
+              >
+                {isNight ? "NIGHT RACE" : "DAY RACE"}
+              </small>
+            </div>
+          </div>
+
+          <div className={styles.courseBadges}>
+            <b>出走表公開</b>
+
+            <span
               className={
                 isNight
-                  ? styles.nightTypeLabel
-                  : styles.dayTypeLabel
+                  ? styles.nightBadge
+                  : styles.dayBadge
               }
             >
-              {isNight ? "NIGHT RACE" : "DAY RACE"}
-            </small>
+              {isNight ? "🌙 ナイター" : "☀️ デイ"}
+            </span>
           </div>
         </div>
 
-        <div className={styles.courseBadges}>
-          <b>出走表公開</b>
-
-          <span
-            className={
-              isNight
-                ? styles.nightBadge
-                : styles.dayBadge
-            }
-          >
-            {isNight ? "🌙 ナイター" : "☀️ デイ"}
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.courseStats}>
-        <div>
-          <span>レース</span>
-          <strong>{course.raceCount}R</strong>
-        </div>
-
-        <div>
-          <span>展示公開</span>
-          <strong>
-            {course.exhibitionCount}R
-          </strong>
-        </div>
-
-        <div>
-          <span>最終同期</span>
-          <strong>
-            {formatJstDateTime(course.syncedAt)}
-          </strong>
-        </div>
-      </div>
-
-      <Link
-        href={`/races/${courseCode}?date=${raceDate}`}
-        className={`${styles.primaryButton} ${
-          isNight
-            ? styles.primaryButtonNight
-            : styles.primaryButtonDay
-        }`}
-      >
-        <span>1R〜12Rを見る</span>
-        <span>→</span>
-      </Link>
-    </article>
-  );
-})}
+        <div className={styles.courseStats}>
+          <div>
+            <span>レース</span>
+            <strong>{course.raceCount}R</strong>
           </div>
+
+          <div>
+            <span>展示公開</span>
+            <strong>{course.exhibitionCount}R</strong>
+          </div>
+
+          <div>
+            <span>最終同期</span>
+            <strong>
+              {formatJstDateTime(course.syncedAt)}
+            </strong>
+          </div>
+        </div>
+
+        <Link
+          href={`/races/${courseCode}?date=${raceDate}`}
+          className={`${styles.primaryButton} ${
+            isNight
+              ? styles.primaryButtonNight
+              : styles.primaryButtonDay
+          }`}
+        >
+          <span>1R〜12Rを見る</span>
+          <span>→</span>
+        </Link>
+      </article>
+    );
+  })}
+</div>
         )}
       </section>
     </main>
