@@ -551,35 +551,25 @@ const activeCourses = courses.filter(
                         styles.courseLiveStats
                       }
                     >
-                      <div
-                        className={`${styles.courseLiveStat} ${
-                          styles[
-                            `courseLiveStat_${liveStatus.key}`
-                          ] ?? ""
-                        }`}
-                      >
-                        
+                     <div
+  className={`${styles.courseLiveStat} ${
+    styles[`courseLiveStat_${liveStatus.key}`] ?? ""
+  }`}
+>
+  <div>
+    <span>レース状況</span>
 
-                       <div>
-  <span>レース状況</span>
+    <strong className={styles.courseStatusLabel}>
+      <i
+        className={
+          styles[`courseStatusDot_${liveStatus.key}`]
+        }
+      />
+      {liveStatus.label}
+    </strong>
 
-  <strong
-    className={styles.courseStatusLabel}
-  >
-    <i
-      className={
-        styles[
-          `courseStatusDot_${liveStatus.key}`
-        ]
-      }
-    />
-
-    {liveStatus.label}
-  </strong>
-
-  <small>
-    {liveStatus.subLabel}
-  </small>
+    <small>{liveStatus.subLabel}</small>
+  </div>
 </div>
 
                       <div
