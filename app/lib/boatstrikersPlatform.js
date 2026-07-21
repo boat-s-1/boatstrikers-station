@@ -1,5 +1,28 @@
 import { createClient } from "@supabase/supabase-js";
 
+async function fetchAllRows(buildQuery) {
+  const rows = [];
+  const pageSize = 1000;
+
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await buildQuery(from, from + pageSize - 1);
+
+    if (error) throw error;
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
+  }
+
+  return rows;
+}
+
 const COURSE_NAMES = {
   1: "桐生", 2: "戸田", 3: "江戸川", 4: "平和島",
   5: "多摩川", 6: "浜名湖", 7: "蒲郡", 8: "常滑",
@@ -112,46 +135,121 @@ export async function getAvailableDates(limit = 14) {
 
   return [...new Set((data || []).map((row) => row.race_date))].slice(0, limit);
 }
-
 export async function getCoursesByDate(raceDate) {
   const supabase = getSupabase();
 
-  const { data, error } = await supabase
-    .from("bs_race_events")
-    .select("race_date,course_code,race_no,race_status,weather,synced_at")
-    .eq("race_date", raceDate)
-    .order("course_code", { ascending: true })
-    .order("race_no", { ascending: true });
+  const [events, exhibitionEntries] = await Promise.all([
 
-  if (error) {
-    throw new Error(`開催場一覧の取得に失敗しました: ${error.message}`);
+    fetchAllRows((from, to) =>
+      supabase
+        .from("bs_race_events")
+        .select(
+          "race_date,course_code,race_no,race_status,weather,synced_at"
+        )
+        .eq("race_date", raceDate)
+        .order("course_code")
+        .order("race_no")
+        .range(from, to)
+    ),
+
+    fetchAllRows((from, to) =>
+      supabase
+        .from("bs_race_entries")
+        .select(
+          `
+          course_code,
+          race_no,
+          boat_no,
+          exhibition_time,
+          exhibition_st
+          `
+        )
+        .eq("race_date", raceDate)
+        .order("course_code")
+        .order("race_no")
+        .order("boat_no")
+        .range(from, to)
+    ),
+
+  ]);
+
+  const exhibitionMap = new Map();
+
+  for (const row of exhibitionEntries) {
+
+    const key = `${row.course_code}-${row.race_no}`;
+
+    if (!exhibitionMap.has(key)) {
+
+      exhibitionMap.set(key, {
+        time: 0,
+        st: 0,
+      });
+
+    }
+
+    const race = exhibitionMap.get(key);
+
+    if (row.exhibition_time != null)
+      race.time++;
+
+    if (row.exhibition_st != null)
+      race.st++;
   }
 
   const grouped = new Map();
 
-  for (const row of data || []) {
+  for (const row of events) {
+
     if (!grouped.has(row.course_code)) {
+
       grouped.set(row.course_code, {
+
         raceDate: row.race_date,
         courseCode: row.course_code,
         courseName: getCourseName(row.course_code),
+
         raceCount: 0,
         exhibitionCount: 0,
+
         weather: row.weather,
         syncedAt: row.synced_at,
+
       });
+
     }
 
     const item = grouped.get(row.course_code);
-    item.raceCount += 1;
 
-    if (row.race_status === "exhibition") {
-      item.exhibitionCount += 1;
+    item.raceCount++;
+
+    const exhibition =
+      exhibitionMap.get(
+        `${row.course_code}-${row.race_no}`
+      );
+
+    if (
+      exhibition &&
+      exhibition.time === 6 &&
+      exhibition.st === 6
+    ) {
+
+      item.exhibitionCount++;
+
     }
 
-    if (row.synced_at && (!item.syncedAt || row.synced_at > item.syncedAt)) {
+    if (
+      row.synced_at &&
+      (
+        !item.syncedAt ||
+        row.synced_at > item.syncedAt
+      )
+    ) {
+
       item.syncedAt = row.synced_at;
+
     }
+
   }
 
   return [...grouped.values()];
