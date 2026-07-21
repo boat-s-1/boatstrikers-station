@@ -106,69 +106,101 @@ function formatUpdateTime(value) {
 function getCourseLiveStatus(course, raceDate) {
   const today = getJstDateString();
 
-  const raceCount = Number(course.raceCount ?? 0);
-  const exhibitionCount = Number(course.exhibitionCount ?? 0);
-
-  const resultCount = Number(
-    course.resultCount ??
-      course.finishedRaceCount ??
-      course.resultRaceCount ??
-      0
+  const raceCount = Number(
+    course.raceCount ?? 0
   );
 
-  if (
-    resultCount > 0 &&
-    raceCount > 0 &&
-    resultCount >= raceCount
-  ) {
-    return {
-      key: "finished",
-      label: "全レース終了",
-      subLabel: `${resultCount}/${raceCount}R終了`,
-      buttonLabel: "本日の結果を見る",
-      icon: "✓",
-    };
-  }
+  const exhibitionCount = Number(
+    course.exhibitionCount ?? 0
+  );
 
+  const startedExhibitionCount = Number(
+    course.startedExhibitionCount ?? 0
+  );
+
+  const resultCount = Number(
+    course.resultCount ?? 0
+  );
+
+  /*
+   * 過去日
+   */
   if (raceDate < today) {
     return {
       key: "finished",
-      label: "全レース終了",
-      subLabel: "結果を公開中",
+      label: "結果確定",
+      subLabel:
+        resultCount > 0
+          ? `${resultCount}/${raceCount}R結果公開`
+          : "結果を公開中",
       buttonLabel: "本日の結果を見る",
-      icon: "✓",
     };
   }
 
+  /*
+   * 未来日
+   */
   if (raceDate > today) {
     return {
       key: "scheduled",
       label: "開催前",
       subLabel: "出走表公開中",
       buttonLabel: "出走表を見る",
-      icon: "○",
     };
   }
 
-  if (exhibitionCount > 0) {
+  /*
+   * 全レースの結果取得済み
+   */
+  if (
+    raceCount > 0 &&
+    resultCount >= raceCount
+  ) {
+    return {
+      key: "finished",
+      label: "結果確定",
+      subLabel: `${resultCount}/${raceCount}R結果公開`,
+      buttonLabel: "本日の結果を見る",
+    };
+  }
+
+  /*
+   * 1レース以上の結果が出ている
+   */
+  if (resultCount > 0) {
     return {
       key: "live",
       label: "只今レース中",
-      subLabel: `${exhibitionCount}R展示公開`,
+      subLabel: `${resultCount}/${raceCount}R終了`,
       buttonLabel: "今日のレースを見る",
-      icon: "●",
     };
   }
 
+  /*
+   * 展示が始まっている
+   */
+  if (startedExhibitionCount > 0) {
+    return {
+      key: "exhibition",
+      label: "展示中",
+      subLabel:
+        exhibitionCount > 0
+          ? `${exhibitionCount}R展示完了`
+          : "展示情報を取得中",
+      buttonLabel: "展示情報を見る",
+    };
+  }
+
+  /*
+   * 当日・展示前
+   */
   return {
-    key: "waiting",
-    label: "開催準備中",
+    key: "scheduled",
+    label: "開催前",
     subLabel: "出走表公開中",
     buttonLabel: "今日のレースを見る",
-    icon: "○",
   };
 }
-
 /* =========================================================
    AI公開状況
 
