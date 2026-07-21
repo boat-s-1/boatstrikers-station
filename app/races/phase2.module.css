@@ -2684,3 +2684,15 @@
     font-size: 8px;
   }
 }
+.courseHero {
+  position: relative;
+  overflow: hidden;
+
+  height: 260px;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  border-radius: 0 0 38px 38px;
+}
