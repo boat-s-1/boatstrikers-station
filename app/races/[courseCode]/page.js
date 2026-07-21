@@ -130,6 +130,7 @@ const headerBackground =
                       : "出走表公開"}
                   </b>
                 </div>
+          
 
      
   <div>
@@ -148,7 +149,7 @@ const headerBackground =
       ? "展示公開"
       : "出走表公開"}
   </b>
-</div>
+
 
 <div className={styles.miniEntryList}>
   {race.entries.map((entry) => (
