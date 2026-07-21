@@ -5,6 +5,7 @@ import {
   getCoursesByDate,
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
+import CourseCountdown from "./components/CourseCountdown";
 import styles from "./phase2.module.css";
 
 /* =========================================================
@@ -645,38 +646,27 @@ export default async function RacesPage({
                       {/* レース状況 */}
 
                       <div
-                        className={`${styles.courseLiveStat} ${
-                          styles[
-                            `courseLiveStat_${liveStatus.key}`
-                          ] ?? ""
-                        }`}
-                      >
-                        <div>
-                          <span>
-                            レース状況
-                          </span>
-
-                          <strong
-                            className={
-                              styles.courseStatusLabel
-                            }
-                          >
-                            <i
-                              className={
-                                styles[
-                                  `courseStatusDot_${liveStatus.key}`
-                                ]
-                              }
-                            />
-
-                            {liveStatus.label}
-                          </strong>
-
-                          <small>
-                            {liveStatus.subLabel}
-                          </small>
-                        </div>
-                      </div>
+                      <div
+  className={`${styles.courseLiveStat} ${
+    styles[
+      `courseLiveStat_${course.liveStatus}`
+    ] ?? ""
+  }`}
+>
+  <CourseCountdown
+    liveStatus={course.liveStatus}
+    raceCount={course.raceCount}
+    resultCount={course.resultCount}
+    nextRaceNo={course.nextRaceNo}
+    nextClosingTime={
+      course.nextClosingTime
+    }
+    nextClosingAt={
+      course.nextClosingAt
+    }
+    liveRaceNo={course.liveRaceNo}
+  />
+</div>
 
                       {/* 最新更新 */}
 
