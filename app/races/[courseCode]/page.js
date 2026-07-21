@@ -131,12 +131,7 @@ const headerBackground =
                   </b>
                 </div>
 
-               <div className={styles.raceCardHead}>
-  <div className={styles.raceNo}>
-    <strong>{race.race_no}</strong>
-    <span>R</span>
-  </div>
-
+     
   <div>
     <h2>
       {courseName} {race.race_no}R
