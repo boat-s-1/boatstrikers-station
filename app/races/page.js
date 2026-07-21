@@ -12,8 +12,8 @@ import styles from "./phase2.module.css";
 ========================================================= */
 
 const NIGHT_COURSE_CODES = new Set([
-  1, // 桐生
-  7, // 蒲郡
+  1,  // 桐生
+  7,  // 蒲郡
   12, // 住之江
   15, // 丸亀
   19, // 下関
@@ -95,12 +95,10 @@ function formatUpdateTime(value) {
 /* =========================================================
    レース状況判定
 
-   resultCountが取得できる場合：
-   12/12なら全レース終了
-
-   現在のデータにresultCountがない場合：
-   過去日は全レース終了
-   当日は展示件数を使って簡易判定
+   🟢 開催前
+   🟡 展示中
+   🔴 只今レース中
+   🔵 結果確定
 ========================================================= */
 
 function getCourseLiveStatus(course, raceDate) {
@@ -150,7 +148,7 @@ function getCourseLiveStatus(course, raceDate) {
   }
 
   /*
-   * 全レースの結果取得済み
+   * 当日・全レース結果取得済み
    */
   if (
     raceCount > 0 &&
@@ -165,7 +163,7 @@ function getCourseLiveStatus(course, raceDate) {
   }
 
   /*
-   * 1レース以上の結果が出ている
+   * 当日・1レース以上結果あり
    */
   if (resultCount > 0) {
     return {
@@ -177,7 +175,7 @@ function getCourseLiveStatus(course, raceDate) {
   }
 
   /*
-   * 展示が始まっている
+   * 当日・展示開始済み
    */
   if (startedExhibitionCount > 0) {
     return {
@@ -201,15 +199,9 @@ function getCourseLiveStatus(course, raceDate) {
     buttonLabel: "今日のレースを見る",
   };
 }
+
 /* =========================================================
    AI公開状況
-
-   次のいずれかがcourseに含まれていれば正確に判定：
-   aiPredictionCount
-   livePredictionCount
-   previousPredictionCount
-   hasAiPrediction
-   aiPublished
 ========================================================= */
 
 function getCourseAiStatus(course) {
@@ -233,33 +225,23 @@ function getCourseAiStatus(course) {
         aiCount > 0
           ? `${aiCount}R分析済み`
           : "予想を公開中",
-      icon: "AI",
     };
   }
 
-  /*
-   * AI件数がまだgetCoursesByDate()に含まれていない場合、
-   * 「公開中」と断定せず安全に表示します。
-   */
   return {
     key: "preparing",
     label: "AI準備中",
     subLabel: "順次公開予定",
-    icon: "AI",
   };
 }
-
-
-
-
-
-
 
 /* =========================================================
    ページ
 ========================================================= */
 
-export default async function RacesPage({ searchParams }) {
+export default async function RacesPage({
+  searchParams,
+}) {
   const query = await searchParams;
   const raceDate = normalizeDate(query?.date);
 
@@ -273,7 +255,10 @@ export default async function RacesPage({ searchParams }) {
       getAvailableDates(),
     ]);
   } catch (error) {
-    console.error(error);
+    console.error(
+      "開催場一覧ページ取得エラー:",
+      error
+    );
 
     loadError =
       error instanceof Error
@@ -281,14 +266,23 @@ export default async function RacesPage({ searchParams }) {
         : "データの取得中にエラーが発生しました。";
   }
 
-const activeCourses = courses.filter(
-  (course) =>
-    course.liveStatus === "live" ||
-    course.liveStatus === "exhibition"
-);
+  /*
+   * 展示中またはレース中の場
+   */
+  const activeCourses = courses.filter(
+    (course) => {
+      const status = getCourseLiveStatus(
+        course,
+        raceDate
+      );
 
+      return (
+        status.key === "live" ||
+        status.key === "exhibition"
+      );
+    }
+  );
 
-  
   return (
     <main className={styles.page}>
       {/* =====================================================
@@ -296,53 +290,98 @@ const activeCourses = courses.filter(
       ===================================================== */}
 
       <header className={styles.racesHero}>
-        <div className={styles.racesHeroBackground} />
-        <div className={styles.racesHeroOverlay} />
-        <div className={styles.racesHeroScanLine} />
-        <div className={styles.racesHeroGlow} />
+        <div
+          className={styles.racesHeroBackground}
+        />
+
+        <div
+          className={styles.racesHeroOverlay}
+        />
+
+        <div
+          className={styles.racesHeroScanLine}
+        />
+
+        <div
+          className={styles.racesHeroGlow}
+        />
 
         <div className={styles.racesHeroInner}>
-          <Link href="/" className={styles.racesBackPill}>
+          <Link
+            href="/"
+            className={styles.racesBackPill}
+          >
             <span>←</span>
             <span>ホーム</span>
           </Link>
 
           <div className={styles.racesHeroMain}>
             <div className={styles.racesHeroText}>
-              <p className={styles.racesHeroEyebrow}>
+              <p
+                className={
+                  styles.racesHeroEyebrow
+                }
+              >
                 BOATSTRIKERS LIVE DATABASE
               </p>
 
               <h1>本日の開催場</h1>
 
-              <div className={styles.racesHeroMeta}>
+              <div
+                className={
+                  styles.racesHeroMeta
+                }
+              >
                 <span>
                   <small>RACE DATE</small>
                   <strong>{raceDate}</strong>
                 </span>
 
                 <span>
-                  <small>TODAY&apos;S COURSES</small>
-                  <strong>{courses.length}場開催</strong>
+                  <small>
+                    TODAY&apos;S COURSES
+                  </small>
+
+                  <strong>
+                    {courses.length}場開催
+                  </strong>
                 </span>
 
-                <span className={styles.racesHeroLive}>
+                <span
+                  className={
+                    styles.racesHeroLive
+                  }
+                >
                   <i />
                   <strong>自動更新中</strong>
                 </span>
               </div>
             </div>
 
-            <div className={styles.racesHeroStatus}>
-              <div className={styles.racesHeroStatusHeader}>
+            <div
+              className={
+                styles.racesHeroStatus
+              }
+            >
+              <div
+                className={
+                  styles.racesHeroStatusHeader
+                }
+              >
                 <span>AI RACE CENTER</span>
                 <b>ONLINE</b>
               </div>
 
-              <div className={styles.racesHeroStatusBody}>
+              <div
+                className={
+                  styles.racesHeroStatusBody
+                }
+              >
                 <div>
                   <small>開催場</small>
-                  <strong>{courses.length}</strong>
+                  <strong>
+                    {courses.length}
+                  </strong>
                 </div>
 
                 <div>
@@ -365,6 +404,8 @@ const activeCourses = courses.filter(
       ===================================================== */}
 
       <section className={styles.content}>
+        {/* 日付ナビ */}
+
         {dates.length > 0 && (
           <nav className={styles.dateNav}>
             {dates.map((date) => (
@@ -383,58 +424,100 @@ const activeCourses = courses.filter(
           </nav>
         )}
 
+        {/* 展示中・レース中 */}
 
-{liveCourses.length > 0 && (
-  <section className={styles.liveCourseSection}>
-    <div className={styles.liveCourseHeading}>
-      <div>
-        <span className={styles.liveCourseDot} />
-        <strong>只今レース中</strong>
-      </div>
-
-      <small>
-        {liveCourses.length}場開催中
-      </small>
-    </div>
-
-    <div className={styles.liveCourseList}>
-      {liveCourses.map((course) => {
-        const numericCourseCode = Number(
-          course.courseCode
-        );
-
-        const courseCode = String(
-          numericCourseCode
-        ).padStart(2, "0");
-
-        return (
-          <Link
-            key={course.courseCode}
-            href={`/races/${courseCode}?date=${raceDate}`}
-            className={styles.liveCourseChip}
+        {activeCourses.length > 0 && (
+          <section
+            className={
+              styles.liveCourseSection
+            }
           >
-            <span>{courseCode}</span>
+            <div
+              className={
+                styles.liveCourseHeading
+              }
+            >
+              <div>
+                <span
+                  className={
+                    styles.liveCourseDot
+                  }
+                />
 
-            <strong>
-              {course.courseName}
-            </strong>
+                <strong>
+                  展示・レース進行中
+                </strong>
+              </div>
 
-            <b>LIVE</b>
-          </Link>
-        );
-      })}
-    </div>
-  </section>
-)}
+              <small>
+                {activeCourses.length}場
+              </small>
+            </div>
 
-          
+            <div
+              className={
+                styles.liveCourseList
+              }
+            >
+              {activeCourses.map((course) => {
+                const numericCourseCode =
+                  Number(course.courseCode);
 
+                const courseCode = String(
+                  numericCourseCode
+                ).padStart(2, "0");
+
+                const status =
+                  getCourseLiveStatus(
+                    course,
+                    raceDate
+                  );
+
+                return (
+                  <Link
+                    key={course.courseCode}
+                    href={`/races/${courseCode}?date=${raceDate}`}
+                    className={
+                      styles.liveCourseChip
+                    }
+                  >
+                    <span>{courseCode}</span>
+
+                    <strong>
+                      {course.courseName}
+                    </strong>
+
+                    <b>
+                      {status.key === "live"
+                        ? "LIVE"
+                        : "展示中"}
+                    </b>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* 見出し */}
+
+        <div className={styles.sectionHeading}>
+          <div>
+            <p>TODAY&apos;S COURSES</p>
+            <h2>開催場を選択</h2>
+          </div>
+
+          <span>{courses.length}場</span>
+        </div>
+
+        {/* エラー・0件・一覧 */}
 
         {loadError ? (
           <div className={styles.messageCard}>
             <strong>
               ⚠️ データを取得できませんでした
             </strong>
+
             <p>{loadError}</p>
           </div>
         ) : courses.length === 0 ? (
@@ -442,42 +525,49 @@ const activeCourses = courses.filter(
             <strong>
               🚤 この日の開催データはありません
             </strong>
+
             <p>
-              PC-KYOTEIから同期済みの日付を選択してください。
+              PC-KYOTEIから同期済みの日付を
+              選択してください。
             </p>
           </div>
         ) : (
           <div className={styles.courseGrid}>
             {courses.map((course) => {
-              const numericCourseCode = Number(
-                course.courseCode
-              );
+              const numericCourseCode =
+                Number(course.courseCode);
 
               const courseCode = String(
                 numericCourseCode
               ).padStart(2, "0");
 
-              const raceType = getCourseRaceType(
-                numericCourseCode
-              );
+              const raceType =
+                getCourseRaceType(
+                  numericCourseCode
+                );
 
-              const isNight = raceType === "night";
+              const isNight =
+                raceType === "night";
 
               const background =
-                COURSE_BACKGROUNDS[numericCourseCode] ??
+                COURSE_BACKGROUNDS[
+                  numericCourseCode
+                ] ??
                 "/backgrounds/default.jpg";
 
-              const liveStatus = getCourseLiveStatus(
-                course,
-                raceDate
-              );
+              const liveStatus =
+                getCourseLiveStatus(
+                  course,
+                  raceDate
+                );
 
               const aiStatus =
                 getCourseAiStatus(course);
 
-              const updateTime = formatUpdateTime(
-                course.syncedAt
-              );
+              const updateTime =
+                formatUpdateTime(
+                  course.syncedAt
+                );
 
               return (
                 <article
@@ -504,24 +594,25 @@ const activeCourses = courses.filter(
                       styles.courseCardContent
                     }
                   >
-                    {/* 上段：場名 */}
+                    {/* 上段：バッジ */}
 
                     <div
                       className={
                         styles.courseCardTop
                       }
                     >
+                      {/*
+                        場名・場コードは背景画像内へ
+                        入れているため、コードでは
+                        表示しません。
+                      */}
+
                       <div
-                        className={styles.courseTitle}
-                      >
-                    
-
-                        <div>
-                         
-
-                         
-                        </div>
-                      </div>
+                        className={
+                          styles.courseTitle
+                        }
+                        aria-hidden="true"
+                      />
 
                       <div
                         className={
@@ -544,62 +635,86 @@ const activeCourses = courses.filter(
                       </div>
                     </div>
 
-                    {/* 中段：ライブ状況 */}
+                    {/* 中段：ステータス */}
 
                     <div
                       className={
                         styles.courseLiveStats
                       }
                     >
-                     <div
-  className={`${styles.courseLiveStat} ${
-    styles[`courseLiveStat_${liveStatus.key}`] ?? ""
-  }`}
->
-  <div>
-    <span>レース状況</span>
+                      {/* レース状況 */}
 
-    <strong className={styles.courseStatusLabel}>
-      <i
-        className={
-          styles[`courseStatusDot_${liveStatus.key}`]
-        }
-      />
-      {liveStatus.label}
-    </strong>
+                      <div
+                        className={`${styles.courseLiveStat} ${
+                          styles[
+                            `courseLiveStat_${liveStatus.key}`
+                          ] ?? ""
+                        }`}
+                      >
+                        <div>
+                          <span>
+                            レース状況
+                          </span>
 
-    <small>{liveStatus.subLabel}</small>
-  </div>
-</div>
+                          <strong
+                            className={
+                              styles.courseStatusLabel
+                            }
+                          >
+                            <i
+                              className={
+                                styles[
+                                  `courseStatusDot_${liveStatus.key}`
+                                ]
+                              }
+                            />
+
+                            {liveStatus.label}
+                          </strong>
+
+                          <small>
+                            {liveStatus.subLabel}
+                          </small>
+                        </div>
+                      </div>
+
+                      {/* 最新更新 */}
 
                       <div
                         className={
                           styles.courseLiveStat
                         }
                       >
-                        
-
                         <div>
                           <span>最新更新</span>
-                          <strong>{updateTime}</strong>
-                          <small>5分ごとに更新</small>
+
+                          <strong>
+                            {updateTime}
+                          </strong>
+
+                          <small>
+                            5分ごとに更新
+                          </small>
                         </div>
                       </div>
 
+                      {/* AI予想 */}
+
                       <div
                         className={`${styles.courseLiveStat} ${
-                          aiStatus.key === "published"
+                          aiStatus.key ===
+                          "published"
                             ? styles.courseLiveStat_aiPublished
                             : styles.courseLiveStat_aiPreparing
                         }`}
                       >
-                      
-
                         <div>
                           <span>AI予想</span>
+
                           <strong>
                             {aiStatus.label}
                           </strong>
+
                           <small>
                             {aiStatus.subLabel}
                           </small>
@@ -620,6 +735,7 @@ const activeCourses = courses.filter(
                       <span>
                         {liveStatus.buttonLabel}
                       </span>
+
                       <span>→</span>
                     </Link>
                   </div>
