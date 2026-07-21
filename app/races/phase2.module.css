@@ -14,14 +14,17 @@
     linear-gradient(180deg, #edf8ff 0%, #f9fcfe 45%, #eef3f6 100%);
 }
 
-.hero {
-  padding: 20px 15px 28px;
-  color: #fff;
-  border-radius: 0 0 30px 30px;
-  background:
-    radial-gradient(circle at 92% 10%, rgba(255,255,255,.2), transparent 140px),
-    linear-gradient(135deg, #176ed0, #27aaed);
-  box-shadow: 0 9px 24px rgba(26, 103, 169, .22);
+.hero{
+  position: relative;
+
+  height: 260px;
+
+  overflow: hidden;
+
+  border-radius: 0 0 34px 34px;
+
+  background-size: cover;
+  background-position: center;
 }
 
 .heroInner,
