@@ -117,13 +117,26 @@ const headerBackground =
                   <div className={styles.raceNo}>
                     <strong>{race.race_no}</strong><span>R</span>
                   </div>
-                  <div>
-                    <h2>{courseName} {race.race_no}R</h2>
-                    <p>
-                      {race.entries.length}艇・同期{" "}
-                      {formatJstDateTime(race.synced_at)}
-                    </p>
-                  </div>
+                 <div className={styles.raceCardTitleArea}>
+  <h2>
+    {courseName} {race.race_no}R
+  </h2>
+
+  <p>
+    {race.entries.length}艇・同期{" "}
+    {formatJstDateTime(race.synced_at)}
+  </p>
+
+  <div className={styles.raceClosingTime}>
+    <span>締切予定</span>
+
+    <strong>
+      {race.closing_time
+        ? String(race.closing_time).slice(0, 5)
+        : "--:--"}
+    </strong>
+  </div>
+</div>
                   <b className={styles.statusBadge}>
                     {race.race_status === "exhibition"
                       ? "展示公開"
