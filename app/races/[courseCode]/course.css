@@ -25,16 +25,17 @@ html {
 }
 
 .courseHero {
-  padding: 17px 16px 26px;
-  border-radius: 0 0 28px 28px;
-  background:
-    linear-gradient(
-      135deg,
-      #1175dc 0%,
-      #25a8ed 100%
-    );
+  position: relative;
+  min-height: 390px;
+  padding: 34px 28px 44px;
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
   color: #ffffff;
-  box-shadow: 0 8px 25px rgba(24, 107, 180, 0.2);
+  border-radius: 0 0 54px 54px;
+  overflow: hidden;
 }
 
 .courseHero.night {
