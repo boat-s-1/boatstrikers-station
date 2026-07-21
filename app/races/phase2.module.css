@@ -2863,3 +2863,89 @@
     padding: 0 9px;
   }
 }
+/* =========================================================
+   開催場ステータス
+========================================================= */
+
+.courseStatusLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.courseStatusLabel i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+/* 🟢 開催前 */
+
+.courseStatusDot_scheduled {
+  background: #31cf78;
+  box-shadow:
+    0 0 0 4px rgba(49, 207, 120, 0.13),
+    0 0 12px rgba(49, 207, 120, 0.55);
+}
+
+/* 🟡 展示中 */
+
+.courseStatusDot_exhibition {
+  background: #ffd84f;
+  box-shadow:
+    0 0 0 4px rgba(255, 216, 79, 0.13),
+    0 0 12px rgba(255, 216, 79, 0.55);
+
+  animation:
+    courseExhibitionPulse 1.4s ease-in-out infinite;
+}
+
+/* 🔴 レース中 */
+
+.courseStatusDot_live {
+  background: #ff4d5e;
+  box-shadow:
+    0 0 0 4px rgba(255, 77, 94, 0.14),
+    0 0 14px rgba(255, 77, 94, 0.65);
+
+  animation:
+    courseRacePulse 1.1s ease-in-out infinite;
+}
+
+/* 🔵 結果確定 */
+
+.courseStatusDot_finished {
+  background: #4e9cff;
+  box-shadow:
+    0 0 0 4px rgba(78, 156, 255, 0.13),
+    0 0 12px rgba(78, 156, 255, 0.5);
+}
+
+@keyframes courseExhibitionPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.78);
+  }
+}
+
+@keyframes courseRacePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.42;
+    transform: scale(0.72);
+  }
+}
