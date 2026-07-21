@@ -55,7 +55,7 @@ const COURSE_BACKGROUNDS = {
   21: "/backgrounds/21.jpg",
   22: "/backgrounds/22.jpg",
   23: "/backgrounds/23.jpg",
-  24: "/backgrounds/24.jpg",
+  24: "/backgrounds/B5B45305-8C2B-4F52-A7A0-41B0917E8156.png",
 };
 
 export const dynamic = "force-dynamic";
