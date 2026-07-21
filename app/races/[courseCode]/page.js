@@ -12,6 +12,33 @@ import styles from "../phase2.module.css";
 
 export const dynamic = "force-dynamic";
 
+const COURSE_HEADER_BACKGROUNDS = {
+  1: "/course-headers/01.png",
+  2: "/course-headers/02.png",
+  3: "/course-headers/03.png",
+  4: "/course-headers/04.png",
+  5: "/course-headers/05.png",
+  6: "/course-headers/06.png",
+  7: "/course-headers/07.png",
+  8: "/course-headers/08.png",
+  9: "/course-headers/09.png",
+  10: "/course-headers/10.png",
+  11: "/course-headers/11.png",
+  12: "/course-headers/12.png",
+  13: "/course-headers/13.png",
+  14: "/course-headers/14.png",
+  15: "/course-headers/15.png",
+  16: "/course-headers/16.png",
+  17: "/course-headers/17.png",
+  18: "/course-headers/18.png",
+  19: "/course-headers/19.png",
+  20: "/course-headers/20.png",
+  21: "/course-headers/21.png",
+  22: "/course-headers/22.png",
+  23: "/course-headers/23.png",
+  24: "/course-headers/24.png",
+
+
 export default async function CoursePage({ params, searchParams }) {
   const route = await params;
   const query = await searchParams;
@@ -38,31 +65,7 @@ const headerBackground =
     loadError = error.message;
   }
 
-  const COURSE_HEADER_BACKGROUNDS = {
-  1: "/course-headers/01.png",
-  2: "/course-headers/02.png",
-  3: "/course-headers/03.png",
-  4: "/course-headers/04.png",
-  5: "/course-headers/05.png",
-  6: "/course-headers/06.png",
-  7: "/course-headers/07.png",
-  8: "/course-headers/08.png",
-  9: "/course-headers/09.png",
-  10: "/course-headers/10.png",
-  11: "/course-headers/11.png",
-  12: "/course-headers/12.png",
-  13: "/course-headers/13.png",
-  14: "/course-headers/14.png",
-  15: "/course-headers/15.png",
-  16: "/course-headers/16.png",
-  17: "/course-headers/17.png",
-  18: "/course-headers/18.png",
-  19: "/course-headers/19.png",
-  20: "/course-headers/20.png",
-  21: "/course-headers/21.png",
-  22: "/course-headers/22.png",
-  23: "/course-headers/23.png",
-  24: "/course-headers/24.png",
+  
 };
   
 
