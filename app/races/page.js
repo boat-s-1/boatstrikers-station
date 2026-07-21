@@ -474,13 +474,7 @@ export default async function RacesPage({ searchParams }) {
                           ] ?? ""
                         }`}
                       >
-                        <div
-                          className={
-                            styles.courseLiveStatIcon
-                          }
-                        >
-                          {liveStatus.icon}
-                        </div>
+                        
 
                         <div>
                           <span>レース状況</span>
@@ -498,13 +492,7 @@ export default async function RacesPage({ searchParams }) {
                           styles.courseLiveStat
                         }
                       >
-                        <div
-                          className={
-                            styles.courseLiveStatIcon
-                          }
-                        >
-                          ↻
-                        </div>
+                        
 
                         <div>
                           <span>最新更新</span>
@@ -520,13 +508,7 @@ export default async function RacesPage({ searchParams }) {
                             : styles.courseLiveStat_aiPreparing
                         }`}
                       >
-                        <div
-                          className={
-                            styles.courseLiveStatIcon
-                          }
-                        >
-                          AI
-                        </div>
+                      
 
                         <div>
                           <span>AI予想</span>
