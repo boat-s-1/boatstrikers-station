@@ -645,7 +645,7 @@ export default async function RacesPage({
                     >
                       {/* レース状況 */}
 
-                      <div
+                    
                       <div
   className={`${styles.courseLiveStat} ${
     styles[
