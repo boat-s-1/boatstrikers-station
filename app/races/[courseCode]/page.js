@@ -132,23 +132,7 @@ const headerBackground =
                 </div>
           
 
-     
-  <div>
-    <h2>
-      {courseName} {race.race_no}R
-    </h2>
-
-    <p>
-      {race.entries.length}艇・同期{" "}
-      {formatJstDateTime(race.synced_at)}
-    </p>
-  </div>
-
-  <b className={styles.statusBadge}>
-    {race.race_status === "exhibition"
-      ? "展示公開"
-      : "出走表公開"}
-  </b>
+  
 
 
 <div className={styles.miniEntryList}>
