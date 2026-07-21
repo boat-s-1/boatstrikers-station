@@ -397,8 +397,7 @@ const liveCourses = courses.filter((course) => {
 )}
 
           
-          <span>{courses.length}場</span>
-        </div>
+
 
         {loadError ? (
           <div className={styles.messageCard}>
