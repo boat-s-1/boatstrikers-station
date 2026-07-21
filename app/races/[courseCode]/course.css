@@ -24,18 +24,14 @@ html {
   color: #25374c;
 }
 
-.courseHero {
-  position: relative;
-  min-height: 390px;
-  padding: 34px 28px 44px;
+.courseHero{
+    min-height:460px;
 
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+    background-size:cover;
 
-  color: #ffffff;
-  border-radius: 0 0 54px 54px;
-  overflow: hidden;
+    background-repeat:no-repeat;
+
+    background-position:center 25%;
 }
 
 .courseHero.night {
