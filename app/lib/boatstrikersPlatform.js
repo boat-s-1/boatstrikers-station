@@ -138,91 +138,93 @@ export async function getAvailableDates(limit = 14) {
 export async function getCoursesByDate(raceDate) {
   const supabase = getSupabase();
 
-  const [events, exhibitionEntries, results] =
-    await Promise.all([
-      /* レース情報 */
-      fetchAllRows((from, to) =>
-        supabase
-          .from("bs_race_events")
-          .select(
-            `
-            race_date,
-            course_code,
-            race_no,
-            race_status,
-            weather,
-            synced_at
-            `
-          )
-          .eq("race_date", raceDate)
-          .order("course_code", {
-            ascending: true,
-          })
-          .order("race_no", {
-            ascending: true,
-          })
-          .range(from, to)
-      ),
+  let events = [];
+  let exhibitionEntries = [];
+  let results = [];
 
-      /* 展示情報 */
-      fetchAllRows((from, to) =>
-        supabase
-          .from("bs_race_entries")
-          .select(
-            `
-            course_code,
-            race_no,
-            boat_no,
-            exhibition_time,
-            exhibition_st,
-            synced_at
-            `
-          )
-          .eq("race_date", raceDate)
-          .order("course_code", {
-            ascending: true,
-          })
-          .order("race_no", {
-            ascending: true,
-          })
-          .order("boat_no", {
-            ascending: true,
-          })
-          .range(from, to)
-      ),
+  try {
+    [events, exhibitionEntries, results] =
+      await Promise.all([
+        /* レース情報 */
+        fetchAllRows((from, to) =>
+          supabase
+            .from("bs_race_events")
+            .select(
+              "race_date,course_code,race_no,race_status,weather,synced_at"
+            )
+            .eq("race_date", raceDate)
+            .order("course_code", {
+              ascending: true,
+            })
+            .order("race_no", {
+              ascending: true,
+            })
+            .range(from, to)
+        ),
 
-      /* 結果情報 */
-      fetchAllRows((from, to) =>
-        supabase
-          .from("bs_race_results")
-          .select(
-            `
-            course_code,
-            race_no,
-            result_status,
-            synced_at
-            `
-          )
-          .eq("race_date", raceDate)
-          .order("course_code", {
-            ascending: true,
-          })
-          .order("race_no", {
-            ascending: true,
-          })
-          .range(from, to)
-      ),
-    ]);
+        /* 展示情報 */
+        fetchAllRows((from, to) =>
+          supabase
+            .from("bs_race_entries")
+            .select(
+              "course_code,race_no,boat_no,exhibition_time,exhibition_st,synced_at"
+            )
+            .eq("race_date", raceDate)
+            .order("course_code", {
+              ascending: true,
+            })
+            .order("race_no", {
+              ascending: true,
+            })
+            .order("boat_no", {
+              ascending: true,
+            })
+            .range(from, to)
+        ),
+
+        /* 結果情報 */
+        fetchAllRows((from, to) =>
+          supabase
+            .from("bs_race_results")
+            .select(
+              "course_code,race_no,synced_at"
+            )
+            .eq("race_date", raceDate)
+            .order("course_code", {
+              ascending: true,
+            })
+            .order("race_no", {
+              ascending: true,
+            })
+            .range(from, to)
+        ),
+      ]);
+  } catch (error) {
+    throw new Error(
+      `開催場一覧の取得に失敗しました: ${
+        error instanceof Error
+          ? error.message
+          : String(error)
+      }`
+    );
+  }
 
   /* =========================================
-     場・レース単位の展示件数
+     レースごとの展示取得数
   ========================================= */
 
   const exhibitionMap = new Map();
 
-  for (const row of exhibitionEntries) {
-    const key =
-      `${Number(row.course_code)}-${Number(row.race_no)}`;
+  for (const entry of exhibitionEntries) {
+    const courseCode = Number(
+      entry.course_code
+    );
+
+    const raceNo = Number(
+      entry.race_no
+    );
+
+    const key = `${courseCode}-${raceNo}`;
 
     if (!exhibitionMap.has(key)) {
       exhibitionMap.set(key, {
@@ -231,18 +233,19 @@ export async function getCoursesByDate(raceDate) {
       });
     }
 
-    const exhibition = exhibitionMap.get(key);
+    const exhibition =
+      exhibitionMap.get(key);
 
     if (
-      row.exhibition_time !== null &&
-      row.exhibition_time !== undefined
+      entry.exhibition_time !== null &&
+      entry.exhibition_time !== undefined
     ) {
       exhibition.timeCount += 1;
     }
 
     if (
-      row.exhibition_st !== null &&
-      row.exhibition_st !== undefined
+      entry.exhibition_st !== null &&
+      entry.exhibition_st !== undefined
     ) {
       exhibition.stCount += 1;
     }
@@ -254,53 +257,72 @@ export async function getCoursesByDate(raceDate) {
 
   const resultRaceSet = new Set();
 
-  for (const row of results) {
-    const key =
-      `${Number(row.course_code)}-${Number(row.race_no)}`;
+  for (const result of results) {
+    const courseCode = Number(
+      result.course_code
+    );
 
-    resultRaceSet.add(key);
+    const raceNo = Number(
+      result.race_no
+    );
+
+    resultRaceSet.add(
+      `${courseCode}-${raceNo}`
+    );
   }
 
   /* =========================================
-     場単位の集計
+     場単位に集計
   ========================================= */
 
   const grouped = new Map();
 
-  for (const row of events) {
-    const courseCode = Number(row.course_code);
-    const raceNo = Number(row.race_no);
-    const raceKey = `${courseCode}-${raceNo}`;
+  for (const event of events) {
+    const courseCode = Number(
+      event.course_code
+    );
+
+    const raceNo = Number(
+      event.race_no
+    );
+
+    const raceKey =
+      `${courseCode}-${raceNo}`;
 
     if (!grouped.has(courseCode)) {
       grouped.set(courseCode, {
-        raceDate: row.race_date,
+        raceDate: event.race_date,
         courseCode,
-        courseName: getCourseName(courseCode),
+        courseName:
+          getCourseName(courseCode),
 
         raceCount: 0,
 
-        /* 展示が1艇以上あるレース */
+        /* 1艇以上の展示があるレース数 */
         startedExhibitionCount: 0,
 
-        /* 6艇分の展示が揃ったレース */
+        /* 6艇の展示タイムが揃ったレース数 */
         exhibitionCount: 0,
 
-        /* 結果取得済みレース */
+        /* 6艇の展示タイム・STが揃ったレース数 */
+        completeExhibitionCount: 0,
+
+        /* 結果取得済みレース数 */
         resultCount: 0,
 
-        weather: row.weather,
-        syncedAt: row.synced_at,
+        weather: event.weather,
+        syncedAt: event.synced_at,
       });
     }
 
     const item = grouped.get(courseCode);
-    const exhibition =
-      exhibitionMap.get(raceKey);
 
     item.raceCount += 1;
 
-    /* 展示が1件以上 */
+    const exhibition =
+      exhibitionMap.get(raceKey);
+
+    /* 展示が1艇以上ある */
     if (
       exhibition &&
       (
@@ -311,12 +333,19 @@ export async function getCoursesByDate(raceDate) {
       item.startedExhibitionCount += 1;
     }
 
-    /* 6艇分の展示タイムが揃った */
+    /* 展示タイムが6艇揃った */
     if (
-      exhibition &&
-      exhibition.timeCount === 6
+      exhibition?.timeCount === 6
     ) {
       item.exhibitionCount += 1;
+    }
+
+    /* 展示タイムとSTが6艇揃った */
+    if (
+      exhibition?.timeCount === 6 &&
+      exhibition?.stCount === 6
+    ) {
+      item.completeExhibitionCount += 1;
     }
 
     /* 結果あり */
@@ -324,55 +353,63 @@ export async function getCoursesByDate(raceDate) {
       item.resultCount += 1;
     }
 
+    /* 最新同期時刻 */
     if (
-      row.synced_at &&
+      event.synced_at &&
       (
         !item.syncedAt ||
-        row.synced_at > item.syncedAt
+        event.synced_at > item.syncedAt
       )
     ) {
-      item.syncedAt = row.synced_at;
+      item.syncedAt = event.synced_at;
     }
   }
 
   /* =========================================
-     場ごとのステータス判定
+     4段階ステータス
   ========================================= */
 
-  return [...grouped.values()].map((course) => {
-    let liveStatus = "scheduled";
+  return [...grouped.values()]
+    .map((course) => {
+      let liveStatus = "scheduled";
 
-    /*
-     * 全レース結果取得済み
-     */
-    if (
-      course.raceCount > 0 &&
-      course.resultCount >= course.raceCount
-    ) {
-      liveStatus = "finished";
-    }
+      /* 🔵 全レース結果確定 */
+      if (
+        course.raceCount > 0 &&
+        course.resultCount >=
+          course.raceCount
+      ) {
+        liveStatus = "finished";
+      }
 
-    /*
-     * 1レース以上結果がある
-     */
-    else if (course.resultCount > 0) {
-      liveStatus = "live";
-    }
+      /* 🔴 1レース以上結果あり */
+      else if (
+        course.resultCount > 0
+      ) {
+        liveStatus = "live";
+      }
 
-    /*
-     * 展示が始まっている
-     */
-    else if (
-      course.startedExhibitionCount > 0
-    ) {
-      liveStatus = "exhibition";
-    }
+      /* 🟡 展示が1レース以上開始 */
+      else if (
+        course.startedExhibitionCount > 0
+      ) {
+        liveStatus = "exhibition";
+      }
 
-    return {
-      ...course,
-      liveStatus,
-    };
-  });
+      /* 🟢 展示前 */
+      else {
+        liveStatus = "scheduled";
+      }
+
+      return {
+        ...course,
+        liveStatus,
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.courseCode - b.courseCode
+    );
 }
     const item = grouped.get(row.course_code);
 
