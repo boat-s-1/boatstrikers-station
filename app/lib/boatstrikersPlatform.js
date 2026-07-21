@@ -135,6 +135,7 @@ export async function getAvailableDates(limit = 14) {
 
   return [...new Set((data || []).map((row) => row.race_date))].slice(0, limit);
 }
+
 export async function getCoursesByDate(raceDate) {
   const supabase = getSupabase();
 
@@ -145,7 +146,6 @@ export async function getCoursesByDate(raceDate) {
   try {
     [events, exhibitionEntries, results] =
       await Promise.all([
-        /* レース情報 */
         fetchAllRows((from, to) =>
           supabase
             .from("bs_race_events")
@@ -162,7 +162,6 @@ export async function getCoursesByDate(raceDate) {
             .range(from, to)
         ),
 
-        /* 展示情報 */
         fetchAllRows((from, to) =>
           supabase
             .from("bs_race_entries")
@@ -182,7 +181,6 @@ export async function getCoursesByDate(raceDate) {
             .range(from, to)
         ),
 
-        /* 結果情報 */
         fetchAllRows((from, to) =>
           supabase
             .from("bs_race_results")
@@ -208,10 +206,6 @@ export async function getCoursesByDate(raceDate) {
       }`
     );
   }
-
-  /* =========================================
-     レースごとの展示取得数
-  ========================================= */
 
   const exhibitionMap = new Map();
 
@@ -251,10 +245,6 @@ export async function getCoursesByDate(raceDate) {
     }
   }
 
-  /* =========================================
-     結果が存在するレース
-  ========================================= */
-
   const resultRaceSet = new Set();
 
   for (const result of results) {
@@ -270,10 +260,6 @@ export async function getCoursesByDate(raceDate) {
       `${courseCode}-${raceNo}`
     );
   }
-
-  /* =========================================
-     場単位に集計
-  ========================================= */
 
   const grouped = new Map();
 
@@ -297,17 +283,9 @@ export async function getCoursesByDate(raceDate) {
           getCourseName(courseCode),
 
         raceCount: 0,
-
-        /* 1艇以上の展示があるレース数 */
         startedExhibitionCount: 0,
-
-        /* 6艇の展示タイムが揃ったレース数 */
         exhibitionCount: 0,
-
-        /* 6艇の展示タイム・STが揃ったレース数 */
         completeExhibitionCount: 0,
-
-        /* 結果取得済みレース数 */
         resultCount: 0,
 
         weather: event.weather,
@@ -315,14 +293,14 @@ export async function getCoursesByDate(raceDate) {
       });
     }
 
-    const item = grouped.get(courseCode);
-
-    item.raceCount += 1;
+    const item =
+      grouped.get(courseCode);
 
     const exhibition =
       exhibitionMap.get(raceKey);
 
-    /* 展示が1艇以上ある */
+    item.raceCount += 1;
+
     if (
       exhibition &&
       (
@@ -333,14 +311,12 @@ export async function getCoursesByDate(raceDate) {
       item.startedExhibitionCount += 1;
     }
 
-    /* 展示タイムが6艇揃った */
     if (
       exhibition?.timeCount === 6
     ) {
       item.exhibitionCount += 1;
     }
 
-    /* 展示タイムとSTが6艇揃った */
     if (
       exhibition?.timeCount === 6 &&
       exhibition?.stCount === 6
@@ -348,57 +324,43 @@ export async function getCoursesByDate(raceDate) {
       item.completeExhibitionCount += 1;
     }
 
-    /* 結果あり */
-    if (resultRaceSet.has(raceKey)) {
+    if (
+      resultRaceSet.has(raceKey)
+    ) {
       item.resultCount += 1;
     }
 
-    /* 最新同期時刻 */
     if (
       event.synced_at &&
       (
         !item.syncedAt ||
-        event.synced_at > item.syncedAt
+        event.synced_at >
+          item.syncedAt
       )
     ) {
-      item.syncedAt = event.synced_at;
+      item.syncedAt =
+        event.synced_at;
     }
   }
-
-  /* =========================================
-     4段階ステータス
-  ========================================= */
 
   return [...grouped.values()]
     .map((course) => {
       let liveStatus = "scheduled";
 
-      /* 🔵 全レース結果確定 */
       if (
         course.raceCount > 0 &&
         course.resultCount >=
           course.raceCount
       ) {
         liveStatus = "finished";
-      }
-
-      /* 🔴 1レース以上結果あり */
-      else if (
+      } else if (
         course.resultCount > 0
       ) {
         liveStatus = "live";
-      }
-
-      /* 🟡 展示が1レース以上開始 */
-      else if (
+      } else if (
         course.startedExhibitionCount > 0
       ) {
         liveStatus = "exhibition";
-      }
-
-      /* 🟢 展示前 */
-      else {
-        liveStatus = "scheduled";
       }
 
       return {
@@ -411,41 +373,6 @@ export async function getCoursesByDate(raceDate) {
         a.courseCode - b.courseCode
     );
 }
-    const item = grouped.get(row.course_code);
-
-    item.raceCount++;
-
-    const exhibition =
-      exhibitionMap.get(
-        `${row.course_code}-${row.race_no}`
-      );
-
-    if (
-      exhibition &&
-      exhibition.time === 6 &&
-      exhibition.st === 6
-    ) {
-
-      item.exhibitionCount++;
-
-    }
-
-    if (
-      row.synced_at &&
-      (
-        !item.syncedAt ||
-        row.synced_at > item.syncedAt
-      )
-    ) {
-
-      item.syncedAt = row.synced_at;
-
-    }
-
-
-  return [...grouped.values()];
-}
-
 export async function getCourseRaces(raceDate, courseCode) {
   const supabase = getSupabase();
 
