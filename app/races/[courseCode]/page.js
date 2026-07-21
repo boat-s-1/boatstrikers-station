@@ -93,7 +93,7 @@ const headerBackground =
               ← 開催場一覧
             </Link>
             <Link href="/" className={styles.backPill}>ホーム</Link>
-          </div>
+          </div></div>
 
        
       </header>
