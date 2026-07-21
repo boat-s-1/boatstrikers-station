@@ -433,9 +433,7 @@ export default async function RacesPage({ searchParams }) {
                         <span>{courseCode}</span>
 
                         <div>
-                          <h2>
-                            {course.courseName}
-                          </h2>
+                         
 
                           <small
                             className={
