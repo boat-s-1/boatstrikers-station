@@ -131,47 +131,83 @@ const headerBackground =
                   </b>
                 </div>
 
-               <div className={styles.miniEntry} key={entry.boat_no}>
-  <span
-    className={`${styles.boatBadge} ${
-      styles[`boat${entry.boat_no}`]
-    }`}
-  >
-    {entry.boat_no}
-  </span>
-
-  <div className={styles.miniEntryInline}>
-    <span className={styles.miniEntryName}>
-      {normalizeRacerName(entry.racer_name)}
-    </span>
-
-    <span className={styles.miniEntryClass}>
-      {entry.racer_class || "-"}
-    </span>
-
-    <span className={styles.miniEntryMotor}>
-      モ
-      {entry.motor_2_rate != null
-        ? `${(entry.motor_2_rate * 100).toFixed(1)}%`
-        : "-"}
-    </span>
-
-    <span className={styles.miniEntryNation}>
-      全
-      {formatNumber(entry.national_win_rate)}
-    </span>
+               <div className={styles.raceCardHead}>
+  <div className={styles.raceNo}>
+    <strong>{race.race_no}</strong>
+    <span>R</span>
   </div>
+
+  <div>
+    <h2>
+      {courseName} {race.race_no}R
+    </h2>
+
+    <p>
+      {race.entries.length}艇・同期{" "}
+      {formatJstDateTime(race.synced_at)}
+    </p>
+  </div>
+
+  <b className={styles.statusBadge}>
+    {race.race_status === "exhibition"
+      ? "展示公開"
+      : "出走表公開"}
+  </b>
 </div>
 
-                <Link
-                  href={`/races/${String(courseCode).padStart(2, "0")}/${
-                    race.race_no
-                  }?date=${raceDate}`}
-                  className={styles.primaryButton}
-                >
-                  <span>出走表・AI情報を見る</span>
-                  <span>→</span>
-                </Link>
+<div className={styles.miniEntryList}>
+  {race.entries.map((entry) => (
+    <div
+      className={styles.miniEntry}
+      key={entry.boat_no}
+    >
+      <span
+        className={`${styles.boatBadge} ${
+          styles[`boat${entry.boat_no}`]
+        }`}
+      >
+        {entry.boat_no}
+      </span>
+
+      <div className={styles.miniEntryInline}>
+        <span className={styles.miniEntryName}>
+          {normalizeRacerName(entry.racer_name)}
+        </span>
+
+        <span className={styles.miniEntryClass}>
+          {entry.racer_class || "-"}
+        </span>
+
+        <span className={styles.miniEntryMotor}>
+          モ
+          {entry.motor_2_rate != null
+            ? `${(
+                Number(entry.motor_2_rate) * 100
+              ).toFixed(1)}%`
+            : "-"}
+        </span>
+
+        <span className={styles.miniEntryNation}>
+          全
+          {formatNumber(
+            entry.national_win_rate
+          )}
+        </span>
+      </div>
+    </div>
+  ))}
+</div>
+
+<Link
+  href={`/races/${String(courseCode).padStart(
+    2,
+    "0"
+  )}/${race.race_no}?date=${raceDate}`}
+  className={styles.primaryButton}
+>
+  <span>出走表・AI情報を見る</span>
+  <span>→</span>
+</Link>
               </article>
             ))}
           </div>
