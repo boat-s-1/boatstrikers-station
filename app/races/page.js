@@ -281,11 +281,11 @@ export default async function RacesPage({ searchParams }) {
         : "データの取得中にエラーが発生しました。";
   }
 
-const liveCourses = courses.filter((course) => {
-  const liveStatus = getCourseLiveStatus(
-    course,
-    raceDate
-  );
+const activeCourses = courses.filter(
+  (course) =>
+    course.liveStatus === "live" ||
+    course.liveStatus === "exhibition"
+);
 
   return liveStatus.key === "live";
 });
