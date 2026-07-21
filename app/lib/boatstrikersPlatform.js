@@ -150,8 +150,16 @@ export async function getCoursesByDate(raceDate) {
           supabase
             .from("bs_race_events")
             .select(
-              "race_date,course_code,race_no,race_status,weather,synced_at"
-            )
+  `
+  race_date,
+  course_code,
+  race_no,
+  race_status,
+  weather,
+  synced_at,
+  closing_time
+  `
+)
             .eq("race_date", raceDate)
             .order("course_code", {
               ascending: true,
@@ -290,14 +298,25 @@ export async function getCoursesByDate(raceDate) {
 
         weather: event.weather,
         syncedAt: event.synced_at,
+          closingTime: event.closing_time,
       });
     }
 
     const item =
-      grouped.get(courseCode);
+  grouped.get(courseCode);
 
-    const exhibition =
-      exhibitionMap.get(raceKey);
+if (
+  event.closing_time &&
+  (
+    !item.closingTime ||
+    event.closing_time < item.closingTime
+  )
+) {
+  item.closingTime = event.closing_time;
+}
+
+const exhibition =
+  exhibitionMap.get(raceKey);
 
     item.raceCount += 1;
 
