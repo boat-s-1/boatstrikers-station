@@ -131,23 +131,37 @@ const headerBackground =
                   </b>
                 </div>
 
-                <div className={styles.miniEntryList}>
-                  {race.entries.map((entry) => (
-                    <div className={styles.miniEntry} key={entry.boat_no}>
-                      <span
-                        className={`${styles.boatBadge} ${
-                          styles[`boat${entry.boat_no}`]
-                        }`}
-                      >
-                        {entry.boat_no}
-                      </span>
-                      <strong>{normalizeRacerName(entry.racer_name)}</strong>
-                      <small>
-                        全国 {formatNumber(entry.national_win_rate)}
-                      </small>
-                    </div>
-                  ))}
-                </div>
+               <div className={styles.miniEntry} key={entry.boat_no}>
+  <span
+    className={`${styles.boatBadge} ${
+      styles[`boat${entry.boat_no}`]
+    }`}
+  >
+    {entry.boat_no}
+  </span>
+
+  <div className={styles.miniEntryInline}>
+    <span className={styles.miniEntryName}>
+      {normalizeRacerName(entry.racer_name)}
+    </span>
+
+    <span className={styles.miniEntryClass}>
+      {entry.racer_class || "-"}
+    </span>
+
+    <span className={styles.miniEntryMotor}>
+      モ
+      {entry.motor_2_rate != null
+        ? `${(entry.motor_2_rate * 100).toFixed(1)}%`
+        : "-"}
+    </span>
+
+    <span className={styles.miniEntryNation}>
+      全
+      {formatNumber(entry.national_win_rate)}
+    </span>
+  </div>
+</div>
 
                 <Link
                   href={`/races/${String(courseCode).padStart(2, "0")}/${
