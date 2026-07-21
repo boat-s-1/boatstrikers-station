@@ -3087,3 +3087,100 @@
     font-size: 12px;
   }
 }
+/* =========================================================
+   締切カウントダウン
+========================================================= */
+
+.courseCountdown {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  text-align: center;
+}
+
+.courseCountdownStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 22px;
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.courseCountdownScheduled {
+  color: #8ff2b7;
+  background: rgba(38, 190, 103, 0.15);
+}
+
+.courseCountdownExhibition {
+  color: #ffe57e;
+  background: rgba(235, 180, 38, 0.17);
+}
+
+.courseCountdownLive {
+  color: #ff98a1;
+  background: rgba(239, 67, 82, 0.17);
+}
+
+.courseCountdownFinished {
+  color: #8dc1ff;
+  background: rgba(61, 136, 231, 0.17);
+}
+
+.courseCountdown small {
+  color: #a7c0d2;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.courseCountdownRemaining {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.courseCountdownRemaining span {
+  color: #8ca8bb;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.courseCountdownRemaining b {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .courseCountdown {
+    gap: 3px;
+  }
+
+  .courseCountdownStatus {
+    min-height: 20px;
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  .courseCountdown small {
+    font-size: 7px;
+  }
+
+  .courseCountdownRemaining b {
+    font-size: 14px;
+  }
+}
