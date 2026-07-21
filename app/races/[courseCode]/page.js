@@ -179,16 +179,14 @@ const headerBackground =
         </span>
 
         <span className={styles.miniEntryMotor}>
-          モ
-          {entry.motor_2_rate != null
-            ? `${(
-                Number(entry.motor_2_rate) * 100
-              ).toFixed(1)}%`
-            : "-"}
-        </span>
+  モーター
+  {entry.motor_2_rate != null
+    ? `${Number(entry.motor_2_rate).toFixed(1)}%`
+    : "-"}
+</span>
 
         <span className={styles.miniEntryNation}>
-          全
+          全国勝率
           {formatNumber(
             entry.national_win_rate
           )}
