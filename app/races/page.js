@@ -561,16 +561,27 @@ const liveCourses = courses.filter((course) => {
                       >
                         
 
-                        <div>
-                          <span>レース状況</span>
-                          <strong>
-                            {liveStatus.label}
-                          </strong>
-                          <small>
-                            {liveStatus.subLabel}
-                          </small>
-                        </div>
-                      </div>
+                       <div>
+  <span>レース状況</span>
+
+  <strong
+    className={styles.courseStatusLabel}
+  >
+    <i
+      className={
+        styles[
+          `courseStatusDot_${liveStatus.key}`
+        ]
+      }
+    />
+
+    {liveStatus.label}
+  </strong>
+
+  <small>
+    {liveStatus.subLabel}
+  </small>
+</div>
 
                       <div
                         className={
