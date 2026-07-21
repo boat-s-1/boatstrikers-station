@@ -287,8 +287,7 @@ const activeCourses = courses.filter(
     course.liveStatus === "exhibition"
 );
 
-  return liveStatus.key === "live";
-});
+
   
   return (
     <main className={styles.page}>
