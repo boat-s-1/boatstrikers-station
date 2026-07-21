@@ -2465,9 +2465,20 @@
 }
 
 /* 開催前 */
-.courseLiveStat_scheduled strong,
-.courseLiveStat_waiting strong {
-  color: #b9eaff;
+.courseLiveStat_scheduled strong {
+  color: #7ff0ad;
+}
+
+.courseLiveStat_exhibition strong {
+  color: #ffe177;
+}
+
+.courseLiveStat_live strong {
+  color: #ff8995;
+}
+
+.courseLiveStat_finished strong {
+  color: #83baff;
 }
 
 /* AI公開中 */
