@@ -217,6 +217,12 @@ function getCourseAiStatus(course) {
   };
 }
 
+
+
+
+
+
+
 /* =========================================================
    ページ
 ========================================================= */
@@ -243,6 +249,15 @@ export default async function RacesPage({ searchParams }) {
         : "データの取得中にエラーが発生しました。";
   }
 
+const liveCourses = courses.filter((course) => {
+  const liveStatus = getCourseLiveStatus(
+    course,
+    raceDate
+  );
+
+  return liveStatus.key === "live";
+});
+  
   return (
     <main className={styles.page}>
       {/* =====================================================
@@ -343,6 +358,50 @@ export default async function RacesPage({ searchParams }) {
             <h2>開催場を選択</h2>
           </div>
 
+{liveCourses.length > 0 && (
+  <section className={styles.liveCourseSection}>
+    <div className={styles.liveCourseHeading}>
+      <div>
+        <span className={styles.liveCourseDot} />
+        <strong>只今レース中</strong>
+      </div>
+
+      <small>
+        {liveCourses.length}場開催中
+      </small>
+    </div>
+
+    <div className={styles.liveCourseList}>
+      {liveCourses.map((course) => {
+        const numericCourseCode = Number(
+          course.courseCode
+        );
+
+        const courseCode = String(
+          numericCourseCode
+        ).padStart(2, "0");
+
+        return (
+          <Link
+            key={course.courseCode}
+            href={`/races/${courseCode}?date=${raceDate}`}
+            className={styles.liveCourseChip}
+          >
+            <span>{courseCode}</span>
+
+            <strong>
+              {course.courseName}
+            </strong>
+
+            <b>LIVE</b>
+          </Link>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+          
           <span>{courses.length}場</span>
         </div>
 
