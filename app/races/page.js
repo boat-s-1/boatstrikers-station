@@ -37,7 +37,7 @@ const COURSE_BACKGROUNDS = {
   3: "/backgrounds/BD55BDF9-EE60-49A1-BFDA-5B95FF2BC85F.png",
   4: "/backgrounds/62DFF1EC-DE56-4368-AD4F-68AD6494C97D.png",
   5: "/backgrounds/C6329CF8-BADE-44E0-838F-BE5B8605DCFC.png",
-  6: "/backgrounds/06.jpg",
+  6: "/backgrounds/C93356BF-1F30-495D-9CCB-9DA45FD6E73A.png",
   7: "/backgrounds/E4607E75-9DB1-4FA5-A5E7-3E6A03B7C9FE.png",
   8: "/backgrounds/08.jpg",
   9: "/backgrounds/09.jpg",
