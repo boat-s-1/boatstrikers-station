@@ -387,9 +387,21 @@ export async function getCourseRaces(raceDate, courseCode) {
 
       supabase
         .from("bs_race_entries")
-        .select(
-          "race_no,boat_no,racer_name,racer_class,national_win_rate,local_win_rate,exhibition_time,exhibition_st,synced_at"
-        )
+       .select(`
+race_no,
+boat_no,
+racer_name,
+racer_class,
+national_win_rate,
+local_win_rate,
+motor_no,
+motor_2_rate,
+boat_machine_no,
+boat_2_rate,
+exhibition_time,
+exhibition_st,
+synced_at
+`)
         .eq("race_date", raceDate)
         .eq("course_code", courseCode)
         .order("race_no", { ascending: true })
