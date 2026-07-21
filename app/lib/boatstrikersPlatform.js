@@ -419,11 +419,14 @@ synced_at
   const byRace = new Map();
 
   for (const entry of entries || []) {
-    if (!byRace.has(entry.race_no)) {
-      byRace.set(entry.race_no, []);
-    }
-    byRace.get(entry.race_no).push(entry);
+  const raceNo = Number(entry.race_no);
+
+  if (!byRace.has(raceNo)) {
+    byRace.set(raceNo, []);
   }
+
+  byRace.get(raceNo).push(entry);
+}
 
   const uniqueEvents = new Map();
 
