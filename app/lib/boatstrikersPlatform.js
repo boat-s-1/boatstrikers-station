@@ -120,6 +120,58 @@ export function formatJstDateTime(value) {
   }
 }
 
+function parseClosingTimestamp(raceDate, closingTime) {
+  if (!raceDate || !closingTime) {
+    return null;
+  }
+
+  const timeText = String(closingTime).trim();
+
+  /*
+   * Supabaseのtime型
+   * 11:33:00
+   * 11:33:00+00
+   * などから時・分・秒だけ取得
+   */
+  const match = timeText.match(
+    /^(\d{1,2}):(\d{2})(?::(\d{2}))?/
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const second = Number(match[3] || 0);
+
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    !Number.isInteger(second) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59 ||
+    second < 0 ||
+    second > 59
+  ) {
+    return null;
+  }
+
+  const hh = String(hour).padStart(2, "0");
+  const mm = String(minute).padStart(2, "0");
+  const ss = String(second).padStart(2, "0");
+
+  const timestamp = Date.parse(
+    `${raceDate}T${hh}:${mm}:${ss}+09:00`
+  );
+
+  return Number.isFinite(timestamp)
+    ? timestamp
+    : null;
+}
+
 export async function getAvailableDates(limit = 14) {
   const supabase = getSupabase();
 
@@ -284,41 +336,89 @@ export async function getCoursesByDate(raceDate) {
       `${courseCode}-${raceNo}`;
 
     if (!grouped.has(courseCode)) {
-      grouped.set(courseCode, {
-        raceDate: event.race_date,
-        courseCode,
-        courseName:
-          getCourseName(courseCode),
+     grouped.set(courseCode, {
+  raceDate: event.race_date,
+  courseCode,
+  courseName: getCourseName(courseCode),
 
-        raceCount: 0,
-        startedExhibitionCount: 0,
-        exhibitionCount: 0,
-        completeExhibitionCount: 0,
-        resultCount: 0,
+  raceCount: 0,
+  startedExhibitionCount: 0,
+  exhibitionCount: 0,
+  completeExhibitionCount: 0,
+  resultCount: 0,
 
-        weather: event.weather,
-        syncedAt: event.synced_at,
-          closingTime: event.closing_time,
-      });
+  /*
+   * 次に締切を迎えるレース
+   */
+  nextRaceNo: null,
+  nextClosingTime: null,
+  nextClosingAt: null,
+
+  /*
+   * 締切済み・結果待ちのレース
+   */
+  liveRaceNo: null,
+  liveClosingAt: null,
+
+  weather: event.weather,
+  syncedAt: event.synced_at,
+});
     }
 
-    const item =
-  grouped.get(courseCode);
-
-if (
-  event.closing_time &&
-  (
-    !item.closingTime ||
-    event.closing_time < item.closingTime
-  )
-) {
-  item.closingTime = event.closing_time;
-}
+    const item = grouped.get(courseCode);
 
 const exhibition =
   exhibitionMap.get(raceKey);
 
-    item.raceCount += 1;
+const hasResult =
+  resultRaceSet.has(raceKey);
+
+const closingAt =
+  parseClosingTimestamp(
+    event.race_date,
+    event.closing_time
+  );
+
+const nowTimestamp = Date.now();
+
+item.raceCount += 1;
+
+/*
+ * 次に締切を迎える未確定レース
+ */
+if (
+  !hasResult &&
+  closingAt !== null &&
+  closingAt > nowTimestamp &&
+  (
+    item.nextClosingAt === null ||
+    closingAt < item.nextClosingAt
+  )
+) {
+  item.nextRaceNo = raceNo;
+  item.nextClosingTime =
+    event.closing_time;
+  item.nextClosingAt = closingAt;
+}
+
+/*
+ * 締切済みで結果がまだないレース
+ *
+ * 同じ場で複数ある場合は、
+ * 最も新しく締切を迎えたレースを採用
+ */
+if (
+  !hasResult &&
+  closingAt !== null &&
+  closingAt <= nowTimestamp &&
+  (
+    item.liveClosingAt === null ||
+    closingAt > item.liveClosingAt
+  )
+) {
+  item.liveRaceNo = raceNo;
+  item.liveClosingAt = closingAt;
+}
 
     if (
       exhibition &&
@@ -363,34 +463,67 @@ const exhibition =
   }
 
   return [...grouped.values()]
-    .map((course) => {
-      let liveStatus = "scheduled";
+  .map((course) => {
+    let liveStatus = "scheduled";
 
-      if (
-        course.raceCount > 0 &&
-        course.resultCount >=
-          course.raceCount
-      ) {
-        liveStatus = "finished";
-      } else if (
-        course.resultCount > 0
-      ) {
-        liveStatus = "live";
-      } else if (
-        course.startedExhibitionCount > 0
-      ) {
-        liveStatus = "exhibition";
-      }
+    const nowTimestamp = Date.now();
 
-      return {
-        ...course,
-        liveStatus,
-      };
-    })
-    .sort(
-      (a, b) =>
-        a.courseCode - b.courseCode
-    );
+    const millisecondsUntilClosing =
+      course.nextClosingAt !== null
+        ? course.nextClosingAt - nowTimestamp
+        : null;
+
+    /*
+     * 締切15分前から展示中と判定
+     */
+    const exhibitionWindowMilliseconds =
+      15 * 60 * 1000;
+
+    /*
+     * 🔵 全レース結果確定
+     */
+    if (
+      course.raceCount > 0 &&
+      course.resultCount >= course.raceCount
+    ) {
+      liveStatus = "finished";
+    }
+
+    /*
+     * 🔴 締切済みで結果待ちのレースがある
+     */
+    else if (course.liveRaceNo !== null) {
+      liveStatus = "live";
+    }
+
+    /*
+     * 🟡 次の締切まで15分以内
+     */
+    else if (
+      millisecondsUntilClosing !== null &&
+      millisecondsUntilClosing >= 0 &&
+      millisecondsUntilClosing <=
+        exhibitionWindowMilliseconds
+    ) {
+      liveStatus = "exhibition";
+    }
+
+    /*
+     * 🟢 それ以前
+     */
+    else {
+      liveStatus = "scheduled";
+    }
+
+    return {
+      ...course,
+      liveStatus,
+    };
+  })
+  .sort(
+    (a, b) =>
+      a.courseCode - b.courseCode
+  );
 }
 export async function getCourseRaces(raceDate, courseCode) {
   const supabase = getSupabase();
