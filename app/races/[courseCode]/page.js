@@ -37,6 +37,7 @@ const COURSE_HEADER_BACKGROUNDS = {
   22: "/course-headers/22.png",
   23: "/course-headers/23.png",
   24: "/course-headers/24.png",
+  };
 
 
 export default async function CoursePage({ params, searchParams }) {
@@ -66,7 +67,7 @@ const headerBackground =
   }
 
   
-};
+
   
 
   const courseName = getCourseName(courseCode);
