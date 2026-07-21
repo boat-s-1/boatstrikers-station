@@ -34,7 +34,7 @@ function getCourseRaceType(courseCode) {
 const COURSE_BACKGROUNDS = {
   1: "/backgrounds/6B178DB8-C92E-46CC-82A5-5451D7AC5AA0.png",
   2: "/backgrounds/FC5BE741-F73B-4256-9F44-6956FBD20E6F.png",
-  3: "/backgrounds/03.jpg",
+  3: "/backgrounds/BD55BDF9-EE60-49A1-BFDA-5B95FF2BC85F.png",
   4: "/backgrounds/04.jpg",
   5: "/backgrounds/05.jpg",
   6: "/backgrounds/06.jpg",
