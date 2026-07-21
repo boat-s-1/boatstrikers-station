@@ -95,21 +95,7 @@ const headerBackground =
             <Link href="/" className={styles.backPill}>ホーム</Link>
           </div>
 
-          <div className={styles.heroMain}>
-            <div className={styles.heroIcon}>🚤</div>
-            <div>
-              <p className={styles.eyebrow}>
-                BOAT RACE {String(courseCode).padStart(2, "0")}
-              </p>
-              <h1>{courseName}</h1>
-              <p>1R〜12R 出走表一覧</p>
-              <div className={styles.heroMeta}>
-                <span>{raceDate}</span>
-                <span>{races.length}レース</span>
-              </div>
-            </div>
-          </div>
-        </div>
+       
       </header>
 
       <section className={styles.content}>
