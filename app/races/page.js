@@ -430,7 +430,7 @@ export default async function RacesPage({ searchParams }) {
                       <div
                         className={styles.courseTitle}
                       >
-                        <span>{courseCode}</span>
+                    
 
                         <div>
                          
