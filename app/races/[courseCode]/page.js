@@ -38,7 +38,6 @@ const COURSE_HEADER_BACKGROUNDS = {
   23: "/backgrounds/6E5D6CA0-3A66-47EB-99BD-9936F92D422E.png",
   24: "/backgrounds/B5B45305-8C2B-4F52-A7A0-41B0917E8156.png",
 };
-  };
 
 
 export default async function CoursePage({ params, searchParams }) {
