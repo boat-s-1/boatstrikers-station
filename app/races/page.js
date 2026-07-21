@@ -435,17 +435,7 @@ export default async function RacesPage({ searchParams }) {
                         <div>
                          
 
-                          <small
-                            className={
-                              isNight
-                                ? styles.nightTypeLabel
-                                : styles.dayTypeLabel
-                            }
-                          >
-                            {isNight
-                              ? "NIGHT RACE"
-                              : "DAY RACE"}
-                          </small>
+                         
                         </div>
                       </div>
 
