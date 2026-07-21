@@ -376,93 +376,138 @@ export async function getCoursesByDate(raceDate) {
 export async function getCourseRaces(raceDate, courseCode) {
   const supabase = getSupabase();
 
-  const [{ data: events, error: eventError }, { data: entries, error: entryError }] =
-    await Promise.all([
+  const [events, entries] = await Promise.all([
+    fetchAllRows((from, to) =>
       supabase
         .from("bs_race_events")
         .select("*")
         .eq("race_date", raceDate)
         .eq("course_code", courseCode)
-        .order("race_no", { ascending: true }),
+        .order("race_no", { ascending: true })
+        .order("synced_at", { ascending: false })
+        .range(from, to)
+    ),
 
+    fetchAllRows((from, to) =>
       supabase
         .from("bs_race_entries")
-       .select(`
-race_no,
-boat_no,
-racer_name,
-racer_class,
-national_win_rate,
-local_win_rate,
-motor_no,
-motor_2_rate,
-boat_machine_no,
-boat_2_rate,
-exhibition_time,
-exhibition_st,
-synced_at
-`)
+        .select(
+          [
+            "race_no",
+            "boat_no",
+            "racer_name",
+            "racer_class",
+            "national_win_rate",
+            "local_win_rate",
+            "motor_no",
+            "motor_2_rate",
+            "boat_machine_no",
+            "boat_2_rate",
+            "exhibition_time",
+            "exhibition_st",
+            "synced_at",
+          ].join(",")
+        )
         .eq("race_date", raceDate)
         .eq("course_code", courseCode)
         .order("race_no", { ascending: true })
-        .order("boat_no", { ascending: true }),
-    ]);
-
-  if (eventError) {
-    throw new Error(`レース一覧の取得に失敗しました: ${eventError.message}`);
-  }
-
-  if (entryError) {
-    throw new Error(`選手一覧の取得に失敗しました: ${entryError.message}`);
-  }
-
-  const byRace = new Map();
-
-  for (const entry of entries || []) {
-  const raceNo = Number(entry.race_no);
-
-  if (!byRace.has(raceNo)) {
-    byRace.set(raceNo, []);
-  }
-
-  byRace.get(raceNo).push(entry);
-}
-
-  const uniqueEvents = new Map();
-
-for (const event of events || []) {
-  const raceNo = Number(event.race_no);
-
-  const current = uniqueEvents.get(raceNo);
+        .order("boat_no", { ascending: true })
+        .order("synced_at", { ascending: false })
+        .range(from, to)
+    ),
+  ]);
 
   /*
-   * 同じレース番号が複数ある場合は、
-   * synced_atが新しい行を採用
+   * レース番号ごとに1件だけ残す
+   * synced_atが新しい行を優先
    */
-  if (
-    !current ||
-    (
-      event.synced_at &&
-      (
-        !current.synced_at ||
-        event.synced_at > current.synced_at
-      )
-    )
-  ) {
-    uniqueEvents.set(raceNo, event);
-  }
-}
+  const eventMap = new Map();
 
-return [...uniqueEvents.values()]
-  .sort(
-    (a, b) =>
-      Number(a.race_no) - Number(b.race_no)
-  )
-  .map((event) => ({
-    ...event,
-    entries:
-      byRace.get(Number(event.race_no)) || [],
-  }));
+  for (const event of events) {
+    const raceNo = Number(event.race_no);
+
+    if (!Number.isInteger(raceNo)) {
+      continue;
+    }
+
+    const current = eventMap.get(raceNo);
+
+    if (
+      !current ||
+      String(event.synced_at || "") >
+        String(current.synced_at || "")
+    ) {
+      eventMap.set(raceNo, {
+        ...event,
+        race_no: raceNo,
+      });
+    }
+  }
+
+  /*
+   * レース番号＋艇番ごとに1件だけ残す
+   */
+  const entryMap = new Map();
+
+  for (const entry of entries) {
+    const raceNo = Number(entry.race_no);
+    const boatNo = Number(entry.boat_no);
+
+    if (
+      !Number.isInteger(raceNo) ||
+      !Number.isInteger(boatNo)
+    ) {
+      continue;
+    }
+
+    const key = `${raceNo}-${boatNo}`;
+    const current = entryMap.get(key);
+
+    if (
+      !current ||
+      String(entry.synced_at || "") >
+        String(current.synced_at || "")
+    ) {
+      entryMap.set(key, {
+        ...entry,
+        race_no: raceNo,
+        boat_no: boatNo,
+      });
+    }
+  }
+
+  /*
+   * レースごとに艇をまとめる
+   */
+  const entriesByRace = new Map();
+
+  for (const entry of entryMap.values()) {
+    const raceNo = Number(entry.race_no);
+
+    if (!entriesByRace.has(raceNo)) {
+      entriesByRace.set(raceNo, []);
+    }
+
+    entriesByRace.get(raceNo).push(entry);
+  }
+
+  for (const raceEntries of entriesByRace.values()) {
+    raceEntries.sort(
+      (a, b) =>
+        Number(a.boat_no) - Number(b.boat_no)
+    );
+  }
+
+  return [...eventMap.values()]
+    .sort(
+      (a, b) =>
+        Number(a.race_no) - Number(b.race_no)
+    )
+    .map((event) => ({
+      ...event,
+      entries:
+        entriesByRace.get(Number(event.race_no)) || [],
+    }));
 }
 
 export async function getRaceDetail(raceDate, courseCode, raceNo) {
