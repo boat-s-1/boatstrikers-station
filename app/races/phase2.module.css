@@ -2308,30 +2308,70 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
+  /* 上下の余白を縮める */
+  margin-top: 10px;
+
+  /* 枠自体を細長く */
+  min-height: 88px;
+
+  border: 1px solid rgba(97, 163, 215, 0.38);
+  border-radius: 18px;
   overflow: hidden;
 
-  border: 1px solid rgba(91, 190, 255, 0.38);
-  border-radius: 20px;
-
-  background: rgba(1, 20, 52, 0.72);
-
-  box-shadow:
-    inset 0 0 24px rgba(46, 155, 255, 0.06),
-    0 8px 24px rgba(0, 0, 0, 0.18);
-
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: rgba(2, 22, 52, 0.88);
+  backdrop-filter: blur(10px);
 }
 
 .courseLiveStat {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 9px;
+  align-items: center;
 
-  min-width: 0;
-  min-height: 105px;
-  padding: 13px 10px;
+  /* ここが重要 */
+  min-height: 88px;
+  padding: 10px 6px;
+
+  text-align: center;
+}
+
+/* 3項目の区切り線 */
+.courseLiveStat:not(:last-child) {
+  border-right: 1px solid rgba(126, 184, 229, 0.28);
+}
+
+/* 内側の縦間隔を詰める */
+.courseLiveStat > div {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+}
+
+/* 小見出し */
+.courseLiveStat span {
+  margin: 0;
+  color: #9fc9e8;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* メイン文字 */
+.courseLiveStat strong {
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* 下の説明 */
+.courseLiveStat small {
+  margin: 0;
+  color: rgba(210, 230, 244, 0.72);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .courseLiveStat + .courseLiveStat {
@@ -2614,5 +2654,33 @@
     min-height: 58px;
     padding: 0 19px;
     font-size: 15px;
+  }
+}
+@media (max-width: 600px) {
+  .courseLiveStats {
+    min-height: 78px;
+    margin-top: 8px;
+    border-radius: 16px;
+  }
+
+  .courseLiveStat {
+    min-height: 78px;
+    padding: 8px 4px;
+  }
+
+  .courseLiveStat > div {
+    gap: 1px;
+  }
+
+  .courseLiveStat span {
+    font-size: 9px;
+  }
+
+  .courseLiveStat strong {
+    font-size: 15px;
+  }
+
+  .courseLiveStat small {
+    font-size: 8px;
   }
 }
