@@ -26,12 +26,8 @@ html {
 
 .courseHero{
     min-height:460px;
-
-    background-size:cover;
-
-    background-repeat:no-repeat;
-
-    background-position:center 25%;
+    background-size:contain;
+    background-position:center top;
 }
 
 .courseHero.night {
