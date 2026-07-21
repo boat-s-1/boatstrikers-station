@@ -17,6 +17,11 @@ export default async function CoursePage({ params, searchParams }) {
   const query = await searchParams;
 
   const courseCode = normalizeCourseCode(route.courseCode);
+  const numericCourseCode = Number(courseCode);
+
+const headerBackground =
+  COURSE_HEADER_BACKGROUNDS[numericCourseCode] ||
+  "/course-headers/default.png";
   const raceDate = normalizeDate(query?.date);
 
   if (!courseCode) {
@@ -33,11 +38,51 @@ export default async function CoursePage({ params, searchParams }) {
     loadError = error.message;
   }
 
+  const COURSE_HEADER_BACKGROUNDS = {
+  1: "/course-headers/01.png",
+  2: "/course-headers/02.png",
+  3: "/course-headers/03.png",
+  4: "/course-headers/04.png",
+  5: "/course-headers/05.png",
+  6: "/course-headers/06.png",
+  7: "/course-headers/07.png",
+  8: "/course-headers/08.png",
+  9: "/course-headers/09.png",
+  10: "/course-headers/10.png",
+  11: "/course-headers/11.png",
+  12: "/course-headers/12.png",
+  13: "/course-headers/13.png",
+  14: "/course-headers/14.png",
+  15: "/course-headers/15.png",
+  16: "/course-headers/16.png",
+  17: "/course-headers/17.png",
+  18: "/course-headers/18.png",
+  19: "/course-headers/19.png",
+  20: "/course-headers/20.png",
+  21: "/course-headers/21.png",
+  22: "/course-headers/22.png",
+  23: "/course-headers/23.png",
+  24: "/course-headers/24.png",
+};
+  
+
   const courseName = getCourseName(courseCode);
 
   return (
     <main className={styles.page}>
-      <header className={styles.hero}>
+      <header
+  className={styles.courseHero}
+  style={{
+    backgroundImage: `
+      linear-gradient(
+        135deg,
+        rgba(2, 45, 105, 0.78),
+        rgba(0, 133, 214, 0.48)
+      ),
+      url("${headerBackground}")
+    `,
+  }}
+>
         <div className={styles.heroInner}>
           <div className={styles.topLinks}>
             <Link href={`/races?date=${raceDate}`} className={styles.backPill}>
