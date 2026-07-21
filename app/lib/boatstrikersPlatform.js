@@ -425,9 +425,40 @@ synced_at
     byRace.get(entry.race_no).push(entry);
   }
 
-  return (events || []).map((event) => ({
+  const uniqueEvents = new Map();
+
+for (const event of events || []) {
+  const raceNo = Number(event.race_no);
+
+  const current = uniqueEvents.get(raceNo);
+
+  /*
+   * 同じレース番号が複数ある場合は、
+   * synced_atが新しい行を採用
+   */
+  if (
+    !current ||
+    (
+      event.synced_at &&
+      (
+        !current.synced_at ||
+        event.synced_at > current.synced_at
+      )
+    )
+  ) {
+    uniqueEvents.set(raceNo, event);
+  }
+}
+
+return [...uniqueEvents.values()]
+  .sort(
+    (a, b) =>
+      Number(a.race_no) - Number(b.race_no)
+  )
+  .map((event) => ({
     ...event,
-    entries: byRace.get(event.race_no) || [],
+    entries:
+      byRace.get(Number(event.race_no)) || [],
   }));
 }
 
