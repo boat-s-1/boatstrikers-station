@@ -352,11 +352,6 @@ const liveCourses = courses.filter((course) => {
           </nav>
         )}
 
-        <div className={styles.sectionHeading}>
-          <div>
-            <p>TODAY&apos;S COURSES</p>
-            <h2>開催場を選択</h2>
-          </div>
 
 {liveCourses.length > 0 && (
   <section className={styles.liveCourseSection}>
