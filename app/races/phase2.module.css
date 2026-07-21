@@ -3037,4 +3037,53 @@
     font-size:10px;
 }
 
+/* =========================================================
+   レースカード・締切予定時刻
+========================================================= */
+
+.raceCardTitleArea {
+  min-width: 0;
+  flex: 1;
+}
+
+.raceClosingTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 6px;
+  padding: 4px 8px;
+
+  border: 1px solid #f2d5b7;
+  border-radius: 999px;
+
+  background: #fff7ed;
+}
+
+.raceClosingTime span {
+  color: #a86b32;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.raceClosingTime strong {
+  color: #e26f18;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+}
+@media (max-width: 600px) {
+  .raceClosingTime {
+    gap: 4px;
+    margin-top: 5px;
+    padding: 3px 7px;
+  }
+
+  .raceClosingTime span {
+    font-size: 7px;
+  }
+
+  .raceClosingTime strong {
+    font-size: 12px;
+  }
 }
