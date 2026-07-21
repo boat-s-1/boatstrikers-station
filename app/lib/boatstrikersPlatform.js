@@ -405,7 +405,6 @@ export async function getCoursesByDate(raceDate) {
 
     }
 
-  }
 
   return [...grouped.values()];
 }
