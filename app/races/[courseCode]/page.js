@@ -13,7 +13,7 @@ import styles from "../phase2.module.css";
 export const dynamic = "force-dynamic";
 
 const COURSE_HEADER_BACKGROUNDS = {
-  1: "/course-headers/6B178DB8-C92E-46CC-82A5-5451D7AC5AA0.png",
+  1: "/course-headers/D48B00AD-D9AB-432E-8DBF-A5ED225ED8C4.png",
   2: "/course-headers/02.png",
   3: "/course-headers/03.png",
   4: "/course-headers/04.png",
