@@ -269,57 +269,86 @@ function buildCorrectedRows(entries) {
     /*
      * 星評価
      */
-    let score = 50;
+/*
+ * 相対順位ベースの評価
+ *
+ * 全艇が5つ星にならないよう、
+ * 補正展示・補正一周の順位を中心に評価します。
+ */
 
-    if (
-      correctedExhibition !== null &&
-      averageExhibition !== null
-    ) {
-      score +=
-        (averageExhibition -
-          correctedExhibition) *
-        300;
-    }
+const exhibitionValues = entries
+  .map((item) =>
+    toNumber(item.exhibition_time)
+  )
+  .filter((value) => value !== null)
+  .sort((a, b) => a - b);
 
-    if (
-      correctedLap !== null &&
-      averageLap !== null
-    ) {
-      score +=
-        (averageLap - correctedLap) *
-        40;
-    }
+const lapValues = entries
+  .map((item) =>
+    toNumber(item.lap_time)
+  )
+  .filter((value) => value !== null)
+  .sort((a, b) => a - b);
 
-    if (
-      turnTime !== null &&
-      turnTime <= 5.45
-    ) {
-      score += 8;
-    }
+const exhibitionRank =
+  correctedExhibition === null
+    ? null
+    : exhibitionValues.findIndex(
+        (value) =>
+          value >= correctedExhibition
+      ) + 1;
 
-    if (
-      straightTime !== null &&
-      straightTime <= 7.45
-    ) {
-      score += 8;
-    }
+const lapRank =
+  correctedLap === null
+    ? null
+    : lapValues.findIndex(
+        (value) =>
+          value >= correctedLap
+      ) + 1;
 
-    const normalizedScore = clamp(
-      Math.round(score),
-      0,
-      100
-    );
+let normalizedScore = 50;
 
-    const stars =
-      normalizedScore >= 85
-        ? 5
-        : normalizedScore >= 75
-          ? 4
-          : normalizedScore >= 60
-            ? 3
-            : normalizedScore >= 45
-              ? 2
-              : 1;
+if (exhibitionRank !== null) {
+  normalizedScore +=
+    (7 - exhibitionRank) * 6;
+}
+
+if (lapRank !== null) {
+  normalizedScore +=
+    (7 - lapRank) * 4;
+}
+
+if (
+  turnTime !== null &&
+  turnTime <= 5.45
+) {
+  normalizedScore += 5;
+}
+
+if (
+  straightTime !== null &&
+  straightTime <= 7.45
+) {
+  normalizedScore += 5;
+}
+
+normalizedScore = clamp(
+  Math.round(normalizedScore),
+  35,
+  95
+);
+
+let stars = 1;
+
+if (normalizedScore >= 88) {
+  stars = 5;
+} else if (normalizedScore >= 76) {
+  stars = 4;
+} else if (normalizedScore >= 64) {
+  stars = 3;
+} else if (normalizedScore >= 52) {
+  stars = 2;
+}
 
     let comment = "平均的な展示内容";
 
@@ -393,35 +422,80 @@ function buildCorrectedRows(entries) {
       "corrected_lap_time"
     );
 
-  return baseRows.map((row) => {
-    const boatNo = Number(row.boat_no);
+ return baseRows.map((row) => {
+  const boatNo = Number(row.boat_no);
 
-    return {
-      ...row,
+  const correctedExhibitionRank =
+    correctedExhibitionRankMap.get(
+      boatNo
+    ) ?? 6;
 
-      exhibition_rank:
-        exhibitionRankMap.get(boatNo) ?? null,
+  const correctedLapRank =
+    correctedLapRankMap.get(
+      boatNo
+    ) ?? 6;
 
-      lap_rank:
-        lapRankMap.get(boatNo) ?? null,
+  const totalRankScore =
+    correctedExhibitionRank * 0.65 +
+    correctedLapRank * 0.35;
 
-      turn_rank:
-        turnRankMap.get(boatNo) ?? null,
+  let bscStars = 1;
 
-      straight_rank:
-        straightRankMap.get(boatNo) ?? null,
+  if (totalRankScore <= 1.4) {
+    bscStars = 5;
+  } else if (totalRankScore <= 2.4) {
+    bscStars = 4;
+  } else if (totalRankScore <= 3.5) {
+    bscStars = 3;
+  } else if (totalRankScore <= 4.6) {
+    bscStars = 2;
+  }
 
-      corrected_exhibition_rank:
-        correctedExhibitionRankMap.get(
-          boatNo
-        ) ?? null,
+  let bscComment = "展示気配に注意";
 
-      corrected_lap_rank:
-        correctedLapRankMap.get(
-          boatNo
-        ) ?? null,
-    };
-  });
+  if (bscStars === 5) {
+    bscComment =
+      "伸び・出足・バランス良好";
+  } else if (bscStars === 4) {
+    bscComment =
+      "展示内容は良好";
+  } else if (bscStars === 3) {
+    bscComment =
+      "全体的に平均レベル";
+  } else if (bscStars === 2) {
+    bscComment =
+      "やや物足りない展示";
+  }
+
+  return {
+    ...row,
+
+    exhibition_rank:
+      exhibitionRankMap.get(boatNo) ??
+      null,
+
+    lap_rank:
+      lapRankMap.get(boatNo) ??
+      null,
+
+    turn_rank:
+      turnRankMap.get(boatNo) ??
+      null,
+
+    straight_rank:
+      straightRankMap.get(boatNo) ??
+      null,
+
+    corrected_exhibition_rank:
+      correctedExhibitionRank,
+
+    corrected_lap_rank:
+      correctedLapRank,
+
+    bsc_stars: bscStars,
+    bsc_comment: bscComment,
+  };
+});
 }
 
 /* =========================================================
