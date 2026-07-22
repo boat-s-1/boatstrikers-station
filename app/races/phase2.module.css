@@ -3184,3 +3184,215 @@
     font-size: 14px;
   }
 }
+/* =========================================================
+   展示タイム順位色
+========================================================= */
+
+.exhibitionTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dce7ef;
+  border-radius: 14px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.exhibitionTable {
+  width: 100%;
+  min-width: 720px;
+  border-spacing: 0;
+  border-collapse: separate;
+  table-layout: fixed;
+}
+
+.exhibitionTable th {
+  padding: 11px 8px;
+  color: #607386;
+  background: #f4f8fb;
+  border-right: 1px solid #dce7ef;
+  border-bottom: 1px solid #dce7ef;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.exhibitionTable th:first-child {
+  width: 58px;
+}
+
+.exhibitionTable th:nth-child(2) {
+  width: 140px;
+  text-align: left;
+}
+
+.exhibitionTable th:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable td {
+  height: 58px;
+  padding: 7px 8px;
+  color: #253d51;
+  background: #ffffff;
+  border-right: 1px solid #dce7ef;
+  border-bottom: 1px solid #dce7ef;
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.exhibitionTable td:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.exhibitionTable tbody tr:nth-child(even) td {
+  background: #f9fcfe;
+}
+
+.exhibitionBoatCell {
+  width: 58px;
+}
+
+.exhibitionRacerName {
+  width: 140px;
+  text-align: left !important;
+}
+
+.exhibitionRacerName strong {
+  display: block;
+  color: #233d52;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.exhibitionRacerName small {
+  display: block;
+  margin-top: 2px;
+  color: #91a1ae;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.exhibitionTimeCell {
+  position: relative;
+  min-width: 82px;
+}
+
+.exhibitionTimeCell strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.exhibitionTimeCell small {
+  display: block;
+  margin-top: 3px;
+  color: #8293a0;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+/* 1位：赤 */
+
+.exhibitionBestCell,
+.exhibitionTable tbody tr:nth-child(even)
+  .exhibitionBestCell {
+  color: #ffffff;
+  background:
+    linear-gradient(
+      180deg,
+      #ff5757 0%,
+      #ef3030 100%
+    );
+}
+
+.exhibitionBestCell strong {
+  color: #ffffff;
+}
+
+.exhibitionBestCell small {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 2位：黄色 */
+
+.exhibitionSecondCell,
+.exhibitionTable tbody tr:nth-child(even)
+  .exhibitionSecondCell {
+  color: #3b3300;
+  background:
+    linear-gradient(
+      180deg,
+      #ffe96d 0%,
+      #ffd83d 100%
+    );
+}
+
+.exhibitionSecondCell strong {
+  color: #3b3300;
+}
+
+.exhibitionSecondCell small {
+  color: #736400;
+}
+
+.bscEvaluationCell {
+  min-width: 126px;
+}
+
+.bscEvaluationCell small {
+  display: block;
+  margin-top: 4px;
+  color: #788b9a;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.bscExhibitionComment {
+  min-width: 175px;
+  color: #50687a !important;
+  font-size: 11px !important;
+  line-height: 1.55;
+  text-align: left !important;
+  white-space: normal;
+}
+
+/* =========================================================
+   スマホ
+========================================================= */
+
+@media (max-width: 720px) {
+  .exhibitionTable {
+    min-width: 680px;
+  }
+
+  .exhibitionTable th {
+    padding: 9px 6px;
+    font-size: 10px;
+  }
+
+  .exhibitionTable td {
+    height: 54px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .exhibitionRacerName strong {
+    font-size: 12px;
+  }
+
+  .exhibitionTimeCell strong {
+    font-size: 15px;
+  }
+
+  .exhibitionTimeCell small {
+    font-size: 8px;
+  }
+}
