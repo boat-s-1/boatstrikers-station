@@ -449,83 +449,51 @@ function OfficialExhibitionTable({ rows }) {
             </tr>
           </thead>
 
-         <tbody>
-  {rows.map((row) => (
-    <tr key={row.boat_no}>
-      <td className={styles.exhibitionBoatCell}>
-        <BoatBadge boatNo={row.boat_no} />
-      </td>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.boat_no}>
+                <td className={styles.exhibitionBoatCell}>
+                  <BoatBadge boatNo={row.boat_no} />
+                </td>
 
-      <td className={styles.exhibitionRacerName}>
-        <strong>{row.racer_name}</strong>
+                <td className={styles.exhibitionRacerName}>
+                  {row.racer_name}
+                </td>
 
-        <small>
-          {row.racer_class || "-"}
-        </small>
-      </td>
+                <td
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.exhibition_rank
+                  )}`}
+                >
+                  {formatTime(row.exhibition_time)}
+                </td>
 
-      <td
-        className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
-          row.exhibition_rank
-        )}`}
-      >
-        <strong>
-          {formatTime(row.exhibition_time)}
-        </strong>
+                <td
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.lap_rank
+                  )}`}
+                >
+                  {formatTime(row.lap_time)}
+                </td>
 
-        {row.exhibition_rank && (
-          <small>
-            {row.exhibition_rank}位
-          </small>
-        )}
-      </td>
+                <td
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.turn_rank
+                  )}`}
+                >
+                  {formatTime(row.turn_time)}
+                </td>
 
-      <td
-        className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
-          row.lap_rank
-        )}`}
-      >
-        <strong>
-          {formatTime(row.lap_time)}
-        </strong>
-
-        {row.lap_rank && (
-          <small>{row.lap_rank}位</small>
-        )}
-      </td>
-
-      <td
-        className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
-          row.turn_rank
-        )}`}
-      >
-        <strong>
-          {formatTime(row.turn_time)}
-        </strong>
-
-        {row.turn_rank && (
-          <small>{row.turn_rank}位</small>
-        )}
-      </td>
-
-      <td
-        className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
-          row.straight_rank
-        )}`}
-      >
-        <strong>
-          {formatTime(row.straight_time)}
-        </strong>
-
-        {row.straight_rank && (
-          <small>
-            {row.straight_rank}位
-          </small>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
+                <td
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.straight_rank
+                  )}`}
+                >
+                  {formatTime(row.straight_time)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>
@@ -560,47 +528,39 @@ function CorrectedExhibitionTable({ rows }) {
           <tbody>
             {rows.map((row) => (
               <tr key={row.boat_no}>
-                <td>
-                  <BoatBadge
-                    boatNo={row.boat_no}
-                  />
+                <td className={styles.exhibitionBoatCell}>
+                  <BoatBadge boatNo={row.boat_no} />
                 </td>
 
-                <td
-                  className={
-                    styles.exhibitionRacerName
-                  }
-                >
+                <td className={styles.exhibitionRacerName}>
                   {row.racer_name}
                 </td>
 
                 <td
-                  className={
-                    styles.exhibitionMainValue
-                  }
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.corrected_exhibition_rank
+                  )}`}
                 >
                   {formatTime(
                     row.corrected_exhibition_time
                   )}
                 </td>
 
-                <td>
+                <td
+                  className={`${styles.exhibitionTimeCell} ${getTimeRankClass(
+                    row.corrected_lap_rank
+                  )}`}
+                >
                   {formatTime(
                     row.corrected_lap_time
                   )}
                 </td>
 
-                <td>
-                  <Stars
-                    count={row.bsc_stars}
-                  />
+                <td className={styles.bscEvaluationCell}>
+                  <Stars count={row.bsc_stars} />
                 </td>
 
-                <td
-                  className={
-                    styles.bscExhibitionComment
-                  }
-                >
+                <td className={styles.bscExhibitionComment}>
                   {row.bsc_comment}
                 </td>
               </tr>
