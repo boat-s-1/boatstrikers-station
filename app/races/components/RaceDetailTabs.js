@@ -8,6 +8,7 @@ import RaceResultPanel from "./RaceResultPanel";
 import AnimatedStartSlit from "./AnimatedStartSlit";
 import AiRaceTheater from "./AiRaceTheater";
 import styles from "../phase2.module.css";
+import ExhibitionComparisonPanel from "./ExhibitionComparisonPanel";
 
 const TABS = [
   { key: "entries", icon: "📋", label: "出走表" },
@@ -420,7 +421,10 @@ export default function RaceDetailTabs({
         )}
 
         {activeTab === "exhibition" && (
-          <>
+  <ExhibitionComparisonPanel
+    entries={entries}
+  />
+)}
             <div className={styles.panelHeading}>
               <div>
                 <p>EXHIBITION COMPARISON</p>
