@@ -69,9 +69,17 @@ export function normalizeCourseCode(value) {
 
 export function normalizeRaceNo(value) {
   const number = Number(value);
+
   return Number.isInteger(number) && number >= 1 && number <= 12
     ? number
     : null;
+}
+
+export function normalizeRacerName(value) {
+  return String(value ?? "")
+    .replace(/\u3000/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function getCourseName(courseCode) {
