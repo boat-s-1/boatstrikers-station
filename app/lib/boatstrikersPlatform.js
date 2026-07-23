@@ -184,6 +184,90 @@ export async function getCoursesByDate(raceDate) {
 
   return [...courses.values()];
 }
+export function formatNumber(value, digits = 2, fallback = "-") {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return fallback;
+  }
+
+  return number.toFixed(digits);
+}
+
+
+
+
+export function normalizeRacerName(value) {
+  return String(value ?? "")
+    .replace(/\u3000/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function formatNumber(value, digits = 2, fallback = "-") {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return fallback;
+  }
+
+  return number.toFixed(digits);
+}
+
+export async function getCourseRaces(raceDate, courseCode) {
+  const normalizedDate = normalizeDate(raceDate);
+  const normalizedCourseCode = normalizeCourseCode(courseCode);
+
+  if (!normalizedCourseCode) {
+    return [];
+  }
+
+  const supabase = getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("bs_race_events")
+    .select(
+      [
+        "race_date",
+        "course_code",
+        "course_name",
+        "race_no",
+        "closing_time",
+        "race_kind_code",
+        "program_available",
+        "result_available",
+        "api_synced_at",
+      ].join(",")
+    )
+    .eq("race_date", normalizedDate)
+    .eq("course_code", normalizedCourseCode)
+    .order("race_no", { ascending: true });
+
+  if (error) {
+    throw new Error(`レース一覧の取得に失敗しました: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    raceDate: row.race_date,
+    courseCode: Number(row.course_code),
+    courseName: row.course_name || getCourseName(row.course_code),
+    raceNo: Number(row.race_no),
+    closingTime: row.closing_time,
+    raceKindCode: row.race_kind_code,
+    programAvailable: Boolean(row.program_available),
+    resultAvailable: Boolean(row.result_available),
+    apiSyncedAt: row.api_synced_at,
+  }));
+}
+
 
 export async function getCourseRaces(raceDate, courseCode) {
   const normalizedDate = normalizeDate(raceDate);
