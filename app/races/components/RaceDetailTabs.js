@@ -420,8 +420,14 @@ export default function RaceDetailTabs({
           </>
         )}
 
-        {activeTab === "exhibition" && (
-  <ExhibitionComparisonPanel entries={entries} />
+       {activeTab === "exhibition" && (
+  <>
+    <ExhibitionComparisonPanel entries={entries} />
+
+    <div style={{ marginTop: "24px" }}>
+      <AnimatedStartSlit entries={entries} />
+    </div>
+  </>
 )}
 
         {activeTab === "bscExhibition" && (
