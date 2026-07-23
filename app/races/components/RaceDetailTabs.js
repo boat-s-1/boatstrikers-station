@@ -1,0 +1,495 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import RaceNumberNav from "./RaceNumberNav";
+import AiDashboard from "./AiDashboard";
+import BscExhibitionPanel from "./BscExhibitionPanel";
+import RaceResultPanel from "./RaceResultPanel";
+import AnimatedStartSlit from "./AnimatedStartSlit";
+import AiRaceTheater from "./AiRaceTheater";
+import styles from "../phase2.module.css";
+import ExhibitionComparisonPanel from "./ExhibitionComparisonPanel";
+
+const TABS = [
+  { key: "entries", icon: "📋", label: "出走表" },
+  { key: "exhibition", icon: "⏱️", label: "展示" },
+  { key: "bscExhibition", icon: "📊", label: "BSC展示" },
+  { key: "raceTheater", icon: "🎬", label: "1マーク予想" },
+  { key: "ai", icon: "🧠", label: "AI分析" },
+  { key: "previous", icon: "📰", label: "前日版" },
+  { key: "live", icon: "⚡", label: "直前版" },
+  { key: "bets", icon: "🎯", label: "買い目" },
+  { key: "result", icon: "🏁", label: "結果" },
+];
+
+function number(value, digits = 2) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toFixed(digits) : "-";
+}
+
+function formatDisplayST(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const st = Number(value);
+
+  if (!Number.isFinite(st)) {
+    return "-";
+  }
+
+  if (st < 0) {
+    return `F${Math.abs(st).toFixed(2).replace(/^0/, "")}`;
+  }
+
+  return st.toFixed(2).replace(/^0/, "");
+}
+
+function racerName(value) {
+  return String(value || "選手名未取得")
+    .replace(/\u3000/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function BoatBadge({ boatNo, large = false }) {
+  return (
+    <span
+      className={`${styles.boatBadge} ${styles[`boat${boatNo}`]} ${
+        large ? styles.boatBadgeLarge : ""
+      }`}
+    >
+      {boatNo}
+    </span>
+  );
+}
+
+function EmptyAi({ type }) {
+  const isLive = type === "live";
+
+  return (
+    <div className={styles.emptyAi}>
+      <div className={styles.emptyAiIcon}>
+        {isLive ? "⚡" : "📰"}
+      </div>
+
+      <h3>
+        {isLive ? "一果の直前版" : "一果の前日版"}
+        は準備中です
+      </h3>
+
+      <p>
+        AI予測が生成されると、期待度・評価・コメント・
+        買い目が自動表示されます。
+      </p>
+    </div>
+  );
+}
+
+function PredictionPanel({ prediction, title }) {
+  if (!prediction) {
+    return (
+      <EmptyAi
+        type={title.includes("直前") ? "live" : "previous"}
+      />
+    );
+  }
+
+  const bets = Array.isArray(prediction.bet_json)
+    ? prediction.bet_json
+    : [];
+
+  return (
+    <div className={styles.predictionPanel}>
+      <div className={styles.predictionHero}>
+        <div>
+          <span className={styles.aiEyebrow}>ICHIKA AI</span>
+          <h3>{title}</h3>
+        </div>
+
+        <div className={styles.scoreCircle}>
+          <strong>{number(prediction.score, 0)}</strong>
+          <span>%</span>
+        </div>
+      </div>
+
+      <div className={styles.aiSummaryGrid}>
+        <div>
+          <span>AI評価</span>
+          <strong>{prediction.rank || "-"}</strong>
+        </div>
+
+        <div>
+          <span>本命艇</span>
+          <strong>
+            {prediction.main_boat
+              ? `${prediction.main_boat}号艇`
+              : "-"}
+          </strong>
+        </div>
+
+        <div>
+          <span>危険度</span>
+          <strong>{prediction.danger_level || "-"}</strong>
+        </div>
+      </div>
+
+      {prediction.comment_text && (
+        <div className={styles.aiComment}>
+          <span>一果のコメント</span>
+          <p>{prediction.comment_text}</p>
+        </div>
+      )}
+
+      {bets.length > 0 && (
+        <div className={styles.betList}>
+          <h4>おすすめ買い目</h4>
+
+          {bets.map((bet, index) => (
+            <div
+              className={styles.betRow}
+              key={`${JSON.stringify(bet)}-${index}`}
+            >
+              <strong>
+                {typeof bet === "string"
+                  ? bet
+                  : bet.bet ||
+                    bet.combination ||
+                    JSON.stringify(bet)}
+              </strong>
+
+              {typeof bet === "object" &&
+                bet !== null &&
+                bet.confidence && (
+                  <span>{bet.confidence}</span>
+                )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BetPanel({ prediction }) {
+  if (!prediction) {
+    return (
+      <div className={styles.emptyAi}>
+        <div className={styles.emptyAiIcon}>🎯</div>
+        <h3>買い目はまだありません</h3>
+        <p>
+          AI予測が公開されると、おすすめ買い目が表示されます。
+        </p>
+      </div>
+    );
+  }
+
+  const bets = Array.isArray(prediction.bet_json)
+    ? prediction.bet_json
+    : [];
+
+  if (bets.length === 0) {
+    return (
+      <div className={styles.emptyAi}>
+        <div className={styles.emptyAiIcon}>🎯</div>
+        <h3>今回は買い目を公開していません</h3>
+        <p>
+          AI評価と1マーク予想を参考にレースを分析してください。
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className={styles.panelHeading}>
+        <div>
+          <p>AI BET SELECTION</p>
+          <h2>一果のおすすめ買い目</h2>
+        </div>
+
+        <span className={styles.panelBadge}>
+          {bets.length}点
+        </span>
+      </div>
+
+      <div className={styles.betList}>
+        {bets.map((bet, index) => (
+          <div
+            className={styles.betRow}
+            key={`${JSON.stringify(bet)}-${index}`}
+          >
+            <strong>
+              {typeof bet === "string"
+                ? bet
+                : bet.bet ||
+                  bet.combination ||
+                  JSON.stringify(bet)}
+            </strong>
+
+            {typeof bet === "object" &&
+              bet !== null &&
+              bet.confidence && (
+                <span>{bet.confidence}</span>
+              )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function RaceDetailTabs({
+  courseCode,
+  raceNo,
+  raceDate,
+  event = null,
+  entries = [],
+  previousPrediction = null,
+  livePrediction = null,
+  syncedAt = null,
+  result = null,
+  resultEntries = [],
+}) {
+  const [activeTab, setActiveTab] = useState("entries");
+
+  const exhibitionRows = useMemo(() => {
+    const validTimes = entries
+      .filter(
+        (entry) =>
+          entry.exhibition_time !== null &&
+          entry.exhibition_time !== undefined
+      )
+      .sort(
+        (a, b) =>
+          Number(a.exhibition_time ?? 999) -
+          Number(b.exhibition_time ?? 999)
+      );
+
+    const timeRank = new Map(
+      validTimes.map((entry, index) => [
+        Number(entry.boat_no),
+        index + 1,
+      ])
+    );
+
+    return entries.map((entry) => ({
+      ...entry,
+      exhibitionRank:
+        timeRank.get(Number(entry.boat_no)) || null,
+    }));
+  }, [entries]);
+
+  const currentPrediction =
+    livePrediction || previousPrediction;
+
+  return (
+    <>
+      <nav className={styles.tabs}>
+        {TABS.map((tab) => (
+          <button
+            type="button"
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`${styles.tabButton} ${
+              activeTab === tab.key
+                ? styles.tabButtonActive
+                : ""
+            }`}
+          >
+            <span>{tab.icon}</span>
+            <strong>{tab.label}</strong>
+          </button>
+        ))}
+      </nav>
+
+      <RaceNumberNav
+        courseCode={courseCode}
+        currentRaceNo={raceNo}
+        raceDate={raceDate}
+      />
+
+      <section className={styles.detailPanel}>
+        {activeTab === "entries" && (
+          <>
+            <div className={styles.panelHeading}>
+              <div>
+                <p>OFFICIAL ENTRY DATA</p>
+                <h2>基本出走表</h2>
+              </div>
+
+              <span className={styles.panelBadge}>
+                {entries.length}艇
+              </span>
+            </div>
+
+            <div className={styles.entryCards}>
+              {entries.map((entry) => (
+                <article
+                  className={styles.entryCard}
+                  key={entry.boat_no}
+                >
+                  <div className={styles.entryCardTop}>
+                    <BoatBadge
+                      boatNo={entry.boat_no}
+                      large
+                    />
+
+                    <div className={styles.entryNameArea}>
+                      <span className={styles.gradeBadge}>
+                        {entry.racer_class || "-"}
+                      </span>
+
+                      <h3>{racerName(entry.racer_name)}</h3>
+
+                      <p>
+                        登録番号{" "}
+                        {entry.racer_registration_no || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.statGrid}>
+                    <div>
+                      <span>全国勝率</span>
+                      <strong>
+                        {number(entry.national_win_rate)}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>当地勝率</span>
+                      <strong>
+                        {number(entry.local_win_rate)}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>展示</span>
+                      <strong>
+                        {number(entry.exhibition_time)}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>展示ST</span>
+                      <strong>
+                        {formatDisplayST(entry.exhibition_st)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className={styles.machineGrid}>
+                    <div>
+                      <span>モーター</span>
+                      <strong>{entry.motor_no ?? "-"}</strong>
+                      <small>
+                        {number(entry.motor_2_rate)}%
+                      </small>
+                    </div>
+
+                    <div>
+                      <span>ボート</span>
+                      <strong>
+                        {entry.boat_machine_no ?? "-"}
+                      </strong>
+                      <small>
+                        {number(entry.boat_2_rate)}%
+                      </small>
+                    </div>
+
+                    <div>
+                      <span>チルト</span>
+                      <strong>{number(entry.tilt, 1)}</strong>
+                    </div>
+                  </div>
+
+                  <div className={styles.seriesRow}>
+                    <span>今節成績</span>
+                    <strong>
+                      {entry.current_series_results || "-"}
+                    </strong>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
+
+       {activeTab === "exhibition" && (
+  <>
+    <ExhibitionComparisonPanel entries={entries} />
+
+    <div style={{ marginTop: "24px" }}>
+      <AnimatedStartSlit entries={entries} />
+    </div>
+  </>
+)}
+
+        {activeTab === "bscExhibition" && (
+          <BscExhibitionPanel
+            entries={entries}
+            event={event}
+          />
+        )}
+
+        {activeTab === "raceTheater" && (
+          <AiRaceTheater
+            event={event}
+            entries={entries}
+            previousPrediction={previousPrediction}
+            livePrediction={livePrediction}
+            result={result}
+            resultEntries={resultEntries}
+          />
+        )}
+
+        {activeTab === "ai" && (
+          <AiDashboard
+            event={event}
+            entries={entries}
+            prediction={currentPrediction}
+            previousPrediction={previousPrediction}
+            livePrediction={livePrediction}
+          />
+        )}
+
+        {activeTab === "previous" && (
+          <PredictionPanel
+            prediction={previousPrediction}
+            title="一果AI 前日版"
+          />
+        )}
+
+        {activeTab === "live" && (
+          <PredictionPanel
+            prediction={livePrediction}
+            title="一果AI 直前版"
+          />
+        )}
+
+        {activeTab === "bets" && (
+          <BetPanel prediction={currentPrediction} />
+        )}
+
+        {activeTab === "result" && (
+          <RaceResultPanel
+            result={result}
+            resultEntries={resultEntries}
+            entries={entries}
+          />
+        )}
+      </section>
+
+      {syncedAt && (
+        <p className={styles.syncedAt}>
+          最終同期：{syncedAt}
+        </p>
+      )}
+    </>
+  );
+}
