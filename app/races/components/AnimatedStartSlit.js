@@ -46,6 +46,15 @@ export default function AnimatedStartSlit({ entries = [] }) {
   const frameRef = useRef(null);
   const startTimeRef = useRef(null);
 
+  console.log(
+    "AnimatedStartSlit entries:",
+    entries.map((entry) => ({
+      boat_no: entry.boat_no,
+      exhibition_st: entry.exhibition_st,
+      exhibition_time: entry.exhibition_time,
+    }))
+  );
+
   const rows = useMemo(() => {
     const normalized = (entries || [])
       .map((entry) => ({
