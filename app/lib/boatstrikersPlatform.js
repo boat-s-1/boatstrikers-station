@@ -183,7 +183,19 @@ export async function getCoursesByDate(raceDate) {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("bs_race_events")
-    .select("race_date,course_code,course_name,race_no,closing_time,race_kind_code,program_available,result_available,api_synced_at")
+    .select(`
+  race_date,
+  course_code,
+  course_name,
+  race_no,
+  closing_time,
+  race_kind_code,
+  program_available,
+  result_available,
+  api_synced_at,
+  synced_at,
+  updated_at
+`)
     .eq("race_date", normalizedDate)
     .order("course_code", { ascending: true }).order("race_no", { ascending: true });
   if (error) throw new Error(`開催一覧の取得に失敗しました: ${error.message}`);
@@ -193,7 +205,17 @@ export async function getCoursesByDate(raceDate) {
     const courseCode = Number(row.course_code);
     const current = courses.get(courseCode) ?? {
       courseCode, courseName: row.course_name || getCourseName(courseCode),
-      raceDate: normalizedDate, apiSyncedAt: row.api_synced_at ?? null, races: [],
+      raceDate: normalizedDate, syncedAt:
+  row.api_synced_at ??
+  row.synced_at ??
+  row.updated_at ??
+  null,
+
+apiSyncedAt:
+  row.api_synced_at ??
+  row.synced_at ??
+  row.updated_at ??
+  null,, races: [],
     };
     current.races.push({
       raceNo: Number(row.race_no), race_no: Number(row.race_no),
