@@ -75,21 +75,29 @@ function getJstDateString() {
 }
 
 function formatUpdateTime(value) {
-  if (!value) {
-    return "未取得";
-  }
+  if (!value) return "未取得";
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return formatJstDateTime(value);
+    return "未取得";
+  }
+
+  const diff =
+    Math.floor(
+      (Date.now() - date.getTime()) / 60000
+    );
+
+  if (diff <= 0) return "たった今";
+
+  if (diff < 60) {
+    return `${diff}分前`;
   }
 
   return new Intl.DateTimeFormat("ja-JP", {
     timeZone: "Asia/Tokyo",
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   }).format(date);
 }
 
@@ -565,10 +573,13 @@ export default async function RacesPage({
               const aiStatus =
                 getCourseAiStatus(course);
 
-              const updateTime =
-                formatUpdateTime(
-                  course.syncedAt
-                );
+              const updateTime = formatUpdateTime(
+  course.syncedAt ??
+  course.exhibitionSyncedAt ??
+  course.exhibition_synced_at ??
+  course.updatedAt ??
+  course.updated_at
+);
 
               return (
                 <article
