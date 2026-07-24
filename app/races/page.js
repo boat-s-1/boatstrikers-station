@@ -573,12 +573,9 @@ export default async function RacesPage({
               const aiStatus =
                 getCourseAiStatus(course);
 
-              const updateTime = formatUpdateTime(
+             const updateTime = formatUpdateTime(
   course.syncedAt ??
-  course.exhibitionSyncedAt ??
-  course.exhibition_synced_at ??
-  course.updatedAt ??
-  course.updated_at
+  course.apiSyncedAt
 );
 
               return (
