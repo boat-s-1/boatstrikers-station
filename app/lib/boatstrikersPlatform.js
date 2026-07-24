@@ -215,7 +215,7 @@ apiSyncedAt:
   row.api_synced_at ??
   row.synced_at ??
   row.updated_at ??
-  null,, races: [],
+  null, races: [],
     };
     current.races.push({
       raceNo: Number(row.race_no), race_no: Number(row.race_no),
