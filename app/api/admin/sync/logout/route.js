@@ -1,0 +1,1 @@
+import { NextResponse } from "next/server"; import { adminCookie } from "../../../../admin/sync/_lib/adminAuth"; export async function POST(request){const res=NextResponse.redirect(new URL("/admin/sync/login",request.url),303);res.cookies.set(adminCookie.name,"",{path:"/",maxAge:0});return res;}
