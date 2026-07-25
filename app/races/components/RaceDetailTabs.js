@@ -377,6 +377,173 @@ function differenceCellStyle(value) {
   };
 }
 
+
+function rankToScore(rank) {
+  if (!Number.isFinite(rank)) {
+    return null;
+  }
+
+  const scoreMap = {
+    1: 100,
+    2: 92,
+    3: 84,
+    4: 76,
+    5: 68,
+    6: 60,
+  };
+
+  return scoreMap[rank] ?? Math.max(40, 108 - rank * 8);
+}
+
+function scoreToGrade(score) {
+  if (score >= 96) return "S";
+  if (score >= 91) return "A+";
+  if (score >= 86) return "A";
+  if (score >= 81) return "B+";
+  if (score >= 75) return "B";
+  return "C";
+}
+
+function gradeStyle(grade) {
+  switch (grade) {
+    case "S":
+      return {
+        background:
+          "linear-gradient(135deg, #ffcf33 0%, #ff8a00 100%)",
+        color: "#3c2100",
+        boxShadow: "0 5px 14px rgba(255, 148, 0, .28)",
+      };
+
+    case "A+":
+      return {
+        background:
+          "linear-gradient(135deg, #ff7979 0%, #ed3f3f 100%)",
+        color: "#fff",
+      };
+
+    case "A":
+      return {
+        background:
+          "linear-gradient(135deg, #fb9d63 0%, #ee6b31 100%)",
+        color: "#fff",
+      };
+
+    case "B+":
+      return {
+        background:
+          "linear-gradient(135deg, #72b9ff 0%, #337fd0 100%)",
+        color: "#fff",
+      };
+
+    case "B":
+      return {
+        background:
+          "linear-gradient(135deg, #83d5aa 0%, #35a66b 100%)",
+        color: "#fff",
+      };
+
+    default:
+      return {
+        background: "#e8edf3",
+        color: "#536174",
+      };
+  }
+}
+
+function buildExhibitionRatings(rows, correctedRanks) {
+  return rows
+    .map((row) => {
+      const boatNo = Number(row.boat_no);
+
+      const metrics = [
+        {
+          key: "exhibition",
+          label: "展示タイム",
+          weight: 0.35,
+          rank: correctedRanks.exhibition.get(boatNo),
+        },
+        {
+          key: "lap",
+          label: "一周タイム",
+          weight: 0.25,
+          rank: correctedRanks.lap.get(boatNo),
+        },
+        {
+          key: "turn",
+          label: "まわり足",
+          weight: 0.25,
+          rank: correctedRanks.turn.get(boatNo),
+        },
+        {
+          key: "straight",
+          label: "直線",
+          weight: 0.15,
+          rank: correctedRanks.straight.get(boatNo),
+        },
+      ];
+
+      const validMetrics = metrics.filter(
+        (metric) => Number.isFinite(metric.rank)
+      );
+
+      const totalWeight = validMetrics.reduce(
+        (sum, metric) => sum + metric.weight,
+        0
+      );
+
+      const weightedScore = validMetrics.reduce(
+        (sum, metric) =>
+          sum +
+          rankToScore(metric.rank) * metric.weight,
+        0
+      );
+
+      const score =
+        totalWeight > 0
+          ? Math.round(weightedScore / totalWeight)
+          : null;
+
+      const bestMetric = [...validMetrics].sort(
+        (a, b) => a.rank - b.rank
+      )[0];
+
+      const weakMetric = [...validMetrics].sort(
+        (a, b) => b.rank - a.rank
+      )[0];
+
+      let comment = "展示データ待ち";
+
+      if (score !== null) {
+        if (bestMetric?.rank === 1) {
+          comment = `${bestMetric.label}がトップ評価`;
+        } else if (score >= 91) {
+          comment = "全体的に高水準な展示内容";
+        } else if (score >= 81) {
+          comment = "バランスの良い展示気配";
+        } else if (
+          weakMetric &&
+          weakMetric.rank >= 5
+        ) {
+          comment = `${weakMetric.label}にやや不安`;
+        } else {
+          comment = "大きな強調材料は少なめ";
+        }
+      }
+
+      return {
+        boatNo,
+        score,
+        grade: score === null ? "-" : scoreToGrade(score),
+        comment,
+      };
+    })
+    .sort((a, b) => {
+      if (a.score === null) return 1;
+      if (b.score === null) return -1;
+      return b.score - a.score;
+    });
+}
+
 function buildOfficialExhibitionAnalysis(entries = []) {
   const safeEntries = Array.isArray(entries)
     ? entries.filter(Boolean)
@@ -1213,6 +1380,188 @@ function AiPredictedStartSlit({ rows }) {
   );
 }
 
+function ExhibitionOverallRating({
+  rows,
+  correctedRanks,
+}) {
+  const ratings = useMemo(
+    () =>
+      buildExhibitionRatings(
+        rows,
+        correctedRanks
+      ),
+    [rows, correctedRanks]
+  );
+
+  const hasRating = ratings.some(
+    (rating) => rating.score !== null
+  );
+
+  return (
+    <div
+      style={{
+        border: "1px solid #dbe4ef",
+        borderRadius: "18px",
+        overflow: "hidden",
+        background: "#fff",
+        boxShadow:
+          "0 8px 24px rgba(28, 50, 78, .08)",
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 18px",
+          borderBottom: "1px solid #e8eef5",
+          background:
+            "linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "11px",
+            fontWeight: 900,
+            letterSpacing: ".12em",
+            color: "#3b74a8",
+          }}
+        >
+          BOATSTRIKERS EXHIBITION RATING
+        </div>
+
+        <h3
+          style={{
+            margin: "4px 0 0",
+            fontSize: "20px",
+          }}
+        >
+          展示総合評価
+        </h3>
+      </div>
+
+      {!hasRating ? (
+        <div
+          style={{
+            padding: "30px 18px",
+            textAlign: "center",
+            color: "#68778a",
+            fontWeight: 700,
+          }}
+        >
+          公式展示情報が公開されると総合評価を表示します。
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gap: "10px",
+            padding: "16px",
+          }}
+        >
+          {ratings.map((rating, index) => (
+            <div
+              key={rating.boatNo}
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "42px 58px 70px minmax(0, 1fr)",
+                gap: "10px",
+                alignItems: "center",
+                padding: "12px",
+                border:
+                  index === 0
+                    ? "2px solid #f0b429"
+                    : "1px solid #e3eaf2",
+                borderRadius: "14px",
+                background:
+                  index === 0
+                    ? "linear-gradient(135deg, #fffdf4 0%, #fff8da 100%)"
+                    : "#fff",
+              }}
+            >
+              <BoatBadge
+                boatNo={rating.boatNo}
+                large
+              />
+
+              <div
+                style={{
+                  ...gradeStyle(rating.grade),
+                  display: "grid",
+                  placeItems: "center",
+                  width: "54px",
+                  height: "42px",
+                  borderRadius: "11px",
+                  fontSize: "20px",
+                  fontWeight: 1000,
+                }}
+              >
+                {rating.grade}
+              </div>
+
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                <strong
+                  style={{
+                    display: "block",
+                    fontSize: "22px",
+                    lineHeight: 1,
+                    color: "#203146",
+                    fontVariantNumeric:
+                      "tabular-nums",
+                  }}
+                >
+                  {rating.score ?? "-"}
+                </strong>
+
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: "4px",
+                    color: "#708095",
+                    fontSize: "10px",
+                    fontWeight: 900,
+                  }}
+                >
+                  BSC指数
+                </span>
+              </div>
+
+              <div
+                style={{
+                  minWidth: 0,
+                  color: "#4c5d71",
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  lineHeight: 1.5,
+                }}
+              >
+                {rating.comment}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div
+        style={{
+          padding: "11px 16px",
+          borderTop: "1px solid #e8eef5",
+          background: "#fafcff",
+          color: "#65758a",
+          fontSize: "11px",
+          fontWeight: 700,
+          lineHeight: 1.6,
+        }}
+      >
+        補正展示・一周・まわり足・直線を総合して、
+        BoatStrikers独自指数と評価を算出しています。
+      </div>
+    </div>
+  );
+}
+
 
 function CorrectedExhibitionSuite({
   entries,
@@ -1416,8 +1765,13 @@ function CorrectedExhibitionSuite({
 
       <AiPredictedStartSlit rows={rows} />
 
-      <div
-        style={{
+<ExhibitionOverallRating
+  rows={rows}
+  correctedRanks={correctedRanks}
+/>
+
+<div
+  style={{
           padding: "14px 16px",
           border: "1px solid #dce7f2",
           borderRadius: "14px",
