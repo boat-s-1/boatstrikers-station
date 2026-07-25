@@ -377,7 +377,47 @@ function differenceCellStyle(value) {
   };
 }
 
+function buildOfficialExhibitionAnalysis(entries = []) {
+  const safeEntries = Array.isArray(entries)
+    ? entries.filter(Boolean)
+    : [];
 
+  const rows = safeEntries.map((entry) => ({
+    ...entry,
+    boat_no: Number(entry.boat_no),
+  }));
+
+  return {
+    rows,
+
+    officialRanks: {
+      exhibition: createRanks(
+        rows,
+        (row) => row.exhibition_time
+      ),
+
+      lap: createRanks(
+        rows,
+        (row) => row.official_lap
+      ),
+
+      turn: createRanks(
+        rows,
+        (row) => row.official_turn
+      ),
+
+      straight: createRanks(
+        rows,
+        (row) => row.official_straight
+      ),
+
+      start: createRanks(
+        rows,
+        (row) => row.exhibition_st
+      ),
+    },
+  };
+}
 
 function buildExhibitionAnalysis(entries, venueBaselines = {}) {
   const lapMedian = median(
@@ -663,8 +703,8 @@ function buildExhibitionAnalysis(entries, venueBaselines = {}) {
 function ExhibitionTable({
   title,
   eyebrow,
-  rows,
-  columns,
+  rows = [],
+  columns = [],
   emptyMessage,
 }) {
   const hasAnyValue = rows.some((row) =>
@@ -759,7 +799,9 @@ function ExhibitionTable({
   ...rankCellStyle(rank),
 }}
                       >
-                        {column.format(value)}
+                        {typeof column.format === "function"
+  ? column.format(value)
+  : value ?? "-"}
                       </td>
                     );
                   })}
@@ -800,9 +842,9 @@ const tableCellStyle = {
   whiteSpace: "nowrap",
 };
 
-function OfficialExhibitionSuite({ entries }) {
+function OfficialExhibitionSuite({ entries = [] }) {
   const analysis = useMemo(
-    () => buildExhibitionAnalysis(entries),
+    () => buildOfficialExhibitionAnalysis(entries),
     [entries]
   );
 
@@ -1571,11 +1613,9 @@ export default function RaceDetailTabs({
 
         {activeTab === "exhibition" && (
           <>
-            <OfficialExhibitionSuite entries={entries} />
-
-            <div style={{ marginTop: "24px" }}>
-              <AnimatedStartSlit entries={entries} />
-            </div>
+           {activeTab === "exhibition" && (
+  <OfficialExhibitionSuite entries={entries} />
+)}
           </>
         )}
 
