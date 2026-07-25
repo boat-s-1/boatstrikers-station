@@ -583,7 +583,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "lap",
             label: "一周",
-            getValue: (row) => row.official_lap
+            getValue: (row) => row.official_lap,
             getRank: (row) =>
               officialRanks.lap.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
@@ -591,7 +591,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "turn",
             label: "まわり足",
-            getValue: (row) => row.official_turn
+            getValue: (row) => row.official_turn,
             getRank: (row) =>
               officialRanks.turn.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
@@ -599,7 +599,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "straight",
             label: "直線",
-           getValue: (row) => row.official_straight
+           getValue: (row) => row.official_straight,
             getRank: (row) =>
               officialRanks.straight.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
