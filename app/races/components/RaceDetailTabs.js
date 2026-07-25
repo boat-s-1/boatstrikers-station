@@ -333,55 +333,141 @@ function displayStart(value) {
   return parsed.toFixed(2).replace(/^0/, "");
 }
 
-function buildExhibitionAnalysis(entries) {
- const lapMedian = median(entries.map((entry) => entry.official_lap));
-const turnMedian = median(entries.map((entry) => entry.official_turn));
-const straightMedian = median(entries.map((entry) => entry.official_straight));
-  const averageStMedian = median(entries.map((entry) => entry.average_st));
+function buildExhibitionAnalysis(entries, venueBaselines = {}) {
+  const lapMedian = median(
+    entries.map((entry) => entry.official_lap)
+  );
+
+  const turnMedian = median(
+    entries.map((entry) => entry.official_turn)
+  );
+
+  const straightMedian = median(
+    entries.map((entry) => entry.official_straight)
+  );
+
+  const averageStMedian = median(
+    entries.map((entry) => entry.average_st)
+  );
+
+  const exhibitionMedian = median(
+    entries.map((entry) => entry.exhibition_time)
+  );
 
   const rows = entries.map((entry) => {
-    const exhibitionTime = finiteNumber(entry.exhibition_time);
-    const exhibitionSt = finiteNumber(entry.exhibition_st);
-    const lapTime = finiteNumber(entry.official_lap);
-const turnTime = finiteNumber(entry.official_turn);
-const straightTime = finiteNumber(entry.official_straight);
-    const averageSt = finiteNumber(entry.average_st);
+    const boatNo = Number(entry.boat_no);
 
+    const exhibitionCourse =
+      finiteNumber(entry.exhibition_course) ?? boatNo;
+
+    const exhibitionTime =
+      finiteNumber(entry.exhibition_time);
+
+    const exhibitionSt =
+      finiteNumber(entry.exhibition_st);
+
+    const lapTime =
+      finiteNumber(entry.official_lap);
+
+    const turnTime =
+      finiteNumber(entry.official_turn);
+
+    const straightTime =
+      finiteNumber(entry.official_straight);
+
+    const averageSt =
+      finiteNumber(entry.average_st);
+
+    /*
+     * 暫定コース補正
+     *
+     * 内側ほど展示タイムを出しやすい想定のため、
+     * 内側は少し加算、外側は少し減算します。
+     *
+     * 将来的には過去データから作成した
+     * 場別・展示進入別の補正値に置き換えます。
+     */
+    const courseCorrectionMap = {
+      1: 0.025,
+      2: 0.015,
+      3: 0.006,
+      4: -0.004,
+      5: -0.014,
+      6: -0.024,
+    };
+
+    const courseCorrection =
+      courseCorrectionMap[exhibitionCourse] ?? 0;
+
+    /*
+     * 展示タイム補正
+     *
+     * 一周・まわり足・直線のレース内中央値との差を加味。
+     * 補正式・係数は画面に表示しません。
+     */
     let exhibitionCorrection = 0;
-    let exhibitionCorrectionParts = 0;
 
     if (lapTime !== null && lapMedian !== null) {
       exhibitionCorrection +=
-        (lapTime - lapMedian) * CORRECTION_WEIGHTS.lap;
-      exhibitionCorrectionParts += 1;
+        (lapTime - lapMedian) *
+        CORRECTION_WEIGHTS.lap;
     }
 
     if (turnTime !== null && turnMedian !== null) {
       exhibitionCorrection +=
-        (turnTime - turnMedian) * CORRECTION_WEIGHTS.turn;
-      exhibitionCorrectionParts += 1;
+        (turnTime - turnMedian) *
+        CORRECTION_WEIGHTS.turn;
     }
 
-    if (straightTime !== null && straightMedian !== null) {
+    if (
+      straightTime !== null &&
+      straightMedian !== null
+    ) {
       exhibitionCorrection +=
-        (straightTime - straightMedian) * CORRECTION_WEIGHTS.straight;
-      exhibitionCorrectionParts += 1;
+        (straightTime - straightMedian) *
+        CORRECTION_WEIGHTS.straight;
     }
 
     const correctedExhibition =
       exhibitionTime === null
         ? null
         : exhibitionTime +
-          (exhibitionCorrectionParts ? exhibitionCorrection : 0);
+          courseCorrection +
+          exhibitionCorrection;
 
-    let correctedStart = exhibitionSt;
+    /*
+     * オリ展項目もコース差を少量だけ補正。
+     *
+     * 展示タイムと同じ補正量をそのまま使わず、
+     * 各項目用に抑えた値を使用します。
+     */
+    const correctedLap =
+      lapTime === null
+        ? null
+        : lapTime + courseCorrection * 0.8;
+
+    const correctedTurn =
+      turnTime === null
+        ? null
+        : turnTime + courseCorrection * 0.35;
+
+    const correctedStraight =
+      straightTime === null
+        ? null
+        : straightTime + courseCorrection * 0.45;
+
+    /*
+     * AI予想スリット用の内部ST
+     * 数値自体は画面に表示しません。
+     */
+    let predictedStart = exhibitionSt;
 
     if (
-      correctedStart !== null &&
+      predictedStart !== null &&
       averageSt !== null &&
       averageStMedian !== null
     ) {
-      const startCorrection = Math.max(
+      const averageStCorrection = Math.max(
         -0.03,
         Math.min(
           0.03,
@@ -390,31 +476,112 @@ const straightTime = finiteNumber(entry.official_straight);
         )
       );
 
-      correctedStart += startCorrection;
+      predictedStart += averageStCorrection;
     }
+
+    /*
+     * 場平均値
+     *
+     * venueBaselines がない項目は null となり、
+     * 場平均差の表では「-」表示になります。
+     */
+    const exhibitionBaseline = finiteNumber(
+      venueBaselines.exhibition
+    );
+
+    const lapBaseline = finiteNumber(
+      venueBaselines.lap
+    );
+
+    const turnBaseline = finiteNumber(
+      venueBaselines.turn
+    );
+
+    const straightBaseline = finiteNumber(
+      venueBaselines.straight
+    );
 
     return {
       ...entry,
-      corrected_exhibition_time: correctedExhibition,
-      corrected_exhibition_st: correctedStart,
+
+      corrected_exhibition_time:
+        correctedExhibition,
+
+      corrected_lap:
+        correctedLap,
+
+      corrected_turn:
+        correctedTurn,
+
+      corrected_straight:
+        correctedStraight,
+
+      predicted_start:
+        predictedStart,
+
+      venue_diff_exhibition:
+        correctedExhibition !== null &&
+        exhibitionBaseline !== null
+          ? correctedExhibition -
+            exhibitionBaseline
+          : null,
+
+      venue_diff_lap:
+        correctedLap !== null &&
+        lapBaseline !== null
+          ? correctedLap - lapBaseline
+          : null,
+
+      venue_diff_turn:
+        correctedTurn !== null &&
+        turnBaseline !== null
+          ? correctedTurn - turnBaseline
+          : null,
+
+      venue_diff_straight:
+        correctedStraight !== null &&
+        straightBaseline !== null
+          ? correctedStraight -
+            straightBaseline
+          : null,
+
+      race_median_diff_exhibition:
+        correctedExhibition !== null &&
+        exhibitionMedian !== null
+          ? correctedExhibition -
+            exhibitionMedian
+          : null,
     };
   });
 
   return {
     rows,
-    officialRanks: {
-      exhibition: createRanks(rows, (row) => row.exhibition_time),
-      lap: createRanks(rows, (row) => row.official_lap),
-turn: createRanks(rows, (row) => row.official_turn),
-straight: createRanks(rows, (row) => row.official_straight),
-      start: createRanks(rows, (row) => row.exhibition_st),
-    },
+
     correctedRanks: {
       exhibition: createRanks(
         rows,
         (row) => row.corrected_exhibition_time
       ),
-      start: createRanks(rows, (row) => row.corrected_exhibition_st),
+
+      lap: createRanks(
+        rows,
+        (row) => row.corrected_lap
+      ),
+
+      turn: createRanks(
+        rows,
+        (row) => row.corrected_turn
+      ),
+
+      straight: createRanks(
+        rows,
+        (row) => row.corrected_straight
+      ),
+
+      start: createRanks(
+        rows,
+        (row) => row.predicted_start
+      ),
     },
   };
 }
