@@ -74,6 +74,9 @@ export default function RaceResultPanel({
   resultEntries,
   entries,
 }) {
+
+console.log("RESULT =", result);
+  
   if (!result || !resultEntries?.length) {
     return (
       <div className={styles.emptyAi}>
