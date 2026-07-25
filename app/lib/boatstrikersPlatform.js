@@ -284,10 +284,21 @@ function mapEntry(row) {
     exhibition_st: toNumberOrNull(row.exhibition_st),
     exhibition_fl: firstValue(row.exhibition_fl, row.show_fl),
 
-    half_lap_time: toNumberOrNull(row.half_lap_time),
-    lap_time: toNumberOrNull(row.lap_time),
-    turn_time: toNumberOrNull(row.turn_time),
-    straight_time: toNumberOrNull(row.straight_time),
+   half_lap_time: toNumberOrNull(
+  firstValue(row.official_half_lap, row.half_lap_time)
+),
+
+lap_time: toNumberOrNull(
+  firstValue(row.official_lap, row.lap_time)
+),
+
+turn_time: toNumberOrNull(
+  firstValue(row.official_turn, row.turn_time)
+),
+
+straight_time: toNumberOrNull(
+  firstValue(row.official_straight, row.straight_time)
+),
 
     exhibition_source: firstValue(row.exhibition_source, row.data_source),
     exhibition_synced_at: firstValue(
@@ -348,9 +359,14 @@ function mapEvent(row) {
     wave_height: toNumberOrNull(row.wave_height),
 
     winning_technique_code: row.winning_technique_code,
-    trifecta: row.trifecta,
-    trifecta_payout: toIntegerOrNull(row.trifecta_payout),
-    trifecta_popularity: toIntegerOrNull(row.trifecta_popularity),
+
+exacta: row.exacta,
+exacta_payout: toIntegerOrNull(row.exacta_payout),
+exacta_popularity: toIntegerOrNull(row.exacta_popularity),
+
+trifecta: row.trifecta,
+trifecta_payout: toIntegerOrNull(row.trifecta_payout),
+trifecta_popularity: toIntegerOrNull(row.trifecta_popularity),
     race_cancel_code: row.race_cancel_code,
 
     program_available: Boolean(row.program_available),
@@ -912,14 +928,22 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
   );
 
   const result =
-    raceStatus === "result"
-      ? {
-          trifecta: event.trifecta,
-          trifecta_payout: event.trifecta_payout,
-          trifecta_popularity: event.trifecta_popularity,
-          winning_technique_code: event.winning_technique_code,
-        }
-      : null;
+  raceStatus === "result"
+    ? {
+        winning_technique_code:
+          event.winning_technique_code,
+
+        exacta: event.exacta,
+        exacta_payout: event.exacta_payout,
+        exacta_popularity:
+          event.exacta_popularity,
+
+        trifecta: event.trifecta,
+        trifecta_payout: event.trifecta_payout,
+        trifecta_popularity:
+          event.trifecta_popularity,
+      }
+    : null;
 
   return {
     event: {
