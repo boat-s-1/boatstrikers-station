@@ -630,7 +630,7 @@ function buildExhibitionAnalysis(entries, venueBaselines = {}) {
       (row) => row.exhibition_st
     ),
   },
-
+} 
   // BSC展示タブで使用する補正値の順位
   correctedRanks: {
     exhibition: createRanks(
