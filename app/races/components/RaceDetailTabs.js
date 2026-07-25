@@ -699,7 +699,7 @@ function buildExhibitionAnalysis(entries, venueBaselines = {}) {
     ),
   },
 };
-
+}
 function ExhibitionTable({
   title,
   eyebrow,
