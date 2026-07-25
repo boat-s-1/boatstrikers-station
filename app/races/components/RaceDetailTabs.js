@@ -332,6 +332,52 @@ function displayStart(value) {
 
   return parsed.toFixed(2).replace(/^0/, "");
 }
+function displayDifference(value, digits = 2) {
+  const parsed = finiteNumber(value);
+
+  if (parsed === null) {
+    return "-";
+  }
+
+  if (Math.abs(parsed) < 0.005) {
+    return "±0.00";
+  }
+
+  return `${parsed > 0 ? "+" : ""}${parsed.toFixed(
+    digits
+  )}`;
+}
+
+function differenceCellStyle(value) {
+  const parsed = finiteNumber(value);
+
+  if (parsed === null) {
+    return {};
+  }
+
+  if (parsed <= -0.03) {
+    return {
+      background: "#e8f6ed",
+      color: "#13753a",
+      fontWeight: 900,
+    };
+  }
+
+  if (parsed >= 0.03) {
+    return {
+      background: "#fff0f0",
+      color: "#c52d2d",
+      fontWeight: 900,
+    };
+  }
+
+  return {
+    color: "#435165",
+    fontWeight: 800,
+  };
+}
+
+
 
 function buildExhibitionAnalysis(entries, venueBaselines = {}) {
   const lapMedian = median(
@@ -678,9 +724,12 @@ function ExhibitionTable({
                       <td
                         key={column.key}
                         style={{
-                          ...tableCellStyle,
-                          ...rankCellStyle(rank),
-                        }}
+  ...tableCellStyle,
+  ...(column.getCellStyle
+    ? column.getCellStyle(value, row)
+    : {}),
+  ...rankCellStyle(rank),
+}}
                       >
                         {column.format(value)}
                       </td>
@@ -838,86 +887,464 @@ function OfficialExhibitionSuite({ entries }) {
   );
 }
 
-function CorrectedExhibitionSuite({ entries }) {
+function AiPredictedStartSlit({ rows }) {
+  const validRows = rows.filter(
+    (row) =>
+      finiteNumber(row.predicted_start) !== null
+  );
+
+  if (!validRows.length) {
+    return (
+      <div
+        style={{
+          padding: "30px 18px",
+          border: "1px solid #dbe4ef",
+          borderRadius: "18px",
+          background: "#fff",
+          textAlign: "center",
+          color: "#68778a",
+          fontWeight: 700,
+        }}
+      >
+        展示STが公開されるとAI予想スリットを表示します。
+      </div>
+    );
+  }
+
+  const startValues = validRows.map(
+    (row) => finiteNumber(row.predicted_start)
+  );
+
+  const fastest = Math.min(...startValues);
+  const slowest = Math.max(...startValues);
+  const range = Math.max(0.08, slowest - fastest);
+
+  const rankedRows = [...rows].sort((a, b) => {
+    const courseA =
+      finiteNumber(a.exhibition_course) ??
+      Number(a.boat_no);
+
+    const courseB =
+      finiteNumber(b.exhibition_course) ??
+      Number(b.boat_no);
+
+    return courseA - courseB;
+  });
+
+  return (
+    <div
+      style={{
+        border: "1px solid #dbe4ef",
+        borderRadius: "18px",
+        overflow: "hidden",
+        background: "#fff",
+        boxShadow:
+          "0 8px 24px rgba(28, 50, 78, .08)",
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 18px",
+          borderBottom: "1px solid #e8eef5",
+          background:
+            "linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "11px",
+            fontWeight: 900,
+            letterSpacing: ".12em",
+            color: "#3b74a8",
+          }}
+        >
+          BOATSTRIKERS AI START SLIT
+        </div>
+
+        <h3
+          style={{
+            margin: "4px 0 0",
+            fontSize: "20px",
+          }}
+        >
+          AI予想スリット
+        </h3>
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          padding: "22px 18px 22px",
+          background:
+            "linear-gradient(180deg, #f9fcff 0%, #eef5fb 100%)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "18px",
+            bottom: "18px",
+            right: "22%",
+            width: "3px",
+            background:
+              "linear-gradient(180deg, #ed3f3f, #ff7474)",
+            boxShadow:
+              "0 0 12px rgba(230, 50, 50, .35)",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            top: "4px",
+            right: "calc(22% - 27px)",
+            fontSize: "10px",
+            fontWeight: 900,
+            color: "#d83434",
+          }}
+        >
+          START
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gap: "10px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {rankedRows.map((row, index) => {
+            const predicted =
+              finiteNumber(row.predicted_start);
+
+            const normalized =
+              predicted === null
+                ? 0
+                : (slowest - predicted) / range;
+
+            const leftPosition =
+              predicted === null
+                ? 12
+                : 42 + normalized * 34;
+
+            const isFastest =
+              predicted !== null &&
+              Math.abs(predicted - fastest) <
+                0.0001;
+
+            return (
+              <div
+                key={row.boat_no}
+                style={{
+                  position: "relative",
+                  height: "42px",
+                  borderRadius: "12px",
+                  background:
+                    "rgba(255,255,255,.78)",
+                  border:
+                    "1px solid rgba(202,215,229,.85)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    zIndex: 2,
+                  }}
+                >
+                  <BoatBadge
+                    boatNo={row.boat_no}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "56px",
+                    right: "12px",
+                    top: "50%",
+                    height: "2px",
+                    transform: "translateY(-50%)",
+                    background:
+                      "repeating-linear-gradient(90deg, #b7c4d3 0 8px, transparent 8px 15px)",
+                  }}
+                />
+
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${leftPosition}%`,
+                    top: "50%",
+                    width: isFastest ? "30px" : "26px",
+                    height: isFastest ? "30px" : "26px",
+                    transform:
+                      "translate(-50%, -50%)",
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: "12px",
+                    fontWeight: 900,
+                    background: isFastest
+                      ? "#ffdf48"
+                      : "#ffffff",
+                    border: isFastest
+                      ? "3px solid #e2473f"
+                      : "2px solid #60748a",
+                    boxShadow: isFastest
+                      ? "0 0 0 5px rgba(255, 215, 65, .24)"
+                      : "0 3px 8px rgba(33, 55, 79, .15)",
+                    animation:
+                      "bscSlitSlide .7s ease both",
+                    animationDelay: `${index * 0.1}s`,
+                  }}
+                >
+                  {row.boat_no}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        style={{
+          padding: "12px 16px",
+          borderTop: "1px solid #e8eef5",
+          color: "#58697c",
+          fontSize: "12px",
+          fontWeight: 700,
+          lineHeight: 1.7,
+        }}
+      >
+        展示進入・展示ST・平均STなどをもとに、
+        BoatStrikers独自基準で予測したスタート隊形です。
+        数値は表示せず、艇の前後関係で表現しています。
+      </div>
+
+      <style jsx>{`
+        @keyframes bscSlitSlide {
+          from {
+            opacity: 0;
+            transform: translate(-90px, -50%);
+          }
+
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
+function CorrectedExhibitionSuite({
+  entries,
+  event,
+}) {
+  /*
+   * 将来的にはSupabaseの場別基準テーブルから取得します。
+   *
+   * 現在はイベントに基準値がある場合に使用し、
+   * 存在しない場合は「-」表示になります。
+   */
+  const venueBaselines = useMemo(
+    () => ({
+      exhibition:
+        event?.venue_average_exhibition_time ??
+        event?.baseline_exhibition_time ??
+        null,
+
+      lap:
+        event?.venue_average_lap ??
+        event?.baseline_lap ??
+        null,
+
+      turn:
+        event?.venue_average_turn ??
+        event?.baseline_turn ??
+        null,
+
+      straight:
+        event?.venue_average_straight ??
+        event?.baseline_straight ??
+        null,
+    }),
+    [event]
+  );
+
   const analysis = useMemo(
-    () => buildExhibitionAnalysis(entries),
-    [entries]
+    () =>
+      buildExhibitionAnalysis(
+        entries,
+        venueBaselines
+      ),
+    [entries, venueBaselines]
   );
 
   const { rows, correctedRanks } = analysis;
 
   return (
-    <div style={{ display: "grid", gap: "20px" }}>
+    <div
+      style={{
+        display: "grid",
+        gap: "20px",
+      }}
+    >
       <ExhibitionTable
-        title="BoatStrikers補正展示タイム"
+        title="BoatStrikers補正展示"
         eyebrow="BOATSTRIKERS CORRECTED EXHIBITION"
         rows={rows}
-        emptyMessage="公式展示タイムが公開されると補正値を表示します。"
+        emptyMessage="公式展示情報が公開されるとBoatStrikers補正値を表示します。"
         columns={[
           {
-            key: "official",
-            label: "公式展示",
-            getValue: (row) => row.exhibition_time,
-            format: (value) => displayTime(value),
-          },
-          {
-            key: "corrected",
-            label: "補正展示",
-            getValue: (row) => row.corrected_exhibition_time,
-            getRank: (row) =>
-              correctedRanks.exhibition.get(Number(row.boat_no)),
-            format: (value) => displayTime(value),
-          },
-          {
-            key: "difference",
-            label: "補正差",
-            getValue: (row) => {
-              const official = finiteNumber(row.exhibition_time);
-              const corrected = finiteNumber(
-                row.corrected_exhibition_time
-              );
+            key: "exhibition",
+            label: "展示",
+            getValue: (row) =>
+              row.corrected_exhibition_time,
 
-              return official === null || corrected === null
-                ? null
-                : corrected - official;
-            },
-            format: (value) => {
-              const parsed = finiteNumber(value);
-              if (parsed === null) return "-";
-              return `${parsed >= 0 ? "+" : ""}${parsed.toFixed(3)}`;
-            },
+            getRank: (row) =>
+              correctedRanks.exhibition.get(
+                Number(row.boat_no)
+              ),
+
+            format: (value) =>
+              displayTime(value),
+          },
+
+          {
+            key: "lap",
+            label: "一周",
+            getValue: (row) =>
+              row.corrected_lap,
+
+            getRank: (row) =>
+              correctedRanks.lap.get(
+                Number(row.boat_no)
+              ),
+
+            format: (value) =>
+              displayTime(value),
+          },
+
+          {
+            key: "turn",
+            label: "まわり足",
+            getValue: (row) =>
+              row.corrected_turn,
+
+            getRank: (row) =>
+              correctedRanks.turn.get(
+                Number(row.boat_no)
+              ),
+
+            format: (value) =>
+              displayTime(value),
+          },
+
+          {
+            key: "straight",
+            label: "直線",
+            getValue: (row) =>
+              row.corrected_straight,
+
+            getRank: (row) =>
+              correctedRanks.straight.get(
+                Number(row.boat_no)
+              ),
+
+            format: (value) =>
+              displayTime(value),
           },
         ]}
       />
 
       <ExhibitionTable
-        title="BoatStrikers補正スタート展示"
-        eyebrow="BOATSTRIKERS CORRECTED START"
+        title="場平均タイム差"
+        eyebrow="VENUE AVERAGE DIFFERENCE"
         rows={rows}
-        emptyMessage="公式スタート展示が公開されると補正STを表示します。"
+        emptyMessage="場平均基準値が登録されると平均との差を表示します。"
         columns={[
           {
-            key: "official",
-            label: "公式展示ST",
-            getValue: (row) => row.exhibition_st,
-            format: displayStart,
+            key: "exhibition",
+            label: "展示",
+
+            getValue: (row) =>
+              row.venue_diff_exhibition,
+
+            format: (value) =>
+              displayDifference(value),
+
+            getCellStyle: (value) =>
+              differenceCellStyle(value),
           },
+
           {
-            key: "corrected",
-            label: "補正展示ST",
-            getValue: (row) => row.corrected_exhibition_st,
-            getRank: (row) =>
-              correctedRanks.start.get(Number(row.boat_no)),
-            format: displayStart,
+            key: "lap",
+            label: "一周",
+
+            getValue: (row) =>
+              row.venue_diff_lap,
+
+            format: (value) =>
+              displayDifference(value),
+
+            getCellStyle: (value) =>
+              differenceCellStyle(value),
           },
+
           {
-            key: "average",
-            label: "平均ST",
-            getValue: (row) => row.average_st,
-            format: displayStart,
+            key: "turn",
+            label: "まわり足",
+
+            getValue: (row) =>
+              row.venue_diff_turn,
+
+            format: (value) =>
+              displayDifference(value),
+
+            getCellStyle: (value) =>
+              differenceCellStyle(value),
+          },
+
+          {
+            key: "straight",
+            label: "直線",
+
+            getValue: (row) =>
+              row.venue_diff_straight,
+
+            format: (value) =>
+              displayDifference(value),
+
+            getCellStyle: (value) =>
+              differenceCellStyle(value),
           },
         ]}
       />
+
+      <div
+        style={{
+          padding: "11px 14px",
+          borderRadius: "12px",
+          background: "#f7f9fc",
+          color: "#566579",
+          fontSize: "12px",
+          fontWeight: 700,
+          lineHeight: 1.7,
+        }}
+      >
+        場平均タイム差は、マイナスほど場平均より速く、
+        プラスほど場平均より遅いことを示します。
+      </div>
+
+      <AiPredictedStartSlit rows={rows} />
 
       <div
         style={{
@@ -930,10 +1357,8 @@ function CorrectedExhibitionSuite({ entries }) {
           lineHeight: 1.7,
         }}
       >
-        補正展示は、公式展示タイムに一周・まわり足・直線の
-        レース内中央値との差を加味した暫定ロジックです。
-        補正スタートは展示STと選手平均STのレース内差を使用し、
-        補正幅を±0.03以内に制限しています。
+        展示進入、競艇場ごとの傾向、展示内容などを
+        BoatStrikers独自基準で補正しています。
       </div>
     </div>
   );
@@ -1127,8 +1552,11 @@ export default function RaceDetailTabs({
         )}
 
         {activeTab === "bscExhibition" && (
-          <CorrectedExhibitionSuite entries={entries} />
-        )}
+  <CorrectedExhibitionSuite
+    entries={entries}
+    event={event}
+  />
+)}
 
         {activeTab === "raceTheater" && (
           <AiRaceTheater
