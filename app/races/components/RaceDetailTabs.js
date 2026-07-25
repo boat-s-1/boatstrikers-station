@@ -600,37 +600,65 @@ function buildExhibitionAnalysis(entries, venueBaselines = {}) {
     };
   });
 
-  return {
-    rows,
+ return {
+  rows,
 
-    correctedRanks: {
-      exhibition: createRanks(
-        rows,
-        (row) => row.corrected_exhibition_time
-      ),
+  // 展示タブで使用する公式値の順位
+  officialRanks: {
+    exhibition: createRanks(
+      rows,
+      (row) => row.exhibition_time
+    ),
 
-      lap: createRanks(
-        rows,
-        (row) => row.corrected_lap
-      ),
+    lap: createRanks(
+      rows,
+      (row) => row.official_lap
+    ),
 
-      turn: createRanks(
-        rows,
-        (row) => row.corrected_turn
-      ),
+    turn: createRanks(
+      rows,
+      (row) => row.official_turn
+    ),
 
-      straight: createRanks(
-        rows,
-        (row) => row.corrected_straight
-      ),
+    straight: createRanks(
+      rows,
+      (row) => row.official_straight
+    ),
 
-      start: createRanks(
-        rows,
-        (row) => row.predicted_start
-      ),
-    },
-  };
-}
+    start: createRanks(
+      rows,
+      (row) => row.exhibition_st
+    ),
+  },
+
+  // BSC展示タブで使用する補正値の順位
+  correctedRanks: {
+    exhibition: createRanks(
+      rows,
+      (row) => row.corrected_exhibition_time
+    ),
+
+    lap: createRanks(
+      rows,
+      (row) => row.corrected_lap
+    ),
+
+    turn: createRanks(
+      rows,
+      (row) => row.corrected_turn
+    ),
+
+    straight: createRanks(
+      rows,
+      (row) => row.corrected_straight
+    ),
+
+    start: createRanks(
+      rows,
+      (row) => row.predicted_start
+    ),
+  },
+};
 
 function ExhibitionTable({
   title,
