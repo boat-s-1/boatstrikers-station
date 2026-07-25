@@ -334,17 +334,17 @@ function displayStart(value) {
 }
 
 function buildExhibitionAnalysis(entries) {
-  const lapMedian = median(entries.map((entry) => entry.lap_time));
-  const turnMedian = median(entries.map((entry) => entry.turn_time));
-  const straightMedian = median(entries.map((entry) => entry.straight_time));
+ const lapMedian = median(entries.map((entry) => entry.official_lap));
+const turnMedian = median(entries.map((entry) => entry.official_turn));
+const straightMedian = median(entries.map((entry) => entry.official_straight));
   const averageStMedian = median(entries.map((entry) => entry.average_st));
 
   const rows = entries.map((entry) => {
     const exhibitionTime = finiteNumber(entry.exhibition_time);
     const exhibitionSt = finiteNumber(entry.exhibition_st);
-    const lapTime = finiteNumber(entry.lap_time);
-    const turnTime = finiteNumber(entry.turn_time);
-    const straightTime = finiteNumber(entry.straight_time);
+    const lapTime = finiteNumber(entry.official_lap);
+const turnTime = finiteNumber(entry.official_turn);
+const straightTime = finiteNumber(entry.official_straight);
     const averageSt = finiteNumber(entry.average_st);
 
     let exhibitionCorrection = 0;
@@ -404,9 +404,9 @@ function buildExhibitionAnalysis(entries) {
     rows,
     officialRanks: {
       exhibition: createRanks(rows, (row) => row.exhibition_time),
-      lap: createRanks(rows, (row) => row.lap_time),
-      turn: createRanks(rows, (row) => row.turn_time),
-      straight: createRanks(rows, (row) => row.straight_time),
+      lap: createRanks(rows, (row) => row.official_lap),
+turn: createRanks(rows, (row) => row.official_turn),
+straight: createRanks(rows, (row) => row.official_straight),
       start: createRanks(rows, (row) => row.exhibition_st),
     },
     correctedRanks: {
@@ -583,7 +583,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "lap",
             label: "一周",
-            getValue: (row) => row.lap_time,
+            getValue: (row) => row.official_lap
             getRank: (row) =>
               officialRanks.lap.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
@@ -591,7 +591,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "turn",
             label: "まわり足",
-            getValue: (row) => row.turn_time,
+            getValue: (row) => row.official_turn
             getRank: (row) =>
               officialRanks.turn.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
@@ -599,7 +599,7 @@ function OfficialExhibitionSuite({ entries }) {
           {
             key: "straight",
             label: "直線",
-            getValue: (row) => row.straight_time,
+           getValue: (row) => row.official_straight
             getRank: (row) =>
               officialRanks.straight.get(Number(row.boat_no)),
             format: (value) => displayTime(value),
