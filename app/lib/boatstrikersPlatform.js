@@ -518,417 +518,49 @@ export async function getAvailableDates(limit = 14) {
   const supabase = getSupabaseServerClient();
   const safeLimit = Math.max(1, Math.min(Number(limit) || 14, 90));
 
-  const { data, error } = await supabase
-    .from("bs_race_events")
-    .select("race_date")
-    .order("race_date", { ascending: false })
-    .limit(safeLimit * 24 * 12);
 
-  if (error) {
-    throw new Error(`開催日の取得に失敗しました: ${error.message}`);
-  }
 
-  return [
-    ...new Set((data ?? []).map((row) => row.race_date).filter(Boolean)),
-  ].slice(0, safeLimit);
-}
 
-export async function getCoursesByDate(raceDate) {
-  const normalizedDate = normalizeDate(raceDate);
-  const supabase = getSupabaseServerClient();
 
-  const latestSuccessfulSyncAtPromise = getLatestSuccessfulSyncAt(
-    supabase,
-    normalizedDate
-  );
 
-  const [
-    { data: eventRows, error: eventError },
-    { data: entryRows, error: entryError },
-  ] = await Promise.all([
-    supabase
-      .from("bs_race_events")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .order("course_code", { ascending: true })
-      .order("race_no", { ascending: true }),
 
-    supabase
-      .from("bs_race_entries")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .order("course_code", { ascending: true })
-      .order("race_no", { ascending: true })
-      .order("boat_no", { ascending: true }),
-  ]);
-
-  if (eventError) {
-    throw new Error(`開催一覧の取得に失敗しました: ${eventError.message}`);
-  }
-
-  if (entryError) {
-    throw new Error(`出走艇一覧の取得に失敗しました: ${entryError.message}`);
-  }
-
-  const entriesByCourseRace = new Map();
-
-  for (const rawEntry of entryRows ?? []) {
-    const key = `${Number(rawEntry.course_code)}:${Number(rawEntry.race_no)}`;
-    const currentEntries = entriesByCourseRace.get(key) ?? [];
-
-    currentEntries.push(mapEntry(rawEntry));
-    entriesByCourseRace.set(key, currentEntries);
-  }
-
-  const courseMap = new Map();
-
-  for (const rawEvent of eventRows ?? []) {
-    const event = mapEvent(rawEvent);
-    const courseCode = Number(event.course_code);
-    const raceNo = Number(event.race_no);
-    const key = `${courseCode}:${raceNo}`;
-    const entries = entriesByCourseRace.get(key) ?? [];
-
-    const raceStatus = getRaceStatus(event, entries);
-    const hasExhibition = raceStatus === "exhibition";
-    const resultAvailable = raceStatus === "result";
-    const closingAt = createClosingAt(normalizedDate, event.closing_time);
-    const syncedAt = getRaceLatestSyncedAt(event, entries);
-
-    const course = courseMap.get(courseCode) ?? {
-      courseCode,
-      courseName: event.course_name || getCourseName(courseCode),
-      raceDate: normalizedDate,
-
-      raceCount: 0,
-      exhibitionCount: 0,
-      startedExhibitionCount: 0,
-      resultCount: 0,
-
-      nextRaceNo: null,
-      nextClosingTime: null,
-      nextClosingAt: null,
-      liveRaceNo: null,
-
-      syncedAt: null,
-      apiSyncedAt: null,
-      exhibitionSyncedAt: null,
-
-      hasAiPrediction: false,
-      aiPublished: false,
-      aiPredictionCount: 0,
-      previousPredictionCount: 0,
-      livePredictionCount: 0,
-
-      races: [],
-    };
-
-    course.raceCount += 1;
-
-    if (hasExhibition) {
-      course.exhibitionCount += 1;
-      course.startedExhibitionCount += 1;
-    }
-
-    if (resultAvailable) {
-      course.resultCount += 1;
-    }
-
-    if (hasPredictionValue(rawEvent)) {
-      course.hasAiPrediction = true;
-      course.aiPublished = true;
-      course.aiPredictionCount += 1;
-    }
-
-    course.races.push({
-      raceNo,
-      race_no: raceNo,
-
-      raceStatus,
-      race_status: raceStatus,
-
-      closingTime: event.closing_time,
-      closing_time: event.closing_time,
-
-      closingAt,
-      closing_at: closingAt,
-
-      raceKindCode: event.race_kind_code,
-      race_kind_code: event.race_kind_code,
-
-      programAvailable: Boolean(event.program_available),
-      program_available: Boolean(event.program_available),
-
-      resultAvailable,
-      result_available: resultAvailable,
-
-      hasExhibition,
-      has_exhibition: hasExhibition,
-
-      syncedAt,
-      synced_at: syncedAt,
-      apiSyncedAt: syncedAt,
-      api_synced_at: syncedAt,
-
-      event,
-      entries,
-    });
-
-    course.syncedAt = getLatestIsoDate([course.syncedAt, syncedAt]);
-    course.apiSyncedAt = course.syncedAt;
-
-    course.exhibitionSyncedAt = getLatestIsoDate([
-      course.exhibitionSyncedAt,
-      ...entries.map((entry) => entry.exhibition_synced_at),
-    ]);
-
-    courseMap.set(courseCode, course);
-  }
-
-  const latestSuccessfulSyncAt = await latestSuccessfulSyncAtPromise;
-  const now = Date.now();
-  const today = getJstDateString();
-
-  return [...courseMap.values()]
-    .map((course) => {
-      const races = [...course.races].sort(
-        (a, b) => Number(a.raceNo) - Number(b.raceNo)
-      );
-
-      let nextRace = null;
-
-      if (normalizedDate >= today) {
-        nextRace =
-          races.find((race) => {
-            if (race.resultAvailable) return false;
-            if (!race.closingAt) return true;
-
-            const closingTimestamp = new Date(race.closingAt).getTime();
-
-            return Number.isNaN(closingTimestamp) || closingTimestamp > now;
-          }) ?? null;
-      }
-
-      const liveRace =
-        races.find(
-          (race) => race.hasExhibition && !race.resultAvailable
-        ) ?? null;
-
-      const liveStatus = getCourseLiveStatus({
-        raceCount: course.raceCount,
-        resultCount: course.resultCount,
-        exhibitionCount: course.startedExhibitionCount,
-      });
-
-      const finalSyncedAt = getLatestIsoDate([
-        latestSuccessfulSyncAt,
-        course.syncedAt,
-        course.apiSyncedAt,
-        course.exhibitionSyncedAt,
-      ]);
-
-      return {
-        ...course,
-        races,
-
-        liveStatus,
-        live_status: liveStatus,
-
-        nextRaceNo: nextRace?.raceNo ?? null,
-        next_race_no: nextRace?.raceNo ?? null,
-
-        nextClosingTime: nextRace?.closingTime ?? null,
-        next_closing_time: nextRace?.closingTime ?? null,
-
-        nextClosingAt: nextRace?.closingAt ?? null,
-        next_closing_at: nextRace?.closingAt ?? null,
-
-        liveRaceNo: liveRace?.raceNo ?? null,
-        live_race_no: liveRace?.raceNo ?? null,
-
-        syncedAt: finalSyncedAt,
-        synced_at: finalSyncedAt,
-
-        apiSyncedAt: finalSyncedAt,
-        api_synced_at: finalSyncedAt,
-
-        exhibitionSyncedAt: course.exhibitionSyncedAt,
-        exhibition_synced_at: course.exhibitionSyncedAt,
-
-        hasAiPrediction: Boolean(course.hasAiPrediction),
-        has_ai_prediction: Boolean(course.hasAiPrediction),
-
-        aiPublished: Boolean(course.aiPublished),
-        ai_published: Boolean(course.aiPublished),
-      };
-    })
-    .sort((a, b) => Number(a.courseCode) - Number(b.courseCode));
-}
-
-export async function getCourseRaces(raceDate, courseCode) {
-  const normalizedDate = normalizeDate(raceDate);
-  const normalizedCourseCode = normalizeCourseCode(courseCode);
-
-  if (!normalizedCourseCode) {
-    return [];
-  }
-
-  const supabase = getSupabaseServerClient();
-
-  const [
-    { data: eventRows, error: eventError },
-    { data: entryRows, error: entryError },
-  ] = await Promise.all([
-    supabase
-      .from("bs_race_events")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .eq("course_code", normalizedCourseCode)
-      .order("race_no", { ascending: true }),
-
-    supabase
-      .from("bs_race_entries")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .eq("course_code", normalizedCourseCode)
-      .order("race_no", { ascending: true })
-      .order("boat_no", { ascending: true }),
-  ]);
-
-  if (eventError) {
-    throw new Error(`レース一覧の取得に失敗しました: ${eventError.message}`);
-  }
-
-  if (entryError) {
-    throw new Error(`出走艇一覧の取得に失敗しました: ${entryError.message}`);
-  }
-
-  const entriesByRace = new Map();
-
-  for (const rawEntry of entryRows ?? []) {
-    const raceNo = Number(rawEntry.race_no);
-    const currentEntries = entriesByRace.get(raceNo) ?? [];
-
-    currentEntries.push(mapEntry(rawEntry));
-    entriesByRace.set(raceNo, currentEntries);
-  }
-
-  return (eventRows ?? []).map((rawEvent) => {
-    const event = mapEvent(rawEvent);
-    const raceNo = Number(event.race_no);
-    const entries = entriesByRace.get(raceNo) ?? [];
-    const raceStatus = getRaceStatus(event, entries);
-    const syncedAt = getRaceLatestSyncedAt(event, entries);
-    const closingAt = createClosingAt(normalizedDate, event.closing_time);
-
-    return {
-      ...event,
-
-      raceStatus,
-      race_status: raceStatus,
-
-      hasExhibition: raceStatus === "exhibition",
-      has_exhibition: raceStatus === "exhibition",
-
-      resultAvailable: raceStatus === "result",
-      result_available: raceStatus === "result",
-
-      closingAt,
-      closing_at: closingAt,
-
-      syncedAt,
-      synced_at: syncedAt,
-
-      apiSyncedAt: syncedAt,
-      api_synced_at: syncedAt,
-
-      entries,
-    };
-  });
-}
-
-export async function getCourseSummary(raceDate, courseCode) {
-  const normalizedCourseCode = normalizeCourseCode(courseCode);
-
-  if (!normalizedCourseCode) {
-    return null;
-  }
-
-  const courses = await getCoursesByDate(raceDate);
-
-  return (
-    courses.find(
-      (course) => Number(course.courseCode) === normalizedCourseCode
-    ) ?? null
-  );
-}
-
-export async function getCourseLatestUpdate(raceDate, courseCode) {
-  const course = await getCourseSummary(raceDate, courseCode);
-
-  if (!course) return null;
-
-  return firstValue(
-    course.syncedAt,
-    course.apiSyncedAt,
-    course.exhibitionSyncedAt
-  );
-}
-
-export async function getRaceDetail(raceDate, courseCode, raceNo) {
-  const normalizedDate = normalizeDate(raceDate);
-  const normalizedCourseCode = normalizeCourseCode(courseCode);
-  const normalizedRaceNo = normalizeRaceNo(raceNo);
-
-  if (!normalizedCourseCode || !normalizedRaceNo) {
-    return null;
-  }
-
-  const supabase = getSupabaseServerClient();
-
-  const [
-    { data: eventRow, error: eventError },
-    { data: entryRows, error: entryError },
-  ] = await Promise.all([
-    supabase
-      .from("bs_race_events")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .eq("course_code", normalizedCourseCode)
-      .eq("race_no", normalizedRaceNo)
-      .maybeSingle(),
-
-    supabase
-      .from("bs_race_entries")
-      .select("*")
-      .eq("race_date", normalizedDate)
-      .eq("course_code", normalizedCourseCode)
-      .eq("race_no", normalizedRaceNo)
-      .order("boat_no", { ascending: true }),
-  ]);
-
-  if (eventError) {
-    throw new Error(`レース情報の取得に失敗しました: ${eventError.message}`);
-  }
-
-  if (entryError) {
-    throw new Error(`レース詳細の取得に失敗しました: ${entryError.message}`);
-  }
-
-  if (!eventRow || !entryRows?.length) {
-    return null;
-  }
-
-
-  const { data: baseline } = await supabase
+  
+ // 場平均基準値取得
+const { data: baseline } = await supabase
   .from("bs_course_baselines")
-  .select("avg_exhibition")
-  .eq("course_code", Number(courseCode))
-  .single();
+  .select("*")
+  .eq("course_code", normalizedCourseCode)
+  .maybeSingle();
 
-  const event = mapEvent(eventRow);
-  const entries = entryRows.map(mapEntry);entry.baseline_exhibition =
-race.baseline_exhibition;
+const event = mapEvent(eventRow);
+
+const entries = entryRows.map((row) => {
+  const entry = mapEntry(row);
+
+  const baselineExhibition = baseline?.avg_exhibition ?? null;
+
+  return {
+    ...entry,
+
+    // 場平均展示
+    baseline_exhibition: baselineExhibition,
+
+    // 場平均との差
+    venue_diff_exhibition:
+      entry.exhibition_time != null &&
+      baselineExhibition != null
+        ? Number(
+            (
+              entry.exhibition_time -
+              baselineExhibition
+            ).toFixed(2)
+          )
+        : null,
+  };
+});
+
+
+  
   const raceStatus = getRaceStatus(event, entries);
   const syncedAt = getRaceLatestSyncedAt(event, entries);
   const resultEntries = entries.filter(
@@ -973,7 +605,7 @@ race.baseline_exhibition;
     resultEntries,
 
     baseline_exhibition:
-baseline?.avg_exhibition ?? null,
+baseline: baseline ?? null,
 
     
   };
