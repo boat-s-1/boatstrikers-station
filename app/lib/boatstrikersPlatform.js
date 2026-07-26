@@ -919,8 +919,16 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
     return null;
   }
 
+
+  const { data: baseline } = await supabase
+  .from("bs_course_baselines")
+  .select("avg_exhibition")
+  .eq("course_code", Number(courseCode))
+  .single();
+
   const event = mapEvent(eventRow);
-  const entries = entryRows.map(mapEntry);
+  const entries = entryRows.map(mapEntry);entry.baseline_exhibition =
+race.baseline_exhibition;
   const raceStatus = getRaceStatus(event, entries);
   const syncedAt = getRaceLatestSyncedAt(event, entries);
   const resultEntries = entries.filter(
@@ -963,5 +971,10 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
 
     result,
     resultEntries,
+
+    baseline_exhibition:
+baseline?.avg_exhibition ?? null,
+
+    
   };
 }
