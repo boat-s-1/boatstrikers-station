@@ -604,8 +604,7 @@ const entries = entryRows.map((row) => {
     result,
     resultEntries,
 
-    baseline_exhibition:
-baseline: baseline ?? null,
+    baseline: baseline ?? null,
 
     
   };
