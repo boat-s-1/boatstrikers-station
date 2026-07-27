@@ -1966,12 +1966,14 @@ export default function RaceDetailTabs({
         )}
 
         {activeTab === "exhibition" && (
-          <>
-           {activeTab === "exhibition" && (
-  <OfficialExhibitionSuite entries={entries} />
+  <>
+    <OfficialExhibitionSuite entries={entries} />
+
+    <div style={{ marginTop: "24px" }}>
+      <AnimatedStartSlit entries={entries} />
+    </div>
+  </>
 )}
-          </>
-        )}
 
         {activeTab === "bscExhibition" && (
   <CorrectedExhibitionSuite
