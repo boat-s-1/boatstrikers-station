@@ -895,9 +895,9 @@ function buildExhibitionAnalysis(entries, venueBaselines = {}) {
     ),
 
     start: createRanks(
-      rows,
-      (row) => row.exhibition_st
-    ),
+  rows,
+  (row) => getOfficialExhibitionStart(row)
+),
   },
 
   // BSC展示タブで使用する補正値の順位
@@ -1029,7 +1029,7 @@ function ExhibitionTable({
 }}
                       >
                         {typeof column.format === "function"
-  ? column.format(value)
+  ? column.format(value, row)
   : value ?? "-"}
                       </td>
                     );
