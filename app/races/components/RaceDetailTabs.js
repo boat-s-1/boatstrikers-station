@@ -683,11 +683,25 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
   return (
     <div className={styles.predictionPanel}>
       <div className={styles.predictionHero} style={{ background: "linear-gradient(135deg, #eaf4ff 0%, #b8dcff 100%)" }}>
-        <div>
-          <span className={styles.aiEyebrow}>ICHIKA LAST-MINUTE AI</span>
-          <h3>一果AI 直前版</h3>
-          <small>展示・補正タイム・スタート気配を反映した最終判断</small>
-        </div>
+        <div
+  style={{
+    borderRadius: "18px",
+    overflow: "hidden",
+    boxShadow: "0 10px 28px rgba(0,60,150,.18)",
+    background: "#fff",
+    marginBottom: "18px",
+  }}
+>
+  <img
+    src="/banners/S__21585947.jpg"
+    alt="一果AI予想 直前版"
+    style={{
+      width: "100%",
+      display: "block",
+      height: "auto",
+    }}
+  />
+</div>
         <div className={styles.scoreCircle}>
           <strong>{number(prediction.score, 0)}</strong><span>%</span>
         </div>
