@@ -1858,19 +1858,141 @@ function CorrectedExhibitionSuite({
       />
 
       <div
-        style={{
-          padding: "11px 14px",
-          borderRadius: "12px",
-          background: "#f7f9fc",
-          color: "#566579",
-          fontSize: "12px",
-          fontWeight: 700,
-          lineHeight: 1.7,
-        }}
-      >
-        場平均タイム差は、マイナスほど場平均より速く、
-        プラスほど場平均より遅いことを示します。
-      </div>
+  style={{
+    padding: "16px",
+    borderRadius: "14px",
+    background: "#f7f9fc",
+    border: "1px solid #dfe8f2",
+    color: "#566579",
+    fontSize: "13px",
+    lineHeight: 1.8,
+  }}
+>
+  <div
+    style={{
+      fontWeight: 900,
+      marginBottom: "10px",
+      color: "#23384f",
+      fontSize: "15px",
+    }}
+  >
+    場平均タイム差の見方
+  </div>
+
+  <div
+    style={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "8px",
+      marginBottom: "14px",
+    }}
+  >
+    <span
+      style={{
+        background: "#009688",
+        color: "#fff",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      濃い緑 = かなり速い
+    </span>
+
+    <span
+      style={{
+        background: "#4CAF50",
+        color: "#fff",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      緑 = 速い
+    </span>
+
+    <span
+      style={{
+        background: "#DFF5E4",
+        color: "#16783B",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      薄緑 = やや速い
+    </span>
+
+    <span
+      style={{
+        background: "#fff",
+        border: "1px solid #ddd",
+        color: "#444",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      白 = 平均
+    </span>
+
+    <span
+      style={{
+        background: "#FFF3D6",
+        color: "#A06A00",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      薄黄 = やや遅い
+    </span>
+
+    <span
+      style={{
+        background: "#FFB74D",
+        color: "#fff",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      オレンジ = 遅い
+    </span>
+
+    <span
+      style={{
+        background: "#E53935",
+        color: "#fff",
+        padding: "4px 10px",
+        borderRadius: "6px",
+        fontWeight: 800,
+      }}
+    >
+      赤 = かなり遅い
+    </span>
+  </div>
+
+  <div style={{ fontWeight: 700 }}>
+    ● <span style={{ color: "#0b8f55" }}>マイナス（－）</span>
+    は場平均より速い展示です。
+  </div>
+
+  <div style={{ fontWeight: 700 }}>
+    ● <span style={{ color: "#d53b3b" }}>プラス（＋）</span>
+    は場平均より遅い展示です。
+  </div>
+
+  <div
+    style={{
+      marginTop: "10px",
+      color: "#6b7787",
+      fontSize: "12px",
+    }}
+  >
+    ※BoatStrikers独自の場別基準タイムとの差を表示しています。
+  </div>
+</div>
 
       <AiPredictedStartSlit rows={rows} />
 
