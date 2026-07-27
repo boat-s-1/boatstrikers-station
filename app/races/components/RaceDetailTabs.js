@@ -682,7 +682,7 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
 
   return (
     <div className={styles.predictionPanel}>
-      <div className={styles.predictionHero} style={{ background: "linear-gradient(135deg, #eaf4ff 0%, #b8dcff 100%)" }}>
+      <div className={styles.predictionPanel}>
         <div
   style={{
     borderRadius: "18px",
