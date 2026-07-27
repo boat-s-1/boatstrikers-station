@@ -411,31 +411,69 @@ function displayOfficialStart(row) {
 
 
 function differenceCellStyle(value) {
-  const parsed = finiteNumber(value);
+  const v = finiteNumber(value);
 
-  if (parsed === null) {
-    return {};
-  }
+  if (v === null) return {};
 
-  if (parsed <= -0.03) {
+  // 場平均よりかなり速い
+  if (v <= -0.08) {
     return {
-      background: "#e8f6ed",
-      color: "#13753a",
+      background: "#009688",
+      color: "#fff",
       fontWeight: 900,
     };
   }
 
-  if (parsed >= 0.03) {
+  // 場平均より速い
+  if (v <= -0.04) {
     return {
-      background: "#fff0f0",
-      color: "#c52d2d",
+      background: "#4CAF50",
+      color: "#fff",
       fontWeight: 900,
     };
   }
 
+  // 少し速い
+  if (v < 0) {
+    return {
+      background: "#DFF5E4",
+      color: "#16783B",
+      fontWeight: 900,
+    };
+  }
+
+  // 平均
+  if (Math.abs(v) < 0.01) {
+    return {
+      background: "#ffffff",
+      color: "#44556A",
+      fontWeight: 900,
+    };
+  }
+
+  // 少し遅い
+  if (v < 0.04) {
+    return {
+      background: "#FFF3D6",
+      color: "#A06A00",
+      fontWeight: 900,
+    };
+  }
+
+  // 遅い
+  if (v < 0.08) {
+    return {
+      background: "#FFB74D",
+      color: "#fff",
+      fontWeight: 900,
+    };
+  }
+
+  // かなり遅い
   return {
-    color: "#435165",
-    fontWeight: 800,
+    background: "#E53935",
+    color: "#fff",
+    fontWeight: 900,
   };
 }
 
