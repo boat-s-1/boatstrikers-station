@@ -348,6 +348,68 @@ function displayDifference(value, digits = 2) {
   )}`;
 }
 
+function getOfficialExhibitionStart(row) {
+  const st = finiteNumber(row?.exhibition_st);
+
+  if (st === null) {
+    return null;
+  }
+
+  const symbol = String(
+    row?.exhibition_fl ??
+    row?.show_fl ??
+    row?.exhibition_start_symbol ??
+    ""
+  )
+    .trim()
+    .toUpperCase();
+
+  if (symbol === "F") {
+    return -Math.abs(st);
+  }
+
+  // Lも区別したい場合に備え、
+  // 通常のSTとは重ならない負値にします
+  if (symbol === "L") {
+    return -2 - Math.abs(st);
+  }
+
+  // すでに負数で保存されている場合はそのまま
+  return st;
+}
+
+function displayOfficialStart(row) {
+  const st = finiteNumber(row?.exhibition_st);
+
+  if (st === null) {
+    return "-";
+  }
+
+  const symbol = String(
+    row?.exhibition_fl ??
+    row?.show_fl ??
+    row?.exhibition_start_symbol ??
+    ""
+  )
+    .trim()
+    .toUpperCase();
+
+  if (symbol === "F" || st < 0) {
+    return `F${Math.abs(st)
+      .toFixed(2)
+      .replace(/^0/, "")}`;
+  }
+
+  if (symbol === "L") {
+    return `L${Math.abs(st)
+      .toFixed(2)
+      .replace(/^0/, "")}`;
+  }
+
+  return st.toFixed(2).replace(/^0/, "");
+}
+
+
 function differenceCellStyle(value) {
   const parsed = finiteNumber(value);
 
@@ -579,9 +641,9 @@ function buildOfficialExhibitionAnalysis(entries = []) {
       ),
 
       start: createRanks(
-        rows,
-        (row) => row.exhibition_st
-      ),
+  rows,
+  (row) => getOfficialExhibitionStart(row)
+),
     },
   };
 }
@@ -1075,14 +1137,23 @@ function OfficialExhibitionSuite({ entries = [] }) {
               return parsed === null ? "-" : String(Math.trunc(parsed));
             },
           },
-          {
-            key: "start",
-            label: "展示ST",
-            getValue: (row) => row.exhibition_st,
-            getRank: (row) =>
-              officialRanks.start.get(Number(row.boat_no)),
-            format: displayStart,
-          },
+         {
+  key: "start",
+  label: "展示ST",
+
+  // ExhibitionTableに値があると認識させる
+  getValue: (row) =>
+    getOfficialExhibitionStart(row),
+
+  getRank: (row) =>
+    officialRanks.start.get(
+      Number(row.boat_no)
+    ),
+
+  // F/Lフラグを含めて表示する
+  format: (_value, row) =>
+    displayOfficialStart(row),
+},
         ]}
       />
 
