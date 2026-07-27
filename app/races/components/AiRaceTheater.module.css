@@ -1,0 +1,78 @@
+.theater { display:grid; gap:12px; }
+.hero { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:17px; color:#fff; border-radius:18px; background:linear-gradient(135deg,#061a39,#0a4b7f 62%,#0f76a8); box-shadow:0 10px 24px rgba(5,45,82,.2); }
+.hero span { display:block; color:#67d3ff; font-size:8px; font-weight:1000; letter-spacing:.15em; }
+.hero h2 { margin:4px 0 0; font-size:22px; }
+.hero p { margin:6px 0 0; color:#c9eaff; font-size:9px; line-height:1.6; }
+.heroStatus { display:flex; align-items:center; gap:7px; flex:0 0 auto; padding:7px 10px; font-size:8px; font-weight:900; border:1px solid rgba(255,255,255,.25); border-radius:999px; background:rgba(255,255,255,.1); }
+.heroStatus i { width:8px; height:8px; border-radius:50%; background:#35e188; box-shadow:0 0 0 4px rgba(53,225,136,.15); }
+.stageNav { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; overflow-x:auto; }
+.stageNav button { min-width:66px; padding:8px 4px; color:#6e8394; cursor:pointer; border:1px solid #d9e6ee; border-radius:10px; background:#fff; }
+.stageNav small,.stageNav span { display:block; }
+.stageNav small { font-size:6px; }
+.stageNav span { margin-top:2px; font-size:8px; font-weight:900; }
+.stageNav .stageActive { color:#fff; border-color:#177ad0; background:linear-gradient(135deg,#1779d4,#23a7e7); box-shadow:0 4px 12px rgba(23,121,212,.22); }
+.mainGrid { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+.raceScreen,.analysisPanel > div,.empty { border:1px solid #dbe7ee; border-radius:17px; background:#fff; box-shadow:0 5px 15px rgba(48,83,111,.07); }
+.raceScreen { overflow:hidden; }
+.screenHeader { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px; background:#f7fbfd; border-bottom:1px solid #dfe9ef; }
+.screenHeader small { display:block; color:#7e919f; font-size:6px; font-weight:900; letter-spacing:.12em; }
+.screenHeader strong { display:block; margin-top:2px; font-size:12px; }
+.environment { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+.environment span { padding:5px 7px; color:#306f9d; font-size:7px; font-weight:900; border-radius:999px; background:#e8f5fd; }
+.svgWrap { position:relative; padding:8px; background:#03172f; }
+.svgWrap svg { display:block; width:100%; height:auto; max-height:520px; }
+.boatGroup { transition:filter .2s ease; }
+.boatActive { filter:drop-shadow(0 0 8px rgba(255,240,110,.9)); }
+.stageCaption { position:absolute; left:18px; right:18px; bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:11px; background:rgba(2,21,45,.72); backdrop-filter:blur(8px); }
+.stageCaption span { color:#69d2ff; font-size:7px; font-weight:1000; }
+.stageCaption strong { text-align:right; font-size:9px; }
+.controls { display:grid; grid-template-columns:auto auto minmax(80px,1fr) auto; align-items:center; gap:8px; padding:10px; background:#fff; }
+.controls button { padding:9px 12px; cursor:pointer; font-size:8px; font-weight:900; border-radius:9px; }
+.playButton { color:#fff; border:0; background:linear-gradient(135deg,#197bd8,#23a8e9); }
+.replayButton { color:#527086; border:1px solid #d8e3ea; background:#fff; }
+.progressTrack { height:6px; overflow:hidden; border-radius:999px; background:#e5edf2; }
+.progressTrack i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#197bd8,#2dc4ef); }
+.speedControl { display:flex; align-items:center; gap:5px; color:#728795; font-size:7px; font-weight:900; }
+.speedControl select { padding:6px; border:1px solid #d7e2e9; border-radius:8px; background:#fff; font-size:8px; }
+.analysisPanel { display:grid; gap:10px; }
+.analysisPanel > div { padding:12px; }
+.scenarioCard { color:#fff; background:linear-gradient(135deg,#ec8734,#e65379)!important; border:0!important; }
+.scenarioCard small,.scenarioCard strong,.scenarioCard span { display:block; }
+.scenarioCard small { font-size:7px; font-weight:1000; letter-spacing:.12em; opacity:.82; }
+.scenarioCard strong { margin-top:3px; font-size:24px; }
+.scenarioCard span { margin-top:4px; font-size:8px; font-weight:800; }
+.probabilityCard h3,.boatPlanCard h3,.evidenceCard h3 { margin:0 0 9px; font-size:12px; }
+.probabilityRow { padding:6px 7px; margin-top:5px; border-radius:9px; background:#f7fafc; }
+.probabilityActive { outline:2px solid rgba(25,122,215,.25); background:#eef8ff; }
+.probabilityRow > div:first-child { display:flex; justify-content:space-between; gap:8px; }
+.probabilityRow span { color:#60788a; font-size:8px; font-weight:900; }
+.probabilityRow strong { color:#1b679d; font-size:9px; }
+.probabilityTrack { height:5px; overflow:hidden; margin-top:4px; border-radius:999px; background:#e3ebf0; }
+.probabilityTrack i { display:block; height:100%; border-radius:inherit; }
+.escape { background:linear-gradient(90deg,#1aa96a,#52cf8b); }
+.sashi { background:linear-gradient(90deg,#197bd8,#35a8ed); }
+.makuri { background:linear-gradient(90deg,#ed8b35,#f2ba4a); }
+.makuriSashi { background:linear-gradient(90deg,#dc476e,#ef6d91); }
+.boatPlanList { display:grid; gap:5px; }
+.boatPlanList > div { display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:7px; padding:7px; border-radius:9px; background:#f7fafc; }
+.boatPlanLeader { outline:2px solid rgba(240,178,55,.3); background:#fff9e9!important; }
+.boatPlanList b { display:grid; width:27px; height:27px; place-items:center; border:1px solid rgba(20,30,40,.16); border-radius:7px; font-size:11px; }
+.boatPlanList span strong,.boatPlanList span small { display:block; }
+.boatPlanList span strong { font-size:9px; }
+.boatPlanList span small { margin-top:2px; color:#8494a0; font-size:7px; }
+.boatPlanList em { color:#1876b7; font-size:10px; font-style:normal; font-weight:1000; }
+.boat1 { color:#111; background:#fff; }.boat2 { color:#fff; background:#353c42; }.boat3 { color:#fff; background:#e34b43; }.boat4 { color:#fff; background:#398fdf; }.boat5 { color:#222; background:#efd748; }.boat6 { color:#fff; background:#58b467; }
+.evidenceCard ul { margin:0; padding-left:18px; color:#657c8d; font-size:8px; line-height:1.8; }
+.finishCard { text-align:center; background:linear-gradient(135deg,#eef8ff,#fff)!important; }
+.finishCard small,.finishCard strong,.finishCard span { display:block; }
+.finishCard small { color:#6d8495; font-size:7px; font-weight:900; }
+.finishCard strong { margin-top:4px; color:#176da9; font-size:25px; letter-spacing:.08em; }
+.finishCard span { margin-top:3px; color:#8394a1; font-size:7px; }
+.disclaimer { margin:0; color:#8797a3; text-align:center; font-size:7px; line-height:1.7; }
+.empty { padding:38px 15px; text-align:center; }
+.empty strong { display:block; }
+.empty p { margin:7px 0 0; color:#8092a0; font-size:9px; }
+@media (min-width:920px) { .mainGrid { grid-template-columns:minmax(0,1.9fr) minmax(270px,.75fr); } }
+@media (max-width:620px) { .hero { align-items:flex-start; flex-direction:column; }.stageNav { grid-template-columns:repeat(7,68px); }.controls { grid-template-columns:1fr 1fr; }.progressTrack { grid-column:1/-1; order:3; }.speedControl { justify-content:flex-end; }.stageCaption { align-items:flex-start; flex-direction:column; }.stageCaption strong { text-align:left; }.screenHeader { align-items:flex-start; flex-direction:column; }.environment { justify-content:flex-start; } }
+.stageActive {}
+.boatPlanCard {}
