@@ -528,6 +528,65 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
   );
 }
 
+function MetricCard({
+  label,
+  value,
+  accent = "#2468a2",
+  detail = "",
+}) {
+  return (
+    <div
+      style={{
+        minHeight: "82px",
+        padding: "14px 15px",
+        border: "1px solid #dce5ef",
+        borderRadius: "14px",
+        background: "#ffffff",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: "6px",
+      }}
+    >
+      <span
+        style={{
+          color: "#6b7889",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        {label}
+      </span>
+
+      <strong
+        style={{
+          color: accent,
+          fontSize: "20px",
+          fontWeight: 900,
+          lineHeight: 1.2,
+        }}
+      >
+        {value ?? "-"}
+      </strong>
+
+      {detail && (
+        <small
+          style={{
+            color: "#8190a2",
+            fontSize: "11px",
+            fontWeight: 700,
+            lineHeight: 1.5,
+          }}
+        >
+          {detail}
+        </small>
+      )}
+    </div>
+  );
+}
+
+
 function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteFeature }) {
   if (!prediction) return <EmptyAi type="live" />;
 
