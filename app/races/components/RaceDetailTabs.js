@@ -702,9 +702,7 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
     }}
   />
 </div>
-        <div className={styles.scoreCircle}>
-          <strong>{number(prediction.score, 0)}</strong><span>%</span>
-        </div>
+        
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "10px", marginTop: "14px" }}>
