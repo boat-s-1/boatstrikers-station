@@ -513,17 +513,27 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
 
   return (
     <div className={styles.predictionPanel}>
-      <div className={styles.predictionHero} style={{ background: "linear-gradient(135deg, #fff7eb 0%, #ffe0b4 100%)" }}>
-        <div>
-          <span className={styles.aiEyebrow}>ICHIKA IN-ESCAPE DIAGNOSIS</span>
-          <h3>一果AI 前日版</h3>
-          <small>1号艇の逃げ切り条件を総合診断</small>
-        </div>
-        <div className={styles.scoreCircle}>
-          <strong>{diagnosisScore === null ? "-" : Math.round(diagnosisScore)}</strong>
-          <span>{diagnosisScore === null ? "" : "点"}</span>
-        </div>
-      </div>
+      <div
+  style={{
+    position: "relative",
+    width: "100%",
+    borderRadius: "18px",
+    overflow: "hidden",
+    background: "#fff7e8",
+    boxShadow: "0 8px 24px rgba(110, 63, 10, .12)",
+  }}
+>
+  <img
+    src="/banners/S__21585946.jpg"
+    alt="一果AI予想 前日版"
+    style={{
+      display: "block",
+      width: "100%",
+      height: "auto",
+      objectFit: "cover",
+    }}
+  />
+</div>
 
       <div
         style={{
