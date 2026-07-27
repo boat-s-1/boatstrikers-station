@@ -1,3 +1,12 @@
+const BOAT_COLORS = {
+  1: { main: "#ffffff", edge: "#d5dbe0", text: "#111111" },
+  2: { main: "#303840", edge: "#111820", text: "#ffffff" },
+  3: { main: "#e74b43", edge: "#9f2924", text: "#ffffff" },
+  4: { main: "#3c91df", edge: "#1967aa", text: "#ffffff" },
+  5: { main: "#f0d748", edge: "#bca525", text: "#222222" },
+  6: { main: "#58b56a", edge: "#2e7f3d", text: "#ffffff" },
+};
+
 const toNumber = (value, fallback = null) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -11,6 +20,31 @@ const normalizeName = (value) =>
     .replace(/\u3000/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+const easeInOut = (t) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function cubicBezier(p0, p1, p2, p3, t) {
+  const oneMinusT = 1 - t;
+  const x =
+    oneMinusT ** 3 * p0.x +
+    3 * oneMinusT ** 2 * t * p1.x +
+    3 * oneMinusT * t ** 2 * p2.x +
+    t ** 3 * p3.x;
+  const y =
+    oneMinusT ** 3 * p0.y +
+    3 * oneMinusT ** 2 * t * p1.y +
+    3 * oneMinusT * t ** 2 * p2.y +
+    t ** 3 * p3.y;
+
+  return { x, y };
+}
+
+function angleBetween(a, b) {
+  return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+}
 
 function rankMap(entries, key, ascending = false) {
   const sorted = entries
@@ -44,77 +78,129 @@ function buildBoatAbility(entries) {
   const boatRank = rankMap(entries, "boat_2_rate");
   const exhibitionRank = rankMap(entries, "exhibition_time", true);
   const stRank = rankMap(entries, "exhibition_st", true);
+  const turnRank = rankMap(entries, "turn_time", true);
+  const straightRank = rankMap(entries, "straight_time", true);
 
   return entries
     .map((entry) => {
-      const boatNo = Number(entry.boat_no);
+      const boatNo = Number(entry.boat_no || entry.teiban);
       const national = nationalRank.get(boatNo) || null;
       const local = localRank.get(boatNo) || null;
       const motor = motorRank.get(boatNo) || null;
       const boat = boatRank.get(boatNo) || null;
       const exhibition = exhibitionRank.get(boatNo) || null;
       const st = stRank.get(boatNo) || null;
+      const turn = turnRank.get(boatNo) || null;
+      const straight = straightRank.get(boatNo) || null;
 
       const exhibitionAvailable =
         toNumber(entry.exhibition_time) !== null ||
         toNumber(entry.exhibition_st) !== null;
 
-      const courseBonus =
-        boatNo === 1 ? 12 :
-        boatNo === 2 ? 6 :
-        boatNo === 3 ? 3 :
-        boatNo === 4 ? 1 : 0;
-
-      const ability = clamp(
-        rankScore(national) * 0.24 +
-        rankScore(local) * 0.15 +
-        rankScore(motor) * 0.2 +
-        rankScore(boat) * 0.1 +
-        (exhibitionAvailable
-          ? rankScore(exhibition) * 0.2 +
-            rankScore(st) * 0.11
-          : 15) +
-        courseBonus
+      const course = Number(
+        entry.exhibition_course || entry.actual_course || entry.course || boatNo
       );
+      const courseBonus = course === 1 ? 13 : course === 2 ? 7 : course === 3 ? 4 : course === 4 ? 2 : 0;
 
+      const baseAbility =
+        rankScore(national) * 0.23 +
+        rankScore(local) * 0.14 +
+        rankScore(motor) * 0.19 +
+        rankScore(boat) * 0.08 +
+        rankScore(turn) * 0.08 +
+        rankScore(straight) * 0.08 +
+        (exhibitionAvailable
+          ? rankScore(exhibition) * 0.13 + rankScore(st) * 0.07
+          : 10) +
+        courseBonus;
+
+      const ability = clamp(baseAbility);
       const exhibitionSt = toNumber(entry.exhibition_st, null);
-      const startPower =
-        exhibitionSt === null
-          ? ability
-          : clamp(100 - exhibitionSt * 190 + ability * 0.25);
+      const averageSt = toNumber(entry.average_st, null);
+      const predictedSt = clamp(
+        exhibitionSt !== null
+          ? exhibitionSt * 0.62 + (averageSt ?? 0.16) * 0.38
+          : averageSt ?? 0.16,
+        0.01,
+        0.35
+      );
+      const startPower = clamp(108 - predictedSt * 245 + ability * 0.2);
+      const turnPower = clamp(rankScore(turn) * 0.56 + ability * 0.44);
+      const stretchPower = clamp(rankScore(straight) * 0.58 + startPower * 0.42);
 
       return {
         boatNo,
         racerName: normalizeName(entry.racer_name),
-        racerClass: entry.racer_class || "-",
+        racerClass: entry.racer_class || entry.class || "-",
         ability: Math.round(ability),
         startPower: Math.round(startPower),
+        turnPower: Math.round(turnPower),
+        stretchPower: Math.round(stretchPower),
+        predictedSt: Number(predictedSt.toFixed(2)),
         exhibitionTime: toNumber(entry.exhibition_time, null),
         exhibitionSt,
         motorRate: toNumber(entry.motor_2_rate, null),
         localRate: toNumber(entry.local_win_rate, null),
-        course: Number(entry.actual_course || entry.course || boatNo),
+        course,
       };
     })
+    .filter((boat) => Number.isInteger(boat.boatNo) && boat.boatNo >= 1 && boat.boatNo <= 6)
     .sort((a, b) => a.boatNo - b.boatNo);
 }
 
 function decideAttackBoat(boats) {
-  const candidates = boats
-    .filter((boat) => boat.boatNo !== 1)
-    .map((boat) => {
-      let attack = boat.ability * 0.55 + boat.startPower * 0.45;
+  return (
+    boats
+      .filter((boat) => boat.course !== 1)
+      .map((boat) => {
+        let attack =
+          boat.ability * 0.34 +
+          boat.startPower * 0.29 +
+          boat.turnPower * 0.22 +
+          boat.stretchPower * 0.15;
 
-      if (boat.boatNo === 2) attack += 4;
-      if (boat.boatNo === 3) attack += 7;
-      if (boat.boatNo === 4) attack += 4;
-      if (boat.boatNo >= 5) attack -= 3;
+        if (boat.course === 2) attack += 5;
+        if (boat.course === 3) attack += 8;
+        if (boat.course === 4) attack += 5;
+        if (boat.course >= 5) attack -= 2;
 
-      return { ...boat, attack };
-    })
-    .sort((a, b) => b.attack - a.attack);
+        return { ...boat, attack };
+      })
+      .sort((a, b) => b.attack - a.attack)[0] || null
+  );
+}
 
-  return candidates[0] || null;
+function normalizeFourProbabilities(values) {
+  const total = values.reduce((sum, value) => sum + Math.max(0, value), 0) || 1;
+  const rounded = values.map((value) => Math.round((Math.max(0, value) / total) * 100));
+  const difference = 100 - rounded.reduce((sum, value) => sum + value, 0);
+  rounded[0] += difference;
+  return rounded;
+}
+
+function getManeuverForBoat(boat, scenario, attackBoatNo) {
+  if (boat.course === 1) return scenario === "escape" ? "escape" : "resist";
+  if (boat.boatNo === attackBoatNo) return scenario;
+  if (boat.course === 2) return "sashi";
+  if (boat.course === 3 || boat.course === 4) return "makuriSashi";
+  return "follow";
+}
+
+function buildEvidence({ boatOne, attackBoat, escape, windSpeed, waveHeight }) {
+  const evidence = [];
+
+  if (boatOne) {
+    evidence.push(`1号艇の予測ST ${boatOne.predictedSt.toFixed(2)}`);
+    evidence.push(`1号艇の旋回指数 ${boatOne.turnPower}`);
+  }
+  if (attackBoat) {
+    evidence.push(`${attackBoat.boatNo}号艇の攻撃指数 ${Math.round(attackBoat.attack)}`);
+  }
+  if (windSpeed > 0) evidence.push(`風速 ${windSpeed}m`);
+  if (waveHeight > 0) evidence.push(`波高 ${waveHeight}cm`);
+  evidence.push(`逃げ期待度 ${Math.round(escape)}%`);
+
+  return evidence.slice(0, 5);
 }
 
 export function buildRaceTheaterModel({
@@ -124,156 +210,224 @@ export function buildRaceTheaterModel({
   livePrediction = null,
 }) {
   const boats = buildBoatAbility(entries);
-  const boatOne = boats.find((boat) => boat.boatNo === 1);
+  const boatOne = boats.find((boat) => boat.course === 1) || boats.find((boat) => boat.boatNo === 1);
   const attackBoat = decideAttackBoat(boats);
-
   const prediction = livePrediction || previousPrediction;
-  const aiEscape = normalizeProbability(prediction?.score);
+  const aiEscape = normalizeProbability(
+    prediction?.escapeProbability ?? prediction?.escape_probability ?? prediction?.score
+  );
 
   const windSpeed = toNumber(event?.wind_speed, 0);
   const waveHeight = toNumber(event?.wave_height, 0);
 
   let escape =
     aiEscape ??
-    ((boatOne?.ability || 50) * 0.72 +
-      (boatOne?.startPower || 50) * 0.28);
+    ((boatOne?.ability || 50) * 0.48 +
+      (boatOne?.startPower || 50) * 0.31 +
+      (boatOne?.turnPower || 50) * 0.21);
 
-  escape -= Math.min(windSpeed * 1.8, 12);
-  escape -= Math.min(waveHeight * 1.2, 8);
+  escape -= Math.min(windSpeed * 1.45, 10);
+  escape -= Math.min(waveHeight * 0.85, 6);
 
   if (attackBoat) {
-    escape -= Math.max(0, attackBoat.attack - 70) * 0.16;
+    escape -= Math.max(0, attackBoat.attack - 68) * 0.22;
   }
 
-  escape = clamp(escape, 18, 94);
-
+  escape = clamp(escape, 16, 94);
   const remaining = 100 - escape;
   const attackNo = attackBoat?.boatNo || 2;
 
-  let sashi = remaining * 0.47;
-  let makuri = remaining * 0.31;
-  let makuriSashi = remaining * 0.22;
+  let sashi = remaining * (attackBoat?.course === 2 ? 0.58 : 0.38);
+  let makuri = remaining * ([3, 4].includes(attackBoat?.course) ? 0.43 : 0.29);
+  let makuriSashi = remaining - sashi - makuri;
 
-  if (attackNo === 2) {
-    sashi += remaining * 0.12;
-    makuri -= remaining * 0.07;
-    makuriSashi -= remaining * 0.05;
-  } else if (attackNo === 3 || attackNo === 4) {
-    makuri += remaining * 0.1;
-    sashi -= remaining * 0.05;
-    makuriSashi -= remaining * 0.05;
-  } else {
-    makuriSashi += remaining * 0.13;
-    sashi -= remaining * 0.06;
-    makuri -= remaining * 0.07;
-  }
-
-  const totalAttack = sashi + makuri + makuriSashi;
-  const scale = remaining / totalAttack;
-
-  sashi *= scale;
-  makuri *= scale;
-  makuriSashi *= scale;
+  const [escapeP, sashiP, makuriP, makuriSashiP] = normalizeFourProbabilities([
+    escape,
+    sashi,
+    makuri,
+    makuriSashi,
+  ]);
 
   const scenario =
-    escape >= 62
+    escapeP >= Math.max(sashiP, makuriP, makuriSashiP)
       ? "escape"
-      : attackNo === 2
+      : sashiP >= Math.max(makuriP, makuriSashiP)
       ? "sashi"
-      : attackNo <= 4
+      : makuriP >= makuriSashiP
       ? "makuri"
       : "makuriSashi";
 
   const sortedForFinish = [...boats].sort((a, b) => {
-    const aBonus =
-      a.boatNo === 1 ? escape :
-      a.boatNo === attackNo ? 100 - escape :
-      0;
+    const aScenarioBonus =
+      a.course === 1 && scenario === "escape"
+        ? escapeP * 0.48
+        : a.boatNo === attackNo
+        ? (100 - escapeP) * 0.54
+        : 0;
+    const bScenarioBonus =
+      b.course === 1 && scenario === "escape"
+        ? escapeP * 0.48
+        : b.boatNo === attackNo
+        ? (100 - escapeP) * 0.54
+        : 0;
 
-    const bBonus =
-      b.boatNo === 1 ? escape :
-      b.boatNo === attackNo ? 100 - escape :
-      0;
-
-    return (
-      b.ability + b.startPower * 0.2 + bBonus * 0.35 -
-      (a.ability + a.startPower * 0.2 + aBonus * 0.35)
-    );
+    const aScore = a.ability * 0.46 + a.startPower * 0.19 + a.turnPower * 0.24 + a.stretchPower * 0.11 + aScenarioBonus;
+    const bScore = b.ability * 0.46 + b.startPower * 0.19 + b.turnPower * 0.24 + b.stretchPower * 0.11 + bScenarioBonus;
+    return bScore - aScore;
   });
 
-  const finishOrder =
-    scenario === "escape"
-      ? [
-          boats.find((boat) => boat.boatNo === 1),
-          ...sortedForFinish.filter((boat) => boat.boatNo !== 1),
-        ].filter(Boolean)
-      : [
-          boats.find((boat) => boat.boatNo === attackNo),
-          ...sortedForFinish.filter((boat) => boat.boatNo !== attackNo),
-        ].filter(Boolean);
+  const leaderNo = scenario === "escape" ? boatOne?.boatNo || 1 : attackNo;
+  const finishOrder = [
+    boats.find((boat) => boat.boatNo === leaderNo),
+    ...sortedForFinish.filter((boat) => boat.boatNo !== leaderNo),
+  ]
+    .filter(Boolean)
+    .map((boat) => boat.boatNo);
 
   const entryOrder = [...boats]
     .sort((a, b) => a.course - b.course)
     .map((boat) => boat.boatNo);
 
+  const boatsWithManeuver = boats.map((boat) => ({
+    ...boat,
+    maneuver: getManeuverForBoat(boat, scenario, attackNo),
+  }));
+
+  const scenarioLabels = {
+    escape: "逃げ",
+    sashi: "差し",
+    makuri: "まくり",
+    makuriSashi: "まくり差し",
+  };
+
   const mainComment =
     scenario === "escape"
-      ? `1号艇が先マイできる想定です。逃げ成功率は${Math.round(
-          escape
-        )}%です。`
+      ? `1号艇が先マイ。内側を締めながらバック先頭へ抜ける想定です。`
       : scenario === "sashi"
-      ? `${attackNo}号艇の差しが最も警戒されます。`
+      ? `${attackNo}号艇が1号艇の懐へ差し込み、出口で並ぶ想定です。`
       : scenario === "makuri"
-      ? `${attackNo}号艇のまくり攻勢が中心シナリオです。`
-      : `${attackNo}号艇が展開を突く、まくり差し想定です。`;
+      ? `${attackNo}号艇がスタート優位から外を握って攻める想定です。`
+      : `${attackNo}号艇が攻め艇の内側を突く、まくり差し想定です。`;
 
   return {
-    boats,
+    boats: boatsWithManeuver,
     scenario,
+    scenarioLabel: scenarioLabels[scenario],
     attackBoatNo: attackNo,
+    leaderBoatNo: leaderNo,
     entryOrder,
-    finishOrder: finishOrder.map((boat) => boat.boatNo),
+    finishOrder,
     probabilities: {
-      escape: Math.round(escape),
-      sashi: Math.round(sashi),
-      makuri: Math.round(makuri),
-      makuriSashi:
-        100 -
-        Math.round(escape) -
-        Math.round(sashi) -
-        Math.round(makuri),
+      escape: escapeP,
+      sashi: sashiP,
+      makuri: makuriP,
+      makuriSashi: makuriSashiP,
     },
     mainComment,
-    environment: {
-      windSpeed,
-      waveHeight,
-    },
+    evidence: buildEvidence({ boatOne, attackBoat, escape: escapeP, windSpeed, waveHeight }),
+    environment: { windSpeed, waveHeight },
+    predictionMode: livePrediction ? "live" : "previous",
   };
 }
 
-export function getStageLabel(stage) {
-  const labels = [
-    "解析待機",
-    "スタート",
-    "進入予想",
-    "1マーク進入",
-    "旋回",
-    "バックストレッチ",
-    "予想着順",
-  ];
+function getCourseIndex(model, boatNo) {
+  const index = model.entryOrder.indexOf(boatNo);
+  return index >= 0 ? index : Math.max(0, boatNo - 1);
+}
 
-  return labels[stage] || labels[0];
+function getFinishIndex(model, boatNo) {
+  const index = model.finishOrder.indexOf(boatNo);
+  return index >= 0 ? index : Math.max(0, boatNo - 1);
+}
+
+function getTurnCurve(model, boat) {
+  const courseIndex = getCourseIndex(model, boat.boatNo);
+  const finishIndex = getFinishIndex(model, boat.boatNo);
+  const approach = { x: 458 - courseIndex * 2, y: 260 + courseIndex * 8 };
+  const exit = { x: 600 - finishIndex * 4, y: 82 + finishIndex * 34 };
+
+  const curves = {
+    escape: [approach, { x: 523, y: 252 }, { x: 525, y: 108 }, exit],
+    resist: [approach, { x: 520, y: 265 }, { x: 548, y: 132 }, exit],
+    sashi: [approach, { x: 492, y: 286 }, { x: 500, y: 121 }, exit],
+    makuri: [approach, { x: 565, y: 305 }, { x: 615, y: 145 }, exit],
+    makuriSashi: [approach, { x: 548, y: 300 }, { x: 535, y: 126 }, exit],
+    follow: [approach, { x: 575, y: 315 }, { x: 596, y: 165 }, exit],
+  };
+
+  return curves[boat.maneuver] || curves.follow;
+}
+
+export function getBoatPose(model, boatNo, stage, progress) {
+  const boat = model.boats.find((row) => row.boatNo === boatNo);
+  if (!boat) return { x: 70, y: 80, angle: 0 };
+
+  const t = easeInOut(clamp(progress, 0, 1));
+  const courseIndex = getCourseIndex(model, boatNo);
+  const finishIndex = getFinishIndex(model, boatNo);
+  const laneY = 76 + courseIndex * 45;
+  let current;
+  let next;
+
+  if (stage === 0) {
+    current = { x: 76, y: laneY };
+    next = { x: 77, y: laneY };
+  } else if (stage === 1) {
+    const startGain = (boat.startPower - 50) * 0.2;
+    current = { x: lerp(76, 205 + startGain, t), y: laneY };
+    next = { x: current.x + 2, y: current.y };
+  } else if (stage === 2) {
+    current = {
+      x: lerp(205, 352 + boat.stretchPower * 0.18, t),
+      y: lerp(laneY, 188 + courseIndex * 18, t),
+    };
+    next = { x: current.x + 2, y: current.y + 0.2 };
+  } else if (stage === 3) {
+    const start = { x: 352 + boat.stretchPower * 0.18, y: 188 + courseIndex * 18 };
+    const end = { x: 458 - courseIndex * 2, y: 260 + courseIndex * 8 };
+    current = { x: lerp(start.x, end.x, t), y: lerp(start.y, end.y, t) };
+    next = { x: lerp(start.x, end.x, Math.min(1, t + 0.02)), y: lerp(start.y, end.y, Math.min(1, t + 0.02)) };
+  } else if (stage === 4) {
+    const curve = getTurnCurve(model, boat);
+    current = cubicBezier(curve[0], curve[1], curve[2], curve[3], t);
+    next = cubicBezier(curve[0], curve[1], curve[2], curve[3], Math.min(1, t + 0.015));
+  } else if (stage === 5) {
+    const start = getTurnCurve(model, boat)[3];
+    const end = { x: 662 - finishIndex * 3, y: 72 + finishIndex * 43 };
+    current = { x: lerp(start.x, end.x, t), y: lerp(start.y, end.y, t) };
+    next = { x: current.x + 2, y: current.y };
+  } else {
+    current = { x: 644 - finishIndex * 5, y: 72 + finishIndex * 43 };
+    next = { x: current.x + 1, y: current.y };
+  }
+
+  return { ...current, angle: angleBetween(current, next) };
+}
+
+export function getBoatTrailPath(model, boatNo, stage, progress) {
+  if (stage < 1) return "";
+  const points = [];
+  const samples = 28;
+  for (let index = 0; index <= samples; index += 1) {
+    const sampleProgress = (index / samples) * progress;
+    const pose = getBoatPose(model, boatNo, stage, sampleProgress);
+    points.push(`${index === 0 ? "M" : "L"} ${pose.x.toFixed(1)} ${pose.y.toFixed(1)}`);
+  }
+  return points.join(" ");
 }
 
 export function getBoatColor(boatNo) {
-  const colors = {
-    1: { main: "#ffffff", text: "#0f172a", edge: "#cbd5e1" },
-    2: { main: "#171717", text: "#ffffff", edge: "#475569" },
-    3: { main: "#ef3038", text: "#ffffff", edge: "#ff7075" },
-    4: { main: "#1987ed", text: "#ffffff", edge: "#62b2ff" },
-    5: { main: "#f5c61b", text: "#111827", edge: "#ffe36e" },
-    6: { main: "#19a85b", text: "#ffffff", edge: "#62db98" },
-  };
+  return BOAT_COLORS[Number(boatNo)] || BOAT_COLORS[1];
+}
 
-  return colors[Number(boatNo)] || colors[1];
+export function getStageLabel(stage) {
+  return [
+    "解析待機",
+    "スタート",
+    "加速・隊形",
+    "1マーク接近",
+    "1マーク攻防",
+    "バックストレッチ",
+    "予想着順",
+  ][stage] || "解析待機";
 }
