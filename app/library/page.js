@@ -158,7 +158,7 @@ const sections = [
         text: "みなも学園",
         href: "/radio",
         className: "redBook",
-        cover: "/F49CB336-9539-4E68-B14F-460BB467597E.png",
+        cover: "/CE14A00C-898A-4CF3-BD7F-5E5F81A92E92.png",
         inside: "/433B2F45-DD7A-4503-A09E-309840D7E591.png",
       },
       
