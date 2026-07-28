@@ -1,0 +1,3765 @@
+.page {
+  --blue: #1679d6;
+  --deep: #155995;
+  --pink: #e54f7d;
+  --orange: #ee923b;
+  --line: #d9e6ef;
+  --text: #273b4d;
+  --sub: #758798;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(56, 173, 239, .16), transparent 340px),
+    linear-gradient(180deg, #edf8ff 0%, #f9fcfe 45%, #eef3f6 100%);
+}
+
+.hero{
+  position: relative;
+
+  height: 260px;
+
+  overflow: hidden;
+
+  border-radius: 0 0 34px 34px;
+
+  background-size: cover;
+  background-position: center;
+}
+
+.heroInner{
+    position:relative;
+    width:100%;
+    height:100%;
+}
+.content {
+  width: min(1080px, 100%);
+  margin-inline: auto;
+}
+
+.topLinks {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.backPill {
+  display: inline-flex;
+  padding: 7px 11px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 999px;
+  background: rgba(255,255,255,.13);
+}
+
+.heroMain {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 19px;
+}
+
+.heroIcon,
+.raceNoHero {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(255,255,255,.28);
+  border-radius: 20px;
+  background: rgba(255,255,255,.14);
+  font-size: 31px;
+}
+
+.raceNoHero {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.raceNoHero strong {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.eyebrow {
+  margin: 0 0 3px;
+  font-size: 8px !important;
+  font-weight: 1000;
+  letter-spacing: .17em;
+  opacity: .82;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(27px, 7vw, 42px);
+  line-height: 1.1;
+}
+
+.hero p {
+  margin: 6px 0 0;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.heroMeta span {
+  padding: 5px 8px;
+  font-size: 8px;
+  font-weight: 900;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+}
+
+.content {
+  width: min(1080px, calc(100% - 26px));
+  margin-top: 23px;
+}
+
+.dateNav {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dateNav::-webkit-scrollbar {
+  display: none;
+}
+
+.dateLink {
+  min-width: max-content;
+  padding: 9px 13px;
+  color: #63788b;
+  text-decoration: none;
+  font-size: 9px;
+  font-weight: 900;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.dateLinkActive {
+  color: #fff;
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.sectionHeading,
+.panelHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 21px 0 12px;
+}
+
+.sectionHeading p,
+.panelHeading p {
+  margin: 0 0 2px;
+  color: var(--blue);
+  font-size: 8px;
+  font-weight: 1000;
+  letter-spacing: .15em;
+}
+
+.sectionHeading h2,
+.panelHeading h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.sectionHeading > span,
+.panelBadge {
+  padding: 6px 10px;
+  color: #1776bd;
+  font-size: 9px;
+  font-weight: 900;
+  border-radius: 999px;
+  background: #deeffc;
+}
+
+.courseGrid,
+.raceGrid,
+.entryCards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.courseCard,
+.raceCard,
+.detailPanel,
+.entryCard,
+.messageCard {
+  overflow: hidden;
+  border: 1px solid rgba(148, 181, 203, .48);
+  border-radius: 20px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 7px 19px rgba(48, 83, 111, .09);
+}
+
+.courseCard {
+  position: relative;
+  overflow: hidden;
+
+  background-size: 100% auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+
+  background-color: #071a35;
+}
+
+.courseCard > * {
+  position: relative;
+  z-index: 2;
+}
+
+.courseCardTop,
+.courseTitle {
+  display: flex;
+  align-items: center;
+}
+
+.courseCardTop {
+  justify-content: space-between;
+}
+
+.courseTitle {
+  gap: 8px;
+}
+
+.courseTitle span {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  color: var(--blue);
+  font-size: 9px;
+  font-weight: 1000;
+  border-radius: 8px;
+  background: #eaf5ff;
+}
+
+.courseTitle h2 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.courseCardTop > b {
+  padding: 5px 8px;
+  color: #20824a;
+  font-size: 8px;
+  border-radius: 999px;
+  background: #e0f6e8;
+}
+
+.courseStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 13px;
+  border: 1px solid #e3ebf0;
+  border-radius: 13px;
+  background: #f7fafc;
+}
+
+.courseStats div {
+  padding: 9px 3px;
+  text-align: center;
+  border-right: 1px solid #e2eaef;
+}
+
+.courseStats div:last-child {
+  border-right: 0;
+}
+
+.courseStats span {
+  display: block;
+  color: #8996a1;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.courseStats strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.primaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 11px;
+  padding: 12px 14px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #1979db, #25a7eb);
+  box-shadow: 0 5px 13px rgba(27, 125, 210, .21);
+}
+
+.raceCardHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border-bottom: 1px solid #e5edf2;
+  background: linear-gradient(90deg, #f3faff, #fff);
+}
+
+.raceCardHead > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.raceCardHead h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.raceCardHead p {
+  margin: 4px 0 0;
+  color: var(--sub);
+  font-size: 8px;
+}
+
+.raceNo {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 51px;
+  height: 51px;
+  flex: 0 0 auto;
+  padding-top: 7px;
+  color: #fff;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1778d8, #24a8ed);
+}
+
+.raceNo strong {
+  font-size: 25px;
+}
+
+.raceNo span {
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.statusBadge {
+  padding: 5px 7px;
+  color: #ba6812;
+  font-size: 8px;
+  border-radius: 999px;
+  background: #fff0dc;
+}
+
+.miniEntryList {
+  padding: 6px 11px;
+}
+
+.miniEntry{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    align-items:center;
+
+    gap:10px;
+
+    min-height:46px;
+
+    padding:8px 0;
+
+    border-bottom:1px dashed #e4eaf0;
+}
+
+.miniEntry:last-child{
+    border-bottom:none;
+}
+
+.miniEntry:last-child {
+  border-bottom: 0;
+}
+
+.miniEntry > strong {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.miniEntry > small {
+  color: #687d90;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.boatBadge {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 1000;
+  border: 1px solid rgba(20,30,40,.16);
+  border-radius: 8px;
+}
+
+.boatBadgeLarge {
+  width: 47px;
+  height: 47px;
+  font-size: 21px;
+  border-radius: 13px;
+}
+
+.boat1 { color: #111; background: #fff; }
+.boat2 { color: #fff; background: #353c42; }
+.boat3 { color: #fff; background: #e34b43; }
+.boat4 { color: #fff; background: #398fdf; }
+.boat5 { color: #222; background: #efd748; }
+.boat6 { color: #fff; background: #58b467; }
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+
+  /* 4列×2段 */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 5px;
+  padding: 7px;
+  border: 1px solid rgba(157, 184, 202, 0.42);
+  border-radius: 16px;
+  background: rgba(249, 252, 254, 0.95);
+  box-shadow: 0 5px 15px rgba(48, 80, 105, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.tabButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 5px 2px;
+  color: #66798b;
+  cursor: pointer;
+  border: 1px solid #d9e4eb;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.tabButton span {
+  font-size: 16px;
+}
+
+.tabButton strong {
+  font-size: 8px;
+}
+
+.tabButtonActive {
+  color: #fff;
+  border-color: var(--blue);
+  background: linear-gradient(135deg, #1978da, #24a7ec);
+  box-shadow: 0 4px 11px rgba(27, 126, 210, .22);
+}
+
+.detailPanel {
+  margin-top: 13px;
+  padding: 13px;
+}
+
+.panelHeading {
+  margin: 0 0 11px;
+}
+
+.entryCardTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+.entryNameArea {
+  min-width: 0;
+  flex: 1;
+}
+
+.entryNameArea h3 {
+  margin: 4px 0 0;
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entryNameArea p {
+  margin: 3px 0 0;
+  color: #8996a1;
+  font-size: 8px;
+}
+
+.gradeBadge {
+  padding: 2px 6px;
+  color: #4e6f89;
+  font-size: 8px;
+  font-weight: 900;
+  border-radius: 5px;
+  background: #e5eff6;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #e6edf1;
+  border-bottom: 1px solid #e6edf1;
+  background: #f8fbfd;
+}
+
+.statGrid div,
+.machineGrid div {
+  padding: 9px 3px;
+  text-align: center;
+  border-right: 1px solid #e1e9ee;
+}
+
+.statGrid div:last-child,
+.machineGrid div:last-child {
+  border-right: 0;
+}
+
+.statGrid span,
+.machineGrid span {
+  display: block;
+  color: #8996a1;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.statGrid strong,
+.machineGrid strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.machineGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.machineGrid small {
+  display: block;
+  margin-top: 2px;
+  color: #687d90;
+  font-size: 7px;
+}
+
+.seriesRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-top: 1px solid #e6edf1;
+  background: #fffdf8;
+}
+
+.seriesRow span {
+  color: #8996a1;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.seriesRow strong {
+  font-size: 9px;
+}
+
+.exhibitionList {
+  display: grid;
+  gap: 8px;
+}
+
+.exhibitionRow {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e0e9ef;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.exhibitionRacer {
+  min-width: 0;
+}
+
+.exhibitionRacer strong {
+  display: block;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exhibitionRacer span {
+  color: #8996a1;
+  font-size: 7px;
+}
+
+.exhibitionValue {
+  text-align: center;
+}
+
+.exhibitionValue small {
+  display: block;
+  color: #8996a1;
+  font-size: 6px;
+}
+
+.exhibitionValue strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.rankBadge {
+  min-width: 38px;
+  padding: 5px 6px;
+  color: #607689;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 900;
+  border-radius: 999px;
+  background: #e7eff5;
+}
+
+.rankFirst { color: #a96900; background: #fff1b7; }
+.rankSecond { color: #64707a; background: #edf0f2; }
+.rankThird { color: #995633; background: #f5dfd2; }
+
+.emptyAi {
+  padding: 38px 15px;
+  text-align: center;
+}
+
+.emptyAiIcon {
+  font-size: 40px;
+}
+
+.emptyAi h3 {
+  margin: 10px 0 0;
+}
+
+.emptyAi p {
+  max-width: 510px;
+  margin: 8px auto 0;
+  color: var(--sub);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.predictionHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 11px;
+  padding: 16px;
+  color: #fff;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ed8b34, #e95479);
+}
+
+.predictionHero h3 {
+  margin: 2px 0 0;
+  font-size: 21px;
+}
+
+.aiEyebrow {
+  font-size: 8px;
+  font-weight: 1000;
+  letter-spacing: .15em;
+  opacity: .86;
+}
+
+.scoreCircle {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  flex: 0 0 auto;
+  padding-top: 17px;
+  border: 2px solid rgba(255,255,255,.34);
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+}
+
+.scoreCircle strong {
+  font-size: 27px;
+}
+
+.scoreCircle span {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.aiSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 10px;
+  border: 1px solid #e2eaf0;
+  border-radius: 13px;
+  background: #f8fbfd;
+}
+
+.aiSummaryGrid div {
+  padding: 10px 4px;
+  text-align: center;
+  border-right: 1px solid #e1e9ee;
+}
+
+.aiSummaryGrid div:last-child {
+  border-right: 0;
+}
+
+.aiSummaryGrid span {
+  display: block;
+  color: #8996a1;
+  font-size: 7px;
+}
+
+.aiSummaryGrid strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.aiComment,
+.betList {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #e2eaf0;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.aiComment span {
+  color: var(--orange);
+  font-size: 8px;
+  font-weight: 1000;
+}
+
+.aiComment p {
+  margin: 5px 0 0;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.betList h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.betRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 9px;
+  margin-top: 6px;
+  border-radius: 9px;
+  background: #f4f8fb;
+}
+
+.betRow strong {
+  font-size: 11px;
+}
+
+.betRow span {
+  color: var(--pink);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.moveNav {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.moveNav a {
+  padding: 11px 13px;
+  color: #50677a;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 900;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.moveNav a:last-child {
+  text-align: right;
+}
+
+.messageCard {
+  padding: 42px 17px;
+  text-align: center;
+}
+
+.messageCard strong {
+  display: block;
+}
+
+.messageCard p {
+  color: var(--sub);
+  font-size: 10px;
+}
+
+@media (min-width: 680px) {
+  .courseGrid,
+  .raceGrid,
+  .entryCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tabButton strong {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .courseGrid,
+  .raceGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 410px) {
+  .exhibitionRow {
+    grid-template-columns: 31px minmax(0, 1fr) auto auto;
+  }
+
+  .rankBadge {
+    display: none;
+  }
+}
+/* =========================================================
+   BoatStrikers Phase 3.1 AI Dashboard
+   phase2.module.css の末尾へ追加
+========================================================= */
+
+.aiDashboard {
+  display: grid;
+  gap: 12px;
+}
+
+.liveUpdateBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d9e8f2;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eef9ff, #ffffff);
+}
+
+.liveUpdateBar > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.liveUpdateBar strong {
+  color: #186fae;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+
+.liveUpdateBar small {
+  color: #718697;
+  text-align: right;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #20bf6b;
+  box-shadow: 0 0 0 4px rgba(32, 191, 107, .14);
+  animation: bsLivePulse 1.5s infinite;
+}
+
+@keyframes bsLivePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(.76); opacity: .55; }
+}
+
+.escapeCard {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 17px;
+  color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(35, 93, 130, .18);
+}
+
+.escapeCard p {
+  margin: 0 0 3px;
+  font-size: 7px;
+  font-weight: 1000;
+  letter-spacing: .14em;
+  opacity: .8;
+}
+
+.escapeCard h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.escapeStrong {
+  background: linear-gradient(135deg, #16a467, #42c982);
+}
+
+.escapeGood {
+  background: linear-gradient(135deg, #1979dc, #28a9ed);
+}
+
+.escapeCaution {
+  background: linear-gradient(135deg, #ed8b34, #f3b145);
+}
+
+.escapeDanger {
+  background: linear-gradient(135deg, #dd426e, #ef668c);
+}
+
+.escapeLabel {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 4px 8px;
+  font-size: 8px;
+  font-weight: 1000;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+}
+
+.escapeCircle {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 78px;
+  height: 78px;
+  padding-top: 18px;
+  border: 2px solid rgba(255,255,255,.36);
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+}
+
+.escapeCircle strong {
+  font-size: 31px;
+  line-height: 1;
+}
+
+.escapeCircle span {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.escapeTrack {
+  grid-column: 1 / -1;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.22);
+}
+
+.escapeTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+}
+
+.aiDashboardCard,
+.ichikaCommentCard,
+.dangerCard {
+  overflow: hidden;
+  padding: 13px;
+  border: 1px solid #dce7ee;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(48, 83, 111, .07);
+}
+
+.aiSectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.aiSectionHeading p,
+.ichikaCommentHead p,
+.dangerBody > p {
+  margin: 0 0 2px;
+  color: #1778bd;
+  font-size: 7px;
+  font-weight: 1000;
+  letter-spacing: .14em;
+}
+
+.aiSectionHeading h2,
+.ichikaCommentHead h2,
+.dangerBody h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.aiSectionHeading > span {
+  padding: 5px 8px;
+  color: #b26b18;
+  font-size: 7px;
+  font-weight: 900;
+  border-radius: 999px;
+  background: #fff0d8;
+}
+
+.aiBoatList {
+  display: grid;
+  gap: 7px;
+}
+
+.aiBoatRow {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) minmax(95px, 1.25fr) 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #e2eaf0;
+  border-radius: 12px;
+  background: #fbfdfe;
+}
+
+.aiBoatTop {
+  border-color: #9ed3f7;
+  background: linear-gradient(90deg, #edf8ff, #fff);
+  box-shadow: 0 4px 11px rgba(37, 135, 202, .1);
+}
+
+.aiBoatIdentity {
+  min-width: 0;
+}
+
+.aiBoatIdentity strong {
+  display: block;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiBoatIdentity span {
+  display: block;
+  margin-top: 2px;
+  color: #8494a0;
+  font-size: 7px;
+}
+
+.aiBoatScoreHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.aiBoatScoreHeader small {
+  color: #8394a1;
+  font-size: 6px;
+}
+
+.aiBoatScoreHeader strong {
+  color: #1678bd;
+  font-size: 13px;
+}
+
+.aiScoreTrack {
+  height: 6px;
+  overflow: hidden;
+  margin-top: 3px;
+  border-radius: 999px;
+  background: #e6edf2;
+}
+
+.aiScoreFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1978d9, #27acee);
+}
+
+.aiGrade {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 1000;
+  border-radius: 8px;
+}
+
+.aiGradeS { color: #a96800; background: #fff0b5; }
+.aiGradeA { color: #1d8552; background: #dcf5e7; }
+.aiGradeB { color: #2776b4; background: #e2f1fc; }
+.aiGradeC { color: #7b6a4d; background: #eee8de; }
+.aiGradeD { color: #a14d5e; background: #f5e1e6; }
+
+.aiTwoColumn {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.aiRankingList {
+  display: grid;
+  gap: 6px;
+}
+
+.aiRankingRow {
+  display: grid;
+  grid-template-columns: 32px 31px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px;
+  border-radius: 10px;
+  background: #f6fafc;
+}
+
+.aiRankingRow > span {
+  color: #637b8f;
+  font-size: 8px;
+  font-weight: 1000;
+}
+
+.aiRankingRow > strong {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiRankingRow > b {
+  color: #176fae;
+  font-size: 11px;
+}
+
+.aiWaiting {
+  padding: 25px 10px;
+  text-align: center;
+}
+
+.aiWaiting > span {
+  font-size: 29px;
+}
+
+.aiWaiting strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.aiWaiting p {
+  margin: 5px 0 0;
+  color: #8495a2;
+  font-size: 8px;
+}
+
+.ichikaCommentCard {
+  background:
+    radial-gradient(circle at 100% 0, rgba(255, 143, 173, .14), transparent 150px),
+    #fff;
+}
+
+.ichikaCommentHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ichikaCommentHead > span {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 12px;
+  background: #fff0f4;
+}
+
+.ichikaCommentHead p {
+  color: #db557a;
+}
+
+.ichikaCommentText {
+  margin: 11px 0 0;
+  padding: 11px;
+  font-size: 10px;
+  line-height: 1.8;
+  border-radius: 12px;
+  background: #fff8fa;
+}
+
+.focusGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.focusGrid div {
+  padding: 9px 4px;
+  text-align: center;
+  border: 1px solid #f1dce3;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.focusGrid span {
+  display: block;
+  color: #db557a;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.focusGrid strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.focusGrid small {
+  display: block;
+  margin-top: 2px;
+  color: #81919d;
+  font-size: 7px;
+}
+
+.dangerCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-color: #f1d9de;
+  background: #fff9fa;
+}
+
+.dangerIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  flex: 0 0 auto;
+  font-size: 21px;
+  border-radius: 12px;
+  background: #ffe8ed;
+}
+
+.dangerBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.dangerBody > p {
+  color: #d94e69;
+}
+
+.dangerBody > strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+}
+
+.dangerBody ul {
+  margin: 6px 0 0;
+  padding-left: 17px;
+  color: #7d5d65;
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+.aiDisclaimer {
+  margin: 0;
+  color: #8797a3;
+  text-align: center;
+  font-size: 7px;
+  line-height: 1.7;
+}
+
+@media (min-width: 760px) {
+  .aiTwoColumn {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .liveUpdateBar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .liveUpdateBar small {
+    text-align: left;
+  }
+
+  .aiBoatRow {
+    grid-template-columns: 31px minmax(0, 1fr) 78px 27px;
+    gap: 6px;
+  }
+
+  .aiGrade {
+    width: 27px;
+    height: 27px;
+  }
+
+  .escapeCircle {
+    width: 68px;
+    height: 68px;
+    padding-top: 16px;
+  }
+
+  .escapeCircle strong {
+    font-size: 27px;
+  }
+}
+@media (min-width: 900px) {
+  .tabs {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   本日の開催場・近未来トップバナー
+========================================================= */
+
+.racesHero {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 0 0 38px 38px;
+  background: #03132e;
+  box-shadow:
+    0 22px 45px rgba(5, 43, 88, 0.22),
+    inset 0 -1px 0 rgba(99, 197, 255, 0.4);
+}
+
+/* 背景画像 */
+.racesHeroBackground {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+
+  background-image: url("/IMG_6460.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+
+  transform: scale(1.015);
+}
+
+/* 画像の上に重ねる暗いレイヤー */
+.racesHeroOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(1, 12, 39, 0.86) 0%,
+      rgba(2, 23, 68, 0.7) 36%,
+      rgba(2, 31, 92, 0.34) 65%,
+      rgba(0, 15, 47, 0.25) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 17, 53, 0.22),
+      rgba(0, 17, 53, 0.64)
+    );
+}
+
+/* 下側に青いグラデーション */
+.racesHeroGlow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -70px;
+  z-index: -3;
+  height: 190px;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 161, 255, 0.48),
+    rgba(0, 100, 255, 0.08) 50%,
+    transparent 72%
+  );
+
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+/* 横に流れるスキャンライン */
+.racesHeroScanLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  z-index: -2;
+  width: 24%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(91, 205, 255, 0.13),
+    rgba(255, 255, 255, 0.2),
+    rgba(91, 205, 255, 0.13),
+    transparent
+  );
+
+  transform: skewX(-18deg);
+  animation: racesHeroScan 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes racesHeroScan {
+  0% {
+    left: -40%;
+  }
+
+  100% {
+    left: 130%;
+  }
+}
+
+.racesHeroInner {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, calc(100% - 36px));
+  min-height: 280px;
+  margin: 0 auto;
+  padding: 32px 0 30px;
+}
+
+.racesBackPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 17px;
+
+  border: 1px solid rgba(116, 206, 255, 0.72);
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: rgba(1, 39, 89, 0.42);
+
+  box-shadow:
+    inset 0 0 18px rgba(75, 190, 255, 0.12),
+    0 6px 20px rgba(0, 0, 0, 0.16);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.racesBackPill:hover {
+  transform: translateY(-2px);
+  background: rgba(10, 93, 164, 0.62);
+}
+
+.racesHeroMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+
+  min-height: 280px;
+  padding-top: 58px;
+}
+
+.racesHeroText {
+  width: min(620px, 100%);
+}
+
+.racesHeroEyebrow {
+  margin: 0 0 7px;
+
+  color: #66d2ff;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+
+  text-shadow: 0 0 14px rgba(62, 195, 255, 0.62);
+}
+
+.racesHeroText h1 {
+  margin: 0;
+
+  color: #ffffff;
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.05em;
+
+  text-shadow:
+    0 0 12px rgba(39, 170, 255, 0.8),
+    0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+.racesHeroDescription {
+  margin: 17px 0 0;
+
+  color: rgba(233, 248, 255, 0.94);
+  font-size: clamp(14px, 2vw, 17px);
+  font-weight: 800;
+  line-height: 1.7;
+
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.racesHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 21px;
+}
+
+.racesHeroMeta > span {
+  display: grid;
+  gap: 2px;
+  min-width: 125px;
+  padding: 9px 14px;
+
+  border: 1px solid rgba(106, 204, 255, 0.4);
+  border-radius: 13px;
+
+  color: #ffffff;
+  background: rgba(4, 52, 109, 0.47);
+
+  box-shadow:
+    inset 0 0 16px rgba(44, 166, 255, 0.1),
+    0 5px 18px rgba(0, 0, 0, 0.16);
+
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+.racesHeroMeta small {
+  color: #72cbff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.racesHeroMeta strong {
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.racesHeroMeta .racesHeroLive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: auto;
+}
+
+.racesHeroLive i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #51ee8b;
+
+  box-shadow:
+    0 0 0 5px rgba(81, 238, 139, 0.13),
+    0 0 15px rgba(81, 238, 139, 0.8);
+
+  animation: racesLivePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes racesLivePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.78);
+  }
+}
+
+/* 右側のAI稼働状況 */
+.racesHeroStatus {
+  width: 275px;
+  flex: 0 0 auto;
+  overflow: hidden;
+
+  border: 1px solid rgba(93, 198, 255, 0.44);
+  border-radius: 18px;
+
+  background: rgba(1, 26, 67, 0.58);
+
+  box-shadow:
+    inset 0 0 30px rgba(30, 147, 255, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.23);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.racesHeroStatusHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 13px;
+
+  border-bottom: 1px solid rgba(91, 200, 255, 0.24);
+
+  color: #b8e8ff;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.racesHeroStatusHeader b {
+  padding: 4px 7px;
+  border-radius: 999px;
+
+  color: #64f79a;
+  background: rgba(67, 239, 133, 0.13);
+
+  font-size: 8px;
+}
+
+.racesHeroStatusBody {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.racesHeroStatusBody > div {
+  display: grid;
+  gap: 4px;
+  padding: 13px 6px;
+  text-align: center;
+}
+
+.racesHeroStatusBody > div + div {
+  border-left: 1px solid rgba(91, 200, 255, 0.16);
+}
+
+.racesHeroStatusBody small {
+  color: #70b9dd;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.racesHeroStatusBody strong {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.mobileBreak {
+  display: none;
+}
+
+/* =========================================================
+   スマートフォン
+========================================================= */
+
+@media (max-width: 700px) {
+  .racesHero {
+    min-height: 430px;
+    border-radius: 0 0 30px 30px;
+  }
+
+  .racesHeroBackground {
+    /*
+      スマホでは中央から少し右側を見せます。
+      日本地図と競艇場の両方が残りやすい位置です。
+    */
+    background-position: 65% center;
+  }
+
+  .racesHeroOverlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(1, 15, 47, 0.48) 0%,
+        rgba(1, 20, 56, 0.72) 38%,
+        rgba(1, 17, 49, 0.92) 100%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(0, 15, 45, 0.55),
+        rgba(0, 15, 45, 0.25)
+      );
+  }
+
+  .racesHeroInner {
+    width: calc(100% - 30px);
+    min-height: 430px;
+    padding-top: 25px;
+  }
+
+  .racesHeroMain {
+    display: block;
+    min-height: auto;
+    padding-top: 63px;
+  }
+
+  .racesHeroEyebrow {
+    font-size: 10px;
+  }
+
+  .racesHeroText h1 {
+    font-size: clamp(42px, 13vw, 58px);
+  }
+
+  .racesHeroDescription {
+    max-width: 330px;
+    font-size: 14px;
+  }
+
+  .mobileBreak {
+    display: block;
+  }
+
+  .racesHeroMeta {
+    gap: 7px;
+  }
+
+  .racesHeroMeta > span {
+    min-width: auto;
+    padding: 8px 11px;
+  }
+
+  .racesHeroMeta strong {
+    font-size: 12px;
+  }
+
+  .racesHeroStatus {
+    display: none;
+  }
+}
+
+/* 動きを減らす設定の端末では停止 */
+@media (prefers-reduced-motion: reduce) {
+  .racesHeroScanLine,
+  .racesHeroLive i {
+    animation: none;
+  }
+}
+@media (max-width: 700px) {
+  .racesHero {
+    min-height: 0 !important;
+    height: 240px !important;
+    border-radius: 0 0 28px 28px;
+  }
+
+  .racesHeroInner {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 12px 0 20px !important;
+  }
+
+  .racesHeroMain {
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 12px !important;
+    align-items: flex-start;
+  }
+
+  .racesHeroText h1 {
+    font-size: 47px;
+    line-height: 1;
+  }
+
+  .racesHeroDescription {
+    display: none;
+  }
+
+  .racesHeroMeta {
+    margin-top: 20px;
+  }
+
+  .racesHeroBackground {
+    background-position: 62% center;
+  }
+
+  .racesHeroStatus {
+    display: none;
+  }
+}
+/* =========================================================
+   開催場カード：デイ・ナイター振り分け
+========================================================= */
+
+.courseCard {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-3px);
+}
+
+/* デイレース */
+.courseCardDay {
+  border-color: #c8ddeb;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(99, 196, 255, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #f5fbff 58%,
+      #e8f6ff 100%
+    );
+
+  box-shadow:
+    0 10px 26px rgba(64, 113, 146, 0.09);
+}
+
+/* ナイターレース */
+.courseCardNight {
+  border-color: rgba(72, 170, 255, 0.6);
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(76, 92, 255, 0.38),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 203, 255, 0.16),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #06172f 0%,
+      #092b57 55%,
+      #15194f 100%
+    );
+
+  box-shadow:
+    0 13px 32px rgba(5, 31, 79, 0.28),
+    inset 0 0 25px rgba(46, 172, 255, 0.08);
+}
+
+/* ナイターカードの装飾 */
+.courseCardNight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 43%,
+      rgba(105, 212, 255, 0.08) 50%,
+      transparent 57%,
+      transparent 100%
+    );
+}
+
+/* ナイター時の文字色 */
+.courseCardNight .courseTitle h2 {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(78, 190, 255, 0.35);
+}
+
+.courseCardNight .courseTitle > span {
+  color: #78d9ff;
+  background: rgba(32, 136, 219, 0.18);
+  border: 1px solid rgba(91, 200, 255, 0.35);
+}
+
+.courseCardNight .courseStats {
+  border-color: rgba(111, 195, 255, 0.28);
+  background: rgba(2, 20, 55, 0.42);
+}
+
+.courseCardNight .courseStats > div + div {
+  border-left-color: rgba(111, 195, 255, 0.22);
+}
+
+.courseCardNight .courseStats span {
+  color: #81b7d7;
+}
+
+.courseCardNight .courseStats strong {
+  color: #ffffff;
+}
+
+/* デイ・ナイターの英字ラベル */
+.dayTypeLabel,
+.nightTypeLabel {
+  display: block;
+  margin-top: 2px;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+}
+
+.dayTypeLabel {
+  color: #4d9bc7;
+}
+
+.nightTypeLabel {
+  color: #6fdcff;
+  text-shadow: 0 0 8px rgba(77, 202, 255, 0.5);
+}
+
+/* 右上のバッジを並べる */
+.courseBadges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.courseBadges > b {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #24915c;
+  background: #e0f7e9;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.dayBadge,
+.nightBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.dayBadge {
+  color: #1d7da9;
+  background: #e4f5ff;
+  border: 1px solid #c5e8fa;
+}
+
+.nightBadge {
+  color: #b8edff;
+  background: rgba(50, 145, 255, 0.18);
+  border: 1px solid rgba(96, 203, 255, 0.36);
+
+  box-shadow:
+    inset 0 0 12px rgba(73, 186, 255, 0.08),
+    0 0 12px rgba(44, 141, 255, 0.12);
+}
+
+/* ボタン */
+.primaryButtonDay {
+  background: linear-gradient(
+    135deg,
+    #147fe4,
+    #25afe8
+  );
+}
+
+.primaryButtonNight {
+  border: 1px solid rgba(91, 205, 255, 0.4);
+
+  background:
+    linear-gradient(
+      135deg,
+      #134a9c,
+      #2138a4 50%,
+      #097dcc
+    );
+
+  box-shadow:
+    0 8px 22px rgba(0, 84, 190, 0.3),
+    inset 0 0 18px rgba(74, 204, 255, 0.11);
+}
+
+/* スマホ調整 */
+@media (max-width: 700px) {
+  .courseBadges {
+    gap: 4px;
+  }
+
+  .courseBadges > b {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .dayBadge,
+  .nightBadge {
+    padding: 4px 7px;
+    font-size: 8px;
+  }
+}
+/* =====================================================
+   展示比較 セクション
+===================================================== */
+
+.exhibitionSection {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(157, 184, 202, 0.42);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fbfd 100%
+  );
+  box-shadow:
+    0 6px 18px rgba(48, 80, 105, 0.07);
+}
+
+/* セクション見出し */
+
+.exhibitionSectionHeading {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 11px;
+  border-bottom:
+    1px solid rgba(157, 184, 202, 0.32);
+}
+
+/* アイコン */
+
+.exhibitionSectionIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(
+    135deg,
+    #e8f6ff,
+    #d8ecf8
+  );
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(62, 126, 168, 0.12);
+  font-size: 21px;
+}
+
+/* 英語見出し */
+
+.exhibitionSectionHeading p {
+  margin: 0 0 2px;
+  color: #7890a3;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+/* 日本語見出し */
+
+.exhibitionSectionHeading h3 {
+  margin: 0;
+  color: #17395a;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+/* 右側バッジ */
+
+.exhibitionSectionBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid #cfe0eb;
+  border-radius: 999px;
+  background: #eef7fc;
+  color: #36749b;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* スマホ */
+
+@media (max-width: 600px) {
+  .exhibitionSection {
+    margin-top: 12px;
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  .exhibitionSectionHeading {
+    grid-template-columns:
+      auto minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .exhibitionSectionIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .exhibitionSectionHeading h3 {
+    font-size: 15px;
+  }
+
+  .exhibitionSectionBadge {
+    min-height: 23px;
+    padding: 0 7px;
+    font-size: 8px;
+  }
+}
+/* =========================================================
+   開催場カード・ライブステータス完全版
+========================================================= */
+
+.courseCard {
+  position: relative;
+  overflow: hidden;
+  min-height: 340px;
+
+  border: 1px solid rgba(84, 177, 244, 0.5);
+  border-radius: 28px;
+
+  background-size: 100% auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-color: #06172f;
+
+  box-shadow:
+    0 16px 36px rgba(19, 66, 103, 0.16),
+    inset 0 0 35px rgba(31, 152, 255, 0.08);
+}
+
+.courseCardContent {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+
+  min-height: 340px;
+  padding: 20px;
+}
+
+.courseCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.courseTitle {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+}
+
+.courseTitle > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  width: 54px;
+  height: 54px;
+
+  border: 1px solid rgba(83, 200, 255, 0.48);
+  border-radius: 16px;
+
+  color: #82ddff;
+  background: rgba(4, 49, 102, 0.58);
+
+  box-shadow:
+    inset 0 0 18px rgba(60, 180, 255, 0.1),
+    0 7px 18px rgba(0, 0, 0, 0.15);
+
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.courseTitle h2 {
+  margin: 0;
+
+  color: #fff;
+  font-size: clamp(28px, 6vw, 42px);
+  font-weight: 950;
+  line-height: 1;
+
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.68),
+    0 0 14px rgba(57, 181, 255, 0.22);
+}
+
+.dayTypeLabel,
+.nightTypeLabel {
+  display: block;
+  margin-top: 9px;
+
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+}
+
+.dayTypeLabel {
+  color: #b7eaff;
+}
+
+.nightTypeLabel {
+  color: #62dbff;
+}
+
+.courseBadges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.courseBadges > b {
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  color: #168854;
+  background: rgba(226, 255, 235, 0.95);
+
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
+
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.dayBadge,
+.nightBadge {
+  padding: 7px 11px;
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 950;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dayBadge {
+  color: #0879a6;
+  border: 1px solid rgba(93, 204, 255, 0.48);
+  background: rgba(226, 248, 255, 0.9);
+}
+
+.nightBadge {
+  color: #d1f4ff;
+  border: 1px solid rgba(78, 191, 255, 0.46);
+  background: rgba(5, 43, 95, 0.7);
+}
+
+/* =========================================================
+   3つのステータス
+========================================================= */
+
+.courseLiveStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  /* 上下の余白を縮める */
+  margin-top: 10px;
+
+  /* 枠自体を細長く */
+  min-height: 88px;
+
+  border: 1px solid rgba(97, 163, 215, 0.38);
+  border-radius: 18px;
+  overflow: hidden;
+
+  background: rgba(2, 22, 52, 0.88);
+  backdrop-filter: blur(10px);
+}
+
+.courseLiveStat {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* ここが重要 */
+  min-height: 88px;
+  padding: 10px 6px;
+
+  text-align: center;
+}
+
+/* 3項目の区切り線 */
+.courseLiveStat:not(:last-child) {
+  border-right: 1px solid rgba(126, 184, 229, 0.28);
+}
+
+/* 内側の縦間隔を詰める */
+.courseLiveStat > div {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+}
+
+/* 小見出し */
+.courseLiveStat span {
+  margin: 0;
+  color: #9fc9e8;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* メイン文字 */
+.courseLiveStat strong {
+  margin: 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* 下の説明 */
+.courseLiveStat small {
+  margin: 0;
+  color: rgba(210, 230, 244, 0.72);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.courseLiveStat + .courseLiveStat {
+  border-left: 1px solid rgba(133, 210, 255, 0.3);
+}
+
+.courseLiveStatIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid rgba(89, 198, 255, 0.38);
+  border-radius: 10px;
+
+  color: #77dcff;
+  background: rgba(24, 120, 202, 0.18);
+
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.courseLiveStat > div:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.courseLiveStat span {
+  color: #82bbda;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.courseLiveStat strong {
+  overflow: hidden;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.courseLiveStat small {
+  overflow: hidden;
+
+  color: #89a9bd;
+  font-size: 8px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 開催中 */
+.courseLiveStat_live .courseLiveStatIcon {
+  color: #ffdf8b;
+  border-color: rgba(255, 180, 68, 0.5);
+  background: rgba(255, 136, 32, 0.16);
+
+  box-shadow: 0 0 15px rgba(255, 142, 32, 0.18);
+
+  animation: courseLivePulse 1.7s ease-in-out infinite;
+}
+
+.courseLiveStat_live strong {
+  color: #ffd27d;
+}
+
+/* 終了 */
+.courseLiveStat_finished .courseLiveStatIcon {
+  color: #a6b4c0;
+  border-color: rgba(166, 180, 192, 0.3);
+  background: rgba(97, 111, 125, 0.18);
+}
+
+.courseLiveStat_finished strong {
+  color: #d5dde3;
+}
+
+/* 開催前 */
+.courseLiveStat_scheduled strong {
+  color: #7ff0ad;
+}
+
+.courseLiveStat_exhibition strong {
+  color: #ffe177;
+}
+
+.courseLiveStat_live strong {
+  color: #ff8995;
+}
+
+.courseLiveStat_finished strong {
+  color: #83baff;
+}
+
+/* AI公開中 */
+.courseLiveStat_aiPublished .courseLiveStatIcon {
+  color: #88ffbd;
+  border-color: rgba(75, 241, 139, 0.4);
+  background: rgba(37, 189, 105, 0.16);
+
+  box-shadow: 0 0 15px rgba(68, 227, 130, 0.14);
+}
+
+.courseLiveStat_aiPublished strong {
+  color: #8dffc0;
+}
+
+/* AI準備中 */
+.courseLiveStat_aiPreparing .courseLiveStatIcon {
+  color: #ffd37a;
+  border-color: rgba(255, 193, 75, 0.4);
+  background: rgba(224, 149, 36, 0.15);
+}
+
+.courseLiveStat_aiPreparing strong {
+  color: #ffda8d;
+}
+
+@keyframes courseLivePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.58;
+    transform: scale(0.88);
+  }
+}
+
+/* =========================================================
+   ボタン
+========================================================= */
+
+.primaryButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  min-height: 64px;
+  padding: 0 24px;
+
+  border-radius: 18px;
+
+  color: #fff;
+  text-decoration: none;
+
+  font-size: 17px;
+  font-weight: 950;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.primaryButtonDay {
+  background: linear-gradient(
+    135deg,
+    #147ee3,
+    #20afe8
+  );
+
+  box-shadow: 0 10px 24px rgba(20, 130, 220, 0.28);
+}
+
+.primaryButtonNight {
+  border: 1px solid rgba(65, 190, 255, 0.46);
+
+  background: linear-gradient(
+    135deg,
+    #1749b4,
+    #2738bd 48%,
+    #058ed1
+  );
+
+  box-shadow:
+    0 10px 26px rgba(7, 72, 191, 0.32),
+    inset 0 0 20px rgba(76, 206, 255, 0.1);
+}
+
+/* =========================================================
+   スマートフォン
+========================================================= */
+
+@media (max-width: 700px) {
+  .courseCard {
+    min-height: 325px;
+    border-radius: 24px;
+
+    /*
+      横長画像を無理にcoverしないため、
+      横幅を基準に表示します。
+    */
+    background-size: auto 100%;
+    background-position: center center;
+  }
+
+  .courseCardContent {
+    min-height: 325px;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .courseTitle {
+    gap: 9px;
+  }
+
+  .courseTitle > span {
+    width: 45px;
+    height: 45px;
+    border-radius: 13px;
+    font-size: 15px;
+  }
+
+  .courseTitle h2 {
+    font-size: 31px;
+  }
+
+  .dayTypeLabel,
+  .nightTypeLabel {
+    margin-top: 6px;
+    font-size: 9px;
+  }
+
+  .courseBadges {
+    gap: 5px;
+  }
+
+  .courseBadges > b {
+    padding: 6px 9px;
+    font-size: 9px;
+  }
+
+  .dayBadge,
+  .nightBadge {
+    padding: 5px 8px;
+    font-size: 8px;
+  }
+
+  .courseLiveStat {
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+
+    min-height: 100px;
+    padding: 10px 4px;
+
+    text-align: center;
+  }
+
+  .courseLiveStatIcon {
+    width: 27px;
+    height: 27px;
+    font-size: 9px;
+  }
+
+  .courseLiveStat > div:last-child {
+    justify-items: center;
+    max-width: 100%;
+  }
+
+  .courseLiveStat span {
+    font-size: 8px;
+  }
+
+  .courseLiveStat strong {
+    max-width: 100%;
+    font-size: 11px;
+  }
+
+  .courseLiveStat small {
+    max-width: 100%;
+    font-size: 7px;
+  }
+
+  .primaryButton {
+    min-height: 58px;
+    padding: 0 19px;
+    font-size: 15px;
+  }
+}
+@media (max-width: 600px) {
+  .courseLiveStats {
+    min-height: 78px;
+    margin-top: 8px;
+    border-radius: 16px;
+  }
+
+  .courseLiveStat {
+    min-height: 78px;
+    padding: 8px 4px;
+  }
+
+  .courseLiveStat > div {
+    gap: 1px;
+  }
+
+  .courseLiveStat span {
+    font-size: 9px;
+  }
+
+  .courseLiveStat strong {
+    font-size: 15px;
+  }
+
+  .courseLiveStat small {
+    font-size: 8px;
+  }
+}
+.courseHero {
+  position: relative;
+  overflow: hidden;
+
+  height: 200px;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  border-radius: 0 0 38px 38px;
+}
+/* =========================================================
+   只今レース中
+========================================================= */
+
+.liveCourseSection {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 13px;
+
+  border: 1px solid rgba(81, 176, 237, 0.34);
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(6, 55, 112, 0.96),
+      rgba(5, 93, 161, 0.94)
+    );
+
+  box-shadow:
+    0 8px 20px rgba(20, 92, 154, 0.16);
+}
+
+.liveCourseHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.liveCourseHeading > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.liveCourseHeading strong {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.liveCourseHeading small {
+  color: rgba(219, 242, 255, 0.82);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.liveCourseDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+
+  background: #50ed8b;
+
+  box-shadow:
+    0 0 0 5px rgba(80, 237, 139, 0.13),
+    0 0 14px rgba(80, 237, 139, 0.7);
+
+  animation:
+    liveCoursePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes liveCoursePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.48;
+    transform: scale(0.78);
+  }
+}
+
+.liveCourseList {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.liveCourseList::-webkit-scrollbar {
+  display: none;
+}
+
+.liveCourseChip {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 7px;
+
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 0 11px;
+
+  border: 1px solid rgba(115, 205, 255, 0.42);
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: rgba(1, 30, 71, 0.48);
+
+  text-decoration: none;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.liveCourseChip > span {
+  display: grid;
+  place-items: center;
+
+  width: 25px;
+  height: 25px;
+
+  border-radius: 7px;
+
+  color: #80dcff;
+  background: rgba(30, 150, 230, 0.2);
+
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.liveCourseChip strong {
+  font-size: 11px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.liveCourseChip b {
+  padding: 3px 6px;
+  border-radius: 999px;
+
+  color: #6aff9e;
+  background: rgba(62, 236, 128, 0.13);
+
+  font-size: 7px;
+  font-weight: 950;
+}
+
+@media (max-width: 700px) {
+  .liveCourseSection {
+    margin-bottom: 14px;
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  .liveCourseHeading strong {
+    font-size: 13px;
+  }
+
+  .liveCourseChip {
+    min-height: 40px;
+    padding: 0 9px;
+  }
+}
+/* =========================================================
+   開催場ステータス
+========================================================= */
+
+.courseStatusLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.courseStatusLabel i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+/* 🟢 開催前 */
+
+.courseStatusDot_scheduled {
+  background: #31cf78;
+  box-shadow:
+    0 0 0 4px rgba(49, 207, 120, 0.13),
+    0 0 12px rgba(49, 207, 120, 0.55);
+}
+
+/* 🟡 展示中 */
+
+.courseStatusDot_exhibition {
+  background: #ffd84f;
+  box-shadow:
+    0 0 0 4px rgba(255, 216, 79, 0.13),
+    0 0 12px rgba(255, 216, 79, 0.55);
+
+  animation:
+    courseExhibitionPulse 1.4s ease-in-out infinite;
+}
+
+/* 🔴 レース中 */
+
+.courseStatusDot_live {
+  background: #ff4d5e;
+  box-shadow:
+    0 0 0 4px rgba(255, 77, 94, 0.14),
+    0 0 14px rgba(255, 77, 94, 0.65);
+
+  animation:
+    courseRacePulse 1.1s ease-in-out infinite;
+}
+
+/* 🔵 結果確定 */
+
+.courseStatusDot_finished {
+  background: #4e9cff;
+  box-shadow:
+    0 0 0 4px rgba(78, 156, 255, 0.13),
+    0 0 12px rgba(78, 156, 255, 0.5);
+}
+
+@keyframes courseExhibitionPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.78);
+  }
+}
+
+@keyframes courseRacePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.42;
+    transform: scale(0.72);
+  }
+}
+.miniEntryInline{
+    display:flex;
+    align-items:center;
+
+    gap:8px;
+
+    min-width:0;
+}
+
+.miniEntryName{
+    font-size:15px;
+    font-weight:900;
+    color:#223547;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    flex:1;
+}
+
+.miniEntryClass{
+    flex:0 0 auto;
+
+    padding:2px 6px;
+
+    border-radius:5px;
+
+    background:#eaf5ff;
+    color:#1776bd;
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.miniEntryMotor,
+.miniEntryNation{
+
+    flex:0 0 auto;
+
+    color:#6e8091;
+
+    font-size:11px;
+    font-weight:800;
+}
+@media (max-width:600px){
+
+.miniEntryInline{
+
+    gap:6px;
+}
+
+.miniEntryName{
+
+    font-size:14px;
+}
+
+.miniEntryClass{
+
+    font-size:9px;
+}
+
+.miniEntryMotor,
+.miniEntryNation{
+
+    font-size:10px;
+}
+
+} /* @media (max-width:600px) をここで閉じる */
+
+/* =========================================================
+   レースカード・締切予定時刻
+========================================================= */
+
+.raceCardTitleArea {
+  min-width: 0;
+  flex: 1;
+}
+
+.raceClosingTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 6px;
+  padding: 4px 8px;
+
+  border: 1px solid #f2d5b7;
+  border-radius: 999px;
+
+  background: #fff7ed;
+}
+
+.raceClosingTime span {
+  color: #a86b32;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.raceClosingTime strong {
+  color: #e26f18;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+}
+@media (max-width: 600px) {
+  .raceClosingTime {
+    gap: 4px;
+    margin-top: 5px;
+    padding: 3px 7px;
+  }
+
+  .raceClosingTime span {
+    font-size: 7px;
+  }
+
+  .raceClosingTime strong {
+    font-size: 12px;
+  }
+}
+/* =========================================================
+   締切カウントダウン
+========================================================= */
+
+.courseCountdown {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  text-align: center;
+}
+
+.courseCountdownStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 22px;
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.courseCountdownScheduled {
+  color: #8ff2b7;
+  background: rgba(38, 190, 103, 0.15);
+}
+
+.courseCountdownExhibition {
+  color: #ffe57e;
+  background: rgba(235, 180, 38, 0.17);
+}
+
+.courseCountdownLive {
+  color: #ff98a1;
+  background: rgba(239, 67, 82, 0.17);
+}
+
+.courseCountdownFinished {
+  color: #8dc1ff;
+  background: rgba(61, 136, 231, 0.17);
+}
+
+.courseCountdown small {
+  color: #a7c0d2;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.courseCountdownRemaining {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.courseCountdownRemaining span {
+  color: #8ca8bb;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.courseCountdownRemaining b {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .courseCountdown {
+    gap: 3px;
+  }
+
+  .courseCountdownStatus {
+    min-height: 20px;
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  .courseCountdown small {
+    font-size: 7px;
+  }
+
+  .courseCountdownRemaining b {
+    font-size: 14px;
+  }
+}
+/* =========================================================
+   展示タイム順位色
+========================================================= */
+
+.exhibitionTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dce7ef;
+  border-radius: 14px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.exhibitionTable {
+  width: 100%;
+  min-width: 720px;
+  border-spacing: 0;
+  border-collapse: separate;
+  table-layout: fixed;
+}
+
+.exhibitionTable th {
+  padding: 11px 8px;
+  color: #607386;
+  background: #f4f8fb;
+  border-right: 1px solid #dce7ef;
+  border-bottom: 1px solid #dce7ef;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.exhibitionTable th:first-child {
+  width: 58px;
+}
+
+.exhibitionTable th:nth-child(2) {
+  width: 140px;
+  text-align: left;
+}
+
+.exhibitionTable th:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable td {
+  height: 58px;
+  padding: 7px 8px;
+  color: #253d51;
+  background: #ffffff;
+  border-right: 1px solid #dce7ef;
+  border-bottom: 1px solid #dce7ef;
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.exhibitionTable td:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.exhibitionTable tbody tr:nth-child(even) td {
+  background: #f9fcfe;
+}
+
+.exhibitionBoatCell {
+  width: 58px;
+}
+
+.exhibitionRacerName {
+  width: 140px;
+  text-align: left !important;
+}
+
+.exhibitionRacerName strong {
+  display: block;
+  color: #233d52;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.exhibitionRacerName small {
+  display: block;
+  margin-top: 2px;
+  color: #91a1ae;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.exhibitionTimeCell {
+  position: relative;
+  min-width: 82px;
+}
+
+.exhibitionTimeCell strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.exhibitionTimeCell small {
+  display: block;
+  margin-top: 3px;
+  color: #8293a0;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+/* 1位：赤 */
+
+.exhibitionBestCell,
+.exhibitionTable tbody tr:nth-child(even)
+  .exhibitionBestCell {
+  color: #ffffff;
+  background:
+    linear-gradient(
+      180deg,
+      #ff5757 0%,
+      #ef3030 100%
+    );
+}
+
+.exhibitionBestCell strong {
+  color: #ffffff;
+}
+
+.exhibitionBestCell small {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 2位：黄色 */
+
+.exhibitionSecondCell,
+.exhibitionTable tbody tr:nth-child(even)
+  .exhibitionSecondCell {
+  color: #3b3300;
+  background:
+    linear-gradient(
+      180deg,
+      #ffe96d 0%,
+      #ffd83d 100%
+    );
+}
+
+.exhibitionSecondCell strong {
+  color: #3b3300;
+}
+
+.exhibitionSecondCell small {
+  color: #736400;
+}
+
+.bscEvaluationCell {
+  min-width: 126px;
+}
+
+.bscEvaluationCell small {
+  display: block;
+  margin-top: 4px;
+  color: #788b9a;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.bscExhibitionComment {
+  min-width: 175px;
+  color: #50687a !important;
+  font-size: 11px !important;
+  line-height: 1.55;
+  text-align: left !important;
+  white-space: normal;
+}
+
+/* =========================================================
+   スマホ
+========================================================= */
+
+@media (max-width: 720px) {
+  .exhibitionTable {
+    min-width: 680px;
+  }
+
+  .exhibitionTable th {
+    padding: 9px 6px;
+    font-size: 10px;
+  }
+
+  .exhibitionTable td {
+    height: 54px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .exhibitionRacerName strong {
+    font-size: 12px;
+  }
+
+  .exhibitionTimeCell strong {
+    font-size: 15px;
+  }
+
+  .exhibitionTimeCell small {
+    font-size: 8px;
+  }
+}
+/* =========================================================
+   展示表・公式オリ展風
+========================================================= */
+
+.exhibitionTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d3e0e9;
+  border-radius: 12px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.exhibitionTable {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.exhibitionTable th {
+  padding: 10px 6px;
+  color: #33495b;
+  background: #eaf2f8;
+  border-right: 1px solid #cfdbe4;
+  border-bottom: 1px solid #c3d1dc;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.exhibitionTable th:first-child {
+  width: 52px;
+}
+
+.exhibitionTable th:nth-child(2) {
+  width: 145px;
+}
+
+.exhibitionTable th:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable td {
+  height: 46px;
+  padding: 5px 7px;
+  color: #243746;
+  background: #ffffff;
+  border-right: 1px solid #d6e0e8;
+  border-bottom: 1px solid #d6e0e8;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.exhibitionTable td:last-child {
+  border-right: 0;
+}
+
+.exhibitionTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.exhibitionTable tbody tr:nth-child(even) td {
+  background: #f7fbfd;
+}
+
+.exhibitionBoatCell {
+  width: 52px;
+}
+
+.exhibitionRacerName {
+  width: 145px;
+  padding-left: 12px !important;
+  color: #203747 !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  text-align: left !important;
+  white-space: nowrap;
+}
+
+.exhibitionTimeCell {
+  color: #183047;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+}
+
+/* 1位セル：赤 */
+
+.exhibitionBestCell,
+.exhibitionTable tbody tr:nth-child(even) td.exhibitionBestCell {
+  color: #ffffff !important;
+  background: linear-gradient(
+    180deg,
+    #ff5b5b 0%,
+    #ed3030 100%
+  ) !important;
+}
+
+/* 2位セル：黄色 */
+
+.exhibitionSecondCell,
+.exhibitionTable tbody tr:nth-child(even) td.exhibitionSecondCell {
+  color: #302900 !important;
+  background: linear-gradient(
+    180deg,
+    #ffe975 0%,
+    #ffd83d 100%
+  ) !important;
+}
+
+.bscEvaluationCell {
+  min-width: 125px;
+}
+
+.bscExhibitionComment {
+  min-width: 180px;
+  color: #40586a !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.45;
+  text-align: left !important;
+  white-space: normal;
+}
+
+/* 古い小文字を非表示 */
+
+.exhibitionRacerName small,
+.exhibitionTimeCell small,
+.bscEvaluationCell small {
+  display: none !important;
+}
+
+/* =========================================================
+   スマホ
+========================================================= */
+
+@media (max-width: 720px) {
+  .exhibitionTable {
+    min-width: 620px;
+  }
+
+  .exhibitionTable th {
+    padding: 8px 5px;
+    font-size: 11px;
+  }
+
+  .exhibitionTable td {
+    height: 43px;
+    padding: 4px 5px;
+    font-size: 12px;
+  }
+
+  .exhibitionRacerName {
+    font-size: 12px !important;
+  }
+
+  .exhibitionTimeCell {
+    font-size: 15px !important;
+  }
+
+  .bscExhibitionComment {
+    font-size: 11px !important;
+  }
+}
+
+
+/* Ultimate v12.0 Note Edition */
+.noteFeatureCard {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 16px;
+  color: #4d2c00;
+  text-decoration: none;
+  border: 1px solid #f0ba43;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff8dc 0%, #fff 54%, #fff1bb 100%);
+  box-shadow: 0 10px 26px rgba(146, 96, 0, .12);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.noteFeatureCard:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(146,96,0,.2); }
+.noteFeatureBadge { padding: 7px 9px; color: #fff; font-size: 10px; font-weight: 1000; border-radius: 999px; background: linear-gradient(135deg,#e64b25,#ff8a00); white-space: nowrap; }
+.noteFeatureCard small { display:block; color:#a06b00; font-weight:900; letter-spacing:.08em; }
+.noteFeatureCard strong { display:block; margin-top:3px; font-size:16px; }
+.noteFeatureCard p { margin:5px 0 0; color:#806536; font-size:12px; line-height:1.65; }
+.noteFeatureCard b { color:#9d5200; white-space:nowrap; }
+.pickupSection { margin: 20px 0; padding: 18px; border:1px solid #f0c45e; border-radius:20px; background:linear-gradient(135deg,#fff9e5,#fff); }
+.pickupHeading { display:flex; align-items:end; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.pickupHeading span { color:#d55315; font-size:10px; font-weight:1000; letter-spacing:.13em; }
+.pickupHeading h2 { margin:2px 0 0; font-size:21px; }
+.pickupHeading small { color:#8b6a26; }
+.pickupGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.pickupCard { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px; color:#3d2a09; text-decoration:none; border:1px solid #f2d488; border-radius:14px; background:#fff; }
+.pickupCard:hover { border-color:#e69b1d; transform:translateY(-1px); }
+.pickupCard span { color:#dc4f1c; font-size:10px; font-weight:1000; }
+.pickupCard strong { display:block; margin-top:3px; font-size:16px; }
+.pickupCard b { color:#a55c00; }
+@media (max-width: 700px) {
+  .noteFeatureCard { grid-template-columns:1fr; }
+  .noteFeatureBadge { width:max-content; }
+  .pickupGrid { grid-template-columns:1fr; }
+}
+
+/* Ultimate v13.0 Phase2 Prediction Edition */
+.predictionChange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid #d6e4ef;
+  border-radius: 14px;
+  background: #f7fbfe;
+  color: #52677a;
+  font-size: 13px;
+}
+.predictionChange strong { color: #315b78; }
+.predictionChangeUp { border-color: #bde4cc; background: #f0fbf4; }
+.predictionChangeUp strong { color: #14804a; }
+.predictionChangeDown { border-color: #f0c7c7; background: #fff5f5; }
+.predictionChangeDown strong { color: #c43d3d; }
+.predictionMarks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.predictionMarks > div {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #dce7ef;
+  border-radius: 14px;
+  background: #fff;
+}
+.predictionMarks > div > span { font-size: 20px; font-weight: 1000; }
+.predictionMarks strong { font-size: 14px; }
+.predictionMarks small { grid-column: 3; color: #718195; font-size: 11px; }
+.factorGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+.factorGrid > div {
+  padding: 11px 8px;
+  text-align: center;
+  border: 1px solid #dfe8ef;
+  border-radius: 12px;
+  background: #f8fbfd;
+}
+.factorGrid span { display: block; color: #718195; font-size: 10px; font-weight: 800; }
+.factorGrid strong { display: inline-block; margin-top: 4px; color: #17364c; font-size: 20px; }
+.factorGrid small { color: #8a99a7; font-size: 9px; }
+@media (max-width: 720px) {
+  .predictionMarks { grid-template-columns: 1fr; }
+  .factorGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* =========================================================
+   BoatStrikers 出走表トップ v2
+   新聞 → 出走表 → note の導線を軸にしたスマホファーストUI
+========================================================= */
+.portalPage { padding-bottom: 96px; }
+.portalHero { position:relative; min-height:330px; overflow:hidden; color:#fff; border-radius:0 0 34px 34px; background:#061b39; }
+.portalHeroBackground { position:absolute; inset:0; background:url('/IMG_6460.jpeg') center/cover no-repeat; transform:scale(1.02); }
+.portalHeroShade { position:absolute; inset:0; background:linear-gradient(90deg,rgba(2,13,38,.91),rgba(4,31,75,.67) 55%,rgba(5,37,82,.25)),linear-gradient(180deg,rgba(0,0,0,.08),rgba(1,16,43,.72)); }
+.portalHeroInner { position:relative; z-index:1; width:min(1080px,calc(100% - 28px)); min-height:330px; margin:auto; padding:24px 0 28px; display:flex; flex-direction:column; }
+.portalHomeLink { align-self:flex-start; padding:9px 13px; color:#fff; text-decoration:none; font-size:10px; font-weight:900; border:1px solid rgba(255,255,255,.35); border-radius:999px; background:rgba(4,28,64,.42); backdrop-filter:blur(10px); }
+.portalHeroCopy { margin-top:auto; max-width:680px; }
+.portalHeroCopy p { margin:0 0 7px; color:#70d7ff; font-size:9px; font-weight:1000; letter-spacing:.16em; }
+.portalHeroCopy h1 { margin:0; font-size:clamp(32px,8vw,62px); line-height:1.08; letter-spacing:-.04em; text-shadow:0 5px 20px rgba(0,0,0,.35); }
+.portalHeroCopy > span { display:block; margin-top:12px; font-size:10px; font-weight:800; opacity:.88; }
+.portalHeroSummary { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:18px; max-width:470px; }
+.portalHeroSummary div { padding:10px; text-align:center; border:1px solid rgba(255,255,255,.22); border-radius:13px; background:rgba(255,255,255,.11); backdrop-filter:blur(8px); }
+.portalHeroSummary small,.portalHeroSummary strong { display:block; }
+.portalHeroSummary small { font-size:7px; opacity:.72; }
+.portalHeroSummary strong { margin-top:3px; font-size:15px; }
+.portalContent { width:min(1080px,calc(100% - 24px)); margin:18px auto 0; }
+.portalDateNav { display:flex; gap:7px; overflow-x:auto; padding:2px 0 4px; scrollbar-width:none; }
+.portalDateNav::-webkit-scrollbar { display:none; }
+.portalDateLink { flex:0 0 auto; padding:8px 12px; color:#61768a; text-decoration:none; font-size:9px; font-weight:900; border:1px solid #d6e4ed; border-radius:999px; background:#fff; }
+.portalDateActive { color:#fff; border-color:#1679d6; background:#1679d6; }
+.portalSection { margin-top:27px; }
+.portalSectionHead { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.portalSectionHead span { display:block; margin-bottom:3px; color:#1679d6; font-size:7px; font-weight:1000; letter-spacing:.15em; }
+.portalSectionHead h2 { margin:0; font-size:20px; }
+.portalSectionHead > b,.portalSectionHead > a { padding:6px 9px; color:#176fae; text-decoration:none; font-size:8px; font-weight:900; border-radius:999px; background:#deeffc; }
+.newspaperRail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(270px,84%); gap:11px; overflow-x:auto; padding:2px 1px 10px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+.newspaperRail::-webkit-scrollbar { display:none; }
+.newspaperCard { scroll-snap-align:start; padding:15px; border:1px solid #f0d8df; border-radius:18px; background:radial-gradient(circle at 100% 0,rgba(238,83,124,.16),transparent 150px),#fff; box-shadow:0 7px 19px rgba(66,48,71,.08); }
+.newspaperTop,.newspaperActions { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.newspaperTop span { color:#d94e77; font-size:10px; font-weight:1000; }
+.newspaperTop b { padding:5px 8px; color:#a75300; font-size:8px; border-radius:999px; background:#fff0d7; }
+.newspaperRace { margin-top:12px; padding:10px 11px; color:#fff; border-radius:12px; background:linear-gradient(135deg,#e55b82,#ef8a50); }
+.newspaperRace small,.newspaperRace strong { display:block; }
+.newspaperRace small { font-size:7px; opacity:.8; }
+.newspaperRace strong { margin-top:2px; font-size:18px; }
+.newspaperCard h3 { margin:12px 0 0; font-size:15px; }
+.newspaperCard p { min-height:42px; margin:7px 0 0; color:#718394; font-size:9px; line-height:1.65; }
+.newspaperActions { margin-top:12px; }
+.newspaperActions a { flex:1; padding:10px 8px; text-align:center; text-decoration:none; font-size:9px; font-weight:900; border-radius:11px; }
+.newspaperActions a:first-child { color:#4e6578; border:1px solid #d5e2ea; background:#fff; }
+.newspaperActions a:last-child { color:#fff; background:linear-gradient(135deg,#e6557e,#f08c4a); }
+.compactCourseGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.compactCourseCard { position:relative; min-height:132px; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; padding:11px; color:#fff; text-decoration:none; border-radius:16px; background-position:center; background-size:cover; box-shadow:0 7px 16px rgba(27,54,81,.15); }
+.compactCourseTop,.compactCourseBottom { display:flex; align-items:center; justify-content:space-between; gap:7px; }
+.compactCourseTop > span { display:grid; place-items:center; min-width:37px; height:27px; padding:0 6px; font-size:9px; font-weight:1000; border-radius:8px; background:rgba(255,255,255,.18); backdrop-filter:blur(8px); }
+.compactCourseTop b { padding:5px 7px; font-size:7px; border-radius:999px; background:rgba(255,255,255,.9); }
+.courseStatus_live { color:#cf294f; }
+.courseStatus_exhibition { color:#ad6300; }
+.courseStatus_finished { color:#526678; }
+.courseStatus_scheduled { color:#1670b3; }
+.compactCourseBottom { align-items:flex-end; }
+.compactCourseBottom h3 { margin:0; font-size:20px; text-shadow:0 2px 8px rgba(0,0,0,.45); }
+.compactCourseBottom p { margin:3px 0 0; font-size:8px; font-weight:800; opacity:.82; }
+.compactCourseBadges { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.compactCourseBadges span,.compactCourseBadges strong { padding:4px 6px; font-size:7px; border-radius:999px; background:rgba(0,0,0,.38); backdrop-filter:blur(8px); }
+.compactCourseBadges strong { color:#fff; background:#df5379; }
+.hitFlashList { display:grid; gap:8px; }
+.hitFlashCard { display:grid; grid-template-columns:43px minmax(0,1fr) auto; align-items:center; gap:10px; padding:11px; color:inherit; text-decoration:none; border:1px solid #eadfcb; border-radius:15px; background:linear-gradient(90deg,#fffaf0,#fff); box-shadow:0 5px 13px rgba(72,62,42,.06); }
+.hitFlashIcon { display:grid; place-items:center; width:43px; height:43px; color:#fff; font-size:10px; font-weight:1000; border-radius:50%; background:linear-gradient(135deg,#f29928,#e84d65); }
+.hitFlashMain span,.hitFlashMain strong,.hitFlashMain small,.hitFlashMoney small,.hitFlashMoney strong { display:block; }
+.hitFlashMain span { color:#d56820; font-size:7px; font-weight:900; }
+.hitFlashMain strong { margin-top:2px; font-size:12px; }
+.hitFlashMain small { margin-top:2px; color:#748596; font-size:8px; }
+.hitFlashMoney { text-align:right; }
+.hitFlashMoney small { color:#8996a1; font-size:7px; }
+.hitFlashMoney strong { margin-top:2px; color:#d64c63; font-size:13px; }
+.popularGrid { display:grid; gap:9px; }
+.popularCard { position:relative; min-height:102px; overflow:hidden; color:#fff; text-decoration:none; border-radius:17px; box-shadow:0 7px 17px rgba(38,57,82,.14); }
+.popularImage { position:absolute; inset:0; background-position:center; background-size:cover; transition:transform .25s ease; }
+.popularCard:hover .popularImage { transform:scale(1.035); }
+.popularCopy { position:relative; z-index:1; min-height:102px; display:grid; grid-template-columns:35px minmax(0,1fr) auto; align-items:center; gap:9px; padding:13px; }
+.popularCopy > span { font-size:25px; }
+.popularCopy strong,.popularCopy small { display:block; }
+.popularCopy strong { font-size:15px; }
+.popularCopy small { margin-top:3px; font-size:8px; opacity:.78; }
+.popularCopy b { font-size:17px; }
+.portalEmpty { padding:30px 14px; text-align:center; border:1px dashed #cfdee8; border-radius:17px; background:rgba(255,255,255,.72); }
+.portalEmpty > span { display:block; font-size:30px; }
+.portalEmpty strong { display:block; margin-top:7px; font-size:13px; }
+.portalEmpty p { margin:5px 0 0; color:#748596; font-size:9px; }
+@media (min-width:680px) {
+  .newspaperRail { grid-auto-columns:minmax(300px,42%); }
+  .compactCourseGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .popularGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .hitFlashList { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (min-width:1000px) {
+  .compactCourseGrid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .newspaperRail { grid-auto-columns:minmax(310px,31%); }
+}
+@media (max-width:370px) {
+  .compactCourseGrid { grid-template-columns:1fr; }
+}
