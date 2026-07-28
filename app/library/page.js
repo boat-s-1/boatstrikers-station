@@ -155,7 +155,7 @@ const sections = [
 　　　{
         title: "Radio",
         icon: "🎙",
-        text: "ラジオ一覧",
+        text: "みなも学園",
         href: "/radio",
         className: "redBook",
         cover: "/F49CB336-9539-4E68-B14F-460BB467597E.png",
