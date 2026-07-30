@@ -53,29 +53,7 @@ export default function RadioPage() {
         </a>
       </section>
 
-      <section className="librarySection">
-        <h2>📻 番組コーナー</h2>
-
-        <div className="radioProgramGrid">
-          <div className="radioProgramCard">
-            <span>🌸</span>
-            <h3>一果のイン逃げ研究室</h3>
-            <p>イン逃げ・イン飛びの考え方を解説。</p>
-          </div>
-
-          <div className="radioProgramCard">
-            <span>💜</span>
-            <h3>初音の女子戦レポート</h3>
-            <p>女子戦の狙い方や注目選手を紹介。</p>
-          </div>
-
-          <div className="radioProgramCard">
-            <span>⚡</span>
-            <h3>キイナの穴党反省会</h3>
-            <p>5アタマ・高配当狙いをゆるく振り返り。</p>
-          </div>
-        </div>
-      </section>
+  
 
       <section className="librarySection">
         <h2>📚 関連コンテンツ</h2>
