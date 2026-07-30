@@ -14,7 +14,7 @@ export default function RadioPage() {
 
       <section className="radioHero">
         <img
-          src="/radio-banner.jpg"
+          src="/IMG_6716.jpeg"
           alt="Boat Strikers Radio"
           className="radioHeroImage"
         />
