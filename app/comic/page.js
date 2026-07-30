@@ -35,7 +35,7 @@ export default function RadioPage() {
           <iframe
             width="100%"
             height="240"
-            src="https://youtube.com/playlist?list=PLc-EenUbZSQm-GnGt_afC3xUuDcI2DD0T&si=82gySh421v5u_SX7"
+            src="https://www.youtube.com/embed/videoseries?list=PLc-EenUbZSQm-GnGt_afC3xUuDcI2DD0T&si=82gySh421v5u_SX7"
             title="Boat Strikers Radio"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
