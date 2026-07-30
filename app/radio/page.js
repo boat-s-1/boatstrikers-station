@@ -9,26 +9,28 @@ const youtubeChannel =
 
 const programs = [
   {
+    name: "一果",
+    title: "一果のボート・ナイト・ニッポン",
+    schedule: "毎週月曜日 22:00 ON AIR",
+    description: "イン逃げ研究や今週の注目情報を、一果が整理してお届けします。",
+    image: "/radio/ichika-program.jpeg",
+  },
+  
+  {
     name: "初音",
-    title: "初音のボートナイトジャパン",
-    schedule: "毎週火曜日 22:00 ON AIR",
+    title: "初音のボート・ナイト・ジャパン",
+    schedule: "毎週水曜日 22:00 ON AIR",
     description: "女子戦や注目レーサーを、初音が楽しく紹介します。",
     image: "/radio/hatsune-program.jpeg",
   },
   {
     name: "キイナ",
-    title: "キイナの穴党トーク",
-    schedule: "毎週木曜日 22:00 ON AIR",
+    title: "キイナのボート・ナイト・ニッポン",
+    schedule: "毎週金曜日 22:00 ON AIR",
     description: "5号艇や高配当レースを中心に、穴狙いを振り返ります。",
     image: "/radio/kiina-program.jpeg",
   },
-  {
-    name: "一果",
-    title: "一果のイン逃げニュース",
-    schedule: "毎週日曜日 22:00 ON AIR",
-    description: "イン逃げ研究や今週の注目情報を、一果が整理してお届けします。",
-    image: "/radio/ichika-program.jpeg",
-  },
+  
 ];
 
 export const metadata = {
