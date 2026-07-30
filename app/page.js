@@ -236,11 +236,7 @@ export default async function Home() {
           priority
           className="heroImage"
         />
-        <div className="heroText">
-          <p>一果・初音・キイナの競艇放送局</p>
-          <h1>3人の力で<br />一緒に勝ちにいこう！</h1>
-    
-        </div>
+
       </section>
 
 
