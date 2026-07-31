@@ -1,0 +1,148 @@
+.wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+.slider {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  padding: 6px 7% 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 7%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.slider::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  flex: 0 0 88%;
+  scroll-snap-align: center;
+  overflow: hidden;
+  border: 2px solid rgba(127, 74, 224, 0.28);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(76, 42, 130, 0.14);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px 14px;
+  background: linear-gradient(180deg, #ffffff, #faf7ff);
+}
+
+.cardFooter div {
+  min-width: 0;
+}
+
+.cardFooter strong {
+  display: block;
+  color: #382161;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.cardFooter span {
+  display: block;
+  margin-top: 4px;
+  color: #746786;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.roomLink {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7249db, #9d5be8);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 5px 12px rgba(108, 63, 191, 0.25);
+}
+
+.roomLink span {
+  margin: 0;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.swipeHint {
+  margin: 0;
+  color: #7b6d8f;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 0 2px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #d4c8e7;
+  cursor: pointer;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.activeDot {
+  width: 25px;
+  border-radius: 999px;
+  background: #7c4bd8;
+}
+
+@media (min-width: 721px) {
+  .slider {
+    padding-inline: 5%;
+    scroll-padding-inline: 5%;
+  }
+
+  .card {
+    flex-basis: 46%;
+  }
+}
+
+@media (max-width: 370px) {
+  .card {
+    flex-basis: 90%;
+  }
+
+  .cardFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .roomLink {
+    justify-content: center;
+  }
+}
