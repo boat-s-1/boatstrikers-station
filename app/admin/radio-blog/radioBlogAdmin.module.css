@@ -42,7 +42,8 @@
   gap: 8px;
 }
 
-button {
+.page button,
+.loginPage button {
   cursor: pointer;
 }
 
@@ -68,16 +69,20 @@ button {
   box-sizing: border-box;
 }
 
-label {
+.page label,
+.loginPage label {
   display: grid;
   gap: 7px;
   margin-top: 14px;
   font-weight: 800;
 }
 
-input,
-textarea,
-select {
+.page input,
+.page textarea,
+.page select,
+.loginPage input,
+.loginPage textarea,
+.loginPage select {
   width: 100%;
   border: 1px solid #bfd1df;
   border-radius: 10px;
@@ -88,7 +93,8 @@ select {
   box-sizing: border-box;
 }
 
-textarea {
+.page textarea,
+.loginPage textarea {
   resize: vertical;
 }
 
