@@ -2,6 +2,7 @@ import Image from "next/image";
 import Parser from "rss-parser";
 import { supabase } from "./bsc2/lib/supabaseClient";
 import BottomNav from "./BottomNav";
+import MemberSlider from "./MemberSlider";
 
 
 export const dynamic = "force-dynamic";
@@ -316,17 +317,7 @@ export default async function Home() {
   className="homeTitleImage"
 />
 
-  <a href="/ichika" className="bannerLink">
-    <Image src="/ichika-banner.jpg" alt="一果の部屋" width={1536} height={1080} className="bannerImage" />
-  </a>
-
-  <a href="/hatsune" className="bannerLink">
-    <Image src="/hatsune-banner.jpg" alt="初音の部屋" width={1536} height={1080} className="bannerImage" />
-  </a>
-
-  <a href="/kiina" className="bannerLink">
-    <Image src="/kiina-banner.jpg" alt="キイナの部屋" width={1536} height={1080} className="bannerImage" />
-  </a>
+  <MemberSlider />
 </section>
 
 <section className="homeSection bscSection">
