@@ -119,6 +119,38 @@ export default async function RaceDetailPage({
           </div>
         ) : (
           <>
+
+            <div
+  style={{
+    marginBottom: "16px",
+    padding: "12px",
+    background: "#fff3cd",
+    border: "1px solid #e4c766",
+    borderRadius: "10px",
+    fontSize: "12px",
+    whiteSpace: "pre-wrap",
+  }}
+>
+  {JSON.stringify(
+    {
+      raceDate,
+      courseCode,
+      raceNo,
+      hasEvent: Boolean(data?.event),
+      entries: data?.entries?.length ?? 0,
+      hasResult: Boolean(data?.result),
+      resultEntries: data?.resultEntries?.length ?? 0,
+      trifecta:
+        data?.result?.trifecta ??
+        data?.result?.trifecta_result ??
+        null,
+    },
+    null,
+    2
+  )}
+</div>
+            
+                  
             <RaceDetailTabs
               event={data.event}
               entries={data.entries}
