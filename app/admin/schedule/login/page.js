@@ -1,31 +1,13 @@
-import styles from "../scheduleAdmin.module.css";
+import { redirect } from "next/navigation";
+import { isScheduleAdminAuthenticated } from "../_lib/scheduleAdminAuth";
+import ScheduleLoginClient from "./ScheduleLoginClient";
 
-export default async function ScheduleLoginPage({ searchParams }) {
-  const query = await searchParams;
+export const dynamic = "force-dynamic";
 
-  return (
-    <main className={styles.loginPage}>
-      <form
-        action="/api/admin/schedule/login"
-        method="post"
-        className={styles.loginCard}
-      >
-        <div className={styles.loginLogo}>BS</div>
-        <p className={styles.eyebrow}>WEEKLY PROGRAM</p>
-        <h1>週間番組表 管理画面</h1>
-        <p>管理パスワードを入力してください。</p>
-        {query?.error && (
-          <div className={styles.error}>パスワードが違います。</div>
-        )}
-        <input
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          placeholder="管理パスワード"
-        />
-        <button type="submit">ログイン</button>
-      </form>
-    </main>
-  );
+export default async function ScheduleLoginPage() {
+  if (await isScheduleAdminAuthenticated()) {
+    redirect("/admin/schedule");
+  }
+
+  return <ScheduleLoginClient />;
 }
