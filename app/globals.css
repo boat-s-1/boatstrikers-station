@@ -6957,11 +6957,7 @@ color:white;
     box-shadow: 0 0 0 0 rgba(255,79,147,.6);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(255, 79, 147, 0);
-  }
-}
-
-.beginnerMapPage {
+    box-shadow: 0 0 0 10px rgba(.beginnerMapPage {
   min-height: 100vh;
   background: #071f4f;
   padding-bottom: 80px;
@@ -8059,6 +8055,162 @@ color:white;
   }
 }
 /* ========================================
+   BOAT STRIKERS ガラス風フッター
+======================================== */
+
+.glassBottomNav {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0 !important;
+  z-index: 99999 !important;
+
+  display: block !important;
+
+  width: min(100%, 720px) !important;
+
+  margin: 0 !important;
+  padding:
+    7px
+    10px
+    calc(7px + env(safe-area-inset-bottom)) !important;
+
+  transform: translateX(-50%) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(235, 247, 255, 0.96)
+    ) !important;
+
+  border-top:
+    1px solid rgba(110, 190, 245, 0.45) !important;
+
+  border-radius: 24px 24px 0 0 !important;
+
+  box-shadow:
+    0 -10px 35px rgba(25, 100, 165, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+
+  -webkit-backdrop-filter:
+    blur(20px) saturate(160%) !important;
+
+  backdrop-filter:
+    blur(20px) saturate(160%) !important;
+}
+
+.glassBottomNavInner {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: center !important;
+
+  width: 100% !important;
+  min-height: 58px !important;
+}
+
+.glassBottomNavItem {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  min-width: 0 !important;
+  min-height: 56px !important;
+
+  margin: 0 !important;
+  padding: 4px 2px !important;
+
+  color: #596274 !important;
+  text-align: center !important;
+  text-decoration: none !important;
+
+  border-radius: 16px !important;
+}
+
+.bottomNavIconArea {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 34px !important;
+  height: 29px !important;
+}
+
+.bottomNavIcon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 25px !important;
+  height: 25px !important;
+
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+
+  color: currentColor !important;
+}
+
+.bottomNavLabel {
+  display: block !important;
+
+  margin-top: 2px !important;
+
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+
+  color: currentColor !important;
+  white-space: nowrap !important;
+}
+
+.glassBottomNavItem.isActive {
+  color: #0877d1 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(220, 242, 255, 0.95),
+      rgba(255, 255, 255, 0.38)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 4px 12px rgba(15, 125, 210, 0.12) !important;
+}
+
+.glassBottomNavItem.isActive::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+
+  width: 28px;
+  height: 3px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #4ac5ff,
+      #0877d1
+    );
+
+  box-shadow:
+    0 0 10px rgba(8, 119, 209, 0.55);
+}
+
+.glassBottomNavItem {
+  position: relative !important;
+}
+
+.page {
+  padding-bottom:
+    calc(100px + env(safe-area-inset-bottom)) !important;
+}
+/* ========================================
    BOAT STRIKERS 固定フッターメニュー
 ======================================== */
 
@@ -8187,4 +8339,24 @@ color:white;
 .page {
   padding-bottom:
     calc(100px + env(safe-area-inset-bottom)) !important;
+}
+body {
+  border: 8px solid red !important;
+}
+
+body {
+  border: 8px solid red !important;
+}
+
+/* トップページ：最新情報コンパクト表示 */
+.homeLatestInfo {
+  padding: 14px;
+}
+
+.homeLatestInfoTitle {
+  margin-bottom: 9px;
+}
+
+.homeLatestInfoTitle .homeTitleImage {
+  margin-bottom: 0;
 }

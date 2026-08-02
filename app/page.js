@@ -3,6 +3,7 @@ import Parser from "rss-parser";
 import { supabase } from "./bsc2/lib/supabaseClient";
 import BottomNav from "./BottomNav";
 import MemberSlider from "./MemberSlider";
+import LatestInfoSlider from "./LatestInfoSlider";
 
 
 export const dynamic = "force-dynamic";
@@ -243,38 +244,17 @@ export default async function Home() {
 
 
             
-            <section className="homeLatestInfo">
-  <div className="homeLatestInfoTitle">
-    <img
-  src="/IMG_6217.jpeg"
-  alt="最新情報"
-  className="homeTitleImage"
-/>
-  </div>
+      <section className="homeLatestInfo">
+        <div className="homeLatestInfoTitle">
+          <img
+            src="/IMG_6217.jpeg"
+            alt="最新情報"
+            className="homeTitleImage"
+          />
+        </div>
 
-  <div className="homeLatestInfoList">
-    {latestInfo.map((item) => (
-      <a
-        href={item.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="homeLatestInfoItem"
-        key={item.link}
-      >
-        <span>
-          {new Date(item.date).toLocaleDateString("ja-JP", {
-            month: "numeric",
-            day: "numeric",
-          })}
-        </span>
-
-        <strong>{item.category}</strong>
-
-        <b>更新</b>
-      </a>
-    ))}
-  </div>
-</section>
+        <LatestInfoSlider items={latestInfo} />
+      </section>
 
       
 
