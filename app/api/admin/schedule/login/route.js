@@ -4,34 +4,78 @@ import {
   scheduleAdminCookie,
 } from "../../../../admin/schedule/_lib/scheduleAdminAuth";
 
-export async function POST(request) {
-  const formData = await request.formData();
-  const password = String(formData.get("password") || "");
-  const expected =
-    process.env.SCHEDULE_ADMIN_PASSWORD ||
-    process.env.ADMIN_DASHBOARD_PASSWORD;
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-  if (!expected || password !== expected) {
-    return NextResponse.redirect(
-      new URL("/admin/schedule/login?error=1", request.url),
-      303
-    );
+async function readPassword(request) {
+  const contentType = request.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    const body = await request.json();
+    return String(body?.password || "");
   }
 
-  const response = NextResponse.redirect(
-    new URL("/admin/schedule", request.url),
+  const formData = await request.formData();
+  return String(formData.get("password") || "");
+}
+
+export async function GET(request) {
+  return NextResponse.redirect(
+    new URL("/admin/schedule/login", request.url),
     303
   );
-  response.cookies.set(
-    scheduleAdminCookie.name,
-    createScheduleAdminToken(),
-    {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: scheduleAdminCookie.maxAge,
+}
+
+export async function POST(request) {
+  try {
+    const password = await readPassword(request);
+    const expected =
+      process.env.SCHEDULE_ADMIN_PASSWORD ||
+      process.env.ADMIN_DASHBOARD_PASSWORD;
+
+    if (!expected) {
+      return NextResponse.json(
+        {
+          error:
+            "SCHEDULE_ADMIN_PASSWORD または ADMIN_DASHBOARD_PASSWORD が未設定です。",
+        },
+        { status: 500 }
+      );
     }
-  );
-  return response;
+
+    if (!password || password !== expected) {
+      return NextResponse.json(
+        { error: "パスワードが違います。" },
+        { status: 401 }
+      );
+    }
+
+    const response = NextResponse.json({ ok: true });
+    response.cookies.set(
+      scheduleAdminCookie.name,
+      createScheduleAdminToken(),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: scheduleAdminCookie.maxAge,
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Schedule admin login error:", error);
+    return NextResponse.json(
+      { error: error.message || "ログイン処理に失敗しました。" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: { Allow: "GET, POST, OPTIONS" },
+  });
 }
