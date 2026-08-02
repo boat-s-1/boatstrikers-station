@@ -8340,13 +8340,6 @@ color:white;
   padding-bottom:
     calc(100px + env(safe-area-inset-bottom)) !important;
 }
-body {
-  border: 8px solid red !important;
-}
-
-body {
-  border: 8px solid red !important;
-}
 
 /* トップページ：最新情報コンパクト表示 */
 .homeLatestInfo {
@@ -8392,4 +8385,31 @@ body {
 .weeklyScheduleLink small {
   color: #587287;
   line-height: 1.5;
+}
+
+
+/* ===== トップページ：予想実績コンパクト表示 ===== */
+.compactResultsSection { padding: 14px; }
+.compactResultsTitle { margin-bottom: 10px; }
+.resultsSummaryGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.resultsSummaryGrid > div { min-width:0; padding:12px 7px; border:1px solid #dbe9f2; border-radius:14px; background:linear-gradient(180deg,#fff,#f8fcff); text-align:center; }
+.resultsSummaryGrid span { display:block; color:#687d90; font-size:11px; font-weight:900; }
+.resultsSummaryGrid strong { display:block; margin-top:5px; color:#17345c; font-size:23px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.resultsSummaryGrid small { margin-left:2px; font-size:11px; }
+.memberResultMiniGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px; }
+.memberResultMini { display:flex; min-width:0; flex-direction:column; gap:3px; padding:10px; border-radius:13px; color:#17345c; text-decoration:none; background:#fff; border-left:5px solid #ff6ca8; box-shadow:0 3px 10px rgba(20,69,103,.08); }
+.memberResultMini.hatsune { border-left-color:#8b6ee8; }
+.memberResultMini.kiina { border-left-color:#f4b315; }
+.memberResultMini b { font-size:14px; }
+.memberResultMini span,.memberResultMini small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#667b8e; font-size:10px; font-weight:800; }
+.resultsCollecting { padding:20px 12px; border:1px dashed #a9cfe3; border-radius:16px; background:#f7fcff; text-align:center; }
+.resultsCollecting strong { color:#19496f; font-size:16px; }
+.resultsCollecting p { margin:6px 0 0; color:#718494; font-size:12px; line-height:1.6; }
+.resultsDetailLink { display:flex; align-items:center; justify-content:center; gap:8px; width:fit-content; margin:13px auto 0; padding:9px 16px; border-radius:999px; color:#0875b4; background:#e7f7ff; text-decoration:none; font-size:13px; font-weight:900; }
+@media(max-width:560px){
+ .resultsSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .resultsSummaryGrid strong{font-size:21px;}
+ .memberResultMiniGrid{grid-template-columns:1fr;}
+ .memberResultMini{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;}
+ .memberResultMini span{text-align:center;}
 }

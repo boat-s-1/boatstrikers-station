@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import { supabase } from "./bsc2/lib/supabaseClient";
-import BottomNav from "./BottomNav";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
@@ -55,91 +54,66 @@ function getCurrentMonthRange() {
 }
 
 /* =========================
-   3人の今月の予想数を取得
+   今月の予想実績を取得
 ========================= */
 
-async function getMonthlyForecastCounts() {
-  const defaultResults = [
-    {
-      name: "ichika",
-      raceCount: 0,
-    },
-    {
-      name: "hatsune",
-      raceCount: 0,
-    },
-    {
-      name: "kiina",
-      raceCount: 0,
-    },
-  ];
+async function getMonthlyForecastResults() {
+  const emptyMember = (name, label) => ({
+    name, label, raceCount: 0, hitCount: 0, hitRate: 0,
+    invest: 0, payout: 0, returnRate: 0, maxPayout: 0,
+  });
 
-  if (!supabase) {
-    console.error("Supabase未接続です");
-    return defaultResults;
-  }
+  const empty = {
+    raceCount: 0, hitCount: 0, hitRate: 0, invest: 0, payout: 0,
+    returnRate: 0, maxPayout: 0,
+    members: [
+      emptyMember("ichika", "一果"),
+      emptyMember("hatsune", "初音"),
+      emptyMember("kiina", "キイナ"),
+    ],
+  };
+
+  if (!supabase) return empty;
 
   try {
-    const { monthStart, nextMonthStart } =
-      getCurrentMonthRange();
-
+    const { monthStart, nextMonthStart } = getCurrentMonthRange();
     const { data, error } = await supabase
       .from("bsc_results")
-      .select("category")
+      .select("category, invest, payout, hit")
       .gte("race_date", monthStart)
       .lt("race_date", nextMonthStart)
-      .in("category", [
-        "一果",
-        "初音",
-        "キイナ",
-      ]);
+      .in("category", ["一果", "初音", "キイナ"]);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
+    const rows = Array.isArray(data) ? data : [];
 
-    const rows = Array.isArray(data)
-      ? data
-      : [];
-
-    const counts = {
-      一果: 0,
-      初音: 0,
-      キイナ: 0,
+    const summarize = (items) => {
+      const raceCount = items.length;
+      const hitCount = items.filter((r) => Boolean(r.hit) || Number(r.payout || 0) > 0).length;
+      const invest = items.reduce((sum, r) => sum + Number(r.invest || 0), 0);
+      const payout = items.reduce((sum, r) => sum + Number(r.payout || 0), 0);
+      const maxPayout = items.reduce((max, r) => Math.max(max, Number(r.payout || 0)), 0);
+      return {
+        raceCount, hitCount, invest, payout, maxPayout,
+        hitRate: raceCount ? Math.round((hitCount / raceCount) * 1000) / 10 : 0,
+        returnRate: invest ? Math.round((payout / invest) * 1000) / 10 : 0,
+      };
     };
 
-    rows.forEach((row) => {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          counts,
-          row.category
-        )
-      ) {
-        counts[row.category] += 1;
-      }
-    });
-
-    return [
-      {
-        name: "ichika",
-        raceCount: counts["一果"],
-      },
-      {
-        name: "hatsune",
-        raceCount: counts["初音"],
-      },
-      {
-        name: "kiina",
-        raceCount: counts["キイナ"],
-      },
+    const total = summarize(rows);
+    const memberDefs = [
+      ["ichika", "一果"], ["hatsune", "初音"], ["kiina", "キイナ"],
     ];
-  } catch (error) {
-    console.error(
-      "トップページ成績取得エラー:",
-      error
-    );
 
-    return defaultResults;
+    return {
+      ...total,
+      members: memberDefs.map(([name, label]) => ({
+        name, label, ...summarize(rows.filter((r) => r.category === label)),
+      })),
+    };
+  } catch (error) {
+    console.error("トップページ成績取得エラー:", error);
+    return empty;
   }
 }
 
@@ -240,7 +214,7 @@ export default async function Home() {
   ] = await Promise.all([
     getTodayNewspapers(),
     getLatestInfo(),
-    getMonthlyForecastCounts(),
+    getMonthlyForecastResults(),
     getHomeCmsData(),
   ]);
 
@@ -339,49 +313,42 @@ export default async function Home() {
   </a>
 </section>
 
-   <section className="homeSectionCard yellow">
+   <section className="homeSectionCard yellow compactResultsSection">
   <img
     src="/IMG_6116.jpeg"
-    alt="今月の予想数"
-    className="homeTitleImage"
+    alt="今月の予想実績"
+    className="homeTitleImage compactResultsTitle"
   />
 
-  <div className="forecastMemberList">
-    {results.map((r) => {
-      const names = {
-        ichika: "一果",
-        hatsune: "初音",
-        kiina: "キイナ",
-      };
+  {results.raceCount === 0 ? (
+    <div className="resultsCollecting">
+      <strong>今月の予想実績は集計中です</strong>
+      <p>実績が登録されると、的中率・回収率・最高払戻を表示します。</p>
+    </div>
+  ) : (
+    <>
+      <div className="resultsSummaryGrid">
+        <div><span>予想レース数</span><strong>{results.raceCount}<small>R</small></strong></div>
+        <div><span>的中率</span><strong>{results.hitRate}<small>%</small></strong></div>
+        <div><span>回収率</span><strong>{results.returnRate}<small>%</small></strong></div>
+        <div><span>最高払戻</span><strong>{results.maxPayout.toLocaleString()}<small>円</small></strong></div>
+      </div>
 
-      const roles = {
-        ichika: "イン逃げ担当",
-        hatsune: "女子戦担当",
-        kiina: "5アタマ担当",
-      };
+      <div className="memberResultMiniGrid">
+        {results.members.map((member) => (
+          <a href={`/${member.name}`} className={`memberResultMini ${member.name}`} key={member.name}>
+            <b>{member.label}</b>
+            <span>{member.raceCount}R／的中 {member.hitCount}R</span>
+            <small>回収率 {member.returnRate}%</small>
+          </a>
+        ))}
+      </div>
+    </>
+  )}
 
-      const classes = {
-        ichika: "ichikaMember",
-        hatsune: "hatsuneMember",
-        kiina: "kiinaMember",
-      };
-
-      return (
-        <a
-          href={`/${r.name}`}
-          className={`forecastMemberCard ${classes[r.name]}`}
-          key={r.name}
-        >
-          <div>
-            <span>{names[r.name]}</span>
-            <strong>{r.raceCount}R</strong>
-            <p>{roles[r.name]}</p>
-            <b>成績を見る ›</b>
-          </div>
-        </a>
-      );
-    })}
-  </div>
+  <a className="resultsDetailLink" href="/results">
+    詳しい予想実績を見る <span>→</span>
+  </a>
 </section>
 
     <section className="homeSectionCard blue">
@@ -408,7 +375,6 @@ export default async function Home() {
   </a>
 </section>
 
-      <BottomNav />
     </main>
   );
 }
