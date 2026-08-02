@@ -731,6 +731,4 @@ export default async function IchikaPage() {
         </a>
       </section>
 
-     
-  );
-
+   
