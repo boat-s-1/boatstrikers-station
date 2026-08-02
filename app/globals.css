@@ -8388,7 +8388,7 @@ color:white;
 }
 
 /* ========================================
-   トップページ：今月の予想実績（改善版）
+   トップページ：今月の予想実績（アイコン版）
 ======================================== */
 .resultSummarySection {
   overflow: hidden;
@@ -8397,28 +8397,30 @@ color:white;
 .resultStatsGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
   margin-top: 16px;
 }
 
 .resultStatCard {
   position: relative;
   min-width: 0;
-  padding: 16px 10px 15px;
-  border: 1px solid rgba(255, 176, 45, 0.35);
-  border-radius: 18px;
+  padding: 15px 8px 14px;
+  border: 1px solid #f1d89b;
+  border-radius: 17px;
   text-align: center;
-  background: linear-gradient(145deg, #ffffff, #fffaf0);
-  box-shadow: 0 8px 18px rgba(135, 93, 15, 0.08);
+  background: linear-gradient(150deg, #ffffff 12%, #fff9e9 100%);
+  box-shadow: 0 7px 16px rgba(91, 65, 14, 0.08);
 }
 
 .resultStatCard::before {
   content: "";
   position: absolute;
-  inset: 0 22% auto;
+  top: 0;
+  left: 24%;
+  right: 24%;
   height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #ff5a9f, #ffbd35);
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, #ff5a9f, #ffbe32);
 }
 
 .resultStatCard > span {
@@ -8426,14 +8428,14 @@ color:white;
   color: #52637a;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .resultStatCard > strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 7px;
   color: #14385f;
-  font-size: clamp(27px, 7vw, 38px);
+  font-size: clamp(27px, 7vw, 37px);
   font-weight: 950;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -8449,7 +8451,7 @@ color:white;
 .resultMemberGrid {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 15px;
 }
 
 .resultMemberCard {
@@ -8457,14 +8459,18 @@ color:white;
   --member-border: #ffc3db;
   --member-bg: #fff0f6;
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
   overflow: hidden;
-  padding: 14px 15px 12px 18px;
+  min-height: 92px;
+  padding: 10px 12px 10px 10px;
   border: 1px solid var(--member-border);
-  border-radius: 18px;
+  border-radius: 20px;
   color: #17385e;
   text-decoration: none;
-  background: linear-gradient(105deg, var(--member-bg), #ffffff 58%);
+  background: linear-gradient(110deg, var(--member-bg), #ffffff 65%);
   box-shadow: 0 7px 17px rgba(31, 55, 83, 0.08);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -8473,8 +8479,13 @@ color:white;
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 6px;
+  width: 5px;
   background: var(--member-color);
+}
+
+.resultMemberCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 23px rgba(31, 55, 83, 0.13);
 }
 
 .resultMemberCard:active {
@@ -8482,56 +8493,73 @@ color:white;
 }
 
 .resultMemberCard--ichika {
-  --member-color: #ff5b9f;
-  --member-border: #ffc3db;
-  --member-bg: #fff0f6;
+  --member-color: #1d7b55;
+  --member-border: #b9dfcd;
+  --member-bg: #eefaf4;
 }
+
 .resultMemberCard--hatsune {
-  --member-color: #8e5cf6;
-  --member-border: #d8c7ff;
-  --member-bg: #f5f0ff;
+  --member-color: #7650d7;
+  --member-border: #d7c8ff;
+  --member-bg: #f6f1ff;
 }
+
 .resultMemberCard--kiina {
-  --member-color: #f5a900;
+  --member-color: #e9a500;
   --member-border: #ffe08a;
   --member-bg: #fff8e5;
 }
 
-.resultMemberTop {
+.resultMemberIcon {
+  width: 74px;
+  height: 74px;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(22, 49, 77, 0.15);
+}
+
+.resultMemberContent {
+  min-width: 0;
+}
+
+.resultMemberHeading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
-.resultMemberTop > div {
+.resultMemberHeading > div {
+  min-width: 0;
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 5px 10px;
+  gap: 4px 9px;
 }
 
 .resultMemberName {
   color: var(--member-color);
   font-size: 20px;
   font-weight: 950;
+  line-height: 1.1;
 }
 
 .resultMemberRole {
   color: #6c798a;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
 }
 
 .resultMemberArrow {
   display: grid;
   place-items: center;
-  width: 27px;
-  height: 27px;
+  width: 25px;
+  height: 25px;
   flex: none;
   border-radius: 50%;
   color: #ffffff;
-  font-size: 22px;
+  font-size: 21px;
   line-height: 1;
   background: var(--member-color);
 }
@@ -8540,10 +8568,10 @@ color:white;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 5px 12px;
-  margin-top: 8px;
+  gap: 4px 11px;
+  margin-top: 7px;
   color: #415672;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -8553,17 +8581,9 @@ color:white;
 
 .resultMemberNumbers b {
   color: #15395f;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 950;
   font-variant-numeric: tabular-nums;
-}
-
-.resultMemberCard > small {
-  display: block;
-  margin-top: 7px;
-  color: var(--member-color);
-  font-size: 10px;
-  font-weight: 900;
 }
 
 .resultEmptyState {
@@ -8578,20 +8598,25 @@ color:white;
   background: linear-gradient(145deg, #fffdf6, #fff7e5);
 }
 
-.resultEmptyState > span {
-  font-size: 28px;
-}
+.resultEmptyState > span { font-size: 28px; }
+.resultEmptyState > strong { color: #17385e; font-size: 16px; }
+.resultEmptyState > p { margin: 0; color: #748194; font-size: 12px; line-height: 1.6; }
 
-.resultEmptyState > strong {
-  color: #17385e;
-  font-size: 16px;
-}
+@media (max-width: 380px) {
+  .resultMemberCard {
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 9px;
+  }
 
-.resultEmptyState > p {
-  margin: 0;
-  color: #748194;
-  font-size: 12px;
-  line-height: 1.6;
+  .resultMemberIcon {
+    width: 62px;
+    height: 62px;
+  }
+
+  .resultMemberNumbers {
+    gap: 3px 7px;
+    font-size: 10px;
+  }
 }
 
 @media (min-width: 680px) {
@@ -8603,12 +8628,13 @@ color:white;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .resultMemberTop > div {
-    display: block;
+  .resultMemberCard {
+    grid-template-columns: 66px minmax(0, 1fr);
   }
 
-  .resultMemberRole {
-    display: block;
-    margin-top: 3px;
+  .resultMemberIcon {
+    width: 66px;
+    height: 66px;
   }
 }
+

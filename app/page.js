@@ -59,9 +59,9 @@ function getCurrentMonthRange() {
 
 async function getMonthlyForecastStats() {
   const emptyMembers = [
-    { name: "ichika", label: "一果", href: "/ichika", role: "イン逃げ担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
-    { name: "hatsune", label: "初音", href: "/hatsune", role: "女子戦担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
-    { name: "kiina", label: "キイナ", href: "/kiina", role: "5アタマ担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "ichika", label: "一果", href: "/ichika", role: "イン逃げ担当", icon: "/results/icons/ichika.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "hatsune", label: "初音", href: "/hatsune", role: "女子戦担当", icon: "/results/icons/hatsune.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "kiina", label: "キイナ", href: "/kiina", role: "5アタマ担当", icon: "/results/icons/kiina.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
   ];
 
   const empty = {
@@ -366,19 +366,25 @@ export default async function Home() {
             key={member.name}
             aria-label={`${member.label}のページを見る`}
           >
-            <div className="resultMemberTop">
-              <div>
-                <span className="resultMemberName">{member.label}</span>
-                <span className="resultMemberRole">{member.role}</span>
+            <img
+              src={member.icon}
+              alt={`${member.label}のアイコン`}
+              className="resultMemberIcon"
+            />
+            <div className="resultMemberContent">
+              <div className="resultMemberHeading">
+                <div>
+                  <span className="resultMemberName">{member.label}</span>
+                  <span className="resultMemberRole">{member.role}</span>
+                </div>
+                <span className="resultMemberArrow" aria-hidden="true">›</span>
               </div>
-              <span className="resultMemberArrow" aria-hidden="true">›</span>
+              <div className="resultMemberNumbers">
+                <span><b>{member.raceCount}</b>R</span>
+                <span><b>{member.hitCount}</b>的中</span>
+                <span>回収率 <b>{member.recoveryRate.toFixed(1)}</b>%</span>
+              </div>
             </div>
-            <div className="resultMemberNumbers">
-              <span><b>{member.raceCount}</b>R</span>
-              <span><b>{member.hitCount}</b>的中</span>
-              <span>回収率 <b>{member.recoveryRate.toFixed(1)}</b>%</span>
-            </div>
-            <small>名前をタップしてキャラクターページへ</small>
           </a>
         ))}
       </div>
