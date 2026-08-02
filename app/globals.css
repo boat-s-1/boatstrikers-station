@@ -8360,3 +8360,36 @@ body {
 .homeLatestInfoTitle .homeTitleImage {
   margin-bottom: 0;
 }
+
+/* 週間番組表へのトップページ導線 */
+.weeklyScheduleLink {
+  width: min(calc(100% - 30px), 660px);
+  margin: 22px auto;
+}
+
+.weeklyScheduleLink a {
+  display: grid;
+  gap: 4px;
+  border: 2px solid #7cccf0;
+  border-radius: 18px;
+  padding: 17px 19px;
+  background: linear-gradient(135deg, #e7f7ff, #f3eaff);
+  box-shadow: 0 9px 22px rgba(22, 99, 146, .12);
+  color: #123e66;
+  text-decoration: none;
+}
+
+.weeklyScheduleLink span {
+  color: #087dbe;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.weeklyScheduleLink strong {
+  font-size: 21px;
+}
+
+.weeklyScheduleLink small {
+  color: #587287;
+  line-height: 1.5;
+}

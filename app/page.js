@@ -241,9 +241,14 @@ export default async function Home() {
 
       </section>
 
+      <section className="weeklyScheduleLink">
+        <a href="/schedule">
+          <span>📅 今週の配信をチェック</span>
+          <strong>BoatStrikers 週間番組表</strong>
+          <small>ラジオ・ショート動画・note・生放送をまとめて確認</small>
+        </a>
+      </section>
 
-
-            
       <section className="homeLatestInfo">
         <div className="homeLatestInfoTitle">
           <img
