@@ -733,4 +733,4 @@ export default async function IchikaPage() {
 
      
   );
-}
+
