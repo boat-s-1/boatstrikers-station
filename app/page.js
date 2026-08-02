@@ -54,26 +54,31 @@ function getCurrentMonthRange() {
 }
 
 /* =========================
-   今月の予想実績を取得
+   3人の今月の予想数を取得
 ========================= */
 
-async function getMonthlyForecastResults() {
-  const emptyMember = (name, label) => ({
-    name, label, raceCount: 0, hitCount: 0, hitRate: 0,
-    invest: 0, payout: 0, returnRate: 0, maxPayout: 0,
-  });
+async function getMonthlyForecastStats() {
+  const emptyMembers = [
+    { name: "ichika", label: "一果", href: "/ichika", role: "イン逃げ担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "hatsune", label: "初音", href: "/hatsune", role: "女子戦担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "kiina", label: "キイナ", href: "/kiina", role: "5アタマ担当", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+  ];
 
   const empty = {
-    raceCount: 0, hitCount: 0, hitRate: 0, invest: 0, payout: 0,
-    returnRate: 0, maxPayout: 0,
-    members: [
-      emptyMember("ichika", "一果"),
-      emptyMember("hatsune", "初音"),
-      emptyMember("kiina", "キイナ"),
-    ],
+    totalRace: 0,
+    hitRace: 0,
+    hitRate: 0,
+    invest: 0,
+    payout: 0,
+    recoveryRate: 0,
+    maxPayout: 0,
+    members: emptyMembers,
   };
 
-  if (!supabase) return empty;
+  if (!supabase) {
+    console.error("Supabase未接続です");
+    return empty;
+  }
 
   try {
     const { monthStart, nextMonthStart } = getCurrentMonthRange();
@@ -85,31 +90,37 @@ async function getMonthlyForecastResults() {
       .in("category", ["一果", "初音", "キイナ"]);
 
     if (error) throw error;
+
     const rows = Array.isArray(data) ? data : [];
+    const totalRace = rows.length;
+    const hitRace = rows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
+    const invest = rows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
+    const payout = rows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
+    const maxPayout = rows.reduce((max, row) => Math.max(max, Number(row.payout || 0)), 0);
 
-    const summarize = (items) => {
-      const raceCount = items.length;
-      const hitCount = items.filter((r) => Boolean(r.hit) || Number(r.payout || 0) > 0).length;
-      const invest = items.reduce((sum, r) => sum + Number(r.invest || 0), 0);
-      const payout = items.reduce((sum, r) => sum + Number(r.payout || 0), 0);
-      const maxPayout = items.reduce((max, r) => Math.max(max, Number(r.payout || 0)), 0);
+    const members = emptyMembers.map((member) => {
+      const memberRows = rows.filter((row) => row.category === member.label);
+      const memberHits = memberRows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
+      const memberInvest = memberRows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
+      const memberPayout = memberRows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
+
       return {
-        raceCount, hitCount, invest, payout, maxPayout,
-        hitRate: raceCount ? Math.round((hitCount / raceCount) * 1000) / 10 : 0,
-        returnRate: invest ? Math.round((payout / invest) * 1000) / 10 : 0,
+        ...member,
+        raceCount: memberRows.length,
+        hitCount: memberHits,
+        recoveryRate: memberInvest > 0 ? (memberPayout / memberInvest) * 100 : 0,
       };
-    };
-
-    const total = summarize(rows);
-    const memberDefs = [
-      ["ichika", "一果"], ["hatsune", "初音"], ["kiina", "キイナ"],
-    ];
+    });
 
     return {
-      ...total,
-      members: memberDefs.map(([name, label]) => ({
-        name, label, ...summarize(rows.filter((r) => r.category === label)),
-      })),
+      totalRace,
+      hitRace,
+      hitRate: totalRace > 0 ? (hitRace / totalRace) * 100 : 0,
+      invest,
+      payout,
+      recoveryRate: invest > 0 ? (payout / invest) * 100 : 0,
+      maxPayout,
+      members,
     };
   } catch (error) {
     console.error("トップページ成績取得エラー:", error);
@@ -214,7 +225,7 @@ export default async function Home() {
   ] = await Promise.all([
     getTodayNewspapers(),
     getLatestInfo(),
-    getMonthlyForecastResults(),
+    getMonthlyForecastStats(),
     getHomeCmsData(),
   ]);
 
@@ -313,42 +324,66 @@ export default async function Home() {
   </a>
 </section>
 
-   <section className="homeSectionCard yellow compactResultsSection">
+   <section className="homeSectionCard yellow resultSummarySection">
   <img
     src="/IMG_6116.jpeg"
     alt="今月の予想実績"
-    className="homeTitleImage compactResultsTitle"
+    className="homeTitleImage"
   />
 
-  {results.raceCount === 0 ? (
-    <div className="resultsCollecting">
+  {results.totalRace === 0 ? (
+    <div className="resultEmptyState">
+      <span aria-hidden="true">📊</span>
       <strong>今月の予想実績は集計中です</strong>
-      <p>実績が登録されると、的中率・回収率・最高払戻を表示します。</p>
+      <p>予想実績が登録されると、ここに自動で表示されます。</p>
     </div>
   ) : (
     <>
-      <div className="resultsSummaryGrid">
-        <div><span>予想レース数</span><strong>{results.raceCount}<small>R</small></strong></div>
-        <div><span>的中率</span><strong>{results.hitRate}<small>%</small></strong></div>
-        <div><span>回収率</span><strong>{results.returnRate}<small>%</small></strong></div>
-        <div><span>最高払戻</span><strong>{results.maxPayout.toLocaleString()}<small>円</small></strong></div>
+      <div className="resultStatsGrid">
+        <div className="resultStatCard">
+          <span>予想レース数</span>
+          <strong>{results.totalRace}<small>R</small></strong>
+        </div>
+        <div className="resultStatCard">
+          <span>的中率</span>
+          <strong>{results.hitRate.toFixed(1)}<small>%</small></strong>
+        </div>
+        <div className="resultStatCard">
+          <span>回収率</span>
+          <strong>{results.recoveryRate.toFixed(1)}<small>%</small></strong>
+        </div>
+        <div className="resultStatCard">
+          <span>最高払戻</span>
+          <strong>{results.maxPayout.toLocaleString()}<small>円</small></strong>
+        </div>
       </div>
 
-      <div className="memberResultMiniGrid">
+      <div className="resultMemberGrid" aria-label="キャラクター別予想実績">
         {results.members.map((member) => (
-          <a href={`/${member.name}`} className={`memberResultMini ${member.name}`} key={member.name}>
-            <b>{member.label}</b>
-            <span>{member.raceCount}R／的中 {member.hitCount}R</span>
-            <small>回収率 {member.returnRate}%</small>
+          <a
+            href={member.href}
+            className={`resultMemberCard resultMemberCard--${member.name}`}
+            key={member.name}
+            aria-label={`${member.label}のページを見る`}
+          >
+            <div className="resultMemberTop">
+              <div>
+                <span className="resultMemberName">{member.label}</span>
+                <span className="resultMemberRole">{member.role}</span>
+              </div>
+              <span className="resultMemberArrow" aria-hidden="true">›</span>
+            </div>
+            <div className="resultMemberNumbers">
+              <span><b>{member.raceCount}</b>R</span>
+              <span><b>{member.hitCount}</b>的中</span>
+              <span>回収率 <b>{member.recoveryRate.toFixed(1)}</b>%</span>
+            </div>
+            <small>名前をタップしてキャラクターページへ</small>
           </a>
         ))}
       </div>
     </>
   )}
-
-  <a className="resultsDetailLink" href="/results">
-    詳しい予想実績を見る <span>→</span>
-  </a>
 </section>
 
     <section className="homeSectionCard blue">
