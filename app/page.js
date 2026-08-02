@@ -370,6 +370,19 @@ export default async function Home() {
               src={member.icon}
               alt={`${member.label}のアイコン`}
               className="resultMemberIcon"
+              width="52"
+              height="52"
+              style={{
+                width: "52px",
+                height: "52px",
+                minWidth: "52px",
+                maxWidth: "52px",
+                minHeight: "52px",
+                maxHeight: "52px",
+                objectFit: "cover",
+                borderRadius: "50%",
+                flexShrink: 0,
+              }}
             />
             <div className="resultMemberContent">
               <div className="resultMemberHeading">

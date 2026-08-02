@@ -6957,7 +6957,11 @@ color:white;
     box-shadow: 0 0 0 0 rgba(255,79,147,.6);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(.beginnerMapPage {
+    box-shadow: 0 0 0 10px rgba(255, 79, 147, 0);
+  }
+}
+
+.beginnerMapPage {
   min-height: 100vh;
   background: #071f4f;
   padding-bottom: 80px;
