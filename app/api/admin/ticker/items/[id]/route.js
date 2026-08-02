@@ -1,0 +1,6 @@
+import {NextResponse} from "next/server";
+import {isScheduleAdminAuthenticated} from "../../../../../admin/schedule/_lib/scheduleAdminAuth";
+import {getAdminScheduleSupabase} from "../../../../../../lib/scheduleSupabase";
+function clean(b){return{message:String(b.message||"").trim(),link_url:String(b.link_url||"").trim()||null,sort_order:Number(b.sort_order)||0,is_active:Boolean(b.is_active)}}
+export async function PUT(r,{params}){if(!(await isScheduleAdminAuthenticated()))return NextResponse.json({error:"Unauthorized"},{status:401});try{const{id}=await params,s=getAdminScheduleSupabase();const{data,error}=await s.from("home_ticker_items").update(clean(await r.json())).eq("id",id).select().single();if(error)throw error;return NextResponse.json({item:data})}catch(e){return NextResponse.json({error:e.message},{status:500})}}
+export async function DELETE(_r,{params}){if(!(await isScheduleAdminAuthenticated()))return NextResponse.json({error:"Unauthorized"},{status:401});try{const{id}=await params,s=getAdminScheduleSupabase();const{error}=await s.from("home_ticker_items").delete().eq("id",id);if(error)throw error;return NextResponse.json({ok:true})}catch(e){return NextResponse.json({error:e.message},{status:500})}}
