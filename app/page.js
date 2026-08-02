@@ -4,6 +4,8 @@ import { supabase } from "./bsc2/lib/supabaseClient";
 import BottomNav from "./BottomNav";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
+import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
+import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 
 
 export const dynamic = "force-dynamic";
@@ -57,74 +59,87 @@ function getCurrentMonthRange() {
 ========================= */
 
 async function getMonthlyForecastCounts() {
-  const emptyMembers = [
-    { name: "ichika", raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0 },
-    { name: "hatsune", raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0 },
-    { name: "kiina", raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0 },
+  const defaultResults = [
+    {
+      name: "ichika",
+      raceCount: 0,
+    },
+    {
+      name: "hatsune",
+      raceCount: 0,
+    },
+    {
+      name: "kiina",
+      raceCount: 0,
+    },
   ];
 
   if (!supabase) {
-    return {
-      summary: { raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0, bestHit: 0 },
-      members: emptyMembers,
-    };
+    console.error("Supabase未接続です");
+    return defaultResults;
   }
 
   try {
-    const { monthStart, nextMonthStart } = getCurrentMonthRange();
+    const { monthStart, nextMonthStart } =
+      getCurrentMonthRange();
+
     const { data, error } = await supabase
       .from("bsc_results")
-      .select("category, invest, payout, hit")
+      .select("category")
       .gte("race_date", monthStart)
       .lt("race_date", nextMonthStart)
-      .in("category", ["一果", "初音", "キイナ"]);
+      .in("category", [
+        "一果",
+        "初音",
+        "キイナ",
+      ]);
 
-    if (error) throw error;
-    const rows = Array.isArray(data) ? data : [];
+    if (error) {
+      throw error;
+    }
 
-    const aggregate = (targetRows) => {
-      const raceCount = targetRows.length;
-      const hitCount = targetRows.filter(
-        (row) => row.hit === true || Number(row.payout || 0) > 0
-      ).length;
-      const invest = targetRows.reduce(
-        (sum, row) => sum + Number(row.invest || 0), 0
-      );
-      const payout = targetRows.reduce(
-        (sum, row) => sum + Number(row.payout || 0), 0
-      );
-      const bestHit = targetRows.reduce(
-        (max, row) => Math.max(max, Number(row.payout || 0)), 0
-      );
+    const rows = Array.isArray(data)
+      ? data
+      : [];
 
-      return {
-        raceCount,
-        hitCount,
-        hitRate: raceCount ? Math.round((hitCount / raceCount) * 1000) / 10 : 0,
-        returnRate: invest ? Math.round((payout / invest) * 1000) / 10 : 0,
-        bestHit,
-      };
+    const counts = {
+      一果: 0,
+      初音: 0,
+      キイナ: 0,
     };
 
-    const configs = [
-      { name: "ichika", category: "一果" },
-      { name: "hatsune", category: "初音" },
-      { name: "kiina", category: "キイナ" },
+    rows.forEach((row) => {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          counts,
+          row.category
+        )
+      ) {
+        counts[row.category] += 1;
+      }
+    });
+
+    return [
+      {
+        name: "ichika",
+        raceCount: counts["一果"],
+      },
+      {
+        name: "hatsune",
+        raceCount: counts["初音"],
+      },
+      {
+        name: "kiina",
+        raceCount: counts["キイナ"],
+      },
     ];
-
-    return {
-      summary: aggregate(rows),
-      members: configs.map((config) => ({
-        name: config.name,
-        ...aggregate(rows.filter((row) => row.category === config.category)),
-      })),
-    };
   } catch (error) {
-    console.error("トップページ成績取得エラー:", error);
-    return {
-      summary: { raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0, bestHit: 0 },
-      members: emptyMembers,
-    };
+    console.error(
+      "トップページ成績取得エラー:",
+      error
+    );
+
+    return defaultResults;
   }
 }
 
@@ -198,15 +213,35 @@ async function getLatestInfo() {
   });
 }
 
+
+async function getHomeCmsData() {
+  const client = getPublicScheduleSupabase();
+  if (!client) return { tickerItems: [], scheduleItems: [] };
+  try {
+    const now = new Date();
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+    const [ticker, schedule] = await Promise.all([
+      client.from("home_ticker_items").select("*").eq("is_active", true).order("sort_order"),
+      client.from("weekly_schedule_items").select("*").eq("event_date", today).eq("status", "published").order("start_time")
+    ]);
+    return { tickerItems: ticker.data || [], scheduleItems: schedule.data || [] };
+  } catch (error) {
+    console.error("CMS表示取得エラー:", error);
+    return { tickerItems: [], scheduleItems: [] };
+  }
+}
+
 export default async function Home() {
   const [
     news,
     latestInfo,
-    resultData,
+    results,
+    cms,
   ] = await Promise.all([
     getTodayNewspapers(),
     getLatestInfo(),
     getMonthlyForecastCounts(),
+    getHomeCmsData(),
   ]);
 
   return (
@@ -228,25 +263,7 @@ export default async function Home() {
 
       </section>
 
-      <section className="weeklyScheduleLink">
-        <a href="/schedule">
-          <span>📅 今週の配信をチェック</span>
-          <strong>BoatStrikers 週間番組表</strong>
-          <small>ラジオ・ショート動画・note・生放送をまとめて確認</small>
-        </a>
-      </section>
-
-      <section className="homeLatestInfo">
-        <div className="homeLatestInfoTitle">
-          <img
-            src="/IMG_6217.jpeg"
-            alt="最新情報"
-            className="homeTitleImage"
-          />
-        </div>
-
-        <LatestInfoSlider items={latestInfo} />
-      </section>
+      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
       
 
@@ -322,46 +339,49 @@ export default async function Home() {
   </a>
 </section>
 
-   <section className="homeResultsCompact">
-  <div className="homeResultsHeading">
-    <div>
-      <span>MONTHLY RESULTS</span>
-      <h2>今月の予想実績</h2>
-    </div>
-    <a href="/ichika">詳しい実績を見る ›</a>
+   <section className="homeSectionCard yellow">
+  <img
+    src="/IMG_6116.jpeg"
+    alt="今月の予想数"
+    className="homeTitleImage"
+  />
+
+  <div className="forecastMemberList">
+    {results.map((r) => {
+      const names = {
+        ichika: "一果",
+        hatsune: "初音",
+        kiina: "キイナ",
+      };
+
+      const roles = {
+        ichika: "イン逃げ担当",
+        hatsune: "女子戦担当",
+        kiina: "5アタマ担当",
+      };
+
+      const classes = {
+        ichika: "ichikaMember",
+        hatsune: "hatsuneMember",
+        kiina: "kiinaMember",
+      };
+
+      return (
+        <a
+          href={`/${r.name}`}
+          className={`forecastMemberCard ${classes[r.name]}`}
+          key={r.name}
+        >
+          <div>
+            <span>{names[r.name]}</span>
+            <strong>{r.raceCount}R</strong>
+            <p>{roles[r.name]}</p>
+            <b>成績を見る ›</b>
+          </div>
+        </a>
+      );
+    })}
   </div>
-
-  {resultData.summary.raceCount > 0 ? (
-    <>
-      <div className="homeResultsStats">
-        <div><span>予想</span><strong>{resultData.summary.raceCount}R</strong></div>
-        <div><span>的中率</span><strong>{resultData.summary.hitRate}%</strong></div>
-        <div><span>回収率</span><strong>{resultData.summary.returnRate}%</strong></div>
-        <div><span>最高払戻</span><strong>{resultData.summary.bestHit.toLocaleString()}円</strong></div>
-      </div>
-
-      <div className="homeResultsMembers">
-        {resultData.members.map((member) => {
-          const names = { ichika: "一果", hatsune: "初音", kiina: "キイナ" };
-          return (
-            <a href={`/${member.name}`} key={member.name}>
-              <b>{names[member.name]}</b>
-              <span>{member.raceCount}R・的中率 {member.hitRate}%</span>
-              <i>›</i>
-            </a>
-          );
-        })}
-      </div>
-    </>
-  ) : (
-    <div className="homeResultsEmpty">
-      <span>📊</span>
-      <div>
-        <strong>今月の予想実績は集計中です</strong>
-        <p>実績が登録されると、こちらへ自動表示されます。</p>
-      </div>
-    </div>
-  )}
 </section>
 
     <section className="homeSectionCard blue">
