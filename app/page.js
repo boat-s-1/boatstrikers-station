@@ -4,6 +4,8 @@ import { supabase } from "./bsc2/lib/supabaseClient";
 import BottomNav from "./BottomNav";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
+import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
+import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 
 
 export const dynamic = "force-dynamic";
@@ -211,15 +213,35 @@ async function getLatestInfo() {
   });
 }
 
+
+async function getHomeCmsData() {
+  const client = getPublicScheduleSupabase();
+  if (!client) return { tickerItems: [], scheduleItems: [] };
+  try {
+    const now = new Date();
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+    const [ticker, schedule] = await Promise.all([
+      client.from("home_ticker_items").select("*").eq("is_active", true).order("sort_order"),
+      client.from("weekly_schedule_items").select("*").eq("event_date", today).eq("status", "published").order("start_time")
+    ]);
+    return { tickerItems: ticker.data || [], scheduleItems: schedule.data || [] };
+  } catch (error) {
+    console.error("CMS表示取得エラー:", error);
+    return { tickerItems: [], scheduleItems: [] };
+  }
+}
+
 export default async function Home() {
   const [
     news,
     latestInfo,
     results,
+    cms,
   ] = await Promise.all([
     getTodayNewspapers(),
     getLatestInfo(),
     getMonthlyForecastCounts(),
+    getHomeCmsData(),
   ]);
 
   return (
@@ -241,25 +263,7 @@ export default async function Home() {
 
       </section>
 
-      <section className="weeklyScheduleLink">
-        <a href="/schedule">
-          <span>📅 今週の配信をチェック</span>
-          <strong>BoatStrikers 週間番組表</strong>
-          <small>ラジオ・ショート動画・note・生放送をまとめて確認</small>
-        </a>
-      </section>
-
-      <section className="homeLatestInfo">
-        <div className="homeLatestInfoTitle">
-          <img
-            src="/IMG_6217.jpeg"
-            alt="最新情報"
-            className="homeTitleImage"
-          />
-        </div>
-
-        <LatestInfoSlider items={latestInfo} />
-      </section>
+      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
       
 
