@@ -66,10 +66,11 @@ export default async function SchedulePage({ searchParams }) {
         <a className={styles.lineButton} href="https://lin.ee/Pf3FEEQ">LINE登録</a>
       </header>
 
-      <section className={styles.hero}>
-        <p>RADIO・SHORTS・NOTE・LIVE</p>
-        <h1>BoatStrikers<br />週間番組表</h1>
-        <span>今週の配信を、ひと目でチェック！</span>
+      <section className={styles.hero} aria-label="BoatStrikers週間番組表">
+        <img
+          src="/schedule-banners/weekly-schedule-banner.jpg"
+          alt="BoatStrikers週間番組表 今週の配信をひと目でチェック"
+        />
       </section>
 
       <nav className={styles.weekNav} aria-label="週の移動">
