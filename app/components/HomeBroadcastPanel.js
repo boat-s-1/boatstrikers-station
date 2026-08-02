@@ -27,7 +27,14 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div>
     </div>
     <div className={styles.card}>
-      <header><div><small>TODAY&apos;S SCHEDULE</small><h2>今日の予定</h2></div><b>{dateLabel}</b></header>
+      <div className={styles.todayBannerWrap}>
+        <img
+          className={styles.todayBanner}
+          src="/schedule-banners/today-schedule-banner.jpg"
+          alt="今日の予定 本日の配信をチェック"
+        />
+        <b className={styles.todayDate}>{dateLabel}</b>
+      </div>
       <div className={styles.list}>
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
