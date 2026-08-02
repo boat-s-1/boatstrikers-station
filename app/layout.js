@@ -1,4 +1,5 @@
 import "./globals.css";
+import PublicBottomNav from "./PublicBottomNav";
 
 export const metadata = {
   title: "BoatStrikers放送局",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        {children}
+        <PublicBottomNav />
+      </body>
     </html>
   );
 }

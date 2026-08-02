@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import { supabase } from "./bsc2/lib/supabaseClient";
-import BottomNav from "./BottomNav";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
@@ -408,7 +407,6 @@ export default async function Home() {
   </a>
 </section>
 
-      <BottomNav />
     </main>
   );
 }
