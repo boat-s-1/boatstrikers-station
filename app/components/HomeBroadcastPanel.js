@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeBroadcastPanel.module.css";
+import { getProgramPresetByTitle } from "../../lib/programPresets";
 
 const TYPE_LABELS = { radio:"ラジオ", short:"ショート動画", note:"note", live:"生放送", comic:"コミック", other:"お知らせ" };
 
@@ -38,7 +39,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <div className={styles.list}>
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
-          const body=<><div className={styles.time}><strong>{String(item.start_time).slice(0,5)}</strong><em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em></div><div className={styles.body}><span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span><h3>{item.title}</h3>{item.episode&&<p>{item.episode}</p>}</div><i>›</i></>;
+          const preset=getProgramPresetByTitle(item.title);
+          const body=<><div className={styles.time}><strong>{String(item.start_time).slice(0,5)}</strong><em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em></div>{preset&&<div className={styles.programIcon} style={{"--program-accent":preset.accent}}>{preset.iconUrl?<img src={preset.iconUrl} alt=""/>:<span>{preset.iconText}</span>}</div>}<div className={styles.body}><span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span><h3>{item.title}</h3>{item.episode&&<p>{item.episode}</p>}</div><i>›</i></>;
           return item.link_url?<a key={item.id} href={item.link_url} className={ended?styles.past:""}>{body}</a>:<div key={item.id} className={ended?styles.past:""}>{body}</div>
         }):<div className={styles.empty}>📅 本日の予定はありません</div>}
       </div>

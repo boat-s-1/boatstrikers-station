@@ -6,3 +6,9 @@
 .todayBanner{display:block;width:100%;height:auto;aspect-ratio:3/1;object-fit:cover}
 .todayDate{position:absolute;right:10px;bottom:9px;padding:6px 11px;border:2px solid rgba(255,255,255,.9);border-radius:999px;color:#fff;background:linear-gradient(135deg,rgba(18,110,201,.96),rgba(25,181,230,.96));font-size:12px;font-weight:900;box-shadow:0 4px 12px rgba(0,84,145,.2)}
 @media(max-width:520px){.card{padding:11px}.todayBannerWrap{border-radius:13px}.todayDate{right:7px;bottom:7px;padding:5px 9px;font-size:11px}.list{margin-top:10px}}
+
+.programIcon{display:grid;place-items:center;width:48px;height:48px;overflow:hidden;border:2px solid var(--program-accent,#168bc7);border-radius:50%;background:#fff;box-shadow:0 4px 10px #164d731f}
+.programIcon img{display:block;width:100%;height:100%;object-fit:cover}
+.programIcon span{display:grid;place-items:center;width:100%;height:100%;color:#fff;background:var(--program-accent,#168bc7);font-size:16px;font-weight:1000}
+.list>a:has(.programIcon),.list>div:not(.empty):has(.programIcon){grid-template-columns:67px 48px minmax(0,1fr) 24px}
+@media(max-width:430px){.programIcon{width:42px;height:42px}.list>a:has(.programIcon),.list>div:not(.empty):has(.programIcon){grid-template-columns:62px 42px minmax(0,1fr) 20px;gap:7px}}
