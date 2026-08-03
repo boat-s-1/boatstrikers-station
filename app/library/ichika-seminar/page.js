@@ -21,6 +21,12 @@ async function getIchikaSeminarArticles() {
     });
 }
 
+export const metadata = {
+  title: "一果のイン逃げ鉄板ゼミ｜1号艇とイン逃げ分析",
+  description:
+    "1号艇のイン逃げ条件、逃げやすいレース、危険なインの見分け方を一果が解説するボートレース攻略コンテンツです。",
+};
+
 export default async function IchikaSeminarPage() {
   const articles = await getIchikaSeminarArticles();
   const latest = articles[0];
