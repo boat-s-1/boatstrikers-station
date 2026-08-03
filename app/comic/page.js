@@ -63,6 +63,12 @@ function formatDate(value) {
   }
 }
 
+export const metadata = {
+  title: "私立みなも学園～ふなけん研究部～",
+  description:
+    "一果、初音、キイナの3人がボートレースにまつわる学園生活を繰り広げる、BoatStrikersのオリジナル漫画です。",
+};
+
 export default async function ComicPage() {
   const episodes = await getLatestEpisodes();
   const playlistUrl = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;
