@@ -20,15 +20,7 @@ export default function RootLayout({ children }) {
         {children}
         <PublicBottomNav />
       </body>
+     <GoogleAnalytics gaId="G-DXF6FFZ574" />
     </html>
   );
-}
-export default function RootLayout({ children }) {
-  return (
-    <html lang="ja">
-      <body>{children}</body>
 
-      <GoogleAnalytics gaId="G-DXF6FFZ574" />
-    </html>
-  );
-}
