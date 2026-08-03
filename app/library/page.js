@@ -1,319 +1,434 @@
 import Image from "next/image";
 import Parser from "rss-parser";
-import BookCard from "./BookCard";
-import LibraryPoint from "./LibraryPoint";
+import { supabase } from "./bsc2/lib/supabaseClient";
+import MemberSlider from "./MemberSlider";
+import LatestInfoSlider from "./LatestInfoSlider";
+import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
+import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 
-async function getLibraryItems() {
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+
+
+/* =========================
+   日本時間基準の今月範囲
+========================= */
+
+function getCurrentMonthRange() {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "numeric",
+  });
+
+  const parts = formatter.formatToParts(new Date());
+
+  const year = Number(
+    parts.find((part) => part.type === "year")?.value
+  );
+
+  const month = Number(
+    parts.find((part) => part.type === "month")?.value
+  );
+
+  const monthStart =
+    `${year}-${String(month).padStart(2, "0")}-01`;
+
+  let nextYear = year;
+  let nextMonth = month + 1;
+
+  if (nextMonth === 13) {
+    nextYear += 1;
+    nextMonth = 1;
+  }
+
+  const nextMonthStart =
+    `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
+  return {
+    monthStart,
+    nextMonthStart,
+  };
+}
+
+/* =========================
+   3人の今月の予想数を取得
+========================= */
+
+async function getMonthlyForecastStats() {
+  const emptyMembers = [
+    { name: "ichika", label: "一果", href: "/ichika", role: "イン逃げ担当", icon: "/results/icons/ichika.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "hatsune", label: "初音", href: "/hatsune", role: "女子戦担当", icon: "/results/icons/hatsune.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+    { name: "kiina", label: "キイナ", href: "/kiina", role: "5アタマ担当", icon: "/results/icons/kiina.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
+  ];
+
+  const empty = {
+    totalRace: 0,
+    hitRace: 0,
+    hitRate: 0,
+    invest: 0,
+    payout: 0,
+    recoveryRate: 0,
+    maxPayout: 0,
+    members: emptyMembers,
+  };
+
+  if (!supabase) {
+    console.error("Supabase未接続です");
+    return empty;
+  }
+
+  try {
+    const { monthStart, nextMonthStart } = getCurrentMonthRange();
+    const { data, error } = await supabase
+      .from("bsc_results")
+      .select("category, invest, payout, hit")
+      .gte("race_date", monthStart)
+      .lt("race_date", nextMonthStart)
+      .in("category", ["一果", "初音", "キイナ"]);
+
+    if (error) throw error;
+
+    const rows = Array.isArray(data) ? data : [];
+    const totalRace = rows.length;
+    const hitRace = rows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
+    const invest = rows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
+    const payout = rows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
+    const maxPayout = rows.reduce((max, row) => Math.max(max, Number(row.payout || 0)), 0);
+
+    const members = emptyMembers.map((member) => {
+      const memberRows = rows.filter((row) => row.category === member.label);
+      const memberHits = memberRows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
+      const memberInvest = memberRows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
+      const memberPayout = memberRows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
+
+      return {
+        ...member,
+        raceCount: memberRows.length,
+        hitCount: memberHits,
+        recoveryRate: memberInvest > 0 ? (memberPayout / memberInvest) * 100 : 0,
+      };
+    });
+
+    return {
+      totalRace,
+      hitRace,
+      hitRate: totalRace > 0 ? (hitRace / totalRace) * 100 : 0,
+      invest,
+      payout,
+      recoveryRate: invest > 0 ? (payout / invest) * 100 : 0,
+      maxPayout,
+      members,
+    };
+  } catch (error) {
+    console.error("トップページ成績取得エラー:", error);
+    return empty;
+  }
+}
+
+async function getTodayNewspapers() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-  return feed.items.slice(0, 8).map((item) => {
+  const targets = [
+    {
+      name: "一果新聞 前日版",
+      keyword: "【一果前日版】",
+      tag: "イン逃げ",
+      href: "/ichika",
+      fallback: "/ichika-banner.jpg",
+    },
+    {
+      name: "初音新聞 女子戦版",
+      keyword: "【初音前日版】",
+      tag: "女子戦",
+      href: "/hatsune",
+      fallback: "/hatsune-banner.jpg",
+    },
+    {
+      name: "キイナ新聞 5アタマ版",
+      keyword: "【キイナ前日版】",
+      tag: "穴狙い",
+      href: "/kiina",
+      fallback: "/kiina-banner.jpg",
+    },
+  ];
+
+  return targets.map((t) => {
+    const item = feed.items.find((feedItem) =>
+      feedItem.title.includes(t.keyword)
+    );
+
     const image =
-      item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
-      "/library-banner.jpg";
+      item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || t.fallback;
+
+    return {
+      title: item ? item.title : t.name,
+      date: item ? item.pubDate : "",
+      link: item ? item.link : t.href,
+      tag: t.tag,
+      image: image,
+    };
+  });
+}
+
+async function getLatestInfo() {
+  const parser = new Parser();
+  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+
+  return feed.items.slice(0, 5).map((item) => {
+    let category = "note";
+
+    if (item.title.includes("【一果前日版】")) category = "一果新聞";
+    if (item.title.includes("【初音前日版】")) category = "初音新聞";
+    if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
+    if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
+    if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
+    if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
+    if (item.title.includes("場攻略】")) category = "24場攻略";
 
     return {
       title: item.title,
       link: item.link,
       date: item.pubDate,
-      image,
+      category,
     };
   });
 }
 
-async function getLibraryNews() {
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-  return feed.items
-    .slice(0, 20)
-    .map((item) => {
-      let category = "";
-
-      if (item.title.includes("【一果ゼミ")) category = "🌸 一果ゼミ";
-      if (item.title.includes("【初音ゼミ")) category = "💜 初音ゼミ";
-      if (item.title.includes("【キイナゼミ")) category = "⚡ キイナゼミ";
-
-      if (item.title.includes("場攻略】")) {
-        const match = item.title.match(/【(.+?)場攻略】/);
-        category = match ? `📘 ${match[1]}攻略` : "📘 24場攻略";
-      }
-
-      if (item.title.includes("【一果前日版】")) category = "🌸 一果新聞";
-      if (item.title.includes("【初音前日版】")) category = "💜 初音新聞";
-      if (item.title.includes("【キイナ前日版】")) category = "⚡ キイナ新聞";
-
-      return {
-        title: item.title,
-        link: item.link,
-        date: item.pubDate,
-        category,
-      };
-    })
-    .filter((item) => item.category !== "")
-    .slice(0, 5);
+async function getHomeCmsData() {
+  const client = getPublicScheduleSupabase();
+  if (!client) return { tickerItems: [], scheduleItems: [] };
+  try {
+    const now = new Date();
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+    const [ticker, schedule] = await Promise.all([
+      client.from("home_ticker_items").select("*").eq("is_active", true).order("sort_order"),
+      client.from("weekly_schedule_items").select("*").eq("event_date", today).eq("status", "published").order("start_time")
+    ]);
+    return { tickerItems: ticker.data || [], scheduleItems: schedule.data || [] };
+  } catch (error) {
+    console.error("CMS表示取得エラー:", error);
+    return { tickerItems: [], scheduleItems: [] };
+  }
 }
 
-const sections = [
-  {
-    title: "週刊誌コーナー",
-    lead: "3人のゼミをまとめてチェック！",
-    titleImage: "/IMG_6091.jpeg",
-    books: [
-      {
-        title: "一果ゼミ",
-        icon: "🌸",
-        text: "イン逃げ研究",
-        href: "/library/ichika-seminar",
-        className: "greenBook",
-        cover: "/5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",
-        inside: "/0624D4E1-6C05-4F40-9439-2A093A1B0F0D.png",
-      },
-      {
-        title: "初音ゼミ",
-        icon: "💜",
-        text: "女子戦研究",
-        href: "/library/hatsune-seminar",
-        className: "purpleBook",
-        cover: "/D5E40BCC-AA6E-4347-B86B-9D0FE4BF4833.png",
-        inside: "/2906B318-96E8-4CE9-AA58-2591BC5F6007.png",
-      },
-      {
-        title: "キイナゼミ",
-        icon: "⚡",
-        text: "穴党研究",
-        href: "/library/kiina-seminar",
-        className: "yellowBook",
-        cover: "/6716D6BF-80F0-415A-BC81-0270FB704655.png",
-        inside: "/4A1DFE79-8D3F-4D28-BFCA-E97C36B752D2.png",
-      },
-    ],
-  },
-  {
-    title: "攻略本コーナー",
-    titleImage: "/IMG_6094.jpeg",
-    books: [
-      {
-        title: "24場攻略ノート",
-        icon: "📘",
-        text: "場別攻略",
-        href: "/library/stadiums",
-        className: "blueBook",
-        cover: "/9DB363E3-DA3D-44BE-BC88-26F3B23C6B3E.png",
-        inside: "/B40F322B-2661-475E-8F36-519CD91A4F52.png",
-      },
-    ],
-  },
-  {
-    title: "バックナンバー",
-    titleImage: "/IMG_6095.jpeg",
-    books: [
-      {
-        title: "一果予想新聞",
-        icon: "🌸",
-        text: "イン逃げ新聞",
-        href: "/library/news/ichika",
-        className: "greenBook",
-        cover: "/C53B3EAC-3CBA-411D-BCFF-4C67354CC424.png",
-        inside: "/50A928E2-55B4-4FEC-BE0E-6B890A37C4A4.png",
-      },
-      {
-        title: "初音予想新聞",
-        icon: "💜",
-        text: "女子戦新聞",
-        href: "/library/news/hatsune",
-        className: "purpleBook",
-        cover: "/796A2BB9-A731-4038-9A83-D00FF5F80DFD.png",
-        inside: "/A8A98454-7463-489D-AF73-D23E8C3D9E98.png",
-      },
-      {
-        title: "キイナ予想新聞",
-        icon: "⚡",
-        text: "5アタマ新聞",
-        href: "/library/news/kiina",
-        className: "yellowBook",
-        cover: "/736ED09D-025E-4BF8-8215-81C0C0B9EA18.png",
-        inside: "/CF5B266A-CA11-44D0-8DF1-31D4341D5928.png",
-      },
-    ],
-  },
-  {
-    title: "🎙 視聴覚コーナー",
-    titleImage: "/IMG_6424.jpeg",
-    lead: "Boat Strikers Radioを聴く！",
-    books: [
-      {
-        title: "Radio",
-        icon: "🎙",
-        text: "ラジオ一覧",
-        href: "/radio",
-        className: "redBook",
-        cover: "/F49CB336-9539-4E68-B14F-460BB467597E.png",
-        inside: "/433B2F45-DD7A-4503-A09E-309840D7E591.png",
-      },
-
-　　　{
-        title: "Radio",
-        icon: "🎙",
-        text: "みなも学園",
-        href: "/comic",
-        className: "redBook",
-        cover: "/CE14A00C-898A-4CF3-BD7F-5E5F81A92E92.png",
-        inside: "/59F96330-6F99-4736-8083-6D6508FCD861.png",
-      },
-      
-    ],
-  },
-  {
-    title: "📊 資料室",
-    titleImage: "/IMG_6425.jpeg",
-  
-    lead: "成績・データ・特典資料はこちら！",
-    books: [
-      {
-        title: "成績データ",
-        icon: "📊",
-        text: "的中実績",
-        href: "/library/results",
-        className: "brownBook",
-        cover: "/A0021C32-58D9-488E-B0E2-F99E8718DB03.png",
-        inside: "/F8A10D72-9BB2-41B3-943E-54C1CB5D122D.png",
-      },
-      {
-        title: "特典資料",
-        icon: "🎁",
-        text: "PDF資料",
-        href: "/library/bonus",
-        className: "tealBook",
-        cover: "/FC167F92-CB82-4EB4-8712-A19C9F50535D.png",
-        inside: "/F8A10D72-9BB2-41B3-943E-54C1CB5D122D.png",
-      },
-    ],
-  },
-];
-
-export default async function LibraryPage() {
-  const items = await getLibraryItems();
-  const news = await getLibraryNews();
+export default async function Home() {
+  const [
+    news,
+    latestInfo,
+    results,
+    cms,
+  ] = await Promise.all([
+    getTodayNewspapers(),
+    getLatestInfo(),
+    getMonthlyForecastStats(),
+    getHomeCmsData(),
+  ]);
 
   return (
-    <main className="libraryPage">
+    <main className="page">
       <header className="header">
-        <div className="logo">
-          BOAT
-          <br />
-          <span>STRIKERS</span>
-        </div>
-        <a className="lineMini" href="https://lin.ee/Pf3FEEQ">
-          LINE登録
-        </a>
+        <div className="logo">BOAT<br /><span>STRIKERS</span></div>
+        <a className="lineMini" href="https://lin.ee/Pf3FEEQ">LINE登録</a>
       </header>
 
-      <section className="libraryHeroImageBox">
-        <img
-          src="/IMG_6098.jpeg"
-          alt="一果図書館"
-          className="libraryHeroImage"
+      <section className="hero">
+        <Image
+          src="/hero.jpg"
+          alt="BoatStrikers"
+          width={1536}
+          height={864}
+          priority
+          className="heroImage"
         />
+
       </section>
 
-      <section className="libraryNotice">
-        <div className="libraryNoticeTitle">
-          <img
-          src="IMG_6319.jpeg"
-            alt="新刊"
-              className="libraryHeroImage"
-              />
-          
+      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
+
+      
+
+        <section className="homeSectionCard pink">
+  <img
+  src="/IMG_6118.jpeg"
+  alt="新聞"
+  className="homeTitleImage"
+/>
+
+  <div className="todayNewsGrid">
+    {news.map((n) => (
+      <a
+        className="todayNewsCard"
+        key={n.title}
+        href={n.link}
+        target={n.link.startsWith("http") ? "_blank" : "_self"}
+        rel="noopener noreferrer"
+      >
+        <img src={n.image} alt={n.title} />
+        <div className="todayNewsBody">
+          <span>{n.tag}</span>
+          <h3>{n.title}</h3>
+          <p>
+            {n.date
+              ? new Date(n.date).toLocaleDateString("ja-JP")
+              : "最新号をチェック"}
+          </p>
+          <b>読む ›</b>
         </div>
+      </a>
+    ))}
+  </div>
+</section>   
 
-        <div className="libraryNoticeList">
-          {news.map((n) => (
-            <a
-              href={n.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="libraryNoticeItem"
-              key={n.link}
-            >
-              <span>
-                {new Date(n.date).toLocaleDateString("ja-JP", {
-                  month: "numeric",
-                  day: "numeric",
-                })}
-              </span>
+      <section className="homeSectionCard purple">
+  <img
+  src="/IMG_6117.jpeg"
+  alt="メンバー紹介"
+  className="homeTitleImage"
+/>
 
-              <strong>{n.category}</strong>
+  <MemberSlider />
+</section>
 
-              <b>更新</b>
-            </a>
-          ))}
+<section className="homeSection bscSection">
+
+<a href="/bsc2">
+
+     <img
+  src="/88D8F192-324A-4FD9-8F3A-A2AF27E35C9F.png"
+  alt="トップ"
+  className="homeTitleImage"
+/>
+
+</a>
+
+
+</section>
+
+    
+
+      <section className="homeSectionCard yellow">
+
+  <a href="/library" className="bannerLink">
+    <Image
+      src="/1C1FAE76-929A-4DEE-9D2D-816BBC47FA04.png"
+      alt="一果図書館"
+      width={1536}
+      height={864}
+      className="bannerImage"
+    />
+  </a>
+</section>
+
+   <section className="homeSectionCard yellow resultSummarySection">
+  <img
+    src="/IMG_6116.jpeg"
+    alt="今月の予想実績"
+    className="homeTitleImage"
+  />
+
+  {results.totalRace === 0 ? (
+    <div className="resultEmptyState">
+      <span aria-hidden="true">📊</span>
+      <strong>今月の予想実績は集計中です</strong>
+      <p>予想実績が登録されると、ここに自動で表示されます。</p>
+    </div>
+  ) : (
+    <>
+      <div className="resultStatsGrid">
+        <div className="resultStatCard">
+          <span>予想レース数</span>
+          <strong>{results.totalRace}<small>R</small></strong>
         </div>
-      </section>
+        <div className="resultStatCard">
+          <span>的中率</span>
+          <strong>{results.hitRate.toFixed(1)}<small>%</small></strong>
+        </div>
+        <div className="resultStatCard">
+          <span>回収率</span>
+          <strong>{results.recoveryRate.toFixed(1)}<small>%</small></strong>
+        </div>
+        <div className="resultStatCard">
+          <span>最高払戻</span>
+          <strong>{results.maxPayout.toLocaleString()}<small>円</small></strong>
+        </div>
+      </div>
 
-      <LibraryPoint />
-
-      {sections.map((section) => (
-        <section className="libraryShelfSection" key={section.title}>
-          {section.titleImage ? (
-            <img
-              src={section.titleImage}
-              alt={section.title}
-              className="shelfTitleImage"
-            />
-          ) : (
-            <>
-              <h2>{section.title}</h2>
-              <p>{section.lead}</p>
-            </>
-          )}
-
-          <div className="woodShelf">
-            {section.books.map((book) => (
-              <BookCard key={book.title} book={book} />
-            ))}
-          </div>
-
-          <div className="shelfBoard"></div>
-        </section>
-      ))}
-
-      <section className="librarySection">
-        <div className="libraryTitleRow">
-          <h2>📖 最新追加</h2>
+      <div className="resultMemberGrid" aria-label="キャラクター別予想実績">
+        {results.members.map((member) => (
           <a
-            href="https://note.com/boat_strikers"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={member.href}
+            className={`resultMemberCard resultMemberCard--${member.name}`}
+            key={member.name}
+            aria-label={`${member.label}のページを見る`}
           >
-            もっと見る ›
+            <img
+              src={member.icon}
+              alt={`${member.label}のアイコン`}
+              className="resultMemberIcon"
+              width="52"
+              height="52"
+              style={{
+                width: "52px",
+                height: "52px",
+                minWidth: "52px",
+                maxWidth: "52px",
+                minHeight: "52px",
+                maxHeight: "52px",
+                objectFit: "cover",
+                borderRadius: "50%",
+                flexShrink: 0,
+              }}
+            />
+            <div className="resultMemberContent">
+              <div className="resultMemberHeading">
+                <div>
+                  <span className="resultMemberName">{member.label}</span>
+                  <span className="resultMemberRole">{member.role}</span>
+                </div>
+                <span className="resultMemberArrow" aria-hidden="true">›</span>
+              </div>
+              <div className="resultMemberNumbers">
+                <span><b>{member.raceCount}</b>R</span>
+                <span><b>{member.hitCount}</b>的中</span>
+                <span>回収率 <b>{member.recoveryRate.toFixed(1)}</b>%</span>
+              </div>
+            </div>
           </a>
-        </div>
+        ))}
+      </div>
+    </>
+  )}
+</section>
 
-        <div className="latestBooks">
-          {items.map((item) => (
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="latestBookCard"
-              key={item.link}
-            >
-              <img src={item.image} alt={item.title} />
-              <h3>{item.title}</h3>
-              <p>{new Date(item.date).toLocaleDateString("ja-JP")}</p>
-            </a>
-          ))}
-        </div>
-      </section>
+    <section className="homeSectionCard blue">
 
-      <nav className="bottomNav">
-        <a href="/">ホーム</a>
-        <a href="/ichika">一果</a>
-        <a href="/hatsune">初音</a>
-        <a href="/kiina">キイナ</a>
-        <a href="/library">図書館</a>
-      </nav>
+  <a href="/radio" className="bannerLink">
+    <Image
+      src="/6EDF5261-8C7D-49F6-9C79-F22A3AA172C1.png"
+      alt="BoatStrikers Radio"
+      className="bannerImage"
+    />
+  </a>
+</section>
+
+      <section className="homeSectionCard green">
+  <h2 className="homeSectionTitle">💚 LINE限定情報</h2>
+  <p className="homeSectionLead">前日版・直前版を最速配信中！</p>
+
+  <a href="https://lin.ee/Pf3FEEQ" className="bannerLink">
+    <img
+      src="/EED67E49-6856-4A73-BFF4-60583A6B2835.png"
+      alt="公式LINE登録"
+      className="bannerImage"
+    />
+  </a>
+</section>
+
     </main>
   );
 }
