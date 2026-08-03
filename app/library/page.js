@@ -212,6 +212,13 @@ const sections = [
   },
 ];
 
+export const metadata = {
+  title: "一果図書館｜ボートレース攻略本・週刊誌",
+  description:
+    "ボートレース初心者講座、キャラクター別週刊誌、全国24場攻略ノート、特典資料をまとめたBoatStrikersの図書館です。",
+};
+
+
 export default async function LibraryPage() {
   const items = await getLibraryItems();
   const news = await getLibraryNews();
