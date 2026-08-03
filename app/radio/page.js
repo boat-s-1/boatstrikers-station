@@ -34,8 +34,9 @@ const programs = [
 ];
 
 export const metadata = {
-  title: "ボート・ナイト・ニッポン｜BoatStrikers",
-  description: "一果・初音・キイナが出演するBoatStrikersのラジオ番組ページです。",
+  title: "ボート・ナイト・ニッポン｜ラジオ・音声配信",
+  description:
+    "一果、初音、キイナがボートレースの話題を楽しく届ける、BoatStrikersのラジオ・音声配信ページです。",
 };
 
 export default function RadioPage() {
