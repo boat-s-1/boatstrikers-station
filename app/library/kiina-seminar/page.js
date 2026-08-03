@@ -21,6 +21,12 @@ async function getKiinaSeminarArticles() {
     });
 }
 
+export const metadata = {
+  title: "キイナの穴党塾｜高配当・5号艇攻略",
+  description:
+    "5号艇が狙える条件、穴レースの考え方、高配当を狙うポイントをキイナが楽しく解説します。",
+};
+
 export default async function KiinaSeminarPage() {
   const articles = await getKiinaSeminarArticles();
 
