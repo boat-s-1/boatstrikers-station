@@ -116,6 +116,12 @@ function yen(value) {
   return `${Number(value ?? 0).toLocaleString("ja-JP")}円`;
 }
 
+export const metadata = {
+  title: "本日のボートレース出走表・レース情報",
+  description:
+    "本日開催されるボートレースの出走表、選手情報、モーター成績、展示情報、BoatStrikers独自分析を確認できます。",
+};
+
 export default async function RacesPage({ searchParams }) {
   const query = await searchParams;
   const raceDate = normalizeDate(query?.date);
