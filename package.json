@@ -5,6 +5,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@next/third-parties": "latest",
     "@supabase/supabase-js": "^2.53.0",
     "firebase": "^12.1.0",
     "next": "latest",
