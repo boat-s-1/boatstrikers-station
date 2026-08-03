@@ -66,6 +66,12 @@ function formatDate(value) {
   }
 }
 
+export const metadata = {
+  title: "教えて！一果センセー｜ボートレース初心者講座",
+  description:
+    "ボートレースのルール、展示タイム、スタート、進入、決まり手などを、一果センセーが初心者向けに分かりやすく解説します。",
+};
+
 export default async function IchikaSenseiPage() {
   const lessons = await getLatestLessons();
 
