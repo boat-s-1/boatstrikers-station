@@ -198,6 +198,14 @@ async function getLatestInfo() {
   });
 }
 
+export const metadata = {
+  title: {
+    absolute: "BoatStrikers｜ボートレースをもっと楽しく、分かりやすく",
+  },
+  description:
+    "BoatStrikersは、出走表、展示比較、キャラクター予想、初心者講座、漫画、ラジオ、24場攻略を楽しめるボートレース情報サイトです。",
+};
+
 
 async function getHomeCmsData() {
   const client = getPublicScheduleSupabase();
