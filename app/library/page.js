@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import BookCard from "./BookCard";
-import LibraryPoint from "./LibraryPoint";
 import arrivalStyles from "./newArrivals.module.css";
 
 async function getLibraryItems() {
@@ -164,16 +163,25 @@ const sections = [
         inside: "/433B2F45-DD7A-4503-A09E-309840D7E591.png",
       },
 
-　　　{
-        title: "Radio",
-        icon: "🎙",
-        text: "みなも学園",
+      {
+        title: "みなも学園",
+        icon: "🎬",
+        text: "学園コメディ",
         href: "/comic",
         className: "redBook",
         cover: "/CE14A00C-898A-4CF3-BD7F-5E5F81A92E92.png",
         inside: "/59F96330-6F99-4736-8083-6D6508FCD861.png",
       },
-      
+      {
+        title: "教えて！一果センセー",
+        icon: "📺",
+        text: "初心者講座",
+        href: "/ichika-sensei",
+        className: "greenBook",
+        cover: "/5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",
+        inside: "/59F96330-6F99-4736-8083-6D6508FCD861.png",
+      },
+
     ],
   },
   {
@@ -324,7 +332,6 @@ export default async function LibraryPage() {
         )}
       </section>
 
-      <LibraryPoint />
 
       {sections.map((section) => (
         <section className="libraryShelfSection" key={section.title}>
