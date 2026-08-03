@@ -23,6 +23,12 @@ function summarize(rows) {
   return { raceCount, hitCount, invest, payout, hitRate: raceCount ? Math.round(hitCount / raceCount * 1000) / 10 : 0, returnRate: invest ? Math.round(payout / invest * 1000) / 10 : 0, maxPayout: rows.reduce((m,r)=>Math.max(m,Number(r.payout||0)),0) };
 }
 
+export const metadata = {
+  title: "BoatStrikers予想実績｜的中率・回収率",
+  description:
+    "一果、初音、キイナのボートレース予想実績を掲載。予想数、的中率、回収率、最高払戻などを確認できます。",
+};
+
 export default async function ResultsPage() {
   const { start, end, label } = monthRange();
   let rows = [];
