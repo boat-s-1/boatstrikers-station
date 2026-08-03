@@ -100,8 +100,16 @@ export default function ScheduleClient({ items, weekStart, today }) {
                 const type = TYPES[item.content_type] || TYPES.other;
                 const preset = getProgramPresetByTitle(item.title);
                 return (
-                  <div className={styles.program} key={item.id} data-type={item.content_type}>
-                    <time>{String(item.start_time).slice(0, 5)}</time>
+                  <div
+                    className={`${styles.program} ${preset ? styles.hasIcon : ""}`}
+                    key={item.id}
+                    data-type={item.content_type}
+                  >
+                    <div className={styles.timeColumn}>
+                      <time>{String(item.start_time).slice(0, 5)}</time>
+                      <span className={styles.timeLabel}>START</span>
+                    </div>
+
                     {preset && (
                       <div
                         className={styles.programIcon}
@@ -115,20 +123,25 @@ export default function ScheduleClient({ items, weekStart, today }) {
                         )}
                       </div>
                     )}
+
                     <div className={styles.programBody}>
                       <div className={styles.programMeta}>
                         <span className={styles.contentBadge}>{type.icon} {type.label}</span>
-                        <span>担当：{item.host}</span>
+                        {item.host && <span className={styles.host}>担当：{item.host}</span>}
                       </div>
                       <h3>{item.title}</h3>
-                      {item.episode && <strong>{item.episode}</strong>}
+                      {item.episode && <strong className={styles.episode}>{item.episode}</strong>}
                       {item.description && <p>{item.description}</p>}
+                      <div className={styles.programFooter}>
+                        {item.link_url ? (
+                          <a href={item.link_url} target="_blank" rel="noreferrer">
+                            {type.action}<span aria-hidden="true">›</span>
+                          </a>
+                        ) : (
+                          <span className={styles.comingSoon}>配信予定</span>
+                        )}
+                      </div>
                     </div>
-                    {item.link_url ? (
-                      <a href={item.link_url} target="_blank" rel="noreferrer">{type.action}</a>
-                    ) : (
-                      <span className={styles.comingSoon}>配信予定</span>
-                    )}
                   </div>
                 );
               })}
