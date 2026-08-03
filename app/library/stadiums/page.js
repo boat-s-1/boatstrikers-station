@@ -35,6 +35,12 @@ async function getLatestStadiumArticles() {
     });
 }
 
+export const metadata = {
+  title: "全国24場攻略ノート｜ボートレース場別の特徴",
+  description:
+    "全国24か所のボートレース場について、水面特性、風、潮、コース別傾向、イン逃げの特徴を場別に紹介します。",
+};
+
 export default async function StadiumsPage() {
   const latest = await getLatestStadiumArticles();
 
