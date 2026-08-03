@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import styles from "./schedule.module.css";
+import { getProgramPresetByTitle } from "../../lib/programPresets";
 
 const TYPES = {
   radio: { label: "RADIO", icon: "🎙️", action: "放送を聴く" },
@@ -97,9 +98,23 @@ export default function ScheduleClient({ items, weekStart, today }) {
 
               {day.items.map((item) => {
                 const type = TYPES[item.content_type] || TYPES.other;
+                const preset = getProgramPresetByTitle(item.title);
                 return (
                   <div className={styles.program} key={item.id} data-type={item.content_type}>
                     <time>{String(item.start_time).slice(0, 5)}</time>
+                    {preset && (
+                      <div
+                        className={styles.programIcon}
+                        style={{ "--program-accent": preset.accent }}
+                        aria-hidden="true"
+                      >
+                        {preset.iconUrl ? (
+                          <img src={preset.iconUrl} alt="" />
+                        ) : (
+                          <span>{preset.iconText}</span>
+                        )}
+                      </div>
+                    )}
                     <div className={styles.programBody}>
                       <div className={styles.programMeta}>
                         <span className={styles.contentBadge}>{type.icon} {type.label}</span>
