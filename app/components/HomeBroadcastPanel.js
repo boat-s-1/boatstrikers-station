@@ -40,8 +40,24 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
           const preset=getProgramPresetByTitle(item.title);
-          const body=<><div className={styles.time}><strong>{String(item.start_time).slice(0,5)}</strong><em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em></div>{preset&&<div className={styles.programIcon} style={{"--program-accent":preset.accent}}>{preset.iconUrl?<img src={preset.iconUrl} alt=""/>:<span>{preset.iconText}</span>}</div>}<div className={styles.body}><span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span><h3>{item.title}</h3>{item.episode&&<p>{item.episode}</p>}</div><i>›</i></>;
-          return item.link_url?<a key={item.id} href={item.link_url} className={ended?styles.past:""}>{body}</a>:<div key={item.id} className={ended?styles.past:""}>{body}</div>
+          const body=<>
+            <div className={styles.time}>
+              <strong>{String(item.start_time).slice(0,5)}</strong>
+              <em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em>
+            </div>
+            {preset&&<div className={styles.programIcon} style={{"--program-accent":preset.accent}}>{preset.iconUrl?<img src={preset.iconUrl} alt=""/>:<span>{preset.iconText}</span>}</div>}
+            <div className={styles.body}>
+              <div className={styles.metaRow}>
+                <span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span>
+                {item.host&&<small>担当：{item.host}</small>}
+              </div>
+              <h3>{item.title}</h3>
+              {item.episode&&<p>{item.episode}</p>}
+              {item.link_url&&<b className={styles.miniAction}>詳しく見る <i>›</i></b>}
+            </div>
+          </>;
+          const rowClass=`${preset?styles.hasIcon:""} ${ended?styles.past:""}`.trim();
+          return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
         }):<div className={styles.empty}>📅 本日の予定はありません</div>}
       </div>
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
