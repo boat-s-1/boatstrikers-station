@@ -21,6 +21,12 @@ async function getHatsuneSeminarArticles() {
     });
 }
 
+export const metadata = {
+  title: "初音の女子戦攻略マガジン｜女子ボートレース分析",
+  description:
+    "女子戦の特徴、選手比較、展示評価、狙い方を初音が解説するBoatStrikersの女子レース攻略コンテンツです。",
+};
+
 export default async function HatsuneSeminarPage() {
   const articles = await getHatsuneSeminarArticles();
 
