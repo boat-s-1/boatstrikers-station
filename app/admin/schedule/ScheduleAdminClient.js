@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./scheduleAdmin.module.css";
+import { PROGRAM_PRESETS, getProgramPresetByTitle } from "../../../lib/programPresets";
 
 const EMPTY = {
   id: null,
+  preset_key: "",
   event_date: "",
   start_time: "08:00",
   content_type: "note",
@@ -78,6 +80,23 @@ export default function ScheduleAdminClient() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  function applyPreset(key) {
+    const preset = PROGRAM_PRESETS.find((item) => item.key === key);
+    if (!preset || !key) {
+      update("preset_key", "");
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      preset_key: key,
+      title: preset.title,
+      link_url: preset.url,
+      content_type: preset.contentType,
+      host: preset.host,
+    }));
+  }
+
   function startNew(date = weekStart) {
     setForm({ ...EMPTY, event_date: date });
     setMessage("");
@@ -85,8 +104,10 @@ export default function ScheduleAdminClient() {
   }
 
   function edit(item) {
+    const preset = getProgramPresetByTitle(item.title);
     setForm({
       ...item,
+      preset_key: preset?.key || "",
       start_time: String(item.start_time || "").slice(0, 5),
       link_url: item.link_url || "",
     });
@@ -164,6 +185,21 @@ export default function ScheduleAdminClient() {
             新規入力
           </button>
         </div>
+
+        <label className={styles.presetLabel}>
+          番組プリセット
+          <select
+            value={form.preset_key || ""}
+            onChange={(e) => applyPreset(e.target.value)}
+          >
+            {PROGRAM_PRESETS.map((preset) => (
+              <option value={preset.key} key={preset.key || "manual"}>
+                {preset.label}
+              </option>
+            ))}
+          </select>
+          <small>選択するとタイトル・担当・種類・リンク先が自動入力されます。入力後の手動修正も可能です。</small>
+        </label>
 
         <div className={styles.grid2}>
           <label>

@@ -249,3 +249,10 @@
     padding: 16px;
   }
 }
+
+.presetLabel small {
+  color: #6b8192;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.55;
+}
