@@ -49,6 +49,7 @@ export async function GET() {
       .order("event_date", { ascending: true })
       .order("start_time", { ascending: true });
     if (error) throw error;
+
     return NextResponse.json({ items: data || [] });
   } catch (error) {
     return NextResponse.json(
