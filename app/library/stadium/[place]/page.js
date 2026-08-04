@@ -1,95 +1,26 @@
-import Parser from "rss-parser";
-
-export default async function StadiumPage({ params }) {
-  const resolvedParams = await params;
-  const place = decodeURIComponent(resolvedParams.place || "住之江");
-
-  if (place === "桐生") {
-    const { redirect } = await import("next/navigation");
-    redirect("/library/stadium/kiryu");
-  }
-
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
-
-  const keyword = `【${place}場攻略】`;
-
-  const articles = feed.items
-    .filter((item) => item.title.includes(keyword))
-    .slice(0, 30)
-    .map((item) => {
-      const image =
-        item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
-        "/book-24-stadiums.jpg";
-
-      return {
-        title: item.title,
-        link: item.link,
-        date: item.pubDate,
-        image,
-      };
-    });
-
-  return (
-    <main className="libraryPage">
-      <header className="header">
-        <div className="logo">
-          BOAT<br />
-          <span>STRIKERS</span>
-        </div>
-        <a className="lineMini" href="https://lin.ee/Pf3FEEQ">
-          LINE登録
-        </a>
-      </header>
-
-      <section className="librarySection">
-        <h2>📘 {place}攻略ノート</h2>
-        <p className="stadiumLead">
-          「【{place}場攻略】」を含むnote記事をまとめています。
-        </p>
-      </section>
-
-      <section className="librarySection">
-        <div className="libraryTitleRow">
-          <h2>📖 攻略記事一覧</h2>
-          <a href="/library/stadiums">24場本棚へ戻る ›</a>
-        </div>
-
-        <div className="stadiumArticleList">
-          {articles.length > 0 ? (
-            articles.map((article) => (
-              <a
-                href={article.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="stadiumArticleCard"
-                key={article.link}
-              >
-                <img src={article.image} alt={article.title} />
-
-                <div>
-                  <span>{place}</span>
-                  <h3>{article.title}</h3>
-                  <p>{new Date(article.date).toLocaleDateString("ja-JP")}</p>
-                  <b>noteで読む ›</b>
-                </div>
-              </a>
-            ))
-          ) : (
-            <p className="stadiumLead">
-              まだ{place}の攻略記事はありません。
-            </p>
-          )}
-        </div>
-      </section>
-
-      <nav className="bottomNav">
-        <a href="/">ホーム</a>
-        <a href="/ichika">一果</a>
-        <a href="/hatsune">初音</a>
-        <a href="/kiina">キイナ</a>
-        <a href="/library">図書館</a>
-      </nav>
-    </main>
-  );
-}
+import Link from 'next/link';
+import {getStadiumAiV2,premiumPreview} from '../../../../lib/stadiumAiV2';
+import styles from './stadiumAiV2.module.css';
+export const dynamic='force-dynamic';
+const pct=v=>v==null?'—':`${Number(v).toFixed(1)}%`;
+const yen=v=>v==null?'—':`${Number(v).toLocaleString()}円`;
+function Metric({label,value,sub}){return <div className={styles.metric}><span>{label}</span><strong>{value}</strong>{sub&&<small>{sub}</small>}</div>}
+function Empty({children='データ集計後に表示されます。'}){return <div className={styles.empty}>{children}</div>}
+function Lock(){return <section className={styles.lock}><b>PREMIUM</b><h2>ここから先は24場攻略プレミアム</h2><p>水面特徴、風別データ、イン逃げ条件、穴条件、展示信頼度を表示します。</p><small>確認用：URL末尾に ?preview=premium</small></section>}
+export default async function Page({params,searchParams}){const p=await params;const sp=await searchParams;const {stadium,payload,error,generatedAt}=await getStadiumAiV2(p.place);const premium=premiumPreview(sp);const y=payload?.yearly_stats||{};return <main className={styles.page}>
+<header className={styles.header}><Link href="/library/stadiums">← 24場攻略</Link><span>STADIUM AI v2</span></header>
+<section className={styles.hero}><div><small>#{String(stadium.courseCode).padStart(2,'0')} DATA GUIDE</small><h1>{stadium.name}</h1><p>{stadium.englishName}</p><div>最終集計：{payload?.updated_at_label||'未集計'}　期間：{payload?.aggregation_from||'—'}〜{payload?.aggregation_to||'—'}</div></div><b>{String(stadium.courseCode).padStart(2,'0')}</b></section>
+{error&&<div className={styles.error}>{error}</div>}
+<section className={styles.today}><h2>今日の{stadium.name}・Stadium AI</h2><p>{payload?.today_ai?.notice||'当日データ取得後にレース別評価を表示します。'}</p>{payload?.today_ai?.races?.length?<div className={styles.races}>{payload.today_ai.races.map(r=><article key={r.race_no}><header><b>{r.race_no}R</b><span>{r.wind_speed==null?'風なし':`風 ${r.wind_speed}m`}</span></header><h3>1号艇 {r.boat1_name||'—'}</h3><Score label="イン" value={r.inside_score}/><Score label="穴" value={r.upset_score}/><Score label="展示" value={r.exhibition_score}/></article>)}</div>:<Empty/>}</section>
+<section className={styles.section}><Title n="01" text="基本情報"/><div className={styles.metrics}><Metric label="場コード" value={String(stadium.courseCode).padStart(2,'0')}/><Metric label="対象レース" value={payload?.race_count?`${Number(payload.race_count).toLocaleString()}R`:'—'}/><Metric label="エンジン" value={payload?.engine_version||'v2'}/></div></section>
+<section className={styles.section}><Title n="02" text="直近1年の基本成績"/><div className={styles.metrics}><Metric label="1コース1着率" value={pct(y.course1_win_rate)}/><Metric label="イン逃げ率" value={pct(y.inside_escape_rate)}/><Metric label="平均3連単" value={yen(y.avg_trifecta_payout)}/><Metric label="万舟率" value={pct(y.over10000_rate)}/></div></section>
+<section className={styles.section}><Title n="03" text="出目データ・季節傾向"/><div className={styles.columns}><div><h3>3連単上位</h3>{payload?.trifecta_stats?.length?<table className={styles.table}><thead><tr><th>#</th><th>出目</th><th>率</th><th>平均配当</th></tr></thead><tbody>{payload.trifecta_stats.slice(0,12).map((x,i)=><tr key={x.combo}><td>{i+1}</td><td><b>{x.combo}</b></td><td>{pct(x.rate)}</td><td>{yen(x.avg_payout)}</td></tr>)}</tbody></table>:<Empty/>}</div><div><h3>季節別</h3>{payload?.seasonal_stats?.length?<div className={styles.seasons}>{payload.seasonal_stats.map(x=><article key={x.season}><b>{x.season}</b><span>イン {pct(x.inside_escape_rate)}</span><span>万舟 {pct(x.over10000_rate)}</span><small>{x.sample_count}R</small></article>)}</div>:<Empty/>}</div></div></section>
+{!premium?<Lock/>:<>
+<section className={styles.section}><Title n="04" text="水面特徴・狙い目" premium/><Empty>水面図と解説はstadium_guidesへ登録して表示します。</Empty></section>
+<section className={styles.section}><Title n="05" text="風向き・風速データ" premium/>{payload?.wind_stats?.length?<div className={styles.wind}>{payload.wind_stats.map((x,i)=><article key={i}><h3>{x.direction}・{x.speed_band}</h3><span>{x.sample_count}R</span><b>イン {pct(x.inside_escape_rate)}</b><b>万舟 {pct(x.over10000_rate)}</b></article>)}</div>:<Empty/>}</section>
+<Strategy n="06" title="データによるイン逃げ狙い" data={payload?.inside_strategy}/><Strategy n="07" title="データによる穴狙い" data={payload?.upset_strategy}/><Strategy n="08" title="展示情報の信頼度" data={payload?.exhibition_reliability}/>
+</>}
+<footer className={styles.footer}>過去データによる傾向であり、将来の結果を保証するものではありません。対象数と欠損状況を確認してください。{generatedAt&&` 生成: ${generatedAt}`}</footer></main>}
+function Title({n,text,premium}){return <div className={styles.title}><b>{n}</b><div><small>{premium?'PREMIUM':'FREE'}</small><h2>{text}</h2></div></div>}
+function Score({label,value}){const n=Math.max(0,Math.min(100,Number(value||0)));return <div className={styles.score}><span>{label}</span><div><i style={{width:`${n}%`}}/></div><b>{n||'—'}</b></div>}
+function Strategy({n,title,data}){return <section className={styles.section}><Title n={n} text={title} premium/>{data&&Object.keys(data).length?<div className={styles.strategy}><div><span>評価</span><b>{data.grade||'—'}</b></div><article><h3>{data.title||title}</h3><p>{data.description}</p><div className={styles.metrics}><Metric label="対象" value={data.sample_count?`${data.sample_count}R`:'—'}/><Metric label="主要率" value={pct(data.primary_rate)}/></div>{data.conditions?.length>0&&<ul>{data.conditions.map((x,i)=><li key={i}>✓ {x}</li>)}</ul>}</article></div>:<Empty/>}</section>}
