@@ -4,7 +4,9 @@ import { supabase } from "./bsc2/lib/supabaseClient";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
+import HomeRaceStrip from "./components/HomeRaceStrip";
 import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
+import { getCoursesByDate } from "../lib/boatstrikersPlatform";
 
 
 export const dynamic = "force-dynamic";
@@ -224,17 +226,39 @@ async function getHomeCmsData() {
   }
 }
 
+function getJstDateString() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+async function getHomeRaceData() {
+  const raceDate = getJstDateString();
+  try {
+    const courses = await getCoursesByDate(raceDate);
+    return { raceDate, courses: Array.isArray(courses) ? courses : [] };
+  } catch (error) {
+    console.error("トップページ開催場取得エラー:", error);
+    return { raceDate, courses: [] };
+  }
+}
+
 export default async function Home() {
   const [
     news,
     latestInfo,
     results,
     cms,
+    raceData,
   ] = await Promise.all([
     getTodayNewspapers(),
     getLatestInfo(),
     getMonthlyForecastStats(),
     getHomeCmsData(),
+    getHomeRaceData(),
   ]);
 
   return (
@@ -257,6 +281,8 @@ export default async function Home() {
       </section>
 
       <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
+
+      <HomeRaceStrip courses={raceData.courses} raceDate={raceData.raceDate} />
 
       
 
