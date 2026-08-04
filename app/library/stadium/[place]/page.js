@@ -4,6 +4,11 @@ export default async function StadiumPage({ params }) {
   const resolvedParams = await params;
   const place = decodeURIComponent(resolvedParams.place || "住之江");
 
+  if (place === "桐生") {
+    const { redirect } = await import("next/navigation");
+    redirect("/library/stadium/kiryu");
+  }
+
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
