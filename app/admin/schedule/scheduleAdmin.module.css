@@ -11,6 +11,7 @@
 
 .header,
 .editor,
+.announcementPanel,
 .listPanel,
 .notice {
   width: min(100%, 980px);
@@ -66,6 +67,7 @@
 }
 
 .editor,
+.announcementPanel,
 .listPanel {
   padding: 20px;
   border: 1px solid #cfe1ee;
@@ -245,6 +247,7 @@
   }
 
   .editor,
+  .announcementPanel,
   .listPanel {
     padding: 16px;
   }
@@ -255,4 +258,104 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 1.55;
+}
+
+
+
+.announcementPanel {
+  margin-bottom: 20px;
+}
+
+.announcementHeader,
+.announcementActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.announcementHeader h2 {
+  margin: 0;
+}
+
+.characterCount {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #e7f4fc;
+  color: #086ca8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.characterCount[data-over="true"] {
+  background: #ffe3e6;
+  color: #b12838;
+}
+
+.announcementHelp {
+  margin: 12px 0;
+  color: #577084;
+  line-height: 1.7;
+}
+
+.announcementText {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #a9c8dc;
+  border-radius: 12px;
+  padding: 14px;
+  background: #f8fcff;
+  color: #153857;
+  font: inherit;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.announcementActions {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.copyButton,
+.openXButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.copyButton {
+  background: #087fc4;
+  color: #fff;
+}
+
+.openXButton {
+  background: #111;
+  color: #fff;
+}
+
+.copyMessage {
+  margin: 10px 0 0;
+  color: #176b43;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .announcementHeader,
+  .announcementActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .copyButton,
+  .openXButton {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }

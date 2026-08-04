@@ -48,6 +48,7 @@ export default function ScheduleAdminClient() {
   const [weekStart, setWeekStart] = useState(mondayOf());
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
 
   const load = useCallback(async () => {
     const response = await fetch("/api/admin/schedule/items", {
@@ -114,6 +115,64 @@ export default function ScheduleAdminClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function formatAnnouncementDate(dateValue) {
+    const [year, month, day] = String(dateValue || "").split("-").map(Number);
+    if (!year || !month || !day) return "日付未設定";
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const weekday = new Intl.DateTimeFormat("ja-JP", {
+      weekday: "short",
+      timeZone: "Asia/Tokyo",
+    }).format(date);
+    return `${month}月${day}日（${weekday}）`;
+  }
+
+  function toAbsoluteUrl(value) {
+    if (!value) return "https://www.boat-strike.online/schedule";
+    if (/^https?:\/\//i.test(value)) return value;
+    return `https://www.boat-strike.online/${String(value).replace(/^\//, "")}`;
+  }
+
+  const announcementText = useMemo(() => {
+    const hostTags = {
+      一果: "#一果",
+      初音: "#初音",
+      キイナ: "#キイナ",
+      "3人": "#私立みなも学園",
+      BoatStrikers: "#BoatStrikers",
+    };
+    const title = [form.title, form.episode].filter(Boolean).join(" ") || "番組タイトル未入力";
+    const date = formatAnnouncementDate(form.event_date);
+    const time = String(form.start_time || "").slice(0, 5) || "時刻未設定";
+    const url = toAbsoluteUrl(form.link_url);
+    const tag = hostTags[form.host] || "";
+    const lines = [
+      "📢 番組のお知らせ",
+      "",
+      `🗓 ${date} ${time}〜`,
+      title,
+    ];
+    if (form.description?.trim()) lines.push("", form.description.trim());
+    lines.push("", "▼詳しくはこちら", url, "", `#BoatStrikers #ボートレース ${tag}`.trim());
+    const full = lines.join("\n");
+    if (full.length <= 280) return full;
+    return [
+      "📢 番組のお知らせ",
+      `${date} ${time}〜`,
+      title,
+      url,
+      `#BoatStrikers #ボートレース ${tag}`.trim(),
+    ].join("\n").slice(0, 280);
+  }, [form]);
+
+  async function copyAnnouncement() {
+    try {
+      await navigator.clipboard.writeText(announcementText);
+      setCopyMessage("告知文をコピーしました。Xの投稿画面に貼り付けてください。");
+    } catch {
+      setCopyMessage("自動コピーできませんでした。告知文を選択してコピーしてください。");
+    }
+  }
+
   async function save(event) {
     event.preventDefault();
     setBusy(true);
@@ -135,8 +194,8 @@ export default function ScheduleAdminClient() {
       return;
     }
 
-    setMessage("番組を保存しました。");
-    setForm({ ...EMPTY, event_date: form.event_date });
+    setMessage("番組を保存しました。下の告知文をコピーしてXへ投稿できます。");
+    setForm((current) => ({ ...current, id: data.item?.id || current.id }));
     await load();
     setBusy(false);
   }
@@ -319,10 +378,46 @@ export default function ScheduleAdminClient() {
             </button>
           )}
           <button type="submit" disabled={busy}>
-            {busy ? "保存中…" : "保存する"}
+            {busy ? "保存中…" : "番組を保存"}
           </button>
         </div>
       </form>
+
+      <section className={styles.announcementPanel}>
+        <div className={styles.announcementHeader}>
+          <div>
+            <p className={styles.eyebrow}>FREE X ANNOUNCEMENT</p>
+            <h2>X告知文の自動生成</h2>
+          </div>
+          <span className={styles.characterCount} data-over={announcementText.length > 280}>
+            {announcementText.length} / 280文字
+          </span>
+        </div>
+        <p className={styles.announcementHelp}>
+          入力中の番組情報から告知文を自動生成します。API契約やクレジット購入は不要です。
+        </p>
+        <textarea
+          className={styles.announcementText}
+          rows="10"
+          value={announcementText}
+          readOnly
+          onFocus={(event) => event.currentTarget.select()}
+        />
+        <div className={styles.announcementActions}>
+          <button type="button" className={styles.copyButton} onClick={copyAnnouncement}>
+            告知文をコピー
+          </button>
+          <a
+            className={styles.openXButton}
+            href="https://x.com/compose/post"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Xの投稿画面を開く
+          </a>
+        </div>
+        {copyMessage && <p className={styles.copyMessage}>{copyMessage}</p>}
+      </section>
 
       <section className={styles.listPanel}>
         <div className={styles.weekControls}>
@@ -353,7 +448,9 @@ export default function ScheduleAdminClient() {
                 {TYPE_LABELS[item.content_type] || "その他"}
               </span>
               <strong>{item.title} {item.episode}</strong>
-              <small>{item.host}／{item.status === "published" ? "公開" : "下書き"}</small>
+              <small>
+                {item.host}／{item.status === "published" ? "公開" : "下書き"}
+              </small>
             </button>
           ))}
         </div>
