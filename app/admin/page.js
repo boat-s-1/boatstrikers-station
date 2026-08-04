@@ -5,6 +5,7 @@ const items=[
  {href:"/admin/results",icon:"🏆",title:"予想実績管理",text:"予想・投資・払戻・的中画像を登録"},
  {href:"/admin/schedule",icon:"📅",title:"番組表管理",text:"週間番組表と今日の予定を更新"},
  {href:"/admin/radio-blog",icon:"🎙️",title:"ラジオブログ",text:"放送ブログの記事を管理"},
+ {href:"/admin/magazine",icon:"📚",title:"Web雑誌管理",text:"入力だけで雑誌レイアウトを作成"},
  {href:"/admin/note",icon:"📝",title:"note特集管理",text:"トップ掲載するnoteを管理"},
  {href:"/admin/ai-bet-stats",icon:"📊",title:"AI買い目成績",text:"AI予想の集計を確認"},
  {href:"/admin/sync",icon:"🔄",title:"同期管理",text:"データ同期の状態を確認"},
