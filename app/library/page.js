@@ -72,6 +72,15 @@ const sections = [
     titleImage: "/IMG_6091.jpeg",
     books: [
       {
+        title: "BoatStrikers Weekly",
+        icon: "📰",
+        text: "最新号・バックナンバー",
+        href: "/library/weekly",
+        className: "blueBook",
+        cover: "/library-banner.jpg",
+        inside: "/library-banner.jpg",
+      },
+      {
         title: "一果ゼミ",
         icon: "🌸",
         text: "イン逃げ研究",
