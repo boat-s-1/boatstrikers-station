@@ -152,14 +152,27 @@ function Reliability({ data }) {
   const gapStats = data.gap_stats || [];
   const motorStats = data.motor_stats || [];
   const windStats = data.wind_stats || [];
+  const scoreBreakdown = data.score_breakdown || [];
   return <div className={styles.exhibitionAi}>
     <div className={styles.exhibitionHero}>
       <div><span>展示AI総合評価</span><strong>{data.grade || '—'}</strong><small>AI SCORE {data.ai_score ?? '—'} / 100</small></div>
       <p>{data.comment}</p>
-      <small>6艇完全収録 {Number(data.sample_count || 0).toLocaleString()}R／展示1位判定 {Number(data.rank1_boat_count || 0).toLocaleString()}艇</small>
+      <small>6艇展示収録 {Number(data.sample_count || 0).toLocaleString()}R／展示1位判定 {Number(data.rank1_boat_count || 0).toLocaleString()}艇／着順結合 {Number(data.finished_rank1_boat_count || 0).toLocaleString()}艇</small>
     </div>
 
     <div className={styles.reliabilityGrid}>{metrics.map((item, index) => <article key={`${item.label}-${index}`}><span>{item.label}</span><strong>{item.value_text || pct(item.value)}</strong><small>{item.note}</small></article>)}</div>
+
+    {scoreBreakdown.length > 0 && <section className={styles.exhibitionSection}>
+      <h3>展示AIスコア内訳</h3><p>4項目を重み付けして100点満点に換算しています。</p>
+      <div className={styles.aiBreakdown}>
+        {scoreBreakdown.map((item, index) => <article key={`${item.label}-${index}`}>
+          <div><strong>{item.label}</strong><small>配点 {item.weight}%</small></div>
+          <b>{Number(item.score || 0)}<small>/100</small></b>
+          <div className={styles.breakdownTrack}><i style={{ width: `${Math.max(0, Math.min(100, Number(item.score || 0)))}%` }} /></div>
+          <p>{item.note}</p>
+        </article>)}
+      </div>
+    </section>}
 
     <ExhibitionTable title="展示順位別の成績" description="同タイムは同順位として集計しています。" rows={rankStats} firstLabel="展示順位" firstValue={row => `${row.rank}位`} />
     <ExhibitionTable title="展示タイム差の影響" description="展示1位艇だけを抽出し、最速タイムと次に速い異なるタイムとの差で集計しています。同タイム首位は差0秒です。" rows={gapStats} firstLabel="1位との差" firstValue={row => row.band} />
