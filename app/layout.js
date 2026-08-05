@@ -2,6 +2,7 @@ import "./globals.css";
 import PublicBottomNav from "./PublicBottomNav";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
+
 export const metadata = {
   metadataBase: new URL("https://www.boat-strike.online"),
   title: {
