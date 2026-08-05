@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getStadiumAiV2, premiumPreview } from '../../../../lib/stadiumAiV2';
 import DataBookInteractive from './DataBookInteractive';
+import TodayRacePremium from './TodayRacePremium';
 import styles from './stadiumAiV2.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -87,6 +88,7 @@ export default async function StadiumDataBookPage({ params, searchParams }) {
     <DataBookInteractive seasonalStats={payload?.seasonal_stats || []} windStats={payload?.wind_stats || []} trifectaStats={payload?.trifecta_stats || []} />
 
     {!premium ? <PremiumGate /> : <>
+      <TodayRacePremium place={route.place} stadiumName={stadium.name} />
       <section className={styles.premiumPanel}>
         <SectionHeading number="06" eyebrow="PREMIUM / INSIDE" title="データによるイン逃げ攻略" premium />
         <StrategyBlock data={payload?.inside_strategy} fallback="条件別イン逃げ分析はData Engine v3で自動生成されます。" />
