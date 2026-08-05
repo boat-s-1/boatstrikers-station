@@ -37,13 +37,19 @@ export default function DataBookInteractive({ seasonalStats = [], windStats = []
         {trifectaStats.slice(0, 12).map((item, index) => {
           const strength = Math.max(12, Math.round(Number(item.rate || 0) / maxRate * 100));
           return <article className={styles.trifectaCard} key={item.combo}>
-            <div className={styles.rankBadge}>{index + 1}</div>
-            <strong>{item.combo}</strong>
+            <div className={styles.trifectaCardHead}>
+              <div className={styles.rankBadge}>{index + 1}</div>
+              <strong className={styles.trifectaCombo}>{item.combo}</strong>
+              <div className={styles.trifectaRate}>
+                <small>出現率</small>
+                <b>{pct(item.rate)}</b>
+              </div>
+            </div>
             <div className={styles.heatTrack}><i style={{ width: `${strength}%` }} /></div>
-            <dl>
-              <div><dt>出現率</dt><dd>{pct(item.rate)}</dd></div>
+            <dl className={styles.trifectaMetrics}>
               <div><dt>平均配当</dt><dd>{yen(item.avg_payout)}</dd></div>
               <div><dt>万舟率</dt><dd>{pct(item.over10000_rate)}</dd></div>
+              <div><dt>対象</dt><dd>{Number(item.sample_count || item.count || 0) > 0 ? `${Number(item.sample_count || item.count).toLocaleString()}R` : '—'}</dd></div>
             </dl>
           </article>;
         })}
