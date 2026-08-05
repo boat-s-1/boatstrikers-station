@@ -220,7 +220,7 @@ function ExhibitionTable({ title, description, rows, firstLabel, firstValue, hig
         </div>;
       })}
     </div>
-    {limit && rows.length > limit && <p className={styles.tableFootnote}>上位{limit}条件を表示しています。全条件は集計データに保存されています。</p>}
+    {limit > 0 && rows.length > limit && <p className={styles.tableFootnote}>上位{limit}条件を表示しています。全条件は集計データに保存されています。</p>}
   </section>;
 }
 function sampleLabel(count) {
