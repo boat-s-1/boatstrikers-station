@@ -162,9 +162,9 @@ function Reliability({ data }) {
     <div className={styles.reliabilityGrid}>{metrics.map((item, index) => <article key={`${item.label}-${index}`}><span>{item.label}</span><strong>{item.value_text || pct(item.value)}</strong><small>{item.note}</small></article>)}</div>
 
     <ExhibitionTable title="展示順位別の成績" description="同タイムは同順位として集計しています。" rows={rankStats} firstLabel="展示順位" firstValue={row => `${row.rank}位`} />
-    <ExhibitionTable title="展示タイム差の影響" description="展示1位と2番手のタイム差別に集計しています。" rows={gapStats} firstLabel="1位との差" firstValue={row => row.band} />
-    <ExhibitionTable title="展示1位 × モーター" description="展示1位艇をモーター2連率の帯ごとに比較します。" rows={motorStats} firstLabel="モーター条件" firstValue={row => row.band} />
-    <ExhibitionTable title="展示1位 × 風" description="対象15R以上の風向・風速条件を表示します。" rows={windStats} firstLabel="風条件" firstValue={row => `${windDisplay(row)} ${row.speed_band}`} />
+    <ExhibitionTable title="展示タイム差の影響" description="展示1位艇だけを抽出し、最速タイムと次に速い異なるタイムとの差で集計しています。同タイム首位は差0秒です。" rows={gapStats} firstLabel="1位との差" firstValue={row => row.band} />
+    <ExhibitionTable title="展示1位 × モーター" description="展示1位艇だけを抽出し、同一レース内のモーター2連率順位（上位2艇・中位2艇・下位2艇）で比較します。" rows={motorStats} firstLabel="モーター条件" firstValue={row => row.band} />
+    <ExhibitionTable title="展示1位 × 風" description="展示1位艇だけを抽出し、対象15艇以上の風向・風速条件を表示します。" rows={windStats} firstLabel="風条件" firstValue={row => `${windDisplay(row)} ${row.speed_band}`} />
   </div>;
 }
 function ExhibitionTable({ title, description, rows, firstLabel, firstValue }) {
