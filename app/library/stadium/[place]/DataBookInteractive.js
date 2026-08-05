@@ -6,6 +6,18 @@ import styles from './stadiumAiV2.module.css';
 const pct = (value) => value == null ? '—' : `${Number(value).toFixed(1)}%`;
 const yen = (value) => value == null ? '—' : `${Number(value).toLocaleString()}円`;
 
+const WIND_META = {
+  '01': ['北', '↓'], '02': ['北北東', '↙'], '03': ['北東', '↙'], '04': ['東北東', '↙'],
+  '05': ['東', '←'], '06': ['東南東', '↖'], '07': ['南東', '↖'], '08': ['南南東', '↖'],
+  '09': ['南', '↑'], '10': ['南南西', '↗'], '11': ['南西', '↗'], '12': ['西南西', '↗'],
+  '13': ['西', '→'], '14': ['西北西', '↘'], '15': ['北西', '↘'], '16': ['北北西', '↘'],
+};
+function windMeta(item) {
+  const code = String(item?.direction_code ?? '').padStart(2, '0');
+  const [mapped, arrow] = WIND_META[code] || [item?.direction || '風向不明', '◇'];
+  return { code, label: item?.direction && !/^\d+$/.test(String(item.direction)) ? item.direction : mapped, arrow };
+}
+
 export default function DataBookInteractive({ seasonalStats = [], windStats = [], trifectaStats = [] }) {
   const seasonOrder = ['春', '夏', '秋', '冬'];
   const seasons = useMemo(() => seasonOrder.map(name => seasonalStats.find(x => x.season === name)).filter(Boolean), [seasonalStats]);
@@ -66,10 +78,10 @@ export default function DataBookInteractive({ seasonalStats = [], windStats = []
       </div>
       {windStats.length ? <>
         <div className={styles.tabRow}>
-          {windStats.map((item, index) => <button key={`${item.direction}-${item.speed_band}-${index}`} type="button" className={wind === index ? styles.activeTab : ''} onClick={() => setWind(index)}>{item.direction}<small>{item.speed_band}</small></button>)}
+          {windStats.map((item, index) => { const meta = windMeta(item); return <button key={`${meta.code}-${item.speed_band}-${index}`} type="button" className={wind === index ? styles.activeTab : ''} onClick={() => setWind(index)}><b className={styles.windArrow}>{meta.arrow}</b><span>{meta.label}</span><small>{item.speed_band}</small></button>; })}
         </div>
         {activeWind && <div className={styles.tabContent}>
-          <div className={styles.tabHero}><small>{activeWind.direction}・{activeWind.speed_band}</small><strong>{Number(activeWind.sample_count || 0).toLocaleString()}R</strong></div>
+          <div className={styles.tabHero}><small>{windMeta(activeWind).arrow} {windMeta(activeWind).label}・{activeWind.speed_band}</small><strong>{Number(activeWind.sample_count || 0).toLocaleString()}R</strong></div>
           <div className={styles.miniMetrics}>
             <Metric label="1コース1着率" value={pct(activeWind.course1_win_rate)} />
             <Metric label="イン逃げ率" value={pct(activeWind.inside_escape_rate)} />

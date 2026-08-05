@@ -146,9 +146,41 @@ function StrategyBlock({ data, fallback }) {
   return <div className={styles.strategy}><div className={styles.grade}><span>評価</span><strong>{data.grade || '—'}</strong><small>{data.sample_count ? `${Number(data.sample_count).toLocaleString()}R` : ''}</small></div><div><h3>{data.title || 'データ攻略'}</h3><p>{data.description}</p>{data.conditions?.length > 0 && <ul>{data.conditions.map((item, index) => <li key={`${item}-${index}`}>✓ {item}</li>)}</ul>}<div className={styles.strategyMetrics}><span>主要率 <b>{pct(data.primary_rate)}</b></span><span>対象数 <b>{Number(data.sample_count || 0).toLocaleString()}R</b></span></div></div></div>;
 }
 function Reliability({ data }) {
-  if (!data || !Object.keys(data).length) return <div className={styles.empty}>展示タイム・展示ST・周回展示の信頼度はData Engine v3実行後に表示されます。</div>;
+  if (!data || !Object.keys(data).length) return <div className={styles.empty}>展示タイム・展示ST・周回展示の信頼度は集計後に表示されます。</div>;
   const metrics = data.metrics || [];
-  return <div className={styles.reliability}><div className={styles.grade}><span>総合</span><strong>{data.grade || '—'}</strong><small>{data.sample_count ? `${Number(data.sample_count).toLocaleString()}R` : ''}</small></div><div className={styles.reliabilityGrid}>{metrics.map((item, index) => <article key={`${item.label}-${index}`}><span>{item.label}</span><strong>{item.value_text || pct(item.value)}</strong><small>{item.note}</small></article>)}</div></div>;
+  const rankStats = data.rank_stats || [];
+  const gapStats = data.gap_stats || [];
+  const motorStats = data.motor_stats || [];
+  const windStats = data.wind_stats || [];
+  return <div className={styles.exhibitionAi}>
+    <div className={styles.exhibitionHero}>
+      <div><span>展示AI総合評価</span><strong>{data.grade || '—'}</strong><small>AI SCORE {data.ai_score ?? '—'} / 100</small></div>
+      <p>{data.comment}</p>
+      <small>6艇完全収録 {Number(data.sample_count || 0).toLocaleString()}R／展示1位判定 {Number(data.rank1_boat_count || 0).toLocaleString()}艇</small>
+    </div>
+
+    <div className={styles.reliabilityGrid}>{metrics.map((item, index) => <article key={`${item.label}-${index}`}><span>{item.label}</span><strong>{item.value_text || pct(item.value)}</strong><small>{item.note}</small></article>)}</div>
+
+    <ExhibitionTable title="展示順位別の成績" description="同タイムは同順位として集計しています。" rows={rankStats} firstLabel="展示順位" firstValue={row => `${row.rank}位`} />
+    <ExhibitionTable title="展示タイム差の影響" description="展示1位と2番手のタイム差別に集計しています。" rows={gapStats} firstLabel="1位との差" firstValue={row => row.band} />
+    <ExhibitionTable title="展示1位 × モーター" description="展示1位艇をモーター2連率の帯ごとに比較します。" rows={motorStats} firstLabel="モーター条件" firstValue={row => row.band} />
+    <ExhibitionTable title="展示1位 × 風" description="対象15R以上の風向・風速条件を表示します。" rows={windStats} firstLabel="風条件" firstValue={row => `${windDisplay(row)} ${row.speed_band}`} />
+  </div>;
+}
+function ExhibitionTable({ title, description, rows, firstLabel, firstValue }) {
+  if (!rows?.length) return <section className={styles.exhibitionSection}><h3>{title}</h3><p>{description}</p><div className={styles.empty}>対象データを集計中です。</div></section>;
+  return <section className={styles.exhibitionSection}>
+    <h3>{title}</h3><p>{description}</p>
+    <div className={styles.exhibitionTable}>
+      <div className={styles.exhibitionTableHead}><b>{firstLabel}</b><b>対象</b><b>1着率</b><b>3連対率</b></div>
+      {rows.map((row, index) => <div className={styles.exhibitionTableRow} key={`${firstValue(row)}-${index}`}><strong>{firstValue(row)}</strong><span>{Number(row.sample_count || 0).toLocaleString()}</span><b>{pct(row.win_rate)}</b><b>{pct(row.top3_rate)}</b></div>)}
+    </div>
+  </section>;
+}
+function windDisplay(row) {
+  const map = {'01':'↓ 北','02':'↙ 北北東','03':'↙ 北東','04':'↙ 東北東','05':'← 東','06':'↖ 東南東','07':'↖ 南東','08':'↖ 南南東','09':'↑ 南','10':'↗ 南南西','11':'↗ 南西','12':'↗ 西南西','13':'→ 西','14':'↘ 西北西','15':'↘ 北西','16':'↘ 北北西'};
+  const code = String(row.direction_code ?? '').padStart(2,'0');
+  return map[code] || row.direction || '風向不明';
 }
 function Summary({ label, value }) { return <div><span>{label}</span><strong>{value}</strong></div>; }
 function buildFallbackProfile(yearly) {
