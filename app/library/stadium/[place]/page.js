@@ -1,28 +1,165 @@
 import Link from 'next/link';
-import {getStadiumAiV2,premiumPreview} from '../../../../lib/stadiumAiV2';
+import { getStadiumAiV2, premiumPreview } from '../../../../lib/stadiumAiV2';
+import DataBookInteractive from './DataBookInteractive';
 import styles from './stadiumAiV2.module.css';
-export const dynamic='force-dynamic';
-const pct=v=>v==null?'—':`${Number(v).toFixed(1)}%`;
-const yen=v=>v==null?'—':`${Number(v).toLocaleString()}円`;
-function Metric({label,value,sub}){return <div className={styles.metric}><span>{label}</span><strong>{value}</strong>{sub&&<small>{sub}</small>}</div>}
-function Empty({children='データ集計後に表示されます。'}){return <div className={styles.empty}>{children}</div>}
-function Lock(){return <section className={styles.lock}><b>PREMIUM</b><h2>ここから先は24場攻略プレミアム</h2><p>水面特徴、風別データ、イン逃げ条件、穴条件、展示信頼度を表示します。</p><small>確認用：URL末尾に ?preview=premium</small></section>}
-export default async function Page({params,searchParams}){const p=await params;const sp=await searchParams;const {stadium,payload,error,generatedAt}=await getStadiumAiV2(p.place);const premium=premiumPreview(sp);const y=payload?.yearly_stats||{};return <main className={styles.page}>
-<header className={styles.header}><Link href="/library/stadiums">← 24場攻略</Link><span>STADIUM AI v2</span></header>
-<section className={styles.hero}><div><small>#{String(stadium.courseCode).padStart(2,'0')} DATA GUIDE</small><h1>{stadium.name}</h1><p>{stadium.englishName}</p><div>最終集計：{payload?.updated_at_label||'未集計'}　期間：{payload?.aggregation_from||'—'}〜{payload?.aggregation_to||'—'}</div></div><b>{String(stadium.courseCode).padStart(2,'0')}</b></section>
-{error&&<div className={styles.error}>{error}</div>}
-{payload?.source_health&&<section className={payload.source_health.status==='ok'?styles.healthOk:styles.healthWarn}><b>データ収録状況</b><span>{payload.source_health.message}</span><small>収録日数 {payload.source_health.date_count||0}日／最古 {payload.source_health.min_date||'—'}／最新 {payload.source_health.max_date||'—'}</small></section>}
-<section className={styles.today}><h2>今日の{stadium.name}・Stadium AI</h2><p>{payload?.today_ai?.notice||'当日データ取得後にレース別評価を表示します。'}</p>{payload?.today_ai?.races?.length?<div className={styles.races}>{payload.today_ai.races.map(r=><article key={r.race_no}><header><b>{r.race_no}R</b><span>{r.wind_speed==null?'風なし':`風 ${r.wind_speed}m`}</span></header><h3>1号艇 {r.boat1_name||'—'}</h3><Score label="イン" value={r.inside_score}/><Score label="穴" value={r.upset_score}/><Score label="展示" value={r.exhibition_score}/></article>)}</div>:<Empty/>}</section>
-<section className={styles.section}><Title n="01" text="基本情報"/><div className={styles.metrics}><Metric label="場コード" value={String(stadium.courseCode).padStart(2,'0')}/><Metric label="対象レース" value={payload?.race_count?`${Number(payload.race_count).toLocaleString()}R`:'—'}/><Metric label="エンジン" value={payload?.engine_version||'v2'}/></div></section>
-<section className={styles.section}><Title n="02" text="直近1年の基本成績"/><div className={styles.metrics}><Metric label="1コース1着率" value={pct(y.course1_win_rate)}/><Metric label="イン逃げ率" value={pct(y.inside_escape_rate)} sub={y.inside_course_sample_count?`実進入判明 ${y.inside_course_sample_count}R`:'実進入データなし'}/><Metric label="平均3連単" value={yen(y.avg_trifecta_payout)} sub={y.payout_sample_count?`払戻 ${y.payout_sample_count}R／収録 ${pct(y.payout_coverage_rate)}`:'払戻データなし'}/><Metric label="万舟率" value={pct(y.over10000_rate)}/></div></section>
-<section className={styles.section}><div className={styles.healthOk}><b>集計定義</b><span>イン逃げ率は、勝者の実進入が1コースだった割合です。決まり手「逃げ」の収録率は {pct(y.method_coverage_rate)}、収録済みレース内の逃げ率は {pct(y.escape_method_rate)} です。</span></div></section>
-<section className={styles.section}><Title n="03" text="出目データ・季節傾向"/><div className={styles.columns}><div><h3>3連単上位</h3>{payload?.trifecta_stats?.length?<table className={styles.table}><thead><tr><th>#</th><th>出目</th><th>率</th><th>平均配当</th></tr></thead><tbody>{payload.trifecta_stats.slice(0,12).map((x,i)=><tr key={x.combo}><td>{i+1}</td><td><b>{x.combo}</b></td><td>{pct(x.rate)}</td><td>{yen(x.avg_payout)}</td></tr>)}</tbody></table>:<Empty/>}</div><div><h3>季節別</h3>{payload?.seasonal_stats?.length?<div className={styles.seasons}>{payload.seasonal_stats.map(x=><article key={x.season}><b>{x.season}</b><span>イン {pct(x.inside_escape_rate)}</span><span>万舟 {pct(x.over10000_rate)}</span><small>{x.sample_count}R</small></article>)}</div>:<Empty/>}</div></div></section>
-{!premium?<Lock/>:<>
-<section className={styles.section}><Title n="04" text="水面特徴・狙い目" premium/><Empty>水面図と解説はstadium_guidesへ登録して表示します。</Empty></section>
-<section className={styles.section}><Title n="05" text="風向き・風速データ" premium/>{payload?.wind_stats?.length?<div className={styles.wind}>{payload.wind_stats.map((x,i)=><article key={i}><h3>{x.direction}・{x.speed_band}</h3><span>{x.sample_count}R</span><b>イン {pct(x.inside_escape_rate)}</b><b>万舟 {pct(x.over10000_rate)}</b></article>)}</div>:<Empty/>}</section>
-<Strategy n="06" title="データによるイン逃げ狙い" data={payload?.inside_strategy}/><Strategy n="07" title="データによる穴狙い" data={payload?.upset_strategy}/><Strategy n="08" title="展示情報の信頼度" data={payload?.exhibition_reliability}/>
-</>}
-<footer className={styles.footer}>過去データによる傾向であり、将来の結果を保証するものではありません。対象数と欠損状況を確認してください。{generatedAt&&` 生成: ${generatedAt}`}</footer></main>}
-function Title({n,text,premium}){return <div className={styles.title}><b>{n}</b><div><small>{premium?'PREMIUM':'FREE'}</small><h2>{text}</h2></div></div>}
-function Score({label,value}){const n=Math.max(0,Math.min(100,Number(value||0)));return <div className={styles.score}><span>{label}</span><div><i style={{width:`${n}%`}}/></div><b>{n||'—'}</b></div>}
-function Strategy({n,title,data}){return <section className={styles.section}><Title n={n} text={title} premium/>{data&&Object.keys(data).length?<div className={styles.strategy}><div><span>評価</span><b>{data.grade||'—'}</b></div><article><h3>{data.title||title}</h3><p>{data.description}</p><div className={styles.metrics}><Metric label="対象" value={data.sample_count?`${data.sample_count}R`:'—'}/><Metric label="主要率" value={pct(data.primary_rate)}/></div>{data.conditions?.length>0&&<ul>{data.conditions.map((x,i)=><li key={i}>✓ {x}</li>)}</ul>}</article></div>:<Empty/>}</section>}
+
+export const dynamic = 'force-dynamic';
+
+const pct = value => value == null ? '—' : `${Number(value).toFixed(1)}%`;
+const yen = value => value == null ? '—' : `${Number(value).toLocaleString()}円`;
+const clamp = value => Math.max(0, Math.min(100, Math.round(Number(value || 0))));
+
+export default async function StadiumDataBookPage({ params, searchParams }) {
+  const route = await params;
+  const query = await searchParams;
+  const { stadium, payload, error, generatedAt } = await getStadiumAiV2(route.place);
+  const premium = premiumPreview(query);
+  const yearly = payload?.yearly_stats || {};
+  const profile = payload?.ai_profile || buildFallbackProfile(yearly);
+  const source = payload?.source_health || {};
+
+  return <main className={styles.page}>
+    <header className={styles.topbar}>
+      <Link href="/library/stadiums">← 24場攻略</Link>
+      <span>BOATSTRIKERS DATA BOOK</span>
+    </header>
+
+    <section className={styles.cover}>
+      <div className={styles.coverCopy}>
+        <small>BOATSTRIKERS DATA BOOK / 2026 EDITION</small>
+        <h1><span>#{String(stadium.courseCode).padStart(2, '0')}</span>{stadium.name}</h1>
+        <p>{stadium.englishName}</p>
+        <div className={styles.coverMeta}>
+          <b>{Number(payload?.race_count || 0).toLocaleString()}R ANALYZED</b>
+          <span>最終更新 {payload?.updated_at_label || '未集計'}</span>
+          <span>{payload?.aggregation_from || '—'}〜{payload?.aggregation_to || '—'}</span>
+        </div>
+      </div>
+      <div className={styles.coverScore}>
+        <span>AI総合評価</span>
+        <strong>{profile.overall_score ?? '—'}</strong>
+        <Stars value={profile.overall_score} />
+      </div>
+      <i className={styles.coverNumber}>{String(stadium.courseCode).padStart(2, '0')}</i>
+    </section>
+
+    {error && <div className={styles.error}>{error}</div>}
+    {source.message && <div className={styles.sourceNotice}><b>DATA STATUS</b><span>{source.message}</span><small>収録 {source.date_count || 0}日 / {source.min_date || '—'}〜{source.max_date || '—'}</small></div>}
+
+    <section className={styles.dashboard}>
+      <div className={styles.dashboardHeader}>
+        <div><small>AI DASHBOARD</small><h2>{stadium.name}を30秒で読む</h2></div>
+        <span className={styles.difficulty}>攻略難易度 <b>{profile.difficulty_label || '分析中'}</b></span>
+      </div>
+      <div className={styles.scoreGrid}>
+        <ScoreCard label="イン信頼度" value={profile.inside_score} icon="1" note="1コース・逃げ傾向" />
+        <ScoreCard label="穴期待度" value={profile.upset_score} icon="穴" note="万舟・イン不成立傾向" />
+        <ScoreCard label="展示重要度" value={profile.exhibition_score} icon="展" note="展示上位艇の信頼性" />
+        <ScoreCard label="風影響度" value={profile.wind_score} icon="風" note="風条件による変動幅" />
+      </div>
+      <div className={styles.aiComment}>
+        <div className={styles.aiBadge}>AI</div>
+        <div><small>DATA BOOK COMMENT</small><p>{profile.comment || createComment(stadium.name, yearly)}</p></div>
+      </div>
+      {profile.priority?.length > 0 && <div className={styles.priorityRow}><span>この場で重視する順番</span>{profile.priority.map((item, index) => <b key={`${item}-${index}`}><i>{index + 1}</i>{item}</b>)}</div>}
+    </section>
+
+    <section className={styles.panel}>
+      <SectionHeading number="01" eyebrow="BASIC METRICS" title="直近1年の基本成績" />
+      <div className={styles.primaryMetrics}>
+        <StatCard label="1コース1着率" value={pct(yearly.course1_win_rate)} sub={`${Number(yearly.course1_win_count || 0).toLocaleString()}勝 / ${Number(payload?.race_count || 0).toLocaleString()}R`} score={yearly.course1_win_rate} />
+        <StatCard label="イン逃げ率" value={pct(yearly.inside_escape_rate)} sub={`実進入判明 ${Number(yearly.inside_course_sample_count || 0).toLocaleString()}R`} score={yearly.inside_escape_rate} />
+        <StatCard label="平均3連単" value={yen(yearly.avg_trifecta_payout)} sub={`払戻収録 ${Number(yearly.payout_sample_count || 0).toLocaleString()}R`} />
+        <StatCard label="万舟率" value={pct(yearly.over10000_rate)} sub={`${Number(yearly.over10000_count || 0).toLocaleString()}R`} score={yearly.over10000_rate * 3.2} />
+      </div>
+      <div className={styles.coverageGrid}>
+        <Coverage label="決まり手収録率" value={yearly.method_coverage_rate} />
+        <Coverage label="払戻収録率" value={yearly.payout_coverage_rate} />
+        <Coverage label="実進入収録率" value={payload?.race_count ? Number(yearly.inside_course_sample_count || 0) / Number(payload.race_count) * 100 : 0} />
+      </div>
+    </section>
+
+    <section className={styles.panel}>
+      <SectionHeading number="02" eyebrow="COURSE ANALYSIS" title="コース別1着率" />
+      {payload?.course_stats?.length ? <div className={styles.courseChart}>{payload.course_stats.map(item => <CourseBar key={item.course} item={item} />)}</div> : <div className={styles.empty}>コース別データはData Engine v3実行後に表示されます。</div>}
+    </section>
+
+    <DataBookInteractive seasonalStats={payload?.seasonal_stats || []} windStats={payload?.wind_stats || []} trifectaStats={payload?.trifecta_stats || []} />
+
+    {!premium ? <PremiumGate /> : <>
+      <section className={styles.premiumPanel}>
+        <SectionHeading number="06" eyebrow="PREMIUM / INSIDE" title="データによるイン逃げ攻略" premium />
+        <StrategyBlock data={payload?.inside_strategy} fallback="条件別イン逃げ分析はData Engine v3で自動生成されます。" />
+      </section>
+      <section className={styles.premiumPanel}>
+        <SectionHeading number="07" eyebrow="PREMIUM / UPSET" title="データによる穴攻略" premium />
+        <StrategyBlock data={payload?.upset_strategy} fallback="差し・まくり・まくり差し別の穴条件を自動抽出します。" />
+      </section>
+      <section className={styles.premiumPanel}>
+        <SectionHeading number="08" eyebrow="PREMIUM / EXHIBITION" title="展示情報の信頼度" premium />
+        <Reliability data={payload?.exhibition_reliability} />
+      </section>
+      <section className={styles.summaryPanel}>
+        <small>MONTHLY CONCLUSION</small><h2>今月の{stadium.name}攻略まとめ</h2>
+        <div className={styles.summaryGrid}>
+          <Summary label="最優先" value={profile.priority?.[0] || 'データ確認'} />
+          <Summary label="イン評価" value={`${profile.inside_score || '—'}点`} />
+          <Summary label="穴評価" value={`${profile.upset_score || '—'}点`} />
+          <Summary label="攻略難易度" value={profile.difficulty_label || '分析中'} />
+        </div>
+        <p>{profile.premium_summary || profile.comment || createComment(stadium.name, yearly)}</p>
+      </section>
+    </>}
+
+    <footer className={styles.footer}>過去データに基づく傾向であり、将来の結果を保証するものではありません。対象数・欠損率・更新日をご確認ください。{generatedAt && ` 最終生成: ${generatedAt}`}</footer>
+  </main>;
+}
+
+function SectionHeading({ number, eyebrow, title, premium = false }) {
+  return <div className={styles.sectionHeading}><div><span>{number}</span><small>{premium ? 'PREMIUM' : 'FREE DATA'}</small></div><div><p>{eyebrow}</p><h2>{title}</h2></div></div>;
+}
+function ScoreCard({ label, value, icon, note }) {
+  const score = clamp(value);
+  return <article className={styles.scoreCard}><div className={styles.scoreIcon}>{icon}</div><span>{label}</span><strong>{score || '—'}</strong><div className={styles.scoreTrack}><i style={{ width: `${score}%` }} /></div><small>{note}</small></article>;
+}
+function StatCard({ label, value, sub, score }) {
+  const width = score == null ? 65 : clamp(score);
+  return <article className={styles.statCard}><span>{label}</span><strong>{value}</strong><div className={styles.statTrack}><i style={{ width: `${width}%` }} /></div><small>{sub}</small></article>;
+}
+function Coverage({ label, value }) {
+  const n = clamp(value);
+  return <div className={styles.coverage}><span>{label}</span><b>{pct(value)}</b><div><i style={{ width: `${n}%` }} /></div></div>;
+}
+function CourseBar({ item }) {
+  const n = clamp(item.win_rate);
+  return <div className={styles.courseBar}><b className={`${styles.boat} ${styles[`boat${item.course}`]}`}>{item.course}</b><div><span><b>{item.course}コース</b><small>{Number(item.sample_count || 0).toLocaleString()}R</small></span><div className={styles.courseTrack}><i style={{ width: `${n}%` }} /></div></div><strong>{pct(item.win_rate)}</strong></div>;
+}
+function Stars({ value }) {
+  const count = Math.max(1, Math.min(5, Math.round(Number(value || 0) / 20)));
+  return <div className={styles.stars}>{'★'.repeat(count)}{'☆'.repeat(5 - count)}</div>;
+}
+function PremiumGate() {
+  return <section className={styles.premiumGate}><small>BOATSTRIKERS PREMIUM</small><h2>ここから先は、データを「買い方」へ変える攻略エリア</h2><p>イン逃げ条件、穴パターン、展示信頼度、風攻略、AI総括を公開します。</p><div><span>イン攻略</span><span>穴攻略</span><span>展示攻略</span><span>風攻略</span></div><button type="button">24場攻略プレミアムを見る</button><small>管理者確認：URL末尾に ?preview=premium</small></section>;
+}
+function StrategyBlock({ data, fallback }) {
+  if (!data || !Object.keys(data).length) return <div className={styles.empty}>{fallback}</div>;
+  return <div className={styles.strategy}><div className={styles.grade}><span>評価</span><strong>{data.grade || '—'}</strong><small>{data.sample_count ? `${Number(data.sample_count).toLocaleString()}R` : ''}</small></div><div><h3>{data.title || 'データ攻略'}</h3><p>{data.description}</p>{data.conditions?.length > 0 && <ul>{data.conditions.map((item, index) => <li key={`${item}-${index}`}>✓ {item}</li>)}</ul>}<div className={styles.strategyMetrics}><span>主要率 <b>{pct(data.primary_rate)}</b></span><span>対象数 <b>{Number(data.sample_count || 0).toLocaleString()}R</b></span></div></div></div>;
+}
+function Reliability({ data }) {
+  if (!data || !Object.keys(data).length) return <div className={styles.empty}>展示タイム・展示ST・周回展示の信頼度はData Engine v3実行後に表示されます。</div>;
+  const metrics = data.metrics || [];
+  return <div className={styles.reliability}><div className={styles.grade}><span>総合</span><strong>{data.grade || '—'}</strong><small>{data.sample_count ? `${Number(data.sample_count).toLocaleString()}R` : ''}</small></div><div className={styles.reliabilityGrid}>{metrics.map((item, index) => <article key={`${item.label}-${index}`}><span>{item.label}</span><strong>{item.value_text || pct(item.value)}</strong><small>{item.note}</small></article>)}</div></div>;
+}
+function Summary({ label, value }) { return <div><span>{label}</span><strong>{value}</strong></div>; }
+function buildFallbackProfile(yearly) {
+  const inside = clamp((Number(yearly.course1_win_rate || 0) - 35) * 2.2);
+  const upset = clamp(Number(yearly.over10000_rate || 0) * 3.4);
+  return { overall_score: Math.round((inside + upset + 55 + 50) / 4), inside_score: inside, upset_score: upset, exhibition_score: 55, wind_score: 50, difficulty_label: '分析中', priority: ['展示', 'イン', '風'], comment: null };
+}
+function createComment(name, yearly) {
+  const c1 = Number(yearly.course1_win_rate || 0);
+  const high = Number(yearly.over10000_rate || 0);
+  const insideText = c1 >= 55 ? '1コースの信頼度が比較的高い' : c1 >= 48 ? '1コースは標準的な強さ' : '1コースは慎重に見極めたい';
+  const upsetText = high >= 20 ? '万舟も発生しやすく、穴条件の確認が重要です' : '配当は比較的落ち着きやすく、本命条件の精査が重要です';
+  return `${name}は直近1年のデータでは${insideText}水面です。${upsetText}。表示されている母数と収録率を確認しながら、展示・風・進入を組み合わせて判断してください。`;
+}
