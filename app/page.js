@@ -332,20 +332,8 @@ export default async function Home() {
 
 
 
-    
 
-      <section className="homeSectionCard yellow">
-
-  <a href="/library" className="bannerLink">
-    <Image
-      src="/1C1FAE76-929A-4DEE-9D2D-816BBC47FA04.png"
-      alt="一果図書館"
-      width={1536}
-      height={864}
-      className="bannerImage"
-    />
-  </a>
-</section>
+  
 
    <section className="homeSectionCard yellow resultSummarySection">
   <img
@@ -442,6 +430,21 @@ export default async function Home() {
     />
   </a>
 </section>
+
+
+
+         
+ <section className="homeSection bscSection">
+         <a href="/library" className="bannerLink">
+    <Image
+      src="/IMG_6917.jpeg"
+      alt="一果図書館"
+      className="bannerImage"
+    />
+  </a>
+</section>
+
+         
 
          <section className="homeSection bscSection">
 <a href="/radio" className="bannerLink">
