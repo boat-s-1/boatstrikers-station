@@ -555,19 +555,7 @@ export default async function Home() {
 ======================================== */}
 <footer className="siteFooter">
   <div className="siteFooterInner">
-    <div className="siteFooterHeading">
-      <div className="siteFooterLogo">
-        BOAT
-        <br />
-        <span>STRIKERS</span>
-      </div>
-
-      <p>
-        ボートレースをもっと楽しく、
-        <br />
-        もっと分かりやすく。
-      </p>
-    </div>
+   
 
     <nav className="footerSitemap" aria-label="フッターサイトマップ">
       <div className="footerLinkGroup">
