@@ -1,17 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const STADIUMS = {
-  kiryu: { code: 1, name: '桐生' }, toda: { code: 2, name: '戸田' }, edogawa: { code: 3, name: '江戸川' },
-  heiwajima: { code: 4, name: '平和島' }, tamagawa: { code: 5, name: '多摩川' }, hamana: { code: 6, name: '浜名湖' },
-  gamagori: { code: 7, name: '蒲郡' }, toki: { code: 8, name: '常滑' }, tsu: { code: 9, name: '津' },
-  mikuni: { code: 10, name: '三国' }, biwako: { code: 11, name: 'びわこ' }, suminoe: { code: 12, name: '住之江' },
-  amagasaki: { code: 13, name: '尼崎' }, naruto: { code: 14, name: '鳴門' }, marugame: { code: 15, name: '丸亀' },
-  kojima: { code: 16, name: '児島' }, miyajima: { code: 17, name: '宮島' }, tokuyama: { code: 18, name: '徳山' },
-  shimonoseki: { code: 19, name: '下関' }, wakamatsu: { code: 20, name: '若松' }, ashiya: { code: 21, name: '芦屋' },
-  fukuoka: { code: 22, name: '福岡' }, karatsu: { code: 23, name: '唐津' }, omura: { code: 24, name: '大村' },
-};
-
+import { resolveStadium } from '../../../../../lib/stadiums';
 function supabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -25,16 +15,16 @@ export const revalidate = 0;
 export async function GET(request, { params }) {
   try {
     const route = await params;
-    const stadium = STADIUMS[route.place];
+    const stadium = resolveStadium(route.place);
     if (!stadium) return NextResponse.json({ error: '場コードが見つかりません。' }, { status: 404 });
     const db = supabase();
     const requestedDate = new URL(request.url).searchParams.get('date');
-    const raceDate = requestedDate || await resolveLatestDate(db, stadium.code);
+    const raceDate = requestedDate || await resolveLatestDate(db, stadium.courseCode);
     if (!raceDate) return NextResponse.json({ stadium, raceDate: null, races: [], generatedAt: new Date().toISOString() });
 
     const [{ data: eventRows, error: eventError }, { data: entryRows, error: entryError }] = await Promise.all([
-      db.from('bs_race_events').select('*').eq('race_date', raceDate).eq('course_code', stadium.code).order('race_no'),
-      db.from('bs_race_entries').select('*').eq('race_date', raceDate).eq('course_code', stadium.code).order('race_no').order('boat_no'),
+      db.from('bs_race_events').select('*').eq('race_date', raceDate).eq('course_code', stadium.courseCode).order('race_no'),
+      db.from('bs_race_entries').select('*').eq('race_date', raceDate).eq('course_code', stadium.courseCode).order('race_no').order('boat_no'),
     ]);
     if (eventError) throw eventError;
     if (entryError) throw entryError;
