@@ -427,16 +427,7 @@ export default async function Home() {
   )}
 </section>
 
-    <section className="homeSectionCard blue">
-
-  <a href="/radio" className="bannerLink">
-    <Image
-      src="/IMG_6916.jpeg"
-      alt="BoatStrikers Radio"
-      className="bannerImage"
-    />
-  </a>
-</section>
+    
 
       <section className="homeSectionCard green">
   <h2 className="homeSectionTitle">💚 LINE限定情報</h2>
@@ -450,19 +441,26 @@ export default async function Home() {
     />
   </a>
 </section>
-         <section className="homeSection bscSection">
 
+         
+<a href="/radio" className="bannerLink">
+    <Image
+      src="/IMG_6916.jpeg"
+      alt="BoatStrikers Radio"
+      className="bannerImage"
+    />
+  </a>
+
+
+         
+<section className="homeSection bscSection">
 <a href="/bsc2">
-
      <img
   src="/IMG_6915.jpeg"
   alt="トップ"
   className="homeTitleImage"
 />
-
 </a>
-
-
 </section>
 
     </main>
