@@ -458,15 +458,178 @@ export default async function Home() {
 
          
 <section className="homeSection bscSection">
-<a href="/bsc2">
-     <img
-  src="/IMG_6915.jpeg"
-  alt="トップ"
-  className="homeTitleImage"
-/>
-</a>
+  <a href="/bsc2">
+    <img
+      src="/IMG_6915.jpeg"
+      alt="BoatStrikers Challenge"
+      className="homeTitleImage"
+    />
+  </a>
 </section>
 
-    </main>
+{/* ========================================
+    BoatStrikersについて
+======================================== */}
+<section className="aboutBoatStrikers" aria-labelledby="about-title">
+  <div className="aboutBoatStrikersInner">
+    <div className="aboutHeading">
+      <span className="aboutHeadingEnglish">ABOUT BOATSTRIKERS</span>
+
+      <h2 id="about-title">
+        BoatStrikersについて
+      </h2>
+
+      <p className="aboutHeadingSub">
+        ボートレースを、もっと楽しく、もっと分かりやすく。
+      </p>
+    </div>
+
+    <div className="aboutDescription">
+      <p>
+        BoatStrikersは、ボートレースを初心者の方にも
+        分かりやすく楽しんでもらうための情報サイトです。
+      </p>
+
+      <p>
+        一果のイン逃げ予想、初音の女子戦攻略、
+        キイナの5号艇・穴狙い情報を中心に、
+        出走表、展示情報、予想新聞、全国24場攻略、
+        漫画、動画、ラジオなどを配信しています。
+      </p>
+
+      <p>
+        「なんとなく舟券を買う」から、
+        選手・モーター・スタート・展示・水面状況を確認して
+        レースを楽しむためのきっかけをお届けします。
+      </p>
+    </div>
+
+    <div className="aboutFeatureGrid">
+      <div className="aboutFeatureCard aboutFeatureCard--pink">
+        <span className="aboutFeatureIcon" aria-hidden="true">
+          1
+        </span>
+
+        <div>
+          <h3>予想を楽しむ</h3>
+          <p>
+            イン逃げ・女子戦・5号艇を、
+            3人の担当キャラクターが紹介します。
+          </p>
+        </div>
+      </div>
+
+      <div className="aboutFeatureCard aboutFeatureCard--blue">
+        <span className="aboutFeatureIcon" aria-hidden="true">
+          📖
+        </span>
+
+        <div>
+          <h3>ボートレースを学ぶ</h3>
+          <p>
+            初心者講座や24場攻略を通して、
+            レースの見方を分かりやすく解説します。
+          </p>
+        </div>
+      </div>
+
+      <div className="aboutFeatureCard aboutFeatureCard--yellow">
+        <span className="aboutFeatureIcon" aria-hidden="true">
+          ♪
+        </span>
+
+        <div>
+          <h3>動画やラジオで楽しむ</h3>
+          <p>
+            漫画、ショート動画、ラジオなど、
+            気軽に楽しめる番組を配信しています。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/* ========================================
+    通常フッターサイトマップ
+======================================== */}
+<footer className="siteFooter">
+  <div className="siteFooterInner">
+    <div className="siteFooterHeading">
+      <div className="siteFooterLogo">
+        BOAT
+        <br />
+        <span>STRIKERS</span>
+      </div>
+
+      <p>
+        ボートレースをもっと楽しく、
+        <br />
+        もっと分かりやすく。
+      </p>
+    </div>
+
+    <nav className="footerSitemap" aria-label="フッターサイトマップ">
+      <div className="footerLinkGroup">
+        <h2>予想を見る</h2>
+
+        <a href="/">ホーム</a>
+        <a href="/races">本日の出走表</a>
+        <a href="/ichika">一果のイン逃げ予想</a>
+        <a href="/hatsune">初音の女子戦攻略</a>
+        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/bsc2">BSC</a>
+      </div>
+
+      <div className="footerLinkGroup">
+        <h2>学ぶ・楽しむ</h2>
+
+        <a href="/library">一果図書館</a>
+        <a href="/library/stadiums">全国24場攻略</a>
+        <a href="/ichika-sensei">教えて！一果センセー</a>
+        <a href="/comic">ふなけん研究部</a>
+        <a href="/radio">ボート・ナイト・ニッポン</a>
+        <a href="/program">番組表</a>
+      </div>
+
+      <div className="footerLinkGroup">
+        <h2>サイト案内</h2>
+
+        <a href="/about">BoatStrikersについて</a>
+        <a href="/sitemap">サイトマップ</a>
+        <a href="/contact">お問い合わせ</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/terms">利用規約</a>
+        <a href="/disclaimer">免責事項</a>
+      </div>
+    </nav>
+
+    <div className="footerNotice">
+      <p>
+        当サイトに掲載している予想や情報は、
+        的中および利益を保証するものではありません。
+      </p>
+
+      <p>
+        舟券の購入は20歳になってから。
+        無理のない範囲でボートレースをお楽しみください。
+      </p>
+    </div>
+
+    <div className="footerBottom">
+      <span>© BoatStrikers</span>
+
+      <a
+        href="https://lin.ee/Pf3FEEQ"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        公式LINE
+      </a>
+    </div>
+  </div>
+</footer>
+
+</main>
   );
 }
