@@ -442,7 +442,7 @@ export default async function Home() {
   </a>
 </section>
 
-         
+         <section className="homeSection bscSection">
 <a href="/radio" className="bannerLink">
     <Image
       src="/IMG_6916.jpeg"
@@ -450,7 +450,7 @@ export default async function Home() {
       className="bannerImage"
     />
   </a>
-
+</section>
 
          
 <section className="homeSection bscSection">
