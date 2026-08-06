@@ -329,20 +329,7 @@ export default async function Home() {
   <MemberSlider />
 </section>
 
-<section className="homeSection bscSection">
 
-<a href="/bsc2">
-
-     <img
-  src="/88D8F192-324A-4FD9-8F3A-A2AF27E35C9F.png"
-  alt="トップ"
-  className="homeTitleImage"
-/>
-
-</a>
-
-
-</section>
 
     
 
@@ -462,6 +449,20 @@ export default async function Home() {
       className="bannerImage"
     />
   </a>
+</section>
+         <section className="homeSection bscSection">
+
+<a href="/bsc2">
+
+     <img
+  src="/IMG_6915.jpeg"
+  alt="トップ"
+  className="homeTitleImage"
+/>
+
+</a>
+
+
 </section>
 
     </main>
