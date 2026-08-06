@@ -1,23 +1,10 @@
 import Link from 'next/link';
-import { getStadiumAiV2, premiumPreview, STADIUMS } from '../../../../lib/stadiumAiV2';
+import { getStadiumAiV2, premiumPreview } from '../../../../lib/stadiumAiV2';
 import DataBookInteractive from './DataBookInteractive';
 import TodayRacePremium from './TodayRacePremium';
 import styles from './stadiumAiV2.module.css';
 
 export const dynamic = 'force-dynamic';
-
-export function generateStaticParams() {
-  return STADIUMS.map(stadium => ({ place: stadium.slug }));
-}
-
-export async function generateMetadata({ params }) {
-  const route = await params;
-  const stadium = STADIUMS.find(item => item.slug === route.place) || STADIUMS[0];
-  return {
-    title: `${stadium.name} DATA BOOK｜BoatStrikers 24場攻略`,
-    description: `${stadium.name}の直近1年データ、出目、季節、風、展示AI、今日の出走表と直前評価を掲載します。`,
-  };
-}
 
 const pct = value => value == null ? '—' : `${Number(value).toFixed(1)}%`;
 const yen = value => value == null ? '—' : `${Number(value).toLocaleString()}円`;
@@ -32,7 +19,7 @@ export default async function StadiumDataBookPage({ params, searchParams }) {
   const profile = payload?.ai_profile || buildFallbackProfile(yearly);
   const source = payload?.source_health || {};
 
-  return <main className={styles.page} data-stadium={stadium.slug} style={{ '--stadium-code': `'${String(stadium.courseCode).padStart(2, '0')}'` }}>
+  return <main className={styles.page}>
     <header className={styles.topbar}>
       <Link href="/library/stadiums">← 24場攻略</Link>
       <span>BOATSTRIKERS DATA BOOK</span>
