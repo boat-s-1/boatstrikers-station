@@ -9,6 +9,7 @@ import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 import { getCoursesByDate } from "../lib/boatstrikersPlatform";
 
 
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
