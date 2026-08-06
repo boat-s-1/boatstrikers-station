@@ -431,7 +431,7 @@ export default async function Home() {
 
   <a href="/radio" className="bannerLink">
     <Image
-      src="/6EDF5261-8C7D-49F6-9C79-F22A3AA172C1.png"
+      src="/IMG_6916.jpeg"
       alt="BoatStrikers Radio"
       className="bannerImage"
     />
