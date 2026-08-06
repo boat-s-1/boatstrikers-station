@@ -15,16 +15,17 @@ export const revalidate = 0;
 export async function GET(request, { params }) {
   try {
     const route = await params;
-    const stadium = resolveStadium(route.place);
-    if (!stadium) return NextResponse.json({ error: '場コードが見つかりません。' }, { status: 404 });
+    const resolved = resolveStadium(route.place);
+    if (!resolved) return NextResponse.json({ error: '場コードが見つかりません。' }, { status: 404 });
+    const stadium = { code: resolved.courseCode, name: resolved.name, place: resolved.place };
     const db = supabase();
     const requestedDate = new URL(request.url).searchParams.get('date');
-    const raceDate = requestedDate || await resolveLatestDate(db, stadium.courseCode);
+    const raceDate = requestedDate || await resolveLatestDate(db, stadium.code);
     if (!raceDate) return NextResponse.json({ stadium, raceDate: null, races: [], generatedAt: new Date().toISOString() });
 
     const [{ data: eventRows, error: eventError }, { data: entryRows, error: entryError }] = await Promise.all([
-      db.from('bs_race_events').select('*').eq('race_date', raceDate).eq('course_code', stadium.courseCode).order('race_no'),
-      db.from('bs_race_entries').select('*').eq('race_date', raceDate).eq('course_code', stadium.courseCode).order('race_no').order('boat_no'),
+      db.from('bs_race_events').select('*').eq('race_date', raceDate).eq('course_code', stadium.code).order('race_no'),
+      db.from('bs_race_entries').select('*').eq('race_date', raceDate).eq('course_code', stadium.code).order('race_no').order('boat_no'),
     ]);
     if (eventError) throw eventError;
     if (entryError) throw entryError;
