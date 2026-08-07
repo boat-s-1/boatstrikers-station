@@ -318,7 +318,7 @@ export default function DisclaimerPage() {
         <a href="/ichika-sensei">教えて！一果センセー</a>
         <a href="/comic">ふなけん研究部</a>
         <a href="/radio">ボート・ナイト・ニッポン</a>
-        <a href="/program">番組表</a>
+        <a href="/schedule">番組表</a>
       </div>
 
       <div className="footerLinkGroup">
