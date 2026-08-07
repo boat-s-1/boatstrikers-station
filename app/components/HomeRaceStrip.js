@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeRaceStrip.module.css";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
@@ -11,25 +14,102 @@ function courseType(courseCode) {
   return { label: "デイ", icon: "☀️", key: "day" };
 }
 
-function statusInfo(course) {
+function getJstClock(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    minutes: Number(values.hour) * 60 + Number(values.minute),
+  };
+}
+
+function timeToMinutes(value) {
+  const match = String(value || "").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+
+  return hour * 60 + minute;
+}
+
+function statusInfo(course, clock, raceDate) {
+  const races = Array.isArray(course.races)
+    ? [...course.races].sort((a, b) => Number(a.raceNo) - Number(b.raceNo))
+    : [];
+
+  // トップページは当日開催を表示する。万一別日を表示した場合は最初の締切を案内する。
+  const currentMinutes = clock.date === raceDate ? clock.minutes : -1;
+
+  const racesWithClosingTime = races
+    .map((race) => ({
+      ...race,
+      closingMinutes: timeToMinutes(race.closingTime),
+    }))
+    .filter((race) => race.closingMinutes !== null);
+
+  if (racesWithClosingTime.length > 0) {
+    const nextRace = racesWithClosingTime.find(
+      (race) => currentMinutes < race.closingMinutes
+    );
+
+    if (nextRace) {
+      const remaining = nextRace.closingMinutes - currentMinutes;
+      return {
+        label: `${nextRace.raceNo}R ${nextRace.closingTime}`,
+        key: remaining >= 0 && remaining <= 5 ? "soon" : "scheduled",
+      };
+    }
+
+    // 最終レースの締切予定時刻を過ぎたら発売終了。
+    return { label: "発売終了", key: "finished" };
+  }
+
+  // 締切予定時刻がまだDBに入っていない場合の安全なフォールバック。
   const raceCount = Number(course.raceCount || 0);
   const resultCount = Number(course.resultCount || 0);
-  const nextRaceNo = Number(course.nextRaceNo || 0);
 
-  if (course.liveStatus === "finished" || (raceCount > 0 && resultCount >= raceCount)) {
-    return { label: "開催終了", key: "finished" };
+  if (raceCount > 0 && resultCount >= raceCount) {
+    return { label: "発売終了", key: "finished" };
   }
-  if (course.liveStatus === "exhibition") {
-    return { label: nextRaceNo ? `${nextRaceNo}R 展示中` : "展示中", key: "live" };
+
+  const firstUnfinished = races.find((race) => !race.resultAvailable);
+  if (firstUnfinished?.raceNo) {
+    return { label: `${firstUnfinished.raceNo}Rから`, key: "scheduled" };
   }
-  if (course.liveStatus === "live") {
-    return { label: nextRaceNo ? `${nextRaceNo}R 受付中` : "開催中", key: "live" };
-  }
-  return { label: nextRaceNo ? `${nextRaceNo}Rから` : "出走表公開", key: "scheduled" };
+
+  return { label: "出走表公開", key: "scheduled" };
 }
 
 export default function HomeRaceStrip({ courses = [], raceDate = "" }) {
-  if (!Array.isArray(courses) || courses.length === 0) return null;
+  const [clock, setClock] = useState(() => getJstClock());
+
+  useEffect(() => {
+    // 締切時刻をまたいだとき、ページ更新なしで次レースへ切り替える。
+    const timer = window.setInterval(() => {
+      setClock(getJstClock());
+    }, 15 * 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const visibleCourses = useMemo(
+    () => (Array.isArray(courses) ? courses : []),
+    [courses]
+  );
+
+  if (visibleCourses.length === 0) return null;
 
   return (
     <section className={styles.section} aria-labelledby="home-race-title">
@@ -44,10 +124,10 @@ export default function HomeRaceStrip({ courses = [], raceDate = "" }) {
       </div>
 
       <div className={styles.rail}>
-        {courses.map((course) => {
+        {visibleCourses.map((course) => {
           const code = String(course.courseCode).padStart(2, "0");
           const type = courseType(course.courseCode);
-          const status = statusInfo(course);
+          const status = statusInfo(course, clock, raceDate);
           const href = `/races/${code}?date=${raceDate}`;
 
           return (
@@ -61,7 +141,9 @@ export default function HomeRaceStrip({ courses = [], raceDate = "" }) {
                 <span className={styles.type}>{type.icon} {type.label}</span>
               </div>
               <strong>{course.courseName}</strong>
-              <span className={`${styles.status} ${styles[`status_${status.key}`]}`}>{status.label}</span>
+              <span className={`${styles.status} ${styles[`status_${status.key}`]}`}>
+                {status.label}
+              </span>
             </Link>
           );
         })}

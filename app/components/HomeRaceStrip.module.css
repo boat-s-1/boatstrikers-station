@@ -122,6 +122,7 @@
 
 .status_live { color: #fff; background: #ff4f91; }
 .status_scheduled { color: #087bb3; background: #dff5ff; }
+.status_soon { color: #a85d00; background: #fff0c9; }
 .status_finished { color: #778793; background: #e9eef1; }
 
 .night::before { background: #6259d6; }
