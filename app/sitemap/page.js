@@ -238,46 +238,62 @@ export default function SitemapPage() {
         ))}
       </div>
 
-      <section className={styles.guideSection}>
-        <div className={styles.guideCard}>
-          <div className={styles.guideIcon} aria-hidden="true">
-            🔍
-          </div>
+      {/* ========================================
+    通常フッターサイトマップ
+======================================== */}
+<footer className="siteFooter">
+  <div className="siteFooterInner">
+   
 
-          <div>
-            <span>迷ったときは</span>
-            <h2>まずはトップページをご覧ください</h2>
-            <p>
-              今日の予定、開催場、最新の予想新聞、メンバー紹介など、
-              BoatStrikersの最新情報をまとめて確認できます。
-            </p>
-          </div>
+    <nav className="footerSitemap" aria-label="フッターサイトマップ">
+      <div className="footerLinkGroup">
+        <h2>予想を見る</h2>
 
-          <Link href="/" className={styles.homeButton}>
-            トップページへ
-          </Link>
-        </div>
-      </section>
+        <a href="/">ホーム</a>
+        <a href="/races">本日の出走表</a>
+        <a href="/ichika">一果のイン逃げ予想</a>
+        <a href="/hatsune">初音の女子戦攻略</a>
+        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/bsc2">BSC</a>
+      </div>
 
-      <section className={styles.noticeSection}>
-        <h2>ご利用にあたって</h2>
-        <p>
-          当サイトに掲載している予想、データ、解説などは、
-          的中や利益を保証するものではありません。
-          舟券の購入は20歳になってから、無理のない範囲でお楽しみください。
-        </p>
-      </section>
+      <div className="footerLinkGroup">
+        <h2>学ぶ・楽しむ</h2>
 
-      <footer className={styles.footer}>
-        <nav aria-label="フッター">
-          <Link href="/">ホーム</Link>
-          <Link href="/about">BoatStrikersについて</Link>
-          <Link href="/library">図書館</Link>
-          <Link href="/radio">ラジオ</Link>
-        </nav>
+        <a href="/library">一果図書館</a>
+        <a href="/library/stadiums">全国24場攻略</a>
+        <a href="/ichika-sensei">教えて！一果センセー</a>
+        <a href="/comic">ふなけん研究部</a>
+        <a href="/radio">ボート・ナイト・ニッポン</a>
+        <a href="/program">番組表</a>
+      </div>
 
-        <p>© BoatStrikers</p>
-      </footer>
+      <div className="footerLinkGroup">
+        <h2>サイト案内</h2>
+
+        <a href="/about">BoatStrikersについて</a>
+        <a href="/sitemap">サイトマップ</a>
+        <a href="/contact">お問い合わせ</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/terms">利用規約</a>
+        <a href="/disclaimer">免責事項</a>
+      </div>
+    </nav>
+
+    <div className="footerNotice">
+      <p>
+        当サイトに掲載している予想や情報は、
+        的中および利益を保証するものではありません。
+      </p>
+
+      <p>
+        舟券の購入は20歳になってから。
+        無理のない範囲でボートレースをお楽しみください。
+      </p>
+    </div>
+  </div>
+</footer>
+
     </main>
   );
 }
