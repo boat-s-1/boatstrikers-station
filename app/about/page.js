@@ -117,9 +117,9 @@ export default function AboutPage() {
           <span className={styles.eyebrow}>ABOUT BOATSTRIKERS</span>
           <h1>BoatStrikersについて</h1>
           <p className={styles.heroCopy}>
-            ボートレースを
+            ボートレースをもっと
             <br className={styles.mobileBreak} />
-            もっと楽しくもっと分かりやすく。
+            楽しくもっと分かりやすく
           </p>
 
           <p className={styles.heroDescription}>
