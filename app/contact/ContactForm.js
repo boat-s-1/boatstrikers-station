@@ -7,7 +7,7 @@ import styles from "./contact.module.css";
  * 必ず実際に受信できるメールアドレスへ変更してください。
  * 例: contact@boat-strike.online
  */
-const CONTACT_EMAIL = "marron.toyohashi@gmail.com";
+const CONTACT_EMAIL = "YOUR_EMAIL@example.com";
 
 const initialForm = {
   name: "",
@@ -269,15 +269,9 @@ export default function ContactForm() {
         {errors.agreement && (
           <p className={styles.errorText}>{errors.agreement}</p>
         )}
+      </div>
 
-      {status && (
-        <p className={styles.formStatus} role="status">
-          {status}
-        </p>
-      )}
-
-
-     {!isEmailConfigured && (
+      {!isEmailConfigured && (
         <div className={styles.setupNotice}>
           <strong>公開前の設定が必要です</strong>
           <p>
@@ -287,8 +281,12 @@ export default function ContactForm() {
           </p>
         </div>
       )}
-        
 
+      {status && (
+        <p className={styles.formStatus} role="status">
+          {status}
+        </p>
+      )}
 
       <button type="submit" className={styles.submitButton}>
         入力内容をメールで送る
@@ -300,5 +298,4 @@ export default function ContactForm() {
       </p>
     </form>
   );
-
-      )
+}
