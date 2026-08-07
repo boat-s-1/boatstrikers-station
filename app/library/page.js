@@ -253,7 +253,7 @@ export default async function LibraryPage() {
         />
       </section>
 
-<div className={styles.developingBanner}>
+<div className={arrivalStyles.developingBanner}>
   <Image
     src="/S__22142979.jpg"
     alt="只今、開発中"
