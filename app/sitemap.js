@@ -48,6 +48,10 @@ export default function sitemap() {
     { path: "/hatsune", changeFrequency: "weekly", priority: 0.7 },
     { path: "/kiina", changeFrequency: "weekly", priority: 0.7 },
     { path: "/bsc", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/disclaimer", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/contact", changeFrequency: "yearly", priority: 0.4 },
   ];
 
   const staticEntries = staticPages.map((page) => ({
