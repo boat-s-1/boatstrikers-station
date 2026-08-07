@@ -106,6 +106,19 @@ export default async function RaceDetailPage({
         </div>
       </header>
 
+                  
+<div className={styles.developingBanner}>
+  <Image
+    src="/S__22142979.jpg"
+    alt="只今、開発中"
+    width={2172}
+    height={724}
+    className={styles.developingBannerImage}
+  />
+</div>
+
+
+    
       <section className={styles.content}>
         {loadError ? (
           <div className={styles.messageCard}>
