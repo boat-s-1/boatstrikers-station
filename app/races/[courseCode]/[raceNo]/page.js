@@ -109,7 +109,7 @@ export default async function RaceDetailPage({
                   
 <div className={styles.developingBanner}>
   <Image
-    src="/S__22142979.jpg"
+    src="/S_22142979.jpg"
     alt="只今、開発中"
     width={2172}
     height={724}
