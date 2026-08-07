@@ -1,73 +1,50 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import styles from "./BottomNav.module.css";
 
 const navItems = [
-  {
-    href: "/",
-    label: "ホーム",
-    icon: "⌂",
-  },
-  {
-    href: "/ichika",
-    label: "一果",
-    icon: "1",
-  },
-  {
-    href: "/hatsune",
-    label: "初音",
-    icon: "4",
-  },
-  {
-    href: "/kiina",
-    label: "キイナ",
-    icon: "5",
-  },
-  {
-    href: "/library",
-    label: "図書館",
-    icon: "▤",
-  },
+  { href: "/", label: "ホーム" },
+  { href: "/radio", label: "ラジオ" },
+  { href: "/library", label: "図書館" },
+  { href: "/races", label: "出走表" },
+  { href: "/schedule", label: "番組表" },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   const isActive = (href) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
-
+    if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
-    <nav className="glassBottomNav">
-      <div className="glassBottomNavInner">
-        {navItems.map((item) => {
-          const active = isActive(item.href);
+    <nav className={styles.footerNav} aria-label="フッターナビ">
+      <div className={styles.footerInner}>
+        <Image
+          src="/footer/footer-menu.jpg"
+          alt="フッターメニュー"
+          width={1320}
+          height={386}
+          className={styles.footerImage}
+          priority
+        />
 
-          return (
+        <div className={styles.linkGrid}>
+          {navItems.map((item) => (
             <Link
-              href={item.href}
               key={item.href}
-              className={`glassBottomNavItem ${
-                active ? "isActive" : ""
-              }`}
+              href={item.href}
+              className={`${styles.linkItem} ${isActive(item.href) ? styles.active : ""}`}
+              aria-label={item.label}
             >
-              <span className="bottomNavIconArea">
-                <span className="bottomNavIcon">
-                  {item.icon}
-                </span>
-              </span>
-
-              <span className="bottomNavLabel">
-                {item.label}
-              </span>
+              <span className={styles.screenReaderOnly}>{item.label}</span>
             </Link>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </nav>
   );
