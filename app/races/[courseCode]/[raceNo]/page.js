@@ -110,7 +110,7 @@ export default async function RaceDetailPage({
                   
 <div className={styles.developingBanner}>
   <Image
-    src="/S_22142979.jpg"
+    src="/S__22142979.jpg"
     alt="只今、開発中"
     className={styles.developingBannerImage}
   />
