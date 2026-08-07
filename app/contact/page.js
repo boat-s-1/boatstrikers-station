@@ -196,10 +196,7 @@ export default function ContactPage() {
         </p>
       </section>
 
-      <div className={styles.backLinks}>
-        <Link href="/sitemap">サイトマップへ</Link>
-        <Link href="/">トップページへ</Link>
-      </div>
+      
 
       <footer className={styles.footer}>
         <nav aria-label="フッター">
