@@ -253,6 +253,15 @@ export default async function LibraryPage() {
         />
       </section>
 
+<div className={styles.developingBanner}>
+  <Image
+    src="/S__22142979.jpg"
+    alt="只今、開発中"
+    className={styles.developingBannerImage}
+  />
+</div>
+
+            
       <section className={arrivalStyles.section} aria-labelledby="library-arrivals-title">
         <div className={arrivalStyles.titleBox}>
           <img
