@@ -603,18 +603,6 @@ export default async function Home() {
         無理のない範囲でボートレースをお楽しみください。
       </p>
     </div>
-
-    <div className="footerBottom">
-      <span>© BoatStrikers</span>
-
-      <a
-        href="https://lin.ee/Pf3FEEQ"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        公式LINE
-      </a>
-    </div>
   </div>
 </footer>
 
