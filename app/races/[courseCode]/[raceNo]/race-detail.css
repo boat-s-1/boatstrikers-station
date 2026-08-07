@@ -1410,3 +1410,28 @@ a {
     gap: 5px;
   }
 }
+.developingBanner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 14px auto 20px;
+  padding: 0 12px;
+}
+
+.developingBannerImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 768px) {
+  .developingBanner {
+    margin: 10px auto 14px;
+    padding: 0 8px;
+  }
+
+  .developingBannerImage {
+    border-radius: 10px;
+  }
+}
