@@ -257,34 +257,62 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaCard}>
-          <span>BOATSTRIKERS</span>
-          
-          <p>開催場、出走表、最新の予想情報をトップページから確認できます。</p>
+      {/* ========================================
+    通常フッターサイトマップ
+======================================== */}
+<footer className="siteFooter">
+  <div className="siteFooterInner">
+   
 
-          <div className={styles.ctaButtons}>
-            <Link href="/" className={styles.primaryButton}>
-              トップページへ
-            </Link>
+    <nav className="footerSitemap" aria-label="フッターサイトマップ">
+      <div className="footerLinkGroup">
+        <h2>予想を見る</h2>
 
-            <Link href="/library" className={styles.secondaryButton}>
-              一果図書館へ
-            </Link>
-          </div>
-        </div>
-      </section>
+        <a href="/">ホーム</a>
+        <a href="/races">本日の出走表</a>
+        <a href="/ichika">一果のイン逃げ予想</a>
+        <a href="/hatsune">初音の女子戦攻略</a>
+        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/bsc2">BSC</a>
+      </div>
 
-      <footer className={styles.footer}>
-        <nav aria-label="このページのフッター">
-          <Link href="/">ホーム</Link>
-          <Link href="/library">図書館</Link>
-          <Link href="/radio">ラジオ</Link>
-          <Link href="/comic">漫画</Link>
-        </nav>
+      <div className="footerLinkGroup">
+        <h2>学ぶ・楽しむ</h2>
 
-        <p>© BoatStrikers</p>
-      </footer>
+        <a href="/library">一果図書館</a>
+        <a href="/library/stadiums">全国24場攻略</a>
+        <a href="/ichika-sensei">教えて！一果センセー</a>
+        <a href="/comic">ふなけん研究部</a>
+        <a href="/radio">ボート・ナイト・ニッポン</a>
+        <a href="/program">番組表</a>
+      </div>
+
+      <div className="footerLinkGroup">
+        <h2>サイト案内</h2>
+
+        <a href="/about">BoatStrikersについて</a>
+        <a href="/sitemap">サイトマップ</a>
+        <a href="/contact">お問い合わせ</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/terms">利用規約</a>
+        <a href="/disclaimer">免責事項</a>
+      </div>
+    </nav>
+
+    <div className="footerNotice">
+      <p>
+        当サイトに掲載している予想や情報は、
+        的中および利益を保証するものではありません。
+      </p>
+
+      <p>
+        舟券の購入は20歳になってから。
+        無理のない範囲でボートレースをお楽しみください。
+      </p>
+    </div>
+  </div>
+</footer>
+
     </main>
   );
 }
