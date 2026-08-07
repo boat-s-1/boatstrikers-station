@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: "BoatStrikersについて",
     description:
-      "ボートレースを、もっと楽しく、もっと分かりやすく。BoatStrikersのコンセプトやコンテンツをご紹介します。",
+      "ボートレースを　もっと楽しくもっと分かりやすく。BoatStrikersのコンセプトやコンテンツをご紹介します。",
     url: "/about",
     type: "website",
   },
@@ -117,9 +117,9 @@ export default function AboutPage() {
           <span className={styles.eyebrow}>ABOUT BOATSTRIKERS</span>
           <h1>BoatStrikersについて</h1>
           <p className={styles.heroCopy}>
-            ボートレースを、
+            ボートレースを
             <br className={styles.mobileBreak} />
-            もっと楽しく、もっと分かりやすく。
+            もっと楽しくもっと分かりやすく。
           </p>
 
           <p className={styles.heroDescription}>
@@ -161,7 +161,7 @@ export default function AboutPage() {
           </p>
 
           <div className={styles.messageBox}>
-            <strong>「なんとなく買う」から、「考えて楽しむ」へ。</strong>
+            <strong>「なんとなく買う」から「考えて楽しむ」へ</strong>
             <span>
               選手・モーター・スタート・展示・水面状況など、
               レースを見るためのヒントを親しみやすくお届けします。
@@ -173,7 +173,7 @@ export default function AboutPage() {
       <section className={styles.membersSection}>
         <div className={styles.sectionHeading}>
           <span>OUR MEMBERS</span>
-          <h2>3人の担当メンバー</h2>
+          <h2>メンバー</h2>
           <p>それぞれの得意分野から、ボートレースの楽しみ方をご案内します。</p>
         </div>
 
@@ -260,7 +260,7 @@ export default function AboutPage() {
       <section className={styles.ctaSection}>
         <div className={styles.ctaCard}>
           <span>BOATSTRIKERS</span>
-          <h2>今日のボートレースを見にいこう！</h2>
+          
           <p>開催場、出走表、最新の予想情報をトップページから確認できます。</p>
 
           <div className={styles.ctaButtons}>
