@@ -25,7 +25,7 @@ export default function BottomNav() {
     <nav className={styles.footerNav} aria-label="フッターナビ">
       <div className={styles.footerInner}>
         <Image
-          src="/7aeb524e-61ec-4930-842f-f394df5ccb7e.png"
+          src="/67851022-9433-4efb-a978-37b8b6dd295c.png"
           alt="フッターメニュー"
           width={1320}
           height={386}
