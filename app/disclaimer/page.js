@@ -291,54 +291,61 @@ export default function DisclaimerPage() {
         ))}
       </div>
 
-      <section className={styles.contactSection}>
-        <div className={styles.contactIcon} aria-hidden="true">
-          ✉️
-        </div>
-        <div>
-          <span>CONTACT</span>
-          <h2>掲載内容に関するお問い合わせ</h2>
-          <p>
-            権利関係、掲載内容、動画・レース映像などに関するご連絡は、
-            お問い合わせページからお願いいたします。
-          </p>
-        </div>
-        <Link href="/contact" className={styles.contactButton}>
-          お問い合わせへ
-        </Link>
-      </section>
+          {/* ========================================
+    通常フッターサイトマップ
+======================================== */}
+<footer className="siteFooter">
+  <div className="siteFooterInner">
+   
 
-      <section className={styles.revision}>
-        <p>
-          <span>制定日</span>
-          2026年8月6日
-        </p>
-        <p>
-          <span>最終改定日</span>
-          2026年8月6日
-        </p>
-        <p>
-          <span>運営</span>
-          BoatStrikers運営事務局
-        </p>
-      </section>
+    <nav className="footerSitemap" aria-label="フッターサイトマップ">
+      <div className="footerLinkGroup">
+        <h2>予想を見る</h2>
 
-      <div className={styles.backLinks}>
-        <Link href="/privacy">プライバシーポリシーへ</Link>
-        <Link href="/sitemap">サイトマップへ</Link>
-        <Link href="/">トップページへ</Link>
+        <a href="/">ホーム</a>
+        <a href="/races">本日の出走表</a>
+        <a href="/ichika">一果のイン逃げ予想</a>
+        <a href="/hatsune">初音の女子戦攻略</a>
+        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/bsc2">BSC</a>
       </div>
 
-      <footer className={styles.footer}>
-        <nav aria-label="フッター">
-          <Link href="/">ホーム</Link>
-          <Link href="/about">BoatStrikersについて</Link>
-          <Link href="/sitemap">サイトマップ</Link>
-          <Link href="/privacy">プライバシーポリシー</Link>
-          <Link href="/disclaimer">免責事項</Link>
-        </nav>
-        <p>© BoatStrikers</p>
-      </footer>
+      <div className="footerLinkGroup">
+        <h2>学ぶ・楽しむ</h2>
+
+        <a href="/library">一果図書館</a>
+        <a href="/library/stadiums">全国24場攻略</a>
+        <a href="/ichika-sensei">教えて！一果センセー</a>
+        <a href="/comic">ふなけん研究部</a>
+        <a href="/radio">ボート・ナイト・ニッポン</a>
+        <a href="/program">番組表</a>
+      </div>
+
+      <div className="footerLinkGroup">
+        <h2>サイト案内</h2>
+
+        <a href="/about">BoatStrikersについて</a>
+        <a href="/sitemap">サイトマップ</a>
+        <a href="/contact">お問い合わせ</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/terms">利用規約</a>
+        <a href="/disclaimer">免責事項</a>
+      </div>
+    </nav>
+
+    <div className="footerNotice">
+      <p>
+        当サイトに掲載している予想や情報は、
+        的中および利益を保証するものではありません。
+      </p>
+
+      <p>
+        舟券の購入は20歳になってから。
+        無理のない範囲でボートレースをお楽しみください。
+      </p>
+    </div>
+  </div>
+</footer>
     </main>
   );
 }
