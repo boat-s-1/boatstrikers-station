@@ -21,6 +21,7 @@ export default function BottomNav() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  
   return (
     <nav className={styles.footerNav} aria-label="フッターナビ">
       <div className={styles.footerInner}>
