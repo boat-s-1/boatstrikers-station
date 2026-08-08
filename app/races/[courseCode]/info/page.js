@@ -2,6 +2,7 @@ import Link from "next/link";
 import { normalizeCourseCode, normalizeDate } from "../../../lib/boatstrikersPlatform";
 import { resolveStadium, stadiumPath } from "../../../../lib/stadiums";
 import { getStadiumGuide } from "../../../../lib/stadiumGuideData";
+import { getStadiumBasicGuide } from "../../../../lib/stadiumBasicGuide24";
 import styles from "./stadiumInfo.module.css";
 
 export const dynamic = "force-dynamic";
@@ -13,78 +14,9 @@ const SECTION_IMAGES = {
   check: "/stadium-guide/section-04-check.png",
 };
 
-const KIRYU_COMPLETE = {
-  basic_info: {
-    race_type: "ナイター",
-    water_type: "淡水",
-    tide: "影響なし",
-    summary:
-      "桐生は年間を通じてナイター開催。冬〜春は「赤城おろし」と呼ばれる強風で水面が荒れることがあり、夏場は比較的穏やかで、まくりも効きやすい水面です。標高が高いため、モーターのパワーや出足が弱めになりやすい点も特徴です。",
-  },
-  yearly_stats: {
-    course1_win_rate: 49.7,
-    course3_win_rate: 12.8,
-    course4_win_rate: 14.1,
-    course5_win_rate: 10.2,
-  },
-  layout_image_url: "/stadium-guide/kiryu-water-layout.webp",
-  layout_notes: [
-    {
-      title: "ピット〜2マーク 165m",
-      text: "水面図ではピットから第2ターンマークまで165m。レース前はピット離れから進入隊形がどうなるかも確認したいポイントです。",
-    },
-    {
-      title: "ターンマーク間 300m",
-      text: "第1・第2ターンマーク間は300m。水面全体の形とあわせて、各艇がどこから仕掛けるかをイメージしやすいレイアウトです。",
-    },
-    {
-      title: "風の変化に注意",
-      text: "冬〜春は赤城おろしで荒れることがあります。直前の風向・風速と展示の変化をセットで確認すると分かりやすいです。",
-    },
-  ],
-  focus_cards: [
-    {
-      label: "1コース",
-      value: "49.7%",
-      title: "まずはインの信頼度",
-      text: "直近6か月の1コース1着率は49.7%。インだけで決め打ちせず、展示・スタート・機力まで見て判断したい場です。",
-    },
-    {
-      label: "4コース",
-      value: "14.1%",
-      title: "センター勢の攻め",
-      text: "4コースの1着率は14.1%。夏場の穏やかな水面ではまくりも効くため、センター勢の気配には注目です。",
-    },
-    {
-      label: "3コース",
-      value: "12.8%",
-      title: "3コースも侮れない",
-      text: "3コースの1着率は12.8%。1号艇の気配が弱いときは、3・4コースのスタートと伸びを比較しておきたいところです。",
-    },
-  ],
-  check_points: [
-    {
-      title: "風向・風速を最初に確認",
-      text: "特に冬〜春は赤城おろしの影響で水面が変わりやすいため、予想を始める前に直前の風を確認します。",
-    },
-    {
-      title: "モーターの出足・行き足",
-      text: "桐生は標高が高く、モーターのパワーや出足が弱めになりやすいとされています。展示で各艇の機力差を比較します。",
-    },
-    {
-      title: "1号艇だけで決めない",
-      text: "1コース1着率は約5割。インの気配に加えて、3・4コースのスタートや伸びが良いときは攻めの展開も考えます。",
-    },
-    {
-      title: "季節で水面イメージを変える",
-      text: "冬〜春は強風による荒れ、夏は比較的穏やかな水面を意識。季節と当日のコンディションを一緒に見ます。",
-    },
-  ],
-};
-
 function pct(value) {
   const n = Number(value);
-  return Number.isFinite(n) && n > 0 ? `${n.toFixed(1)}%` : "集計中";
+  return Number.isFinite(n) ? `${n.toFixed(1)}%` : "集計中";
 }
 
 function BasicItem({ label, value }) {
@@ -104,6 +36,17 @@ function SectionImage({ src, alt }) {
   );
 }
 
+function CourseCard({ course, rate, title, text }) {
+  return (
+    <article>
+      <span>{course}コース</span>
+      <strong>{pct(rate)}</strong>
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </article>
+  );
+}
+
 export default async function StadiumInfoPage({ params, searchParams }) {
   const route = await params;
   const query = await searchParams;
@@ -115,72 +58,28 @@ export default async function StadiumInfoPage({ params, searchParams }) {
     return <main className={styles.page}>開催場が見つかりません。</main>;
   }
 
-  const guide = await getStadiumGuide(stadium.slug);
-  const isKiryu = stadium.slug === "kiryu";
+  const [dbGuide, staticGuide] = await Promise.all([
+    getStadiumGuide(stadium.slug),
+    Promise.resolve(getStadiumBasicGuide(stadium.slug)),
+  ]);
 
-  const basic = isKiryu
-    ? { ...(guide?.basic_info || {}), ...KIRYU_COMPLETE.basic_info }
-    : guide?.basic_info || {};
+  if (!staticGuide) {
+    return <main className={styles.page}>基本情報データが見つかりません。</main>;
+  }
 
-  const yearly = isKiryu
-    ? { ...(guide?.yearly_stats || {}), ...KIRYU_COMPLETE.yearly_stats }
-    : guide?.yearly_stats || {};
-
-  const layoutNotes = isKiryu
-    ? KIRYU_COMPLETE.layout_notes
-    : Array.isArray(guide?.layout_notes)
-      ? guide.layout_notes
-      : [];
-
-  const layoutImage = isKiryu
-    ? KIRYU_COMPLETE.layout_image_url
-    : guide?.layout_image_url;
+  const rates = staticGuide.courseWinRates || [];
+  const layoutImage =
+    dbGuide?.layout_image_url ||
+    staticGuide.layoutImageUrl ||
+    null;
 
   const hasLayoutImage = Boolean(
     layoutImage && layoutImage !== "/book-24-stadiums.jpg"
   );
 
-  const focusCards = isKiryu
-    ? KIRYU_COMPLETE.focus_cards
-    : [
-        {
-          label: "イン",
-          value: pct(yearly.course1_win_rate),
-          title: "まずは1号艇",
-          text: "1号艇の信頼度を見る基本指標。数字だけでなく展示・スタートも合わせて確認します。",
-        },
-        {
-          label: "高配当",
-          value: pct(yearly.over10000_rate),
-          title: "荒れやすさ",
-          text: "高配当率は荒れやすさの参考。母数が少ない場合は参考値として扱います。",
-        },
-        {
-          label: "展示",
-          value: guide?.exhibition_reliability?.grade || "分析中",
-          title: "展示の信頼度",
-          text: "展示タイムや周回展示が結果につながりやすいかを24場攻略で分析します。",
-        },
-      ];
-
-  const checkPoints = isKiryu
-    ? KIRYU_COMPLETE.check_points
-    : [
-        {
-          title: "まず1号艇の信頼度",
-          text: "全国平均だけで決めず、その場のイン傾向と選手・モーターを確認します。",
-        },
-        {
-          title: "展示とスタート",
-          text: "直前情報が出たら、展示タイム・展示ST・進入の変化をチェックします。",
-        },
-        {
-          title: "風と水面状況",
-          text: "風向・風速や潮位の影響がある場では、直前の水面状況を優先します。",
-        },
-      ];
-
   const code = String(stadium.courseCode).padStart(2, "0");
+  const topOuter = staticGuide.topOuter;
+  const secondOuter = staticGuide.secondOuter;
 
   return (
     <main className={styles.page}>
@@ -211,26 +110,29 @@ export default async function StadiumInfoPage({ params, searchParams }) {
         />
 
         <div className={styles.basicGrid}>
-          <BasicItem label="開催タイプ" value={basic.race_type} />
-          <BasicItem label="水面タイプ" value={basic.water_type} />
-          <BasicItem label="潮位" value={basic.tide} />
-          <BasicItem
-            label="1コース1着率"
-            value={pct(yearly.course1_win_rate)}
-          />
+          <BasicItem label="主な開催" value={staticGuide.raceType} />
+          <BasicItem label="水面タイプ" value={staticGuide.waterType} />
+          <BasicItem label="干満差" value={staticGuide.tide} />
+          <BasicItem label="1コース1着率" value={pct(rates[0])} />
         </div>
 
-        <p className={styles.lead}>
-          {basic.summary ||
-            `${stadium.name}の基本情報・水面特徴・コース傾向を、初心者にも分かりやすく整理しています。`}
-        </p>
+        <p className={styles.lead}>{staticGuide.summary}</p>
 
-        {isKiryu && (
-          <p className={styles.sourceNote}>
-            ※1コース1着率はBOAT RACE桐生公式「水面特性」
-            （2025年11月〜2026年4月・全レース）の掲載値を使用。
-          </p>
-        )}
+        <div className={styles.sourceBox}>
+          <div>
+            <strong>データ出典：BOAT RACE公式 ボートレース場データ</strong>
+            <span>
+              集計期間：{staticGuide.periodFrom}〜{staticGuide.periodTo}
+            </span>
+          </div>
+          <a
+            href={staticGuide.officialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            公式データを確認 →
+          </a>
+        </div>
       </section>
 
       <section className={styles.panel} id="water">
@@ -246,30 +148,35 @@ export default async function StadiumInfoPage({ params, searchParams }) {
             alt={`${stadium.name} 水面レイアウト`}
           />
         ) : (
-          <div className={styles.waterMap} aria-label="水面レイアウト概略図">
-            <div className={styles.startLine}>START</div>
-            <i className={styles.mark1}>1M</i>
-            <i className={styles.mark2}>2M</i>
-            <span>ホームストレッチ</span>
+          <div className={styles.layoutPlaceholder}>
+            <div className={styles.placeholderIcon}>WATER LAYOUT</div>
+            <strong>{stadium.name} 水面レイアウト</strong>
+            <p>
+              水面レイアウト画像は準備中です。
+              <br />
+              あとから画像を追加するだけで、この位置に自動表示できます。
+            </p>
           </div>
         )}
 
         <div className={styles.noteGrid}>
-          {layoutNotes.length ? (
-            layoutNotes.slice(0, 4).map((note, index) => (
-              <article key={`${note.title}-${index}`}>
-                <strong>{note.title || `POINT ${index + 1}`}</strong>
-                <p>{note.text}</p>
-              </article>
-            ))
-          ) : (
-            <article>
-              <strong>水面データ準備中</strong>
-              <p>
-                水面図・1マーク周辺・ピットからの進入など、場ごとの特徴を順次追加します。
-              </p>
-            </article>
-          )}
+          <article>
+            <strong>水質：{staticGuide.waterType}</strong>
+            <p>
+              BOAT RACE公式の場データに掲載されている水質です。
+            </p>
+          </article>
+          <article>
+            <strong>干満差：{staticGuide.tide}</strong>
+            <p>{staticGuide.tideText}</p>
+          </article>
+          <article>
+            <strong>外で最も高い1着率</strong>
+            <p>
+              {topOuter.course}コース {pct(topOuter.rate)}。
+              水面図追加後は位置関係と合わせて確認できます。
+            </p>
+          </article>
         </div>
       </section>
 
@@ -280,15 +187,29 @@ export default async function StadiumInfoPage({ params, searchParams }) {
         />
 
         <div className={styles.tendencyGrid}>
-          {focusCards.map((item, index) => (
-            <article key={`${item.label}-${index}`}>
-              <span>{item.label}</span>
-              <strong>{item.value}</strong>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
+          <CourseCard
+            course={1}
+            rate={rates[0]}
+            title={staticGuide.insideLabel}
+            text={staticGuide.insideText}
+          />
+          <CourseCard
+            course={topOuter.course}
+            rate={topOuter.rate}
+            title={`外で最も高い1着率`}
+            text={`直近3か月では、1コース以外で最も1着率が高いのが${topOuter.course}コースです。スタートと展示気配を比較したい艇です。`}
+          />
+          <CourseCard
+            course={secondOuter.course}
+            rate={secondOuter.rate}
+            title="次に見る外コース"
+            text={`${topOuter.course}コースだけでなく、${secondOuter.course}コースも外の比較候補。1号艇の信頼度が下がるレースでは特に確認します。`}
+          />
         </div>
+
+        <p className={styles.miniNote}>
+          ※コース別1着率は直近3か月の場全体の傾向です。個々のレースでは選手・モーター・展示・進入を優先してください。
+        </p>
       </section>
 
       <section className={styles.panel} id="point">
@@ -298,15 +219,42 @@ export default async function StadiumInfoPage({ params, searchParams }) {
         />
 
         <ol className={styles.points}>
-          {checkPoints.map((item, index) => (
-            <li key={`${item.title}-${index}`}>
-              <b>{index + 1}</b>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.text}</p>
-              </div>
-            </li>
-          ))}
+          <li>
+            <b>1</b>
+            <div>
+              <strong>まず1コースの数字を見る</strong>
+              <p>
+                直近3か月の1コース1着率は{pct(rates[0])}。
+                この数字を「インをどこまで信頼するか」の入口にします。
+              </p>
+            </div>
+          </li>
+          <li>
+            <b>2</b>
+            <div>
+              <strong>{topOuter.course}コースの気配を比較</strong>
+              <p>
+                外では{topOuter.course}コースの1着率が{pct(topOuter.rate)}で最上位。
+                展示タイム・展示ST・伸びを1号艇と比較します。
+              </p>
+            </div>
+          </li>
+          <li>
+            <b>3</b>
+            <div>
+              <strong>{staticGuide.tide === "あり" ? "潮位と水面状況" : "風と水面状況"}</strong>
+              <p>{staticGuide.tideText}</p>
+            </div>
+          </li>
+          <li>
+            <b>4</b>
+            <div>
+              <strong>最後はそのレースの直前情報</strong>
+              <p>
+                場全体の傾向は土台。実際の買い目では、進入・展示・モーター・スタート気配を重ねて判断します。
+              </p>
+            </div>
+          </li>
         </ol>
       </section>
 
