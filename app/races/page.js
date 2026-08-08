@@ -5,6 +5,7 @@ import {
   getCoursesByDate,
   getPublishedNoteFeaturesByDate,
   getAiBetHitFlashByDate,
+  getAiPredictionPickupsByDate,
   getCourseName,
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
@@ -117,6 +118,25 @@ function yen(value) {
   return `${Number(value ?? 0).toLocaleString("ja-JP")}円`;
 }
 
+function shortTime(value) {
+  const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return "--:--";
+  return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
+}
+
+function pickupTickets(value, limit = 2) {
+  const source = Array.isArray(value) ? value : [];
+  return source
+    .map((item) => (typeof item === "string" ? item : item?.ticket))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+function scoreText(value) {
+  const score = Number(value ?? 0);
+  return Number.isFinite(score) ? `${Math.round(score)}%` : "--";
+}
+
 export const metadata = {
   title: "本日のボートレース出走表・レース情報",
   description:
@@ -131,14 +151,16 @@ export default async function RacesPage({ searchParams }) {
   let dates = [];
   let newspapers = [];
   let hitFlash = [];
+  let aiPickups = [];
   let loadError = null;
 
   try {
-    [courses, dates, newspapers, hitFlash] = await Promise.all([
+    [courses, dates, newspapers, hitFlash, aiPickups] = await Promise.all([
       getCoursesByDate(raceDate),
       getAvailableDates(),
       getPublishedNoteFeaturesByDate(raceDate, false),
       getAiBetHitFlashByDate(raceDate, 6),
+      getAiPredictionPickupsByDate(raceDate),
     ]);
   } catch (error) {
     console.error("出走表トップ取得エラー:", error);
@@ -150,6 +172,52 @@ export default async function RacesPage({ searchParams }) {
     map.set(code, (map.get(code) ?? 0) + 1);
     return map;
   }, new Map());
+
+  // 開催一覧から「まだ買えるレース」だけをAI注目候補として許可します。
+  const raceMetaByKey = new Map();
+  for (const course of courses) {
+    for (const race of course.races ?? []) {
+      const key = `${Number(course.courseCode)}:${Number(race.raceNo)}`;
+      if (race.resultAvailable) continue;
+      if (raceDate === getJstDateString() && race.closingAt) {
+        const closing = new Date(race.closingAt).getTime();
+        if (Number.isFinite(closing) && closing <= Date.now()) continue;
+      }
+      raceMetaByKey.set(key, {
+        courseCode: Number(course.courseCode),
+        courseName: course.courseName,
+        raceNo: Number(race.raceNo),
+        closingTime: race.closingTime,
+      });
+    }
+  }
+
+  const activeAiPickups = aiPickups
+    .map((item) => {
+      const key = `${Number(item.stadium_code)}:${Number(item.race_no)}`;
+      const meta = raceMetaByKey.get(key);
+      return meta ? { ...item, ...meta } : null;
+    })
+    .filter(Boolean)
+    .filter((item) => item.diagnosis_code !== "skip");
+
+  const insidePickups = activeAiPickups
+    .filter((item) =>
+      ["イン鉄板", "イン有力"].includes(item.diagnosis_label) ||
+      Number(item.inside_expectation ?? 0) >= 70
+    )
+    .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
+    .slice(0, 6);
+
+  const insideKeys = new Set(insidePickups.map((item) => `${item.courseCode}:${item.raceNo}`));
+  const holePickups = activeAiPickups
+    .filter((item) =>
+      ["穴期待", "5アタマ警戒"].includes(item.diagnosis_label) ||
+      Number(item.hole_expectation ?? 0) >= 65
+    )
+    .filter((item) => !insideKeys.has(`${item.courseCode}:${item.raceNo}`))
+    .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
+    .slice(0, 6);
 
   return (
     <main className={`${styles.page} ${styles.portalPage}`}>
@@ -280,6 +348,86 @@ export default async function RacesPage({ searchParams }) {
                 );
               })}
             </div>
+          )}
+        </section>
+
+        <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
+          <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerInside}`}>
+            <div><span>AI PICKUP</span><h2>🍎 イン逃げ鉄板レース</h2></div>
+            <b>イン期待度 上位</b>
+          </div>
+
+          {insidePickups.length > 0 ? (
+            <div className={styles.aiPickupRail}>
+              {insidePickups.map((item, index) => {
+                const code = String(item.courseCode).padStart(2, "0");
+                const tickets = pickupTickets(item.tickets);
+                return (
+                  <Link
+                    key={`inside-${item.id ?? `${code}-${item.raceNo}`}`}
+                    href={`/races/${code}/${item.raceNo}?date=${raceDate}`}
+                    className={`${styles.aiPickupCard} ${styles.aiPickupCardInside}`}
+                  >
+                    <div className={styles.aiPickupRank}>#{index + 1}</div>
+                    <div className={styles.aiPickupCardHead}>
+                      <div><small>イン逃げ鉄板</small><strong>{item.courseName} {item.raceNo}R</strong></div>
+                      <span>締切 {shortTime(item.closingTime)}</span>
+                    </div>
+                    <div className={styles.aiPickupScoreRow}>
+                      <div><small>イン期待度</small><strong>{scoreText(item.inside_expectation)}</strong></div>
+                      <div><small>AI総合</small><strong>{scoreText(item.total_score)}</strong></div>
+                    </div>
+                    <div className={styles.aiPickupMeter}><span style={{ width: `${Math.max(4, Math.min(100, Number(item.inside_expectation ?? 0)))}%` }} /></div>
+                    <div className={styles.aiPickupBottom}>
+                      <span>{item.diagnosis_label || "イン有力"}</span>
+                      <b>{tickets.length ? tickets.join(" / ") : "予想を見る"}</b>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={styles.aiPickupEmpty}>現在、締切前のイン逃げ鉄板候補はありません。</div>
+          )}
+        </section>
+
+        <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
+          <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerHole}`}>
+            <div><span>AI PICKUP</span><h2>🔥 穴狙いレース</h2></div>
+            <b>穴期待度 上位</b>
+          </div>
+
+          {holePickups.length > 0 ? (
+            <div className={styles.aiPickupRail}>
+              {holePickups.map((item, index) => {
+                const code = String(item.courseCode).padStart(2, "0");
+                const tickets = pickupTickets(item.tickets);
+                return (
+                  <Link
+                    key={`hole-${item.id ?? `${code}-${item.raceNo}`}`}
+                    href={`/races/${code}/${item.raceNo}?date=${raceDate}`}
+                    className={`${styles.aiPickupCard} ${styles.aiPickupCardHole}`}
+                  >
+                    <div className={styles.aiPickupRank}>#{index + 1}</div>
+                    <div className={styles.aiPickupCardHead}>
+                      <div><small>穴狙い</small><strong>{item.courseName} {item.raceNo}R</strong></div>
+                      <span>締切 {shortTime(item.closingTime)}</span>
+                    </div>
+                    <div className={styles.aiPickupScoreRow}>
+                      <div><small>穴期待度</small><strong>{scoreText(item.hole_expectation)}</strong></div>
+                      <div><small>波乱警戒</small><strong>{scoreText(item.danger_score)}</strong></div>
+                    </div>
+                    <div className={styles.aiPickupMeter}><span style={{ width: `${Math.max(4, Math.min(100, Number(item.hole_expectation ?? 0)))}%` }} /></div>
+                    <div className={styles.aiPickupBottom}>
+                      <span>{item.diagnosis_label || "穴期待"}</span>
+                      <b>{tickets.length ? tickets.join(" / ") : "予想を見る"}</b>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={styles.aiPickupEmpty}>現在、締切前の穴狙い候補はありません。</div>
           )}
         </section>
 

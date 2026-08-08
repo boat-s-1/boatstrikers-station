@@ -3866,3 +3866,115 @@
   .courseQuickNavItem > b { font-size: 9px; }
   .courseQuickNavItem > span { width: 21px; height: 21px; font-size: 12px; }
 }
+
+/* =========================================================
+   出走表トップ AI PICKUP 横スライド
+   本日の開催場 → イン逃げ鉄板 → 穴狙い → 的中速報
+========================================================= */
+.aiPickupSection { margin-top: 24px; }
+.aiPickupBanner {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:11px;
+  padding:13px 14px;
+  color:#fff;
+  border-radius:16px;
+  box-shadow:0 7px 18px rgba(7,35,70,.14);
+}
+.aiPickupBanner > div > span { display:block; margin-bottom:3px; font-size:7px; font-weight:1000; letter-spacing:.16em; opacity:.72; }
+.aiPickupBanner h2 { margin:0; font-size:18px; line-height:1.15; }
+.aiPickupBanner > b { flex:0 0 auto; padding:6px 8px; font-size:7px; border:1px solid rgba(255,255,255,.24); border-radius:999px; background:rgba(255,255,255,.10); }
+.aiPickupBannerInside { background:linear-gradient(135deg,#07385e,#056b82 58%,#0c8ca3); }
+.aiPickupBannerHole { background:linear-gradient(135deg,#39134f,#6e185d 58%,#a02970); }
+.aiPickupRail {
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(245px,78%);
+  gap:10px;
+  overflow-x:auto;
+  padding:1px 1px 10px;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  overscroll-behavior-inline:contain;
+}
+.aiPickupRail::-webkit-scrollbar { display:none; }
+.aiPickupCard {
+  position:relative;
+  scroll-snap-align:start;
+  overflow:hidden;
+  display:block;
+  padding:14px;
+  color:#183249;
+  text-decoration:none;
+  border:1px solid #dce7ef;
+  border-radius:17px;
+  background:#fff;
+  box-shadow:0 6px 15px rgba(31,67,96,.09);
+}
+.aiPickupCardInside { background:radial-gradient(circle at 100% 0,rgba(13,153,176,.14),transparent 150px),#fff; }
+.aiPickupCardHole { background:radial-gradient(circle at 100% 0,rgba(220,55,142,.15),transparent 150px),#fff; }
+.aiPickupRank {
+  position:absolute;
+  top:0;
+  left:0;
+  display:grid;
+  width:38px;
+  height:29px;
+  place-items:center;
+  color:#fff;
+  font-size:9px;
+  font-weight:1000;
+  border-radius:0 0 12px 0;
+  background:#0c83a2;
+}
+.aiPickupCardHole .aiPickupRank { background:#d63886; }
+.aiPickupCardHead { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; padding-left:31px; }
+.aiPickupCardHead small,.aiPickupCardHead strong { display:block; }
+.aiPickupCardHead small { color:#16839e; font-size:7px; font-weight:1000; }
+.aiPickupCardHole .aiPickupCardHead small { color:#d33482; }
+.aiPickupCardHead strong { margin-top:2px; font-size:16px; }
+.aiPickupCardHead > span { flex:0 0 auto; padding:5px 7px; color:#64798a; font-size:8px; font-weight:900; border:1px solid #dce7ed; border-radius:9px; background:rgba(255,255,255,.82); }
+.aiPickupScoreRow { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.aiPickupScoreRow > div { padding:9px 10px; border-radius:11px; background:#f4f9fc; }
+.aiPickupScoreRow small,.aiPickupScoreRow strong { display:block; }
+.aiPickupScoreRow small { color:#7890a1; font-size:7px; font-weight:800; }
+.aiPickupScoreRow strong { margin-top:2px; color:#0785a3; font-size:22px; line-height:1; }
+.aiPickupCardHole .aiPickupScoreRow strong { color:#d72f82; }
+.aiPickupMeter { height:7px; overflow:hidden; margin-top:10px; border-radius:999px; background:#e5edf2; }
+.aiPickupMeter span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#1596af,#13bfd0); }
+.aiPickupCardHole .aiPickupMeter span { background:linear-gradient(90deg,#dd368a,#f05bb0); }
+.aiPickupBottom { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; }
+.aiPickupBottom span { padding:5px 7px; color:#087a94; font-size:7px; font-weight:1000; border-radius:999px; background:#e3f7fa; }
+.aiPickupCardHole .aiPickupBottom span { color:#c52d75; background:#fde5f1; }
+.aiPickupBottom b { overflow:hidden; color:#273f54; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+.aiPickupEmpty { padding:20px 12px; color:#758899; text-align:center; font-size:9px; font-weight:800; border:1px dashed #cfdee8; border-radius:15px; background:rgba(255,255,255,.72); }
+
+@media (min-width:680px) {
+  .aiPickupRail { grid-auto-columns:minmax(270px,42%); }
+}
+@media (min-width:1000px) {
+  .aiPickupRail { grid-auto-columns:minmax(280px,31%); }
+}
+
+/* 的中速報も同じ横スライドUIに統一 */
+.hitFlashList {
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(255px,82%);
+  gap:10px;
+  overflow-x:auto;
+  padding:1px 1px 10px;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  overscroll-behavior-inline:contain;
+}
+.hitFlashList::-webkit-scrollbar { display:none; }
+.hitFlashCard { scroll-snap-align:start; }
+@media (min-width:680px) {
+  .hitFlashList { grid-template-columns:none; grid-auto-columns:minmax(280px,43%); }
+}
+@media (min-width:1000px) {
+  .hitFlashList { grid-auto-columns:minmax(290px,32%); }
+}
