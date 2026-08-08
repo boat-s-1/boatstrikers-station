@@ -10,6 +10,7 @@ import {
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
 import styles from "./phase2.module.css";
+import XTimeline from "./XTimeline";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 
@@ -40,36 +41,6 @@ const COURSE_BACKGROUNDS = {
   24: "/backgrounds/B5B45305-8C2B-4F52-A7A0-41B0917E8156.png",
 };
 
-const POPULAR_CONTENTS = [
-  {
-    href: "/library",
-    icon: "📚",
-    title: "一果図書館",
-    text: "攻略本・週刊誌・24場データ",
-    image: "/library-banner.jpg",
-  },
-  {
-    href: "/ichika",
-    icon: "🍎",
-    title: "一果のイン逃げ",
-    text: "前日版・直前版のAI予想",
-    image: "/ichika-banner.jpg",
-  },
-  {
-    href: "/hatsune",
-    icon: "🌸",
-    title: "初音の女子戦",
-    text: "女子戦の注目レースを研究",
-    image: "/hatsune-banner.jpg",
-  },
-  {
-    href: "/kiina",
-    icon: "🎯",
-    title: "キイナの穴党塾",
-    text: "5号艇と高配当を狙う",
-    image: "/kiina-banner.jpg",
-  },
-];
 
 export const dynamic = "force-dynamic";
 
@@ -135,6 +106,19 @@ function pickupTickets(value, limit = 2) {
 function scoreText(value) {
   const score = Number(value ?? 0);
   return Number.isFinite(score) ? `${Math.round(score)}%` : "--";
+}
+
+function formatQuickDate(value) {
+  try {
+    return new Intl.DateTimeFormat("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+    }).format(new Date(`${value}T00:00:00+09:00`));
+  } catch {
+    return String(value || "").slice(5).replace("-", "/");
+  }
 }
 
 export const metadata = {
@@ -223,7 +207,7 @@ export default async function RacesPage({ searchParams }) {
     <main className={`${styles.page} ${styles.portalPage}`}>
       <header className={styles.portalBannerHero}>
         <Image
-          src="/races/7465ae1e-cbab-4271-836f-4d443777080d.png"
+          src="/races/race-top-banner.jpeg"
           alt="BoatStrikers 今日のレースをもっと分かりやすく。24場対応・展示データ・AI分析"
           width={1536}
           height={512}
@@ -233,9 +217,18 @@ export default async function RacesPage({ searchParams }) {
       </header>
 
       <nav className={styles.portalQuickNav} aria-label="出走表トップメニュー">
-        <a href="#race-dates"><span aria-hidden="true">📅</span><strong>日付</strong></a>
-        <a href="#todays-courses"><span aria-hidden="true">🚤</span><strong>本日の開催場</strong></a>
-        <a href="#daily-newspaper"><span aria-hidden="true">📰</span><strong>新聞</strong></a>
+        <a href="#race-dates">
+          <span className={styles.portalQuickIcon} aria-hidden="true">📅</span>
+          <span className={styles.portalQuickText}><small>日付</small><strong>{formatQuickDate(raceDate)}</strong></span>
+        </a>
+        <a href="#todays-courses">
+          <span className={styles.portalQuickIcon} aria-hidden="true">🚤</span>
+          <span className={styles.portalQuickText}><small>本日の開催場</small><strong>{courses.length}場</strong></span>
+        </a>
+        <a href="#daily-newspaper">
+          <span className={styles.portalQuickIcon} aria-hidden="true">📰</span>
+          <span className={styles.portalQuickText}><small>新聞</small><strong>{newspapers.length}件</strong></span>
+        </a>
       </nav>
 
       <div className={styles.portalContent}>
@@ -458,18 +451,20 @@ export default async function RacesPage({ searchParams }) {
           )}
         </section>
 
-        <section className={styles.portalSection}>
+        <section className={`${styles.portalSection} ${styles.xRealtimeSection}`}>
           <div className={styles.portalSectionHead}>
-            <div><span>POPULAR CONTENTS</span><h2>📚 人気コンテンツ</h2></div>
+            <div><span>REALTIME UPDATE</span><h2>𝕏 リアルタイム予想・更新情報</h2></div>
+            <a
+              href={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || "https://x.com"}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.xOpenLink}
+            >
+              Xで見る ↗
+            </a>
           </div>
-          <div className={styles.popularGrid}>
-            {POPULAR_CONTENTS.map((item) => (
-              <Link key={item.href} href={item.href} className={styles.popularCard}>
-                <div className={styles.popularImage} style={{ backgroundImage: `linear-gradient(90deg,rgba(5,18,43,.76),rgba(5,18,43,.18)),url("${item.image}")` }} />
-                <div className={styles.popularCopy}><span>{item.icon}</span><div><strong>{item.title}</strong><small>{item.text}</small></div><b>→</b></div>
-              </Link>
-            ))}
-          </div>
+
+          <XTimeline profileUrl={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || ""} />
         </section>
       </div>
     </main>

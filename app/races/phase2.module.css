@@ -4114,3 +4114,138 @@
     font-size: 9px;
   }
 }
+
+/* =========================================================
+   Race portal quick stats + X realtime timeline
+========================================================= */
+.portalQuickNav a {
+  flex-direction: row;
+}
+
+.portalQuickIcon {
+  flex: 0 0 auto;
+  font-size: 17px !important;
+}
+
+.portalQuickText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1.05;
+}
+
+.portalQuickText small {
+  color: #71869a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.portalQuickText strong {
+  max-width: 100%;
+  color: #173f62;
+  font-size: 13px;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+.xRealtimeSection {
+  padding-bottom: 22px;
+}
+
+.xOpenLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid #d8e6f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #24445f;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.xTimelineShell {
+  width: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  border: 1px solid #dbe8f1;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.xTimelineShell :global(.twitter-timeline) {
+  width: 100% !important;
+}
+
+.xTimelineFallback {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 18px;
+  text-align: center;
+  border: 1px dashed #b9d3e4;
+  border-radius: 20px;
+  background: rgba(255,255,255,.8);
+  color: #25455f;
+}
+
+.xTimelineLogo {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #0d1720;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.xTimelineFallback strong {
+  font-size: 18px;
+  font-weight: 1000;
+}
+
+.xTimelineFallback p {
+  max-width: 430px;
+  margin: 0;
+  color: #73889a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.xTimelineFallback code {
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: #eef6fb;
+  color: #1e608e;
+  font-size: 10px;
+}
+
+@media (max-width: 390px) {
+  .portalQuickIcon {
+    font-size: 14px !important;
+  }
+
+  .portalQuickText small {
+    font-size: 8px;
+  }
+
+  .portalQuickText strong {
+    font-size: 11px;
+  }
+
+  .xTimelineShell {
+    border-radius: 16px;
+  }
+}
