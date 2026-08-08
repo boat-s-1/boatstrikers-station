@@ -1400,6 +1400,53 @@ export async function getPublishedNoteFeaturesByDate(raceDate, pickupOnly = fals
   return data ?? [];
 }
 
+
+/**
+ * 出走表トップ用のAI注目レース候補。
+ * AI診断VIEWが未作成の環境でもページ全体を止めないよう、失敗時は空配列を返します。
+ */
+export async function getAiPredictionPickupsByDate(raceDate) {
+  const normalizedDate = normalizeDate(raceDate);
+  const supabase = getSupabaseServerClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("v_ai_diagnosis_ranking_v3")
+      .select(
+        [
+          "id",
+          "daily_rank",
+          "race_date",
+          "stadium_code",
+          "race_no",
+          "star_count",
+          "star_label",
+          "diagnosis_code",
+          "diagnosis_label",
+          "total_score",
+          "inside_expectation",
+          "hole_expectation",
+          "danger_score",
+          "consensus_score",
+          "tickets",
+          "generated_at",
+        ].join(",")
+      )
+      .eq("race_date", normalizedDate)
+      .order("daily_rank", { ascending: true });
+
+    if (error) {
+      console.warn(`AI注目レースの取得をスキップしました: ${error.message}`);
+      return [];
+    }
+
+    return data ?? [];
+  } catch (error) {
+    console.warn("AI注目レースの取得をスキップしました:", error);
+    return [];
+  }
+}
+
 /**
  * 出走表トップ用のAI的中速報。
  * テーブル未作成の環境でもトップページを止めないよう、失敗時は空配列を返します。
