@@ -3778,3 +3778,91 @@
   display: block;
   border-radius: 14px;
 }
+
+/* =========================================================
+   開催場ページ：コンパクトヒーロー + クイックメニュー
+========================================================= */
+.courseHero {
+  height: 126px;
+  min-height: 126px;
+  border-radius: 0 0 26px 26px;
+  background-position: center 42%;
+}
+
+.courseQuickNav {
+  width: min(1080px, calc(100% - 26px));
+  margin: 12px auto 4px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.courseQuickNavItem {
+  min-width: 0;
+  min-height: 54px;
+  padding: 8px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid rgba(128, 176, 207, .5);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 5px 14px rgba(30, 93, 139, .08);
+  color: #2a5879;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.courseQuickNavItem > span {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  background: #e8f5fd;
+  color: #1686c8;
+  font-size: 13px;
+  font-weight: 1000;
+}
+
+.courseQuickNavItem > b {
+  overflow: hidden;
+  max-width: 100%;
+  color: #234a68;
+  font-size: 10px;
+  font-weight: 1000;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.courseQuickNavItem:active {
+  transform: translateY(1px);
+  background: #eef9ff;
+}
+
+.raceCard {
+  scroll-margin-top: 76px;
+}
+
+@media (max-width: 480px) {
+  .courseHero {
+    height: 112px;
+    min-height: 112px;
+    border-radius: 0 0 22px 22px;
+  }
+  .courseQuickNav {
+    width: calc(100% - 20px);
+    gap: 5px;
+    margin-top: 9px;
+  }
+  .courseQuickNavItem {
+    min-height: 50px;
+    border-radius: 12px;
+  }
+  .courseQuickNavItem > b { font-size: 9px; }
+  .courseQuickNavItem > span { width: 21px; height: 21px; font-size: 12px; }
+}
