@@ -207,7 +207,7 @@ export default async function RacesPage({ searchParams }) {
     <main className={`${styles.page} ${styles.portalPage}`}>
       <header className={styles.portalBannerHero}>
         <Image
-          src="/races/race-top-banner.jpeg"
+          src="/races/7465ae1e-cbab-4271-836f-4d443777080d.png"
           alt="BoatStrikers 今日のレースをもっと分かりやすく。24場対応・展示データ・AI分析"
           width={1536}
           height={512}
