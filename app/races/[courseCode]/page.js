@@ -9,6 +9,7 @@ import {
   normalizeRacerName,
 } from "../../lib/boatstrikersPlatform";
 import styles from "../phase2.module.css";
+import CourseQuickNav from "../components/CourseQuickNav";
 
 export const dynamic = "force-dynamic";
 
@@ -87,16 +88,16 @@ const headerBackground =
     `,
   }}
 >
-        <div className={styles.heroInner}>
-          <div className={styles.topLinks}>
-            <Link href={`/races?date=${raceDate}`} className={styles.backPill}>
-              ← 開催場一覧
-            </Link>
-            <Link href="/" className={styles.backPill}>ホーム</Link>
-          </div></div>
+        <div className={styles.heroInner} />
 
        
       </header>
+
+      <CourseQuickNav
+        courseCode={courseCode}
+        raceDate={raceDate}
+        races={races}
+      />
 
       <section className={styles.content}>
         <div className={styles.sectionHeading}>
@@ -112,7 +113,7 @@ const headerBackground =
         ) : (
           <div className={styles.raceGrid}>
             {races.map((race) => (
-              <article className={styles.raceCard} key={race.race_no}>
+              <article id={`race-card-${race.race_no}`} className={styles.raceCard} key={race.race_no}>
                 <div className={styles.raceCardHead}>
                   <div className={styles.raceNo}>
                     <strong>{race.race_no}</strong><span>R</span>
