@@ -3978,3 +3978,139 @@
 @media (min-width:1000px) {
   .hitFlashList { grid-auto-columns:minmax(290px,32%); }
 }
+
+/* =========================================================
+   Race portal banner + quick navigation
+========================================================= */
+.portalBannerHero {
+  width: min(1080px, calc(100% - 24px));
+  margin: 14px auto 0;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #0878e8;
+  box-shadow: 0 12px 30px rgba(17, 84, 151, .16);
+}
+
+.portalBannerImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+}
+
+.portalQuickNav {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: .78fr 1.45fr .78fr;
+  width: min(1080px, calc(100% - 24px));
+  margin: 10px auto 0;
+  overflow: hidden;
+  border: 1px solid rgba(142, 181, 208, .45);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 7px 20px rgba(42, 92, 130, .09);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.portalQuickNav a {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px;
+  padding: 8px 6px;
+  color: #31526f;
+  text-decoration: none;
+  border-right: 1px solid #e2edf4;
+  transition: background .18s ease, color .18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.portalQuickNav a:last-child {
+  border-right: 0;
+}
+
+.portalQuickNav a:active {
+  color: #1179c7;
+  background: #edf8ff;
+}
+
+.portalQuickNav span {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.portalQuickNav strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portalAnchorTarget {
+  scroll-margin-top: 18px;
+}
+
+@media (min-width: 680px) {
+  .portalBannerHero,
+  .portalQuickNav {
+    width: min(1080px, calc(100% - 40px));
+  }
+
+  .portalBannerHero {
+    margin-top: 20px;
+    border-radius: 28px;
+  }
+
+  .portalQuickNav {
+    margin-top: 12px;
+    border-radius: 17px;
+  }
+
+  .portalQuickNav a {
+    min-height: 54px;
+  }
+
+  .portalQuickNav strong {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 390px) {
+  .portalBannerHero,
+  .portalQuickNav {
+    width: calc(100% - 18px);
+  }
+
+  .portalBannerHero {
+    margin-top: 9px;
+    border-radius: 17px;
+  }
+
+  .portalQuickNav {
+    grid-template-columns: .74fr 1.52fr .74fr;
+    margin-top: 8px;
+    border-radius: 13px;
+  }
+
+  .portalQuickNav a {
+    min-height: 44px;
+    gap: 4px;
+    padding-inline: 4px;
+  }
+
+  .portalQuickNav span {
+    font-size: 13px;
+  }
+
+  .portalQuickNav strong {
+    font-size: 9px;
+  }
+}

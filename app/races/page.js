@@ -221,27 +221,26 @@ export default async function RacesPage({ searchParams }) {
 
   return (
     <main className={`${styles.page} ${styles.portalPage}`}>
-      <header className={styles.portalHero}>
-        <div className={styles.portalHeroBackground} />
-        <div className={styles.portalHeroShade} />
-        <div className={styles.portalHeroInner}>
-          <Link href="/" className={styles.portalHomeLink}>← BoatStrikers HOME</Link>
-          <div className={styles.portalHeroCopy}>
-            <p>BOATSTRIKERS RACE &amp; NEWSPAPER</p>
-            <h1>今日のレースを、<br />新聞からもっと面白く。</h1>
-            <span>出走表・展示情報・AI予想を5分ごとに更新中</span>
-          </div>
-          <div className={styles.portalHeroSummary}>
-            <div><small>開催場</small><strong>{courses.length}</strong></div>
-            <div><small>公開新聞</small><strong>{newspapers.length}</strong></div>
-            <div><small>開催日</small><strong>{raceDate.slice(5).replace("-", "/")}</strong></div>
-          </div>
-        </div>
+      <header className={styles.portalBannerHero}>
+        <Image
+          src="/races/race-top-banner.jpeg"
+          alt="BoatStrikers 今日のレースをもっと分かりやすく。24場対応・展示データ・AI分析"
+          width={1536}
+          height={512}
+          className={styles.portalBannerImage}
+          priority
+        />
       </header>
+
+      <nav className={styles.portalQuickNav} aria-label="出走表トップメニュー">
+        <a href="#race-dates"><span aria-hidden="true">📅</span><strong>日付</strong></a>
+        <a href="#todays-courses"><span aria-hidden="true">🚤</span><strong>本日の開催場</strong></a>
+        <a href="#daily-newspaper"><span aria-hidden="true">📰</span><strong>新聞</strong></a>
+      </nav>
 
       <div className={styles.portalContent}>
         {dates.length > 0 && (
-          <nav className={styles.portalDateNav} aria-label="開催日を選択">
+          <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
             {dates.map((date) => (
               <Link
                 key={date}
@@ -264,7 +263,7 @@ export default async function RacesPage({ searchParams }) {
 </div>
 
 
-        <section className={styles.portalSection}>
+        <section id="daily-newspaper" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
             <div><span>DAILY NEWSPAPER</span><h2>📰 今日公開の新聞</h2></div>
             <b>{newspapers.length}件公開</b>
@@ -307,7 +306,7 @@ export default async function RacesPage({ searchParams }) {
           )}
         </section>
 
-        <section className={styles.portalSection}>
+        <section id="todays-courses" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
             <div><span>TODAY&apos;S COURSES</span><h2>🚤 本日の開催場</h2></div>
             <b>{courses.length}場</b>
