@@ -6,27 +6,26 @@ const X_URL = "https://x.com/boatstrikers";
 
 export default function XTimeline() {
   const containerRef = useRef(null);
-
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     let cancelled = false;
-    let timeoutId;
+    let timeoutId = null;
 
     const sleep = (ms) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
+      new Promise((resolve) => window.setTimeout(resolve, ms));
 
     const hasTimeline = () => {
       if (!containerRef.current) return false;
 
       return Boolean(
         containerRef.current.querySelector(
-          "iframe.twitter-timeline, iframe[id^='twitter-widget'], iframe"
+          'iframe.twitter-timeline, iframe[id^="twitter-widget"], iframe'
         )
       );
     };
 
-    const waitForTwitter = async () => {
+    const waitForXWidgets = async () => {
       for (let i = 0; i < 30; i += 1) {
         if (window.twttr?.widgets?.createTimeline) {
           return true;
@@ -38,50 +37,41 @@ export default function XTimeline() {
       return false;
     };
 
+    const loadScript = () => {
+      let script = document.getElementById(
+        "boatstrikers-x-widgets"
+      );
+
+      if (script) {
+        return script;
+      }
+
+      script = document.createElement("script");
+      script.id = "boatstrikers-x-widgets";
+      script.src = "https://platform.x.com/widgets.js";
+      script.async = true;
+      script.charset = "utf-8";
+
+      document.body.appendChild(script);
+
+      return script;
+    };
+
     const createTimeline = async () => {
       try {
-        /*
-         * X公式 widgets.js を読み込み
-         */
-        let script =
-          document.getElementById("boatstrikers-x-widgets");
+        loadScript();
 
-        if (!script) {
-          script = document.createElement("script");
+        const ready = await waitForXWidgets();
 
-          script.id = "boatstrikers-x-widgets";
-          script.src =
-            "https://platform.x.com/widgets.js";
-
-          script.async = true;
-          script.charset = "utf-8";
-
-          document.body.appendChild(script);
-        }
-
-        /*
-         * twttr API が使えるまで待機
-         */
-        const ready = await waitForTwitter();
-
-        if (!ready || cancelled) {
-          setStatus("failed");
+        if (!ready || cancelled || !containerRef.current) {
+          if (!cancelled) {
+            setStatus("failed");
+          }
           return;
         }
 
-        if (!containerRef.current) {
-          setStatus("failed");
-          return;
-        }
-
-        /*
-         * 古い内容を削除
-         */
         containerRef.current.innerHTML = "";
 
-        /*
-         * プロフィールタイムライン生成
-         */
         await window.twttr.widgets.createTimeline(
           {
             sourceType: "profile",
@@ -90,20 +80,14 @@ export default function XTimeline() {
           containerRef.current,
           {
             height: 500,
-
             theme: "light",
-
-            chrome:
-              "noheader nofooter noborders",
-
+            chrome: "noheader nofooter noborders",
             dnt: true,
           }
         );
 
-        /*
-         * createTimeline が成功扱いになっても
-         * iframe が作られないケースがあるため確認
-         */
+        // createTimeline が成功扱いでも iframe が
+        // 実際には作られない場合があるため確認する。
         for (let i = 0; i < 20; i += 1) {
           if (cancelled) return;
 
@@ -115,9 +99,6 @@ export default function XTimeline() {
           await sleep(250);
         }
 
-        /*
-         * iframe ができなければ失敗扱い
-         */
         if (!cancelled) {
           setStatus("failed");
         }
@@ -135,9 +116,8 @@ export default function XTimeline() {
 
     createTimeline();
 
-    /*
-     * 最大12秒で強制的に判定
-     */
+    // 最大12秒で表示できなければ、
+    // 大きな空白を残さずフォールバックへ切り替える。
     timeoutId = window.setTimeout(() => {
       if (cancelled) return;
 
@@ -156,11 +136,7 @@ export default function XTimeline() {
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100%",
-      }}
-    >
+    <div style={{ width: "100%" }}>
       {status === "loading" && (
         <div
           style={{
@@ -221,6 +197,7 @@ export default function XTimeline() {
               margin: "0 0 16px",
               color: "#718399",
               fontSize: "14px",
+              lineHeight: 1.7,
             }}
           >
             予想・新聞更新・的中速報を
