@@ -68,5 +68,12 @@ export default function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...stadiumEntries];
+  const raceInfoEntries = Array.from({ length: 24 }, (_, index) => ({
+    url: `${BASE_URL}/races/${String(index + 1).padStart(2, "0")}/info`,
+    lastModified,
+    changeFrequency: "monthly",
+    priority: 0.65,
+  }));
+
+  return [...staticEntries, ...stadiumEntries, ...raceInfoEntries];
 }
