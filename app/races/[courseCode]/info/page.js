@@ -4,6 +4,7 @@ import { resolveStadium, stadiumPath } from "../../../../lib/stadiums";
 import { getStadiumGuide } from "../../../../lib/stadiumGuideData";
 import { getStadiumBasicGuide } from "../../../../lib/stadiumBasicGuide24";
 import styles from "./stadiumInfo.module.css";
+import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -89,12 +90,7 @@ export default async function StadiumInfoPage({ params, searchParams }) {
         </Link>
         <span>BOATSTRIKERS STADIUM GUIDE</span>
       </header>
-
-      <section className={styles.hero}>
-        <small>#{code} BASIC GUIDE</small>
-        <h1>{stadium.name}</h1>
-        <p>{stadium.englishName}</p>
-      </section>
+      <StadiumHeroBanner courseCode={courseCode} compact />
 
       <nav className={styles.jump} aria-label="場基本情報メニュー">
         <a href="#water">水面</a>
