@@ -9,6 +9,7 @@ import {
   normalizeRaceNo,
 } from "../../../lib/boatstrikersPlatform";
 import RaceDetailTabs from "../../components/RaceDetailTabs";
+import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
 
 export const dynamic = "force-dynamic";
@@ -57,55 +58,20 @@ export default async function RaceDetailPage({
 
   return (
     <main className={styles.page}>
-      <header className={styles.hero}>
-        <div className={styles.heroInner}>
-          <div className={styles.topLinks}>
-            <Link
-              href={`/races/${paddedCourseCode}?date=${raceDate}`}
-              className={styles.backPill}
-            >
-              ← {courseName}一覧
-            </Link>
+      <StadiumHeroBanner courseCode={courseCode} />
 
-            <Link
-              href={`/races?date=${raceDate}`}
-              className={styles.backPill}
-            >
-              開催場
-            </Link>
-          </div>
-
-          <div className={styles.heroMain}>
-            <div className={styles.raceNoHero}>
-              <strong>{raceNo}</strong>
-              <span>R</span>
-            </div>
-
-            <div>
-              <p className={styles.eyebrow}>
-                BOATSTRIKERS RACE CENTER
-              </p>
-
-              <h1>
-                {courseName} {raceNo}R
-              </h1>
-
-              <p>出走表・展示・一果AI・買い目</p>
-
-              <div className={styles.heroMeta}>
-                <span>{raceDate}</span>
-
-                <span>
-                  同期{" "}
-                  {formatJstDateTime(
-                    data?.event?.synced_at
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
+      <section className={styles.compactRaceHeader}>
+        <div>
+          <span className={styles.compactRaceLabel}>CURRENT RACE</span>
+          <strong>{courseName} {raceNo}R</strong>
         </div>
-      </header>
+        <div className={styles.compactRaceMeta}>
+          <span>{raceDate}</span>
+          <span>
+            同期 {formatJstDateTime(data?.event?.synced_at)}
+          </span>
+        </div>
+      </section>
 
                   
 <div className={styles.developingBanner}>
