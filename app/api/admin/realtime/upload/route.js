@@ -1,0 +1,6 @@
+import crypto from "node:crypto";
+import { NextResponse } from "next/server";
+import { isScheduleAdminAuthenticated } from "../../../../admin/schedule/_lib/scheduleAdminAuth";
+import { getAdminScheduleSupabase } from "../../../../../lib/scheduleSupabase";
+const allowed=new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"]]);
+export async function POST(request){if(!(await isScheduleAdminAuthenticated()))return NextResponse.json({error:"Unauthorized"},{status:401});try{const form=await request.formData();const file=form.get("file");if(!(file instanceof File))return NextResponse.json({error:"画像を選択してください"},{status:400});if(!allowed.has(file.type))return NextResponse.json({error:"JPEG・PNG・WebPのみ対応しています"},{status:400});if(file.size>12*1024*1024)return NextResponse.json({error:"画像は12MB以下にしてください"},{status:400});const ext=allowed.get(file.type);const path=`${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;const s=getAdminScheduleSupabase();const{error}=await s.storage.from("realtime-images").upload(path,Buffer.from(await file.arrayBuffer()),{contentType:file.type,cacheControl:"3600",upsert:false});if(error)throw error;const{data}=s.storage.from("realtime-images").getPublicUrl(path);return NextResponse.json({url:data.publicUrl,path})}catch(e){return NextResponse.json({error:e.message||"アップロード失敗"},{status:500})}}
