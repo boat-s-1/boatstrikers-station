@@ -32,6 +32,8 @@ export default function ResultsAdminClient() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("all");
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,7 +51,7 @@ export default function ResultsAdminClient() {
   const visibleRows = useMemo(() => filter === "all" ? rows : rows.filter(r => r.category === filter), [rows, filter]);
 
   function change(name, value) { setForm(prev => ({ ...prev, [name]: value })); }
-  function reset() { setEditingId(null); setForm({ ...EMPTY, race_date: todayJst() }); setMessage(""); }
+  function reset() { setEditingId(null); setForm({ ...EMPTY, race_date: todayJst() }); setPreviewUrl(""); setMessage(""); }
 
   function edit(row) {
     setEditingId(row.id);
@@ -59,7 +61,25 @@ export default function ResultsAdminClient() {
       invest: row.invest ?? "", payout: row.payout ?? "", hit: Boolean(row.hit), memo: row.memo || "",
       hit_image_url: row.hit_image_url || "", hit_title: row.hit_title || "", hit_note: row.hit_note || "",
     });
+    setPreviewUrl(row.hit_image_url || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+
+  async function uploadImage(file) {
+    if (!file) return;
+    setUploading(true); setMessage("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/results/upload", { method: "POST", body: fd });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "画像アップロードに失敗しました");
+      change("hit_image_url", body.url);
+      setPreviewUrl(body.url);
+      setMessage("画像をアップロードしました。実績を登録すると保存されます。");
+    } catch (e) { setMessage(e.message); }
+    finally { setUploading(false); }
   }
 
   async function submit(e) {
@@ -102,7 +122,21 @@ export default function ResultsAdminClient() {
         <label><span>払戻額</span><input type="number" min="0" value={form.payout} onChange={e => change("payout", e.target.value)} /></label>
         <label className={styles.check}><input type="checkbox" checked={form.hit} onChange={e => change("hit", e.target.checked)} /><span>的中として登録</span></label>
         <label className={styles.wide}><span>メモ</span><textarea rows="3" value={form.memo} onChange={e => change("memo", e.target.value)} /></label>
-        <label className={styles.wide}><span>的中画像URL</span><input type="url" placeholder="https://..." value={form.hit_image_url} onChange={e => change("hit_image_url", e.target.value)} /></label>
+        <div className={`${styles.wide} ${styles.imageUploadBox}`}>
+          <div className={styles.imageUploadHead}>
+            <div><span className={styles.fieldLabel}>的中画像</span><small>JPG / PNG / WebP・8MB以下</small></div>
+            {form.hit_image_url && <button type="button" className={styles.clearImage} onClick={() => { change("hit_image_url", ""); setPreviewUrl(""); }}>画像を外す</button>}
+          </div>
+          <label className={styles.uploadButton}>
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => uploadImage(e.target.files?.[0])} disabled={uploading} />
+            <span>{uploading ? "アップロード中…" : "画像を選んでアップロード"}</span>
+          </label>
+          {(previewUrl || form.hit_image_url) && <div className={styles.imagePreview}><img src={previewUrl || form.hit_image_url} alt="的中画像プレビュー" /></div>}
+          <details className={styles.urlDetails}>
+            <summary>URLを直接入力する場合</summary>
+            <input type="url" placeholder="https://..." value={form.hit_image_url} onChange={e => { change("hit_image_url", e.target.value); setPreviewUrl(e.target.value); }} />
+          </details>
+        </div>
         <label><span>的中画像タイトル</span><input value={form.hit_title} onChange={e => change("hit_title", e.target.value)} /></label>
         <label><span>的中画像コメント</span><input value={form.hit_note} onChange={e => change("hit_note", e.target.value)} /></label>
       </div>
