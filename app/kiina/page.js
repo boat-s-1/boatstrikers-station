@@ -1,4 +1,5 @@
 import Image from "next/image";
+import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
@@ -422,6 +423,8 @@ export default async function KiinaPage() {
           priority
         />
       </section>
+
+      <RealtimeUpdates target="kiina" limit={5} />
 
       {/* キイナ新聞 */}
 
