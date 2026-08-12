@@ -1,4 +1,5 @@
 import Image from "next/image";
+import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
@@ -425,6 +426,8 @@ export default async function IchikaPage() {
           priority
         />
       </section>
+
+      <RealtimeUpdates target="ichika" limit={5} />
 
       {/* 一果新聞 */}
 
