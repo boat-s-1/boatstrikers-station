@@ -180,15 +180,12 @@ export default async function HomeRaceInfo({
 
   return (
     <section className={styles.section} aria-labelledby="home-race-info-title">
-      <div className={styles.mainHeader}>
-        <div>
-          <p className={styles.eyebrow}>TODAY&apos;S RACE INFO</p>
-          <h2 id="home-race-info-title">本日のレース情報</h2>
-        </div>
-
-        <Link href={`/races?date=${raceDate}`} className={styles.mainLink}>
-          出走表を見る <span aria-hidden="true">›</span>
-        </Link>
+      <div className={styles.bannerWrap}>
+        <img
+          src="/home/today-race-info-banner.jpg"
+          alt="本日のレース情報"
+          className={styles.banner}
+        />
       </div>
 
       <div className={styles.block}>
@@ -199,7 +196,7 @@ export default async function HomeRaceInfo({
           </div>
 
           <Link href={`/races?date=${raceDate}`} className={styles.subLink}>
-            全場を見る <span aria-hidden="true">›</span>
+            一覧を見る <span aria-hidden="true">›</span>
           </Link>
         </div>
 
