@@ -4,7 +4,7 @@ import { supabase } from "./bsc2/lib/supabaseClient";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
-import HomeRaceInfo from "./components/HomeRaceInfo";
+import HomeRaceStrip from "./components/HomeRaceStrip";
 import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 import { getCoursesByDate } from "../lib/boatstrikersPlatform";
 
@@ -284,15 +284,11 @@ export default async function Home() {
 
       <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
-      <HomeRaceInfo
-        courses={raceData.courses}
-        raceDate={raceData.raceDate}
-        realtimeLimit={3}
-      />
+      <HomeRaceStrip courses={raceData.courses} raceDate={raceData.raceDate} />
 
       
 
-        <section className="homeSectionCard pink">
+        <section className="homeSectionCard pink homeBannerFlush">
   <img
   src="/IMG_6118.jpeg"
   alt="新聞"
@@ -324,7 +320,7 @@ export default async function Home() {
   </div>
 </section>   
 
-      <section className="homeSectionCard purple">
+      <section className="homeSectionCard purple homeBannerFlush">
   <img
   src="/IMG_6117.jpeg"
   alt="メンバー紹介"
@@ -339,7 +335,7 @@ export default async function Home() {
 
   
 
-   <section className="homeSectionCard yellow resultSummarySection">
+   <section className="homeSectionCard yellow resultSummarySection homeBannerFlush">
   <img
     src="/IMG_6116.jpeg"
     alt="今月の予想実績"

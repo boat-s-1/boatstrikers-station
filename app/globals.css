@@ -9507,3 +9507,52 @@ color:white;
     font-size: 10px;
   }
 }
+
+
+/* =========================================================
+   TOP PAGE / SECTION BANNER FLUSH
+   最新の予想新聞・メンバー紹介・今月の予想実績
+   バナーを外枠上端いっぱいに表示
+========================================================= */
+.homeSectionCard.homeBannerFlush {
+  overflow: hidden;
+  padding: 0 18px 18px;
+}
+
+.homeSectionCard.homeBannerFlush > .homeTitleImage {
+  display: block;
+  width: calc(100% + 36px);
+  max-width: none;
+  height: auto;
+  margin: 0 -18px 18px;
+  border-radius: 26px 26px 0 0;
+  box-shadow: none;
+}
+
+/* バナー直下の最初のコンテンツに余白が重複しないよう調整 */
+.homeSectionCard.homeBannerFlush > .todayNewsGrid,
+.homeSectionCard.homeBannerFlush > .resultStatsGrid {
+  margin-top: 0;
+}
+
+.homeSectionCard.homeBannerFlush > .resultEmptyState {
+  margin-top: 0;
+}
+
+/* メンバースライダーはバナー直下から自然に開始 */
+.homeSectionCard.homeBannerFlush > .memberSlider,
+.homeSectionCard.homeBannerFlush > [class*="memberSlider"] {
+  margin-top: 0;
+}
+
+@media (max-width: 520px) {
+  .homeSectionCard.homeBannerFlush {
+    padding: 0 14px 16px;
+  }
+
+  .homeSectionCard.homeBannerFlush > .homeTitleImage {
+    width: calc(100% + 28px);
+    margin: 0 -14px 14px;
+    border-radius: 24px 24px 0 0;
+  }
+}
