@@ -5,6 +5,7 @@ import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
 import HomeRaceStrip from "./components/HomeRaceStrip";
+import RealtimeUpdates from "./components/RealtimeUpdates";
 import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 import { getCoursesByDate } from "../lib/boatstrikersPlatform";
 
@@ -285,6 +286,8 @@ export default async function Home() {
       <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
       <HomeRaceStrip courses={raceData.courses} raceDate={raceData.raceDate} />
+
+      <RealtimeUpdates target="home" limit={4} compact />
 
       
 
