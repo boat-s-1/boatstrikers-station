@@ -1,4 +1,5 @@
 import Image from "next/image";
+import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
@@ -411,6 +412,8 @@ export default async function HatsunePage() {
           priority
         />
       </section>
+
+      <RealtimeUpdates target="hatsune" limit={5} />
 
       {/* 初音新聞 */}
 
