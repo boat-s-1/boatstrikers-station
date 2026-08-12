@@ -2,6 +2,7 @@ import Link from "next/link";
 import styles from "./adminHome.module.css";
 
 const items=[
+ {href:"/admin/realtime",icon:"⚡",title:"リアルタイム更新",text:"トップ・出走表・キャラページ・X投稿用を一括管理"},
  {href:"/admin/results",icon:"🏆",title:"予想実績管理",text:"予想・投資・払戻・的中画像を登録"},
  {href:"/admin/schedule",icon:"📅",title:"番組表管理",text:"週間番組表と今日の予定を更新"},
  {href:"/admin/radio-blog",icon:"🎙️",title:"ラジオブログ",text:"放送ブログの記事を管理"},
