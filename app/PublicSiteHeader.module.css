@@ -1,0 +1,354 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 1200;
+  width: min(100%, 430px);
+  height: 64px;
+  padding: 8px 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, .94);
+  border-bottom: 1px solid rgba(45, 140, 196, .12);
+  box-shadow: 0 5px 18px rgba(16, 76, 120, .10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.compact {
+  height: 58px;
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-decoration: none;
+  line-height: .78;
+  letter-spacing: -.04em;
+}
+
+.logo span,
+.logo strong {
+  color: #0754a8;
+  font-weight: 950;
+  text-shadow: 1px 1px 0 #fff, 2px 2px 0 #f6b31b;
+}
+
+.logo span {
+  font-size: 18px;
+}
+
+.logo strong {
+  font-size: 19px;
+}
+
+.menuButton {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #d5e9f5;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #fff, #eef8ff);
+  box-shadow: 0 4px 12px rgba(28, 105, 155, .09);
+  cursor: pointer;
+}
+
+.menuButton span {
+  position: absolute;
+  left: 11px;
+  width: 22px;
+  height: 2.5px;
+  border-radius: 99px;
+  background: #17466f;
+  transition: .22s ease;
+}
+
+.menuButton span:nth-child(1) { top: 13px; }
+.menuButton span:nth-child(2) { top: 20px; }
+.menuButton span:nth-child(3) { top: 27px; }
+
+.menuButtonOpen span:nth-child(1) {
+  top: 20px;
+  transform: rotate(45deg);
+}
+
+.menuButtonOpen span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(5px);
+}
+
+.menuButtonOpen span:nth-child(3) {
+  top: 20px;
+  transform: rotate(-45deg);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1240;
+  pointer-events: none;
+  background: rgba(7, 25, 43, 0);
+  transition: background .25s ease;
+}
+
+.overlayOpen {
+  pointer-events: auto;
+  background: rgba(7, 25, 43, .42);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: max(0px, calc((100vw - 430px) / 2));
+  z-index: 1250;
+  width: min(92vw, 390px);
+  height: 100dvh;
+  overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(105%);
+  background:
+    radial-gradient(circle at 90% 0, rgba(94, 203, 248, .25), transparent 26%),
+    linear-gradient(180deg, #f9fdff 0%, #edf8ff 58%, #ffffff 100%);
+  box-shadow: -14px 0 38px rgba(7, 46, 78, .22);
+  transition: transform .28s cubic-bezier(.22, .61, .36, 1);
+  overscroll-behavior: contain;
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 2px 16px;
+}
+
+.drawerTop p {
+  margin: 0 0 3px;
+  color: #1397cf;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+.drawerTop h2 {
+  margin: 0;
+  color: #143b62;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.closeButton {
+  width: 43px;
+  height: 43px;
+  border: 1px solid #d8eaf4;
+  border-radius: 50%;
+  color: #264d6c;
+  background: #fff;
+  font-size: 28px;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(25, 85, 125, .08);
+  cursor: pointer;
+}
+
+.socialSection {
+  padding: 15px 12px 14px;
+  border: 1px solid #d4edf8;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .91);
+  box-shadow: 0 8px 22px rgba(21, 104, 154, .08);
+}
+
+.socialHeading {
+  margin-bottom: 13px;
+  text-align: center;
+}
+
+.socialHeading span {
+  display: block;
+  color: #1798d0;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.socialHeading strong {
+  display: block;
+  margin-top: 2px;
+  color: #1d4468;
+  font-size: 14px;
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.socialButton {
+  min-width: 0;
+  color: #34536d;
+  text-decoration: none;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.socialCircle {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 6px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 950;
+  box-shadow: 0 5px 11px rgba(24, 69, 102, .15);
+}
+
+.line .socialCircle {
+  background: #06c755;
+  font-size: 9px;
+}
+
+.youtube .socialCircle {
+  background: #ff0033;
+  font-size: 18px;
+}
+
+.x .socialCircle {
+  background: #111;
+  font-size: 19px;
+}
+
+.instagram .socialCircle {
+  background: linear-gradient(135deg, #6a4cff, #dd2a7b 48%, #feda75);
+  font-size: 19px;
+}
+
+.tiktok .socialCircle {
+  background: linear-gradient(145deg, #121212 45%, #26f4ee 46%, #fe2c55);
+  font-size: 20px;
+}
+
+.socialDisabled {
+  opacity: .38;
+}
+
+.socialDisabled small {
+  display: block;
+  margin-top: 1px;
+  color: #7f91a0;
+  font-size: 6px;
+}
+
+.nav {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.navGroup {
+  overflow: hidden;
+  border: 1px solid #d8ebf5;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(18, 82, 124, .06);
+}
+
+.groupHeading {
+  padding: 12px 14px 9px;
+  background: linear-gradient(90deg, #eef9ff, #fff);
+}
+
+.groupHeading span {
+  display: block;
+  color: #1597cf;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.groupHeading h3 {
+  margin: 2px 0 0;
+  color: #193f63;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.linkList a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-top: 1px solid #edf3f7;
+  color: #31516d;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.linkList a:active {
+  background: #eef9ff;
+}
+
+.linkList i {
+  color: #27a5dc;
+  font-size: 21px;
+  font-style: normal;
+  line-height: 1;
+}
+
+.drawerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 4px 5px;
+  color: #8a9aa7;
+  font-size: 9px;
+}
+
+.drawerFooter a {
+  color: #3b718f;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+@media (min-width: 700px) {
+  .header {
+    width: min(100%, 1100px);
+  }
+
+  .drawer {
+    right: max(0px, calc((100vw - 1100px) / 2));
+    width: 410px;
+  }
+}
+
+@media (max-width: 360px) {
+  .drawer {
+    width: 95vw;
+    padding-inline: 12px;
+  }
+
+  .socialCircle {
+    width: 42px;
+    height: 42px;
+  }
+
+  .socialButton {
+    font-size: 7px;
+  }
+}

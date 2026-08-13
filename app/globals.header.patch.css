@@ -1,0 +1,30 @@
+
+/* =========================================================
+   BOATSTRIKERS 共通固定ヘッダー
+========================================================= */
+
+/* 共通ヘッダー表示時の本文オフセット */
+body.bsSharedHeaderEnabled {
+  padding-top: 64px;
+}
+
+/* 旧・共通公開ヘッダーを二重表示させない */
+body.bsSharedHeaderEnabled .header {
+  display: none !important;
+}
+
+/* LINEボタン付きの旧ページヘッダー */
+body.bsSharedHeaderEnabled main > header:first-child:has(a[href^="https://lin.ee/"]) {
+  display: none !important;
+}
+
+/* コミック・一果センセーのページ内ナビ付き旧ヘッダー */
+body.bsSharedHeaderEnabled main > header:first-child:has(nav[aria-label*="ページ内メニュー"]) {
+  display: none !important;
+}
+
+@media (max-width: 699px) {
+  body.bsSharedHeaderEnabled {
+    padding-top: 64px;
+  }
+}
