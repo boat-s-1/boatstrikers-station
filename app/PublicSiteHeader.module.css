@@ -352,3 +352,19 @@
     font-size: 7px;
   }
 }
+
+
+/* ===== SAFE FIX: fixed header spacing without touching global page styles ===== */
+.headerSpacer {
+  height: 64px;
+}
+
+.headerSpacerCompact {
+  height: 58px;
+}
+
+/* Only hide the legacy public headers that use the old global classes. */
+:global(main.page > header.header:first-child),
+:global(main.libraryPage > header.header:first-child) {
+  display: none !important;
+}

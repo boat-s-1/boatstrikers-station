@@ -122,12 +122,6 @@ export default function PublicSiteHeader() {
     setOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    if (hidden) return;
-
-    document.body.classList.add("bsSharedHeaderEnabled");
-    return () => document.body.classList.remove("bsSharedHeaderEnabled");
-  }, [hidden]);
 
   useEffect(() => {
     if (!open) return;
@@ -169,6 +163,7 @@ export default function PublicSiteHeader() {
           <span />
         </button>
       </header>
+      <div className={`${styles.headerSpacer} ${compact ? styles.headerSpacerCompact : ""}`} aria-hidden="true" />
 
       <div
         className={`${styles.overlay} ${open ? styles.overlayOpen : ""}`}
