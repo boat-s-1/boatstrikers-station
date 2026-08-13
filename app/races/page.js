@@ -10,7 +10,7 @@ import {
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
 import styles from "./phase2.module.css";
-import XTimeline from "./XTimeline";
+import RealtimeUpdates from "../components/RealtimeUpdates";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 
@@ -560,21 +560,7 @@ export default async function RacesPage({ searchParams }) {
           )}
         </section>
 
-        <section className={`${styles.portalSection} ${styles.xRealtimeSection}`}>
-          <div className={styles.portalSectionHead}>
-            <div><span>REALTIME UPDATE</span><h2>𝕏 リアルタイム予想・更新情報</h2></div>
-            <a
-              href={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || "https://x.com"}
-              target="_blank"
-              rel="noreferrer"
-              className={styles.xOpenLink}
-            >
-              Xで見る ↗
-            </a>
-          </div>
-
-          <XTimeline profileUrl={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || ""} />
-        </section>
+        <RealtimeUpdates target="races" limit={5} />
       </div>
     </main>
   );
