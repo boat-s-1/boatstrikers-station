@@ -10,7 +10,7 @@ import {
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
 import styles from "./phase2.module.css";
-import RealtimeUpdates from "../components/RealtimeUpdates";
+import XTimeline from "./XTimeline";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 
@@ -108,6 +108,94 @@ function scoreText(value) {
   return Number.isFinite(score) ? `${Math.round(score)}%` : "--";
 }
 
+function safeNumber(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function clampScore(value, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function buildFallbackPickups(courses, raceDate) {
+  const now = Date.now();
+  const today = getJstDateString();
+  const candidates = [];
+
+  for (const course of courses ?? []) {
+    for (const race of course.races ?? []) {
+      if (race.resultAvailable) continue;
+      if (raceDate === today && race.closingAt) {
+        const closing = new Date(race.closingAt).getTime();
+        if (Number.isFinite(closing) && closing <= now) continue;
+      }
+
+      const entries = Array.isArray(race.entries) ? race.entries : [];
+      if (entries.length < 6) continue;
+
+      const byBoat = new Map(entries.map((entry) => [Number(entry.boat_no), entry]));
+      const one = byBoat.get(1);
+      if (!one) continue;
+
+      const rate = (entry) => {
+        const national = safeNumber(entry?.national_win_rate, 4.8);
+        const local = safeNumber(entry?.local_win_rate, national);
+        const motor = safeNumber(entry?.motor_2_rate, 30);
+        const boat = safeNumber(entry?.boat_2_rate, 30);
+        const st = safeNumber(entry?.average_st, 0.18);
+        return national * 8 + local * 4 + motor * 0.45 + boat * 0.20 - st * 45;
+      };
+
+      const onePower = rate(one);
+      const rivals = [2,3,4,5,6].map((n) => ({ boatNo:n, entry:byBoat.get(n) })).filter((x) => x.entry);
+      const rivalScores = rivals.map((x) => ({ ...x, score: rate(x.entry) })).sort((a,b) => b.score-a.score);
+      const bestRival = rivalScores[0]?.score ?? onePower;
+      const gap = onePower - bestRival;
+
+      const oneEx = safeNumber(one.exhibition_time, 0);
+      const exTimes = entries.map((e) => safeNumber(e.exhibition_time, 0)).filter((v) => v > 0);
+      const bestEx = exTimes.length ? Math.min(...exTimes) : 0;
+      const exhibitionBonus = oneEx > 0 && bestEx > 0 ? clampScore((bestEx - oneEx + 0.08) * 80, -6, 6) : 0;
+
+      const insideExpectation = clampScore(66 + gap * 1.25 + exhibitionBonus, 45, 94);
+
+      const outer = rivalScores.filter((x) => x.boatNo >= 3);
+      const outerBest = outer[0];
+      const outerGap = (outerBest?.score ?? bestRival) - onePower;
+      const holeExpectation = clampScore(55 + outerGap * 1.15 + (insideExpectation < 62 ? 8 : 0), 38, 91);
+      const dangerScore = clampScore(100 - insideExpectation + Math.max(0, outerGap * 1.1), 20, 92);
+      const totalScore = clampScore((insideExpectation + (100-dangerScore)) / 2, 45, 92);
+
+      const second = rivalScores[0]?.boatNo ?? 2;
+      const third = rivalScores.find((x) => x.boatNo !== second)?.boatNo ?? 3;
+      const holeHead = outerBest?.boatNo ?? 5;
+
+      candidates.push({
+        id: `fallback-${course.courseCode}-${race.raceNo}`,
+        stadium_code: Number(course.courseCode),
+        courseCode: Number(course.courseCode),
+        courseName: course.courseName,
+        race_no: Number(race.raceNo),
+        raceNo: Number(race.raceNo),
+        closingTime: race.closingTime,
+        closing_time: race.closingTime,
+        inside_expectation: insideExpectation,
+        hole_expectation: holeExpectation,
+        danger_score: dangerScore,
+        total_score: totalScore,
+        diagnosis_code: 'fallback',
+        diagnosis_label: insideExpectation >= 72 ? 'イン有力' : holeExpectation >= 67 ? '穴期待' : 'データ注目',
+        tickets: insideExpectation >= holeExpectation
+          ? [`1-${second}-${third}`, `1-${third}-${second}`]
+          : [`${holeHead}-1-${second}`, `${holeHead}-${second}-1`],
+        isFallback: true,
+      });
+    }
+  }
+
+  return candidates;
+}
+
 function formatQuickDate(value) {
   try {
     return new Intl.DateTimeFormat("ja-JP", {
@@ -185,7 +273,12 @@ export default async function RacesPage({ searchParams }) {
     .filter(Boolean)
     .filter((item) => item.diagnosis_code !== "skip");
 
-  const insidePickups = activeAiPickups
+  // AI診断VIEWがまだ生成されていない日でも空欄にしないため、
+  // 出走表の選手・モーター・展示データから簡易候補を補完します。
+  const fallbackPickups = buildFallbackPickups(courses, raceDate);
+  const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
+
+  let insidePickups = pickupPool
     .filter((item) =>
       ["イン鉄板", "イン有力"].includes(item.diagnosis_label) ||
       Number(item.inside_expectation ?? 0) >= 70
@@ -193,8 +286,16 @@ export default async function RacesPage({ searchParams }) {
     .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
     .slice(0, 6);
 
+  // 閾値未満でも、その日の締切前候補から上位3件は表示します。
+  if (insidePickups.length === 0) {
+    insidePickups = pickupPool
+      .slice()
+      .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
+      .slice(0, 3);
+  }
+
   const insideKeys = new Set(insidePickups.map((item) => `${item.courseCode}:${item.raceNo}`));
-  const holePickups = activeAiPickups
+  let holePickups = pickupPool
     .filter((item) =>
       ["穴期待", "5アタマ警戒"].includes(item.diagnosis_label) ||
       Number(item.hole_expectation ?? 0) >= 65
@@ -202,6 +303,14 @@ export default async function RacesPage({ searchParams }) {
     .filter((item) => !insideKeys.has(`${item.courseCode}:${item.raceNo}`))
     .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
     .slice(0, 6);
+
+  if (holePickups.length === 0) {
+    holePickups = pickupPool
+      .filter((item) => !insideKeys.has(`${item.courseCode}:${item.raceNo}`))
+      .slice()
+      .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
+      .slice(0, 3);
+  }
 
   return (
     <main className={`${styles.page} ${styles.portalPage}`}>
@@ -451,7 +560,21 @@ export default async function RacesPage({ searchParams }) {
           )}
         </section>
 
-        <RealtimeUpdates target="races" limit={5} />
+        <section className={`${styles.portalSection} ${styles.xRealtimeSection}`}>
+          <div className={styles.portalSectionHead}>
+            <div><span>REALTIME UPDATE</span><h2>𝕏 リアルタイム予想・更新情報</h2></div>
+            <a
+              href={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || "https://x.com"}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.xOpenLink}
+            >
+              Xで見る ↗
+            </a>
+          </div>
+
+          <XTimeline profileUrl={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || ""} />
+        </section>
       </div>
     </main>
   );
