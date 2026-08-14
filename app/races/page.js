@@ -535,7 +535,7 @@ export default async function RacesPage({ searchParams }) {
         <section className={styles.portalSection}>
           <div className={styles.portalSectionHead}>
             <div><span>HIT FLASH</span><h2>🎯 的中速報</h2></div>
-            <Link href="/admin/ai-bet-stats">成績を見る →</Link>
+            <Link href="/ai-results">成績を見る →</Link>
           </div>
 
           {hitFlash.length > 0 ? (
