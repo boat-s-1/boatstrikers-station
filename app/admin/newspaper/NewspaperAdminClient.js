@@ -4,46 +4,69 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import styles from "./newspaperAdmin.module.css";
 
-const STORAGE_KEY = "boatstrikers:newspaper-phase1";
+const STORAGE_KEY = "boatstrikers:newspaper-phase2";
 
-const PERSONAS = {
+const MODES = [
+  ["ichika", "🌸", "一果"],
+  ["kiina", "⚡", "キイナ"],
+  ["hatsune", "👗", "初音"],
+  ["grade", "🏆", "12R特別紙"],
+  ["sns", "📱", "SNS画像"],
+  ["sticker", "✨", "速報ステッカー"],
+];
+
+const HEADERS = {
   ichika: {
-    label: "一果",
-    icon: "🌸",
-    color: "#e94687",
-    dark: "#8f2458",
-    pale: "#fff1f7",
-    previousHeader: "/admin-newspaper/ichika-previous.png",
-    liveHeader: "/admin-newspaper/ichika-live.png",
-  },
-  hatsune: {
-    label: "初音",
-    icon: "👗",
-    color: "#7857c8",
-    dark: "#4b358f",
-    pale: "#f5f0ff",
-    previousHeader: "/admin-newspaper/hatsune-previous.jpg",
-    liveHeader: "/admin-newspaper/hatsune-live.jpg",
+    previous: "/admin-newspaper/ichika-previous.png",
+    live: "/admin-newspaper/ichika-live.png",
   },
   kiina: {
-    label: "キイナ",
-    icon: "⚡",
-    color: "#f5b400",
-    dark: "#221b00",
-    pale: "#fff8db",
-    previousHeader: "/admin-newspaper/kiina-previous.jpg",
-    liveHeader: "/admin-newspaper/kiina-live.jpg",
+    previous: "/admin-newspaper/kiina-previous.jpg",
+    live: "/admin-newspaper/kiina-live.jpg",
+  },
+  hatsune: {
+    previous: "/admin-newspaper/hatsune-previous.jpg",
+    live: "/admin-newspaper/hatsune-live.jpg",
   },
   grade: {
-    label: "12R特別紙",
-    icon: "🏆",
-    color: "#c89221",
-    dark: "#38270b",
-    pale: "#fff8e8",
-    previousHeader: "/admin-newspaper/grade.jpg",
-    liveHeader: "/admin-newspaper/grade.jpg",
+    previous: "/admin-newspaper/grade.jpg",
+    live: "/admin-newspaper/grade.jpg",
   },
 };
+
+const STAMPS = {
+  "なし": "",
+  "本命": "/admin-newspaper/stamp-honmei.png",
+  "激アツ": "/admin-newspaper/stamp-gekiatsu.png",
+  "鉄板": "/admin-newspaper/stamp-teppan.png",
+  "穴狙い": "/admin-newspaper/stamp-ana.png",
+  "見": "/admin-newspaper/stamp-mi.png",
+  "危険": "/admin-newspaper/stamp-kiken.png",
+  "波乱注意": "/admin-newspaper/stamp-haran.png",
+};
+
+const KIINA_STAMPS = {
+  "なし": "",
+  "イン信用しない": "/admin-newspaper/kiina-no-inner.png",
+  "展示次第": "/admin-newspaper/kiina-tenji.png",
+  "モーター抜群": "/admin-newspaper/kiina-motor.png",
+  "オッズがつかない": "/admin-newspaper/kiina-odds.png",
+  "荒れそうだけど": "/admin-newspaper/kiina-are.png",
+  "4コースが": "/admin-newspaper/kiina-course4.png",
+};
+
+const STICKER_FRAMES = {
+  "鉄板": "/admin-newspaper/frames/teppan.jpg",
+  "危険": "/admin-newspaper/frames/kiken.jpg",
+  "ヴィーナス": "/admin-newspaper/frames/venus.jpg",
+  "5アタマ": "/admin-newspaper/frames/five_atama.jpg",
+  "プレミア": "/admin-newspaper/frames/premium.jpg",
+};
+
+const COURSE_NAMES = [
+  "桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江",
+  "尼崎","鳴門","丸亀","児島","宮島","徳山","下関","若松","芦屋","福岡","唐津","大村",
+];
 
 function todayJst() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -54,36 +77,37 @@ function todayJst() {
   }).format(new Date());
 }
 
-const initialState = {
-  persona: "ichika",
+const defaultPickups = Array.from({ length: 6 }, (_, i) => ({
+  name: `${i + 1}号艇`,
+  comment: i === 0 ? "近況リズム良好。ターン回りに安定感。" : "展開ひとつで連圏。",
+  image: "",
+}));
+
+const initial = {
+  mode: "ichika",
   edition: "previous",
   raceDate: todayJst(),
   racePlace: "丸亀",
   raceNo: "1R",
 
-  honmei: "1号艇",
   stamp: "本命",
+  kiinaStamp: "なし",
+  characterImage: "",
+
+  honmei: "1号艇",
   nigeRate: 84,
   upRate: 11,
   wave: 28,
   dangerBoat: "なし",
   mainComment: "1号艇中心だが2号艇の差し注意！",
-  attentionBoats: ["1号艇", "2号艇", "3号艇"],
-  boatScores: {
-    "1号艇": 82,
-    "2号艇": 67,
-    "3号艇": 58,
-    "4号艇": 48,
-    "5号艇": 44,
-    "6号艇": 36,
-  },
+  boatScores: {1:82,2:67,3:58,4:48,5:44,6:36},
   boatComments: {
-    "1号艇": "インから先マイできる足。",
-    "2号艇": "差し残しに注意。",
-    "3号艇": "握って攻める展開なら連圏。",
-    "4号艇": "展開待ち。",
-    "5号艇": "まくり差しの余地あり。",
-    "6号艇": "大外で展開待ち。",
+    1:"インから先マイできる足。",
+    2:"差し残しに注意。",
+    3:"握って攻める展開なら連圏。",
+    4:"展開待ち。",
+    5:"まくり差しの余地あり。",
+    6:"大外で展開待ち。",
   },
 
   tenjiRank: "S",
@@ -96,42 +120,70 @@ const initialState = {
   markMain: "1",
   markSecond: "2",
   markThird: "5",
-  motorEval: "1号艇は出足型、3号艇の伸びが良好。",
+  motorEval: "1号艇は出足型、3号艇の伸びが節イチ級！",
   liveComment: "展示は1号艇優勢！",
 
   kiina5Rate: 72,
   kiinaStars: "★★★★★",
   anaTarget: "5号艇のまくり差し",
   warningMessage: "波乱警報発令中！万舟のチャンス！",
-  kiinaDiff4: "-0.05",
-  slit: {
-    "1号艇": 0,
-    "2号艇": 0,
-    "3号艇": 0,
-    "4号艇": 0,
-    "5号艇": 0,
-    "6号艇": 0,
+  checkItems: {
+    "インの足": true,
+    "4号艇の伸び": false,
+    "スタ展気配": true,
+    "風向き": false,
+    "展示タイム": true,
   },
+  slit: {1:0,2:0,3:0,4:0,5:0,6:0},
+  slitBg: "#111111",
+  laneBg: "#222222",
+  slitLine: "#ffcc00",
+  diff4: "-0.05",
 
   hatsuneHonmei: "1号艇",
   hatsuneRhythm: "好調",
   wallRank: "A",
   hatsuneBet: "1-23-4",
-  hatsuneMemo: "チルト0.5",
-  hatsunePickup: "1号艇：近況リズム良好\n4号艇：展開ひとつで連圏",
+  weightMemo: "チルト0.5",
+  pickupCount: 2,
+  pickups: defaultPickups,
 
-  gradeTitle: "Gレース 12R FINAL",
-  gradeHeadline: "勝負レースをデータで厳選",
+  gradeTitle: "三姫頂上決戦新聞",
+  gradeDate: todayJst(),
+  gradePlace: "丸亀",
+  gradeHit: "本日の勝負12R",
+  gradeRows: Array.from({ length: 12 }, (_, i) => ({
+    race: `${i + 1}R`,
+    grade: i === 11 ? "勝負" : "通常",
+    rank: i === 11 ? "S" : "A",
+    ichika: "○",
+    hatsune: "△",
+    kiina: "穴",
+    main: "1-2-3",
+    sub: "1-3-2",
+    memo: i === 11 ? "最終レース勝負" : "",
+    haran: i % 4 === 0 ? "高" : "中",
+    deadline: "",
+  })),
+
+  snsMode: "危険",
+  snsDeadline: "15:24",
+  snsRate: 28,
+  snsMain: "3-2-5",
+  snsStep1: "1号艇は流される",
+  snsStep2: "2号艇が絞って攻める",
+  snsStep3: "3号艇が差して決着へ",
+  snsAxis: "3号艇",
+
+  frameType: "鉄板",
+  stickerMain: "92%",
+  stickerSub: "信頼度",
+  stickerBet: "1-2-3",
+  stickerMemo: "一果の鉄板候補",
 };
 
-function clampNumber(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return min;
-  return Math.max(min, Math.min(max, n));
-}
-
-function esc(value) {
-  return String(value ?? "")
+function esc(v) {
+  return String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -139,547 +191,471 @@ function esc(value) {
     .replace(/'/g, "&apos;");
 }
 
-function multilineText(value, x, y, options = {}) {
+function clamp(v, min=0, max=100) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : min;
+}
+
+function textLines(value, x, y, opts={}) {
   const {
-    fontSize = 28,
-    fill = "#27384b",
-    weight = 700,
-    lineHeight = 1.45,
-    maxLines = 4,
-    anchor = "start",
-  } = options;
-  const lines = String(value || "")
-    .split(/\r?\n/)
-    .slice(0, maxLines);
-
-  return `<text x="${x}" y="${y}" fill="${fill}" font-size="${fontSize}" font-weight="${weight}" text-anchor="${anchor}" font-family="Arial,'Noto Sans JP',sans-serif">${lines
-    .map(
-      (line, index) =>
-        `<tspan x="${x}" dy="${index === 0 ? 0 : fontSize * lineHeight}">${esc(
-          line
-        )}</tspan>`
-    )
-    .join("")}</text>`;
+    size=28, fill="#26384a", weight=700, line=1.45, max=4, anchor="start"
+  } = opts;
+  const lines = String(value || "").split(/\r?\n/).slice(0, max);
+  return `<text x="${x}" y="${y}" fill="${fill}" font-size="${size}" font-weight="${weight}" text-anchor="${anchor}" font-family="Arial,'Noto Sans JP',sans-serif">${lines.map((t,i)=>`<tspan x="${x}" dy="${i===0?0:size*line}">${esc(t)}</tspan>`).join("")}</text>`;
 }
 
-function scoreBars(state, color) {
-  const boats = Object.keys(state.boatScores || {});
-  return boats
-    .map((boat, index) => {
-      const score = clampNumber(state.boatScores?.[boat], 0, 100);
-      const y = 655 + index * 62;
-      const boatNo = Number(boat.replace(/\D/g, "")) || index + 1;
-      const boatColors = ["#f5f5f5", "#333", "#e53d3d", "#2877e8", "#e6b315", "#2da052"];
-      const textColor = boatNo === 1 ? "#333" : "#fff";
-      return `
-        <text x="92" y="${y + 25}" fill="#516478" font-size="25" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(boat)}</text>
-        <rect x="205" y="${y}" width="500" height="34" rx="17" fill="#edf1f5"/>
-        <rect x="205" y="${y}" width="${score * 5}" height="34" rx="17" fill="${boatColors[index] || color}"/>
-        <text x="725" y="${y + 26}" fill="${color}" font-size="25" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${score}</text>
-      `;
-    })
-    .join("");
+function img(href,x,y,w,h,extra="") {
+  return href ? `<image href="${esc(href)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" ${extra}/>` : "";
 }
 
-function buildSvg(state) {
-  const persona = PERSONAS[state.persona] || PERSONAS.ichika;
-  const header =
-    state.edition === "live" ? persona.liveHeader : persona.previousHeader;
-  const live = state.edition === "live";
-  const W = 1080;
-  const H = 1350;
+function stampOverlay(href, x=760, y=420, size=210, rotate=-10) {
+  if (!href) return "";
+  return `<g transform="rotate(${rotate} ${x+size/2} ${y+size/2})">${img(href,x,y,size,size,'opacity=".92"')}</g>`;
+}
 
-  const title =
-    state.persona === "grade"
-      ? state.gradeTitle
-      : `${persona.icon} ${persona.label}の${live ? "直前版" : "前日版"}`;
-
-  let specialBlock = "";
-
-  if (state.persona === "ichika") {
-    specialBlock = live
-      ? `
-        <rect x="60" y="455" width="960" height="205" rx="28" fill="${persona.pale}" stroke="${persona.color}" stroke-width="3"/>
-        <text x="90" y="510" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">直前チェック</text>
-        <text x="90" y="570" fill="#20364b" font-size="54" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">展示 ${esc(state.tenjiRank)}　補正 ${esc(state.tenjiTime)}</text>
-        <text x="90" y="625" fill="#52697d" font-size="28" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">進入 ${esc(state.shinnyu)}　◎${esc(state.markMain)} ○${esc(state.markSecond)} ▲${esc(state.markThird)}</text>
-      `
-      : `
-        <rect x="60" y="455" width="960" height="180" rx="28" fill="${persona.pale}" stroke="${persona.color}" stroke-width="3"/>
-        <text x="90" y="510" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">一果 本命候補</text>
-        <text x="90" y="585" fill="#20364b" font-size="64" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.honmei)}</text>
-        <text x="470" y="575" fill="${persona.color}" font-size="52" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">イン逃げ ${clampNumber(state.nigeRate,0,100)}%</text>
-      `;
-  } else if (state.persona === "kiina") {
-    specialBlock = `
-      <rect x="60" y="455" width="960" height="205" rx="28" fill="#151515" stroke="${persona.color}" stroke-width="5"/>
-      <text x="90" y="510" fill="${persona.color}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">穴党チェック</text>
-      <text x="90" y="580" fill="#fff" font-size="58" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">5アタマ ${clampNumber(state.kiina5Rate,0,100)}%</text>
-      <text x="90" y="628" fill="${persona.color}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.kiinaStars)}　${esc(state.anaTarget)}</text>
-    `;
-  } else if (state.persona === "hatsune") {
-    specialBlock = `
-      <rect x="60" y="455" width="960" height="205" rx="28" fill="${persona.pale}" stroke="${persona.color}" stroke-width="3"/>
-      <text x="90" y="510" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">女子戦 PICK UP</text>
-      <text x="90" y="578" fill="#20364b" font-size="58" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.hatsuneHonmei)}</text>
-      <text x="480" y="565" fill="${persona.color}" font-size="38" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">近況 ${esc(state.hatsuneRhythm)}　壁 ${esc(state.wallRank)}</text>
-      <text x="90" y="625" fill="#53687b" font-size="26" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">推奨 ${esc(state.hatsuneBet)}　${esc(state.hatsuneMemo)}</text>
-    `;
-  } else {
-    specialBlock = `
-      <rect x="60" y="455" width="960" height="205" rx="28" fill="${persona.pale}" stroke="${persona.color}" stroke-width="4"/>
-      <text x="90" y="520" fill="${persona.dark}" font-size="35" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.gradeHeadline)}</text>
-      <text x="90" y="600" fill="#20364b" font-size="60" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.racePlace)} ${esc(state.raceNo)}</text>
-    `;
-  }
-
-  const lower =
-    state.persona === "ichika"
-      ? live
-        ? `
-          <rect x="60" y="700" width="960" height="210" rx="24" fill="#fff"/>
-          <text x="90" y="755" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">推奨買い目</text>
-          <text x="90" y="830" fill="#142a3e" font-size="58" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.mainBet)}</text>
-          ${multilineText(state.subBets, 440, 790, {fontSize: 26, fill:"#5b6f80", weight:800, maxLines:3})}
-          <text x="90" y="885" fill="${persona.color}" font-size="27" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">的中期待度 ${clampNumber(state.hitRate,0,100)}%</text>
-          <rect x="60" y="940" width="960" height="270" rx="24" fill="#fff"/>
-          <text x="90" y="995" fill="${persona.dark}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">直前コメント</text>
-          ${multilineText(state.liveComment, 90, 1050, {fontSize:30, maxLines:3})}
-          ${multilineText(state.motorEval, 90, 1160, {fontSize:24, fill:"#687c8d", weight:700, maxLines:2})}
-        `
-        : `
-          <rect x="60" y="680" width="960" height="465" rx="24" fill="#fff"/>
-          <text x="90" y="735" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">艇別評価</text>
-          ${scoreBars(state, persona.color)}
-          <rect x="60" y="1175" width="960" height="105" rx="24" fill="${persona.pale}"/>
-          ${multilineText(state.mainComment, 90, 1220, {fontSize:28, fill:persona.dark, weight:900, maxLines:2})}
-        `
-      : state.persona === "kiina"
-      ? `
-        <rect x="60" y="700" width="960" height="220" rx="24" fill="#fff"/>
-        <text x="90" y="755" fill="#222" font-size="29" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${live ? "直前LIVE" : "波乱警報"}</text>
-        ${multilineText(live ? `展示 ${state.tenjiRank} / ${state.tenjiTime}　進入 ${state.shinnyu}` : state.warningMessage, 90, 815, {fontSize:31, fill:"#333", weight:900, maxLines:3})}
-        <rect x="60" y="960" width="960" height="250" rx="24" fill="#111"/>
-        <text x="90" y="1015" fill="${persona.color}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">スリット予想</text>
-        ${Object.entries(state.slit || {}).map(([boat,val],i)=>`
-          <text x="100" y="${1065+i*24}" fill="#ddd" font-size="18" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">${esc(boat)}</text>
-          <rect x="220" y="${1050+i*24}" width="520" height="10" rx="5" fill="#333"/>
-          <rect x="${480 + clampNumber(val,-50,50)*4}" y="${1046+i*24}" width="10" height="18" rx="4" fill="${persona.color}"/>
-        `).join("")}
-      `
-      : state.persona === "hatsune"
-      ? `
-        <rect x="60" y="700" width="960" height="300" rx="24" fill="#fff"/>
-        <text x="90" y="755" fill="${persona.dark}" font-size="29" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">女子戦メモ</text>
-        ${multilineText(state.hatsunePickup, 90, 820, {fontSize:29, fill:"#35485d", weight:800, maxLines:5})}
-        <rect x="60" y="1040" width="960" height="170" rx="24" fill="${persona.pale}"/>
-        ${multilineText(live ? state.liveComment : state.mainComment, 90, 1100, {fontSize:30, fill:persona.dark, weight:900, maxLines:3})}
-      `
-      : `
-        <rect x="60" y="700" width="960" height="450" rx="24" fill="#fff"/>
-        <text x="90" y="765" fill="${persona.dark}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">FINAL PICK</text>
-        <text x="90" y="850" fill="#142a3e" font-size="72" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.mainBet)}</text>
-        ${multilineText(state.mainComment, 90, 930, {fontSize:31, fill:"#53687b", weight:800, maxLines:4})}
-      `;
-
+function baseCanvas(header, title, state, accent, dark, body="") {
   return `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-    <rect width="${W}" height="${H}" fill="#f4f7fb"/>
-    <rect x="35" y="35" width="1010" height="1280" rx="35" fill="#ffffff" stroke="${persona.color}" stroke-width="5"/>
-    <image href="${esc(header)}" x="60" y="60" width="960" height="190" preserveAspectRatio="xMidYMid slice"/>
-    <rect x="60" y="265" width="960" height="150" rx="24" fill="${persona.dark}"/>
-    <text x="90" y="315" fill="${persona.color}" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${live ? "LIVE / JUST BEFORE" : "PRE-RACE EDITION"}</text>
-    <text x="90" y="370" fill="#fff" font-size="45" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(title)}</text>
-    <text x="980" y="315" fill="#fff" font-size="24" font-weight="800" text-anchor="end" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.raceDate)}</text>
-    <text x="980" y="375" fill="#fff" font-size="42" font-weight="900" text-anchor="end" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.racePlace)} ${esc(state.raceNo)}</text>
-    ${specialBlock}
-    ${lower}
-    <text x="540" y="1290" fill="#7890a5" font-size="20" font-weight="800" text-anchor="middle" font-family="Arial,'Noto Sans JP',sans-serif">BOATSTRIKERS / GENERATED FROM ADMIN NEWSPAPER</text>
+  <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1500" viewBox="0 0 1080 1500">
+    <rect width="1080" height="1500" fill="#f1f4f8"/>
+    <rect x="32" y="32" width="1016" height="1436" rx="34" fill="#fff" stroke="${accent}" stroke-width="5"/>
+    ${img(header,60,60,960,170)}
+    <rect x="60" y="250" width="960" height="150" rx="24" fill="${dark}"/>
+    <text x="90" y="305" fill="${accent}" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${state.edition==="live"?"LIVE / JUST BEFORE":"PRE-RACE EDITION"}</text>
+    <text x="90" y="360" fill="#fff" font-size="44" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(title)}</text>
+    <text x="980" y="308" fill="#fff" font-size="22" font-weight="800" text-anchor="end" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.raceDate)}</text>
+    <text x="980" y="365" fill="#fff" font-size="40" font-weight="900" text-anchor="end" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.racePlace)} ${esc(state.raceNo)}</text>
+    ${body}
+    ${img("/admin-newspaper/footer.png",174,1390,732,104)}
   </svg>`;
 }
 
-function Field({ label, children, hint }) {
-  return (
-    <label className={styles.field}>
-      <span>{label}</span>
-      {children}
-      {hint && <small>{hint}</small>}
-    </label>
-  );
+function buildIchika(state) {
+  const accent="#ff4f93", dark="#692348";
+  const header=HEADERS.ichika[state.edition];
+  let rows="";
+  for (let i=1;i<=6;i++) {
+    const score=clamp(state.boatScores[i]);
+    const y=730+(i-1)*70;
+    rows += `
+      <text x="92" y="${y+28}" fill="#405367" font-size="25" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${i}号艇</text>
+      <rect x="210" y="${y}" width="480" height="36" rx="18" fill="#edf1f5"/>
+      <rect x="210" y="${y}" width="${score*4.8}" height="36" rx="18" fill="${accent}"/>
+      <text x="720" y="${y+28}" fill="${dark}" font-size="25" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${score}</text>
+      <text x="790" y="${y+26}" fill="#687d91" font-size="18" font-weight="700" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.boatComments[i])}</text>`;
+  }
+  const stamp=STAMPS[state.stamp] || "";
+  const main = state.edition==="previous"
+    ? `
+      <rect x="60" y="430" width="960" height="230" rx="28" fill="#fff1f7" stroke="${accent}" stroke-width="3"/>
+      <text x="90" y="490" fill="${dark}" font-size="29" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">🌸 一果本命候補</text>
+      <text x="90" y="580" fill="#20364b" font-size="72" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.honmei)}</text>
+      <text x="470" y="555" fill="${accent}" font-size="48" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">イン逃げ ${clamp(state.nigeRate)}%</text>
+      <text x="470" y="605" fill="#53697d" font-size="24" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">場平均との差 ${Number(state.upRate)>0?"+":""}${esc(state.upRate)} / 波乱 ${clamp(state.wave)}%</text>
+      ${stampOverlay(stamp,780,430,190)}
+      <rect x="60" y="690" width="960" height="450" rx="24" fill="#fff"/>
+      <text x="90" y="715" fill="${dark}" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">艇別展開評価</text>
+      ${rows}
+      <rect x="60" y="1170" width="960" height="165" rx="24" fill="#fff1f7"/>
+      ${textLines(state.mainComment,90,1220,{size:30,fill:dark,weight:900,max:3})}
+      <text x="90" y="1315" fill="#a44270" font-size="22" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">危険艇：${esc(state.dangerBoat)}</text>
+    `
+    : `
+      <rect x="60" y="430" width="960" height="235" rx="28" fill="#fff1f7" stroke="${accent}" stroke-width="3"/>
+      <text x="90" y="485" fill="${dark}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">🌸 展示終了！一果の最終決定</text>
+      <text x="90" y="555" fill="#20364b" font-size="56" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">展示 ${esc(state.tenjiRank)} / ${esc(state.tenjiTime)}</text>
+      <text x="90" y="615" fill="#53697d" font-size="27" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">進入 ${esc(state.shinnyu)}　◎${esc(state.markMain)} ○${esc(state.markSecond)} ▲${esc(state.markThird)}</text>
+      ${stampOverlay(STAMPS[state.stamp] || "",795,435,175)}
+      <rect x="60" y="700" width="960" height="250" rx="24" fill="#fff"/>
+      <text x="90" y="755" fill="${dark}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">🌸 一果の買い目</text>
+      <text x="90" y="835" fill="#152c41" font-size="64" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.mainBet)}</text>
+      ${textLines(state.subBets,480,795,{size:25,fill:"#596f82",weight:800,max:4})}
+      <text x="90" y="915" fill="${accent}" font-size="29" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">🎯 的中期待度 ${clamp(state.hitRate)}%</text>
+      <rect x="60" y="980" width="960" height="330" rx="24" fill="#fff"/>
+      <text x="90" y="1035" fill="${dark}" font-size="27" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">🌸 一果の直前談</text>
+      ${textLines(state.liveComment,90,1090,{size:31,weight:900,max:3})}
+      <text x="90" y="1210" fill="${dark}" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">⚙️ 機力チェック</text>
+      ${textLines(state.motorEval,90,1255,{size:24,fill:"#63798b",weight:700,max:2})}
+    `;
+  return baseCanvas(header, `一果の${state.edition==="live"?"直前版":"前日版"}`, state, accent, dark, main);
 }
 
-function Section({ title, children }) {
-  return (
-    <section className={styles.formSection}>
-      <h3>{title}</h3>
-      <div className={styles.formGrid}>{children}</div>
-    </section>
-  );
+function buildKiina(state) {
+  const accent="#ffcc00", dark="#101010";
+  const header=HEADERS.kiina[state.edition];
+  const checked=Object.entries(state.checkItems).map(([label,on],i)=>`
+    <text x="${90+(i%3)*290}" y="${1050+Math.floor(i/3)*48}" fill="${on?accent:"#8a8a8a"}" font-size="22" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${on?"☑":"☐"} ${esc(label)}</text>`).join("");
+  const lanes=Array.from({length:6},(_,idx)=>{
+    const i=idx+1, val=clamp(state.slit[i],-50,50);
+    const y=760+idx*42;
+    return `
+      <text x="92" y="${y+18}" fill="#ddd" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${i}号艇</text>
+      <rect x="190" y="${y}" width="650" height="26" rx="13" fill="${esc(state.laneBg)}"/>
+      <line x1="515" y1="${y-3}" x2="515" y2="${y+29}" stroke="${esc(state.slitLine)}" stroke-width="4"/>
+      <circle cx="${515+val*4}" cy="${y+13}" r="10" fill="${accent}"/>`;
+  }).join("");
+  const kstamp=KIINA_STAMPS[state.kiinaStamp] || "";
+  const main=`
+    <rect x="60" y="430" width="960" height="235" rx="28" fill="#151515" stroke="${accent}" stroke-width="5"/>
+    <text x="90" y="490" fill="${accent}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">⚡ キイナの穴党設定</text>
+    <text x="90" y="575" fill="#fff" font-size="64" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">5アタマ ${clamp(state.kiina5Rate)}%</text>
+    <text x="90" y="625" fill="${accent}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.kiinaStars)}　${esc(state.anaTarget)}</text>
+    ${state.edition==="live"?stampOverlay(kstamp,790,440,175):stampOverlay(STAMPS[state.stamp]||"",790,440,175)}
+    <rect x="60" y="700" width="960" height="300" rx="24" fill="${esc(state.slitBg)}"/>
+    <text x="90" y="742" fill="${accent}" font-size="26" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">⚡ スリット予想</text>
+    ${lanes}
+    <rect x="60" y="1020" width="960" height="170" rx="24" fill="#171717"/>
+    <text x="90" y="1060" fill="${accent}" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">直前チェック項目</text>
+    ${checked}
+    <rect x="60" y="1220" width="960" height="130" rx="24" fill="#fff8d9"/>
+    ${textLines(state.edition==="live"?`展示 ${state.tenjiRank} / ${state.tenjiTime}　進入 ${state.shinnyu}　4号艇差 ${state.diff4}`:state.warningMessage,90,1270,{size:28,fill:"#29220b",weight:900,max:3})}
+  `;
+  return baseCanvas(header, `キイナの${state.edition==="live"?"直前版":"前日版"}`, state, accent, dark, main);
+}
+
+function buildHatsune(state) {
+  const accent=state.edition==="live"?"#d81b60":"#7e57c2", dark="#453369";
+  const header=HEADERS.hatsune[state.edition];
+  const pickups=(state.pickups||[]).slice(0, clamp(state.pickupCount,1,6));
+  const cards=pickups.map((p,i)=>{
+    const col=i%2,row=Math.floor(i/2),x=70+col*480,y=740+row*180;
+    return `
+      <rect x="${x}" y="${y}" width="450" height="155" rx="20" fill="#fff" stroke="#e5d8f3" stroke-width="2"/>
+      ${p.image?img(p.image,x+18,y+18,115,115):`<circle cx="${x+75}" cy="${y+75}" r="55" fill="#eee6f8"/><text x="${x+75}" y="${y+86}" text-anchor="middle" fill="${accent}" font-size="46" font-family="Arial">👤</text>`}
+      <text x="${x+150}" y="${y+48}" fill="${dark}" font-size="23" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(p.name)}</text>
+      ${textLines(p.comment,x+150,y+82,{size:17,fill:"#68758a",weight:700,max:3,line:1.35})}
+    `;
+  }).join("");
+  const main=`
+    <rect x="60" y="430" width="960" height="240" rx="28" fill="#f7f1ff" stroke="${accent}" stroke-width="3"/>
+    ${state.characterImage?img(state.characterImage,780,445,190,205):""}
+    <text x="90" y="490" fill="${dark}" font-size="29" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">👗 初音の女子戦AI指数</text>
+    <text x="90" y="575" fill="#20364b" font-size="64" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.hatsuneHonmei)}</text>
+    <text x="430" y="552" fill="${accent}" font-size="36" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">近況 ${esc(state.hatsuneRhythm)}</text>
+    <text x="430" y="605" fill="#647287" font-size="27" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">壁信頼度 ${esc(state.wallRank)} / ${esc(state.weightMemo)}</text>
+    ${stampOverlay(STAMPS[state.stamp]||"",820,450,145)}
+    <text x="70" y="715" fill="${dark}" font-size="27" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">👗 初音の注目ピックアップ</text>
+    ${cards}
+    <rect x="60" y="1270" width="960" height="100" rx="22" fill="#f7f1ff"/>
+    <text x="90" y="1328" fill="${accent}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${state.edition==="live"?"💋 初音のヴィーナスアイ":"推奨買い目"}：${esc(state.hatsuneBet)}</text>
+  `;
+  return baseCanvas(header, `初音の${state.edition==="live"?"直前版":"前日版"}`, state, accent, dark, main);
+}
+
+function buildGrade(state) {
+  const rows=(state.gradeRows||[]).map((r,i)=>{
+    const y=510+i*65;
+    const bg=i===11?"#fff2cb":i%2===0?"#fff":"#f8fafc";
+    return `
+      <rect x="55" y="${y}" width="970" height="62" fill="${bg}" stroke="#e7dfcf"/>
+      <text x="80" y="${y+39}" fill="#2f2c25" font-size="20" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.race)}</text>
+      <text x="150" y="${y+39}" fill="#7a5c1e" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.grade)}</text>
+      <text x="235" y="${y+39}" fill="#222" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.rank)}</text>
+      <text x="310" y="${y+39}" fill="#e04c87" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.ichika)}</text>
+      <text x="380" y="${y+39}" fill="#7e57c2" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.hatsune)}</text>
+      <text x="450" y="${y+39}" fill="#b48a00" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.kiina)}</text>
+      <text x="525" y="${y+39}" fill="#1f3347" font-size="18" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.main)}</text>
+      <text x="665" y="${y+39}" fill="#647284" font-size="16" font-weight="700" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.sub)}</text>
+      <text x="810" y="${y+39}" fill="${r.haran==="高"?"#d92d20":"#647284"}" font-size="16" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.haran)}</text>
+      <text x="875" y="${y+39}" fill="#647284" font-size="14" font-weight="700" font-family="Arial,'Noto Sans JP',sans-serif">${esc(r.memo)}</text>`;
+  }).join("");
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1450" viewBox="0 0 1080 1450">
+    <rect width="1080" height="1450" fill="#f4efe4"/>
+    ${img("/admin-newspaper/grade.jpg",40,40,1000,300)}
+    <rect x="40" y="360" width="1000" height="100" rx="12" fill="#2e2417"/>
+    <text x="70" y="405" fill="#d5ad4d" font-size="21" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">BOATSTRIKERS GRADE SPECIAL</text>
+    <text x="70" y="445" fill="#fff" font-size="34" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.gradeTitle)}</text>
+    <text x="1010" y="420" text-anchor="end" fill="#fff" font-size="24" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.gradePlace)} / ${esc(state.gradeDate)}</text>
+    <text x="80" y="495" fill="#6c5733" font-size="17" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">R　種別　AI　一果　初音　キイナ　本線　押さえ　波乱　短評</text>
+    ${rows}
+    <rect x="55" y="1320" width="970" height="80" rx="16" fill="#2e2417"/>
+    <text x="540" y="1371" text-anchor="middle" fill="#f0cc73" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.gradeHit)}</text>
+  </svg>`;
+}
+
+function buildSNS(state) {
+  const dangerous=state.snsMode==="危険";
+  const accent=dangerous?"#e63232":"#147bd1";
+  const title=dangerous?"危険レース警報":"鉄板候補";
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+    <rect width="1080" height="1350" fill="${dangerous?"#160d0d":"#eaf5ff"}"/>
+    <rect x="45" y="45" width="990" height="1260" rx="42" fill="${dangerous?"#251313":"#fff"}" stroke="${accent}" stroke-width="8"/>
+    <text x="80" y="125" fill="${accent}" font-size="34" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">BOAT STRIKE SNS</text>
+    <text x="80" y="220" fill="${dangerous?"#fff":"#17344f"}" font-size="76" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(title)}</text>
+    <text x="80" y="310" fill="${dangerous?"#fff":"#17344f"}" font-size="50" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.racePlace)} ${esc(state.raceNo)}</text>
+    <text x="1000" y="300" text-anchor="end" fill="${accent}" font-size="30" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">締切 ${esc(state.snsDeadline)}</text>
+    <circle cx="290" cy="535" r="175" fill="${accent}"/>
+    <text x="290" y="520" text-anchor="middle" fill="#fff" font-size="50" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${dangerous?"波乱度":"信頼度"}</text>
+    <text x="290" y="610" text-anchor="middle" fill="#fff" font-size="96" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${clamp(state.snsRate)}%</text>
+    <text x="590" y="470" fill="${dangerous?"#fff":"#17344f"}" font-size="28" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">本線</text>
+    <text x="590" y="545" fill="${accent}" font-size="68" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.snsMain)}</text>
+    <text x="590" y="610" fill="${dangerous?"#ddd":"#5f7488"}" font-size="27" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">軸 ${esc(state.snsAxis)}</text>
+    <rect x="80" y="760" width="920" height="390" rx="30" fill="${dangerous?"#351b1b":"#f2f8fd"}"/>
+    ${[state.snsStep1,state.snsStep2,state.snsStep3].map((t,i)=>`
+      <circle cx="135" cy="${845+i*100}" r="30" fill="${accent}"/>
+      <text x="135" y="${856+i*100}" text-anchor="middle" fill="#fff" font-size="24" font-weight="900" font-family="Arial">0${i+1}</text>
+      <text x="195" y="${856+i*100}" fill="${dangerous?"#fff":"#29445c"}" font-size="31" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(t)}</text>`).join("")}
+    <text x="540" y="1245" text-anchor="middle" fill="${dangerous?"#aaa":"#7a8fa1"}" font-size="23" font-weight="800" font-family="Arial,'Noto Sans JP',sans-serif">BOATSTRIKERS / 1マーク展開イメージ</text>
+  </svg>`;
+}
+
+function buildSticker(state) {
+  const frame=STICKER_FRAMES[state.frameType] || STICKER_FRAMES["鉄板"];
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+    <rect width="1080" height="1080" fill="#111"/>
+    ${img(frame,0,0,1080,1080)}
+    <rect x="90" y="90" width="900" height="900" rx="55" fill="rgba(0,0,0,.18)"/>
+    <text x="120" y="180" fill="#fff" font-size="38" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.racePlace)} ${esc(state.raceNo)}</text>
+    <text x="540" y="465" text-anchor="middle" fill="#fff" font-size="180" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.stickerMain)}</text>
+    <text x="540" y="555" text-anchor="middle" fill="#fff" font-size="46" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.stickerSub)}</text>
+    <text x="540" y="720" text-anchor="middle" fill="#fff" font-size="72" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.stickerBet)}</text>
+    <text x="540" y="835" text-anchor="middle" fill="#fff" font-size="34" font-weight="900" font-family="Arial,'Noto Sans JP',sans-serif">${esc(state.stickerMemo)}</text>
+  </svg>`;
+}
+
+function buildSvg(state) {
+  if (state.mode==="ichika") return buildIchika(state);
+  if (state.mode==="kiina") return buildKiina(state);
+  if (state.mode==="hatsune") return buildHatsune(state);
+  if (state.mode==="grade") return buildGrade(state);
+  if (state.mode==="sns") return buildSNS(state);
+  return buildSticker(state);
+}
+
+function Field({label,children,wide=false}) {
+  return <label className={`${styles.field} ${wide?styles.wideField:""}`}><span>{label}</span>{children}</label>;
+}
+function Section({title,children}) {
+  return <section className={styles.formSection}><h3>{title}</h3><div className={styles.formGrid}>{children}</div></section>;
+}
+
+async function fileToDataUrl(file) {
+  return await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result||""));
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export default function NewspaperAdminClient() {
-  const [form, setForm] = useState(initialState);
-  const [savedMessage, setSavedMessage] = useState("");
+  const [form,setForm]=useState(initial);
+  const [message,setMessage]=useState("");
 
-  useEffect(() => {
+  useEffect(()=>{
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw=localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw);
-      setForm((prev) => ({
-        ...prev,
-        ...parsed,
-        boatScores: { ...prev.boatScores, ...(parsed.boatScores || {}) },
-        boatComments: { ...prev.boatComments, ...(parsed.boatComments || {}) },
-        slit: { ...prev.slit, ...(parsed.slit || {}) },
+      const p=JSON.parse(raw);
+      setForm(prev=>({
+        ...prev,...p,
+        boatScores:{...prev.boatScores,...(p.boatScores||{})},
+        boatComments:{...prev.boatComments,...(p.boatComments||{})},
+        checkItems:{...prev.checkItems,...(p.checkItems||{})},
+        slit:{...prev.slit,...(p.slit||{})},
+        pickups:Array.isArray(p.pickups)?p.pickups:prev.pickups,
+        gradeRows:Array.isArray(p.gradeRows)?p.gradeRows:prev.gradeRows,
       }));
     } catch {}
-  }, []);
+  },[]);
 
-  const svg = useMemo(() => buildSvg(form), [form]);
-  const persona = PERSONAS[form.persona] || PERSONAS.ichika;
+  const svg=useMemo(()=>buildSvg(form),[form]);
 
-  function set(name, value) {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setSavedMessage("");
-  }
+  function set(name,value){setForm(p=>({...p,[name]:value}));setMessage("");}
+  function setObj(name,key,value){setForm(p=>({...p,[name]:{...(p[name]||{}),[key]:value}}));setMessage("");}
+  function setArray(name,index,patcher){setForm(p=>{const a=[...(p[name]||[])];a[index]={...a[index],...patcher};return {...p,[name]:a};});setMessage("");}
 
-  function updateObject(name, key, value) {
-    setForm((prev) => ({
-      ...prev,
-      [name]: { ...(prev[name] || {}), [key]: value },
-    }));
-    setSavedMessage("");
-  }
-
-  function saveDraft() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-    setSavedMessage("下書きをこの端末に保存しました。");
-  }
-
-  function resetDraft() {
-    if (!window.confirm("入力内容を初期状態に戻しますか？")) return;
-    window.localStorage.removeItem(STORAGE_KEY);
-    setForm({ ...initialState, raceDate: todayJst() });
-    setSavedMessage("入力内容を初期化しました。");
-  }
-
-  async function downloadPng() {
+  function save(){
     try {
-      const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const image = new Image();
-
-      image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 1080;
-        canvas.height = 1350;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(image, 0, 0);
-        URL.revokeObjectURL(url);
-
-        const link = document.createElement("a");
-        const safePlace = String(form.racePlace || "race").replace(/[\\/:*?"<>|]/g, "");
-        link.download = `${form.raceDate}_${safePlace}_${form.raceNo}_${form.persona}_${form.edition}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      };
-
-      image.onerror = () => {
-        URL.revokeObjectURL(url);
-        alert("画像生成に失敗しました。プレビュー画像をスクリーンショットしてください。");
-      };
-
-      image.src = url;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(form));
+      setMessage("下書きをこの端末に保存しました。");
     } catch {
-      alert("画像生成に失敗しました。");
+      setMessage("画像が大きいため下書きを保存できませんでした。画像以外は入力内容を保持しています。");
     }
   }
+  function reset(){
+    if(!confirm("Phase 2の入力内容を初期化しますか？"))return;
+    localStorage.removeItem(STORAGE_KEY);
+    setForm({...initial,raceDate:todayJst(),gradeDate:todayJst()});
+    setMessage("初期化しました。");
+  }
+  async function uploadMain(e){
+    const f=e.target.files?.[0]; if(!f)return;
+    set("characterImage",await fileToDataUrl(f));
+  }
+  async function uploadPickup(index,e){
+    const f=e.target.files?.[0];if(!f)return;
+    setArray("pickups",index,{image:await fileToDataUrl(f)});
+  }
+  function downloadPng(){
+    const blob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const image=new Image();
+    image.onload=()=>{
+      const vb=svg.match(/viewBox="0 0 (\d+) (\d+)"/);
+      const w=Number(vb?.[1]||1080),h=Number(vb?.[2]||1500);
+      const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(image,0,0,w,h);
+      URL.revokeObjectURL(url);
+      const a=document.createElement("a");
+      a.download=`${form.raceDate}_${form.racePlace}_${form.raceNo}_${form.mode}_${form.edition}.png`;
+      a.href=canvas.toDataURL("image/png");a.click();
+    };
+    image.onerror=()=>{URL.revokeObjectURL(url);alert("PNG生成に失敗しました。");};
+    image.src=url;
+  }
 
-  return (
-    <main className={styles.page}>
-      <div className={styles.shell}>
-        <header className={styles.hero}>
-          <div>
-            <span>BOATSTRIKERS CMS / NEWSPAPER</span>
-            <h1>新聞・画像作成</h1>
-            <p>
-              Streamlit版の主要入力を管理画面へ移植した第一弾です。
-              入力しながら右側でリアルタイムに確認できます。
-            </p>
-          </div>
-          <div className={styles.heroButtons}>
-            <Link href="/admin">← 管理画面</Link>
-            <button type="button" onClick={saveDraft}>下書き保存</button>
-          </div>
-        </header>
+  const newspaperMode=["ichika","kiina","hatsune"].includes(form.mode);
 
-        <nav className={styles.personaTabs}>
-          {Object.entries(PERSONAS).map(([key, item]) => (
-            <button
-              type="button"
-              key={key}
-              className={form.persona === key ? styles.activePersona : ""}
-              onClick={() => set("persona", key)}
-            >
-              <b>{item.icon}</b>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
+  return <main className={styles.page}><div className={styles.shell}>
+    <header className={styles.hero}>
+      <div><span>BOATSTRIKERS CMS / NEWSPAPER PHASE 2</span><h1>新聞・SNS画像作成</h1><p>元Streamlit版のスタンプ、顔写真差し替え、全新聞レイアウト、SNS画像、速報ステッカーを管理画面へ統合しました。</p></div>
+      <div className={styles.heroButtons}><Link href="/admin">← 管理画面</Link><button onClick={save}>下書き保存</button></div>
+    </header>
 
-        <div className={styles.editionTabs}>
-          <button
-            type="button"
-            className={form.edition === "previous" ? styles.activeEdition : ""}
-            onClick={() => set("edition", "previous")}
-          >
-            📰 前日版
-          </button>
-          <button
-            type="button"
-            className={form.edition === "live" ? styles.activeEdition : ""}
-            onClick={() => set("edition", "live")}
-          >
-            ⚡ 直前版
-          </button>
-        </div>
+    <nav className={styles.personaTabs}>
+      {MODES.map(([key,icon,label])=><button key={key} className={form.mode===key?styles.activePersona:""} onClick={()=>set("mode",key)}><b>{icon}</b><span>{label}</span></button>)}
+    </nav>
 
-        <div className={styles.workspace}>
-          <div className={styles.editor}>
-            <Section title="レース基本情報">
-              <Field label="日付">
-                <input type="date" value={form.raceDate} onChange={(e) => set("raceDate", e.target.value)} />
-              </Field>
-              <Field label="レース場">
-                <input value={form.racePlace} onChange={(e) => set("racePlace", e.target.value)} />
-              </Field>
-              <Field label="レース番号">
-                <select value={form.raceNo} onChange={(e) => set("raceNo", e.target.value)}>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <option value={`${i + 1}R`} key={i + 1}>{i + 1}R</option>
-                  ))}
-                </select>
-              </Field>
-            </Section>
+    {newspaperMode && <div className={styles.editionTabs}>
+      <button className={form.edition==="previous"?styles.activeEdition:""} onClick={()=>set("edition","previous")}>📰 前日版</button>
+      <button className={form.edition==="live"?styles.activeEdition:""} onClick={()=>set("edition","live")}>⚡ 直前版</button>
+    </div>}
 
-            {form.persona === "ichika" && (
-              <>
-                <Section title="🌸 一果・基本評価">
-                  <Field label="本命">
-                    <select value={form.honmei} onChange={(e) => set("honmei", e.target.value)}>
-                      {Array.from({ length: 6 }, (_, i) => (
-                        <option value={`${i + 1}号艇`} key={i + 1}>{i + 1}号艇</option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="イン逃げ期待度">
-                    <input type="range" min="0" max="100" value={form.nigeRate} onChange={(e) => set("nigeRate", Number(e.target.value))} />
-                    <output>{form.nigeRate}%</output>
-                  </Field>
-                  <Field label="波乱指数">
-                    <input type="range" min="0" max="100" value={form.wave} onChange={(e) => set("wave", Number(e.target.value))} />
-                    <output>{form.wave}%</output>
-                  </Field>
-                  <Field label="一果のひとこと">
-                    <textarea value={form.mainComment} onChange={(e) => set("mainComment", e.target.value)} />
-                  </Field>
-                </Section>
+    <div className={styles.workspace}>
+      <div className={styles.editor}>
+        <Section title="レース基本情報">
+          <Field label="日付"><input type="date" value={form.raceDate} onChange={e=>set("raceDate",e.target.value)}/></Field>
+          <Field label="レース場"><select value={form.racePlace} onChange={e=>set("racePlace",e.target.value)}>{COURSE_NAMES.map(v=><option key={v}>{v}</option>)}</select></Field>
+          <Field label="レース番号"><select value={form.raceNo} onChange={e=>set("raceNo",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1}>{i+1}R</option>)}</select></Field>
+          {newspaperMode && <Field label="表示スタンプ"><select value={form.stamp} onChange={e=>set("stamp",e.target.value)}>{Object.keys(STAMPS).map(v=><option key={v}>{v}</option>)}</select></Field>}
+        </Section>
 
-                {!form.edition.includes("live") && (
-                  <Section title="艇別評価">
-                    {Array.from({ length: 6 }, (_, i) => `${i + 1}号艇`).map((boat) => (
-                      <Field label={`${boat} 評価`} key={boat}>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={form.boatScores[boat]}
-                          onChange={(e) => updateObject("boatScores", boat, Number(e.target.value))}
-                        />
-                        <output>{form.boatScores[boat]}</output>
-                      </Field>
-                    ))}
-                  </Section>
-                )}
+        {form.mode==="ichika" && <>
+          <Section title="🌸 一果・本命候補">
+            <Field label="本命"><select value={form.honmei} onChange={e=>set("honmei",e.target.value)}>{Array.from({length:6},(_,i)=><option key={i+1}>{i+1}号艇</option>)}</select></Field>
+            <Field label="イン逃げ期待度"><input type="range" min="0" max="100" value={form.nigeRate} onChange={e=>set("nigeRate",Number(e.target.value))}/><output>{form.nigeRate}%</output></Field>
+            <Field label="場平均との差"><input type="range" min="-30" max="30" value={form.upRate} onChange={e=>set("upRate",Number(e.target.value))}/><output>{form.upRate}</output></Field>
+            <Field label="波乱指数"><input type="range" min="0" max="100" value={form.wave} onChange={e=>set("wave",Number(e.target.value))}/><output>{form.wave}%</output></Field>
+            <Field label="危険艇"><select value={form.dangerBoat} onChange={e=>set("dangerBoat",e.target.value)}><option>なし</option>{Array.from({length:6},(_,i)=><option key={i+1}>{i+1}号艇</option>)}</select></Field>
+            <Field label="一果のひとこと" wide><textarea value={form.mainComment} onChange={e=>set("mainComment",e.target.value)}/></Field>
+          </Section>
+          {form.edition==="previous" && <Section title="艇別展開評価">
+            {Array.from({length:6},(_,idx)=>idx+1).map(i=><Field key={i} label={`${i}号艇 評価 / コメント`}>
+              <input type="range" min="0" max="100" value={form.boatScores[i]} onChange={e=>setObj("boatScores",i,Number(e.target.value))}/><output>{form.boatScores[i]}</output>
+              <input value={form.boatComments[i]} onChange={e=>setObj("boatComments",i,e.target.value)}/>
+            </Field>)}
+          </Section>}
+          {form.edition==="live" && <Section title="🌸 一果直前">
+            <Field label="展示評価"><select value={form.tenjiRank} onChange={e=>set("tenjiRank",e.target.value)}>{["S","A","B","C"].map(v=><option key={v}>{v}</option>)}</select></Field>
+            <Field label="補正タイム"><input value={form.tenjiTime} onChange={e=>set("tenjiTime",e.target.value)}/></Field>
+            <Field label="進入予想"><input value={form.shinnyu} onChange={e=>set("shinnyu",e.target.value)}/></Field>
+            <Field label="本命買い目"><input value={form.mainBet} onChange={e=>set("mainBet",e.target.value)}/></Field>
+            <Field label="押さえ買い目"><textarea value={form.subBets} onChange={e=>set("subBets",e.target.value)}/></Field>
+            <Field label="的中期待度"><input type="range" min="0" max="100" value={form.hitRate} onChange={e=>set("hitRate",Number(e.target.value))}/><output>{form.hitRate}%</output></Field>
+            <Field label="直前コメント" wide><textarea value={form.liveComment} onChange={e=>set("liveComment",e.target.value)}/></Field>
+            <Field label="機力チェック" wide><textarea value={form.motorEval} onChange={e=>set("motorEval",e.target.value)}/></Field>
+          </Section>}
+        </>}
 
-                {form.edition === "live" && (
-                  <Section title="直前情報">
-                    <Field label="展示評価">
-                      <select value={form.tenjiRank} onChange={(e) => set("tenjiRank", e.target.value)}>
-                        {["S", "A", "B", "C"].map((v) => <option key={v}>{v}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="補正展示タイム">
-                      <input value={form.tenjiTime} onChange={(e) => set("tenjiTime", e.target.value)} />
-                    </Field>
-                    <Field label="進入予想">
-                      <input value={form.shinnyu} onChange={(e) => set("shinnyu", e.target.value)} />
-                    </Field>
-                    <Field label="本命買い目">
-                      <input value={form.mainBet} onChange={(e) => set("mainBet", e.target.value)} />
-                    </Field>
-                    <Field label="押さえ買い目">
-                      <textarea value={form.subBets} onChange={(e) => set("subBets", e.target.value)} />
-                    </Field>
-                    <Field label="的中期待度">
-                      <input type="range" min="0" max="100" value={form.hitRate} onChange={(e) => set("hitRate", Number(e.target.value))} />
-                      <output>{form.hitRate}%</output>
-                    </Field>
-                    <Field label="直前コメント">
-                      <textarea value={form.liveComment} onChange={(e) => set("liveComment", e.target.value)} />
-                    </Field>
-                    <Field label="機力チェック">
-                      <textarea value={form.motorEval} onChange={(e) => set("motorEval", e.target.value)} />
-                    </Field>
-                  </Section>
-                )}
-              </>
-            )}
+        {form.mode==="kiina" && <>
+          <Section title="⚡ キイナの穴党設定">
+            <Field label="5アタマ期待度"><input type="range" min="0" max="100" value={form.kiina5Rate} onChange={e=>set("kiina5Rate",Number(e.target.value))}/><output>{form.kiina5Rate}%</output></Field>
+            <Field label="超抜気配"><select value={form.kiinaStars} onChange={e=>set("kiinaStars",e.target.value)}>{["★","★★","★★★","★★★★","★★★★★"].map(v=><option key={v}>{v}</option>)}</select></Field>
+            <Field label="穴ターゲット"><input value={form.anaTarget} onChange={e=>set("anaTarget",e.target.value)}/></Field>
+            <Field label="警報メッセージ" wide><textarea value={form.warningMessage} onChange={e=>set("warningMessage",e.target.value)}/></Field>
+            {form.edition==="live" && <Field label="LIVEスタンプ"><select value={form.kiinaStamp} onChange={e=>set("kiinaStamp",e.target.value)}>{Object.keys(KIINA_STAMPS).map(v=><option key={v}>{v}</option>)}</select></Field>}
+          </Section>
+          <Section title="⚡ スリット予想">
+            {Array.from({length:6},(_,idx)=>idx+1).map(i=><Field label={`${i}号艇 スリット`} key={i}><input type="range" min="-50" max="50" step="5" value={form.slit[i]} onChange={e=>setObj("slit",i,Number(e.target.value))}/><output>{form.slit[i]}</output></Field>)}
+            <Field label="背景色"><input type="color" value={form.slitBg} onChange={e=>set("slitBg",e.target.value)}/></Field>
+            <Field label="レーン色"><input type="color" value={form.laneBg} onChange={e=>set("laneBg",e.target.value)}/></Field>
+            <Field label="ライン色"><input type="color" value={form.slitLine} onChange={e=>set("slitLine",e.target.value)}/></Field>
+          </Section>
+          <Section title="直前チェック項目">
+            {Object.entries(form.checkItems).map(([k,v])=><label className={styles.checkField} key={k}><input type="checkbox" checked={v} onChange={e=>setObj("checkItems",k,e.target.checked)}/><span>{k}</span></label>)}
+            {form.edition==="live" && <>
+              <Field label="展示評価"><select value={form.tenjiRank} onChange={e=>set("tenjiRank",e.target.value)}>{["S","A","B","C"].map(v=><option key={v}>{v}</option>)}</select></Field>
+              <Field label="補正タイム"><input value={form.tenjiTime} onChange={e=>set("tenjiTime",e.target.value)}/></Field>
+              <Field label="進入予想"><input value={form.shinnyu} onChange={e=>set("shinnyu",e.target.value)}/></Field>
+              <Field label="4号艇との展示差"><input value={form.diff4} onChange={e=>set("diff4",e.target.value)}/></Field>
+            </>}
+          </Section>
+        </>}
 
-            {form.persona === "kiina" && (
-              <>
-                <Section title="⚡ キイナ・穴党設定">
-                  <Field label="5アタマ期待度">
-                    <input type="range" min="0" max="100" value={form.kiina5Rate} onChange={(e) => set("kiina5Rate", Number(e.target.value))} />
-                    <output>{form.kiina5Rate}%</output>
-                  </Field>
-                  <Field label="超抜気配">
-                    <select value={form.kiinaStars} onChange={(e) => set("kiinaStars", e.target.value)}>
-                      {["★","★★","★★★","★★★★","★★★★★"].map((v) => <option key={v}>{v}</option>)}
-                    </select>
-                  </Field>
-                  <Field label="穴ターゲット">
-                    <input value={form.anaTarget} onChange={(e) => set("anaTarget", e.target.value)} />
-                  </Field>
-                  <Field label="警報メッセージ">
-                    <textarea value={form.warningMessage} onChange={(e) => set("warningMessage", e.target.value)} />
-                  </Field>
-                </Section>
+        {form.mode==="hatsune" && <>
+          <Section title="👗 初音の女子戦設定">
+            <Field label="本命ヴィーナス"><select value={form.hatsuneHonmei} onChange={e=>set("hatsuneHonmei",e.target.value)}>{Array.from({length:6},(_,i)=><option key={i+1}>{i+1}号艇</option>)}</select></Field>
+            <Field label="近況リズム"><select value={form.hatsuneRhythm} onChange={e=>set("hatsuneRhythm",e.target.value)}>{["不調","並","好調","絶好調","神掛かり"].map(v=><option key={v}>{v}</option>)}</select></Field>
+            <Field label="壁信頼度"><select value={form.wallRank} onChange={e=>set("wallRank",e.target.value)}>{["SS","S","A","B","C"].map(v=><option key={v}>{v}</option>)}</select></Field>
+            <Field label="推奨買い目"><input value={form.hatsuneBet} onChange={e=>set("hatsuneBet",e.target.value)}/></Field>
+            <Field label="調整メモ"><input value={form.weightMemo} onChange={e=>set("weightMemo",e.target.value)}/></Field>
+            <Field label="初音ちゃん画像差し替え"><input type="file" accept="image/*" onChange={uploadMain}/></Field>
+          </Section>
+          <Section title="👗 女子戦ピックアップ">
+            <Field label="表示人数"><input type="number" min="1" max="6" value={form.pickupCount} onChange={e=>set("pickupCount",clamp(e.target.value,1,6))}/></Field>
+            {(form.pickups||[]).slice(0,form.pickupCount).map((p,i)=><div className={styles.pickupEditor} key={i}>
+              <b>選手 {i+1}</b>
+              <input value={p.name} onChange={e=>setArray("pickups",i,{name:e.target.value})}/>
+              <input type="file" accept="image/*" onChange={e=>uploadPickup(i,e)}/>
+              <textarea value={p.comment} onChange={e=>setArray("pickups",i,{comment:e.target.value})}/>
+            </div>)}
+          </Section>
+        </>}
 
-                <Section title="スリット予想">
-                  {Array.from({ length: 6 }, (_, i) => `${i + 1}号艇`).map((boat) => (
-                    <Field label={`${boat} スリット`} key={boat}>
-                      <input
-                        type="range"
-                        min="-50"
-                        max="50"
-                        step="5"
-                        value={form.slit[boat]}
-                        onChange={(e) => updateObject("slit", boat, Number(e.target.value))}
-                      />
-                      <output>{form.slit[boat]}</output>
-                    </Field>
-                  ))}
-                </Section>
+        {form.mode==="grade" && <>
+          <Section title="🏆 12R新聞 共通情報">
+            <Field label="タイトル"><input value={form.gradeTitle} onChange={e=>set("gradeTitle",e.target.value)}/></Field>
+            <Field label="日付"><input type="date" value={form.gradeDate} onChange={e=>set("gradeDate",e.target.value)}/></Field>
+            <Field label="場"><select value={form.gradePlace} onChange={e=>set("gradePlace",e.target.value)}>{COURSE_NAMES.map(v=><option key={v}>{v}</option>)}</select></Field>
+            <Field label="見出し"><input value={form.gradeHit} onChange={e=>set("gradeHit",e.target.value)}/></Field>
+          </Section>
+          <Section title="🏆 12R入力">
+            {(form.gradeRows||[]).map((r,i)=><div className={styles.gradeRowEditor} key={i}>
+              <b>{r.race}</b>
+              <select value={r.grade} onChange={e=>setArray("gradeRows",i,{grade:e.target.value})}><option>通常</option><option>勝負</option><option>見</option></select>
+              <select value={r.rank} onChange={e=>setArray("gradeRows",i,{rank:e.target.value})}>{["SS","S","A","B","C"].map(v=><option key={v}>{v}</option>)}</select>
+              <input value={r.ichika} onChange={e=>setArray("gradeRows",i,{ichika:e.target.value})} placeholder="一果"/>
+              <input value={r.hatsune} onChange={e=>setArray("gradeRows",i,{hatsune:e.target.value})} placeholder="初音"/>
+              <input value={r.kiina} onChange={e=>setArray("gradeRows",i,{kiina:e.target.value})} placeholder="キイナ"/>
+              <input value={r.main} onChange={e=>setArray("gradeRows",i,{main:e.target.value})} placeholder="本線"/>
+              <input value={r.sub} onChange={e=>setArray("gradeRows",i,{sub:e.target.value})} placeholder="押さえ"/>
+              <select value={r.haran} onChange={e=>setArray("gradeRows",i,{haran:e.target.value})}><option>低</option><option>中</option><option>高</option></select>
+              <input value={r.memo} onChange={e=>setArray("gradeRows",i,{memo:e.target.value})} placeholder="短評"/>
+            </div>)}
+          </Section>
+        </>}
 
-                {form.edition === "live" && (
-                  <Section title="直前LIVE">
-                    <Field label="展示評価">
-                      <select value={form.tenjiRank} onChange={(e) => set("tenjiRank", e.target.value)}>
-                        {["S", "A", "B", "C"].map((v) => <option key={v}>{v}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="補正タイム">
-                      <input value={form.tenjiTime} onChange={(e) => set("tenjiTime", e.target.value)} />
-                    </Field>
-                    <Field label="進入予想">
-                      <input value={form.shinnyu} onChange={(e) => set("shinnyu", e.target.value)} />
-                    </Field>
-                    <Field label="4号艇との展示差">
-                      <input value={form.kiinaDiff4} onChange={(e) => set("kiinaDiff4", e.target.value)} />
-                    </Field>
-                  </Section>
-                )}
-              </>
-            )}
+        {form.mode==="sns" && <Section title="📱 SNS画像ツール">
+          <Field label="画像タイプ"><select value={form.snsMode} onChange={e=>set("snsMode",e.target.value)}><option>危険</option><option>鉄板</option></select></Field>
+          <Field label="締切"><input value={form.snsDeadline} onChange={e=>set("snsDeadline",e.target.value)}/></Field>
+          <Field label="成功率 / 信頼度"><input type="range" min="0" max="100" value={form.snsRate} onChange={e=>set("snsRate",Number(e.target.value))}/><output>{form.snsRate}%</output></Field>
+          <Field label="本線予想"><input value={form.snsMain} onChange={e=>set("snsMain",e.target.value)}/></Field>
+          <Field label="展開①"><input value={form.snsStep1} onChange={e=>set("snsStep1",e.target.value)}/></Field>
+          <Field label="展開②"><input value={form.snsStep2} onChange={e=>set("snsStep2",e.target.value)}/></Field>
+          <Field label="展開③"><input value={form.snsStep3} onChange={e=>set("snsStep3",e.target.value)}/></Field>
+          <Field label="軸選手"><select value={form.snsAxis} onChange={e=>set("snsAxis",e.target.value)}>{Array.from({length:6},(_,i)=><option key={i+1}>{i+1}号艇</option>)}</select></Field>
+        </Section>}
 
-            {form.persona === "hatsune" && (
-              <Section title="👗 初音・女子戦設定">
-                <Field label="本命ヴィーナス">
-                  <select value={form.hatsuneHonmei} onChange={(e) => set("hatsuneHonmei", e.target.value)}>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <option value={`${i + 1}号艇`} key={i + 1}>{i + 1}号艇</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="近況リズム">
-                  <select value={form.hatsuneRhythm} onChange={(e) => set("hatsuneRhythm", e.target.value)}>
-                    {["不調","並","好調","絶好調","神掛かり"].map((v) => <option key={v}>{v}</option>)}
-                  </select>
-                </Field>
-                <Field label="壁信頼度">
-                  <select value={form.wallRank} onChange={(e) => set("wallRank", e.target.value)}>
-                    {["SS","S","A","B","C"].map((v) => <option key={v}>{v}</option>)}
-                  </select>
-                </Field>
-                <Field label="推奨買い目">
-                  <input value={form.hatsuneBet} onChange={(e) => set("hatsuneBet", e.target.value)} />
-                </Field>
-                <Field label="調整メモ">
-                  <input value={form.hatsuneMemo} onChange={(e) => set("hatsuneMemo", e.target.value)} />
-                </Field>
-                <Field label="ピックアップメモ">
-                  <textarea value={form.hatsunePickup} onChange={(e) => set("hatsunePickup", e.target.value)} />
-                </Field>
-                <Field label={form.edition === "live" ? "直前コメント" : "初音のひとこと"}>
-                  <textarea value={form.edition === "live" ? form.liveComment : form.mainComment} onChange={(e) => set(form.edition === "live" ? "liveComment" : "mainComment", e.target.value)} />
-                </Field>
-              </Section>
-            )}
+        {form.mode==="sticker" && <Section title="✨ 速報ステッカー">
+          <Field label="フレーム"><select value={form.frameType} onChange={e=>set("frameType",e.target.value)}>{Object.keys(STICKER_FRAMES).map(v=><option key={v}>{v}</option>)}</select></Field>
+          <Field label="メイン表示"><input value={form.stickerMain} onChange={e=>set("stickerMain",e.target.value)}/></Field>
+          <Field label="サブ表示"><input value={form.stickerSub} onChange={e=>set("stickerSub",e.target.value)}/></Field>
+          <Field label="買い目"><input value={form.stickerBet} onChange={e=>set("stickerBet",e.target.value)}/></Field>
+          <Field label="メモ" wide><input value={form.stickerMemo} onChange={e=>set("stickerMemo",e.target.value)}/></Field>
+        </Section>}
 
-            {form.persona === "grade" && (
-              <Section title="🏆 12R特別紙">
-                <Field label="タイトル">
-                  <input value={form.gradeTitle} onChange={(e) => set("gradeTitle", e.target.value)} />
-                </Field>
-                <Field label="見出し">
-                  <input value={form.gradeHeadline} onChange={(e) => set("gradeHeadline", e.target.value)} />
-                </Field>
-                <Field label="本線">
-                  <input value={form.mainBet} onChange={(e) => set("mainBet", e.target.value)} />
-                </Field>
-                <Field label="コメント">
-                  <textarea value={form.mainComment} onChange={(e) => set("mainComment", e.target.value)} />
-                </Field>
-              </Section>
-            )}
-
-            <div className={styles.editorActions}>
-              <button type="button" className={styles.saveButton} onClick={saveDraft}>
-                💾 下書き保存
-              </button>
-              <button type="button" className={styles.resetButton} onClick={resetDraft}>
-                入力を初期化
-              </button>
-            </div>
-
-            {savedMessage && <p className={styles.savedMessage}>{savedMessage}</p>}
-          </div>
-
-          <aside className={styles.previewPane}>
-            <div className={styles.previewHeader}>
-              <div>
-                <span>LIVE PREVIEW</span>
-                <strong>{persona.icon} {persona.label}・{form.edition === "live" ? "直前版" : "前日版"}</strong>
-              </div>
-              <button type="button" onClick={downloadPng}>
-                PNG保存
-              </button>
-            </div>
-
-            <div
-              className={styles.svgPreview}
-              dangerouslySetInnerHTML={{ __html: svg }}
-            />
-
-            <p className={styles.previewNote}>
-              ※第一弾では主要項目と画像保存を移植しています。
-              元Streamlit版の細かなスタンプ・顔写真差し替え・全新聞レイアウトは次段階で追加できます。
-            </p>
-          </aside>
-        </div>
+        <div className={styles.editorActions}><button className={styles.saveButton} onClick={save}>💾 下書き保存</button><button className={styles.resetButton} onClick={reset}>初期化</button></div>
+        {message && <p className={styles.savedMessage}>{message}</p>}
       </div>
-    </main>
-  );
+
+      <aside className={styles.previewPane}>
+        <div className={styles.previewHeader}><div><span>PHASE 2 PREVIEW</span><strong>{MODES.find(v=>v[0]===form.mode)?.[1]} {MODES.find(v=>v[0]===form.mode)?.[2]} {newspaperMode?`・${form.edition==="live"?"直前版":"前日版"}`:""}</strong></div><button onClick={downloadPng}>PNG保存</button></div>
+        <div className={styles.svgPreview} dangerouslySetInnerHTML={{__html:svg}}/>
+        <p className={styles.previewNote}>元Streamlit版の主要6系統（一果・キイナ・初音・12R・SNS・速報ステッカー）を統合しています。画像差し替えは端末内で処理されます。</p>
+      </aside>
+    </div>
+  </div></main>;
 }
