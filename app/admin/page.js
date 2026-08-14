@@ -16,3 +16,4 @@ const items=[
  {href:"/bsc2/admin",icon:"🤖",title:"AI Pipeline",text:"AI処理とCSV登録"},
 ];
 export default function AdminHome(){return <main className={styles.page}><header><span>BOATSTRIKERS CMS</span><h1>管理画面一覧</h1><p>更新したい項目を選んでください。</p></header><div className={styles.grid}>{items.map(i=><Link href={i.href} key={i.href} className={styles.card}><b>{i.icon}</b><div><h2>{i.title}</h2><p>{i.text}</p></div><i>›</i></Link>)}</div><Link className={styles.back} href="/">トップページへ戻る</Link></main>}
+
