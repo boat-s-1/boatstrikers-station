@@ -1,19 +1,544 @@
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import styles from "./adminHome.module.css";
 
-const items=[
- {href:"/admin/realtime",icon:"⚡",title:"リアルタイム更新",text:"トップ・出走表・キャラページ・X投稿用を一括管理"},
- {href:"/admin/results",icon:"🏆",title:"予想実績管理",text:"予想・投資・払戻・的中画像を登録"},
- {href:"/admin/schedule",icon:"📅",title:"番組表管理",text:"週間番組表と今日の予定を更新"},
- {href:"/admin/radio-blog",icon:"🎙️",title:"ラジオブログ",text:"放送ブログの記事を管理"},
- {href:"/admin/magazine",icon:"📚",title:"Web雑誌管理",text:"入力だけで雑誌レイアウトを作成"},
- {href:"/admin/newspaper",icon:"📰",title:"新聞・画像作成",text:"一果・初音・キイナ・12R紙を管理画面で作成"},
- {href:"/library/stadium/kiryu?preview=premium",icon:"🚤",title:"桐生攻略プレビュー",text:"1場完成版の無料・有料レイアウトを確認"},
- {href:"/admin/stadium-ai",icon:"🧭",title:"Stadium AI集計",text:"桐生の直近1年・当日評価を再集計"},
- {href:"/admin/note",icon:"📝",title:"note特集管理",text:"トップ掲載するnoteを管理"},
- {href:"/admin/ai-bet-stats",icon:"📊",title:"AI買い目成績",text:"AI予想の集計を確認"},
- {href:"/admin/sync",icon:"🔄",title:"同期管理",text:"データ同期の状態を確認"},
- {href:"/bsc2/admin",icon:"🤖",title:"AI Pipeline",text:"AI処理とCSV登録"},
-];
-export default function AdminHome(){return <main className={styles.page}><header><span>BOATSTRIKERS CMS</span><h1>管理画面一覧</h1><p>更新したい項目を選んでください。</p></header><div className={styles.grid}>{items.map(i=><Link href={i.href} key={i.href} className={styles.card}><b>{i.icon}</b><div><h2>{i.title}</h2><p>{i.text}</p></div><i>›</i></Link>)}</div><Link className={styles.back} href="/">トップページへ戻る</Link></main>}
+export const dynamic = "force-dynamic";
 
+const GROUPS = [
+  {
+    key: "today",
+    icon: "☀️",
+    title: "今日の運営",
+    description: "毎日の更新・告知・配信まわり",
+    items: [
+      {
+        href: "/admin/realtime",
+        icon: "⚡",
+        title: "リアルタイム更新",
+        text: "トップ・出走表・キャラページの速報を一括更新",
+        badge: "よく使う",
+      },
+      {
+        href: "/admin/schedule",
+        icon: "📅",
+        title: "番組表・今日の予定",
+        text: "週間番組表と今日の予定を更新",
+        badge: "よく使う",
+      },
+      {
+        href: "/admin/ticker",
+        icon: "📢",
+        title: "速報テロップ",
+        text: "トップに流す最新情報を編集",
+      },
+      {
+        href: "/admin/radio-blog",
+        icon: "🎙️",
+        title: "ラジオブログ",
+        text: "放送ブログの記事作成・更新",
+      },
+      {
+        href: "/admin/note",
+        icon: "📝",
+        title: "note特集管理",
+        text: "トップに掲載するnote特集を管理",
+      },
+    ],
+  },
+  {
+    key: "prediction",
+    icon: "🎯",
+    title: "予想・成績",
+    description: "AI予想・実績・結果を確認",
+    items: [
+      {
+        href: "/admin/results",
+        icon: "🏆",
+        title: "予想実績管理",
+        text: "予想・投資・払戻・的中画像を登録",
+        badge: "よく使う",
+      },
+      {
+        href: "/admin/ai-bet-stats",
+        icon: "📊",
+        title: "AI買い目成績",
+        text: "AI予想の的中率・回収率・収支を確認",
+        badge: "よく使う",
+      },
+      {
+        href: "/ai-results",
+        icon: "👀",
+        title: "公開成績を見る",
+        text: "ユーザーに見えているAI成績ページを確認",
+      },
+      {
+        href: "/bsc2/admin",
+        icon: "🤖",
+        title: "AI Pipeline",
+        text: "AI処理・生成・CSV登録",
+      },
+      {
+        href: "/admin/engine-v3",
+        icon: "🧠",
+        title: "Engine v3",
+        text: "AIエンジンの管理・実行",
+      },
+    ],
+  },
+  {
+    key: "content",
+    icon: "📚",
+    title: "コンテンツ",
+    description: "記事・雑誌・24場攻略を管理",
+    items: [
+      {
+        href: "/admin/magazine",
+        icon: "📖",
+        title: "Web雑誌管理",
+        text: "入力だけで雑誌レイアウトを作成",
+      },
+      {
+        href: "/admin/newspaper",
+        icon: "📰",
+        title: "新聞・画像作成",
+        text: "一果・初音・キイナ・12R特別紙を作成",
+        badge: "NEW",
+      },
+      {
+        href: "/admin/stadium-ai",
+        icon: "🧭",
+        title: "Stadium AI集計",
+        text: "競艇場データの再集計・確認",
+      },
+      {
+        href: "/admin/stadium-ai-v2",
+        icon: "🗺️",
+        title: "Stadium AI v2",
+        text: "24場向けAI分析の管理",
+      },
+      {
+        href: "/library/stadium/kiryu?preview=premium",
+        icon: "🚤",
+        title: "24場攻略プレビュー",
+        text: "公開中の攻略ページを確認",
+      },
+    ],
+  },
+  {
+    key: "system",
+    icon: "⚙️",
+    title: "システム",
+    description: "同期・データ・稼働状態を確認",
+    items: [
+      {
+        href: "/admin/sync",
+        icon: "🔄",
+        title: "同期管理",
+        text: "AutoSync・結果・展示データの状態を確認",
+        badge: "重要",
+      },
+    ],
+  },
+];
+
+const FAVORITES = [
+  { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
+  { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
+  { href: "/admin/results", icon: "🏆", title: "予想実績" },
+  { href: "/admin/ai-bet-stats", icon: "📊", title: "AI成績" },
+  { href: "/admin/sync", icon: "🔄", title: "同期状態" },
+];
+
+function getClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) return null;
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
+function jstToday() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function formatJst(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+async function safeCount(client, table, date, extra = null) {
+  if (!client) return null;
+
+  try {
+    let query = client
+      .from(table)
+      .select("*", { count: "exact", head: true });
+
+    if (date) query = query.eq("race_date", date);
+    if (extra) query = extra(query);
+
+    const { count, error } = await query;
+    if (error) return null;
+    return Number(count || 0);
+  } catch {
+    return null;
+  }
+}
+
+async function safeRuntime(client) {
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from("bs_sync_runtime")
+      .select(
+        "state,last_success_at,heartbeat_at,last_status,last_error,current_mode,current_target_date"
+      )
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) return null;
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
+async function loadStatus() {
+  const client = getClient();
+  const today = jstToday();
+
+  if (!client) {
+    return {
+      today,
+      events: null,
+      predictions: null,
+      results: null,
+      hits: null,
+      runtime: null,
+    };
+  }
+
+  const [events, predictions, results, hits, runtime] =
+    await Promise.all([
+      safeCount(client, "bs_race_events", today),
+      safeCount(client, "bs_ai_predictions", today),
+      safeCount(client, "bs_race_results", today),
+      safeCount(
+        client,
+        "bs_ai_bet_results",
+        today,
+        (query) => query.eq("is_hit", true)
+      ),
+      safeRuntime(client),
+    ]);
+
+  return {
+    today,
+    events,
+    predictions,
+    results,
+    hits,
+    runtime,
+  };
+}
+
+function statusText(runtime) {
+  const state = String(runtime?.state || "").toLowerCase();
+
+  if (state === "running") return "実行中";
+  if (state === "error" || runtime?.last_error) return "要確認";
+  if (state === "idle") return "正常";
+  return runtime ? "待機中" : "未取得";
+}
+
+function statusTone(runtime) {
+  const state = String(runtime?.state || "").toLowerCase();
+  if (state === "error" || runtime?.last_error) return "danger";
+  if (state === "running") return "running";
+  if (state === "idle") return "good";
+  return "neutral";
+}
+
+function buildAlerts(status) {
+  const alerts = [];
+
+  if (status.runtime?.last_error) {
+    alerts.push({
+      tone: "danger",
+      icon: "⚠️",
+      title: "AutoSyncでエラーを検出",
+      text: String(status.runtime.last_error).slice(0, 100),
+      href: "/admin/sync",
+    });
+  }
+
+  if (
+    Number.isFinite(status.events) &&
+    status.events > 0 &&
+    Number.isFinite(status.predictions) &&
+    status.predictions === 0
+  ) {
+    alerts.push({
+      tone: "warning",
+      icon: "⚠️",
+      title: "本日のAI予想がまだありません",
+      text: `${status.events}Rの開催データに対してAI予想0件です。`,
+      href: "/admin/sync",
+    });
+  }
+
+  if (
+    Number.isFinite(status.events) &&
+    Number.isFinite(status.results) &&
+    status.events > 0 &&
+    status.results > status.events
+  ) {
+    alerts.push({
+      tone: "warning",
+      icon: "⚠️",
+      title: "結果件数を確認してください",
+      text: `開催${status.events}Rに対して結果${status.results}Rです。`,
+      href: "/admin/sync",
+    });
+  }
+
+  if (alerts.length === 0) {
+    alerts.push({
+      tone: "good",
+      icon: "✅",
+      title: "大きな要対応はありません",
+      text: "管理画面から必要な更新作業を選んでください。",
+      href: null,
+    });
+  }
+
+  return alerts;
+}
+
+export default async function AdminHome() {
+  const status = await loadStatus();
+  const alerts = buildAlerts(status);
+  const tone = statusTone(status.runtime);
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.shell}>
+        <header className={styles.hero}>
+          <div>
+            <span className={styles.eyebrow}>BOATSTRIKERS CMS</span>
+            <h1>運営ダッシュボード</h1>
+            <p>
+              今日の状態を確認して、必要な管理機能へすぐ移動できます。
+            </p>
+          </div>
+
+          <div className={styles.heroActions}>
+            <Link href="/" className={styles.secondaryButton}>
+              サイトを見る
+            </Link>
+            <Link href="/ai-results" className={styles.primaryButton}>
+              公開成績を見る
+            </Link>
+          </div>
+        </header>
+
+        <section className={styles.todayPanel}>
+          <div className={styles.panelHeading}>
+            <div>
+              <span>TODAY STATUS</span>
+              <h2>本日の運営状況</h2>
+            </div>
+            <div className={`${styles.syncPill} ${styles[tone]}`}>
+              <span className={styles.statusDot} />
+              AutoSync {statusText(status.runtime)}
+            </div>
+          </div>
+
+          <div className={styles.statusGrid}>
+            <article className={styles.statusCard}>
+              <span>🚤 開催</span>
+              <strong>
+                {status.events === null ? "—" : `${status.events}R`}
+              </strong>
+              <small>{status.today}</small>
+            </article>
+
+            <article className={styles.statusCard}>
+              <span>🤖 AI予想</span>
+              <strong>
+                {status.predictions === null
+                  ? "—"
+                  : `${status.predictions}件`}
+              </strong>
+              <small>保存済み予想</small>
+            </article>
+
+            <article className={styles.statusCard}>
+              <span>🏁 結果同期</span>
+              <strong>
+                {status.results === null ? "—" : `${status.results}R`}
+              </strong>
+              <small>
+                {status.events
+                  ? `${status.results || 0} / ${status.events}R`
+                  : "本日分"}
+              </small>
+            </article>
+
+            <article className={styles.statusCard}>
+              <span>🎯 的中速報</span>
+              <strong>
+                {status.hits === null ? "—" : `${status.hits}件`}
+              </strong>
+              <small>AI的中データ</small>
+            </article>
+          </div>
+
+          <div className={styles.syncMeta}>
+            <span>
+              最終成功：
+              <strong>{formatJst(status.runtime?.last_success_at)}</strong>
+            </span>
+            <span>
+              Heartbeat：
+              <strong>{formatJst(status.runtime?.heartbeat_at)}</strong>
+            </span>
+            {status.runtime?.current_mode && (
+              <span>
+                実行中：
+                <strong>{status.runtime.current_mode}</strong>
+              </span>
+            )}
+          </div>
+        </section>
+
+        <section className={styles.alertSection}>
+          <div className={styles.panelHeading}>
+            <div>
+              <span>NEEDS ATTENTION</span>
+              <h2>要対応</h2>
+            </div>
+          </div>
+
+          <div className={styles.alertList}>
+            {alerts.map((alert, index) => {
+              const content = (
+                <>
+                  <b>{alert.icon}</b>
+                  <div>
+                    <strong>{alert.title}</strong>
+                    <span>{alert.text}</span>
+                  </div>
+                  {alert.href && <i>›</i>}
+                </>
+              );
+
+              return alert.href ? (
+                <Link
+                  href={alert.href}
+                  key={`${alert.title}-${index}`}
+                  className={`${styles.alertItem} ${styles[alert.tone]}`}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div
+                  key={`${alert.title}-${index}`}
+                  className={`${styles.alertItem} ${styles[alert.tone]}`}
+                >
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className={styles.favoriteSection}>
+          <div className={styles.panelHeading}>
+            <div>
+              <span>QUICK ACCESS</span>
+              <h2>よく使う</h2>
+            </div>
+          </div>
+
+          <div className={styles.favoriteGrid}>
+            {FAVORITES.map((item) => (
+              <Link
+                href={item.href}
+                className={styles.favoriteCard}
+                key={item.href}
+              >
+                <b>{item.icon}</b>
+                <span>{item.title}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <div className={styles.groups}>
+          {GROUPS.map((group) => (
+            <section className={styles.group} key={group.key}>
+              <div className={styles.groupTitle}>
+                <b>{group.icon}</b>
+                <div>
+                  <h2>{group.title}</h2>
+                  <p>{group.description}</p>
+                </div>
+              </div>
+
+              <div className={styles.menuGrid}>
+                {group.items.map((item) => (
+                  <Link
+                    href={item.href}
+                    key={item.href}
+                    className={styles.menuCard}
+                  >
+                    <b className={styles.menuIcon}>{item.icon}</b>
+
+                    <div className={styles.menuText}>
+                      <div className={styles.menuName}>
+                        <h3>{item.title}</h3>
+                        {item.badge && <span>{item.badge}</span>}
+                      </div>
+                      <p>{item.text}</p>
+                    </div>
+
+                    <i>›</i>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <footer className={styles.footer}>
+          <Link href="/">← BoatStrikersトップへ</Link>
+          <span>BOATSTRIKERS CMS</span>
+        </footer>
+      </div>
+    </main>
+  );
+}
