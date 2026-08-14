@@ -1,0 +1,617 @@
+.page {
+  min-height: 100vh;
+  padding: 18px 16px 110px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 150, 255, .11), transparent 28%),
+    #f5f9ff;
+  color: #14243b;
+}
+
+.hero,
+.filterPanel,
+.summarySection,
+.section,
+.errorCard {
+  width: min(100%, 980px);
+  margin: 0 auto 18px;
+}
+
+.hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #dbe9f7;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #ffffff 0%, #eef7ff 100%);
+  box-shadow: 0 12px 34px rgba(20, 70, 120, .08);
+}
+
+.heroCopy {
+  min-width: 0;
+}
+
+.eyebrow,
+.sectionHeading p {
+  margin: 0 0 6px;
+  color: #1976d2;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 6vw, 48px);
+  line-height: 1.05;
+  letter-spacing: -.03em;
+}
+
+.heroCopy > p:last-child {
+  max-width: 600px;
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.heroBadge {
+  flex: 0 0 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 18px;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(145deg, #087bd3, #13a2d7);
+  box-shadow: 0 10px 24px rgba(20, 133, 210, .22);
+}
+
+.heroBadge span,
+.heroBadge small {
+  opacity: .85;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.heroBadge strong {
+  font-size: 20px;
+}
+
+.periodTabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: min(100%, 980px);
+  margin: 0 auto 14px;
+  padding: 5px;
+  border: 1px solid #dce8f5;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .95);
+  box-shadow: 0 8px 22px rgba(30, 70, 110, .08);
+  backdrop-filter: blur(12px);
+}
+
+.periodTabs a {
+  padding: 11px 4px;
+  border-radius: 14px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: center;
+  text-decoration: none;
+}
+
+.periodTabs .activeTab {
+  color: #fff;
+  background: #1689de;
+  box-shadow: 0 6px 14px rgba(22, 137, 222, .22);
+}
+
+.filterPanel,
+.summarySection,
+.section {
+  padding: 20px;
+  border: 1px solid #dce8f5;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(20, 70, 110, .055);
+}
+
+.filterBlock + .filterBlock {
+  margin-top: 18px;
+}
+
+.filterBlock > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.chipScroller,
+.modeChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.chipScroller::-webkit-scrollbar,
+.modeChips::-webkit-scrollbar {
+  display: none;
+}
+
+.chipScroller a,
+.modeChips a {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  border: 1px solid #dce8f5;
+  border-radius: 999px;
+  color: #38506d;
+  background: #f8fbff;
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.chipScroller .activeChip,
+.modeChips .activeChip {
+  color: #fff;
+  border-color: #1689de;
+  background: #1689de;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  font-size: 23px;
+  letter-spacing: -.02em;
+}
+
+.sectionHeading > span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #3571b5;
+  background: #edf6ff;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.primaryMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricHero {
+  padding: 18px;
+  border-radius: 20px;
+  background: #f4f9ff;
+}
+
+.metricHero span,
+.moneyGrid span,
+.modeMetrics span,
+.dailyCard span,
+.courseCard > div > span,
+.hitPayout span {
+  display: block;
+  color: #71839a;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.metricHero strong {
+  display: block;
+  margin-top: 5px;
+  font-size: clamp(30px, 8vw, 44px);
+  line-height: 1;
+}
+
+.metricHero small {
+  display: block;
+  margin-top: 8px;
+  color: #7c8ca0;
+  font-size: 11px;
+}
+
+.goodValue {
+  color: #079455;
+}
+
+.normalValue {
+  color: #14243b;
+}
+
+.moneyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.moneyGrid article {
+  padding: 15px;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.moneyGrid strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 19px;
+}
+
+.profitCard {
+  background: #edfdf4 !important;
+}
+
+.profitCard strong {
+  color: #079455;
+}
+
+.lossCard {
+  background: #fff4f3 !important;
+}
+
+.lossCard strong {
+  color: #d92d20;
+}
+
+.modeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modeCard {
+  overflow: hidden;
+  border: 1px solid #e0e9f4;
+  border-radius: 20px;
+  color: inherit;
+  background: #fff;
+  text-decoration: none;
+}
+
+.modeTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: #f7fbff;
+}
+
+.modeTop h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.modeTop span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #3175bd;
+  background: #eaf5ff;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.modeMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.modeMetrics > div {
+  padding: 15px;
+}
+
+.modeMetrics > div + div {
+  border-left: 1px solid #edf1f5;
+}
+
+.modeMetrics strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 23px;
+}
+
+.modeProfitPlus,
+.modeProfitMinus {
+  padding: 12px 15px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.modeProfitPlus {
+  color: #087a47;
+  background: #eefbf4;
+}
+
+.modeProfitMinus {
+  color: #b42318;
+  background: #fff1f0;
+}
+
+.hitList,
+.dailyList,
+.courseList {
+  display: grid;
+  gap: 10px;
+}
+
+.hitCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #f2dec0;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #fffaf1, #fff);
+}
+
+.hitMark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, #ff8c32, #ef4d52);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.hitMain {
+  min-width: 0;
+}
+
+.hitMain span,
+.hitMain small {
+  display: block;
+  color: #7b8796;
+  font-size: 11px;
+}
+
+.hitMain strong {
+  display: block;
+  margin: 3px 0;
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hitPayout {
+  text-align: right;
+}
+
+.hitPayout strong {
+  display: block;
+  margin-top: 3px;
+  color: #d94c2f;
+  font-size: 18px;
+}
+
+.dailyCard {
+  display: grid;
+  grid-template-columns: 90px repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #e4ecf5;
+  border-radius: 18px;
+  background: #fbfdff;
+}
+
+.dailyDate strong {
+  display: block;
+  font-size: 20px;
+}
+
+.dailyDate span {
+  margin-top: 2px;
+}
+
+.dailyCard > div > strong,
+.courseCard > div > strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 16px;
+}
+
+.courseCard {
+  display: grid;
+  grid-template-columns: 42px minmax(100px, 1.3fr) repeat(3, minmax(74px, 1fr));
+  align-items: center;
+  gap: 8px;
+  padding: 13px;
+  border: 1px solid #e3ecf5;
+  border-radius: 18px;
+  color: inherit;
+  background: #fff;
+  text-decoration: none;
+}
+
+.rank {
+  color: #2a73bd;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.courseName strong {
+  font-size: 16px !important;
+}
+
+.courseName small {
+  display: block;
+  margin-top: 2px;
+  color: #8492a5;
+  font-size: 11px;
+}
+
+.textProfit strong {
+  color: #079455;
+}
+
+.textLoss strong {
+  color: #d92d20;
+}
+
+.emptyCard {
+  padding: 34px 16px;
+  border: 1px dashed #cbdbea;
+  border-radius: 20px;
+  text-align: center;
+  background: #f9fcff;
+}
+
+.emptyCard > span {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 30px;
+}
+
+.emptyCard strong {
+  display: block;
+  font-size: 17px;
+}
+
+.emptyCard p {
+  margin: 6px 0 0;
+  color: #7d8da2;
+  font-size: 12px;
+}
+
+.errorCard {
+  display: grid;
+  gap: 6px;
+  padding: 22px;
+  border: 1px solid #fecaca;
+  border-radius: 20px;
+  color: #991b1b;
+  background: #fff7f7;
+}
+
+.disclaimer {
+  width: min(100%, 940px);
+  margin: 24px auto 0;
+  color: #8190a3;
+  font-size: 11px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .page {
+    padding: 12px 10px 110px;
+  }
+
+  .hero,
+  .filterPanel,
+  .summarySection,
+  .section {
+    border-radius: 20px;
+  }
+
+  .hero {
+    padding: 18px;
+  }
+
+  .heroBadge {
+    flex-basis: 110px;
+    padding: 14px;
+  }
+
+  .heroBadge strong {
+    font-size: 16px;
+  }
+
+  .periodTabs a {
+    font-size: 11px;
+  }
+
+  .filterPanel,
+  .summarySection,
+  .section {
+    padding: 15px;
+  }
+
+  .modeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dailyCard {
+    grid-template-columns: 72px repeat(3, minmax(0, 1fr));
+    padding: 12px 9px;
+  }
+
+  .dailyDate strong {
+    font-size: 17px;
+  }
+
+  .dailyCard > div > strong {
+    font-size: 13px;
+  }
+
+  .dailyCard span {
+    font-size: 10px;
+  }
+
+  .courseList {
+    overflow-x: auto;
+  }
+
+  .courseCard {
+    min-width: 650px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    display: block;
+  }
+
+  .heroBadge {
+    margin-top: 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .heroBadge small {
+    margin-left: auto;
+  }
+
+  .moneyGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .moneyGrid article:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .hitCard {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .hitPayout {
+    grid-column: 2;
+    text-align: left;
+  }
+}
