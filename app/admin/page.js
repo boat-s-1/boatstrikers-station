@@ -200,6 +200,25 @@ async function safeCount(client, table, date, extra = null) {
   }
 }
 
+async function safeRuntime(client) {
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from("bs_sync_runtime")
+      .select(
+        "state,last_success_at,heartbeat_at,last_status,last_error,current_mode,current_target_date"
+      )
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) return null;
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
 async function loadStatus() {
   const client = getClient();
   const today = jstToday();
@@ -215,7 +234,7 @@ async function loadStatus() {
     };
   }
 
-  const [events, predictions, results, hits, runtimeResult] =
+  const [events, predictions, results, hits, runtime] =
     await Promise.all([
       safeCount(client, "bs_race_events", today),
       safeCount(client, "bs_ai_predictions", today),
@@ -226,14 +245,7 @@ async function loadStatus() {
         today,
         (query) => query.eq("is_hit", true)
       ),
-      client
-        .from("bs_sync_runtime")
-        .select(
-          "state,last_success_at,heartbeat_at,last_status,last_error,current_mode,current_target_date"
-        )
-        .eq("id", 1)
-        .maybeSingle()
-        .catch(() => ({ data: null })),
+      safeRuntime(client),
     ]);
 
   return {
@@ -242,7 +254,7 @@ async function loadStatus() {
     predictions,
     results,
     hits,
-    runtime: runtimeResult?.data || null,
+    runtime,
   };
 }
 
