@@ -1048,6 +1048,62 @@ function formatActualTrifecta(actualTrifecta) {
     : null;
 }
 
+function normalizeTicketParts(ticket) {
+  const parts = String(ticket ?? "")
+    .trim()
+    .replace(/[－ー–—]/g, "-")
+    .split("-")
+    .map((part) => part.trim());
+
+  return parts.length === 3 ? parts : null;
+}
+
+function isAllTicketPart(part) {
+  const value = String(part ?? "").trim().toLowerCase();
+  return value === "全" || value === "all" || value === "*";
+}
+
+function expandTicketCombinations(ticket) {
+  const parts = normalizeTicketParts(ticket);
+  if (!parts) return [];
+
+  const combinations = [];
+
+  for (let first = 1; first <= 6; first += 1) {
+    for (let second = 1; second <= 6; second += 1) {
+      if (second === first) continue;
+
+      for (let third = 1; third <= 6; third += 1) {
+        if (third === first || third === second) continue;
+
+        const values = [first, second, third];
+        const matches = parts.every((part, index) => {
+          if (isAllTicketPart(part)) return true;
+          return Number(part) === values[index];
+        });
+
+        if (matches) {
+          combinations.push(values.join("-"));
+        }
+      }
+    }
+  }
+
+  return combinations;
+}
+
+function expandModeTickets(tickets) {
+  const expanded = new Set();
+
+  for (const ticket of Array.isArray(tickets) ? tickets : []) {
+    for (const combination of expandTicketCombinations(ticket)) {
+      expanded.add(combination);
+    }
+  }
+
+  return [...expanded];
+}
+
 
 function getTrifectaPayout(result, event = null) {
   const value =
@@ -1073,24 +1129,29 @@ function calculateModeSettlement(
   trifectaPayout,
   unitStake = 100
 ) {
-  const ticketCount = Array.isArray(mode?.tickets)
-    ? mode.tickets.length
-    : 0;
-
-  const investment = ticketCount * unitStake;
-  const hitCount = Array.isArray(actualTrifecta)
-    ? mode.tickets.filter((ticket) =>
-        ticketMatchesResult(ticket, actualTrifecta)
-      ).length
-    : 0;
-
   /*
-   * BOAT RACEの払戻は100円あたりの金額として扱います。
-   * 同じ的中組み合わせがモード内に重複しない前提です。
+   * 「1-5-全」のような流し表記は、表示上1行でも実際には複数点です。
+   * 6艇3連単の有効な組み合わせ（同一艇の重複なし）へ展開して、
+   * 投資額・点数・回収率を実際の購入点数で計算します。
+   *
+   * 例:
+   * 1-5-全 = 1-5-2 / 1-5-3 / 1-5-4 / 1-5-6 の4点
+   * 1-2-全 = 4点
+   * 合計 = 8点
    */
+  const expandedTickets = expandModeTickets(mode?.tickets);
+  const ticketCount = expandedTickets.length;
+  const investment = ticketCount * unitStake;
+
+  const actualCombination = formatActualTrifecta(actualTrifecta);
+  const hitCount =
+    actualCombination && expandedTickets.includes(actualCombination)
+      ? 1
+      : 0;
+
   const payout =
     hitCount > 0 && Number.isFinite(trifectaPayout)
-      ? trifectaPayout * (unitStake / 100) * hitCount
+      ? trifectaPayout * (unitStake / 100)
       : 0;
 
   const profit = payout - investment;
@@ -1218,7 +1279,7 @@ function BetModeCard({ mode, recommended, actualTrifecta, trifectaPayout, unitSt
               fontSize: "13px",
             }}
           >
-            {mode.tickets.length}パターン
+            {settlement.ticketCount}パターン
           </strong>
 
           {resultSynced && (
