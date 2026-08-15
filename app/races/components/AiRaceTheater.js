@@ -183,7 +183,7 @@ function getPhase(progress) {
   return {
     label: "旋回後",
     eyebrow: "TURN EXIT",
-    caption: "バックストレッチへ",
+    caption: "バックストレッチを直進",
   };
 }
 
@@ -353,46 +353,33 @@ function getBoatPosition(model, boat, rawProgress) {
   }
 
   /*
-   * 0.82〜1.00 : 旋回後
+   * 0.82〜1.00 : バックストレッチ
    *
-   * 円弧終点の左向き接線から、そのまま左へ抜ける。
-   * すぐに予想着順へ吸い寄せず、
-   * まず各艇の旋回半径差を残したまま隊形を広げる。
+   * 旋回を抜けたら、艇首を左向きに揃えて
+   * それぞれのレーンを「まっすぐ」走らせる。
+   *
+   * ここではBezierで着順位置へ吸い寄せず、
+   * 旋回出口のY座標を基本的に維持することで
+   * ボートレースらしい直線のバックストレッチにする。
    */
-  const t = easeInOutSine(
+  const t = easeOutCubic(
     (progress - 0.82) / 0.18
   );
 
-  const targetY = 58 + finishIndex * 45;
+  /*
+   * 旋回後の隊形差はX方向（前後差）だけで表現。
+   * Y方向はturnExit.yを維持して直進させる。
+   */
+  const rankAdvance =
+    Math.max(0, 5 - finishIndex) * 10;
+
   const targetX =
-    300 - Math.max(0, 5 - finishIndex) * 7;
-
-  const p0 = turnExit;
-  const p1 = {
-    x: turnExit.x - 110,
-    y: turnExit.y,
-  };
-  const p2 = {
-    x: targetX + 100,
-    y: targetY,
-  };
-  const p3 = {
-    x: targetX,
-    y: targetY,
-  };
-
-  const point = cubicBezierPoint(p0, p1, p2, p3, t);
-  const tangent = cubicBezierDerivative(
-    p0,
-    p1,
-    p2,
-    p3,
-    t
-  );
+    270 - rankAdvance;
 
   return {
-    ...point,
-    angle: angleOf(tangent, 180),
+    x: lerp(turnExit.x, targetX, t),
+    y: turnExit.y,
+    angle: 180,
   };
 }
 
