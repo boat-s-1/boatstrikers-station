@@ -22,9 +22,8 @@ import styles from "./AiRaceTheater.module.css";
  */
 
 const DURATION_MS = 6200;
-const TURN_MARK = Object.freeze({ x: 548, y: 146 });
+const TURN_MARK = Object.freeze({ x: 548, y: 116 });
 
-/* FIT-6-BOATS: 6艇がホーム/バック両方で見切れない表示調整 */
 const COURSE_RADIUS = Object.freeze({
   1: 54,
   2: 80,
@@ -246,7 +245,7 @@ function getBoatPosition(model, boat, rawProgress) {
    * スリット側。
    * 6艇の縦間隔を十分に取る。
    */
-  const startY = 176 + courseIndex * 24;
+  const startY = 168 + courseIndex * 28;
   const startBoost = clamp(
     Number(boat.startPower || 0) * 0.12,
     -5,
@@ -726,7 +725,7 @@ export default function AiRaceTheater({
 
           <div className={styles.svgWrap}>
             <svg
-              viewBox="0 0 700 460"
+              viewBox="0 0 700 380"
               role="img"
               aria-label="1マークAIシミュレーション"
             >
@@ -780,19 +779,19 @@ export default function AiRaceTheater({
 
               <rect
                 width="700"
-                height="460"
+                height="380"
                 rx="22"
                 fill="url(#waterGradientDropin)"
               />
               <rect
                 width="700"
-                height="460"
+                height="380"
                 rx="22"
                 fill="url(#waterPatternDropin)"
               />
 
               <path
-                d="M 45 88 L 45 390"
+                d="M 45 88 L 45 330"
                 stroke="#ff6b72"
                 strokeWidth="3"
                 strokeDasharray="10 9"
