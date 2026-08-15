@@ -14,7 +14,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 
-
 /* =========================
    日本時間基準の今月範囲
 ========================= */
