@@ -8,19 +8,10 @@ import {
 import styles from "./AiRaceTheater.module.css";
 
 const DURATION_MS = 6800;
-const TURN_MARK = Object.freeze({ x: 570, y: 165 });
+const HISTORY_POINTS = 26;
 
 function clamp01(value) {
   return Math.max(0, Math.min(1, Number(value) || 0));
-}
-
-function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
-
-function easeInOutSine(value) {
-  const t = clamp01(value);
-  return -(Math.cos(Math.PI * t) - 1) / 2;
 }
 
 function cubicBezierPoint(p0, p1, p2, p3, t) {
@@ -67,12 +58,9 @@ function vectorAngle(vector, fallback = 0) {
   return (Math.atan2(y, x) * 180) / Math.PI;
 }
 
-function getCourseIndex(model, boatNo) {
-  const index = Array.isArray(model?.entryOrder)
-    ? model.entryOrder.indexOf(boatNo)
-    : -1;
-
-  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
+function easeInOutSine(value) {
+  const t = clamp01(value);
+  return -(Math.cos(Math.PI * t) - 1) / 2;
 }
 
 function normalizeScenario(model) {
@@ -82,61 +70,280 @@ function normalizeScenario(model) {
     .replace(/[\s-]+/g, "_");
 }
 
-function getTurnRadius(model, boatNo) {
-  const courseIndex = getCourseIndex(model, boatNo);
-  const scenario = normalizeScenario(model);
-  const isAttack = Number(boatNo) === Number(model?.attackBoatNo);
-
-  let radius = 62 + courseIndex * 13.5;
-
-  if (scenario !== "escape" && Number(boatNo) === 1) {
-    radius += 6;
-  }
-
-  if (isAttack) {
-    if (
-      scenario === "sashi" ||
-      scenario === "差し" ||
-      (scenario.includes("sashi") && !scenario.includes("makuri"))
-    ) {
-      radius -= 8;
-    } else if (
-      scenario.includes("makuri_sashi") ||
-      scenario.includes("makurisashi") ||
-      scenario.includes("まくり差")
-    ) {
-      radius -= 4;
-    } else if (
-      scenario.includes("makuri") ||
-      scenario.includes("まくり")
-    ) {
-      radius += 5;
-    }
-  }
-
-  return Math.max(52, Math.min(136, radius));
-}
-
 function getLeaderBoat(model) {
   return normalizeScenario(model) === "escape"
     ? 1
     : Number(model?.attackBoatNo || 1);
 }
 
-function getTurnProgress(model, boatNo, progress) {
-  const t = clamp01(progress);
+function getCourseIndex(model, boatNo) {
+  const index = Array.isArray(model?.entryOrder)
+    ? model.entryOrder.indexOf(Number(boatNo))
+    : -1;
+
+  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
+}
+
+function getFinishIndex(model, boatNo) {
+  const index = Array.isArray(model?.finishOrder)
+    ? model.finishOrder.indexOf(Number(boatNo))
+    : -1;
+
+  return index >= 0 ? index : getCourseIndex(model, boatNo);
+}
+
+function getTrajectoryType(model, boatNo) {
+  const scenario = normalizeScenario(model);
   const leader = getLeaderBoat(model);
-  const finishSecond = Number(model?.finishOrder?.[1]);
+  const attack = Number(model?.attackBoatNo || 1);
+  const course = getCourseIndex(model, boatNo);
 
-  let bonus = 0;
-
-  if (Number(boatNo) === leader) {
-    bonus = 0.055;
-  } else if (Number(boatNo) === finishSecond) {
-    bonus = 0.018;
+  if (scenario === "escape") {
+    if (Number(boatNo) === 1) return "innerLead";
+    if (course === 1) return "insideChase";
+    if (course === 2) return "outsideHold";
+    return "outerFollow";
   }
 
-  return clamp01(t + bonus * Math.sin(Math.PI * t));
+  if (
+    scenario === "sashi" ||
+    scenario === "差し" ||
+    (scenario.includes("sashi") && !scenario.includes("makuri"))
+  ) {
+    if (Number(boatNo) === attack) return "sharpSashi";
+    if (Number(boatNo) === 1) return "innerResist";
+    return course <= 2 ? "outsideHold" : "outerFollow";
+  }
+
+  if (
+    scenario.includes("makuri_sashi") ||
+    scenario.includes("makurisashi") ||
+    scenario.includes("まくり差")
+  ) {
+    if (Number(boatNo) === attack) return "makuriSashi";
+    if (Number(boatNo) === 1) return "innerResist";
+    return course <= 2 ? "outsideHold" : "outerFollow";
+  }
+
+  if (
+    scenario.includes("makuri") ||
+    scenario.includes("まくり")
+  ) {
+    if (Number(boatNo) === attack) return "outerAttack";
+    if (Number(boatNo) === 1) return "innerResist";
+    return course <= 2 ? "outsideHold" : "outerFollow";
+  }
+
+  if (Number(boatNo) === leader) return "innerLead";
+  return course <= 2 ? "outsideHold" : "outerFollow";
+}
+
+function buildLanePath(model, boat) {
+  const boatNo = Number(boat.boatNo);
+  const courseIndex = getCourseIndex(model, boatNo);
+  const finishIndex = getFinishIndex(model, boatNo);
+  const laneType = getTrajectoryType(model, boatNo);
+
+  const slitY = 194 + courseIndex * 17;
+  const finishY = 76 + finishIndex * 41;
+
+  const startPower = Math.max(
+    -8,
+    Math.min(16, Number(boat.startPower || 0) * 0.14)
+  );
+
+  const start = { x: 76, y: slitY };
+  const slitEnd = { x: 205 + startPower, y: slitY };
+
+  const presets = {
+    innerLead: [
+      start,
+      slitEnd,
+      { x: 330, y: slitY - 1 },
+      { x: 470, y: 252 },
+      { x: 542, y: 224 },
+      { x: 590, y: 162 },
+      { x: 524, y: 106 },
+      { x: 405, y: finishY + 14 },
+      { x: 288, y: finishY },
+    ],
+    innerResist: [
+      start,
+      slitEnd,
+      { x: 330, y: slitY + 3 },
+      { x: 468, y: 262 },
+      { x: 550, y: 232 },
+      { x: 596, y: 166 },
+      { x: 536, y: 110 },
+      { x: 420, y: finishY + 18 },
+      { x: 302, y: finishY },
+    ],
+    insideChase: [
+      start,
+      slitEnd,
+      { x: 332, y: slitY + 3 },
+      { x: 470, y: 272 },
+      { x: 558, y: 243 },
+      { x: 610, y: 178 },
+      { x: 548, y: 114 },
+      { x: 430, y: finishY + 21 },
+      { x: 306, y: finishY },
+    ],
+    sharpSashi: [
+      start,
+      slitEnd,
+      { x: 334, y: slitY + 1 },
+      { x: 458, y: 283 },
+      { x: 530, y: 255 },
+      { x: 566, y: 198 },
+      { x: 514, y: 128 },
+      { x: 390, y: finishY + 8 },
+      { x: 270, y: finishY },
+    ],
+    outerAttack: [
+      start,
+      slitEnd,
+      { x: 344, y: slitY - 4 },
+      { x: 500, y: 286 },
+      { x: 598, y: 250 },
+      { x: 652, y: 176 },
+      { x: 585, y: 95 },
+      { x: 455, y: finishY + 22 },
+      { x: 320, y: finishY },
+    ],
+    makuriSashi: [
+      start,
+      slitEnd,
+      { x: 342, y: slitY - 2 },
+      { x: 492, y: 286 },
+      { x: 579, y: 252 },
+      { x: 615, y: 192 },
+      { x: 548, y: 116 },
+      { x: 415, y: finishY + 10 },
+      { x: 282, y: finishY },
+    ],
+    outsideHold: [
+      start,
+      slitEnd,
+      { x: 342, y: slitY },
+      { x: 492, y: 289 },
+      { x: 596, y: 265 },
+      { x: 654, y: 198 },
+      { x: 604, y: 112 },
+      { x: 470, y: finishY + 29 },
+      { x: 336, y: finishY },
+    ],
+    outerFollow: [
+      start,
+      slitEnd,
+      { x: 350, y: slitY + 1 },
+      { x: 510, y: 300 },
+      { x: 620, y: 282 },
+      { x: 676, y: 212 },
+      { x: 625, y: 120 },
+      { x: 490, y: finishY + 34 },
+      { x: 350, y: finishY },
+    ],
+  };
+
+  const points = presets[laneType] || presets.outerFollow;
+
+  return {
+    laneType,
+    points,
+  };
+}
+
+function samplePath(path, progress) {
+  const t = clamp01(progress);
+
+  /*
+   * 区間1: スリット〜1M進入
+   * 区間2: 1M攻防
+   * 区間3: 旋回後〜立ち上がり
+   */
+  if (t <= 0.34) {
+    const local = easeInOutSine(t / 0.34);
+
+    const p0 = path[0];
+    const p1 = path[2];
+    const p2 = path[3];
+    const p3 = path[4];
+
+    return {
+      point: cubicBezierPoint(p0, p1, p2, p3, local),
+      derivative: cubicBezierDerivative(
+        p0,
+        p1,
+        p2,
+        p3,
+        local
+      ),
+    };
+  }
+
+  if (t <= 0.72) {
+    const local = easeInOutSine((t - 0.34) / 0.38);
+
+    const p0 = path[4];
+    const p1 = path[5];
+    const p2 = path[5];
+    const p3 = path[6];
+
+    return {
+      point: cubicBezierPoint(p0, p1, p2, p3, local),
+      derivative: cubicBezierDerivative(
+        p0,
+        p1,
+        p2,
+        p3,
+        local
+      ),
+    };
+  }
+
+  const local = easeInOutSine((t - 0.72) / 0.28);
+
+  const p0 = path[6];
+  const p1 = path[7];
+  const p2 = path[7];
+  const p3 = path[8];
+
+  return {
+    point: cubicBezierPoint(p0, p1, p2, p3, local),
+    derivative: cubicBezierDerivative(
+      p0,
+      p1,
+      p2,
+      p3,
+      local
+    ),
+  };
+}
+
+function getBoatState(model, boat, progress) {
+  const { laneType, points } = buildLanePath(model, boat);
+  const { point, derivative } = samplePath(points, progress);
+
+  return {
+    ...point,
+    angle: vectorAngle(derivative, 0),
+    laneType,
+  };
+}
+
+function getTrailPoints(model, boat, progress) {
+  const current = clamp01(progress);
+  const start = Math.max(0, current - 0.12);
+  const points = [];
+
+  for (let i = 0; i < HISTORY_POINTS; i += 1) {
+    const ratio = i / Math.max(1, HISTORY_POINTS - 1);
+    const p = start + (current - start) * ratio;
+    points.push(getBoatState(model, boat, p));
+  }
+
+  return points;
 }
 
 function getPhase(progress) {
@@ -144,181 +351,32 @@ function getPhase(progress) {
 
   if (p < 0.18) {
     return {
-      key: "slit",
       label: "スリット通過",
       caption: "スタート隊形",
     };
   }
 
-  if (p < 0.52) {
+  if (p < 0.5) {
     return {
-      key: "approach",
       label: "1マーク進入",
-      caption: "1マークへ加速",
+      caption: "攻め艇が仕掛ける",
     };
   }
 
-  if (p < 0.86) {
+  if (p < 0.8) {
     return {
-      key: "turn",
       label: "1マーク旋回",
-      caption: "AI本命展開",
+      caption: "1マークの攻防",
     };
   }
 
   return {
-    key: "exit",
     label: "旋回後",
-    caption: "バックストレッチへ",
+    caption: "隊形が決まる",
   };
 }
 
-function getContinuousPosition(model, boat, progress) {
-  const p = clamp01(progress);
-  const boatNo = Number(boat.boatNo);
-  const courseIndex = getCourseIndex(model, boatNo);
-  const radius = getTurnRadius(model, boatNo);
-
-  /*
-   * スリット位置。
-   * 1〜6号艇を詰めすぎず、旋回進入位置へ自然につながる高さに配置。
-   */
-  const slitY = 205 + courseIndex * 16;
-  const slitStart = { x: 72, y: slitY };
-  const slitEnd = {
-    x: 192 + Math.max(-5, Math.min(14, Number(boat.startPower || 0) * 0.12)),
-    y: slitY,
-  };
-
-  const turnEntry = {
-    x: TURN_MARK.x,
-    y: TURN_MARK.y + radius,
-  };
-
-  const turnExit = {
-    x: TURN_MARK.x,
-    y: TURN_MARK.y - radius,
-  };
-
-  /*
-   * 0.00〜0.18 : スリット通過
-   */
-  if (p <= 0.18) {
-    const t = easeInOutSine(p / 0.18);
-
-    return {
-      x: lerp(slitStart.x, slitEnd.x, t),
-      y: slitY,
-      angle: 0,
-    };
-  }
-
-  /*
-   * 0.18〜0.52 : 1マークへ進入
-   *
-   * 最後の制御点をturnEntryと同じYにすることで、
-   * ターン開始時の艇首が右向きになり、
-   * 円弧への接続が滑らかになります。
-   */
-  if (p <= 0.52) {
-    const t = easeInOutSine((p - 0.18) / 0.34);
-
-    const p0 = slitEnd;
-    const p1 = {
-      x: 320,
-      y: slitY + (turnEntry.y - slitY) * 0.18,
-    };
-    const p2 = {
-      x: TURN_MARK.x - 112,
-      y: turnEntry.y,
-    };
-    const p3 = turnEntry;
-
-    const point = cubicBezierPoint(p0, p1, p2, p3, t);
-    const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
-
-    return {
-      ...point,
-      angle: vectorAngle(derivative, 0),
-    };
-  }
-
-  /*
-   * 0.52〜0.86 : 1マーク旋回
-   *
-   * SVGのY軸は下向きなので、
-   * θ=90° → -90° と減少させると
-   *
-   *   マーク下 → マーク右 → マーク上
-   *
-   * の反時計回り左旋回になります。
-   * 艇首は円弧の接線方向から毎フレーム計算。
-   */
-  if (p <= 0.86) {
-    const rawTurn = (p - 0.52) / 0.34;
-    const t = easeInOutSine(
-      getTurnProgress(model, boatNo, rawTurn)
-    );
-
-    const theta = lerp(90, -90, t);
-    const radians = (theta * Math.PI) / 180;
-
-    const point = {
-      x: TURN_MARK.x + radius * Math.cos(radians),
-      y: TURN_MARK.y + radius * Math.sin(radians),
-    };
-
-    const tangent = {
-      x: Math.sin(radians),
-      y: -Math.cos(radians),
-    };
-
-    return {
-      ...point,
-      angle: vectorAngle(tangent, 0),
-    };
-  }
-
-  /*
-   * 0.86〜1.00 : 旋回後
-   *
-   * 円弧の終点から左方向へそのまま抜けます。
-   * 旋回終了時の接線方向（左）とBezierの開始方向を一致。
-   */
-  const t = easeInOutSine((p - 0.86) / 0.14);
-  const finishIndex = Math.max(
-    0,
-    Array.isArray(model?.finishOrder)
-      ? model.finishOrder.indexOf(boatNo)
-      : courseIndex
-  );
-
-  const target = {
-    x: 285 - Math.max(0, 5 - finishIndex) * 4,
-    y: 72 + finishIndex * 43,
-  };
-
-  const p0 = turnExit;
-  const p1 = {
-    x: turnExit.x - 100,
-    y: turnExit.y,
-  };
-  const p2 = {
-    x: target.x + 105,
-    y: target.y,
-  };
-  const p3 = target;
-
-  const point = cubicBezierPoint(p0, p1, p2, p3, t);
-  const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
-
-  return {
-    ...point,
-    angle: vectorAngle(derivative, 180),
-  };
-}
-
-function BoatMarker({ boat, position, active = false }) {
+function BoatMarker({ boat, state, active = false }) {
   const color = getBoatColor(boat.boatNo);
 
   return (
@@ -326,18 +384,18 @@ function BoatMarker({ boat, position, active = false }) {
       className={`${styles.boatGroup} ${
         active ? styles.boatActive : ""
       }`}
-      transform={`translate(${position.x} ${position.y}) rotate(${position.angle})`}
+      transform={`translate(${state.x} ${state.y}) rotate(${state.angle})`}
     >
       <ellipse
         cx="0"
         cy="8"
         rx="19"
         ry="7"
-        fill="rgba(0,0,0,.25)"
+        fill="rgba(0,0,0,.24)"
       />
 
       <path
-        d="M -20 -7 L 16 -7 L 25 0 L 16 7 L -20 7 L -12 0 Z"
+        d="M -21 -7 L 16 -7 L 26 0 L 16 7 L -21 7 L -12 0 Z"
         fill={color.main}
         stroke={color.edge}
         strokeWidth="2"
@@ -362,15 +420,56 @@ function BoatMarker({ boat, position, active = false }) {
       >
         {boat.boatNo}
       </text>
-
-      <path
-        d="M -23 0 C -35 0 -42 -3 -50 -7"
-        fill="none"
-        stroke="rgba(190,235,255,.72)"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
     </g>
+  );
+}
+
+function Trail({ points, boatNo }) {
+  const color = getBoatColor(boatNo);
+
+  if (!points || points.length < 2) return null;
+
+  const d = points
+    .map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${point.x.toFixed(
+        1
+      )} ${point.y.toFixed(1)}`
+    )
+    .join(" ");
+
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke={color.main}
+      strokeWidth="5"
+      strokeOpacity=".23"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  );
+}
+
+function Wake({ points }) {
+  if (!points || points.length < 2) return null;
+
+  const d = points
+    .map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${point.x.toFixed(
+        1
+      )} ${point.y.toFixed(1)}`
+    )
+    .join(" ");
+
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke="rgba(225,248,255,.48)"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   );
 }
 
@@ -381,6 +480,7 @@ function ProbabilityBar({ label, value, type }) {
         <span>{label}</span>
         <strong>{value}%</strong>
       </div>
+
       <div className={styles.probabilityTrack}>
         <i
           className={styles[type]}
@@ -406,7 +506,12 @@ export default function AiRaceTheater({
         previousPrediction,
         livePrediction,
       }),
-    [entries, event, previousPrediction, livePrediction]
+    [
+      entries,
+      event,
+      previousPrediction,
+      livePrediction,
+    ]
   );
 
   const [progress, setProgress] = useState(0);
@@ -419,18 +524,32 @@ export default function AiRaceTheater({
   const phase = getPhase(progress);
   const leaderBoat = getLeaderBoat(model);
 
-  const positions = useMemo(() => {
-    const next = {};
+  const boatStates = useMemo(() => {
+    const states = {};
 
     for (const boat of model.boats) {
-      next[boat.boatNo] = getContinuousPosition(
+      states[boat.boatNo] = getBoatState(
         model,
         boat,
         progress
       );
     }
 
-    return next;
+    return states;
+  }, [model, progress]);
+
+  const trails = useMemo(() => {
+    const states = {};
+
+    for (const boat of model.boats) {
+      states[boat.boatNo] = getTrailPoints(
+        model,
+        boat,
+        progress
+      );
+    }
+
+    return states;
   }, [model, progress]);
 
   useEffect(() => {
@@ -517,7 +636,7 @@ export default function AiRaceTheater({
           <h2>AI 1マーク展開予想</h2>
           <p>
             スリット通過から1マーク旋回後までを
-            1本の連続軌道で再生
+            艇ごとの専用軌道で再現
           </p>
         </div>
 
@@ -539,13 +658,13 @@ export default function AiRaceTheater({
       >
         {[
           ["スリット", 0.09],
-          ["1M進入", 0.35],
-          ["旋回", 0.69],
-          ["旋回後", 0.93],
+          ["1M進入", 0.34],
+          ["旋回", 0.63],
+          ["旋回後", 0.9],
         ].map(([label, point]) => {
           const active =
             Math.abs(progress - point) < 0.18 ||
-            (label === "旋回後" && progress >= 0.86);
+            (label === "旋回後" && progress >= 0.8);
 
           return (
             <div
@@ -594,11 +713,11 @@ export default function AiRaceTheater({
             <svg
               viewBox="0 0 700 380"
               role="img"
-              aria-label="AI 1マーク連続シミュレーション"
+              aria-label="AI 1マーク展開シミュレーション"
             >
               <defs>
                 <linearGradient
-                  id="waterGradientContinuous"
+                  id="waterGradientSpline"
                   x1="0"
                   y1="0"
                   x2="0"
@@ -619,7 +738,7 @@ export default function AiRaceTheater({
                 </linearGradient>
 
                 <pattern
-                  id="waterPatternContinuous"
+                  id="waterPatternSpline"
                   width="42"
                   height="15"
                   patternUnits="userSpaceOnUse"
@@ -632,7 +751,7 @@ export default function AiRaceTheater({
                   />
                 </pattern>
 
-                <filter id="turnGlowContinuous">
+                <filter id="turnGlowSpline">
                   <feGaussianBlur
                     stdDeviation="4"
                     result="blur"
@@ -648,17 +767,17 @@ export default function AiRaceTheater({
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterGradientContinuous)"
+                fill="url(#waterGradientSpline)"
               />
               <rect
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterPatternContinuous)"
+                fill="url(#waterPatternSpline)"
               />
 
               <path
-                d="M 45 72 L 45 330"
+                d="M 46 72 L 46 330"
                 stroke="#ff6b72"
                 strokeWidth="3"
                 strokeDasharray="10 9"
@@ -676,66 +795,62 @@ export default function AiRaceTheater({
               </text>
 
               <circle
-                cx={TURN_MARK.x}
-                cy={TURN_MARK.y}
+                cx="570"
+                cy="165"
                 r="18"
                 fill="#f5f5f5"
                 stroke="#e53935"
                 strokeWidth="7"
-                filter="url(#turnGlowContinuous)"
+                filter="url(#turnGlowSpline)"
               />
 
               <path
-                d={`M ${TURN_MARK.x} ${
-                  TURN_MARK.y - 29
-                } L ${TURN_MARK.x} ${
-                  TURN_MARK.y - 61
-                }`}
+                d="M570 136 L570 105"
                 stroke="#ffb14b"
                 strokeWidth="5"
               />
 
               <path
-                d={`M ${TURN_MARK.x - 10} ${
-                  TURN_MARK.y - 61
-                } L ${TURN_MARK.x + 10} ${
-                  TURN_MARK.y - 61
-                } L ${TURN_MARK.x} ${
-                  TURN_MARK.y - 80
-                } Z`}
+                d="M560 105 L580 105 L570 86 Z"
                 fill="#ff7043"
               />
 
-              {model.boats.map((boat) => {
-                const position =
-                  positions[boat.boatNo] || {
-                    x: 72,
-                    y: 220,
-                    angle: 0,
-                  };
+              {model.boats.map((boat) => (
+                <Trail
+                  key={`trail-${boat.boatNo}`}
+                  points={trails[boat.boatNo]}
+                  boatNo={boat.boatNo}
+                />
+              ))}
 
-                return (
-                  <BoatMarker
-                    key={boat.boatNo}
-                    boat={boat}
-                    position={position}
-                    active={
-                      Number(boat.boatNo) ===
-                      Number(leaderBoat)
-                    }
-                  />
-                );
-              })}
+              {model.boats.map((boat) => (
+                <Wake
+                  key={`wake-${boat.boatNo}`}
+                  points={trails[boat.boatNo]}
+                />
+              ))}
+
+              {model.boats.map((boat) => (
+                <BoatMarker
+                  key={boat.boatNo}
+                  boat={boat}
+                  state={boatStates[boat.boatNo]}
+                  active={
+                    Number(boat.boatNo) ===
+                    Number(leaderBoat)
+                  }
+                />
+              ))}
             </svg>
 
             <div className={styles.stageCaption}>
               <span>{phase.caption}</span>
               <strong>
-                {phase.key === "slit"
+                {progress < 0.18
                   ? "スリット通過から展開予想を開始"
-                  : phase.key === "approach"
-                  ? `注目艇 ${model.attackBoatNo}号艇の攻めを解析`
-                  : phase.key === "turn"
+                  : progress < 0.5
+                  ? `注目艇 ${model.attackBoatNo}号艇が仕掛ける`
+                  : progress < 0.8
                   ? model.mainComment
                   : `予想着順 ${model.finishOrder
                       .slice(0, 3)
