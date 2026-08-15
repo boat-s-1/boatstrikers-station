@@ -4,13 +4,321 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildRaceTheaterModel,
   getBoatColor,
-  getStageLabel,
 } from "../../lib/raceTheaterEngine";
 import styles from "./AiRaceTheater.module.css";
 
-const STAGE_DURATIONS = [800, 2100, 1800, 2200, 2600, 2200, 2600];
+const DURATION_MS = 6800;
+const TURN_MARK = Object.freeze({ x: 570, y: 165 });
 
-function BoatMarker({ boat, position, angle = 0, active = false }) {
+function clamp01(value) {
+  return Math.max(0, Math.min(1, Number(value) || 0));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function easeInOutSine(value) {
+  const t = clamp01(value);
+  return -(Math.cos(Math.PI * t) - 1) / 2;
+}
+
+function cubicBezierPoint(p0, p1, p2, p3, t) {
+  const u = 1 - t;
+  const uu = u * u;
+  const tt = t * t;
+
+  return {
+    x:
+      uu * u * p0.x +
+      3 * uu * t * p1.x +
+      3 * u * tt * p2.x +
+      tt * t * p3.x,
+    y:
+      uu * u * p0.y +
+      3 * uu * t * p1.y +
+      3 * u * tt * p2.y +
+      tt * t * p3.y,
+  };
+}
+
+function cubicBezierDerivative(p0, p1, p2, p3, t) {
+  const u = 1 - t;
+
+  return {
+    x:
+      3 * u * u * (p1.x - p0.x) +
+      6 * u * t * (p2.x - p1.x) +
+      3 * t * t * (p3.x - p2.x),
+    y:
+      3 * u * u * (p1.y - p0.y) +
+      6 * u * t * (p2.y - p1.y) +
+      3 * t * t * (p3.y - p2.y),
+  };
+}
+
+function vectorAngle(vector, fallback = 0) {
+  const x = Number(vector?.x);
+  const y = Number(vector?.y);
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return fallback;
+  if (Math.abs(x) < 0.0001 && Math.abs(y) < 0.0001) return fallback;
+
+  return (Math.atan2(y, x) * 180) / Math.PI;
+}
+
+function getCourseIndex(model, boatNo) {
+  const index = Array.isArray(model?.entryOrder)
+    ? model.entryOrder.indexOf(boatNo)
+    : -1;
+
+  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
+}
+
+function normalizeScenario(model) {
+  return String(model?.scenario || "escape")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function getTurnRadius(model, boatNo) {
+  const courseIndex = getCourseIndex(model, boatNo);
+  const scenario = normalizeScenario(model);
+  const isAttack = Number(boatNo) === Number(model?.attackBoatNo);
+
+  let radius = 62 + courseIndex * 13.5;
+
+  if (scenario !== "escape" && Number(boatNo) === 1) {
+    radius += 6;
+  }
+
+  if (isAttack) {
+    if (
+      scenario === "sashi" ||
+      scenario === "差し" ||
+      (scenario.includes("sashi") && !scenario.includes("makuri"))
+    ) {
+      radius -= 8;
+    } else if (
+      scenario.includes("makuri_sashi") ||
+      scenario.includes("makurisashi") ||
+      scenario.includes("まくり差")
+    ) {
+      radius -= 4;
+    } else if (
+      scenario.includes("makuri") ||
+      scenario.includes("まくり")
+    ) {
+      radius += 5;
+    }
+  }
+
+  return Math.max(52, Math.min(136, radius));
+}
+
+function getLeaderBoat(model) {
+  return normalizeScenario(model) === "escape"
+    ? 1
+    : Number(model?.attackBoatNo || 1);
+}
+
+function getTurnProgress(model, boatNo, progress) {
+  const t = clamp01(progress);
+  const leader = getLeaderBoat(model);
+  const finishSecond = Number(model?.finishOrder?.[1]);
+
+  let bonus = 0;
+
+  if (Number(boatNo) === leader) {
+    bonus = 0.055;
+  } else if (Number(boatNo) === finishSecond) {
+    bonus = 0.018;
+  }
+
+  return clamp01(t + bonus * Math.sin(Math.PI * t));
+}
+
+function getPhase(progress) {
+  const p = clamp01(progress);
+
+  if (p < 0.18) {
+    return {
+      key: "slit",
+      label: "スリット通過",
+      caption: "スタート隊形",
+    };
+  }
+
+  if (p < 0.52) {
+    return {
+      key: "approach",
+      label: "1マーク進入",
+      caption: "1マークへ加速",
+    };
+  }
+
+  if (p < 0.86) {
+    return {
+      key: "turn",
+      label: "1マーク旋回",
+      caption: "AI本命展開",
+    };
+  }
+
+  return {
+    key: "exit",
+    label: "旋回後",
+    caption: "バックストレッチへ",
+  };
+}
+
+function getContinuousPosition(model, boat, progress) {
+  const p = clamp01(progress);
+  const boatNo = Number(boat.boatNo);
+  const courseIndex = getCourseIndex(model, boatNo);
+  const radius = getTurnRadius(model, boatNo);
+
+  /*
+   * スリット位置。
+   * 1〜6号艇を詰めすぎず、旋回進入位置へ自然につながる高さに配置。
+   */
+  const slitY = 205 + courseIndex * 16;
+  const slitStart = { x: 72, y: slitY };
+  const slitEnd = {
+    x: 192 + Math.max(-5, Math.min(14, Number(boat.startPower || 0) * 0.12)),
+    y: slitY,
+  };
+
+  const turnEntry = {
+    x: TURN_MARK.x,
+    y: TURN_MARK.y + radius,
+  };
+
+  const turnExit = {
+    x: TURN_MARK.x,
+    y: TURN_MARK.y - radius,
+  };
+
+  /*
+   * 0.00〜0.18 : スリット通過
+   */
+  if (p <= 0.18) {
+    const t = easeInOutSine(p / 0.18);
+
+    return {
+      x: lerp(slitStart.x, slitEnd.x, t),
+      y: slitY,
+      angle: 0,
+    };
+  }
+
+  /*
+   * 0.18〜0.52 : 1マークへ進入
+   *
+   * 最後の制御点をturnEntryと同じYにすることで、
+   * ターン開始時の艇首が右向きになり、
+   * 円弧への接続が滑らかになります。
+   */
+  if (p <= 0.52) {
+    const t = easeInOutSine((p - 0.18) / 0.34);
+
+    const p0 = slitEnd;
+    const p1 = {
+      x: 320,
+      y: slitY + (turnEntry.y - slitY) * 0.18,
+    };
+    const p2 = {
+      x: TURN_MARK.x - 112,
+      y: turnEntry.y,
+    };
+    const p3 = turnEntry;
+
+    const point = cubicBezierPoint(p0, p1, p2, p3, t);
+    const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
+
+    return {
+      ...point,
+      angle: vectorAngle(derivative, 0),
+    };
+  }
+
+  /*
+   * 0.52〜0.86 : 1マーク旋回
+   *
+   * SVGのY軸は下向きなので、
+   * θ=90° → -90° と減少させると
+   *
+   *   マーク下 → マーク右 → マーク上
+   *
+   * の反時計回り左旋回になります。
+   * 艇首は円弧の接線方向から毎フレーム計算。
+   */
+  if (p <= 0.86) {
+    const rawTurn = (p - 0.52) / 0.34;
+    const t = easeInOutSine(
+      getTurnProgress(model, boatNo, rawTurn)
+    );
+
+    const theta = lerp(90, -90, t);
+    const radians = (theta * Math.PI) / 180;
+
+    const point = {
+      x: TURN_MARK.x + radius * Math.cos(radians),
+      y: TURN_MARK.y + radius * Math.sin(radians),
+    };
+
+    const tangent = {
+      x: Math.sin(radians),
+      y: -Math.cos(radians),
+    };
+
+    return {
+      ...point,
+      angle: vectorAngle(tangent, 0),
+    };
+  }
+
+  /*
+   * 0.86〜1.00 : 旋回後
+   *
+   * 円弧の終点から左方向へそのまま抜けます。
+   * 旋回終了時の接線方向（左）とBezierの開始方向を一致。
+   */
+  const t = easeInOutSine((p - 0.86) / 0.14);
+  const finishIndex = Math.max(
+    0,
+    Array.isArray(model?.finishOrder)
+      ? model.finishOrder.indexOf(boatNo)
+      : courseIndex
+  );
+
+  const target = {
+    x: 285 - Math.max(0, 5 - finishIndex) * 4,
+    y: 72 + finishIndex * 43,
+  };
+
+  const p0 = turnExit;
+  const p1 = {
+    x: turnExit.x - 100,
+    y: turnExit.y,
+  };
+  const p2 = {
+    x: target.x + 105,
+    y: target.y,
+  };
+  const p3 = target;
+
+  const point = cubicBezierPoint(p0, p1, p2, p3, t);
+  const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
+
+  return {
+    ...point,
+    angle: vectorAngle(derivative, 180),
+  };
+}
+
+function BoatMarker({ boat, position, active = false }) {
   const color = getBoatColor(boat.boatNo);
 
   return (
@@ -18,7 +326,7 @@ function BoatMarker({ boat, position, angle = 0, active = false }) {
       className={`${styles.boatGroup} ${
         active ? styles.boatActive : ""
       }`}
-      transform={`translate(${position.x} ${position.y}) rotate(${angle})`}
+      transform={`translate(${position.x} ${position.y}) rotate(${position.angle})`}
     >
       <ellipse
         cx="0"
@@ -58,7 +366,7 @@ function BoatMarker({ boat, position, angle = 0, active = false }) {
       <path
         d="M -23 0 C -35 0 -42 -3 -50 -7"
         fill="none"
-        stroke="rgba(190,235,255,.68)"
+        stroke="rgba(190,235,255,.72)"
         strokeWidth="3"
         strokeLinecap="round"
       />
@@ -83,174 +391,6 @@ function ProbabilityBar({ label, value, type }) {
   );
 }
 
-const TURN_MARK = Object.freeze({ x: 545, y: 182 });
-
-function clamp01(value) {
-  return Math.max(0, Math.min(1, Number(value) || 0));
-}
-
-function lerp(from, to, t) {
-  return from + (to - from) * t;
-}
-
-function easeInOutSine(value) {
-  const t = clamp01(value);
-  return -(Math.cos(Math.PI * t) - 1) / 2;
-}
-
-function cubicBezierPoint(p0, p1, p2, p3, t) {
-  const u = 1 - t;
-  return {
-    x: u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x,
-    y: u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y,
-  };
-}
-
-function cubicBezierDerivative(p0, p1, p2, p3, t) {
-  const u = 1 - t;
-  return {
-    x: 3*u*u*(p1.x-p0.x) + 6*u*t*(p2.x-p1.x) + 3*t*t*(p3.x-p2.x),
-    y: 3*u*u*(p1.y-p0.y) + 6*u*t*(p2.y-p1.y) + 3*t*t*(p3.y-p2.y),
-  };
-}
-
-function vectorAngle(vector, fallback = 0) {
-  const x = Number(vector?.x);
-  const y = Number(vector?.y);
-  if (!Number.isFinite(x) || !Number.isFinite(y)) return fallback;
-  if (Math.abs(x) < 0.0001 && Math.abs(y) < 0.0001) return fallback;
-  return Math.atan2(y, x) * 180 / Math.PI;
-}
-
-function getCourseIndex(model, boatNo) {
-  const index = Array.isArray(model?.entryOrder) ? model.entryOrder.indexOf(boatNo) : -1;
-  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
-}
-
-function getScenarioName(model) {
-  return String(model?.scenario || 'escape').trim().toLowerCase().replace(/[\s-]+/g, '_');
-}
-
-function getTurnRadius(model, boat) {
-  const courseIndex = getCourseIndex(model, boat.boatNo);
-  const scenario = getScenarioName(model);
-  let radius = 57 + courseIndex * 12.5;
-  const isAttackBoat = Number(boat.boatNo) === Number(model?.attackBoatNo);
-
-  if (scenario !== 'escape' && Number(boat.boatNo) === 1) radius += 7;
-
-  if (isAttackBoat) {
-    if (scenario === 'sashi' || scenario === '差し' || (scenario.includes('sashi') && !scenario.includes('makuri'))) {
-      radius -= 8;
-    } else if (scenario.includes('makuri_sashi') || scenario.includes('makurisashi') || scenario.includes('まくり差')) {
-      radius -= 3;
-    } else if (scenario.includes('makuri') || scenario.includes('まくり')) {
-      radius += 5;
-    }
-  }
-
-  return Math.max(48, Math.min(126, radius));
-}
-
-function getTurnProgress(model, boat, progress) {
-  const t = clamp01(progress);
-  const scenario = getScenarioName(model);
-  const isLeader =
-    (scenario === 'escape' && Number(boat.boatNo) === 1) ||
-    (scenario !== 'escape' && Number(boat.boatNo) === Number(model?.attackBoatNo));
-  const isSecond = Array.isArray(model?.finishOrder) && Number(boat.boatNo) === Number(model.finishOrder[1]);
-  const bonus = isLeader ? 0.055 : isSecond ? 0.018 : 0;
-  return clamp01(t + bonus * Math.sin(Math.PI * t));
-}
-
-function pointOnCounterClockwiseTurn(radius, progress) {
-  // SVGのY軸は下向き。90°→0°→-90°で、画面上は 下→右→上 の反時計回り。
-  const t = easeInOutSine(progress);
-  const theta = lerp(90, -90, t);
-  const radians = theta * Math.PI / 180;
-  const x = TURN_MARK.x + radius * Math.cos(radians);
-  const y = TURN_MARK.y + radius * Math.sin(radians);
-
-  // 円弧の接線方向。艇首と航跡の向きを常に進行方向へ合わせる。
-  const tangent = { x: Math.sin(radians), y: -Math.cos(radians) };
-  return { x, y, angle: vectorAngle(tangent, 0) };
-}
-
-function getTurnEntryPoint(model, boat) {
-  const radius = getTurnRadius(model, boat);
-  return { x: TURN_MARK.x, y: TURN_MARK.y + radius };
-}
-
-function getTurnExitPoint(model, boat) {
-  const radius = getTurnRadius(model, boat);
-  return { x: TURN_MARK.x, y: TURN_MARK.y - radius };
-}
-
-function getPositions(model, stage, progress) {
-  const result = {};
-  const t = clamp01(progress);
-
-  model.boats.forEach((boat) => {
-    const boatNo = Number(boat.boatNo);
-    const courseIndex = getCourseIndex(model, boatNo);
-    const baseY = 72 + courseIndex * 47;
-    const turnEntry = getTurnEntryPoint(model, boat);
-    const turnExit = getTurnExitPoint(model, boat);
-
-    if (stage <= 1) {
-      const startBoost = Math.max(-6, Math.min(16, Number(boat.startPower || 0) * 0.16));
-      result[boatNo] = { x: 72 + t * (138 + startBoost), y: baseY, angle: 0 };
-      return;
-    }
-
-    if (stage === 2) {
-      const e = easeInOutSine(t);
-      const x = lerp(210, 300, e);
-      const y = lerp(baseY, turnEntry.y, e);
-      result[boatNo] = { x, y, angle: vectorAngle({ x: 90, y: turnEntry.y - baseY }, 0) };
-      return;
-    }
-
-    if (stage === 3) {
-      const p0 = { x: 300, y: turnEntry.y };
-      const p1 = { x: 375, y: turnEntry.y };
-      const p2 = { x: TURN_MARK.x - 88, y: turnEntry.y };
-      const p3 = { x: turnEntry.x, y: turnEntry.y };
-      const point = cubicBezierPoint(p0, p1, p2, p3, t);
-      const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
-      result[boatNo] = { ...point, angle: vectorAngle(derivative, 0) };
-      return;
-    }
-
-    if (stage === 4) {
-      result[boatNo] = pointOnCounterClockwiseTurn(
-        getTurnRadius(model, boat),
-        getTurnProgress(model, boat, t)
-      );
-      return;
-    }
-
-    if (stage === 5) {
-      const finishIndex = Math.max(0, Array.isArray(model.finishOrder) ? model.finishOrder.indexOf(boatNo) : courseIndex);
-      const targetY = 70 + finishIndex * 47;
-      const targetX = 238 - Math.max(0, 5 - finishIndex) * 3;
-      const p0 = { x: turnExit.x, y: turnExit.y };
-      const p1 = { x: turnExit.x - 92, y: turnExit.y };
-      const p2 = { x: targetX + 92, y: targetY };
-      const p3 = { x: targetX, y: targetY };
-      const point = cubicBezierPoint(p0, p1, p2, p3, t);
-      const derivative = cubicBezierDerivative(p0, p1, p2, p3, t);
-      result[boatNo] = { ...point, angle: vectorAngle(derivative, 180) };
-      return;
-    }
-
-    const finishIndex = Math.max(0, Array.isArray(model.finishOrder) ? model.finishOrder.indexOf(boatNo) : courseIndex);
-    result[boatNo] = { x: 102 + finishIndex * 8, y: 70 + finishIndex * 47, angle: 180 };
-  });
-
-  return result;
-}
-
 export default function AiRaceTheater({
   event,
   entries = [],
@@ -269,26 +409,39 @@ export default function AiRaceTheater({
     [entries, event, previousPrediction, livePrediction]
   );
 
-  const [stage, setStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+
   const animationRef = useRef(null);
   const startedAtRef = useRef(null);
 
-  const positions = useMemo(
-    () => getPositions(model, stage, progress),
-    [model, stage, progress]
-  );
+  const phase = getPhase(progress);
+  const leaderBoat = getLeaderBoat(model);
+
+  const positions = useMemo(() => {
+    const next = {};
+
+    for (const boat of model.boats) {
+      next[boat.boatNo] = getContinuousPosition(
+        model,
+        boat,
+        progress
+      );
+    }
+
+    return next;
+  }, [model, progress]);
 
   useEffect(() => {
     if (!playing) return undefined;
 
-    const duration = STAGE_DURATIONS[stage] / speed;
+    const duration = DURATION_MS / speed;
 
     const animate = (timestamp) => {
       if (!startedAtRef.current) {
-        startedAtRef.current = timestamp - progress * duration;
+        startedAtRef.current =
+          timestamp - progress * duration;
       }
 
       const nextProgress = Math.min(
@@ -299,32 +452,27 @@ export default function AiRaceTheater({
       setProgress(nextProgress);
 
       if (nextProgress >= 1) {
+        setPlaying(false);
         startedAtRef.current = null;
-
-        if (stage >= 6) {
-          setPlaying(false);
-          return;
-        }
-
-        setStage((current) => current + 1);
-        setProgress(0);
+        return;
       }
 
-      animationRef.current = requestAnimationFrame(animate);
+      animationRef.current =
+        requestAnimationFrame(animate);
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    animationRef.current =
+      requestAnimationFrame(animate);
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [playing, stage, speed]);
+  }, [playing, speed, progress]);
 
   const play = () => {
-    if (stage >= 6 && progress >= 1) {
-      setStage(0);
+    if (progress >= 1) {
       setProgress(0);
     }
 
@@ -339,7 +487,6 @@ export default function AiRaceTheater({
 
   const replay = () => {
     setPlaying(false);
-    setStage(0);
     setProgress(0);
     startedAtRef.current = null;
 
@@ -348,15 +495,10 @@ export default function AiRaceTheater({
     }, 80);
   };
 
-  const seekStage = (nextStage) => {
-    setPlaying(false);
-    setStage(nextStage);
-    setProgress(nextStage === 6 ? 1 : 0);
+  const changeSpeed = (value) => {
+    setSpeed(value);
     startedAtRef.current = null;
   };
-
-  const leaderBoat =
-    model.scenario === "escape" ? 1 : model.attackBoatNo;
 
   if (!entries || entries.length === 0) {
     return (
@@ -371,53 +513,79 @@ export default function AiRaceTheater({
     <section className={styles.theater}>
       <header className={styles.hero}>
         <div>
-          <span>BOATSTRIKERS PHASE 6.1</span>
-          <h2>AI RACE THEATER</h2>
-          <p>AIが1マークの攻防を2Dシミュレーション</p>
+          <span>BOATSTRIKERS 1 MARK SIMULATION</span>
+          <h2>AI 1マーク展開予想</h2>
+          <p>
+            スリット通過から1マーク旋回後までを
+            1本の連続軌道で再生
+          </p>
         </div>
 
         <div className={styles.heroStatus}>
           <i />
-          {livePrediction ? "展示後AI反映" : "前日データ版"}
+          {livePrediction
+            ? "展示後AI反映"
+            : "前日データ版"}
         </div>
       </header>
 
-      <nav className={styles.stageNav}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 8,
+          margin: "12px 0",
+        }}
+      >
         {[
-          "待機",
-          "START",
-          "進入",
-          "1M進入",
-          "旋回",
-          "BACK",
-          "予想着順",
-        ].map((label, index) => (
-          <button
-            key={label}
-            type="button"
-            className={index === stage ? styles.stageActive : ""}
-            onClick={() => seekStage(index)}
-          >
-            <small>0{index}</small>
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
+          ["スリット", 0.09],
+          ["1M進入", 0.35],
+          ["旋回", 0.69],
+          ["旋回後", 0.93],
+        ].map(([label, point]) => {
+          const active =
+            Math.abs(progress - point) < 0.18 ||
+            (label === "旋回後" && progress >= 0.86);
+
+          return (
+            <div
+              key={label}
+              style={{
+                padding: "9px 6px",
+                borderRadius: 12,
+                textAlign: "center",
+                fontSize: 11,
+                fontWeight: 900,
+                color: active ? "#fff" : "#597089",
+                background: active
+                  ? "#168dcc"
+                  : "#f4f8fb",
+                border: "1px solid #d8e6ef",
+              }}
+            >
+              {label}
+            </div>
+          );
+        })}
+      </div>
 
       <div className={styles.mainGrid}>
         <div className={styles.raceScreen}>
           <div className={styles.screenHeader}>
             <div>
-              <small>CURRENT STAGE</small>
-              <strong>{getStageLabel(stage)}</strong>
+              <small>CURRENT</small>
+              <strong>{phase.label}</strong>
             </div>
 
             <div className={styles.environment}>
-              <span>風 {model.environment.windSpeed}m</span>
-              <span>波 {model.environment.waveHeight}cm</span>
               <span>
-                進入 {model.entryOrder.join("")}/
-                {model.entryOrder.slice(3).join("")}
+                風 {model.environment.windSpeed}m
+              </span>
+              <span>
+                波 {model.environment.waveHeight}cm
+              </span>
+              <span>
+                進入 {model.entryOrder.join("")}
               </span>
             </div>
           </div>
@@ -426,37 +594,49 @@ export default function AiRaceTheater({
             <svg
               viewBox="0 0 700 380"
               role="img"
-              aria-label="1マークAIシミュレーション"
+              aria-label="AI 1マーク連続シミュレーション"
             >
               <defs>
                 <linearGradient
-                  id="waterGradient"
+                  id="waterGradientContinuous"
                   x1="0"
                   y1="0"
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="0%" stopColor="#074f7e" />
-                  <stop offset="55%" stopColor="#063862" />
-                  <stop offset="100%" stopColor="#041c3b" />
+                  <stop
+                    offset="0%"
+                    stopColor="#075987"
+                  />
+                  <stop
+                    offset="58%"
+                    stopColor="#064369"
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="#042943"
+                  />
                 </linearGradient>
 
                 <pattern
-                  id="waterPattern"
-                  width="40"
-                  height="14"
+                  id="waterPatternContinuous"
+                  width="42"
+                  height="15"
                   patternUnits="userSpaceOnUse"
                 >
                   <path
-                    d="M0 7 Q10 2 20 7 T40 7"
+                    d="M0 8 Q10 3 21 8 T42 8"
                     fill="none"
-                    stroke="rgba(120,210,255,.13)"
+                    stroke="rgba(130,220,255,.12)"
                     strokeWidth="2"
                   />
                 </pattern>
 
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
+                <filter id="turnGlowContinuous">
+                  <feGaussianBlur
+                    stdDeviation="4"
+                    result="blur"
+                  />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
@@ -468,107 +648,98 @@ export default function AiRaceTheater({
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterGradient)"
+                fill="url(#waterGradientContinuous)"
               />
               <rect
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterPattern)"
+                fill="url(#waterPatternContinuous)"
               />
 
               <path
-                d="M 42 55 L 42 345"
-                stroke="#ff6268"
+                d="M 45 72 L 45 330"
+                stroke="#ff6b72"
                 strokeWidth="3"
-                strokeDasharray="11 9"
+                strokeDasharray="10 9"
                 opacity=".8"
               />
 
               <text
                 x="25"
-                y="42"
-                fill="#ffb6b9"
+                y="55"
+                fill="#ffc1c4"
                 fontSize="12"
                 fontWeight="900"
               >
-                START
+                SLIT
               </text>
 
-              <path
-                d="M 360 35 C 520 55 610 145 625 292"
-                fill="none"
-                stroke="rgba(184,228,255,.42)"
-                strokeWidth="3"
-                strokeDasharray="10 10"
-              />
-
-              <path
-                d="M 545 306 C 625 306 665 250 665 182 C 665 114 625 58 545 58"
-                fill="none"
-                stroke="rgba(255,255,255,.18)"
-                strokeWidth="2"
-                strokeDasharray="7 10"
-              />
-              <path
-                d="M 557 64 L 541 58 L 551 45"
-                fill="none"
-                stroke="rgba(255,255,255,.42)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
               <circle
-                cx="545"
-                cy="182"
+                cx={TURN_MARK.x}
+                cy={TURN_MARK.y}
                 r="18"
                 fill="#f5f5f5"
                 stroke="#e53935"
                 strokeWidth="7"
-                filter="url(#glow)"
+                filter="url(#turnGlowContinuous)"
               />
+
               <path
-                d="M545 153 L545 120"
+                d={`M ${TURN_MARK.x} ${
+                  TURN_MARK.y - 29
+                } L ${TURN_MARK.x} ${
+                  TURN_MARK.y - 61
+                }`}
                 stroke="#ffb14b"
                 strokeWidth="5"
               />
+
               <path
-                d="M535 120 L555 120 L545 101 Z"
+                d={`M ${TURN_MARK.x - 10} ${
+                  TURN_MARK.y - 61
+                } L ${TURN_MARK.x + 10} ${
+                  TURN_MARK.y - 61
+                } L ${TURN_MARK.x} ${
+                  TURN_MARK.y - 80
+                } Z`}
                 fill="#ff7043"
               />
 
               {model.boats.map((boat) => {
-                const position = positions[boat.boatNo] || {
-                  x: 70,
-                  y: 80,
-                  angle: 0,
-                };
+                const position =
+                  positions[boat.boatNo] || {
+                    x: 72,
+                    y: 220,
+                    angle: 0,
+                  };
 
                 return (
                   <BoatMarker
                     key={boat.boatNo}
                     boat={boat}
                     position={position}
-                    angle={position.angle}
-                    active={boat.boatNo === leaderBoat}
+                    active={
+                      Number(boat.boatNo) ===
+                      Number(leaderBoat)
+                    }
                   />
                 );
               })}
             </svg>
 
             <div className={styles.stageCaption}>
-              <span>{getStageLabel(stage)}</span>
+              <span>{phase.caption}</span>
               <strong>
-                {stage < 3
-                  ? "スタート隊形を解析中"
-                  : stage === 4
+                {phase.key === "slit"
+                  ? "スリット通過から展開予想を開始"
+                  : phase.key === "approach"
+                  ? `注目艇 ${model.attackBoatNo}号艇の攻めを解析`
+                  : phase.key === "turn"
                   ? model.mainComment
-                  : stage >= 5
-                  ? `予想着順 ${model.finishOrder
+                  : `予想着順 ${model.finishOrder
                       .slice(0, 3)
-                      .join("-")}`
-                  : "1マークへ進入"}
+                      .join("-")}`}
               </strong>
             </div>
           </div>
@@ -579,7 +750,7 @@ export default function AiRaceTheater({
               className={styles.playButton}
               onClick={playing ? pause : play}
             >
-              {playing ? "Ⅱ 一時停止" : "▶ 再生"}
+              {playing ? "Ⅱ 一時停止" : "▶ 展開を見る"}
             </button>
 
             <button
@@ -593,9 +764,7 @@ export default function AiRaceTheater({
             <div className={styles.progressTrack}>
               <i
                 style={{
-                  width: `${
-                    ((stage + progress) / 7) * 100
-                  }%`,
+                  width: `${progress * 100}%`,
                 }}
               />
             </div>
@@ -606,12 +775,11 @@ export default function AiRaceTheater({
                   key={value}
                   type="button"
                   className={
-                    speed === value ? styles.speedActive : ""
+                    speed === value
+                      ? styles.speedActive
+                      : ""
                   }
-                  onClick={() => {
-                    setSpeed(value);
-                    startedAtRef.current = null;
-                  }}
+                  onClick={() => changeSpeed(value)}
                 >
                   ×{value}
                 </button>
@@ -648,18 +816,20 @@ export default function AiRaceTheater({
           />
 
           <div className={styles.aiComment}>
-            <span>一果AIコメント</span>
+            <span>AI本命展開</span>
             <strong>{model.mainComment}</strong>
             <p>
-              展示タイム・展示ST・モーター・全国勝率・当地勝率・
-              AIイン逃げ期待度をもとに算出しています。
+              展示タイム・展示ST・モーター・全国勝率・
+              当地勝率・AIイン逃げ期待度を反映。
             </p>
           </div>
 
           <div className={styles.finishPrediction}>
             <small>予想着順</small>
             <strong>
-              {model.finishOrder.slice(0, 3).join(" - ")}
+              {model.finishOrder
+                .slice(0, 3)
+                .join(" - ")}
             </strong>
             <span>
               注目艇 {model.attackBoatNo}号艇
@@ -717,7 +887,9 @@ export default function AiRaceTheater({
           <div>
             <small>AI予想</small>
             <strong>
-              {model.finishOrder.slice(0, 3).join("-")}
+              {model.finishOrder
+                .slice(0, 3)
+                .join("-")}
             </strong>
           </div>
 
@@ -725,14 +897,17 @@ export default function AiRaceTheater({
 
           <div>
             <small>実際の結果</small>
-            <strong>{result.trifecta_result || "-"}</strong>
+            <strong>
+              {result.trifecta_result || "-"}
+            </strong>
           </div>
         </div>
       )}
 
       <p className={styles.note}>
-        ※ このシミュレーションは過去データと当日の取得情報をもとにした
-        研究用予測です。実際の進入・展開・着順を保証するものではありません。
+        ※ このシミュレーションは過去データと
+        当日の取得情報をもとにした研究用予測です。
+        実際の進入・展開・着順を保証するものではありません。
       </p>
     </section>
   );
