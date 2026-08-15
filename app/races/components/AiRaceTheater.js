@@ -7,17 +7,58 @@ import {
 } from "../../lib/raceTheaterEngine";
 import styles from "./AiRaceTheater.module.css";
 
-const DURATION_MS = 6800;
-const HISTORY_POINTS = 26;
+/*
+ * BoatStrikers 1マーク予想
+ * Drop-in版:
+ *   app/races/components/AiRaceTheater.js
+ *
+ * 設計方針
+ * - 既存 raceTheaterEngine.js をそのまま使用
+ * - CSSも既存 AiRaceTheater.module.css をそのまま使用
+ * - 7ステージ方式をやめ、スリット→1M→旋回後を1本で再生
+ * - 6艇は1マーク周辺で絶対に同じ軌道へ収束させない
+ * - 1〜6コースを大きく離した専用半径に固定
+ * - 攻め艇は「速度差」で表現し、他艇のレーンを横切らせない
+ */
+
+const DURATION_MS = 6200;
+const TURN_MARK = Object.freeze({ x: 548, y: 116 });
+
+const COURSE_RADIUS = Object.freeze({
+  1: 54,
+  2: 80,
+  3: 106,
+  4: 132,
+  5: 158,
+  6: 184,
+});
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, Number(value) || 0));
+}
 
 function clamp01(value) {
-  return Math.max(0, Math.min(1, Number(value) || 0));
+  return clamp(value, 0, 1);
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function easeInOutSine(value) {
+  const t = clamp01(value);
+  return -(Math.cos(Math.PI * t) - 1) / 2;
+}
+
+function easeOutCubic(value) {
+  const t = clamp01(value);
+  return 1 - Math.pow(1 - t, 3);
 }
 
 function cubicBezierPoint(p0, p1, p2, p3, t) {
   const u = 1 - t;
-  const uu = u * u;
   const tt = t * t;
+  const uu = u * u;
 
   return {
     x:
@@ -48,7 +89,7 @@ function cubicBezierDerivative(p0, p1, p2, p3, t) {
   };
 }
 
-function vectorAngle(vector, fallback = 0) {
+function angleOf(vector, fallback = 0) {
   const x = Number(vector?.x);
   const y = Number(vector?.y);
 
@@ -58,9 +99,22 @@ function vectorAngle(vector, fallback = 0) {
   return (Math.atan2(y, x) * 180) / Math.PI;
 }
 
-function easeInOutSine(value) {
-  const t = clamp01(value);
-  return -(Math.cos(Math.PI * t) - 1) / 2;
+function getCourseIndex(model, boatNo) {
+  const order = Array.isArray(model?.entryOrder)
+    ? model.entryOrder.map(Number)
+    : [1, 2, 3, 4, 5, 6];
+
+  const index = order.indexOf(Number(boatNo));
+  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
+}
+
+function getFinishIndex(model, boatNo) {
+  const order = Array.isArray(model?.finishOrder)
+    ? model.finishOrder.map(Number)
+    : [1, 2, 3, 4, 5, 6];
+
+  const index = order.indexOf(Number(boatNo));
+  return index >= 0 ? index : getCourseIndex(model, boatNo);
 }
 
 function normalizeScenario(model) {
@@ -76,274 +130,27 @@ function getLeaderBoat(model) {
     : Number(model?.attackBoatNo || 1);
 }
 
-function getCourseIndex(model, boatNo) {
-  const index = Array.isArray(model?.entryOrder)
-    ? model.entryOrder.indexOf(Number(boatNo))
-    : -1;
-
-  return index >= 0 ? index : Math.max(0, Number(boatNo) - 1);
-}
-
-function getFinishIndex(model, boatNo) {
-  const index = Array.isArray(model?.finishOrder)
-    ? model.finishOrder.indexOf(Number(boatNo))
-    : -1;
-
-  return index >= 0 ? index : getCourseIndex(model, boatNo);
-}
-
-function getTrajectoryType(model, boatNo) {
+/*
+ * 攻め艇は隣のレーンへワープさせない。
+ * 位置の進捗だけ少し先行させることで
+ * 「差し・まくり・まくり差し」の攻め感を作る。
+ */
+function getBoatTimelineProgress(model, boatNo, progress) {
+  const p = clamp01(progress);
   const scenario = normalizeScenario(model);
-  const leader = getLeaderBoat(model);
-  const attack = Number(model?.attackBoatNo || 1);
-  const course = getCourseIndex(model, boatNo);
+  const leaderBoat = getLeaderBoat(model);
+  const finishSecond = Number(model?.finishOrder?.[1]);
 
-  if (scenario === "escape") {
-    if (Number(boatNo) === 1) return "innerLead";
-    if (course === 1) return "insideChase";
-    if (course === 2) return "outsideHold";
-    return "outerFollow";
+  let bonus = 0;
+
+  if (Number(boatNo) === leaderBoat) {
+    bonus = scenario === "escape" ? 0.055 : 0.075;
+  } else if (Number(boatNo) === finishSecond) {
+    bonus = 0.018;
   }
 
-  if (
-    scenario === "sashi" ||
-    scenario === "差し" ||
-    (scenario.includes("sashi") && !scenario.includes("makuri"))
-  ) {
-    if (Number(boatNo) === attack) return "sharpSashi";
-    if (Number(boatNo) === 1) return "innerResist";
-    return course <= 2 ? "outsideHold" : "outerFollow";
-  }
-
-  if (
-    scenario.includes("makuri_sashi") ||
-    scenario.includes("makurisashi") ||
-    scenario.includes("まくり差")
-  ) {
-    if (Number(boatNo) === attack) return "makuriSashi";
-    if (Number(boatNo) === 1) return "innerResist";
-    return course <= 2 ? "outsideHold" : "outerFollow";
-  }
-
-  if (
-    scenario.includes("makuri") ||
-    scenario.includes("まくり")
-  ) {
-    if (Number(boatNo) === attack) return "outerAttack";
-    if (Number(boatNo) === 1) return "innerResist";
-    return course <= 2 ? "outsideHold" : "outerFollow";
-  }
-
-  if (Number(boatNo) === leader) return "innerLead";
-  return course <= 2 ? "outsideHold" : "outerFollow";
-}
-
-function buildLanePath(model, boat) {
-  const boatNo = Number(boat.boatNo);
-  const courseIndex = getCourseIndex(model, boatNo);
-  const finishIndex = getFinishIndex(model, boatNo);
-  const laneType = getTrajectoryType(model, boatNo);
-
-  const slitY = 194 + courseIndex * 17;
-  const finishY = 76 + finishIndex * 41;
-
-  const startPower = Math.max(
-    -8,
-    Math.min(16, Number(boat.startPower || 0) * 0.14)
-  );
-
-  const start = { x: 76, y: slitY };
-  const slitEnd = { x: 205 + startPower, y: slitY };
-
-  const presets = {
-    innerLead: [
-      start,
-      slitEnd,
-      { x: 330, y: slitY - 1 },
-      { x: 470, y: 252 },
-      { x: 542, y: 224 },
-      { x: 590, y: 162 },
-      { x: 524, y: 106 },
-      { x: 405, y: finishY + 14 },
-      { x: 288, y: finishY },
-    ],
-    innerResist: [
-      start,
-      slitEnd,
-      { x: 330, y: slitY + 3 },
-      { x: 468, y: 262 },
-      { x: 550, y: 232 },
-      { x: 596, y: 166 },
-      { x: 536, y: 110 },
-      { x: 420, y: finishY + 18 },
-      { x: 302, y: finishY },
-    ],
-    insideChase: [
-      start,
-      slitEnd,
-      { x: 332, y: slitY + 3 },
-      { x: 470, y: 272 },
-      { x: 558, y: 243 },
-      { x: 610, y: 178 },
-      { x: 548, y: 114 },
-      { x: 430, y: finishY + 21 },
-      { x: 306, y: finishY },
-    ],
-    sharpSashi: [
-      start,
-      slitEnd,
-      { x: 334, y: slitY + 1 },
-      { x: 458, y: 283 },
-      { x: 530, y: 255 },
-      { x: 566, y: 198 },
-      { x: 514, y: 128 },
-      { x: 390, y: finishY + 8 },
-      { x: 270, y: finishY },
-    ],
-    outerAttack: [
-      start,
-      slitEnd,
-      { x: 344, y: slitY - 4 },
-      { x: 500, y: 286 },
-      { x: 598, y: 250 },
-      { x: 652, y: 176 },
-      { x: 585, y: 95 },
-      { x: 455, y: finishY + 22 },
-      { x: 320, y: finishY },
-    ],
-    makuriSashi: [
-      start,
-      slitEnd,
-      { x: 342, y: slitY - 2 },
-      { x: 492, y: 286 },
-      { x: 579, y: 252 },
-      { x: 615, y: 192 },
-      { x: 548, y: 116 },
-      { x: 415, y: finishY + 10 },
-      { x: 282, y: finishY },
-    ],
-    outsideHold: [
-      start,
-      slitEnd,
-      { x: 342, y: slitY },
-      { x: 492, y: 289 },
-      { x: 596, y: 265 },
-      { x: 654, y: 198 },
-      { x: 604, y: 112 },
-      { x: 470, y: finishY + 29 },
-      { x: 336, y: finishY },
-    ],
-    outerFollow: [
-      start,
-      slitEnd,
-      { x: 350, y: slitY + 1 },
-      { x: 510, y: 300 },
-      { x: 620, y: 282 },
-      { x: 676, y: 212 },
-      { x: 625, y: 120 },
-      { x: 490, y: finishY + 34 },
-      { x: 350, y: finishY },
-    ],
-  };
-
-  const points = presets[laneType] || presets.outerFollow;
-
-  return {
-    laneType,
-    points,
-  };
-}
-
-function samplePath(path, progress) {
-  const t = clamp01(progress);
-
-  /*
-   * 区間1: スリット〜1M進入
-   * 区間2: 1M攻防
-   * 区間3: 旋回後〜立ち上がり
-   */
-  if (t <= 0.34) {
-    const local = easeInOutSine(t / 0.34);
-
-    const p0 = path[0];
-    const p1 = path[2];
-    const p2 = path[3];
-    const p3 = path[4];
-
-    return {
-      point: cubicBezierPoint(p0, p1, p2, p3, local),
-      derivative: cubicBezierDerivative(
-        p0,
-        p1,
-        p2,
-        p3,
-        local
-      ),
-    };
-  }
-
-  if (t <= 0.72) {
-    const local = easeInOutSine((t - 0.34) / 0.38);
-
-    const p0 = path[4];
-    const p1 = path[5];
-    const p2 = path[5];
-    const p3 = path[6];
-
-    return {
-      point: cubicBezierPoint(p0, p1, p2, p3, local),
-      derivative: cubicBezierDerivative(
-        p0,
-        p1,
-        p2,
-        p3,
-        local
-      ),
-    };
-  }
-
-  const local = easeInOutSine((t - 0.72) / 0.28);
-
-  const p0 = path[6];
-  const p1 = path[7];
-  const p2 = path[7];
-  const p3 = path[8];
-
-  return {
-    point: cubicBezierPoint(p0, p1, p2, p3, local),
-    derivative: cubicBezierDerivative(
-      p0,
-      p1,
-      p2,
-      p3,
-      local
-    ),
-  };
-}
-
-function getBoatState(model, boat, progress) {
-  const { laneType, points } = buildLanePath(model, boat);
-  const { point, derivative } = samplePath(points, progress);
-
-  return {
-    ...point,
-    angle: vectorAngle(derivative, 0),
-    laneType,
-  };
-}
-
-function getTrailPoints(model, boat, progress) {
-  const current = clamp01(progress);
-  const start = Math.max(0, current - 0.12);
-  const points = [];
-
-  for (let i = 0; i < HISTORY_POINTS; i += 1) {
-    const ratio = i / Math.max(1, HISTORY_POINTS - 1);
-    const p = start + (current - start) * ratio;
-    points.push(getBoatState(model, boat, p));
-  }
-
-  return points;
+  // 0と1では補正を0へ戻すので、開始/終了で位置が飛ばない
+  return clamp01(p + bonus * Math.sin(Math.PI * p));
 }
 
 function getPhase(progress) {
@@ -351,32 +158,301 @@ function getPhase(progress) {
 
   if (p < 0.18) {
     return {
-      label: "スリット通過",
-      caption: "スタート隊形",
+      label: "スリット",
+      eyebrow: "START FORMATION",
+      caption: "スタート隊形から1マークへ",
     };
   }
 
-  if (p < 0.5) {
+  if (p < 0.48) {
     return {
       label: "1マーク進入",
-      caption: "攻め艇が仕掛ける",
+      eyebrow: "APPROACH",
+      caption: "各艇が自分のレーンを保って進入",
     };
   }
 
-  if (p < 0.8) {
+  if (p < 0.82) {
     return {
       label: "1マーク旋回",
+      eyebrow: "1 MARK BATTLE",
       caption: "1マークの攻防",
     };
   }
 
   return {
     label: "旋回後",
-    caption: "隊形が決まる",
+    eyebrow: "TURN EXIT",
+    caption: "バックストレッチへ",
   };
 }
 
-function BoatMarker({ boat, state, active = false }) {
+/*
+ * 1マーク進入位置
+ *
+ * 全艇がマーク直前で一点へ集まらないよう、
+ * 1〜6コースで明確に半径を分離。
+ */
+function getTurnEntry(model, boatNo) {
+  const courseIndex = getCourseIndex(model, boatNo);
+  const course = courseIndex + 1;
+  const radius = COURSE_RADIUS[course] || COURSE_RADIUS[6];
+
+  return {
+    radius,
+    point: {
+      x: TURN_MARK.x,
+      y: TURN_MARK.y + radius,
+    },
+  };
+}
+
+/*
+ * 旋回終了位置
+ *
+ * 下 → 右 → 上 とマークを反時計回りに回り、
+ * 終点では艇首が左向きになる。
+ */
+function getTurnExit(model, boatNo) {
+  const { radius } = getTurnEntry(model, boatNo);
+
+  return {
+    radius,
+    point: {
+      x: TURN_MARK.x,
+      y: TURN_MARK.y - radius,
+    },
+  };
+}
+
+function getBoatPosition(model, boat, rawProgress) {
+  const boatNo = Number(boat.boatNo);
+  const courseIndex = getCourseIndex(model, boatNo);
+  const finishIndex = getFinishIndex(model, boatNo);
+  const progress = getBoatTimelineProgress(
+    model,
+    boatNo,
+    rawProgress
+  );
+
+  const { radius, point: turnEntry } = getTurnEntry(
+    model,
+    boatNo
+  );
+  const { point: turnExit } = getTurnExit(model, boatNo);
+
+  /*
+   * スリット側。
+   * 6艇の縦間隔を十分に取る。
+   */
+  const startY = 168 + courseIndex * 28;
+  const startBoost = clamp(
+    Number(boat.startPower || 0) * 0.12,
+    -5,
+    14
+  );
+
+  const slitStart = {
+    x: 72,
+    y: startY,
+  };
+
+  const slitEnd = {
+    x: 180 + startBoost,
+    y: startY,
+  };
+
+  /*
+   * 0.00〜0.18 : スリット
+   */
+  if (progress <= 0.18) {
+    const t = easeOutCubic(progress / 0.18);
+
+    return {
+      x: lerp(slitStart.x, slitEnd.x, t),
+      y: startY,
+      angle: 0,
+    };
+  }
+
+  /*
+   * 0.18〜0.48 : 1M進入
+   *
+   * 外艇ほど下側の専用進入レーンを通る。
+   * 終点は各艇固有のturnEntryなので重ならない。
+   */
+  if (progress <= 0.48) {
+    const t = easeInOutSine(
+      (progress - 0.18) / 0.30
+    );
+
+    const p0 = slitEnd;
+    const p1 = {
+      x: 290,
+      y: startY,
+    };
+    const p2 = {
+      x: TURN_MARK.x - 118 - courseIndex * 5,
+      y: turnEntry.y,
+    };
+    const p3 = turnEntry;
+
+    const point = cubicBezierPoint(p0, p1, p2, p3, t);
+    const tangent = cubicBezierDerivative(
+      p0,
+      p1,
+      p2,
+      p3,
+      t
+    );
+
+    return {
+      ...point,
+      angle: angleOf(tangent, 0),
+    };
+  }
+
+  /*
+   * 0.48〜0.82 : 1マーク旋回
+   *
+   * 1号艇 54px
+   * 2号艇 80px
+   * ...
+   * 6号艇 184px
+   *
+   * 半径差26pxを確保するので、
+   * 1マーク周辺で縦積みになりにくい。
+   *
+   * SVGはY軸が下向き。
+   * θ=90 → -90 と進めると
+   *   下 → 右 → 上
+   * と左旋回する。
+   */
+  if (progress <= 0.82) {
+    const t = easeInOutSine(
+      (progress - 0.48) / 0.34
+    );
+
+    const theta = lerp(90, -90, t);
+    const radians = (theta * Math.PI) / 180;
+
+    const point = {
+      x: TURN_MARK.x + radius * Math.cos(radians),
+      y: TURN_MARK.y + radius * Math.sin(radians),
+    };
+
+    const tangent = {
+      x: Math.sin(radians),
+      y: -Math.cos(radians),
+    };
+
+    return {
+      ...point,
+      angle: angleOf(tangent, 0),
+    };
+  }
+
+  /*
+   * 0.82〜1.00 : 旋回後
+   *
+   * 円弧終点の左向き接線から、そのまま左へ抜ける。
+   * すぐに予想着順へ吸い寄せず、
+   * まず各艇の旋回半径差を残したまま隊形を広げる。
+   */
+  const t = easeInOutSine(
+    (progress - 0.82) / 0.18
+  );
+
+  const targetY = 58 + finishIndex * 45;
+  const targetX =
+    300 - Math.max(0, 5 - finishIndex) * 7;
+
+  const p0 = turnExit;
+  const p1 = {
+    x: turnExit.x - 110,
+    y: turnExit.y,
+  };
+  const p2 = {
+    x: targetX + 100,
+    y: targetY,
+  };
+  const p3 = {
+    x: targetX,
+    y: targetY,
+  };
+
+  const point = cubicBezierPoint(p0, p1, p2, p3, t);
+  const tangent = cubicBezierDerivative(
+    p0,
+    p1,
+    p2,
+    p3,
+    t
+  );
+
+  return {
+    ...point,
+    angle: angleOf(tangent, 180),
+  };
+}
+
+function getTrail(model, boat, progress) {
+  const current = clamp01(progress);
+  const from = Math.max(0, current - 0.10);
+  const points = [];
+  const count = 18;
+
+  for (let i = 0; i < count; i += 1) {
+    const ratio = i / (count - 1);
+    const p = from + (current - from) * ratio;
+    points.push(getBoatPosition(model, boat, p));
+  }
+
+  return points;
+}
+
+function pathFromPoints(points) {
+  return points
+    .map(
+      (point, index) =>
+        `${index === 0 ? "M" : "L"} ${point.x.toFixed(
+          1
+        )} ${point.y.toFixed(1)}`
+    )
+    .join(" ");
+}
+
+function BoatTrail({ boat, points }) {
+  const color = getBoatColor(boat.boatNo);
+
+  if (!points || points.length < 2) return null;
+
+  const d = pathFromPoints(points);
+
+  return (
+    <>
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(225,248,255,.48)"
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d={d}
+        fill="none"
+        stroke={color.main}
+        strokeOpacity=".25"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  );
+}
+
+function BoatMarker({ boat, position, active }) {
   const color = getBoatColor(boat.boatNo);
 
   return (
@@ -384,18 +460,18 @@ function BoatMarker({ boat, state, active = false }) {
       className={`${styles.boatGroup} ${
         active ? styles.boatActive : ""
       }`}
-      transform={`translate(${state.x} ${state.y}) rotate(${state.angle})`}
+      transform={`translate(${position.x} ${position.y}) rotate(${position.angle})`}
     >
       <ellipse
         cx="0"
-        cy="8"
+        cy="9"
         rx="19"
         ry="7"
-        fill="rgba(0,0,0,.24)"
+        fill="rgba(0,0,0,.23)"
       />
 
       <path
-        d="M -21 -7 L 16 -7 L 26 0 L 16 7 L -21 7 L -12 0 Z"
+        d="M -21 -7 L 16 -7 L 27 0 L 16 7 L -21 7 L -12 0 Z"
         fill={color.main}
         stroke={color.edge}
         strokeWidth="2"
@@ -421,55 +497,6 @@ function BoatMarker({ boat, state, active = false }) {
         {boat.boatNo}
       </text>
     </g>
-  );
-}
-
-function Trail({ points, boatNo }) {
-  const color = getBoatColor(boatNo);
-
-  if (!points || points.length < 2) return null;
-
-  const d = points
-    .map((point, index) =>
-      `${index === 0 ? "M" : "L"} ${point.x.toFixed(
-        1
-      )} ${point.y.toFixed(1)}`
-    )
-    .join(" ");
-
-  return (
-    <path
-      d={d}
-      fill="none"
-      stroke={color.main}
-      strokeWidth="5"
-      strokeOpacity=".23"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  );
-}
-
-function Wake({ points }) {
-  if (!points || points.length < 2) return null;
-
-  const d = points
-    .map((point, index) =>
-      `${index === 0 ? "M" : "L"} ${point.x.toFixed(
-        1
-      )} ${point.y.toFixed(1)}`
-    )
-    .join(" ");
-
-  return (
-    <path
-      d={d}
-      fill="none"
-      stroke="rgba(225,248,255,.48)"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
   );
 }
 
@@ -524,32 +551,32 @@ export default function AiRaceTheater({
   const phase = getPhase(progress);
   const leaderBoat = getLeaderBoat(model);
 
-  const boatStates = useMemo(() => {
-    const states = {};
+  const positions = useMemo(() => {
+    const resultMap = {};
 
     for (const boat of model.boats) {
-      states[boat.boatNo] = getBoatState(
+      resultMap[boat.boatNo] = getBoatPosition(
         model,
         boat,
         progress
       );
     }
 
-    return states;
+    return resultMap;
   }, [model, progress]);
 
   const trails = useMemo(() => {
-    const states = {};
+    const resultMap = {};
 
     for (const boat of model.boats) {
-      states[boat.boatNo] = getTrailPoints(
+      resultMap[boat.boatNo] = getTrail(
         model,
         boat,
         progress
       );
     }
 
-    return states;
+    return resultMap;
   }, [model, progress]);
 
   useEffect(() => {
@@ -636,7 +663,7 @@ export default function AiRaceTheater({
           <h2>AI 1マーク展開予想</h2>
           <p>
             スリット通過から1マーク旋回後までを
-            艇ごとの専用軌道で再現
+            シンプルに再生
           </p>
         </div>
 
@@ -658,13 +685,13 @@ export default function AiRaceTheater({
       >
         {[
           ["スリット", 0.09],
-          ["1M進入", 0.34],
-          ["旋回", 0.63],
-          ["旋回後", 0.9],
+          ["1M進入", 0.33],
+          ["旋回", 0.65],
+          ["旋回後", 0.91],
         ].map(([label, point]) => {
           const active =
-            Math.abs(progress - point) < 0.18 ||
-            (label === "旋回後" && progress >= 0.8);
+            Math.abs(progress - point) < 0.17 ||
+            (label === "旋回後" && progress >= 0.82);
 
           return (
             <div
@@ -692,7 +719,7 @@ export default function AiRaceTheater({
         <div className={styles.raceScreen}>
           <div className={styles.screenHeader}>
             <div>
-              <small>CURRENT</small>
+              <small>{phase.eyebrow}</small>
               <strong>{phase.label}</strong>
             </div>
 
@@ -713,11 +740,11 @@ export default function AiRaceTheater({
             <svg
               viewBox="0 0 700 380"
               role="img"
-              aria-label="AI 1マーク展開シミュレーション"
+              aria-label="1マークAIシミュレーション"
             >
               <defs>
                 <linearGradient
-                  id="waterGradientSpline"
+                  id="waterGradientDropin"
                   x1="0"
                   y1="0"
                   x2="0"
@@ -738,7 +765,7 @@ export default function AiRaceTheater({
                 </linearGradient>
 
                 <pattern
-                  id="waterPatternSpline"
+                  id="waterPatternDropin"
                   width="42"
                   height="15"
                   patternUnits="userSpaceOnUse"
@@ -751,7 +778,7 @@ export default function AiRaceTheater({
                   />
                 </pattern>
 
-                <filter id="turnGlowSpline">
+                <filter id="turnGlowDropin">
                   <feGaussianBlur
                     stdDeviation="4"
                     result="blur"
@@ -767,17 +794,17 @@ export default function AiRaceTheater({
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterGradientSpline)"
+                fill="url(#waterGradientDropin)"
               />
               <rect
                 width="700"
                 height="380"
                 rx="22"
-                fill="url(#waterPatternSpline)"
+                fill="url(#waterPatternDropin)"
               />
 
               <path
-                d="M 46 72 L 46 330"
+                d="M 45 88 L 45 330"
                 stroke="#ff6b72"
                 strokeWidth="3"
                 strokeDasharray="10 9"
@@ -785,8 +812,8 @@ export default function AiRaceTheater({
               />
 
               <text
-                x="25"
-                y="55"
+                x="24"
+                y="70"
                 fill="#ffc1c4"
                 fontSize="12"
                 fontWeight="900"
@@ -795,37 +822,40 @@ export default function AiRaceTheater({
               </text>
 
               <circle
-                cx="570"
-                cy="165"
+                cx={TURN_MARK.x}
+                cy={TURN_MARK.y}
                 r="18"
                 fill="#f5f5f5"
                 stroke="#e53935"
                 strokeWidth="7"
-                filter="url(#turnGlowSpline)"
+                filter="url(#turnGlowDropin)"
               />
 
               <path
-                d="M570 136 L570 105"
+                d={`M ${TURN_MARK.x} ${
+                  TURN_MARK.y - 28
+                } L ${TURN_MARK.x} ${
+                  TURN_MARK.y - 59
+                }`}
                 stroke="#ffb14b"
                 strokeWidth="5"
               />
 
               <path
-                d="M560 105 L580 105 L570 86 Z"
+                d={`M ${TURN_MARK.x - 10} ${
+                  TURN_MARK.y - 59
+                } L ${TURN_MARK.x + 10} ${
+                  TURN_MARK.y - 59
+                } L ${TURN_MARK.x} ${
+                  TURN_MARK.y - 78
+                } Z`}
                 fill="#ff7043"
               />
 
               {model.boats.map((boat) => (
-                <Trail
+                <BoatTrail
                   key={`trail-${boat.boatNo}`}
-                  points={trails[boat.boatNo]}
-                  boatNo={boat.boatNo}
-                />
-              ))}
-
-              {model.boats.map((boat) => (
-                <Wake
-                  key={`wake-${boat.boatNo}`}
+                  boat={boat}
                   points={trails[boat.boatNo]}
                 />
               ))}
@@ -834,7 +864,7 @@ export default function AiRaceTheater({
                 <BoatMarker
                   key={boat.boatNo}
                   boat={boat}
-                  state={boatStates[boat.boatNo]}
+                  position={positions[boat.boatNo]}
                   active={
                     Number(boat.boatNo) ===
                     Number(leaderBoat)
@@ -848,9 +878,9 @@ export default function AiRaceTheater({
               <strong>
                 {progress < 0.18
                   ? "スリット通過から展開予想を開始"
-                  : progress < 0.5
-                  ? `注目艇 ${model.attackBoatNo}号艇が仕掛ける`
-                  : progress < 0.8
+                  : progress < 0.48
+                  ? `注目艇 ${model.attackBoatNo}号艇の攻めを解析`
+                  : progress < 0.82
                   ? model.mainComment
                   : `予想着順 ${model.finishOrder
                       .slice(0, 3)
@@ -865,7 +895,9 @@ export default function AiRaceTheater({
               className={styles.playButton}
               onClick={playing ? pause : play}
             >
-              {playing ? "Ⅱ 一時停止" : "▶ 展開を見る"}
+              {playing
+                ? "Ⅱ 一時停止"
+                : "▶ 展開を見る"}
             </button>
 
             <button
@@ -979,10 +1011,12 @@ export default function AiRaceTheater({
                   <dt>AI指数</dt>
                   <dd>{boat.ability}</dd>
                 </div>
+
                 <div>
                   <dt>ST力</dt>
                   <dd>{boat.startPower}</dd>
                 </div>
+
                 <div>
                   <dt>展示ST</dt>
                   <dd>
