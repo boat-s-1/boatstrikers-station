@@ -1,4 +1,5 @@
 import SeminarMagazineShelf from "../components/SeminarMagazineShelf";
-import { seminarMagazines } from "../../../lib/seminarMagazines";
-export const metadata = { title: "一果のイン逃げ鉄板ゼミ｜BoatStrikers", description: "一果のイン逃げ鉄板ゼミ バックナンバー一覧" };
-export default function Page(){ return <SeminarMagazineShelf magazine={seminarMagazines.ichika} />; }
+import { getSeminarMagazine } from "../../../lib/seminarMagazineLibrary";
+export const dynamic = "force-dynamic";
+export const metadata = { title: "一果のイン逃げ鉄板ゼミ｜BoatStrikers" };
+export default async function Page(){ const magazine=await getSeminarMagazine("ichika"); return <SeminarMagazineShelf magazine={magazine} />; }

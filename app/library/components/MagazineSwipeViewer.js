@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./MagazineSwipeViewer.module.css";
@@ -29,7 +28,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
     const pageNumber = premiumStartPage + index;
     return {
       pageNumber,
-      src: `/api/magazine-premium-page?magazine=${encodeURIComponent(magazine.key)}&issue=${encodeURIComponent(issue.id)}&page=${pageNumber}`,
+      src: `/api/magazine-premium-page?magazine=${encodeURIComponent(magazine.key)}&issue=${encodeURIComponent(issue.id)}&page=${pageNumber}&source=${encodeURIComponent(issue.source || "local")}`,
     };
   });
 
@@ -96,7 +95,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
     }
   };
 
-  if (!freeCount) {
+  if (!freeCount && !hasPremium) {
     return (
       <main className={`${styles.viewer} ${styles[magazine.accent]}`}>
         <header className={styles.topbar}>
@@ -127,7 +126,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
             <section className={styles.slide} key={`${src}-${index}`} aria-label={`${index + 1}ページ目`}>
               <div className={styles.pageWrap}>
                 <div className={styles.pagePaper}>
-                  <Image src={src} alt={`${issue.title} ${index + 1}ページ`} fill sizes="(max-width: 800px) 96vw, 760px" className={styles.pageImage} priority={index === 0} />
+                  <img src={src} alt={`${issue.title} ${index + 1}ページ`} className={styles.pageImage} />
                 </div>
                 <div className={styles.pageNumber}>{index + 1}</div>
               </div>
