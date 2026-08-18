@@ -9,9 +9,13 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
   const [page, setPage] = useState(0);
   const scroller = useRef(null);
   const slides = issue.freePages || [];
-  const totalSlides = slides.length;
-  const isLastPage = totalSlides > 0 && page === totalSlides - 1;
+  const freeCount = slides.length;
+  const hasPremiumGate = freeCount > 0;
+  const totalSlides = freeCount + (hasPremiumGate ? 1 : 0);
+  const premiumGateIndex = freeCount;
+  const isPremiumGate = hasPremiumGate && page === premiumGateIndex;
   const progress = totalSlides ? ((page + 1) / totalSlides) * 100 : 0;
+  const membershipUrl = issue.membershipUrl || magazine.membershipUrl || null;
 
   const goTo = useCallback((next) => {
     if (!totalSlides) return;
@@ -38,7 +42,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
     if (nextPage !== page) setPage(nextPage);
   };
 
-  if (!totalSlides) {
+  if (!freeCount) {
     return (
       <main className={`${styles.viewer} ${styles[magazine.accent]}`}>
         <header className={styles.topbar}>
@@ -105,6 +109,35 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
               </div>
             </section>
           ))}
+
+          <section className={`${styles.slide} ${styles.premiumSlide}`} aria-label="Premium案内">
+            <div className={styles.premiumGate}>
+              <div className={styles.premiumLock}>🔒</div>
+              <span className={styles.premiumEyebrow}>BOATSTRIKERS PREMIUM</span>
+              <h2>ここから先は<br />メンバー限定です</h2>
+              <p>
+                無料公開はここまでです。<br />
+                続きの詳しいデータ・狙い方・実戦ポイントは、Premium版で公開します。
+              </p>
+
+              <div className={styles.premiumBenefits}>
+                <span>✓ 詳細データ</span>
+                <span>✓ 狙い条件</span>
+                <span>✓ 実戦ポイント</span>
+              </div>
+
+              {membershipUrl ? (
+                <a className={styles.premiumButton} href={membershipUrl} target="_blank" rel="noreferrer">
+                  メンバーシップを見る
+                </a>
+              ) : (
+                <div className={styles.premiumButtonMuted}>メンバーシップ連携は次の段階で追加</div>
+              )}
+
+              <Link className={styles.premiumBack} href={`/library/${magazine.slug}`}>雑誌一覧へ戻る</Link>
+              <small className={styles.premiumNote}>※この画面では認証処理を行わないため、既存ビューアの安定動作に影響しません。</small>
+            </div>
+          </section>
         </div>
 
         <button
@@ -125,31 +158,21 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
 
           <div className={styles.centerControls}>
             <div className={styles.dots} aria-label="ページ選択">
-              {slides.map((_, index) => (
+              {Array.from({ length: totalSlides }).map((_, index) => (
                 <button
                   type="button"
                   key={index}
                   className={index === page ? styles.activeDot : ""}
                   onClick={() => goTo(index)}
-                  aria-label={`${index + 1}ページへ`}
+                  aria-label={index === premiumGateIndex ? "Premium案内へ" : `${index + 1}ページへ`}
                 />
               ))}
             </div>
-            <p>{isLastPage ? "最後のページです" : "左右にスワイプしてページをめくれます"}</p>
+            <p>{isPremiumGate ? "この先はPremiumコンテンツです" : "左右にスワイプしてページをめくれます"}</p>
           </div>
 
           <button type="button" className={styles.mobileNav} onClick={() => goTo(page + 1)} disabled={page === totalSlides - 1} aria-label="次のページ">›</button>
         </div>
-
-        {isLastPage && (
-          <div className={styles.finishedBar}>
-            <div>
-              <span>FINISHED</span>
-              <strong>{issue.number}を読み終えました</strong>
-            </div>
-            <Link href={`/library/${magazine.slug}`}>雑誌一覧へ戻る</Link>
-          </div>
-        )}
       </footer>
     </main>
   );
