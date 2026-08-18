@@ -108,13 +108,17 @@ export default function PublicSiteHeader() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
 
-  const hidden = useMemo(
-    () =>
+  const hidden = useMemo(() => {
+    const isMagazineViewer =
+      /^\/library\/(ichika|hatsune|kiina)-seminar\/[^/]+\/?$/.test(pathname);
+
+    return (
       pathname.startsWith("/admin") ||
       pathname.startsWith("/bsc2/admin") ||
-      pathname.startsWith("/bsc2/"),
-    [pathname]
-  );
+      pathname.startsWith("/bsc2/") ||
+      isMagazineViewer
+    );
+  }, [pathname]);
 
   const compact = pathname.startsWith("/races");
 
