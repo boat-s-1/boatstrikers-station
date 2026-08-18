@@ -92,6 +92,13 @@ const GROUPS = [
     description: "記事・雑誌・24場攻略を管理",
     items: [
       {
+        href: "/admin/seminar-magazines",
+        icon: "📚",
+        title: "攻略マガジン管理",
+        text: "月・水・金の週刊3誌を画像登録・予約公開",
+        badge: "よく使う",
+      },
+      {
         href: "/admin/magazine",
         icon: "📖",
         title: "Web雑誌管理",
@@ -142,6 +149,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
   { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
   { href: "/admin/results", icon: "🏆", title: "予想実績" },
