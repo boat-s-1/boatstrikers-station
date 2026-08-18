@@ -1,12 +1,35 @@
+import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { MAGAZINE_COOKIE, verifyMagazineToken } from "../../../lib/magazineAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAGAZINE_COOKIE = "bs_magazine_premium";
 const allowedMagazines = new Set(["ichika", "hatsune", "kiina"]);
+
+function authSecret() {
+  return process.env.BOATSTRIKERS_MAGAZINE_AUTH_SECRET || process.env.BOATSTRIKERS_MAGAZINE_PASSWORD || "";
+}
+
+function signature(value) {
+  const secret = authSecret();
+  if (!secret) return "";
+  return crypto.createHmac("sha256", secret).update(value).digest("hex");
+}
+
+function verifyMagazineToken(token) {
+  if (!token || !authSecret()) return false;
+  const [expiresAt, providedSignature] = token.split(".");
+  if (!expiresAt || !providedSignature) return false;
+  if (Number(expiresAt) <= Math.floor(Date.now() / 1000)) return false;
+
+  const expected = signature(expiresAt);
+  if (!expected || expected.length !== providedSignature.length) return false;
+
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(providedSignature));
+}
 
 export async function GET(request) {
   if (!verifyMagazineToken(request.cookies.get(MAGAZINE_COOKIE)?.value)) {
