@@ -1,0 +1,344 @@
+.page {
+  min-height: 100vh;
+  background: #f4f7fb;
+  color: #162033;
+  padding: 32px 18px 120px;
+}
+
+.shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.1;
+}
+
+.hero p {
+  margin: 10px 0 0;
+  color: #64748b;
+}
+
+.backButton {
+  text-decoration: none;
+  color: #162033;
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.filterCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filters label {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.filters label span {
+  font-size: 12px;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.filters input,
+.filters select {
+  height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 12px;
+  color: #162033;
+  font: inherit;
+}
+
+.filters button,
+.stickySave button {
+  border: 0;
+  border-radius: 11px;
+  background: #111827;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.filters button {
+  height: 42px;
+  padding: 0 20px;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.summary span {
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.summary strong { color: #111827; }
+
+.success,
+.error {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  font-weight: 800;
+}
+
+.success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.error {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+.empty {
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+  padding: 46px 24px;
+  text-align: center;
+}
+
+.empty p { color: #64748b; margin-bottom: 0; }
+
+.groupStack {
+  display: grid;
+  gap: 18px;
+}
+
+.group {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+  border-top-width: 5px;
+}
+
+.ichika { border-top-color: #f59e0b; }
+.hatsune { border-top-color: #ec4899; }
+.hatsuneRisk { border-top-color: #8b5cf6; }
+.kiina { border-top-color: #10b981; }
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.groupHeader div > span {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 900;
+  color: #64748b;
+  margin-bottom: 3px;
+}
+
+.groupHeader h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.groupHeader > strong {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.raceCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px;
+  background: #fbfdff;
+}
+
+.rankLine,
+.raceMain,
+.metrics,
+.checks {
+  display: flex;
+  align-items: center;
+}
+
+.rankLine {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rank {
+  font-weight: 900;
+  color: #64748b;
+}
+
+.probability {
+  font-size: 21px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.raceMain {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.raceMain strong {
+  font-size: 20px;
+}
+
+.raceMain span {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #e2e8f0;
+  font-weight: 900;
+}
+
+.metrics {
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.metrics span {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  border-radius: 8px;
+  padding: 5px 7px;
+}
+
+.checks {
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.checks label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.checks input {
+  width: 18px;
+  height: 18px;
+  accent-color: #111827;
+}
+
+.model {
+  display: block;
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.stickySave {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: min(900px, calc(100% - 28px));
+  background: rgba(15, 23, 42, .96);
+  color: #fff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .28);
+  z-index: 20;
+}
+
+.stickySave div {
+  display: grid;
+  gap: 2px;
+}
+
+.stickySave span {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.stickySave button {
+  background: #fff;
+  color: #111827;
+  padding: 11px 20px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .page { padding: 20px 12px 130px; }
+  .hero { align-items: stretch; flex-direction: column; }
+  .backButton { align-self: flex-start; }
+  .cardGrid { grid-template-columns: 1fr; }
+  .filterCard { padding: 14px; }
+  .filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .filters label { min-width: 0; }
+  .filters button { grid-column: 1 / -1; }
+  .stickySave { bottom: 10px; border-radius: 15px; }
+  .stickySave div span { display: none; }
+}
