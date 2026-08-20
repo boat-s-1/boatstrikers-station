@@ -96,7 +96,9 @@ def main():
             raw = raw_score(r)
             common = first_map.get((int(r["course_code"]), int(r["race_no"]), boat_no), float("-inf"))
             if inverse:
-                return (raw, common, int(r["course_code"]), int(r["race_no"]))
+                # raw_ranking_score is already an inverted risk score (higher = more risky).
+                # For ties, lower common first-place probability means greater inside-risk.
+                return (-raw, common, int(r["course_code"]), int(r["race_no"]))
             return (-raw, -common, int(r["course_code"]), int(r["race_no"]))
 
         rows.sort(key=key)
