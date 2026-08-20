@@ -18,21 +18,36 @@ const CHARACTER_META = {
     title: "一果AI 今日のイン逃げ注目",
     subtitle: "前日データからイン逃げ期待度の高いレースを抽出",
     selector: ".ichikaPage .hero",
+    pageSelector: ".ichikaPage",
     tone: "ichika",
+    legacyNeedle: "一果のイン逃げツール",
+    researchTitle: "一果のイン逃げ研究ツール（β）",
+    researchText: "自分で条件を見ながらイン逃げを研究したい方向けの補助ツールです。",
+    researchHref: "https://www.boat-strike.com/ichika",
   },
   hatsune: {
     name: "初音",
     title: "初音AI 今日の女子戦注目",
     subtitle: "女子戦からイン優勢とイン不安の両方をチェック",
     selector: ".hatsunePage .hero",
+    pageSelector: ".hatsunePage",
     tone: "hatsune",
+    legacyNeedle: "女子戦データツール",
+    researchTitle: "初音の女子戦データ研究ツール（β）",
+    researchText: "女子戦データを自分で比較・確認したい方向けの研究用ツールです。",
+    researchHref: "https://www.boat-strike.com/hastune",
   },
   kiina: {
     name: "キイナ",
     title: "キイナAI 今日の5アタマ注目",
     subtitle: "前日データから5号艇1着の期待レースを抽出",
     selector: ".kiinaPage .hero",
+    pageSelector: ".kiinaPage",
     tone: "kiina",
+    legacyNeedle: "5アタマ予想ツール",
+    researchTitle: "キイナの5アタマ研究ツール（β）",
+    researchText: "5号艇を自分で掘り下げて研究したい方向けの補助ツールです。",
+    researchHref: "https://www.boat-strike.com/kiina5.html",
   },
 };
 
@@ -63,24 +78,38 @@ export default function CharacterAiRoomPanel() {
   const pathname = usePathname();
   const character = useMemo(() => getCharacter(pathname), [pathname]);
   const [mount, setMount] = useState(null);
+  const [researchMount, setResearchMount] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!character) {
       setMount(null);
+      setResearchMount(null);
       setData(null);
       return undefined;
     }
 
     const meta = CHARACTER_META[character];
     const target = document.querySelector(meta.selector);
-    if (!target) return undefined;
+    const page = document.querySelector(meta.pageSelector);
+    if (!target || !page) return undefined;
 
     const node = document.createElement("div");
     node.className = styles.portalMount;
     target.insertAdjacentElement("afterend", node);
     setMount(node);
+
+    const oldToolSection = Array.from(page.querySelectorAll("section.sectionCard")).find((section) =>
+      String(section.textContent || "").includes(meta.legacyNeedle)
+    );
+    const previousDisplay = oldToolSection?.style.display || "";
+    if (oldToolSection) oldToolSection.style.display = "none";
+
+    const researchNode = document.createElement("div");
+    researchNode.className = styles.researchMount;
+    page.appendChild(researchNode);
+    setResearchMount(researchNode);
 
     let cancelled = false;
     setLoading(true);
@@ -105,18 +134,21 @@ export default function CharacterAiRoomPanel() {
 
     return () => {
       cancelled = true;
+      if (oldToolSection) oldToolSection.style.display = previousDisplay;
       node.remove();
+      researchNode.remove();
       setMount(null);
+      setResearchMount(null);
     };
   }, [character]);
 
-  if (!character || !mount) return null;
+  if (!character) return null;
 
   const meta = CHARACTER_META[character];
   const picks = Array.isArray(data?.picks) ? data.picks : [];
   const stats = Array.isArray(data?.stats) ? data.stats : [];
 
-  const panel = (
+  const panel = mount ? (
     <section className={`${styles.panel} ${styles[meta.tone]}`} aria-label={`${meta.name} AI予想`}>
       <div className={styles.heading}>
         <div>
@@ -187,7 +219,30 @@ export default function CharacterAiRoomPanel() {
         </p>
       </div>
     </section>
-  );
+  ) : null;
 
-  return createPortal(panel, mount);
+  const research = researchMount ? (
+    <section className={`${styles.researchSection} ${styles[meta.tone]}`} aria-label={`${meta.name} 研究ツール`}>
+      <details>
+        <summary>
+          <span>🔬 自分で調べたい人向け</span>
+          <strong>{meta.researchTitle}</strong>
+          <small>研究ツールを開く</small>
+        </summary>
+        <div className={styles.researchBody}>
+          <p>{meta.researchText}</p>
+          <a href={meta.researchHref} target="_blank" rel="noopener noreferrer">
+            研究ツールを使う ↗
+          </a>
+        </div>
+      </details>
+    </section>
+  ) : null;
+
+  return (
+    <>
+      {mount && panel ? createPortal(panel, mount) : null}
+      {researchMount && research ? createPortal(research, researchMount) : null}
+    </>
+  );
 }
