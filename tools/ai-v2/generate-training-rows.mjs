@@ -20,7 +20,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  console.log(`BoatStrikers AI v2 training-row generator\n\nUsage:\n  node --env-file=.env.local tools/ai-v2/generate-training-rows.mjs --from YYYY-MM-DD --to YYYY-MM-DD [--timing previous_day|after_exhibition|both]\n\nThis script only calls public.ai_v2_refresh_training_rows().\nIt does not train or activate any model.`);
+  console.log(`BoatStrikers AI v2 training-row generator\n\nUsage:\n  node --env-file=.env.local tools/ai-v2/generate-training-rows.mjs --from YYYY-MM-DD --to YYYY-MM-DD [--timing previous_day|after_exhibition|both]\n\nThis script refreshes public.ai_v2_training_rows and then normalizes historical rate scales.\nIt does not train or activate any model.`);
 }
 
 function assertDate(label, value) {
@@ -65,11 +65,22 @@ async function main() {
     });
 
     if (error) {
-      throw new Error(`[${timing}] ${error.message}`);
+      throw new Error(`[${timing}] refresh: ${error.message}`);
     }
 
     const summary = Array.isArray(data) ? data[0] : data;
     console.log(JSON.stringify({ timing, ...summary }, null, 2));
+
+    console.log(`[${timing}] normalizing rate scales...`);
+    const { error: normalizeError } = await supabase.rpc('ai_v2_normalize_training_rows', {
+      p_start: args.from,
+      p_end: args.to,
+      p_timing: timing,
+    });
+    if (normalizeError) {
+      throw new Error(`[${timing}] normalize: ${normalizeError.message}`);
+    }
+    console.log(`[${timing}] normalized.`);
   }
 
   console.log('\nDone. No model was trained or activated.');
