@@ -1,0 +1,262 @@
+.portalMount {
+  width: 100%;
+}
+
+.panel {
+  width: min(1120px, calc(100% - 28px));
+  margin: 18px auto 22px;
+  padding: 18px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.ichika {
+  border-top: 5px solid #f59e0b;
+}
+
+.hatsune {
+  border-top: 5px solid #ec4899;
+}
+
+.kiina {
+  border-top: 5px solid #10b981;
+}
+
+.heading,
+.recordHeading,
+.pickTop,
+.raceLine {
+  display: flex;
+  align-items: center;
+}
+
+.heading {
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.kicker,
+.recordHeading span {
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+}
+
+.heading h2 {
+  margin: 4px 0 5px;
+  color: #111827;
+  font-size: clamp(21px, 3vw, 30px);
+  line-height: 1.2;
+}
+
+.heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dateBadge {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pickCard {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.pickTop {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pickTop span {
+  font-size: 12px;
+  font-weight: 900;
+  color: #64748b;
+}
+
+.pickTop strong {
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.raceLine {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.raceLine b {
+  font-size: 19px;
+  color: #111827;
+}
+
+.raceLine span {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 900;
+}
+
+.pickCard > small {
+  display: block;
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.loading,
+.empty {
+  padding: 24px;
+  border-radius: 14px;
+  background: #f8fafc;
+  text-align: center;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.recordArea {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.recordHeading {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.recordHeading h3 {
+  margin: 3px 0 0;
+  color: #111827;
+  font-size: 17px;
+}
+
+.recordHeading > small {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.statCard {
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.statCard span {
+  display: block;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.statCard strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 25px;
+  line-height: 1.05;
+}
+
+.statCard small {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.note {
+  margin: 9px 0 0;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.ichika .pickCard:first-child {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.hatsune .pickCard {
+  background: #fdf2f8;
+  border-color: #fbcfe8;
+}
+
+.kiina .pickCard:first-child {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+@media (max-width: 760px) {
+  .panel {
+    width: calc(100% - 20px);
+    margin: 12px auto 16px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .heading {
+    align-items: flex-start;
+  }
+
+  .heading p {
+    font-size: 12px;
+  }
+
+  .pickGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pickCard {
+    padding: 12px;
+  }
+
+  .pickTop strong {
+    font-size: 18px;
+  }
+
+  .raceLine b {
+    font-size: 18px;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .dateBadge {
+    display: none;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+}
