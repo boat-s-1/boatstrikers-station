@@ -52,6 +52,13 @@ const GROUPS = [
     description: "AI予想・実績・結果を確認",
     items: [
       {
+        href: "/admin/ai-candidates",
+        icon: "✨",
+        title: "AI今日の候補",
+        text: "一果・初音・キイナの候補からホーム・SNS使用レースを選択",
+        badge: "NEW",
+      },
+      {
         href: "/admin/results",
         icon: "🏆",
         title: "予想実績管理",
