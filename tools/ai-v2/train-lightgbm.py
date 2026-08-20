@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import math
 import os
 from pathlib import Path
 
@@ -9,8 +8,13 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import requests
+from dotenv import load_dotenv
 from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+
+ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(ROOT / ".env.local", override=False)
+load_dotenv(ROOT / ".env", override=False)
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or os.environ.get("SUPABASE_URL")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
@@ -39,7 +43,7 @@ EXHIBITION_FEATURES = [
     "wind_speed", "wave_height",
 ]
 
-# Intentionally excluded from v1 training because historical coverage is extremely sparse:
+# Historical coverage is too sparse for these in v1:
 # average_st, relative_st, st_rank_in_race, course1_average_st, course1_top2_rate, course1_race_count
 
 SELECT_COLUMNS = sorted(set([
@@ -151,7 +155,6 @@ def train_one(df: pd.DataFrame, timing: str, target: str, row_filter=None):
         n_estimators=1200,
         learning_rate=0.025,
         num_leaves=31,
-        max_depth=-1,
         min_child_samples=80,
         subsample=0.85,
         colsample_bytree=0.85,
@@ -216,12 +219,11 @@ def main():
         df = fetch_all(timing)
         print(f"[{timing}] {len(df):,} rows / {df['race_date'].min().date()}..{df['race_date'].max().date()}")
 
-        # Common per-boat finishing heads.
         for target in ["is_first", "is_second", "is_third"]:
             r = train_one(df, timing, target)
-            if r: all_results.append(r)
+            if r:
+                all_results.append(r)
 
-        # Character specialist heads.
         specs = [
             ("ichika_target", lambda x: x["boat_no"] == 1),
             ("hatsune_target", lambda x: (x["boat_no"] == 1) & (x["is_female_race"] == True)),
@@ -229,7 +231,8 @@ def main():
         ]
         for target, filt in specs:
             r = train_one(df, timing, target, filt)
-            if r: all_results.append(r)
+            if r:
+                all_results.append(r)
 
     summary = OUT / "training_summary.json"
     summary.write_text(json.dumps(all_results, ensure_ascii=False, indent=2), encoding="utf-8")
