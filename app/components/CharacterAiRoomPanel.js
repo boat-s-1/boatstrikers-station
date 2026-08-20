@@ -1,0 +1,193 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
+import styles from "./CharacterAiRoomPanel.module.css";
+
+const STADIUMS = {
+  1: "桐生", 2: "戸田", 3: "江戸川", 4: "平和島", 5: "多摩川", 6: "浜名湖",
+  7: "蒲郡", 8: "常滑", 9: "津", 10: "三国", 11: "びわこ", 12: "住之江",
+  13: "尼崎", 14: "鳴門", 15: "丸亀", 16: "児島", 17: "宮島", 18: "徳山",
+  19: "下関", 20: "若松", 21: "芦屋", 22: "福岡", 23: "唐津", 24: "大村",
+};
+
+const CHARACTER_META = {
+  ichika: {
+    name: "一果",
+    title: "一果AI 今日のイン逃げ注目",
+    subtitle: "前日データからイン逃げ期待度の高いレースを抽出",
+    selector: ".ichikaPage .hero",
+    tone: "ichika",
+  },
+  hatsune: {
+    name: "初音",
+    title: "初音AI 今日の女子戦注目",
+    subtitle: "女子戦からイン優勢とイン不安の両方をチェック",
+    selector: ".hatsunePage .hero",
+    tone: "hatsune",
+  },
+  kiina: {
+    name: "キイナ",
+    title: "キイナAI 今日の5アタマ注目",
+    subtitle: "前日データから5号艇1着の期待レースを抽出",
+    selector: ".kiinaPage .hero",
+    tone: "kiina",
+  },
+};
+
+const TYPE_META = {
+  ichika_escape_best10: { label: "イン逃げ期待", statLabel: "イン逃げ予想" },
+  hatsune_dominant_best3: { label: "イン優勢", statLabel: "イン優勢予想" },
+  hatsune_risky_best3: { label: "イン不安", statLabel: "イン不安予想" },
+  kiina_boat5_best5: { label: "5アタマ期待", statLabel: "5アタマ予想" },
+};
+
+function getCharacter(pathname) {
+  const first = String(pathname || "").split("/").filter(Boolean)[0];
+  return CHARACTER_META[first] ? first : null;
+}
+
+function percent(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+function formatDate(value) {
+  if (!value) return "—";
+  return String(value).replaceAll("-", "/");
+}
+
+export default function CharacterAiRoomPanel() {
+  const pathname = usePathname();
+  const character = useMemo(() => getCharacter(pathname), [pathname]);
+  const [mount, setMount] = useState(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!character) {
+      setMount(null);
+      setData(null);
+      return undefined;
+    }
+
+    const meta = CHARACTER_META[character];
+    const target = document.querySelector(meta.selector);
+    if (!target) return undefined;
+
+    const node = document.createElement("div");
+    node.className = styles.portalMount;
+    target.insertAdjacentElement("afterend", node);
+    setMount(node);
+
+    let cancelled = false;
+    setLoading(true);
+    setData(null);
+
+    fetch(`/api/ai-v2/character-panel?character=${encodeURIComponent(character)}`, {
+      cache: "no-store",
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("AI panel fetch failed");
+        return response.json();
+      })
+      .then((json) => {
+        if (!cancelled) setData(json);
+      })
+      .catch(() => {
+        if (!cancelled) setData({ picks: [], stats: [], error: true });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      node.remove();
+      setMount(null);
+    };
+  }, [character]);
+
+  if (!character || !mount) return null;
+
+  const meta = CHARACTER_META[character];
+  const picks = Array.isArray(data?.picks) ? data.picks : [];
+  const stats = Array.isArray(data?.stats) ? data.stats : [];
+
+  const panel = (
+    <section className={`${styles.panel} ${styles[meta.tone]}`} aria-label={`${meta.name} AI予想`}>
+      <div className={styles.heading}>
+        <div>
+          <span className={styles.kicker}>BOATSTRIKERS AI V2</span>
+          <h2>🤖 {meta.title}</h2>
+          <p>{meta.subtitle}</p>
+        </div>
+        <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
+      </div>
+
+      {loading ? (
+        <div className={styles.loading}>AI予想を読み込み中...</div>
+      ) : picks.length > 0 ? (
+        <div className={styles.pickGrid}>
+          {picks.map((pick) => {
+            const type = TYPE_META[pick.rankingType] || { label: "AI注目" };
+            return (
+              <article className={styles.pickCard} key={`${pick.rankingType}-${pick.rankNo}-${pick.courseCode}-${pick.raceNo}`}>
+                <div className={styles.pickTop}>
+                  <span>{type.label}</span>
+                  <strong>{percent(pick.probability)}</strong>
+                </div>
+                <div className={styles.raceLine}>
+                  <b>{STADIUMS[pick.courseCode] || `${pick.courseCode}場`}</b>
+                  <span>{pick.raceNo}R</span>
+                </div>
+                <small>AIランク #{pick.rankNo}</small>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className={styles.empty}>本日のAI予想は準備中です。</div>
+      )}
+
+      <div className={styles.recordArea}>
+        <div className={styles.recordHeading}>
+          <div>
+            <span>AI PERFORMANCE</span>
+            <h3>過去のAI予想 的中率</h3>
+          </div>
+          <small>結果確定分のみ</small>
+        </div>
+
+        <div className={styles.statGrid}>
+          {(character === "hatsune"
+            ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
+            : character === "ichika"
+              ? ["ichika_escape_best10"]
+              : ["kiina_boat5_best5"]
+          ).map((typeKey) => {
+            const stat = stats.find((item) => item.rankingType === typeKey);
+            const type = TYPE_META[typeKey];
+            const predictions = Number(stat?.predictions || 0);
+            const hits = Number(stat?.hits || 0);
+            return (
+              <div className={styles.statCard} key={typeKey}>
+                <span>{type.statLabel}</span>
+                <strong>{predictions > 0 && stat?.hitRate != null ? `${Number(stat.hitRate).toFixed(1)}%` : "—%"}</strong>
+                <small>{predictions > 0 ? `${hits} / ${predictions}R 的中` : "結果データ蓄積中"}</small>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className={styles.note}>
+          AI v2集計開始：{formatDate(data?.startDate)} ／ 前日版AIランキングと確定結果を集計しています。
+        </p>
+      </div>
+    </section>
+  );
+
+  return createPortal(panel, mount);
+}
