@@ -49,6 +49,8 @@ export default function ShortsEditor({ date, candidates }) {
   const generatedPost = useMemo(() => defaultPost(date, picks), [date, selected, candidates]);
   const [scriptOverride, setScriptOverride] = useState("");
   const [postOverride, setPostOverride] = useState("");
+  const [engine, setEngine] = useState("aivis");
+  const [speakerId, setSpeakerId] = useState("");
   const script = scriptOverride || generatedScript;
   const post = postOverride || generatedPost;
   const seconds = Math.max(1, Math.round(script.replace(/\s/g, "").length / 6.2));
@@ -65,7 +67,14 @@ export default function ShortsEditor({ date, candidates }) {
 
   function downloadPlan() {
     const payload = {
-      version: 1, date, format: "youtube_short_9x16", voice: "boatstrikers_narrator",
+      version: 2, date, format: "youtube_short_9x16", voice: "boatstrikers_narrator",
+      tts: {
+        engine,
+        speakerId: speakerId === "" ? null : Number(speakerId),
+        endpoint: engine === "aivis" ? "http://127.0.0.1:10101" : "http://127.0.0.1:50021",
+        speedScale: 1.08,
+        intonationScale: 1.05,
+      },
       character: "ichika", picks, narration: script, socialPost: post,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -125,9 +134,18 @@ export default function ShortsEditor({ date, candidates }) {
             <textarea value={post} onChange={(event) => setPostOverride(event.target.value)} rows={8} />
           </div>
 
+          <div className={styles.textSection}>
+            <div className={styles.textHeading}><div><span>VOICE</span><h2>公式ナレーター設定</h2></div></div>
+            <div className={styles.voiceSettings}>
+              <label><span>音声エンジン</span><select value={engine} onChange={(event) => setEngine(event.target.value)}><option value="aivis">AivisSpeech</option><option value="voicevox">VOICEVOX</option></select></label>
+              <label><span>スタイルID</span><input type="number" min="0" placeholder="声を選んで入力" value={speakerId} onChange={(event) => setSpeakerId(event.target.value)} /></label>
+            </div>
+            <p className={styles.localNote}>音声とMP4は、音声エンジンを起動したWindowsパソコンで生成します。制作データにはこの設定が保存されます。</p>
+          </div>
+
           <div className={styles.actions}>
-            <button type="button" className={styles.download} onClick={downloadPlan}>制作データを保存</button>
-            <button type="button" className={styles.disabled} disabled>音声・MP4を生成（次段階）</button>
+            <button type="button" className={styles.download} onClick={downloadPlan}>音声・動画用データを保存</button>
+            <button type="button" className={styles.disabled} disabled>クラウドで直接生成（準備中）</button>
           </div>
         </section>
 
@@ -142,7 +160,7 @@ export default function ShortsEditor({ date, candidates }) {
             <Image src="/admin-newspaper/ichika-previous.png" alt="一果" width={420} height={600} className={styles.ichika} />
             <div className={styles.narrator}>VOICE：BoatStrikers公式ナレーター</div>
           </div>
-          <div className={styles.voiceCard}><span>🎙️</span><div><strong>音声プロファイル</strong><p>公式ナレーター／落ち着いた実況調</p></div><em>固定</em></div>
+          <div className={styles.voiceCard}><span>🎙️</span><div><strong>音声プロファイル</strong><p>公式ナレーター／{engine === "aivis" ? "AivisSpeech" : "VOICEVOX"}</p></div><em>{speakerId ? `ID ${speakerId}` : "未選択"}</em></div>
         </aside>
       </div>
     </>
