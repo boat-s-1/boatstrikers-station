@@ -59,6 +59,13 @@ const GROUPS = [
         badge: "NEW",
       },
       {
+        href: "/admin/shorts",
+        icon: "🎬",
+        title: "ショート動画生成",
+        text: "一果の前日イン逃げTOP3から台本・投稿素材を作成",
+        badge: "NEW",
+      },
+      {
         href: "/admin/results",
         icon: "🏆",
         title: "予想実績管理",
@@ -156,6 +163,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
   { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
   { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
