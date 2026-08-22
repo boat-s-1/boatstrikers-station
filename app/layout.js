@@ -4,6 +4,7 @@ import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
 import CharacterShortsShelf from "./components/CharacterShortsShelf";
 import IchikaRoomTheme from "./components/IchikaRoomTheme";
+import IchikaBannerFix from "./components/IchikaBannerFix";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
         <CharacterAiRoomPanel />
         <CharacterShortsShelf />
         <IchikaRoomTheme />
+        <IchikaBannerFix />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
