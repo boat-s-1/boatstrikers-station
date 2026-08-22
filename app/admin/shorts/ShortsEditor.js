@@ -50,7 +50,7 @@ export default function ShortsEditor({ date, candidates }) {
   const [scriptOverride, setScriptOverride] = useState("");
   const [postOverride, setPostOverride] = useState("");
   const [engine, setEngine] = useState("aivis");
-  const [speakerId, setSpeakerId] = useState("");
+  const [speakerId, setSpeakerId] = useState("888753763");
   const script = scriptOverride || generatedScript;
   const post = postOverride || generatedPost;
   const seconds = Math.max(1, Math.round(script.replace(/\s/g, "").length / 6.2));
@@ -70,6 +70,8 @@ export default function ShortsEditor({ date, candidates }) {
       version: 2, date, format: "youtube_short_9x16", voice: "boatstrikers_narrator",
       tts: {
         engine,
+        modelName: "まお",
+        styleName: speakerId === "888753763" ? "おちつき" : "カスタム",
         speakerId: speakerId === "" ? null : Number(speakerId),
         endpoint: engine === "aivis" ? "http://127.0.0.1:10101" : "http://127.0.0.1:50021",
         speedScale: 1.08,
@@ -138,7 +140,7 @@ export default function ShortsEditor({ date, candidates }) {
             <div className={styles.textHeading}><div><span>VOICE</span><h2>公式ナレーター設定</h2></div></div>
             <div className={styles.voiceSettings}>
               <label><span>音声エンジン</span><select value={engine} onChange={(event) => setEngine(event.target.value)}><option value="aivis">AivisSpeech</option><option value="voicevox">VOICEVOX</option></select></label>
-              <label><span>スタイルID</span><input type="number" min="0" placeholder="声を選んで入力" value={speakerId} onChange={(event) => setSpeakerId(event.target.value)} /></label>
+              <label><span>スタイルID（まお／おちつき）</span><input type="number" min="0" placeholder="声を選んで入力" value={speakerId} onChange={(event) => setSpeakerId(event.target.value)} /></label>
             </div>
             <p className={styles.localNote}>音声とMP4は、音声エンジンを起動したWindowsパソコンで生成します。制作データにはこの設定が保存されます。</p>
           </div>
@@ -160,7 +162,7 @@ export default function ShortsEditor({ date, candidates }) {
             <Image src="/admin-newspaper/ichika-previous.png" alt="一果" width={420} height={600} className={styles.ichika} />
             <div className={styles.narrator}>VOICE：BoatStrikers公式ナレーター</div>
           </div>
-          <div className={styles.voiceCard}><span>🎙️</span><div><strong>音声プロファイル</strong><p>公式ナレーター／{engine === "aivis" ? "AivisSpeech" : "VOICEVOX"}</p></div><em>{speakerId ? `ID ${speakerId}` : "未選択"}</em></div>
+          <div className={styles.voiceCard}><span>🎙️</span><div><strong>音声プロファイル</strong><p>公式ナレーター／{engine === "aivis" ? "まお・おちつき" : "VOICEVOX"}</p></div><em>{speakerId ? `ID ${speakerId}` : "未選択"}</em></div>
         </aside>
       </div>
     </>
