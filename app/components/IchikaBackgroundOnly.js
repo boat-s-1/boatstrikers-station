@@ -1,53 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 export default function IchikaBackgroundOnly() {
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (pathname !== "/ichika") return undefined;
+  if (pathname !== "/ichika") return null;
 
-    const page = document.querySelector(".ichikaPage");
-    if (!page) return undefined;
+  return (
+    <style>{`
+      .ichikaPage {
+        position: relative !important;
+        isolation: isolate !important;
+        background: transparent !important;
+      }
 
-    const previous = {
-      backgroundImage: page.style.backgroundImage,
-      backgroundColor: page.style.backgroundColor,
-      backgroundRepeat: page.style.backgroundRepeat,
-      backgroundPosition: page.style.backgroundPosition,
-      backgroundSize: page.style.backgroundSize,
-      backgroundAttachment: page.style.backgroundAttachment,
-    };
+      .ichikaPage::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-color: #eef8fb;
+        background-image: url("/images/ichika/ichika-room-bg.webp");
+        background-repeat: no-repeat;
+        background-position: center top;
+        background-size: min(100vw, 430px) auto;
+      }
 
-    page.style.setProperty(
-      "background-image",
-      'url("/images/ichika/ichika-room-bg.webp")',
-      "important"
-    );
-    page.style.setProperty("background-color", "#eef8fb", "important");
-    page.style.setProperty("background-repeat", "no-repeat", "important");
-    page.style.setProperty("background-position", "center top", "important");
-
-    // cover だと長いページ全体に合わせて画像が巨大化し、
-    // 中央の白い部分だけが見えてしまうため、画面幅基準で表示する。
-    page.style.setProperty(
-      "background-size",
-      "min(100vw, 430px) auto",
-      "important"
-    );
-    page.style.setProperty("background-attachment", "fixed", "important");
-
-    return () => {
-      page.style.backgroundImage = previous.backgroundImage;
-      page.style.backgroundColor = previous.backgroundColor;
-      page.style.backgroundRepeat = previous.backgroundRepeat;
-      page.style.backgroundPosition = previous.backgroundPosition;
-      page.style.backgroundSize = previous.backgroundSize;
-      page.style.backgroundAttachment = previous.backgroundAttachment;
-    };
-  }, [pathname]);
-
-  return null;
+      @media (min-width: 431px) {
+        .ichikaPage::before {
+          background-size: 430px auto;
+        }
+      }
+    `}</style>
+  );
 }
