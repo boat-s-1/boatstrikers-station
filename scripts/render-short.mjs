@@ -38,6 +38,13 @@ function pct(value) {
   return Number.isFinite(n) ? `${Math.round(n * 100)}%` : "—";
 }
 
+function displayStadium(value) {
+  return String(value || "会場未定")
+    .replace(/^ボートレース/u, "")
+    .replace(/^BOAT\s*RACE\s*/iu, "")
+    .replace(/[\s　]+/gu, "");
+}
+
 function shortReason(row) {
   const racer = row.racer || {};
   const courseRate = Number(racer.course1_2_rate);
@@ -75,7 +82,7 @@ function makeAss(plan, duration, font) {
     const racerName = String(row.racer?.racer_name || "注目レーサー").replace(/[\s　]+/g, "");
     const reasons = reasonLines(row);
     return [
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(180,180)}${assEscape(row.stadium)}  ${row.race_no}R`,
+      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(180,180)}${assEscape(displayStadium(row.stadium))}  ${row.race_no}R`,
       `Dialogue: 2,${assTime(start + 0.18)},${assTime(finish)},Racer,,0,0,0,,{\\fad(180,180)}1号艇  ${assEscape(racerName)}選手`,
       `Dialogue: 2,${assTime(start + 0.36)},${assTime(finish)},Reason,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[0])}`,
       reasons[1] ? `Dialogue: 2,${assTime(start + 0.54)},${assTime(finish)},Reason2,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[1])}` : "",
@@ -91,7 +98,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Place,${font},64,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,145,390,680,1
+Style: Place,${font},60,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,1,0,1,3,1,8,180,180,700,1
 Style: Racer,${font},50,&H00415943,&H00415943,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,150,370,800,1
 Style: Reason,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,925,1
 Style: Reason2,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,1015,1
@@ -161,7 +168,7 @@ async function main() {
 
   const duration = Number(capture("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", wavPath]));
   if (!Number.isFinite(duration)) fail("音声の長さを取得できません。");
-  await writeFile(assPath, makeAss(plan, duration, process.env.BS_SHORTS_FONT || "Yu Gothic"), "utf8");
+  await writeFile(assPath, makeAss(plan, duration, process.env.BS_SHORTS_FONT || "Yu Gothic UI"), "utf8");
 
   const templateDir = path.resolve(process.env.BS_SHORTS_TEMPLATES || "public/shorts/templates");
   const templates = ["intro.jpg", "rank-3.jpg", "rank-2.jpg", "rank-1.jpg", "outro.jpg"].map((name) => path.join(templateDir, name));
