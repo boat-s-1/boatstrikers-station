@@ -48,26 +48,34 @@ function statusInfo(course) {
   };
 }
 
-async function getTodayHits(raceDate) {
-  if (!supabase || !raceDate) return [];
+function formatHitDate(value) {
+  if (!value) return "";
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return String(value);
+  return `${Number(match[2])}/${Number(match[3])}`;
+}
+
+async function getLatestHits(limit = 5) {
+  if (!supabase) return [];
 
   try {
     const { data, error } = await supabase
       .from("bsc_results")
-      .select("category, invest, payout, hit")
-      .eq("race_date", raceDate)
-      .in("category", ["一果", "初音", "キイナ"]);
+      .select("race_date, category, invest, payout, hit")
+      .in("category", ["一果", "初音", "キイナ"])
+      .order("race_date", { ascending: false })
+      .limit(60);
 
     if (error) {
-      console.error("本日の的中レース取得エラー:", error.message);
+      console.error("最新の的中レース取得エラー:", error.message);
       return [];
     }
 
     return (Array.isArray(data) ? data : [])
       .filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0)
-      .sort((a, b) => Number(b.payout || 0) - Number(a.payout || 0));
+      .slice(0, limit);
   } catch (error) {
-    console.error("本日の的中レース取得例外:", error);
+    console.error("最新の的中レース取得例外:", error);
     return [];
   }
 }
@@ -81,7 +89,7 @@ function HitCard({ item, index }) {
     <article className={styles.hitCard}>
       <div className={styles.hitTop}>
         <span className={styles.hitCharacter}>{item.category}AI</span>
-        <span className={styles.hitNo}>的中 #{index + 1}</span>
+        <span className={styles.hitNo}>{formatHitDate(item.race_date)}</span>
       </div>
       <span className={styles.hitLabel}>払戻</span>
       <strong className={styles.hitPayout}>{payout.toLocaleString()}円</strong>
@@ -89,12 +97,13 @@ function HitCard({ item, index }) {
         <span>投資 {invest.toLocaleString()}円</span>
         {invest > 0 ? <span>回収率 {recovery.toFixed(1)}%</span> : null}
       </div>
+      <span className={styles.hitSequence}>直近的中 #{index + 1}</span>
     </article>
   );
 }
 
 export default async function HomeRaceInfo({ courses = [], raceDate = "" }) {
-  const hitItems = await getTodayHits(raceDate);
+  const hitItems = await getLatestHits(5);
   const hasCourses = Array.isArray(courses) && courses.length > 0;
 
   return (
@@ -168,23 +177,27 @@ export default async function HomeRaceInfo({ courses = [], raceDate = "" }) {
         <div className={styles.subHeader}>
           <div className={styles.subTitleWrap}>
             <span className={styles.subIcon} aria-hidden="true">🎯</span>
-            <h3>本日の的中レース</h3>
+            <h3>的中レース</h3>
           </div>
-          <span className={styles.swipeHint}>横にスワイプ →</span>
+          <span className={styles.swipeHint}>最新5件・横にスワイプ →</span>
         </div>
 
         {hitItems.length > 0 ? (
           <div className={styles.hitsRail}>
             {hitItems.map((item, index) => (
-              <HitCard item={item} index={index} key={`${item.category}-${index}`} />
+              <HitCard
+                item={item}
+                index={index}
+                key={`${item.race_date}-${item.category}-${index}`}
+              />
             ))}
           </div>
         ) : (
           <div className={styles.hitEmpty}>
             <span aria-hidden="true">📊</span>
             <div>
-              <strong>本日の的中実績はまだありません。</strong>
-              <p>結果が登録されると、ここに自動で表示されます。</p>
+              <strong>的中実績を集計中です。</strong>
+              <p>的中結果が登録されると、最新順にここへ表示されます。</p>
             </div>
           </div>
         )}
