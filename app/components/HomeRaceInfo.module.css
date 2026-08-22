@@ -189,25 +189,11 @@
   background: #e9eef1;
 }
 
-.night::before {
-  background: #6259d6;
-}
-
-.night .courseNo {
-  color: #6259d6;
-}
-
-.morning::before {
-  background: #f2a722;
-}
-
-.morning .courseNo {
-  color: #d98900;
-}
-
-.day::before {
-  background: #33addc;
-}
+.night::before { background: #6259d6; }
+.night .courseNo { color: #6259d6; }
+.morning::before { background: #f2a722; }
+.morning .courseNo { color: #d98900; }
+.day::before { background: #33addc; }
 
 .finished {
   opacity: .62;
@@ -228,14 +214,7 @@
 .divider {
   height: 1px;
   margin: 15px 18px;
-  background:
-    repeating-linear-gradient(
-      to right,
-      #c9dfeb 0,
-      #c9dfeb 6px,
-      transparent 6px,
-      transparent 11px
-    );
+  background: repeating-linear-gradient(to right, #c9dfeb 0, #c9dfeb 6px, transparent 6px, transparent 11px);
 }
 
 .updateList {
@@ -280,30 +259,12 @@
   font-weight: 950;
 }
 
-.kindBadge {
-  color: #176a99;
-  background: #e5f5fd;
-}
-
-.characterBadge {
-  color: #fff;
-}
-
-.ichika {
-  background: #20a06b;
-}
-
-.hatsune {
-  background: #8258dd;
-}
-
-.kiina {
-  background: #f0a20d;
-}
-
-.all {
-  background: #2c71b7;
-}
+.kindBadge { color: #176a99; background: #e5f5fd; }
+.characterBadge { color: #fff; }
+.ichika { background: #20a06b; }
+.hatsune { background: #8258dd; }
+.kiina { background: #f0a20d; }
+.all { background: #2c71b7; }
 
 .updateTime {
   flex: none;
@@ -366,134 +327,149 @@
   background: rgba(255, 255, 255, .78);
 }
 
-.emptyIcon {
-  flex: none;
-  font-size: 19px;
-}
+.emptyIcon { flex: none; font-size: 19px; }
+.updateEmpty strong { display: block; color: #4f6b7e; font-size: 12px; line-height: 1.45; }
+.updateEmpty p { margin: 3px 0 0; color: #8aa0af; font-size: 10px; line-height: 1.5; }
 
-.updateEmpty strong {
-  display: block;
-  color: #4f6b7e;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.updateEmpty p {
-  margin: 3px 0 0;
-  color: #8aa0af;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-@media (max-width: 390px) {
-  .section {
-    margin-inline: 10px;
-    border-radius: 22px;
-  }
-
-  .mainHeader {
-    padding-inline: 14px;
-  }
-
-  .mainHeader h2 {
-    font-size: 22px;
-  }
-
-  .mainLink {
-    padding: 7px 9px;
-    font-size: 10px;
-  }
-
-  .subHeader {
-    padding-inline: 14px;
-  }
-
-  .courseRail {
-    padding-inline: 14px;
-  }
-
-  .courseCard {
-    flex-basis: 124px;
-    min-height: 88px;
-  }
-
-  .courseName {
-    font-size: 16px;
-  }
-
-  .divider {
-    margin-inline: 14px;
-  }
-
-  .updateList {
-    padding-inline: 14px;
-  }
-
-  .updateEmpty,
-  .courseEmpty {
-    margin-inline: 14px;
-  }
-}
-
-
-/* ===== 2026-08-13 本日のレース情報バナー版 ===== */
-.bannerWrap {
-  padding: 14px 18px 12px;
-}
-
+.bannerWrap { padding: 0; margin: 0; }
 .banner {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 14px;
-  box-shadow: 0 6px 16px rgba(15, 88, 140, .10);
-}
-
-@media (max-width: 390px) {
-  .bannerWrap {
-    padding: 12px 14px 10px;
-  }
-
-  .banner {
-    border-radius: 12px;
-  }
-}
-
-
-/* ===== 2026-08-13 バナー周囲の余白圧縮 ===== */
-.section {
-  padding-top: 0;
-}
-
-.bannerWrap {
-  padding: 0;
-  margin: 0;
-}
-
-.banner {
-  width: 100%;
   border-radius: 24px 24px 0 0;
   box-shadow: none;
 }
+.section { padding-top: 0; }
+.bannerWrap + .block { padding-top: 10px; }
+.subHeader { padding-top: 0; }
 
-.bannerWrap + .block {
-  padding-top: 10px;
+.hitsBlock {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 2px;
 }
 
-.subHeader {
-  padding-top: 0;
+.swipeHint {
+  color: #8ca3b7;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hitsRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 76%);
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 18px 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hitsRail::-webkit-scrollbar { display: none; }
+
+.hitCard {
+  scroll-snap-align: start;
+  min-height: 150px;
+  padding: 16px;
+  border: 1px solid #d8eaf4;
+  border-radius: 20px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 7px 18px rgba(26,82,115,.07);
+}
+
+.hitTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hitCharacter {
+  color: #176a99;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.hitNo {
+  color: #98aabd;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hitLabel {
+  display: block;
+  margin-top: 16px;
+  color: #7e94a7;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.hitPayout {
+  display: block;
+  margin-top: 2px;
+  color: #0a9b59;
+  font-size: 30px;
+  font-weight: 950;
+  letter-spacing: -.02em;
+}
+
+.hitMeta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+  color: #647c90;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.hitEmpty {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 18px;
+  padding: 14px 15px;
+  border: 1px dashed #c9dee9;
+  border-radius: 15px;
+  background: rgba(255,255,255,.78);
+  color: #6f8798;
+}
+
+.hitEmpty strong { display:block; color:#4f6b7e; font-size:12px; }
+.hitEmpty p { margin:3px 0 0; color:#8aa0af; font-size:10px; }
+
+.resultsLinkRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 18px 2px;
+}
+
+.resultsLink {
+  color: #075b8e;
+  font-size: 12px;
+  font-weight: 950;
+  text-decoration: none;
 }
 
 @media (max-width: 390px) {
-  .bannerWrap {
-    padding: 0;
-  }
-
-  .banner {
-    border-radius: 20px 20px 0 0;
-  }
-
-  .bannerWrap + .block {
-    padding-top: 8px;
-  }
+  .section { margin-inline: 10px; border-radius: 22px; }
+  .mainHeader { padding-inline: 14px; }
+  .mainHeader h2 { font-size: 22px; }
+  .mainLink { padding: 7px 9px; font-size: 10px; }
+  .subHeader { padding-inline: 14px; }
+  .courseRail { padding-inline: 14px; }
+  .courseCard { flex-basis: 124px; min-height: 88px; }
+  .courseName { font-size: 16px; }
+  .divider { margin-inline: 14px; }
+  .updateList { padding-inline: 14px; }
+  .updateEmpty,
+  .courseEmpty,
+  .hitEmpty { margin-inline: 14px; }
+  .banner { border-radius: 20px 20px 0 0; }
+  .bannerWrap + .block { padding-top: 8px; }
+  .hitsRail { padding-inline: 14px; grid-auto-columns: minmax(208px, 80%); }
+  .resultsLinkRow { padding-inline: 14px; }
 }
