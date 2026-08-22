@@ -29,7 +29,14 @@ export default function IchikaBackgroundOnly() {
     page.style.setProperty("background-color", "#eef8fb", "important");
     page.style.setProperty("background-repeat", "no-repeat", "important");
     page.style.setProperty("background-position", "center top", "important");
-    page.style.setProperty("background-size", "cover", "important");
+
+    // cover だと長いページ全体に合わせて画像が巨大化し、
+    // 中央の白い部分だけが見えてしまうため、画面幅基準で表示する。
+    page.style.setProperty(
+      "background-size",
+      "min(100vw, 430px) auto",
+      "important"
+    );
     page.style.setProperty("background-attachment", "fixed", "important");
 
     return () => {
