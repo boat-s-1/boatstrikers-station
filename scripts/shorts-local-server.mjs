@@ -36,7 +36,7 @@ async function body(req) {
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 1_000_000) throw new Error("送信データが大きすぎます。");
+    if (size > 50_000_000) throw new Error("送信データが大きすぎます。画像は1枚8MB以下にしてください。");
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
@@ -89,12 +89,32 @@ async function synthesizePreview(plan) {
   return Buffer.from(await response.arrayBuffer());
 }
 
+async function materializeAssets(plan, id, tempDir) {
+  const slots = ["intro", "rank3", "rank2", "rank1", "outro"];
+  const assetPaths = {};
+  for (const slot of slots) {
+    const dataUrl = plan.assets?.[slot]?.dataUrl;
+    if (!dataUrl) continue;
+    const match = String(dataUrl).match(/^data:image\/(jpeg|png|webp);base64,/i);
+    if (!match) throw new Error(`${slot}の画像形式を確認してください。JPEG・PNG・WebPに対応しています。`);
+    const buffer = Buffer.from(String(dataUrl).slice(match[0].length), "base64");
+    if (!buffer.length || buffer.length > 8_000_000) throw new Error(`${slot}の画像は1枚8MB以下にしてください。`);
+    const extension = match[1].toLowerCase() === "jpeg" ? "jpg" : match[1].toLowerCase();
+    const assetPath = path.join(tempDir, `${id}-${slot}.${extension}`);
+    await writeFile(assetPath, buffer);
+    assetPaths[slot] = assetPath;
+  }
+  const { assets, ...cleanPlan } = plan;
+  return { ...cleanPlan, assetPaths };
+}
+
 async function startJob(plan) {
   const id = randomUUID();
   const job = { id, status: "queued", progress: 5, message: "生成準備中", date: plan.date, createdAt: new Date().toISOString() };
   jobs.set(id, job);
   const tempDir = path.join(ROOT, ".shorts-local");
   await mkdir(tempDir, { recursive: true });
+  plan = await materializeAssets(plan, id, tempDir);
   const planPath = path.join(tempDir, `${id}.json`);
   await writeFile(planPath, JSON.stringify(plan, null, 2), "utf8");
 
