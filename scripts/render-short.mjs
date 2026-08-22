@@ -85,19 +85,22 @@ function makeAss(plan, duration, font) {
   const sceneEnd = duration - outroLength;
   const sceneLength = Math.max(1, (sceneEnd - introEnd) / 3);
   const scenes = [...plan.picks.slice(0, 3)].reverse().map((row, index) => {
-    const rank = 3 - index;
     const start = introEnd + sceneLength * index;
     const finish = index === 2 ? sceneEnd : start + sceneLength;
-    const racerName = String(row.racer?.racer_name || "注目レーサー").replace(/[\s　]+/g, "");
-    const reasons = reasonLines(row);
+    const racer = row.racer || {};
+    const courseRate = numeric(racer.course1_top2_rate, racer.course1_2_rate);
+    const probability = pct(row.probability);
+    const courseRateText = courseRate === null ? "—" : `${courseRate.toFixed(1)}%`;
     return [
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(180,180)}${assEscape(displayStadium(row.stadium))}  ${row.race_no}R`,
-      `Dialogue: 2,${assTime(start + 0.18)},${assTime(finish)},Racer,,0,0,0,,{\\fad(180,180)}1号艇  ${assEscape(racerName)}選手`,
-      `Dialogue: 2,${assTime(start + 0.36)},${assTime(finish)},Reason,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[0])}`,
-      reasons[1] ? `Dialogue: 2,${assTime(start + 0.54)},${assTime(finish)},Reason2,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[1])}` : "",
-      `Dialogue: 2,${assTime(start + 0.72)},${assTime(finish)},Probability,,0,0,0,,{\\fad(220,180)}イン逃げ期待度  ${pct(row.probability)}`,
-    ].join("\n");
-  }).join("\n");
+      `Dialogue: 0,${assTime(start)},${assTime(finish)},AccentLine,,0,0,0,,{\\fad(180,180)\\pos(170,785)\\p1}m 0 0 l 740 0 740 10 0 10{\\p0}`,
+      `Dialogue: 0,${assTime(start)},${assTime(finish)},AccentLine,,0,0,0,,{\\fad(180,180)\\pos(170,935)\\p1}m 0 0 l 740 0 740 10 0 10{\\p0}`,
+      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(180,180)}${assEscape(displayStadium(row.stadium))} ${row.race_no}R`,
+      `Dialogue: 2,${assTime(start + 0.22)},${assTime(finish)},MetricLabel,,0,0,0,,{\\fad(180,180)\\pos(115,815)}イン逃げ期待度`,
+      `Dialogue: 3,${assTime(start + 0.38)},${assTime(finish)},MetricValue,,0,0,0,,{\\fad(220,180)\\pos(770,795)}${probability}`,
+      `Dialogue: 2,${assTime(start + 0.54)},${assTime(finish)},MetricLabel,,0,0,0,,{\\fad(180,180)\\pos(115,965)}1コース2連率`,
+      `Dialogue: 3,${assTime(start + 0.70)},${assTime(finish)},MetricValue,,0,0,0,,{\\fad(220,180)\\pos(770,945)}${courseRateText}`,
+    ].join("\\n");
+  }).join("\\n");
   return `[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -107,11 +110,10 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Place,${font},60,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,1,0,1,3,1,8,180,180,700,1
-Style: Racer,${font},50,&H00415943,&H00415943,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,150,370,800,1
-Style: Reason,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,925,1
-Style: Reason2,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,1015,1
-Style: Probability,${font},62,&H00009938,&H00009938,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,7,145,390,1140,1
+Style: Place,${font},82,&H00163F22,&H00163F22,&H00FFFFFF,&H00000000,1,0,0,0,100,100,1,0,1,4,1,8,150,150,680,1
+Style: MetricLabel,${font},58,&H00102F1A,&H00102F1A,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,0,0,0,1
+Style: MetricValue,${font},94,&H002323C8,&H002323C8,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,8,0,0,0,1
+Style: AccentLine,${font},20,&H0000D8FF,&H0000D8FF,&H0000D8FF,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
