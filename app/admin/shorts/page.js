@@ -51,7 +51,7 @@ async function loadCandidates(date) {
   const enriched = await Promise.all(rankings.map(async (ranking) => {
     const { data: entry } = await supabase
       .from("bs_race_entries")
-      .select("racer_name,racer_class,national_win_rate,local_win_rate,motor_no,motor_2_rate,average_st,course1_average_st,course1_2_rate,course1_races")
+      .select("racer_name,racer_class,national_win_rate,local_win_rate,motor_no,motor_2_rate,motor_top2_rate,average_st,course1_average_st,course1_2_rate,course1_top2_rate,course1_races,course1_race_count")
       .eq("race_date", date)
       .eq("course_code", ranking.course_code)
       .eq("race_no", ranking.race_no)
@@ -61,7 +61,12 @@ async function loadCandidates(date) {
     return {
       ...ranking,
       stadium: STADIUMS[Number(ranking.course_code)] || `${ranking.course_code}場`,
-      racer: entry || null,
+      racer: entry ? {
+        ...entry,
+        motor_2_rate: entry.motor_top2_rate ?? entry.motor_2_rate,
+        course1_2_rate: entry.course1_top2_rate ?? entry.course1_2_rate,
+        course1_races: entry.course1_race_count ?? entry.course1_races,
+      } : null,
     };
   }));
 
