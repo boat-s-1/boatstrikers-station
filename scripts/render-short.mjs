@@ -182,7 +182,14 @@ async function main() {
   await writeFile(assPath, makeAss(plan, duration, process.env.BS_SHORTS_FONT || "Yu Gothic UI"), "utf8");
 
   const templateDir = path.resolve(process.env.BS_SHORTS_TEMPLATES || "public/shorts/templates");
-  const templates = ["intro.jpg", "rank-3.jpg", "rank-2.jpg", "rank-1.jpg", "outro.jpg"].map((name) => path.join(templateDir, name));
+  const templateSlots = [
+    ["intro", "intro.jpg"],
+    ["rank3", "rank-3.jpg"],
+    ["rank2", "rank-2.jpg"],
+    ["rank1", "rank-1.jpg"],
+    ["outro", "outro.jpg"],
+  ];
+  const templates = templateSlots.map(([slot, fallback]) => plan.assetPaths?.[slot] ? path.resolve(plan.assetPaths[slot]) : path.join(templateDir, fallback));
   for (const template of templates) if (!existsSync(template)) fail(`動画テンプレートが見つかりません: ${template}`);
   const introEnd = Math.min(4.5, duration * 0.12);
   const outroLength = Math.min(4, duration * 0.1);
