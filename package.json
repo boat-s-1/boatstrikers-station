@@ -3,7 +3,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "shorts:render": "node scripts/render-short.mjs"
+    "shorts:render": "node scripts/render-short.mjs",
+    "shorts:local": "node scripts/shorts-local-server.mjs"
   },
   "dependencies": {
     "@next/third-parties": "latest",
