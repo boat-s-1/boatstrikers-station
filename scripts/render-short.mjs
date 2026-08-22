@@ -91,11 +91,11 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Place,${font},66,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,115,360,650,1
-Style: Racer,${font},44,&H00415943,&H00415943,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,115,330,765,1
-Style: Reason,${font},39,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,125,360,875,1
-Style: Reason2,${font},39,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,125,360,950,1
-Style: Probability,${font},53,&H00009938,&H00009938,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,115,330,1060,1
+Style: Place,${font},64,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,145,390,680,1
+Style: Racer,${font},50,&H00415943,&H00415943,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,150,370,800,1
+Style: Reason,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,925,1
+Style: Reason2,${font},43,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,165,385,1015,1
+Style: Probability,${font},62,&H00009938,&H00009938,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,7,145,390,1140,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
