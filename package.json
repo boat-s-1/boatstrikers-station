@@ -4,6 +4,7 @@
     "build": "next build",
     "start": "next start",
     "shorts:render": "node scripts/render-short.mjs",
+    "news:render": "node scripts/render-news.mjs",
     "shorts:local": "node scripts/shorts-local-server.mjs"
   },
   "dependencies": {

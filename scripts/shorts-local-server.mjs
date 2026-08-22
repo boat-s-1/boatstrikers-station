@@ -67,6 +67,12 @@ async function health() {
 }
 
 function validatePlan(plan) {
+  if (plan?.type === "boatstrikers_news") {
+    if (!plan.narration || !["ichika", "hatsune", "kiina"].includes(plan.character)) throw new Error("ニュース原稿またはキャラクターが設定されていません。");
+    if (!Array.isArray(plan.bullets) || plan.bullets.filter(Boolean).length < 1) throw new Error("ニュース項目を1つ以上入力してください。");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(plan.date || ""))) throw new Error("作成日が正しくありません。");
+    return plan;
+  }
   if (!plan || !plan.narration || !Array.isArray(plan.picks) || plan.picks.length < 3) throw new Error("原稿またはTOP3が不足しています。");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(plan.date || ""))) throw new Error("開催日が正しくありません。");
   return plan;
@@ -114,11 +120,13 @@ async function startJob(plan) {
   jobs.set(id, job);
   const tempDir = path.join(ROOT, ".shorts-local");
   await mkdir(tempDir, { recursive: true });
-  plan = await materializeAssets(plan, id, tempDir);
+  if (plan.type !== "boatstrikers_news") plan = await materializeAssets(plan, id, tempDir);
   const planPath = path.join(tempDir, `${id}.json`);
   await writeFile(planPath, JSON.stringify(plan, null, 2), "utf8");
 
-  const child = spawn(process.execPath, [path.join(ROOT, "scripts", "render-short.mjs"), planPath], { cwd: ROOT, shell: false });
+  const isNews = plan.type === "boatstrikers_news";
+  const renderer = isNews ? "render-news.mjs" : "render-short.mjs";
+  const child = spawn(process.execPath, [path.join(ROOT, "scripts", renderer), planPath], { cwd: ROOT, shell: false });
   job.status = "running";
   job.progress = 15;
   job.message = "ナレーター音声を生成中";
@@ -133,8 +141,9 @@ async function startJob(plan) {
   child.on("error", (error) => Object.assign(job, { status: "error", message: error.message, progress: 0 }));
   child.on("close", (code) => {
     if (code === 0) {
-      const outputDir = path.join(ROOT, "output", "shorts", plan.date);
-      Object.assign(job, { status: "complete", progress: 100, message: "MP4が完成しました", outputDir, outputPath: path.join(outputDir, `ichika-top3-${plan.date}.mp4`) });
+      const outputDir = path.join(ROOT, "output", isNews ? "news" : "shorts", plan.date);
+      const fileName = isNews ? `boatstrikers-news-${plan.character}-${plan.date}.mp4` : `ichika-top3-${plan.date}.mp4`;
+      Object.assign(job, { status: "complete", progress: 100, message: "MP4が完成しました", outputDir, outputPath: path.join(outputDir, fileName) });
     } else if (job.status !== "error") {
       Object.assign(job, { status: "error", progress: 0, message: (job.log || `生成処理が終了コード${code}で停止しました。`).trim().split("\n").slice(-3).join(" ") });
     }
