@@ -76,47 +76,67 @@
 }
 
 .pickGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pickGrid::-webkit-scrollbar {
+  display: none;
 }
 
 .pickCard {
+  flex: 0 0 clamp(150px, 38vw, 190px);
+  aspect-ratio: 1 / 0.92;
+  scroll-snap-align: start;
   padding: 14px;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 18px;
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .pickTop {
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  align-items: flex-start;
 }
 
 .pickTop span {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   color: #64748b;
+  line-height: 1.35;
 }
 
 .pickTop strong {
-  font-size: 20px;
+  font-size: 19px;
   color: #0f172a;
+  white-space: nowrap;
 }
 
 .raceLine {
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .raceLine b {
-  font-size: 19px;
+  font-size: 22px;
   color: #111827;
 }
 
 .raceLine span {
-  padding: 3px 8px;
-  border-radius: 8px;
+  padding: 4px 9px;
+  border-radius: 9px;
   background: #e2e8f0;
   color: #334155;
   font-weight: 900;
@@ -127,6 +147,23 @@
   margin-top: 8px;
   color: #94a3b8;
   font-size: 11px;
+}
+
+.moreRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.moreRow a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 4px;
+  color: #0f4c81;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .loading,
@@ -140,7 +177,7 @@
 }
 
 .recordArea {
-  margin-top: 16px;
+  margin-top: 12px;
   padding-top: 16px;
   border-top: 1px solid #e2e8f0;
 }
@@ -310,19 +347,22 @@
   }
 
   .pickGrid {
-    grid-template-columns: 1fr;
+    margin-right: -14px;
+    padding-right: 14px;
   }
 
   .pickCard {
+    flex-basis: 156px;
+    min-height: 145px;
     padding: 12px;
   }
 
   .pickTop strong {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .raceLine b {
-    font-size: 18px;
+    font-size: 21px;
   }
 
   .statGrid {
