@@ -12,37 +12,35 @@ export default function IchikaBackgroundOnly() {
     const page = document.querySelector(".ichikaPage");
     if (!page) return undefined;
 
-    const prevBackground = page.style.background;
-    const prevPosition = page.style.position;
-    const prevZIndex = page.style.zIndex;
+    const previous = {
+      backgroundImage: page.style.backgroundImage,
+      backgroundColor: page.style.backgroundColor,
+      backgroundRepeat: page.style.backgroundRepeat,
+      backgroundPosition: page.style.backgroundPosition,
+      backgroundSize: page.style.backgroundSize,
+      backgroundAttachment: page.style.backgroundAttachment,
+    };
 
-    page.style.background = "transparent";
-    page.style.position = "relative";
-    page.style.zIndex = "1";
+    page.style.setProperty(
+      "background-image",
+      'url("/images/ichika/ichika-room-bg.webp")',
+      "important"
+    );
+    page.style.setProperty("background-color", "#eef8fb", "important");
+    page.style.setProperty("background-repeat", "no-repeat", "important");
+    page.style.setProperty("background-position", "center top", "important");
+    page.style.setProperty("background-size", "cover", "important");
+    page.style.setProperty("background-attachment", "fixed", "important");
 
     return () => {
-      page.style.background = prevBackground;
-      page.style.position = prevPosition;
-      page.style.zIndex = prevZIndex;
+      page.style.backgroundImage = previous.backgroundImage;
+      page.style.backgroundColor = previous.backgroundColor;
+      page.style.backgroundRepeat = previous.backgroundRepeat;
+      page.style.backgroundPosition = previous.backgroundPosition;
+      page.style.backgroundSize = previous.backgroundSize;
+      page.style.backgroundAttachment = previous.backgroundAttachment;
     };
   }, [pathname]);
 
-  if (pathname !== "/ichika") return null;
-
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: "none",
-        backgroundImage: 'url("/images/ichika/ichika-room-bg.webp")',
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center top",
-        backgroundSize: "cover",
-        backgroundColor: "#eef8fb",
-      }}
-    />
-  );
+  return null;
 }
