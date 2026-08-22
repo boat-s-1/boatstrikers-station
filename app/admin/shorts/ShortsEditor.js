@@ -16,16 +16,25 @@ function percent(value) {
   return Number.isFinite(n) ? `${Math.round(n * 100)}%` : "—";
 }
 
+function numeric(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    const number = Number(value);
+    if (Number.isFinite(number)) return number;
+  }
+  return null;
+}
+
 function metric(value, suffix = "") {
-  const n = Number(value);
-  return Number.isFinite(n) ? `${n.toFixed(2)}${suffix}` : null;
+  const n = numeric(value);
+  return n === null ? null : `${n.toFixed(2)}${suffix}`;
 }
 
 function reason(row) {
   const racer = row.racer || {};
-  const courseRate = Number(racer.course1_2_rate);
-  const motorRate = Number(racer.motor_2_rate);
-  const st = Number(racer.course1_average_st ?? racer.average_st);
+  const courseRate = numeric(racer.course1_top2_rate, racer.course1_2_rate);
+  const motorRate = numeric(racer.motor_top2_rate, racer.motor_2_rate);
+  const st = numeric(racer.course1_average_st, racer.average_st);
   if (Number.isFinite(courseRate) && courseRate >= 60) return `1コース2連対率${courseRate.toFixed(1)}パーセントを高く評価`;
   if (Number.isFinite(motorRate) && motorRate >= 35) return `モーター2連対率${motorRate.toFixed(1)}パーセントが好材料`;
   if (Number.isFinite(st) && st <= 0.16) return `平均スタートタイミング${st.toFixed(2)}のスタート力に注目`;
