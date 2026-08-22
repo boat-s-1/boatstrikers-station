@@ -50,12 +50,9 @@ export default function IchikaFixedWallpaperLayer() {
           background-color: #eef8fb !important;
         }
 
-        body:has(.ichikaPage) > *:not([aria-hidden="true"]) {
-          position: relative;
-          z-index: 1;
-        }
-
         .ichikaPage {
+          position: relative !important;
+          z-index: 1;
           background: transparent !important;
         }
       `}</style>
