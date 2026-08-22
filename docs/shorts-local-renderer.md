@@ -24,7 +24,7 @@ npm run shorts:render -- "C:\Users\user\Downloads\ichika-short-2026-08-23.json"
 
 ## 音声設定
 
-管理画面でAivisSpeechまたはVOICEVOXとスタイルIDを選択します。
+標準の公式ナレーターは、AivisSpeechの「まお／おちつき」（スタイルID `888753763`）です。管理画面にはこのIDが初期設定されています。
 
 - AivisSpeech: `http://127.0.0.1:10101/speakers`
 - VOICEVOX: `http://127.0.0.1:50021/speakers`
