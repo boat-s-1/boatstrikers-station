@@ -19,13 +19,18 @@ export default function IchikaBackgroundOnly() {
         content: "";
         position: fixed;
         inset: 0;
-        z-index: -1;
+        z-index: 0;
         pointer-events: none;
         background-color: #eef8fb;
         background-image: url("/images/ichika/ichika-room-bg.webp");
         background-repeat: no-repeat;
         background-position: center top;
         background-size: min(100vw, 430px) auto;
+      }
+
+      .ichikaPage > * {
+        position: relative;
+        z-index: 1;
       }
 
       @media (min-width: 431px) {
