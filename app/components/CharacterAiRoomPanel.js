@@ -106,6 +106,18 @@ export default function CharacterAiRoomPanel() {
     const previousDisplay = oldToolSection?.style.display || "";
     if (oldToolSection) oldToolSection.style.display = "none";
 
+    // 一果ページはAI中心の導線に整理。今日の一言と旧下部テキストメニューは非表示。
+    const ichikaTodayComment = character === "ichika"
+      ? page.querySelector("section.todayCommentCard")
+      : null;
+    const ichikaBottomNav = character === "ichika"
+      ? page.querySelector("nav.bottomNav")
+      : null;
+    const previousTodayDisplay = ichikaTodayComment?.style.display || "";
+    const previousBottomNavDisplay = ichikaBottomNav?.style.display || "";
+    if (ichikaTodayComment) ichikaTodayComment.style.display = "none";
+    if (ichikaBottomNav) ichikaBottomNav.style.display = "none";
+
     const researchNode = document.createElement("div");
     researchNode.className = styles.researchMount;
     page.appendChild(researchNode);
@@ -135,6 +147,8 @@ export default function CharacterAiRoomPanel() {
     return () => {
       cancelled = true;
       if (oldToolSection) oldToolSection.style.display = previousDisplay;
+      if (ichikaTodayComment) ichikaTodayComment.style.display = previousTodayDisplay;
+      if (ichikaBottomNav) ichikaBottomNav.style.display = previousBottomNavDisplay;
       node.remove();
       researchNode.remove();
       setMount(null);
@@ -162,24 +176,29 @@ export default function CharacterAiRoomPanel() {
       {loading ? (
         <div className={styles.loading}>AI予想を読み込み中...</div>
       ) : picks.length > 0 ? (
-        <div className={styles.pickGrid}>
-          {picks.map((pick) => {
-            const type = TYPE_META[pick.rankingType] || { label: "AI注目" };
-            return (
-              <article className={styles.pickCard} key={`${pick.rankingType}-${pick.rankNo}-${pick.courseCode}-${pick.raceNo}`}>
-                <div className={styles.pickTop}>
-                  <span>{type.label}</span>
-                  <strong>{percent(pick.probability)}</strong>
-                </div>
-                <div className={styles.raceLine}>
-                  <b>{STADIUMS[pick.courseCode] || `${pick.courseCode}場`}</b>
-                  <span>{pick.raceNo}R</span>
-                </div>
-                <small>AIランク #{pick.rankNo}</small>
-              </article>
-            );
-          })}
-        </div>
+        <>
+          <div className={styles.pickGrid}>
+            {picks.map((pick) => {
+              const type = TYPE_META[pick.rankingType] || { label: "AI注目" };
+              return (
+                <article className={styles.pickCard} key={`${pick.rankingType}-${pick.rankNo}-${pick.courseCode}-${pick.raceNo}`}>
+                  <div className={styles.pickTop}>
+                    <span>{type.label}</span>
+                    <strong>{percent(pick.probability)}</strong>
+                  </div>
+                  <div className={styles.raceLine}>
+                    <b>{STADIUMS[pick.courseCode] || `${pick.courseCode}場`}</b>
+                    <span>{pick.raceNo}R</span>
+                  </div>
+                  <small>AIランク #{pick.rankNo}</small>
+                </article>
+              );
+            })}
+          </div>
+          <div className={styles.moreRow}>
+            <a href="/races">もっと見る → 出走表へ</a>
+          </div>
+        </>
       ) : (
         <div className={styles.empty}>本日のAI予想は準備中です。</div>
       )}
