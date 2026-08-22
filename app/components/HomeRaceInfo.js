@@ -82,6 +82,41 @@ function formatHitDate(value) {
   return `${Number(match[2])}/${Number(match[3])}`;
 }
 
+function groupHitRows(rows, limit) {
+  const grouped = new Map();
+
+  for (const row of rows || []) {
+    const key = `${row.race_date}:${row.course_code}:${row.race_no}`;
+    const mode = MODE_META[row.mode_key] || {
+      label: row.mode_name || row.mode_key || "AI予想",
+      emoji: "🤖",
+    };
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        race_date: row.race_date,
+        course_code: row.course_code,
+        race_no: row.race_no,
+        payout: Number(row.payout || 0),
+        result_combination: row.result_combination || "",
+        settled_at: row.settled_at || "",
+        modes: [],
+      });
+    }
+
+    const item = grouped.get(key);
+    item.payout = Math.max(item.payout, Number(row.payout || 0));
+    if (!item.result_combination && row.result_combination) {
+      item.result_combination = row.result_combination;
+    }
+    if (!item.modes.some((entry) => entry.key === row.mode_key)) {
+      item.modes.push({ key: row.mode_key, ...mode });
+    }
+  }
+
+  return [...grouped.values()].slice(0, limit);
+}
+
 async function getLatestAiHits(limit = 5) {
   const supabase = getClient();
   if (!supabase) return [];
@@ -90,61 +125,58 @@ async function getLatestAiHits(limit = 5) {
     const { data, error } = await supabase
       .from("bs_ai_bet_results")
       .select(
-        "race_date,course_code,race_no,mode_key,mode_name,is_hit,investment,payout,recovery_rate,result_combination,settled_at"
+        "race_date,course_code,race_no,mode_key,mode_name,is_hit,payout,result_combination,settled_at"
       )
       .eq("is_hit", true)
       .order("race_date", { ascending: false })
       .order("settled_at", { ascending: false })
-      .limit(limit);
+      .limit(100);
 
     if (error) {
       console.error("最新AI的中レース取得エラー:", error.message);
       return [];
     }
 
-    return Array.isArray(data) ? data : [];
+    return groupHitRows(Array.isArray(data) ? data : [], limit);
   } catch (error) {
     console.error("最新AI的中レース取得例外:", error);
     return [];
   }
 }
 
-function HitCard({ item, index }) {
-  const investment = Number(item.investment || 0);
+function HitCard({ item }) {
   const payout = Number(item.payout || 0);
-  const recovery = Number(item.recovery_rate || 0) ||
-    (investment > 0 ? (payout / investment) * 100 : 0);
   const courseName = COURSE_NAMES[Number(item.course_code)] || `#${item.course_code}`;
-  const mode = MODE_META[item.mode_key] || {
-    label: item.mode_name || item.mode_key || "AI予想",
-    emoji: "🤖",
-  };
 
   return (
     <article className={styles.hitCard}>
       <div className={styles.hitTop}>
-        <span className={styles.hitCharacter}>🤖 BoatStrikers AI</span>
+        <strong className={styles.hitRace}>
+          {courseName} {Number(item.race_no)}R
+        </strong>
         <span className={styles.hitNo}>{formatHitDate(item.race_date)}</span>
       </div>
 
-      <strong className={styles.hitRace}>
-        {courseName} {Number(item.race_no)}R
-      </strong>
-      <span className={styles.hitMode}>{mode.emoji} {mode.label}</span>
+      <div className={styles.hitModes} aria-label="的中した買い方">
+        {item.modes.map((mode) => (
+          <span className={styles.hitMode} key={mode.key || mode.label}>
+            {mode.emoji} {mode.label}
+          </span>
+        ))}
+      </div>
 
       <span className={styles.hitLabel}>払戻</span>
       <strong className={styles.hitPayout}>{payout.toLocaleString()}円</strong>
 
-      <div className={styles.hitMeta}>
-        <span>投資 {investment.toLocaleString()}円</span>
-        <span>回収率 {recovery.toFixed(1)}%</span>
-      </div>
-
       {item.result_combination ? (
-        <span className={styles.hitCombination}>結果 {item.result_combination}</span>
+        <span className={styles.hitCombination}>
+          結果 <strong>{item.result_combination}</strong>
+        </span>
       ) : null}
 
-      <span className={styles.hitSequence}>直近AI的中 #{index + 1}</span>
+      {item.modes.length > 1 ? (
+        <span className={styles.hitMulti}>{item.modes.length}モード的中</span>
+      ) : null}
     </article>
   );
 }
@@ -226,16 +258,15 @@ export default async function HomeRaceInfo({ courses = [], raceDate = "" }) {
             <span className={styles.subIcon} aria-hidden="true">🎯</span>
             <h3>AI的中レース</h3>
           </div>
-          <span className={styles.swipeHint}>最新5件・横にスワイプ →</span>
+          <span className={styles.swipeHint}>最新5レース・横にスワイプ →</span>
         </div>
 
         {hitItems.length > 0 ? (
           <div className={styles.hitsRail}>
-            {hitItems.map((item, index) => (
+            {hitItems.map((item) => (
               <HitCard
                 item={item}
-                index={index}
-                key={`${item.race_date}-${item.course_code}-${item.race_no}-${item.mode_key}-${index}`}
+                key={`${item.race_date}-${item.course_code}-${item.race_no}`}
               />
             ))}
           </div>
