@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -19,6 +19,16 @@ function capture(command, args) {
   const result = spawnSync(command, args, { encoding: "utf8", shell: false });
   if (result.error || result.status !== 0) fail(`${command}で情報を取得できません。`);
   return String(result.stdout || "").trim();
+}
+
+async function publishVideo(renderPath, mp4Path) {
+  try {
+    await rm(mp4Path, { force: true });
+    await rename(renderPath, mp4Path);
+  } catch (error) {
+    const code = error?.code ? ` (${error.code})` : "";
+    fail(`完成MP4を保存できません${code}。同名の動画を再生中の場合は、動画プレイヤーとエクスプローラーのプレビューを閉じて再生成してください。完成前の動画: ${renderPath}`);
+  }
 }
 
 function assEscape(value) {
@@ -175,6 +185,7 @@ async function main() {
   const wavPath = path.join(outputDir, "narration.wav");
   const assPath = path.join(outputDir, "captions.ass");
   const mp4Path = path.join(outputDir, `ichika-top3-${plan.date || "short"}.mp4`);
+  const renderPath = path.join(outputDir, `.ichika-top3-${plan.date || "short"}-${process.pid}.rendering.mp4`);
   await synthesize(plan, wavPath);
 
   const duration = Number(capture("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", wavPath]));
@@ -198,7 +209,8 @@ async function main() {
   const imageInputs = templates.flatMap((template) => ["-loop", "1", "-i", template]);
   const pieces = lengths.map((length, index) => `[${index}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,trim=duration=${length},setpts=PTS-STARTPTS[v${index}]`).join(";");
   const filter = `${pieces};[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0,subtitles=captions.ass[video]`;
-  run("ffmpeg", ["-y", ...imageInputs, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "5:a:0", "-t", String(duration), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", mp4Path], { cwd: outputDir });
+  run("ffmpeg", ["-y", ...imageInputs, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "5:a:0", "-t", String(duration), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k", "-movflags", "+faststart", renderPath], { cwd: outputDir });
+  await publishVideo(renderPath, mp4Path);
   await writeFile(path.join(outputDir, "post.txt"), String(plan.socialPost || ""), "utf8");
   console.log(`完成: ${mp4Path}`);
 }
