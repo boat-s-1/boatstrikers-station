@@ -6,6 +6,22 @@ import styles from "./shorts.module.css";
 import localStyles from "./localCompanion.module.css";
 
 const LOCAL_COMPANION = "http://127.0.0.1:3210";
+const ASSET_SLOTS = [
+  { key: "intro", label: "オープニング", defaultSrc: "/shorts/templates/intro.jpg" },
+  { key: "rank3", label: "第3位", defaultSrc: "/shorts/templates/rank-3.jpg" },
+  { key: "rank2", label: "第2位", defaultSrc: "/shorts/templates/rank-2.jpg" },
+  { key: "rank1", label: "第1位", defaultSrc: "/shorts/templates/rank-1.jpg" },
+  { key: "outro", label: "エンドカード", defaultSrc: "/shorts/templates/outro.jpg" },
+];
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("画像を読み込めませんでした。"));
+    reader.readAsDataURL(file);
+  });
+}
 
 function cleanName(value) {
   return String(value || "").replace(/[\s　]+/g, "");
@@ -72,6 +88,7 @@ export default function ShortsEditor({ date, candidates }) {
   const [localError, setLocalError] = useState("");
   const [job, setJob] = useState(null);
   const [audioUrl, setAudioUrl] = useState("");
+  const [assets, setAssets] = useState({});
   const pollRef = useRef(null);
   const script = scriptOverride || generatedScript;
   const post = postOverride || generatedPost;
@@ -97,9 +114,35 @@ export default function ShortsEditor({ date, candidates }) {
     await navigator.clipboard.writeText(text);
   }
 
-  function buildPlan() {
+  async function setAssetFile(slot, file) {
+    setLocalError("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setLocalError("画像はJPEG・PNG・WebPを選択してください。");
+      return;
+    }
+    if (file.size > 8_000_000) {
+      setLocalError("画像は1枚8MB以下にしてください。");
+      return;
+    }
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setAssets((current) => ({ ...current, [slot]: { name: file.name, dataUrl } }));
+    } catch (error) {
+      setLocalError(error.message);
+    }
+  }
+
+  function resetAsset(slot) {
+    setAssets((current) => {
+      const next = { ...current };
+      delete next[slot];
+      return next;
+    });
+  }
+
+  function buildPlan(includeAssets = false) {
     return {
-      version: 2, date, format: "youtube_short_9x16", voice: "boatstrikers_narrator",
+      version: 3, date, format: "youtube_short_9x16", voice: "boatstrikers_narrator",
       tts: {
         engine,
         modelName: "まお",
@@ -113,6 +156,7 @@ export default function ShortsEditor({ date, candidates }) {
       picks: picks.map((row) => ({ ...row, racer: row.racer ? { ...row.racer, racer_name: cleanName(row.racer.racer_name) } : row.racer })),
       narration: script,
       socialPost: post,
+      ...(includeAssets ? { assets } : {}),
     };
   }
 
@@ -182,7 +226,7 @@ export default function ShortsEditor({ date, candidates }) {
     setLocalError("");
     setJob({ status: "queued", progress: 2, message: "生成リクエストを送信中" });
     try {
-      const response = await localFetch("/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(buildPlan()), timeout: 10000 });
+      const response = await localFetch("/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(buildPlan(true)), timeout: 60000 });
       const next = await response.json();
       setJob(next);
       pollJob(next.id);
@@ -237,8 +281,60 @@ export default function ShortsEditor({ date, candidates }) {
             })}
           </div>
 
+          <section className={localStyles.assetSection}>
+            <div className={styles.sectionTitle}>
+              <div><span>STEP 2</span><h2>動画に使用する画像</h2></div>
+              <em>JPEG・PNG・WebP／1枚8MBまで</em>
+            </div>
+            <p className={localStyles.assetHelp}>初期画像のまま生成できます。変更したい画像だけ選択するか、カードへドラッグ＆ドロップしてください。</p>
+            <div className={localStyles.assetGrid}>
+              {ASSET_SLOTS.map((slot) => {
+                const custom = assets[slot.key];
+                return (
+                  <article
+                    className={`${localStyles.assetCard} ${custom ? localStyles.assetCustom : ""}`}
+                    key={slot.key}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const file = event.dataTransfer.files?.[0];
+                      if (file) setAssetFile(slot.key, file);
+                    }}
+                  >
+                    <strong>{slot.label}</strong>
+                    <Image
+                      src={custom?.dataUrl || slot.defaultSrc}
+                      alt={`${slot.label}画像プレビュー`}
+                      width={180}
+                      height={320}
+                      sizes="180px"
+                      unoptimized={Boolean(custom)}
+                      className={localStyles.assetPreview}
+                    />
+                    <small>{custom?.name || "登録済みテンプレート"}</small>
+                    <input
+                      id={`short-asset-${slot.key}`}
+                      className={localStyles.assetInput}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) setAssetFile(slot.key, file);
+                        event.target.value = "";
+                      }}
+                    />
+                    <div className={localStyles.assetActions}>
+                      <label htmlFor={`short-asset-${slot.key}`}>画像を変更</label>
+                      {custom && <button type="button" onClick={() => resetAsset(slot.key)}>初期画像に戻す</button>}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
           <div className={styles.textSection}>
-            <div className={styles.textHeading}><div><span>STEP 2</span><h2>公式ナレーター原稿</h2></div><button type="button" onClick={() => copy(script)}>コピー</button></div>
+            <div className={styles.textHeading}><div><span>STEP 3</span><h2>公式ナレーター原稿</h2></div><button type="button" onClick={() => copy(script)}>コピー</button></div>
             <textarea value={script} onChange={(event) => setScriptOverride(event.target.value)} rows={10} />
             <div className={styles.textMeta}><span>推定 {seconds}秒</span><span>{script.replace(/\s/g, "").length}文字</span><button type="button" onClick={() => setScriptOverride("")}>自動原稿に戻す</button></div>
           </div>
