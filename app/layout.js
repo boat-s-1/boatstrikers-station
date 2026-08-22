@@ -5,6 +5,7 @@ import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
 import CharacterShortsShelf from "./components/CharacterShortsShelf";
 import IchikaBackgroundOnly from "./components/IchikaBackgroundOnly";
 import IchikaFixedWallpaperLayer from "./components/IchikaFixedWallpaperLayer";
+import HatsuneWallpaper from "./components/HatsuneWallpaper";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         <CharacterShortsShelf />
         <IchikaBackgroundOnly />
         <IchikaFixedWallpaperLayer />
+        <HatsuneWallpaper />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
