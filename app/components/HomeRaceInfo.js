@@ -1,25 +1,9 @@
 import Link from "next/link";
-import { getPublicScheduleSupabase } from "../../lib/scheduleSupabase";
+import { supabase } from "../bsc2/lib/supabaseClient";
 import styles from "./HomeRaceInfo.module.css";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 const MORNING_COURSE_CODES = new Set([10, 14, 18, 21, 23]);
-
-const KIND_META = {
-  prediction: { icon: "🎯", label: "予想" },
-  hit: { icon: "🎉", label: "的中" },
-  update: { icon: "📰", label: "更新" },
-  radio: { icon: "🎙️", label: "ラジオ" },
-  video: { icon: "▶️", label: "動画" },
-  notice: { icon: "📢", label: "お知らせ" },
-};
-
-const CHARACTER_META = {
-  ichika: { label: "一果", className: styles.ichika },
-  hatsune: { label: "初音", className: styles.hatsune },
-  kiina: { label: "キイナ", className: styles.kiina },
-  all: { label: "BoatStrikers", className: styles.all },
-};
 
 function courseType(courseCode) {
   const code = Number(courseCode);
@@ -64,118 +48,53 @@ function statusInfo(course) {
   };
 }
 
-function formatDate(value) {
-  if (!value) return "";
+async function getTodayHits(raceDate) {
+  if (!supabase || !raceDate) return [];
 
   try {
-    return new Intl.DateTimeFormat("ja-JP", {
-      timeZone: "Asia/Tokyo",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(value));
-  } catch {
-    return "";
-  }
-}
-
-async function getRealtimeItems(limit = 3) {
-  const client = getPublicScheduleSupabase();
-  if (!client) return [];
-
-  try {
-    const { data, error } = await client
-      .from("realtime_updates")
-      .select(
-        "id,kind,character,title,body,link_url,image_url,published_at,created_at"
-      )
-      .eq("is_active", true)
-      .eq("show_home", true)
-      .lte("published_at", new Date().toISOString())
-      .order("published_at", { ascending: false })
-      .limit(limit);
+    const { data, error } = await supabase
+      .from("bsc_results")
+      .select("category, invest, payout, hit")
+      .eq("race_date", raceDate)
+      .in("category", ["一果", "初音", "キイナ"]);
 
     if (error) {
-      console.error("トップページ・リアルタイム更新取得エラー:", error.message);
+      console.error("本日の的中レース取得エラー:", error.message);
       return [];
     }
 
-    return Array.isArray(data) ? data : [];
+    return (Array.isArray(data) ? data : [])
+      .filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0)
+      .sort((a, b) => Number(b.payout || 0) - Number(a.payout || 0));
   } catch (error) {
-    console.error("トップページ・リアルタイム更新取得例外:", error);
+    console.error("本日の的中レース取得例外:", error);
     return [];
   }
 }
 
-function UpdateCard({ item }) {
-  const kind = KIND_META[item.kind] || KIND_META.notice;
-  const chara = CHARACTER_META[item.character] || CHARACTER_META.all;
+function HitCard({ item, index }) {
+  const invest = Number(item.invest || 0);
+  const payout = Number(item.payout || 0);
+  const recovery = invest > 0 ? (payout / invest) * 100 : 0;
 
-  const inner = (
-    <>
-      <div className={styles.updateTop}>
-        <div className={styles.updateBadges}>
-          <span className={styles.kindBadge}>
-            {kind.icon} {kind.label}
-          </span>
-          <span className={`${styles.characterBadge} ${chara.className}`}>
-            {chara.label}
-          </span>
-        </div>
-        <time className={styles.updateTime}>
-          {formatDate(item.published_at || item.created_at)}
-        </time>
+  return (
+    <article className={styles.hitCard}>
+      <div className={styles.hitTop}>
+        <span className={styles.hitCharacter}>{item.category}AI</span>
+        <span className={styles.hitNo}>的中 #{index + 1}</span>
       </div>
-
-      <h4 className={styles.updateTitle}>{item.title}</h4>
-
-      {item.body ? (
-        <p className={styles.updateBody}>{item.body}</p>
-      ) : null}
-
-      {item.image_url ? (
-        <div className={styles.updateImageWrap}>
-          <img
-            src={item.image_url}
-            alt={item.title || "リアルタイム更新画像"}
-            className={styles.updateImage}
-          />
-        </div>
-      ) : null}
-
-      {item.link_url ? (
-        <span className={styles.updateCta}>詳しく見る →</span>
-      ) : null}
-    </>
-  );
-
-  if (!item.link_url) {
-    return <article className={styles.updateCard}>{inner}</article>;
-  }
-
-  const external = /^https?:\/\//.test(item.link_url);
-
-  return external ? (
-    <a
-      href={item.link_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={styles.updateCard}
-    >
-      {inner}
-    </a>
-  ) : (
-    <Link href={item.link_url} className={styles.updateCard}>
-      {inner}
-    </Link>
+      <span className={styles.hitLabel}>払戻</span>
+      <strong className={styles.hitPayout}>{payout.toLocaleString()}円</strong>
+      <div className={styles.hitMeta}>
+        <span>投資 {invest.toLocaleString()}円</span>
+        {invest > 0 ? <span>回収率 {recovery.toFixed(1)}%</span> : null}
+      </div>
+    </article>
   );
 }
 
-export default async function HomeRaceInfo({
-  courses = [],
-  raceDate = "",
-  realtimeLimit = 3,
-}) {
-  const realtimeItems = await getRealtimeItems(realtimeLimit);
+export default async function HomeRaceInfo({ courses = [], raceDate = "" }) {
+  const hitItems = await getTodayHits(raceDate);
   const hasCourses = Array.isArray(courses) && courses.length > 0;
 
   return (
@@ -211,9 +130,7 @@ export default async function HomeRaceInfo({
               return (
                 <Link
                   href={href}
-                  className={`${styles.courseCard} ${
-                    styles[type.key]
-                  } ${
+                  className={`${styles.courseCard} ${styles[type.key]} ${
                     status.key === "finished" ? styles.finished : ""
                   }`}
                   key={course.courseCode}
@@ -230,9 +147,7 @@ export default async function HomeRaceInfo({
                   </strong>
 
                   <span
-                    className={`${styles.courseStatus} ${
-                      styles[`status_${status.key}`]
-                    }`}
+                    className={`${styles.courseStatus} ${styles[`status_${status.key}`]}`}
                   >
                     {status.label}
                   </span>
@@ -249,41 +164,36 @@ export default async function HomeRaceInfo({
 
       <div className={styles.divider} />
 
-      <div className={styles.block}>
+      <div className={`${styles.block} ${styles.hitsBlock}`}>
         <div className={styles.subHeader}>
           <div className={styles.subTitleWrap}>
-            <span className={styles.subIcon} aria-hidden="true">⚡</span>
-            <h3>リアルタイム予想</h3>
+            <span className={styles.subIcon} aria-hidden="true">🎯</span>
+            <h3>本日の的中レース</h3>
           </div>
-
-          <a
-            href={
-              process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL ||
-              "https://x.com/boatstrikers"
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.subLink}
-          >
-            Xを見る ↗
-          </a>
+          <span className={styles.swipeHint}>横にスワイプ →</span>
         </div>
 
-        {realtimeItems.length > 0 ? (
-          <div className={styles.updateList}>
-            {realtimeItems.map((item) => (
-              <UpdateCard item={item} key={item.id} />
+        {hitItems.length > 0 ? (
+          <div className={styles.hitsRail}>
+            {hitItems.map((item, index) => (
+              <HitCard item={item} index={index} key={`${item.category}-${index}`} />
             ))}
           </div>
         ) : (
-          <div className={styles.updateEmpty}>
-            <span className={styles.emptyIcon} aria-hidden="true">📡</span>
+          <div className={styles.hitEmpty}>
+            <span aria-hidden="true">📊</span>
             <div>
-              <strong>現在、新しいリアルタイム予想はありません。</strong>
-              <p>更新が入り次第、ここに自動で表示されます。</p>
+              <strong>本日の的中実績はまだありません。</strong>
+              <p>結果が登録されると、ここに自動で表示されます。</p>
             </div>
           </div>
         )}
+
+        <div className={styles.resultsLinkRow}>
+          <Link href="/results" className={styles.resultsLink}>
+            過去の成績をすべて見る →
+          </Link>
+        </div>
       </div>
     </section>
   );
