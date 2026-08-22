@@ -369,7 +369,7 @@ export default function ShortsEditor({ date, candidates }) {
               {job?.status === "complete" && <button type="button" className={localStyles.secondary} onClick={openOutput}>保存フォルダを開く</button>}
             </div>
             {audioUrl && <audio className={localStyles.audio} src={audioUrl} controls autoPlay />}
-            {job && <div className={localStyles.progress}><div className={localStyles.progressTrack}><span style={{ width: `${job.progress || 0}%` }} /></div><p>{job.message}</p></div>}
+            {job && <div className={localStyles.progress}><div className={localStyles.progressTrack}><span style={{ width: `${job.progress || 0}%` }} /></div><p>{job.message}</p>{job.status === "error" && job.errorDetails && <pre className={localStyles.errorDetails}>{job.errorDetails}</pre>}{job.status === "error" && job.logPath && <p className={localStyles.logPath}>詳細ログ：{job.logPath}</p>}</div>}
             {job?.status === "complete" && <div className={localStyles.output}>完成ファイル：{job.outputPath}</div>}
             {localError && <p className={localStyles.error}>{localError}</p>}
           </section>
