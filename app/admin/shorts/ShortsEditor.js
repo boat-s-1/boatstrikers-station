@@ -152,15 +152,20 @@ export default function ShortsEditor({ date, candidates }) {
     }
   }
 
-  async function pollJob(id) {
+  async function pollJob(id, retryCount = 0) {
     try {
-      const response = await localFetch(`/jobs/${id}`, { timeout: 5000 });
+      const response = await localFetch(`/jobs/${id}`, { timeout: 30000 });
       const next = await response.json();
       setJob(next);
       if (next.status === "queued" || next.status === "running") pollRef.current = setTimeout(() => pollJob(id), 1200);
       if (next.status === "error") setLocalError(next.message);
     } catch (error) {
-      setLocalError(error.message);
+      if (retryCount < 10) {
+        setLocalError("進捗確認が一時的に途切れました。自動で再接続しています…");
+        pollRef.current = setTimeout(() => pollJob(id, retryCount + 1), 2500);
+      } else {
+        setLocalError(`進捗を確認できません。起動画面でEscキーを押してから接続を再確認してください。（${error.message}）`);
+      }
     }
   }
 
