@@ -33,9 +33,18 @@ function assTime(seconds) {
   return `${hours}:${String(minutes).padStart(2, "0")}:${secs}`;
 }
 
+function numeric(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    const number = Number(value);
+    if (Number.isFinite(number)) return number;
+  }
+  return null;
+}
+
 function pct(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? `${Math.round(n * 100)}%` : "—";
+  const n = numeric(value);
+  return n === null ? "—" : `${Math.round(n * 100)}%`;
 }
 
 function displayStadium(value) {
@@ -47,9 +56,9 @@ function displayStadium(value) {
 
 function shortReason(row) {
   const racer = row.racer || {};
-  const courseRate = Number(racer.course1_2_rate);
-  const motorRate = Number(racer.motor_2_rate);
-  const st = Number(racer.course1_average_st ?? racer.average_st);
+  const courseRate = numeric(racer.course1_top2_rate, racer.course1_2_rate);
+  const motorRate = numeric(racer.motor_top2_rate, racer.motor_2_rate);
+  const st = numeric(racer.course1_average_st, racer.average_st);
   if (Number.isFinite(courseRate) && courseRate >= 60) return `1コース2連対率 ${courseRate.toFixed(1)}%`;
   if (Number.isFinite(motorRate) && motorRate >= 35) return `モーター2連対率 ${motorRate.toFixed(1)}%`;
   if (Number.isFinite(st)) return `平均ST ${st.toFixed(2)}`;
@@ -59,9 +68,9 @@ function shortReason(row) {
 function reasonLines(row) {
   const racer = row.racer || {};
   const values = [];
-  const courseRate = Number(racer.course1_2_rate);
-  const motorRate = Number(racer.motor_2_rate);
-  const st = Number(racer.course1_average_st ?? racer.average_st);
+  const courseRate = numeric(racer.course1_top2_rate, racer.course1_2_rate);
+  const motorRate = numeric(racer.motor_top2_rate, racer.motor_2_rate);
+  const st = numeric(racer.course1_average_st, racer.average_st);
   if (Number.isFinite(st)) values.push(`平均ST ${st.toFixed(2)}`);
   if (Number.isFinite(courseRate)) values.push(`1コース2連対率 ${courseRate.toFixed(1)}%`);
   if (Number.isFinite(motorRate)) values.push(`モーター2連対率 ${motorRate.toFixed(1)}%`);
