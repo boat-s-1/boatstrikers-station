@@ -6,6 +6,7 @@ import CharacterShortsShelf from "./components/CharacterShortsShelf";
 import IchikaBackgroundOnly from "./components/IchikaBackgroundOnly";
 import IchikaFixedWallpaperLayer from "./components/IchikaFixedWallpaperLayer";
 import HatsuneWallpaper from "./components/HatsuneWallpaper";
+import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
         <IchikaBackgroundOnly />
         <IchikaFixedWallpaperLayer />
         <HatsuneWallpaper />
+        <KiinaFixedWallpaper />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
