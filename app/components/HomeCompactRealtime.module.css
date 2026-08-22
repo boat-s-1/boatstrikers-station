@@ -1,0 +1,132 @@
+.card {
+  width: min(calc(100% - 28px), 720px);
+  margin: 18px auto 24px;
+  padding: 16px;
+  border: 1.5px solid #cce8f7;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 9px 26px rgba(31, 91, 128, .08);
+  backdrop-filter: blur(4px);
+}
+
+.heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.heading > div {
+  display: grid;
+  gap: 2px;
+}
+
+.heading span {
+  color: #1597d0;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .13em;
+}
+
+.heading strong {
+  color: #163b5f;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.heading > small {
+  color: #8ca0b3;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.latest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 11px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  color: #143755;
+  text-decoration: none;
+  background: #f3faff;
+}
+
+.latest > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.character {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #176a99 !important;
+  background: #e3f4fc;
+  font-size: 9px !important;
+  letter-spacing: normal !important;
+}
+
+.latest b {
+  overflow: hidden;
+  color: #173a59;
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.latest small {
+  color: #8399aa;
+  font-size: 9px;
+}
+
+.view {
+  flex: none;
+  color: #0975aa !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  letter-spacing: normal !important;
+}
+
+.empty {
+  margin: 11px 0 0;
+  padding: 12px;
+  border-radius: 14px;
+  color: #8298aa;
+  background: #f6fafc;
+  font-size: 11px;
+}
+
+.characterLinks {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.characterLinks a {
+  flex: 1;
+  padding: 8px 5px;
+  border-radius: 999px;
+  color: #145d88;
+  text-align: center;
+  text-decoration: none;
+  background: #edf7fc;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 390px) {
+  .card {
+    width: calc(100% - 20px);
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .heading strong {
+    font-size: 17px;
+  }
+}
