@@ -49,18 +49,17 @@ function shortReason(row) {
   return "AI v2 イン逃げ評価上位";
 }
 
-function captionEvents(narration, duration) {
-  const parts = String(narration || "").split(/\n+/).map((value) => value.trim()).filter(Boolean);
-  if (!parts.length) return "";
-  const weights = parts.map((value) => Math.max(10, value.replace(/\s/g, "").length));
-  const total = weights.reduce((sum, value) => sum + value, 0);
-  let cursor = 0;
-  return parts.map((value, index) => {
-    const end = index === parts.length - 1 ? duration : cursor + duration * weights[index] / total;
-    const event = `Dialogue: 5,${assTime(cursor)},${assTime(end)},Caption,,0,0,0,,{\\fad(120,120)}${assEscape(value)}`;
-    cursor = end;
-    return event;
-  }).join("\n");
+function reasonLines(row) {
+  const racer = row.racer || {};
+  const values = [];
+  const courseRate = Number(racer.course1_2_rate);
+  const motorRate = Number(racer.motor_2_rate);
+  const st = Number(racer.course1_average_st ?? racer.average_st);
+  if (Number.isFinite(st)) values.push(`平均ST ${st.toFixed(2)}`);
+  if (Number.isFinite(courseRate)) values.push(`1コース2連対率 ${courseRate.toFixed(1)}%`);
+  if (Number.isFinite(motorRate)) values.push(`モーター2連対率 ${motorRate.toFixed(1)}%`);
+  if (!values.length) values.push(shortReason(row));
+  return values.slice(0, 2);
 }
 
 function makeAss(plan, duration, font) {
@@ -74,12 +73,13 @@ function makeAss(plan, duration, font) {
     const start = introEnd + sceneLength * index;
     const finish = index === 2 ? sceneEnd : start + sceneLength;
     const racerName = String(row.racer?.racer_name || "注目レーサー").replace(/[\s　]+/g, "");
+    const reasons = reasonLines(row);
     return [
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Rank,,0,0,0,,{\\fad(250,250)}第${rank}位`,
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(300,250)}${assEscape(row.stadium)}  ${row.race_no}R`,
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Racer,,0,0,0,,{\\fad(350,250)}1号艇  ${assEscape(racerName)}選手`,
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Probability,,0,0,0,,{\\fad(400,250)}期待度  ${pct(row.probability)}`,
-      `Dialogue: 2,${assTime(start)},${assTime(finish)},Reason,,0,0,0,,{\\fad(450,250)}POINT  ${assEscape(shortReason(row))}`,
+      `Dialogue: 2,${assTime(start)},${assTime(finish)},Place,,0,0,0,,{\\fad(180,180)}${assEscape(row.stadium)}  ${row.race_no}R`,
+      `Dialogue: 2,${assTime(start + 0.18)},${assTime(finish)},Racer,,0,0,0,,{\\fad(180,180)}1号艇  ${assEscape(racerName)}選手`,
+      `Dialogue: 2,${assTime(start + 0.36)},${assTime(finish)},Reason,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[0])}`,
+      reasons[1] ? `Dialogue: 2,${assTime(start + 0.54)},${assTime(finish)},Reason2,,0,0,0,,{\\fad(180,180)}✓ ${assEscape(reasons[1])}` : "",
+      `Dialogue: 2,${assTime(start + 0.72)},${assTime(finish)},Probability,,0,0,0,,{\\fad(220,180)}イン逃げ期待度  ${pct(row.probability)}`,
     ].join("\n");
   }).join("\n");
   return `[Script Info]
@@ -91,29 +91,15 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Brand,${font},38,&H00FFFFFF,&H00FFFFFF,&H004325BA,&H00000000,1,0,0,0,100,100,2,0,1,3,1,8,50,50,55,1
-Style: Header,${font},56,&H002D4054,&H002D4054,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,8,45,45,125,1
-Style: Intro,${font},86,&H003E48EC,&H003E48EC,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,6,2,5,50,50,0,1
-Style: IntroSub,${font},45,&H00FFFFFF,&H00FFFFFF,&H006041C4,&HDD6041C4,1,0,0,0,100,100,1,0,3,2,0,5,140,140,0,1
-Style: Rank,${font},48,&H00FFFFFF,&H00FFFFFF,&H00472BD9,&HE6472BD9,1,0,0,0,100,100,1,0,3,2,0,7,80,0,475,1
-Style: Place,${font},80,&H00253A50,&H00253A50,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,7,80,0,575,1
-Style: Racer,${font},51,&H00384C60,&H00384C60,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,0,7,80,0,690,1
-Style: Probability,${font},68,&H003E48EC,&H003E48EC,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,4,1,7,80,0,790,1
-Style: Reason,${font},36,&H006041C4,&H006041C4,&H00FFFFFF,&HDCFDF3FF,1,0,0,0,100,100,0,0,3,2,0,7,80,380,915,1
-Style: Caption,${font},39,&H00FFFFFF,&H00FFFFFF,&H00273A4C,&HE6273A4C,1,0,0,0,100,100,0,0,3,2,0,2,55,55,150,1
-Style: Note,${font},25,&H00FFFFFF,&H00FFFFFF,&H004325BA,&HE64325BA,0,0,0,0,100,100,0,0,3,1,0,2,45,45,35,1
-Style: Outro,${font},54,&H00FFFFFF,&H00FFFFFF,&H00472BD9,&HE6472BD9,1,0,0,0,100,100,0,0,3,2,0,5,100,100,0,1
+Style: Place,${font},66,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,115,360,650,1
+Style: Racer,${font},44,&H00415943,&H00415943,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,115,330,765,1
+Style: Reason,${font},39,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,125,360,875,1
+Style: Reason2,${font},39,&H00324E36,&H00324E36,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,2,0,7,125,360,950,1
+Style: Probability,${font},53,&H00009938,&H00009938,&H00FFFFFF,&H00000000,1,0,0,0,100,100,0,0,1,3,1,7,115,330,1060,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 1,0:00:00.00,${end},Brand,,0,0,0,,BoatStrikers  SHORTS
-Dialogue: 1,0:00:00.00,${end},Header,,0,0,0,,一果のイン逃げ予想  |  明日版
-Dialogue: 2,0:00:00.00,${assTime(introEnd)},Intro,,0,0,0,,{\\fad(250,300)}イン逃げ期待度\\NTOP 3
-Dialogue: 2,0:00:00.60,${assTime(introEnd)},IntroSub,,0,0,0,,{\\fad(300,300)}AI v2 が選んだ注目レース
 ${scenes}
-Dialogue: 3,${assTime(sceneEnd)},${end},Outro,,0,0,0,,{\\fad(250,300)}最新情報を確認して\\N無理なく楽しもう！
-${captionEvents(plan.narration, duration)}
-Dialogue: 0,0:00:00.00,${end},Note,,0,0,0,,予想は参考情報です。舟券購入は無理のない範囲で。
 `;
 }
 
@@ -177,10 +163,17 @@ async function main() {
   if (!Number.isFinite(duration)) fail("音声の長さを取得できません。");
   await writeFile(assPath, makeAss(plan, duration, process.env.BS_SHORTS_FONT || "Yu Gothic"), "utf8");
 
-  const character = path.resolve(process.env.BS_SHORTS_CHARACTER || "public/bsc/characters/ichika/名称未設定のデザイン (61).png");
-  if (!existsSync(character)) fail(`一果の立ち絵が見つかりません: ${character}`);
-  const filter = "[0:v]drawbox=x=0:y=0:w=1080:h=28:color=0xEA4D78:t=fill,drawbox=x=45:y=340:w=990:h=760:color=white@0.92:t=fill,drawbox=x=45:y=340:w=12:h=760:color=0xEA4D78:t=fill,drawbox=x=0:y=1690:w=1080:h=230:color=0x223C52@0.98:t=fill[bg];[1:v]scale=500:-1[char];[bg][char]overlay=W-w-20:H-h-205,subtitles=captions.ass[video]";
-  run("ffmpeg", ["-y", "-f", "lavfi", "-i", "color=c=0xEAF8FF:s=1080x1920:r=30", "-loop", "1", "-i", character, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "2:a:0", "-t", String(duration), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", mp4Path], { cwd: outputDir });
+  const templateDir = path.resolve(process.env.BS_SHORTS_TEMPLATES || "public/shorts/templates");
+  const templates = ["intro.jpg", "rank-3.jpg", "rank-2.jpg", "rank-1.jpg", "outro.jpg"].map((name) => path.join(templateDir, name));
+  for (const template of templates) if (!existsSync(template)) fail(`動画テンプレートが見つかりません: ${template}`);
+  const introEnd = Math.min(4.5, duration * 0.12);
+  const outroLength = Math.min(4, duration * 0.1);
+  const sceneLength = Math.max(1, (duration - introEnd - outroLength) / 3);
+  const lengths = [introEnd, sceneLength, sceneLength, sceneLength, outroLength];
+  const imageInputs = templates.flatMap((template) => ["-loop", "1", "-i", template]);
+  const pieces = lengths.map((length, index) => `[${index}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,trim=duration=${length},setpts=PTS-STARTPTS[v${index}]`).join(";");
+  const filter = `${pieces};[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0,subtitles=captions.ass[video]`;
+  run("ffmpeg", ["-y", ...imageInputs, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "5:a:0", "-t", String(duration), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", mp4Path], { cwd: outputDir });
   await writeFile(path.join(outputDir, "post.txt"), String(plan.socialPost || ""), "utf8");
   console.log(`完成: ${mp4Path}`);
 }
