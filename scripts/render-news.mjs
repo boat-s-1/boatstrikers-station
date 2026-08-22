@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -7,6 +7,7 @@ import process from "node:process";
 function fail(message) { console.error(`ERROR: ${message}`); process.exit(1); }
 function run(command, args, options = {}) { const result = spawnSync(command, args, { stdio: "inherit", shell: false, ...options }); if (result.error) fail(`${command}を実行できません: ${result.error.message}`); if (result.status !== 0) fail(`${command}が終了コード${result.status}で停止しました。`); }
 function capture(command, args) { const result = spawnSync(command, args, { encoding: "utf8", shell: false }); if (result.error || result.status !== 0) fail(`${command}で情報を取得できません。`); return String(result.stdout || "").trim(); }
+async function publishVideo(renderPath, mp4Path) { try { await rm(mp4Path, { force: true }); await rename(renderPath, mp4Path); } catch (error) { const code = error?.code ? ` (${error.code})` : ""; fail(`完成MP4を保存できません${code}。同名の動画を再生中の場合は、動画プレイヤーとエクスプローラーのプレビューを閉じて再生成してください。完成前の動画: ${renderPath}`); } }
 function assEscape(value) { return String(value ?? "").replaceAll("\\", "\\\\").replaceAll("{", "\\{").replaceAll("}", "\\}").replaceAll("\n", " "); }
 function assTime(seconds) { const value = Math.max(0, Number(seconds) || 0); const h = Math.floor(value / 3600); const m = Math.floor((value % 3600) / 60); const s = (value % 60).toFixed(2).padStart(5, "0"); return `${h}:${String(m).padStart(2, "0")}:${s}`; }
 function fontSize(text) { const length = [...String(text)].length; if (length <= 18) return 49; if (length <= 24) return 41; return 34; }
@@ -43,7 +44,7 @@ async function main() {
   const images = [path.join(templateDir, "opening.jpg"), path.join(templateDir, characterImage || "ichika.jpg"), path.join(templateDir, "ending.jpg")];
   for (const image of images) if (!existsSync(image)) fail(`テンプレート画像が見つかりません: ${image}`);
   const outputDir = path.resolve("output/news", plan.date || "undated"); await mkdir(outputDir, { recursive: true });
-  const wavPath = path.join(outputDir, "narration.wav"); const assPath = path.join(outputDir, "captions.ass"); const mp4Path = path.join(outputDir, `boatstrikers-news-${plan.character}-${plan.date}.mp4`);
+  const wavPath = path.join(outputDir, "narration.wav"); const assPath = path.join(outputDir, "captions.ass"); const mp4Path = path.join(outputDir, `boatstrikers-news-${plan.character}-${plan.date}.mp4`); const renderPath = path.join(outputDir, `.boatstrikers-news-${plan.character}-${plan.date}-${process.pid}.rendering.mp4`);
   await synthesize(plan, wavPath);
   const voiceDuration = Number(capture("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", wavPath]));
   if (!Number.isFinite(voiceDuration)) fail("音声の長さを取得できません。");
@@ -51,7 +52,8 @@ async function main() {
   const total = voiceDuration + 7;
   const inputs = images.flatMap((image) => ["-loop", "1", "-i", image]);
   const filter = `[0:v]scale=1080:1920,crop=1080:1920,fps=30,trim=duration=3,setpts=PTS-STARTPTS[v0];[1:v]scale=1080:1920,crop=1080:1920,fps=30,trim=duration=${voiceDuration},setpts=PTS-STARTPTS[v1];[2:v]scale=1080:1920,crop=1080:1920,fps=30,trim=duration=4,setpts=PTS-STARTPTS[v2];[v0][v1][v2]concat=n=3:v=1:a=0,subtitles=captions.ass[video];[3:a]adelay=3000|3000,apad=pad_dur=4[audio]`;
-  run("ffmpeg", ["-y", ...inputs, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "[audio]", "-t", String(total), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", mp4Path], { cwd: outputDir });
+  run("ffmpeg", ["-y", ...inputs, "-i", wavPath, "-filter_complex", filter, "-map", "[video]", "-map", "[audio]", "-t", String(total), "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p", "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "192k", "-movflags", "+faststart", renderPath], { cwd: outputDir });
+  await publishVideo(renderPath, mp4Path);
   console.log(`完成: ${mp4Path}`);
 }
 
