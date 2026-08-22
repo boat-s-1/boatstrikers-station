@@ -119,10 +119,15 @@ async function startJob(plan) {
   const job = { id, status: "queued", progress: 5, message: "生成準備中", date: plan.date, createdAt: new Date().toISOString() };
   jobs.set(id, job);
   const tempDir = path.join(ROOT, ".shorts-local");
+  const logDir = path.join(ROOT, "output", "logs");
   await mkdir(tempDir, { recursive: true });
+  await mkdir(logDir, { recursive: true });
   if (plan.type !== "boatstrikers_news") plan = await materializeAssets(plan, id, tempDir);
   const planPath = path.join(tempDir, `${id}.json`);
+  const logPath = path.join(logDir, `${plan.date}-${id}.log`);
   await writeFile(planPath, JSON.stringify(plan, null, 2), "utf8");
+  await writeFile(logPath, `[${new Date().toISOString()}] ${plan.type === "boatstrikers_news" ? "news" : "shorts"} render started\n`, "utf8");
+  job.logPath = logPath;
 
   const isNews = plan.type === "boatstrikers_news";
   const renderer = isNews ? "render-news.mjs" : "render-short.mjs";
@@ -132,9 +137,11 @@ async function startJob(plan) {
   job.message = "ナレーター音声を生成中";
   const onOutput = (chunk) => {
     const value = chunk.toString();
+    process.stdout.write(value);
+    void writeFile(logPath, value, { flag: "a" }).catch(() => {});
     if (value.includes("TTS:")) Object.assign(job, { progress: 35, message: "ナレーター音声を生成中" });
     if (value.includes("ffmpeg") || value.includes("frame=")) Object.assign(job, { progress: 70, message: "9:16動画を書き出し中" });
-    job.log = `${job.log || ""}${value}`.slice(-4000);
+    job.log = `${job.log || ""}${value}`.slice(-20000);
   };
   child.stdout.on("data", onOutput);
   child.stderr.on("data", onOutput);
@@ -145,7 +152,16 @@ async function startJob(plan) {
       const fileName = isNews ? `boatstrikers-news-${plan.character}-${plan.date}.mp4` : `ichika-top3-${plan.date}.mp4`;
       Object.assign(job, { status: "complete", progress: 100, message: "MP4が完成しました", outputDir, outputPath: path.join(outputDir, fileName) });
     } else if (job.status !== "error") {
-      Object.assign(job, { status: "error", progress: 0, message: (job.log || `生成処理が終了コード${code}で停止しました。`).trim().split("\n").slice(-3).join(" ") });
+      const fullLog = String(job.log || "").trim();
+      const lines = fullLog.split(/\r?\n/).filter(Boolean);
+      const errorLines = lines.filter((line) => /error|failed|invalid|permission|denied|space|cannot|could not|終了コード/i.test(line));
+      const details = (errorLines.length ? errorLines : lines).slice(-12).join("\n");
+      Object.assign(job, {
+        status: "error",
+        progress: 0,
+        message: details || `生成処理が終了コード${code}で停止しました。`,
+        errorDetails: details,
+      });
     }
   });
   return job;
