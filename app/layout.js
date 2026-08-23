@@ -12,6 +12,7 @@ import HatsuneWallpaper from "./components/HatsuneWallpaper";
 import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
 import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
 import HomeCompactRealtime from "./components/HomeCompactRealtime";
+import RaceHitFlashDeduper from "./components/RaceHitFlashDeduper";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
         <KiinaFixedWallpaper />
         <HomeFixedWallpaper />
         <HomeCompactRealtime />
+        <RaceHitFlashDeduper />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
