@@ -368,3 +368,49 @@
 :global(main.libraryPage > header.header:first-child) {
   display: none !important;
 }
+
+/* ===== Glass drawer: matches the floating public header ===== */
+.drawer {
+  border-left: 1px solid rgba(255, 255, 255, .82);
+  background:
+    radial-gradient(circle at 84% 4%, rgba(117, 214, 255, .26), transparent 28%),
+    linear-gradient(160deg, rgba(255,255,255,.84) 0%, rgba(238,249,255,.76) 58%, rgba(255,255,255,.82) 100%);
+  box-shadow:
+    -14px 0 40px rgba(9, 67, 108, .20),
+    inset 1px 0 0 rgba(255,255,255,.82);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+.closeButton {
+  border-color: rgba(170, 222, 247, .72);
+  background: rgba(255,255,255,.72);
+  box-shadow:
+    0 7px 20px rgba(19, 95, 145, .10),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.socialSection,
+.navGroup {
+  border-color: rgba(190, 226, 244, .72);
+  background: rgba(255,255,255,.66);
+  box-shadow:
+    0 10px 26px rgba(24, 104, 153, .08),
+    inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+}
+
+.groupHeading {
+  background: linear-gradient(90deg, rgba(232,248,255,.72), rgba(255,255,255,.56));
+}
+
+.linkList a {
+  border-top-color: rgba(216, 234, 243, .72);
+}
+
+.linkList a:active {
+  background: rgba(226, 247, 255, .72);
+}
