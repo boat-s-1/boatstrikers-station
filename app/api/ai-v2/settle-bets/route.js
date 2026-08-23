@@ -29,8 +29,11 @@ function jstDateOffset(offsetDays = 0) {
 }
 
 function normalizeResult(row) {
-  const direct = String(row?.trifecta_result || row?.winning_trifecta || "").trim();
+  const direct = String(row?.trifecta_result || row?.winning_trifecta || "")
+    .replace(/\s+/g, "")
+    .trim();
   if (/^\d-\d-\d$/.test(direct)) return direct;
+  if (/^\d{3}$/.test(direct)) return `${direct[0]}-${direct[1]}-${direct[2]}`;
   if (row?.first_boat && row?.second_boat && row?.third_boat) {
     return `${row.first_boat}-${row.second_boat}-${row.third_boat}`;
   }
@@ -39,21 +42,22 @@ function normalizeResult(row) {
 
 function modeTickets(top) {
   if (!Array.isArray(top) || top.length < 4) return null;
-  const first = Number(top[0]);
+  const head = Number(top[0]);
   const a = Number(top[1]);
   const b = Number(top[2]);
   const c = Number(top[3]);
-  if (![first, a, b, c].every((v) => Number.isInteger(v) && v >= 1 && v <= 6)) return null;
+  if (![head, a, b, c].every((v) => Number.isInteger(v) && v >= 1 && v <= 6)) return null;
+  if (new Set([head, a, b, c]).size < 4) return null;
 
   return {
-    oni: [`1-${a}-${b}`, `1-${b}-${a}`],
-    hit: [`1-${a}-全`, `1-${b}-全`],
+    oni: [`${head}-${a}-${b}`, `${head}-${b}-${a}`],
+    hit: [`${head}-${a}-全`, `${head}-${b}-全`],
     recovery: [
-      `1-${a}-${b}`, `1-${b}-${a}`,
-      `1-${a}-${c}`, `1-${c}-${a}`,
-      `1-${b}-${c}`, `1-${c}-${b}`,
+      `${head}-${a}-${b}`, `${head}-${b}-${a}`,
+      `${head}-${a}-${c}`, `${head}-${c}-${a}`,
+      `${head}-${b}-${c}`, `${head}-${c}-${b}`,
     ],
-    hole: [`${b}-${a}-全`, `${b}-1-全`],
+    hole: [`${a}-${b}-全`, `${a}-${head}-全`],
   };
 }
 
