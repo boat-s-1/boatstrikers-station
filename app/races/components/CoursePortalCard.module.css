@@ -25,12 +25,12 @@
 
 .morning .tint {
   background:
-    linear-gradient(180deg, rgba(6,75,171,.24), rgba(3,22,54,.72)),
-    linear-gradient(110deg, rgba(255,179,62,.18), transparent 50%);
+    linear-gradient(180deg, rgba(6,75,171,.18), rgba(3,22,54,.62)),
+    linear-gradient(110deg, rgba(255,179,62,.12), transparent 50%);
 }
 
 .day .tint {
-  background: linear-gradient(180deg, rgba(7,89,191,.15), rgba(2,24,61,.74));
+  background: linear-gradient(180deg, rgba(7,89,191,.10), rgba(2,24,61,.64));
 }
 
 .night {
@@ -39,7 +39,7 @@
 }
 
 .night .tint {
-  background: linear-gradient(180deg, rgba(25,10,82,.22), rgba(12,5,44,.82));
+  background: linear-gradient(180deg, rgba(25,10,82,.16), rgba(12,5,44,.74));
 }
 
 .topRow,
@@ -62,11 +62,11 @@
 .code {
   display: grid;
   min-width: 37px;
-  height: 26px;
+  height: 25px;
   place-items: center;
   padding: 0 6px;
   border-radius: 8px;
-  background: rgba(2,24,58,.48);
+  background: rgba(2,24,58,.50);
   border: 1px solid rgba(255,255,255,.26);
   font-size: 9px;
   font-weight: 1000;
@@ -76,19 +76,20 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
 }
 
 .session,
 .ladies {
-  padding: 5px 7px;
+  padding: 4px 6px;
   border: 1px solid rgba(255,255,255,.52);
   border-radius: 999px;
-  font-size: 7px;
+  font-size: 6.5px;
+  line-height: 1.1;
   font-weight: 950;
   white-space: nowrap;
-  background: rgba(255,255,255,.86);
+  background: rgba(255,255,255,.90);
   color: #176ea9;
 }
 
@@ -97,8 +98,10 @@
 .ladies { color: #d93379; }
 
 .mainInfo {
-  margin-top: auto;
-  padding-top: 24px;
+  margin: auto -4px 0;
+  padding: 30px 4px 3px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, transparent 0%, rgba(2,16,43,.10) 32%, rgba(2,16,43,.34) 100%);
 }
 
 .mainInfo h3 {
@@ -107,7 +110,7 @@
   line-height: 1;
   font-weight: 1000;
   letter-spacing: -.04em;
-  text-shadow: 0 2px 10px rgba(0,0,0,.55);
+  text-shadow: 0 2px 5px rgba(0,0,0,.88), 0 0 12px rgba(0,0,0,.34);
 }
 
 .statusLine {
@@ -115,23 +118,42 @@
   margin-top: 6px;
   padding: 5px 8px;
   border-radius: 8px;
-  background: rgba(0,20,53,.56);
-  border: 1px solid rgba(255,255,255,.20);
+  background: rgba(0,20,53,.62);
+  border: 1px solid rgba(255,255,255,.24);
   font-size: 9px;
   line-height: 1;
   font-weight: 950;
-  text-shadow: 0 1px 3px rgba(0,0,0,.38);
+  text-shadow: 0 1px 3px rgba(0,0,0,.42);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.deadline_normal {
+  background: rgba(0,20,53,.62);
+}
+
+.deadline_soon {
+  color: #fffbe8;
+  border-color: rgba(255,224,117,.75);
+  background: linear-gradient(135deg, rgba(193,131,0,.88), rgba(226,167,20,.90));
+  box-shadow: 0 3px 10px rgba(205,145,0,.24);
+}
+
+.deadline_urgent {
+  color: #fff;
+  border-color: rgba(255,184,184,.80);
+  background: linear-gradient(135deg, rgba(211,45,55,.94), rgba(239,76,83,.94));
+  box-shadow: 0 3px 11px rgba(197,37,48,.30);
 }
 
 .finished {
-  background: rgba(44,58,74,.68);
+  background: rgba(44,58,74,.72);
 }
 
 .bottomRow {
   min-height: 25px;
-  margin-top: 7px;
+  margin-top: 6px;
   align-items: flex-end;
 }
 
@@ -177,10 +199,15 @@
     padding: 10px;
     border-radius: 16px;
   }
+  .mainInfo {
+    margin-inline: -3px;
+    padding: 28px 3px 3px;
+  }
   .mainInfo h3 { font-size: 21px; }
-  .statusLine { font-size: 8px; }
+  .statusLine { font-size: 8px; padding: 5px 7px; }
   .session, .ladies { padding: 4px 6px; font-size: 6px; }
   .direct, .newspaper { font-size: 6px; }
+  .card:nth-last-child(-n+2) { margin-bottom: 86px; }
 }
 
 @media (max-width: 370px) {
