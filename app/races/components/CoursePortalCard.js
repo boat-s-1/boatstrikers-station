@@ -158,6 +158,26 @@ function eventBadges(course, raceDate) {
   return [detectGrade(course), detectStage(course, raceDate)].filter(Boolean).slice(0, 2);
 }
 
+function badgeLabel(badge) {
+  if (badge === "女子戦") return "🌸 女子戦";
+  if (badge === "優勝戦") return "🏆 優勝戦";
+  if (badge === "準優勝戦") return "🔥 準優勝戦";
+  if (badge === "初日") return "🚩 初日";
+  return badge;
+}
+
+function badgeClass(badge) {
+  if (badge === "女子戦") return styles.infoTag_ladies;
+  if (badge === "優勝戦") return styles.infoTag_優勝戦;
+  if (badge === "準優勝戦") return styles.infoTag_準優勝戦;
+  if (badge === "初日") return styles.infoTag_初日;
+  if (badge === "SG") return styles.infoTag_sg;
+  if (badge === "G1") return styles.infoTag_g1;
+  if (badge === "G2") return styles.infoTag_g2;
+  if (badge === "G3") return styles.infoTag_g3;
+  return "";
+}
+
 export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const numericCode = Number(course.courseCode);
   const code = String(numericCode).padStart(2, "0");
@@ -171,6 +191,10 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const nextClosing = shortTime(course.nextClosingTime);
   const urgency = deadlineUrgency(course.nextClosingAt);
   const specialBadges = eventBadges(course, raceDate);
+  const infoBadges = [
+    ...(ladies ? ["女子戦"] : []),
+    ...specialBadges,
+  ].slice(0, 3);
 
   return (
     <Link
@@ -184,23 +208,8 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
         <span className={styles.code}>#{code}</span>
         <div className={styles.tags}>
           <span className={styles.session}>{sessionLabel(type)}</span>
-          {ladies && <span className={styles.ladies}>🌸 女子戦</span>}
         </div>
       </div>
-
-      {specialBadges.length > 0 && (
-        <div className={styles.eventTags}>
-          {specialBadges.map((badge) => (
-            <span
-              key={badge}
-              className={`${styles.eventTag} ${styles[`eventTag_${badge.toLowerCase()}`] ?? ""}`}
-            >
-              {badge === "優勝戦" ? "🏆 " : badge === "準優勝戦" ? "🔥 " : badge === "初日" ? "🚩 " : "★ "}
-              {badge}
-            </span>
-          ))}
-        </div>
-      )}
 
       <div className={styles.mainInfo}>
         <h3>{course.courseName}</h3>
@@ -213,6 +222,16 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
           </div>
         ) : (
           <div className={styles.statusLine}>出走表公開中</div>
+        )}
+
+        {infoBadges.length > 0 && (
+          <div className={styles.infoTags}>
+            {infoBadges.map((badge) => (
+              <span key={badge} className={`${styles.infoTag} ${badgeClass(badge)}`}>
+                {badgeLabel(badge)}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
