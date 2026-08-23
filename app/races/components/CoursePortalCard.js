@@ -7,6 +7,33 @@ const SESSION_BACKGROUNDS = {
   night: "/races/course-cards/night.webp",
 };
 
+const COURSE_ENGLISH = {
+  "01": "KIRYU",
+  "02": "TODA",
+  "03": "EDOGAWA",
+  "04": "HEIWAJIMA",
+  "05": "TAMAGAWA",
+  "06": "HAMANAKO",
+  "07": "GAMAGORI",
+  "08": "TOKONAME",
+  "09": "TSU",
+  "10": "MIKUNI",
+  "11": "BIWAKO",
+  "12": "SUMINOE",
+  "13": "AMAGASAKI",
+  "14": "NARUTO",
+  "15": "MARUGAME",
+  "16": "KOJIMA",
+  "17": "MIYAJIMA",
+  "18": "TOKUYAMA",
+  "19": "SHIMONOSEKI",
+  "20": "WAKAMATSU",
+  "21": "ASHIYA",
+  "22": "FUKUOKA",
+  "23": "KARATSU",
+  "24": "OMURA",
+};
+
 function timeMinutes(value) {
   const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
   if (!match) return null;
@@ -74,6 +101,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const code = String(numericCode).padStart(2, "0");
   const type = sessionType(course);
   const background = SESSION_BACKGROUNDS[type] ?? SESSION_BACKGROUNDS.day;
+  const englishName = COURSE_ENGLISH[code] ?? "BOATRACE";
   const ladies = isLadiesCourse(course);
   const finished = course.liveStatus === "finished";
   const directRace = latestDirectRace(course);
@@ -99,6 +127,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
 
       <div className={styles.mainInfo}>
         <h3>{course.courseName}</h3>
+        <div className={styles.englishName}>BoatRace {englishName}</div>
         {finished ? (
           <div className={`${styles.statusLine} ${styles.finished}`}>✓ 本日終了</div>
         ) : nextRaceNo ? (
