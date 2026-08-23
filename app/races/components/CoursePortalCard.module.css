@@ -1,6 +1,6 @@
 .card {
   position: relative;
-  min-height: 148px;
+  min-height: 142px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -15,6 +15,10 @@
   box-shadow: 0 8px 18px rgba(22, 65, 112, .17), inset 0 0 0 1px rgba(255,255,255,.35);
   isolation: isolate;
 }
+
+.morning { background-position: 48% 50%; }
+.day { background-position: 53% 50%; }
+.night { background-position: 56% 50%; }
 
 .tint {
   position: absolute;
@@ -99,7 +103,7 @@
 
 .mainInfo {
   margin: auto -4px 0;
-  padding: 30px 4px 3px;
+  padding: 24px 4px 3px;
   border-radius: 12px;
   background: linear-gradient(180deg, transparent 0%, rgba(2,16,43,.10) 32%, rgba(2,16,43,.34) 100%);
 }
@@ -140,9 +144,7 @@
   transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
-.deadline_normal {
-  background: rgba(0,20,53,.62);
-}
+.deadline_normal { background: rgba(0,20,53,.62); }
 
 .deadline_soon {
   color: #fffbe8;
@@ -158,13 +160,11 @@
   box-shadow: 0 3px 11px rgba(197,37,48,.30);
 }
 
-.finished {
-  background: rgba(44,58,74,.72);
-}
+.finished { background: rgba(44,58,74,.72); }
 
 .bottomRow {
-  min-height: 25px;
-  margin-top: 6px;
+  min-height: 22px;
+  margin-top: 5px;
   align-items: flex-end;
 }
 
@@ -201,29 +201,33 @@
 .card:focus-visible { outline: 3px solid #ffd43b; outline-offset: 2px; }
 
 @media (min-width: 680px) {
-  .card { min-height: 158px; }
+  .card { min-height: 150px; }
   .englishName { font-size: 9.5px; }
 }
 
 @media (max-width: 430px) {
   .card {
-    min-height: 142px;
-    padding: 10px;
+    min-height: 128px;
+    padding: 9px 10px;
     border-radius: 16px;
   }
+  .morning { background-position: 46% 50%; }
+  .day { background-position: 54% 50%; }
+  .night { background-position: 58% 50%; }
   .mainInfo {
     margin-inline: -3px;
-    padding: 28px 3px 3px;
+    padding: 18px 3px 2px;
   }
   .mainInfo h3 { font-size: 21px; }
   .englishName { margin-top: 3px; font-size: 7.5px; letter-spacing: .065em; }
-  .statusLine { font-size: 8px; padding: 5px 7px; }
+  .statusLine { margin-top: 5px; font-size: 8px; padding: 4px 7px; }
   .session, .ladies { padding: 4px 6px; font-size: 6px; }
   .direct, .newspaper { font-size: 6px; }
+  .bottomRow { min-height: 16px; margin-top: 3px; }
   .card:nth-last-child(-n+2) { margin-bottom: 86px; }
 }
 
 @media (max-width: 370px) {
-  .card { min-height: 154px; }
+  .card { min-height: 134px; }
   .englishName { font-size: 7px; letter-spacing: .05em; }
 }
