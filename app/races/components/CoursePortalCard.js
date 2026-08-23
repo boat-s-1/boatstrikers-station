@@ -1,6 +1,12 @@
 import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
 
+const SESSION_BACKGROUNDS = {
+  morning: "/races/course-cards/morning.webp",
+  day: "/races/course-cards/day.webp",
+  night: "/races/course-cards/night.webp",
+};
+
 function timeMinutes(value) {
   const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
   if (!match) return null;
@@ -52,10 +58,11 @@ function latestDirectRace(course) {
   return available.reduce((latest, race) => Number(race.raceNo) > Number(latest.raceNo) ? race : latest);
 }
 
-export default function CoursePortalCard({ course, raceDate, background, noteCount = 0 }) {
+export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const numericCode = Number(course.courseCode);
   const code = String(numericCode).padStart(2, "0");
   const type = sessionType(course);
+  const background = SESSION_BACKGROUNDS[type] ?? SESSION_BACKGROUNDS.day;
   const ladies = isLadiesCourse(course);
   const finished = course.liveStatus === "finished";
   const directRace = latestDirectRace(course);
