@@ -11,12 +11,11 @@ import styles from "../phase2.module.css";
 const TABS = [
   { key: "entries", icon: "📋", label: "出走表" },
   { key: "exhibition", icon: "⏱️", label: "展示" },
-  { key: "bscExhibition", icon: "📊", label: "BSC展示" },
-  { key: "raceTheater", icon: "🎬", label: "1マーク予想" },
-  { key: "ai", icon: "🧠", label: "AI分析" },
-  { key: "previous", icon: "📰", label: "前日版" },
+  { key: "bscExhibition", icon: "📊", label: "BS展示" },
+  { key: "previous", icon: "🌙", label: "前日版" },
   { key: "live", icon: "⚡", label: "直前版" },
-  { key: "bets", icon: "🎯", label: "買い目" },
+  { key: "previousBets", icon: "🎫", label: "前日買い目" },
+  { key: "liveBets", icon: "🎯", label: "直前買い目" },
   { key: "result", icon: "🏁", label: "結果" },
 ];
 
@@ -3639,9 +3638,19 @@ export default function RaceDetailTabs({
           />
         )}
 
-        {activeTab === "bets" && (
+        {activeTab === "previousBets" && (
           <BetPanel
-            prediction={currentPrediction}
+            prediction={previousPrediction}
+            noteFeature={noteFeature}
+            result={result}
+            resultEntries={resultEntries}
+            event={event}
+          />
+        )}
+
+        {activeTab === "liveBets" && (
+          <BetPanel
+            prediction={livePrediction}
             noteFeature={noteFeature}
             result={result}
             resultEntries={resultEntries}
