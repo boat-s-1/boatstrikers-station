@@ -1,0 +1,68 @@
+/* Races index: keep secondary/status blocks compact on mobile. */
+
+main[class*="portalPage"] img[alt="只今、開発中"] {
+  display: block;
+  width: min(100%, 520px) !important;
+  height: auto !important;
+  max-height: 118px;
+  margin: 0 auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 18px;
+}
+
+main[class*="portalPage"] div[class*="portalSection"]:has(> img[alt="只今、開発中"]) {
+  margin-block: 12px !important;
+}
+
+#daily-newspaper [class*="portalEmpty"] {
+  min-height: 0 !important;
+  padding: 14px 16px !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  align-items: center !important;
+  column-gap: 10px !important;
+  row-gap: 2px !important;
+  text-align: left !important;
+  border-radius: 16px !important;
+}
+
+#daily-newspaper [class*="portalEmpty"] > span {
+  grid-row: 1 / span 2;
+  font-size: 22px !important;
+}
+
+#daily-newspaper [class*="portalEmpty"] > strong {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+#daily-newspaper [class*="portalEmpty"] > p {
+  margin: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+@media (max-width: 560px) {
+  main[class*="portalPage"] img[alt="只今、開発中"] {
+    max-height: 94px;
+    border-radius: 15px;
+  }
+
+  #daily-newspaper [class*="portalEmpty"] {
+    padding: 12px 13px !important;
+  }
+
+  #daily-newspaper [class*="portalEmpty"] > span {
+    font-size: 20px !important;
+  }
+
+  #daily-newspaper [class*="portalEmpty"] > strong {
+    font-size: 13px !important;
+  }
+
+  #daily-newspaper [class*="portalEmpty"] > p {
+    font-size: 10px !important;
+  }
+}
