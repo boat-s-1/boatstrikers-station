@@ -164,7 +164,7 @@
 
 .mainInfo h3 {
   margin: 0;
-  font-size: 25px;
+  font-size: 28px;
   line-height: 1;
   font-weight: 1000;
   letter-spacing: -.04em;
@@ -274,7 +274,7 @@
     margin-inline: -3px;
     padding: 11px 3px 2px;
   }
-  .mainInfo h3 { font-size: 24px; }
+  .mainInfo h3 { font-size: 28px; }
   .englishName { margin-top: 3px; font-size: 9px; letter-spacing: .06em; }
   .statusLine { margin-top: 5px; font-size: 9.5px; padding: 5px 8px; }
   .session, .ladies { padding: 4px 7px; font-size: 7px; }
@@ -285,7 +285,7 @@
 
 @media (max-width: 370px) {
   .card { min-height: 134px; }
-  .mainInfo h3 { font-size: 23px; }
+  .mainInfo h3 { font-size: 28px; }
   .englishName { font-size: 8.5px; letter-spacing: .05em; }
   .statusLine { font-size: 9px; }
   .session, .ladies { font-size: 6.5px; }
