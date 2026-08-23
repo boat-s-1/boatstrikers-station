@@ -1,0 +1,17 @@
+.PublicSiteHeader_logo__glass {
+  width: 220px !important;
+  height: 56px !important;
+  flex: 0 0 220px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: left center !important;
+  opacity: 1 !important;
+  filter: saturate(1.08) contrast(1.04) drop-shadow(0 2px 3px rgba(7, 79, 150, .10));
+}
+
+@media (max-width: 380px) {
+  .PublicSiteHeader_logo__glass {
+    width: 205px !important;
+    flex-basis: 205px !important;
+  }
+}
