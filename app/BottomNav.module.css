@@ -23,7 +23,7 @@
   background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(242,249,255,.86));
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
-  box-shadow: 0 -10px 30px rgba(15,75,135,.14), inset 0 1px 0 rgba(255,255,255,.98);
+  box-shadow: 0 -9px 26px rgba(15,75,135,.12), inset 0 1px 0 rgba(255,255,255,.98);
   padding-bottom: env(safe-area-inset-bottom);
   pointer-events: auto;
 }
@@ -32,7 +32,7 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
-  padding: 7px 7px 6px;
+  padding: 6px 7px 5px;
 }
 
 .linkItem {
@@ -40,21 +40,21 @@
   --accent2: #0074e8;
   position: relative;
   min-width: 0;
-  height: 74px;
+  height: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   border: 1px solid color-mix(in srgb, var(--accent2) 28%, white);
-  border-radius: 16px;
+  border-radius: 15px;
   background:
     linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,255,255,.84)),
     linear-gradient(135deg, color-mix(in srgb, var(--accent1) 18%, white), white);
   color: var(--accent2);
   text-decoration: none;
   box-shadow:
-    0 5px 12px rgba(14,71,120,.06),
+    0 4px 10px rgba(14,71,120,.055),
     inset 0 1px 0 rgba(255,255,255,1),
     inset 0 -1px 0 color-mix(in srgb, var(--accent2) 10%, transparent);
   overflow: hidden;
@@ -71,7 +71,7 @@
   pointer-events: none;
 }
 
-.home { --accent1: #28c6ff; --accent2: #0877e8; }
+.home { --accent1: #6edcff; --accent2: #2b98e8; }
 .radio { --accent1: #c245ff; --accent2: #7925df; }
 .library { --accent1: #ffc62a; --accent2: #f08a00; }
 .races { --accent1: #27d9e7; --accent2: #078eae; }
@@ -81,55 +81,55 @@
   color: #fff;
   border-color: rgba(255,255,255,.82);
   background:
-    linear-gradient(145deg, color-mix(in srgb, var(--accent1) 88%, white), var(--accent2));
-  transform: translateY(-3px) scale(1.025);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent1) 84%, white), color-mix(in srgb, var(--accent2) 90%, white));
+  transform: translateY(-2px) scale(1.018);
   box-shadow:
-    0 9px 18px color-mix(in srgb, var(--accent2) 26%, transparent),
-    inset 0 1px 0 rgba(255,255,255,.7),
-    inset 0 -2px 0 rgba(0,0,0,.08);
+    0 7px 15px color-mix(in srgb, var(--accent2) 20%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 -2px 0 rgba(0,0,0,.06);
 }
 
 .active::after {
   content: "";
   position: absolute;
-  left: 11%;
-  right: 11%;
-  top: 6px;
-  height: 15px;
+  left: 12%;
+  right: 12%;
+  top: 5px;
+  height: 13px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0));
+  background: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,0));
   pointer-events: none;
 }
 
 .iconWrap {
   position: relative;
-  width: 31px;
-  height: 31px;
+  width: 29px;
+  height: 29px;
   display: grid;
   place-items: center;
   z-index: 1;
 }
 
 .iconWrap svg {
-  width: 31px;
-  height: 31px;
+  width: 29px;
+  height: 29px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 3.2;
+  stroke-width: 3.1;
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 1px 0 rgba(255,255,255,.65));
 }
 
 .active .iconWrap svg {
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.16));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.14));
 }
 
 .label {
   position: relative;
   z-index: 1;
   max-width: 100%;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
   font-weight: 900;
   letter-spacing: -.03em;
@@ -138,7 +138,7 @@
 }
 
 .active .label {
-  text-shadow: 0 1px 2px rgba(0,0,0,.2);
+  text-shadow: 0 1px 2px rgba(0,0,0,.17);
 }
 
 .onAir {
@@ -162,14 +162,14 @@
   right: 7px;
   top: 5px;
   z-index: 1;
-  font-size: 10px;
+  font-size: 9px;
   color: color-mix(in srgb, var(--accent1) 86%, white);
-  opacity: .9;
+  opacity: .85;
 }
 
 .active .sparkle {
   color: #fff;
-  opacity: 1;
+  opacity: .95;
 }
 
 .linkItem:active {
@@ -193,22 +193,22 @@
 
   .linkGrid {
     gap: 5px;
-    padding: 6px 6px 5px;
+    padding: 5px 6px 4px;
   }
 
   .linkItem {
-    height: 68px;
+    height: 63px;
     border-radius: 14px;
   }
 
   .iconWrap,
   .iconWrap svg {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .label {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 }
 
@@ -224,31 +224,38 @@
 
   .linkGrid {
     gap: 4px;
-    padding: 5px 5px 4px;
+    padding: 4px 5px 3px;
   }
 
   .linkItem {
-    height: 64px;
-    border-radius: 13px;
+    height: 58px;
+    border-radius: 12px;
   }
 
   .active {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-1px) scale(1.012);
   }
 
   .iconWrap,
   .iconWrap svg {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
   }
 
   .label {
-    font-size: 12px;
+    font-size: 11.5px;
   }
 
   .onAir {
-    right: -15px;
+    right: -14px;
+    top: -4px;
     font-size: 6px;
+  }
+
+  .sparkle {
+    right: 6px;
+    top: 4px;
+    font-size: 8px;
   }
 }
 
@@ -265,11 +272,11 @@
   }
 
   .linkItem {
-    height: 61px;
-    border-radius: 12px;
+    height: 56px;
+    border-radius: 11px;
   }
 
   .label {
-    font-size: 11px;
+    font-size: 10.5px;
   }
 }
