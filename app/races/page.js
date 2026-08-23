@@ -11,6 +11,7 @@ import {
 } from "../lib/boatstrikersPlatform";
 import styles from "./phase2.module.css";
 import RealtimeUpdates from "../components/RealtimeUpdates";
+import CoursePortalCard from "./components/CoursePortalCard";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 
@@ -423,29 +424,16 @@ export default async function RacesPage({ searchParams }) {
               {courses.map((course) => {
                 const numericCode = Number(course.courseCode);
                 const code = String(numericCode).padStart(2, "0");
-                const status = getCourseStatus(course, raceDate);
                 const noteCount = noteCountByCourse.get(numericCode) ?? 0;
-                const isNight = NIGHT_COURSE_CODES.has(numericCode);
                 const background = COURSE_BACKGROUNDS[numericCode] ?? "/IMG_6460.jpeg";
                 return (
-                  <Link
+                  <CoursePortalCard
                     key={numericCode}
-                    href={`/races/${code}?date=${raceDate}`}
-                    className={styles.compactCourseCard}
-                    style={{ backgroundImage: `linear-gradient(180deg,rgba(2,12,32,.10),rgba(2,14,38,.88)),url("${background}")` }}
-                  >
-                    <div className={styles.compactCourseTop}>
-                      <span>#{code}</span>
-                      <b className={styles[`courseStatus_${status.key}`]}>{status.label}</b>
-                    </div>
-                    <div className={styles.compactCourseBottom}>
-                      <div><h3>{course.courseName}</h3><p>{status.detail}</p></div>
-                      <div className={styles.compactCourseBadges}>
-                        {isNight && <span>🌙</span>}
-                        {noteCount > 0 && <strong>📰 {noteCount}件</strong>}
-                      </div>
-                    </div>
-                  </Link>
+                    course={course}
+                    raceDate={raceDate}
+                    background={background}
+                    noteCount={noteCount}
+                  />
                 );
               })}
             </div>
