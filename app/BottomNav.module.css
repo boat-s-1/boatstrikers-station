@@ -13,7 +13,6 @@
   width: 100%;
   box-sizing: border-box;
 
-  /* サイト内コンテンツに合わせた左右余白 */
   padding: 0 16px;
 
   background: transparent;
@@ -29,15 +28,19 @@
 
   overflow: hidden;
 
+  border: 1px solid rgba(255,255,255,.74);
+  border-bottom: 0;
   border-radius: 18px 18px 0 0;
 
-  background: rgba(255, 255, 255, 0.88);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(239,249,255,.58));
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
 
   box-shadow:
-    0 -4px 16px rgba(15, 75, 135, 0.12);
+    0 -8px 24px rgba(15, 75, 135, 0.12),
+    inset 0 1px 0 rgba(255,255,255,.92);
 
   pointer-events: auto;
 }
@@ -56,8 +59,7 @@
   user-select: none;
   -webkit-user-drag: none;
 
-  /* フッターの主張を少し弱くする */
-  opacity: 0.82;
+  opacity: 0.92;
 }
 
 .linkGrid {
@@ -116,7 +118,6 @@
   border: 0;
 }
 
-/* タブレット以下 */
 @media (max-width: 768px) {
   .footerNav {
     padding-left: 16px;
@@ -128,26 +129,26 @@
   }
 }
 
-/* スマホ */
 @media (max-width: 480px) {
   .footerNav {
     padding-left: 12px;
     padding-right: 12px;
-
-    /* Safariで1px程度浮くのを防止 */
     bottom: -1px;
   }
 
   .footerInner {
-    border-radius: 14px 14px 0 0;
+    border-radius: 16px 16px 0 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.70), rgba(238,248,255,.56));
+    backdrop-filter: blur(15px) saturate(135%);
+    -webkit-backdrop-filter: blur(15px) saturate(135%);
   }
 
   .footerImage {
-    opacity: 0.82;
+    opacity: 0.94;
   }
 }
 
-/* 幅の狭いスマホ */
 @media (max-width: 380px) {
   .footerNav {
     padding-left: 8px;
@@ -155,6 +156,6 @@
   }
 
   .footerInner {
-    border-radius: 12px 12px 0 0;
+    border-radius: 14px 14px 0 0;
   }
 }
