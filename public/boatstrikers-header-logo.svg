@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="title desc">
+  <title id="title">BoatStrikers</title>
+  <desc id="desc">BoatStrikers blue and gold logo with racing boat, sparkles, splash and wave accents</desc>
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#19b8ef"/>
+      <stop offset=".44" stop-color="#0873d7"/>
+      <stop offset="1" stop-color="#053f9f"/>
+    </linearGradient>
+    <linearGradient id="deep" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0873d7"/>
+      <stop offset="1" stop-color="#052f85"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe683"/>
+      <stop offset=".45" stop-color="#ffc93d"/>
+      <stop offset="1" stop-color="#f3a80b"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0759c2"/>
+      <stop offset=".5" stop-color="#19c4f2"/>
+      <stop offset="1" stop-color="#0472d9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#0b559c" flood-opacity=".22"/>
+    </filter>
+  </defs>
+
+  <!-- racing boat -->
+  <g transform="translate(470 8)" fill="url(#deep)">
+    <path d="M112 21c17 0 30 13 30 29 0 4-1 8-2 11l-43-8c-8-2-13-8-13-16 0-9 7-16 16-16h12z"/>
+    <path d="M51 74c21-17 48-21 74-13l86 29 130 8c18 1 20 8 5 16l-132 65c-26 13-56 18-85 15l-69-7c-23-2-43-17-52-38L0 129l53-17 56 9 90-18-148-29z"/>
+    <path d="M57 124h260l-127 46c-27 10-57 13-86 9l-53-8c-14-2-25-12-30-25l-4-10 40-12z" fill="#fff" opacity=".96"/>
+    <path d="M80 116h238l-123 35c-25 7-51 9-77 5l-71-10 33-30z" fill="url(#deep)"/>
+    <circle cx="82" cy="73" r="25"/>
+    <path d="M3 86h118L42 75zM-15 103h124L25 96zM-27 121H90L9 114z" fill="#18bbed" opacity=".9"/>
+  </g>
+
+  <!-- sparkles -->
+  <g fill="url(#gold)">
+    <path d="M280 72l10 26 27 10-27 10-10 27-10-27-27-10 27-10z"/>
+    <path d="M659 92l7 18 18 7-18 7-7 18-7-18-18-7 18-7z"/>
+    <path d="M854 62l11 29 29 11-29 11-11 29-11-29-29-11 29-11z"/>
+  </g>
+  <g fill="#086bd4">
+    <path d="M330 104l7 17 17 7-17 7-7 17-7-17-17-7 17-7z"/>
+    <path d="M788 102l7 17 17 7-17 7-7 17-7-17-17-7 17-7z"/>
+  </g>
+
+  <!-- wordmark -->
+  <g filter="url(#shadow)" font-family="Arial Black, Arial, Helvetica, sans-serif" font-style="italic" font-weight="900">
+    <text x="74" y="208" font-size="151" fill="#fff" stroke="#072f77" stroke-width="19" stroke-linejoin="round">BoatStrikers</text>
+    <text x="74" y="208" font-size="151" fill="#fff" stroke="url(#gold)" stroke-width="13" stroke-linejoin="round">BoatStrikers</text>
+    <text x="74" y="208" font-size="151" fill="url(#blue)" stroke="#fff" stroke-width="5" stroke-linejoin="round">BoatStrikers</text>
+  </g>
+
+  <!-- splash -->
+  <g fill="#16aceb">
+    <ellipse cx="47" cy="196" rx="12" ry="29" transform="rotate(-26 47 196)"/>
+    <ellipse cx="29" cy="219" rx="9" ry="22" transform="rotate(-48 29 219)"/>
+    <ellipse cx="63" cy="226" rx="8" ry="18" transform="rotate(18 63 226)"/>
+  </g>
+
+  <!-- waves -->
+  <path d="M44 246c130 27 256 25 390-3 155-33 291-32 469 5-168-19-304-8-449 27-146 35-280 25-410-29z" fill="url(#wave)"/>
+  <path d="M87 259c122 19 238 12 356-11 153-29 280-24 411 4-134-11-264 1-389 30-132 30-254 25-378-23z" fill="#28cef4" opacity=".68"/>
+  <path d="M208 271c90 8 180 2 272-16 127-25 241-18 351 1-110-5-220 8-327 29-101 20-199 16-296-14z" fill="#fff" opacity=".9"/>
+</svg>
