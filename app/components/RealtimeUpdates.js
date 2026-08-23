@@ -62,8 +62,11 @@ async function getItems(target, limit) {
 
 export default async function RealtimeUpdates({ target = "home", limit = 5, compact = false }) {
   const items = await getItems(target, limit);
+  const isCompact = compact || target === "races";
+  const visibleItems = isCompact ? items.slice(0, 1) : items;
+
   return (
-    <section className={`${styles.section} ${compact ? styles.compact : ""}`}>
+    <section className={`${styles.section} ${isCompact ? styles.compact : ""}`}>
       <div className={styles.heading}>
         <div>
           <span>REALTIME UPDATE</span>
@@ -79,9 +82,9 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
         </a>
       </div>
 
-      {items.length ? (
+      {visibleItems.length ? (
         <div className={styles.list}>
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const kind = KIND_META[item.kind] || KIND_META.notice;
             const chara = CHARACTER_META[item.character] || CHARACTER_META.all;
             const inner = (
@@ -94,7 +97,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
                   <time>{formatDate(item.published_at || item.created_at)}</time>
                 </div>
                 <h3>{item.title}</h3>
-                {item.body ? <p>{item.body}</p> : null}
+                {!isCompact && item.body ? <p>{item.body}</p> : null}
                 {item.image_url ? (
                   <div className={styles.imageWrap}>
                     <img src={item.image_url} alt={item.title || "更新画像"} className={styles.image} />
