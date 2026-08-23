@@ -148,57 +148,59 @@
 }
 
 .infoTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   padding: 4px 7px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.50);
-  color: #fff;
-  background: rgba(3,30,75,.72);
+  border: 1px solid rgba(255,255,255,.52);
+  background: rgba(255,255,255,.92);
+  color: #176ea9;
   font-size: 7px;
-  line-height: 1;
-  font-weight: 1000;
+  line-height: 1.1;
+  font-weight: 950;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(0,0,0,.16);
+  box-shadow: 0 3px 10px rgba(0,0,0,.10);
 }
 
 .infoTag_ladies {
-  color: #fff2f8;
-  border-color: rgba(255,205,226,.78);
-  background: linear-gradient(135deg, rgba(221,70,120,.92), rgba(248,115,160,.92));
+  color: #d93379;
+  border-color: rgba(255,196,220,.95);
 }
 
 .infoTag_sg {
-  color: #fff9dd;
-  border-color: rgba(255,220,109,.88);
-  background: linear-gradient(135deg, rgba(142,35,35,.96), rgba(226,95,35,.94));
+  color: #d25b1d;
+  border-color: rgba(255,204,170,.95);
 }
 
 .infoTag_g1 {
-  color: #fff8dc;
-  border-color: rgba(255,220,116,.82);
-  background: linear-gradient(135deg, rgba(162,103,4,.94), rgba(224,155,23,.94));
+  color: #b07a00;
+  border-color: rgba(255,224,150,.95);
 }
 
 .infoTag_g2 {
-  background: linear-gradient(135deg, rgba(38,105,190,.94), rgba(22,149,207,.94));
+  color: #1982cf;
+  border-color: rgba(171,220,255,.95);
 }
 
 .infoTag_g3 {
-  background: linear-gradient(135deg, rgba(34,133,107,.94), rgba(45,166,121,.94));
+  color: #1f9d6c;
+  border-color: rgba(176,235,207,.95);
 }
 
 .infoTag_優勝戦 {
-  color: #fff8df;
-  border-color: rgba(255,222,116,.82);
-  background: linear-gradient(135deg, rgba(172,105,0,.94), rgba(222,154,13,.94));
+  color: #b87700;
+  border-color: rgba(255,220,140,.95);
 }
 
 .infoTag_準優勝戦 {
-  border-color: rgba(255,176,176,.82);
-  background: linear-gradient(135deg, rgba(180,43,65,.94), rgba(224,67,86,.94));
+  color: #d94a5c;
+  border-color: rgba(255,186,194,.95);
 }
 
 .infoTag_初日 {
-  background: linear-gradient(135deg, rgba(36,116,190,.92), rgba(36,161,211,.92));
+  color: #1893d8;
+  border-color: rgba(152,214,255,.95);
 }
 
 .deadline_normal { background: rgba(0,20,53,.62); }
