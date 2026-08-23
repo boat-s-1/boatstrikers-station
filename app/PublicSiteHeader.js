@@ -126,7 +126,6 @@ export default function PublicSiteHeader() {
     setOpen(false);
   }, [pathname]);
 
-
   useEffect(() => {
     if (!open) return;
 
@@ -148,15 +147,21 @@ export default function PublicSiteHeader() {
 
   return (
     <>
-      <header className={`${styles.header} ${compact ? styles.compact : ""}`}>
-        <Link href="/" className={styles.logo} aria-label="BoatStrikers ホーム">
+      <header
+        className={`${styles.header} PublicSiteHeader_header__glass ${compact ? `${styles.compact} PublicSiteHeader_compact__glass` : ""}`}
+      >
+        <Link
+          href="/"
+          className={`${styles.logo} PublicSiteHeader_logo__glass`}
+          aria-label="BoatStrikers ホーム"
+        >
           <span>BOAT</span>
           <strong>STRIKERS</strong>
         </Link>
 
         <button
           type="button"
-          className={`${styles.menuButton} ${open ? styles.menuButtonOpen : ""}`}
+          className={`${styles.menuButton} PublicSiteHeader_menuButton__glass ${open ? `${styles.menuButtonOpen} PublicSiteHeader_menuButtonOpen__glass` : ""}`}
           aria-label={open ? "メニューを閉じる" : "メニューを開く"}
           aria-expanded={open}
           aria-controls="boatstrikers-global-menu"
