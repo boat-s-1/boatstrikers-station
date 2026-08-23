@@ -99,6 +99,65 @@ function deadlineUrgency(closingAt) {
   return "normal";
 }
 
+function normalizeGradeText(value) {
+  return String(value ?? "")
+    .toUpperCase()
+    .replace(/Ｇ/g, "G")
+    .replace(/Ⅰ/g, "1")
+    .replace(/Ⅱ/g, "2")
+    .replace(/Ⅲ/g, "3")
+    .replace(/\s+/g, "");
+}
+
+function detectGrade(course) {
+  const races = Array.isArray(course?.races) ? course.races : [];
+  const values = [];
+
+  for (const race of races) {
+    const event = race?.event ?? {};
+    values.push(
+      event.grade,
+      event.race_grade,
+      event.series_grade,
+      event.grade_code,
+      event.event_grade,
+      event.meeting_grade,
+      event.race_name,
+      event.event_name,
+      event.series_name,
+      event.title
+    );
+  }
+
+  const text = values.map(normalizeGradeText).filter(Boolean).join(" ");
+  if (/\bSG\b/.test(text) || text.includes("SG")) return "SG";
+  if (/G1/.test(text)) return "G1";
+  if (/G2/.test(text)) return "G2";
+  if (/G3/.test(text)) return "G3";
+  return null;
+}
+
+function detectStage(course, raceDate) {
+  const races = Array.isArray(course?.races) ? course.races : [];
+  const kindCodes = new Set(
+    races.map((race) => String(race?.raceKindCode ?? race?.race_kind_code ?? "").padStart(4, "0"))
+  );
+
+  if (kindCodes.has("0021")) return "優勝戦";
+  if (kindCodes.has("0011")) return "準優勝戦";
+
+  const firstEvent = races.find((race) => race?.event)?.event ?? null;
+  const raceDayNo = Number(firstEvent?.race_day_no ?? firstEvent?.raceDayNo ?? 0);
+  const openingDate = String(firstEvent?.opening_date ?? "").slice(0, 10);
+  if (raceDayNo === 1 || (openingDate && openingDate === String(raceDate))) return "初日";
+
+  return null;
+}
+
+function eventBadges(course, raceDate) {
+  return [detectGrade(course), detectStage(course, raceDate)].filter(Boolean).slice(0, 2);
+}
+
 export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const numericCode = Number(course.courseCode);
   const code = String(numericCode).padStart(2, "0");
@@ -111,6 +170,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const nextRaceNo = Number(course.nextRaceNo || 0) || null;
   const nextClosing = shortTime(course.nextClosingTime);
   const urgency = deadlineUrgency(course.nextClosingAt);
+  const specialBadges = eventBadges(course, raceDate);
 
   return (
     <Link
@@ -127,6 +187,20 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
           {ladies && <span className={styles.ladies}>🌸 女子戦</span>}
         </div>
       </div>
+
+      {specialBadges.length > 0 && (
+        <div className={styles.eventTags}>
+          {specialBadges.map((badge) => (
+            <span
+              key={badge}
+              className={`${styles.eventTag} ${styles[`eventTag_${badge.toLowerCase()}`] ?? ""}`}
+            >
+              {badge === "優勝戦" ? "🏆 " : badge === "準優勝戦" ? "🔥 " : badge === "初日" ? "🚩 " : "★ "}
+              {badge}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className={styles.mainInfo}>
         <h3>{course.courseName}</h3>
