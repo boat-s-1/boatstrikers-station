@@ -1,0 +1,188 @@
+.card {
+  position: relative;
+  min-height: 148px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 11px;
+  color: #fff;
+  text-decoration: none;
+  border: 2px solid rgba(74, 176, 255, .9);
+  border-radius: 18px;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 8px 18px rgba(22, 65, 112, .17), inset 0 0 0 1px rgba(255,255,255,.35);
+  isolation: isolate;
+}
+
+.tint {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.morning .tint {
+  background:
+    linear-gradient(180deg, rgba(6,75,171,.24), rgba(3,22,54,.72)),
+    linear-gradient(110deg, rgba(255,179,62,.18), transparent 50%);
+}
+
+.day .tint {
+  background: linear-gradient(180deg, rgba(7,89,191,.15), rgba(2,24,61,.74));
+}
+
+.night {
+  border-color: rgba(151, 92, 255, .92);
+  box-shadow: 0 8px 18px rgba(67, 37, 122, .22), inset 0 0 0 1px rgba(255,255,255,.25);
+}
+
+.night .tint {
+  background: linear-gradient(180deg, rgba(25,10,82,.22), rgba(12,5,44,.82));
+}
+
+.topRow,
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.code,
+.session,
+.ladies,
+.direct,
+.newspaper {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.code {
+  display: grid;
+  min-width: 37px;
+  height: 26px;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: rgba(2,24,58,.48);
+  border: 1px solid rgba(255,255,255,.26);
+  font-size: 9px;
+  font-weight: 1000;
+}
+
+.tags {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.session,
+.ladies {
+  padding: 5px 7px;
+  border: 1px solid rgba(255,255,255,.52);
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 950;
+  white-space: nowrap;
+  background: rgba(255,255,255,.86);
+  color: #176ea9;
+}
+
+.morning .session { color: #b36a05; }
+.night .session { color: #7133c7; }
+.ladies { color: #d93379; }
+
+.mainInfo {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.mainInfo h3 {
+  margin: 0;
+  font-size: 23px;
+  line-height: 1;
+  font-weight: 1000;
+  letter-spacing: -.04em;
+  text-shadow: 0 2px 10px rgba(0,0,0,.55);
+}
+
+.statusLine {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: rgba(0,20,53,.56);
+  border: 1px solid rgba(255,255,255,.20);
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 950;
+  text-shadow: 0 1px 3px rgba(0,0,0,.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.finished {
+  background: rgba(44,58,74,.68);
+}
+
+.bottomRow {
+  min-height: 25px;
+  margin-top: 7px;
+  align-items: flex-end;
+}
+
+.direct,
+.newspaper {
+  padding: 5px 7px;
+  border-radius: 999px;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.direct {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(0,177,255,.88), rgba(0,103,221,.90));
+  border: 1px solid rgba(255,255,255,.42);
+  box-shadow: 0 3px 9px rgba(0,93,194,.22);
+}
+
+.night .direct {
+  background: linear-gradient(135deg, rgba(132,78,255,.92), rgba(73,34,174,.92));
+}
+
+.newspaper {
+  color: #fff;
+  background: rgba(221,70,120,.88);
+  border: 1px solid rgba(255,255,255,.35);
+}
+
+.spacer { min-height: 1px; }
+
+.card:active { transform: scale(.985); }
+.card:focus-visible { outline: 3px solid #ffd43b; outline-offset: 2px; }
+
+@media (min-width: 680px) {
+  .card { min-height: 158px; }
+}
+
+@media (max-width: 430px) {
+  .card {
+    min-height: 142px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .mainInfo h3 { font-size: 21px; }
+  .statusLine { font-size: 8px; }
+  .session, .ladies { padding: 4px 6px; font-size: 6px; }
+  .direct, .newspaper { font-size: 6px; }
+}
+
+@media (max-width: 370px) {
+  .card { min-height: 154px; }
+}
