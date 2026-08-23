@@ -58,6 +58,17 @@ function latestDirectRace(course) {
   return available.reduce((latest, race) => Number(race.raceNo) > Number(latest.raceNo) ? race : latest);
 }
 
+function deadlineUrgency(closingAt) {
+  if (!closingAt) return "normal";
+  const target = new Date(closingAt).getTime();
+  if (!Number.isFinite(target)) return "normal";
+  const minutes = (target - Date.now()) / 60000;
+  if (minutes < 0) return "normal";
+  if (minutes <= 10) return "urgent";
+  if (minutes <= 30) return "soon";
+  return "normal";
+}
+
 export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const numericCode = Number(course.courseCode);
   const code = String(numericCode).padStart(2, "0");
@@ -68,6 +79,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const directRace = latestDirectRace(course);
   const nextRaceNo = Number(course.nextRaceNo || 0) || null;
   const nextClosing = shortTime(course.nextClosingTime);
+  const urgency = deadlineUrgency(course.nextClosingAt);
 
   return (
     <Link
@@ -90,7 +102,9 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
         {finished ? (
           <div className={`${styles.statusLine} ${styles.finished}`}>✓ 本日終了</div>
         ) : nextRaceNo ? (
-          <div className={styles.statusLine}>⏰ {nextRaceNo}R {nextClosing} 〆切</div>
+          <div className={`${styles.statusLine} ${styles[`deadline_${urgency}`]}`}>
+            ⏰ {nextRaceNo}R {nextClosing} 〆切
+          </div>
         ) : (
           <div className={styles.statusLine}>出走表公開中</div>
         )}
