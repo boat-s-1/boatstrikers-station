@@ -53,8 +53,7 @@
 
 .code,
 .session,
-.ladies,
-.eventTag,
+.infoTag,
 .direct,
 .newspaper {
   backdrop-filter: blur(8px);
@@ -82,8 +81,7 @@
   min-width: 0;
 }
 
-.session,
-.ladies {
+.session {
   padding: 4px 7px;
   border: 1px solid rgba(255,255,255,.52);
   border-radius: 999px;
@@ -97,63 +95,6 @@
 
 .morning .session { color: #b36a05; }
 .night .session { color: #7133c7; }
-.ladies { color: #d93379; }
-
-.eventTags {
-  display: flex;
-  justify-content: flex-end;
-  gap: 4px;
-  min-height: 18px;
-  margin-top: 4px;
-}
-
-.eventTag {
-  padding: 4px 7px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.50);
-  color: #fff;
-  background: rgba(3,30,75,.72);
-  font-size: 7px;
-  line-height: 1;
-  font-weight: 1000;
-  white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(0,0,0,.16);
-}
-
-.eventTag_sg {
-  color: #fff9dd;
-  border-color: rgba(255,220,109,.88);
-  background: linear-gradient(135deg, rgba(142,35,35,.96), rgba(226,95,35,.94));
-}
-
-.eventTag_g1 {
-  color: #fff8dc;
-  border-color: rgba(255,220,116,.82);
-  background: linear-gradient(135deg, rgba(162,103,4,.94), rgba(224,155,23,.94));
-}
-
-.eventTag_g2 {
-  background: linear-gradient(135deg, rgba(38,105,190,.94), rgba(22,149,207,.94));
-}
-
-.eventTag_g3 {
-  background: linear-gradient(135deg, rgba(34,133,107,.94), rgba(45,166,121,.94));
-}
-
-.eventTag_優勝戦 {
-  color: #fff8df;
-  border-color: rgba(255,222,116,.82);
-  background: linear-gradient(135deg, rgba(172,105,0,.94), rgba(222,154,13,.94));
-}
-
-.eventTag_準優勝戦 {
-  border-color: rgba(255,176,176,.82);
-  background: linear-gradient(135deg, rgba(180,43,65,.94), rgba(224,67,86,.94));
-}
-
-.eventTag_初日 {
-  background: linear-gradient(135deg, rgba(36,116,190,.92), rgba(36,161,211,.92));
-}
 
 .mainInfo {
   margin: auto -4px 0;
@@ -196,6 +137,68 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.infoTags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.infoTag {
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.50);
+  color: #fff;
+  background: rgba(3,30,75,.72);
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 1000;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0,0,0,.16);
+}
+
+.infoTag_ladies {
+  color: #fff2f8;
+  border-color: rgba(255,205,226,.78);
+  background: linear-gradient(135deg, rgba(221,70,120,.92), rgba(248,115,160,.92));
+}
+
+.infoTag_sg {
+  color: #fff9dd;
+  border-color: rgba(255,220,109,.88);
+  background: linear-gradient(135deg, rgba(142,35,35,.96), rgba(226,95,35,.94));
+}
+
+.infoTag_g1 {
+  color: #fff8dc;
+  border-color: rgba(255,220,116,.82);
+  background: linear-gradient(135deg, rgba(162,103,4,.94), rgba(224,155,23,.94));
+}
+
+.infoTag_g2 {
+  background: linear-gradient(135deg, rgba(38,105,190,.94), rgba(22,149,207,.94));
+}
+
+.infoTag_g3 {
+  background: linear-gradient(135deg, rgba(34,133,107,.94), rgba(45,166,121,.94));
+}
+
+.infoTag_優勝戦 {
+  color: #fff8df;
+  border-color: rgba(255,222,116,.82);
+  background: linear-gradient(135deg, rgba(172,105,0,.94), rgba(222,154,13,.94));
+}
+
+.infoTag_準優勝戦 {
+  border-color: rgba(255,176,176,.82);
+  background: linear-gradient(135deg, rgba(180,43,65,.94), rgba(224,67,86,.94));
+}
+
+.infoTag_初日 {
+  background: linear-gradient(135deg, rgba(36,116,190,.92), rgba(36,161,211,.92));
 }
 
 .deadline_normal { background: rgba(0,20,53,.62); }
@@ -257,7 +260,7 @@
 @media (min-width: 680px) {
   .card { min-height: 150px; }
   .englishName { font-size: 10.5px; }
-  .eventTag { font-size: 8px; }
+  .infoTag { font-size: 8px; }
 }
 
 @media (max-width: 430px) {
@@ -268,16 +271,18 @@
     background-position: center center;
     background-size: auto 122%;
   }
-  .eventTags { min-height: 16px; margin-top: 3px; gap: 3px; }
-  .eventTag { padding: 3px 6px; font-size: 6.5px; }
+
   .mainInfo {
     margin-inline: -3px;
     padding: 11px 3px 2px;
   }
+
   .mainInfo h3 { font-size: 28px; }
   .englishName { margin-top: 3px; font-size: 9px; letter-spacing: .06em; }
   .statusLine { margin-top: 5px; font-size: 9.5px; padding: 5px 8px; }
-  .session, .ladies { padding: 4px 7px; font-size: 7px; }
+  .session { padding: 4px 7px; font-size: 7px; }
+  .infoTags { gap: 3px; margin-top: 5px; }
+  .infoTag { padding: 3px 6px; font-size: 6.5px; }
   .direct, .newspaper { font-size: 7px; }
   .bottomRow { min-height: 16px; margin-top: 3px; }
   .card:nth-last-child(-n+2) { margin-bottom: 86px; }
@@ -288,6 +293,6 @@
   .mainInfo h3 { font-size: 28px; }
   .englishName { font-size: 8.5px; letter-spacing: .05em; }
   .statusLine { font-size: 9px; }
-  .session, .ladies { font-size: 6.5px; }
-  .eventTag { font-size: 6px; }
+  .session { font-size: 6.5px; }
+  .infoTag { font-size: 6px; }
 }
