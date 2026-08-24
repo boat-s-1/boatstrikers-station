@@ -38,31 +38,32 @@
 }
 
 .tabs {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
   padding: 3px 0 13px;
-  scrollbar-width: none;
-}
-
-.tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .tab {
-  flex: 0 0 auto;
-  padding: 9px 13px;
-  border-radius: 999px;
+  min-width: 0;
+  padding: 10px 5px;
+  border-radius: 12px;
   background: #f5f0f9;
+  border: 1px solid #ebe1f2;
   color: #715d7d;
+  text-align: center;
   text-decoration: none;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .active {
   background: #6f3c99;
+  border-color: #6f3c99;
   color: #fff;
+  box-shadow: 0 5px 12px rgba(111, 60, 153, .2);
 }
 
 .summaryBar {
@@ -220,6 +221,17 @@
 @media (max-width: 640px) {
   .page {
     padding-inline: 12px;
+  }
+
+  .tabs {
+    gap: 3px;
+  }
+
+  .tab {
+    padding: 10px 2px;
+    border-radius: 10px;
+    font-size: 10px;
+    letter-spacing: -0.02em;
   }
 
   .newsRow {
