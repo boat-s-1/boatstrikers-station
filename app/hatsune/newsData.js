@@ -2,13 +2,10 @@ import { supabase } from "../bsc2/lib/supabaseClient";
 
 export const HATSUNE_NEWS_CATEGORIES = [
   { key: "all", label: "すべて" },
-  { key: "result", label: "今日の結果" },
-  { key: "women", label: "女子戦" },
-  { key: "suijinsai", label: "水神祭" },
-  { key: "win", label: "優勝" },
-  { key: "grade", label: "昇格" },
-  { key: "motor", label: "モーター" },
-  { key: "tomorrow", label: "明日" },
+  { key: "race", label: "レース" },
+  { key: "racer", label: "レーサー" },
+  { key: "data", label: "データ" },
+  { key: "tomorrow", label: "明日の注目" },
 ];
 
 export const HATSUNE_NEWS_LABELS = {
@@ -22,10 +19,27 @@ export const HATSUNE_NEWS_LABELS = {
   topic: "🔥 注目",
 };
 
+const LEGACY_CATEGORY_TO_TAB = {
+  result: "race",
+  women: "race",
+  win: "race",
+  suijinsai: "racer",
+  grade: "racer",
+  motor: "data",
+  tomorrow: "tomorrow",
+};
+
+export function normalizeHatsuneNewsCategory(value) {
+  const key = String(value || "all");
+  if (HATSUNE_NEWS_CATEGORIES.some((item) => item.key === key)) return key;
+  return LEGACY_CATEGORY_TO_TAB[key] || "all";
+}
+
 export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
   if (!supabase) return [];
 
   try {
+    const normalizedCategory = normalizeHatsuneNewsCategory(category);
     let query = supabase
       .from("hatsune_news")
       .select(`
@@ -48,8 +62,14 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
       .order("published_at", { ascending: false })
       .limit(limit);
 
-    if (category && category !== "all") {
-      query = query.eq("category", category);
+    if (normalizedCategory === "race") {
+      query = query.in("category", ["result", "women", "win"]);
+    } else if (normalizedCategory === "racer") {
+      query = query.in("category", ["suijinsai", "grade"]);
+    } else if (normalizedCategory === "data") {
+      query = query.or("category.eq.motor,source_type.eq.bs_data");
+    } else if (normalizedCategory === "tomorrow") {
+      query = query.eq("category", "tomorrow");
     }
 
     const { data, error } = await query;
