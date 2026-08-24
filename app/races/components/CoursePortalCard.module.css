@@ -15,8 +15,6 @@
   background-repeat: no-repeat;
   box-shadow: 0 8px 18px rgba(22, 65, 112, .17), inset 0 0 0 1px rgba(255,255,255,.35);
   isolation: isolate;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 142px;
 }
 
 .tint {
@@ -274,7 +272,6 @@
     border-radius: 16px;
     background-position: center center;
     background-size: auto 122%;
-    contain-intrinsic-size: auto 128px;
   }
 
   /* iPhone Safari向け軽量化: 複数カード上のblur合成を止めてGPU負荷を抑える */
