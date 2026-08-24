@@ -141,15 +141,20 @@
 
 .infoTags {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
+  min-height: 22px;
   margin-top: 6px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .infoTag {
   display: inline-flex;
   align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
   gap: 3px;
   padding: 4px 7px;
   border-radius: 999px;
@@ -295,7 +300,7 @@
   .englishName { margin-top: 3px; font-size: 9px; letter-spacing: .06em; }
   .statusLine { margin-top: 5px; font-size: 9.5px; padding: 5px 8px; }
   .session { padding: 4px 7px; font-size: 7px; }
-  .infoTags { gap: 3px; margin-top: 5px; }
+  .infoTags { min-height: 18px; gap: 3px; margin-top: 5px; }
   .infoTag { padding: 3px 6px; font-size: 6.5px; }
   .direct, .newspaper { font-size: 7px; }
   .bottomRow { min-height: 16px; margin-top: 3px; }
