@@ -9,10 +9,8 @@ function NewsCard({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
 
   return (
-    <a
-      href={item.source_url || `/hatsune/news/${item.id}`}
-      target={item.source_url ? "_blank" : undefined}
-      rel={item.source_url ? "noopener noreferrer" : undefined}
+    <Link
+      href={`/hatsune/news/${item.id}`}
       className={styles.newsItem}
     >
       <div className={styles.thumbWrap}>
@@ -38,7 +36,7 @@ function NewsCard({ item }) {
           <span>{formatHatsuneNewsDate(item.published_at)}</span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 

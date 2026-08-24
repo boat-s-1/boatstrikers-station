@@ -35,6 +35,21 @@ export function normalizeHatsuneNewsCategory(value) {
   return LEGACY_CATEGORY_TO_TAB[key] || "all";
 }
 
+const HATSUNE_NEWS_SELECT = `
+  id,
+  title,
+  summary,
+  category,
+  source_type,
+  source_name,
+  source_url,
+  image_url,
+  place,
+  published_at,
+  is_featured,
+  priority
+`;
+
 export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
   if (!supabase) return [];
 
@@ -42,20 +57,7 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
     const normalizedCategory = normalizeHatsuneNewsCategory(category);
     let query = supabase
       .from("hatsune_news")
-      .select(`
-        id,
-        title,
-        summary,
-        category,
-        source_type,
-        source_name,
-        source_url,
-        image_url,
-        place,
-        published_at,
-        is_featured,
-        priority
-      `)
+      .select(HATSUNE_NEWS_SELECT)
       .eq("is_published", true)
       .order("is_featured", { ascending: false })
       .order("priority", { ascending: false })
@@ -75,7 +77,6 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
     const { data, error } = await query;
 
     if (error) {
-      // テーブル作成前でも初音ページ自体は壊さない。
       console.warn("初音NEWS取得:", error.message);
       return [];
     }
@@ -84,6 +85,29 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
   } catch (error) {
     console.warn("初音NEWS取得:", error?.message || error);
     return [];
+  }
+}
+
+export async function getHatsuneNewsById(id) {
+  if (!supabase || !id) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("hatsune_news")
+      .select(HATSUNE_NEWS_SELECT)
+      .eq("id", id)
+      .eq("is_published", true)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("初音NEWS詳細取得:", error.message);
+      return null;
+    }
+
+    return data || null;
+  } catch (error) {
+    console.warn("初音NEWS詳細取得:", error?.message || error);
+    return null;
   }
 }
 

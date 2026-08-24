@@ -15,11 +15,9 @@ function NewsRow({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
 
   return (
-    <a
+    <Link
       className={styles.newsRow}
-      href={item.source_url || "#"}
-      target={item.source_url ? "_blank" : undefined}
-      rel={item.source_url ? "noopener noreferrer" : undefined}
+      href={`/hatsune/news/${item.id}`}
     >
       <div className={styles.imageBox}>
         {item.image_url ? (
@@ -47,7 +45,7 @@ function NewsRow({ item }) {
           <span>{formatHatsuneNewsDate(item.published_at)}</span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
