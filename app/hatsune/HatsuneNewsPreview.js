@@ -1,0 +1,106 @@
+import Link from "next/link";
+import styles from "./HatsuneNewsPreview.module.css";
+import {
+  HATSUNE_NEWS_LABELS,
+  formatHatsuneNewsDate,
+} from "./newsData";
+
+function NewsCard({ item }) {
+  const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
+
+  return (
+    <a
+      href={item.source_url || `/hatsune/news/${item.id}`}
+      target={item.source_url ? "_blank" : undefined}
+      rel={item.source_url ? "noopener noreferrer" : undefined}
+      className={styles.newsItem}
+    >
+      <div className={styles.thumbWrap}>
+        {item.image_url ? (
+          <img src={item.image_url} alt="" className={styles.thumb} />
+        ) : (
+          <div className={styles.thumbFallback}>HATSUNE NEWS</div>
+        )}
+      </div>
+
+      <div className={styles.newsBody}>
+        <div className={styles.metaRow}>
+          <span className={styles.tag}>{label}</span>
+          {item.source_type === "bs_data" && (
+            <span className={styles.bsTag}>BS DATA</span>
+          )}
+        </div>
+
+        <h3>{item.title}</h3>
+
+        <div className={styles.subMeta}>
+          {item.place && <span>{item.place}</span>}
+          <span>{formatHatsuneNewsDate(item.published_at)}</span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+export default function HatsuneNewsPreview({ news = [] }) {
+  return (
+    <section className={styles.wrap}>
+      <div className={styles.headingRow}>
+        <div>
+          <span className={styles.kicker}>HATSUNE</span>
+          <h2>女子ボートNEWS</h2>
+          <p>今日の結果と、明日の注目情報をひとまとめ。</p>
+        </div>
+
+        <Link href="/hatsune/news" className={styles.moreTop}>
+          一覧を見る
+        </Link>
+      </div>
+
+      {news.length > 0 ? (
+        <div className={styles.list}>
+          {news.map((item) => (
+            <NewsCard key={item.id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.empty}>
+          <strong>初音NEWSは準備中です</strong>
+          <p>
+            夜間の自動収集を接続すると、水神祭・優勝・級別・女子戦結果・高モーター・翌日情報がここに表示されます。
+          </p>
+        </div>
+      )}
+
+      <div className={styles.quickGrid}>
+        <Link href="/hatsune/news?category=tomorrow" className={styles.quickCard}>
+          <span>📅</span>
+          <div>
+            <strong>明日の女子戦</strong>
+            <small>注目レース・優勝戦・準優</small>
+          </div>
+        </Link>
+
+        <Link href="/hatsune/news?category=motor" className={styles.quickCard}>
+          <span>⚙️</span>
+          <div>
+            <strong>高モーター女子</strong>
+            <small>エース機・上位機をチェック</small>
+          </div>
+        </Link>
+
+        <Link href="/hatsune/news?category=suijinsai" className={styles.quickCard}>
+          <span>💧</span>
+          <div>
+            <strong>水神祭・記録</strong>
+            <small>初勝利・節目勝利・昇格</small>
+          </div>
+        </Link>
+      </div>
+
+      <Link href="/hatsune/news" className={styles.moreButton}>
+        女子ボートNEWSをもっと見る →
+      </Link>
+    </section>
+  );
+}
