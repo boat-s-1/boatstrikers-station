@@ -152,6 +152,7 @@ export default function PublicSiteHeader() {
       >
         <Link
           href="/"
+          prefetch={false}
           className={`${styles.logo} PublicSiteHeader_logo__glass`}
           aria-label="BoatStrikers ホーム"
         >
@@ -223,7 +224,11 @@ export default function PublicSiteHeader() {
 
               <div className={styles.linkList}>
                 {group.links.map((item) => (
-                  <Link href={item.href} key={`${group.eyebrow}-${item.href}-${item.label}`}>
+                  <Link
+                    href={item.href}
+                    prefetch={false}
+                    key={`${group.eyebrow}-${item.href}-${item.label}`}
+                  >
                     <span>{item.label}</span>
                     <i aria-hidden="true">›</i>
                   </Link>
@@ -234,7 +239,7 @@ export default function PublicSiteHeader() {
         </nav>
 
         <div className={styles.drawerFooter}>
-          <Link href="/">BoatStrikers ホーム</Link>
+          <Link href="/" prefetch={false}>BoatStrikers ホーム</Link>
           <span>© BoatStrikers</span>
         </div>
       </aside>
