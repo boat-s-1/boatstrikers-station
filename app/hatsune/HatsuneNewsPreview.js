@@ -7,7 +7,7 @@ import {
 
 function NewsCard({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  const thumbnail = item.image_url || "/news/fallback-default.webp";
+  const thumbnail = item.image_url || "/news/fallback-default-v2.webp";
 
   return (
     <Link
