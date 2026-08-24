@@ -1,6 +1,8 @@
 {
   "scripts": {
+    "predev": "node scripts/build-course-card-backgrounds.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/build-course-card-backgrounds.mjs",
     "build": "next build",
     "start": "next start",
     "shorts:render": "node scripts/render-short.mjs"
