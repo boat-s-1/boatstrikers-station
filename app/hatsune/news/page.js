@@ -4,6 +4,7 @@ import {
   getHatsuneNews,
   HATSUNE_NEWS_CATEGORIES,
   HATSUNE_NEWS_LABELS,
+  normalizeHatsuneNewsCategory,
   formatHatsuneNewsDate,
 } from "../newsData";
 
@@ -52,9 +53,7 @@ function NewsRow({ item }) {
 
 export default async function HatsuneNewsPage({ searchParams }) {
   const params = await searchParams;
-  const requested = params?.category || "all";
-  const valid = HATSUNE_NEWS_CATEGORIES.some((item) => item.key === requested);
-  const category = valid ? requested : "all";
+  const category = normalizeHatsuneNewsCategory(params?.category || "all");
   const news = await getHatsuneNews({ limit: 50, category });
 
   return (
@@ -95,9 +94,9 @@ export default async function HatsuneNewsPage({ searchParams }) {
       ) : (
         <section className={styles.empty}>
           <div>📰</div>
-          <h2>ニュース収集の接続準備中です</h2>
+          <h2>このジャンルのニュースはまだありません</h2>
           <p>
-            毎晩の自動収集を接続すると、女子戦結果・水神祭・優勝・級別・高モーター・翌日情報がここへ自動で蓄積されます。
+            水神祭・優勝・級別・女子戦結果・高モーター・翌日情報を収集し、該当ジャンルへ自動で整理していきます。
           </p>
         </section>
       )}
