@@ -39,6 +39,7 @@ const HATSUNE_NEWS_SELECT = `
   id,
   title,
   summary,
+  article_body,
   category,
   source_type,
   source_name,
