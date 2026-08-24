@@ -29,10 +29,54 @@ const LEGACY_CATEGORY_TO_TAB = {
   tomorrow: "tomorrow",
 };
 
+const HATSUNE_NEWS_IMAGES = {
+  news: "/images/hatsune-news/hatsune-news-v1.webp",
+  race: "/images/hatsune-news/hatsune-race-v1.webp",
+  racer: "/images/hatsune-news/hatsune-racer-v1.webp",
+  data: "/images/hatsune-news/hatsune-data-v1.webp",
+  tomorrow: "/images/hatsune-news/hatsune-tomorrow-v1.webp",
+};
+
 export function normalizeHatsuneNewsCategory(value) {
   const key = String(value || "all");
   if (HATSUNE_NEWS_CATEGORIES.some((item) => item.key === key)) return key;
   return LEGACY_CATEGORY_TO_TAB[key] || "all";
+}
+
+export function getHatsuneNewsImage(item) {
+  if (item?.image_url) return item.image_url;
+
+  const category = String(item?.category || "").toLowerCase();
+  const sourceType = String(item?.source_type || "").toLowerCase();
+  const text = `${item?.title || ""} ${item?.summary || ""}`;
+
+  if (
+    sourceType === "bs_data" ||
+    category === "motor" ||
+    /(モーター|機力|2連対率|展示|データ|勝率)/.test(text)
+  ) {
+    return HATSUNE_NEWS_IMAGES.data;
+  }
+
+  if (category === "tomorrow" || /(明日|翌日|あす)/.test(text)) {
+    return HATSUNE_NEWS_IMAGES.tomorrow;
+  }
+
+  if (
+    ["suijinsai", "grade"].includes(category) ||
+    /(水神祭|昇格|レーサー|選手|A1|A2|B1|B2)/.test(text)
+  ) {
+    return HATSUNE_NEWS_IMAGES.racer;
+  }
+
+  if (
+    ["result", "women", "win"].includes(category) ||
+    /(開幕|優勝戦|準優|レース|シリーズ|結果)/.test(text)
+  ) {
+    return HATSUNE_NEWS_IMAGES.race;
+  }
+
+  return HATSUNE_NEWS_IMAGES.news;
 }
 
 const HATSUNE_NEWS_SELECT = `

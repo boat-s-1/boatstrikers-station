@@ -2,6 +2,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import {
   getHatsuneNews,
+  getHatsuneNewsImage,
   HATSUNE_NEWS_CATEGORIES,
   HATSUNE_NEWS_LABELS,
   normalizeHatsuneNewsCategory,
@@ -13,15 +14,12 @@ export const revalidate = 0;
 
 function NewsRow({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  const thumbnail = item.image_url || "/news/fallback-default-v2.webp";
+  const thumbnail = getHatsuneNewsImage(item);
 
   return (
-    <Link
-      className={styles.newsRow}
-      href={`/hatsune/news/${item.id}`}
-    >
+    <Link className={styles.newsRow} href={`/hatsune/news/${item.id}`}>
       <div className={styles.imageBox}>
-        <img src={thumbnail} alt="" />
+        <img src={thumbnail} alt="" loading="lazy" decoding="async" />
       </div>
 
       <div className={styles.rowBody}>
@@ -33,7 +31,6 @@ function NewsRow({ item }) {
         </div>
 
         <h2>{item.title}</h2>
-
         {item.summary && <p>{item.summary}</p>}
 
         <div className={styles.meta}>
@@ -75,10 +72,7 @@ export default async function HatsuneNewsPage({ searchParams }) {
       </nav>
 
       <section className={styles.summaryBar}>
-        <div>
-          <strong>{news.length}</strong>
-          <span>件</span>
-        </div>
+        <div><strong>{news.length}</strong><span>件</span></div>
         <p>NEWS＝公式・報道情報 / BS DATA＝BoatStrikers独自データ</p>
       </section>
 
@@ -90,9 +84,7 @@ export default async function HatsuneNewsPage({ searchParams }) {
         <section className={styles.empty}>
           <div>📰</div>
           <h2>このジャンルのニュースはまだありません</h2>
-          <p>
-            水神祭・優勝・級別・女子戦結果・高モーター・翌日情報を収集し、該当ジャンルへ自動で整理していきます。
-          </p>
+          <p>水神祭・優勝・級別・女子戦結果・高モーター・翌日情報を収集し、該当ジャンルへ自動で整理していきます。</p>
         </section>
       )}
 

@@ -3,11 +3,12 @@ import styles from "./HatsuneNewsPreview.module.css";
 import {
   HATSUNE_NEWS_LABELS,
   formatHatsuneNewsDate,
+  getHatsuneNewsImage,
 } from "./newsData";
 
 function NewsCard({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  const thumbnail = item.image_url || "/news/fallback-default-v2.webp";
+  const thumbnail = getHatsuneNewsImage(item);
 
   return (
     <Link
@@ -15,7 +16,13 @@ function NewsCard({ item }) {
       className={styles.newsItem}
     >
       <div className={styles.thumbWrap}>
-        <img src={thumbnail} alt="" className={styles.thumb} />
+        <img
+          src={thumbnail}
+          alt=""
+          className={styles.thumb}
+          loading="lazy"
+          decoding="async"
+        />
       </div>
 
       <div className={styles.newsBody}>

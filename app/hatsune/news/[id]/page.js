@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 import {
   getHatsuneNewsById,
+  getHatsuneNewsImage,
   HATSUNE_NEWS_LABELS,
   formatHatsuneNewsDate,
 } from "../../newsData";
@@ -31,6 +32,7 @@ export default async function HatsuneNewsDetailPage({ params }) {
   if (!item) notFound();
 
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
+  const heroImage = getHatsuneNewsImage(item);
 
   return (
     <main className={styles.page}>
@@ -52,11 +54,9 @@ export default async function HatsuneNewsDetailPage({ params }) {
           <span>{formatHatsuneNewsDate(item.published_at)}</span>
         </div>
 
-        {item.image_url && (
-          <div className={styles.heroImage}>
-            <img src={item.image_url} alt="" />
-          </div>
-        )}
+        <div className={styles.heroImage}>
+          <img src={heroImage} alt="" decoding="async" />
+        </div>
 
         <section className={styles.summary}>
           <span>HATSUNE NEWS</span>
