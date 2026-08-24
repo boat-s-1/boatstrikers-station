@@ -1,0 +1,1 @@
+HQ course card backgrounds are stored as binary blobs in the same folder.
