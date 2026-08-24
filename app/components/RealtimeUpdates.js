@@ -65,15 +65,16 @@ async function getItems(target, limit) {
 export default async function RealtimeUpdates({ target = "home", limit = 5, compact = false }) {
   const [items, hatsuneNews] = await Promise.all([
     getItems(target, limit),
-    target === "hatsune" ? getHatsuneNews({ limit: 5 }) : Promise.resolve([]),
+    target === "hatsune" ? getHatsuneNews({ limit: 3 }) : Promise.resolve([]),
   ]);
 
   const isCompact = compact || target === "races";
   const visibleItems = isCompact ? items.slice(0, 1) : items;
+  const isHatsuneEmpty = target === "hatsune" && visibleItems.length === 0;
 
   return (
     <>
-      <section className={`${styles.section} ${isCompact ? styles.compact : ""}`}>
+      <section className={`${styles.section} ${isCompact ? styles.compact : ""} ${isHatsuneEmpty ? styles.emptySectionCompact : ""}`}>
         <div className={styles.heading}>
           <div>
             <span>REALTIME UPDATE</span>
@@ -125,7 +126,9 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
             })}
           </div>
         ) : (
-          <div className={styles.empty}>現在、新しいリアルタイム更新はありません。</div>
+          <div className={`${styles.empty} ${isHatsuneEmpty ? styles.emptyCompact : ""}`}>
+            現在、新しいリアルタイム更新はありません。
+          </div>
         )}
       </section>
 
