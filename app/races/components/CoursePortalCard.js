@@ -2,9 +2,9 @@ import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
 
 const SESSION_BACKGROUNDS = {
-  morning: "/races/card-morning.webp",
-  day: "/races/card-day.webp",
-  night: "/races/card-night.webp",
+  morning: "/races/card-morning.webp?v=20260824-2",
+  day: "/races/card-day.webp?v=20260824-2",
+  night: "/races/card-night.webp?v=20260824-2",
 };
 
 // 開催場ごとの基本開催区分。
