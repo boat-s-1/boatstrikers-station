@@ -78,6 +78,7 @@ export default function CharacterAiRoomPanel() {
   const pathname = usePathname();
   const character = useMemo(() => getCharacter(pathname), [pathname]);
   const [mount, setMount] = useState(null);
+  const [performanceMount, setPerformanceMount] = useState(null);
   const [researchMount, setResearchMount] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -85,6 +86,7 @@ export default function CharacterAiRoomPanel() {
   useEffect(() => {
     if (!character) {
       setMount(null);
+      setPerformanceMount(null);
       setResearchMount(null);
       setData(null);
       return undefined;
@@ -100,13 +102,25 @@ export default function CharacterAiRoomPanel() {
     target.insertAdjacentElement("afterend", node);
     setMount(node);
 
+    let performanceNode = null;
+    if (character === "hatsune") {
+      const newsSection = Array.from(page.querySelectorAll("section")).find((section) =>
+        String(section.textContent || "").includes("女子ボートNEWS")
+      );
+      if (newsSection) {
+        performanceNode = document.createElement("div");
+        performanceNode.className = styles.performanceMount;
+        newsSection.insertAdjacentElement("afterend", performanceNode);
+        setPerformanceMount(performanceNode);
+      }
+    }
+
     const oldToolSection = Array.from(page.querySelectorAll("section.sectionCard")).find((section) =>
       String(section.textContent || "").includes(meta.legacyNeedle)
     );
     const previousDisplay = oldToolSection?.style.display || "";
     if (oldToolSection) oldToolSection.style.display = "none";
 
-    // 一果ページはAI中心の導線に整理。今日の一言と旧下部テキストメニューは非表示。
     const ichikaTodayComment = character === "ichika"
       ? page.querySelector("section.todayCommentCard")
       : null;
@@ -150,8 +164,10 @@ export default function CharacterAiRoomPanel() {
       if (ichikaTodayComment) ichikaTodayComment.style.display = previousTodayDisplay;
       if (ichikaBottomNav) ichikaBottomNav.style.display = previousBottomNavDisplay;
       node.remove();
+      performanceNode?.remove();
       researchNode.remove();
       setMount(null);
+      setPerformanceMount(null);
       setResearchMount(null);
     };
   }, [character]);
@@ -162,15 +178,58 @@ export default function CharacterAiRoomPanel() {
   const picks = Array.isArray(data?.picks) ? data.picks : [];
   const stats = Array.isArray(data?.stats) ? data.stats : [];
 
+  const performance = (
+    <div className={`${styles.recordArea} ${character === "hatsune" ? styles.hatsunePerformance : ""}`}>
+      <div className={styles.recordHeading}>
+        <div>
+          <span>AI PERFORMANCE</span>
+          <h3>過去のAI予想 的中率</h3>
+        </div>
+        <small>結果確定分のみ</small>
+      </div>
+
+      <div className={styles.statGrid}>
+        {(character === "hatsune"
+          ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
+          : character === "ichika"
+            ? ["ichika_escape_best10"]
+            : ["kiina_boat5_best5"]
+        ).map((typeKey) => {
+          const stat = stats.find((item) => item.rankingType === typeKey);
+          const type = TYPE_META[typeKey];
+          const predictions = Number(stat?.predictions || 0);
+          const hits = Number(stat?.hits || 0);
+          return (
+            <div className={styles.statCard} key={typeKey}>
+              <span>{type.statLabel}</span>
+              <strong>{predictions > 0 && stat?.hitRate != null ? `${Number(stat.hitRate).toFixed(1)}%` : "—%"}</strong>
+              <small>{predictions > 0 ? `${hits} / ${predictions}R 的中` : "結果データ蓄積中"}</small>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className={styles.note}>
+        AI v2集計開始：{formatDate(data?.startDate)} ／ 前日版AIランキングと確定結果を集計しています。
+      </p>
+    </div>
+  );
+
   const panel = mount ? (
-    <section className={`${styles.panel} ${styles[meta.tone]}`} aria-label={`${meta.name} AI予想`}>
+    <section
+      className={`${styles.panel} ${styles[meta.tone]} ${character === "hatsune" ? styles.hatsuneCompact : ""}`}
+      aria-label={`${meta.name} AI予想`}
+    >
       <div className={styles.heading}>
         <div>
           <span className={styles.kicker}>BOATSTRIKERS AI V2</span>
           <h2>🤖 {meta.title}</h2>
           <p>{meta.subtitle}</p>
         </div>
-        <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
+        <div className={styles.headingActions}>
+          {character === "hatsune" ? <a href="/races">もっと見る →</a> : null}
+          <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
+        </div>
       </div>
 
       {loading ? (
@@ -195,48 +254,17 @@ export default function CharacterAiRoomPanel() {
               );
             })}
           </div>
-          <div className={styles.moreRow}>
-            <a href="/races">もっと見る → 出走表へ</a>
-          </div>
+          {character !== "hatsune" ? (
+            <div className={styles.moreRow}>
+              <a href="/races">もっと見る → 出走表へ</a>
+            </div>
+          ) : null}
         </>
       ) : (
         <div className={styles.empty}>本日のAI予想は準備中です。</div>
       )}
 
-      <div className={styles.recordArea}>
-        <div className={styles.recordHeading}>
-          <div>
-            <span>AI PERFORMANCE</span>
-            <h3>過去のAI予想 的中率</h3>
-          </div>
-          <small>結果確定分のみ</small>
-        </div>
-
-        <div className={styles.statGrid}>
-          {(character === "hatsune"
-            ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
-            : character === "ichika"
-              ? ["ichika_escape_best10"]
-              : ["kiina_boat5_best5"]
-          ).map((typeKey) => {
-            const stat = stats.find((item) => item.rankingType === typeKey);
-            const type = TYPE_META[typeKey];
-            const predictions = Number(stat?.predictions || 0);
-            const hits = Number(stat?.hits || 0);
-            return (
-              <div className={styles.statCard} key={typeKey}>
-                <span>{type.statLabel}</span>
-                <strong>{predictions > 0 && stat?.hitRate != null ? `${Number(stat.hitRate).toFixed(1)}%` : "—%"}</strong>
-                <small>{predictions > 0 ? `${hits} / ${predictions}R 的中` : "結果データ蓄積中"}</small>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className={styles.note}>
-          AI v2集計開始：{formatDate(data?.startDate)} ／ 前日版AIランキングと確定結果を集計しています。
-        </p>
-      </div>
+      {character !== "hatsune" ? performance : null}
     </section>
   ) : null;
 
@@ -261,6 +289,7 @@ export default function CharacterAiRoomPanel() {
   return (
     <>
       {mount && panel ? createPortal(panel, mount) : null}
+      {performanceMount && character === "hatsune" ? createPortal(performance, performanceMount) : null}
       {researchMount && research ? createPortal(research, researchMount) : null}
     </>
   );
