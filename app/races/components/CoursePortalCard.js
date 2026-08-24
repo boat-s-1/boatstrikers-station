@@ -199,6 +199,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   return (
     <Link
       href={`/races/${code}?date=${raceDate}`}
+      prefetch={false}
       className={`${styles.card} ${styles[type]}`}
       style={{ backgroundImage: `url("${background}")` }}
     >
