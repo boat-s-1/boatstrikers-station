@@ -1,13 +1,10 @@
 import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
-import { MORNING_BACKGROUND } from "./courseCardBackgroundMorning";
-import { DAY_BACKGROUND } from "./courseCardBackgroundDay";
-import { NIGHT_BACKGROUND } from "./courseCardBackgroundNight";
 
 const SESSION_BACKGROUNDS = {
-  morning: MORNING_BACKGROUND,
-  day: DAY_BACKGROUND,
-  night: NIGHT_BACKGROUND,
+  morning: "/races/card-morning.webp",
+  day: "/races/card-day.webp",
+  night: "/races/card-night.webp",
 };
 
 const COURSE_ENGLISH = {
