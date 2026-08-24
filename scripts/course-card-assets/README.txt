@@ -1,0 +1,1 @@
+BoatStrikers course card assets are reconstructed during Vercel build from Base64 chunks stored in this directory. The generated static WebP files are served from /public/races and are never bundled into client JavaScript.
