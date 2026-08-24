@@ -1,43 +1,23 @@
 import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
+import layerStyles from "./CoursePortalCardLayers.module.css";
 
 const SESSION_BACKGROUNDS = {
-  morning: "/races/card-morning.webp?v=20260824-2",
-  day: "/races/card-day.webp?v=20260824-2",
-  night: "/races/card-night.webp?v=20260824-2",
+  morning: "/races/card-morning.webp?v=20260824-3",
+  day: "/races/card-day.webp?v=20260824-3",
+  night: "/races/card-night.webp?v=20260824-3",
 };
 
-// 開催場ごとの基本開催区分。
-// 締切時刻だけで判定すると、デイ開催でも最終Rが18時台の場を
-// ナイターと誤判定するため、場コードを優先します。
 const MORNING_COURSE_CODES = new Set([10, 18, 21, 23]);
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
 
 const COURSE_ENGLISH = {
-  "01": "KIRYU",
-  "02": "TODA",
-  "03": "EDOGAWA",
-  "04": "HEIWAJIMA",
-  "05": "TAMAGAWA",
-  "06": "HAMANAKO",
-  "07": "GAMAGORI",
-  "08": "TOKONAME",
-  "09": "TSU",
-  "10": "MIKUNI",
-  "11": "BIWAKO",
-  "12": "SUMINOE",
-  "13": "AMAGASAKI",
-  "14": "NARUTO",
-  "15": "MARUGAME",
-  "16": "KOJIMA",
-  "17": "MIYAJIMA",
-  "18": "TOKUYAMA",
-  "19": "SHIMONOSEKI",
-  "20": "WAKAMATSU",
-  "21": "ASHIYA",
-  "22": "FUKUOKA",
-  "23": "KARATSU",
-  "24": "OMURA",
+  "01": "KIRYU", "02": "TODA", "03": "EDOGAWA", "04": "HEIWAJIMA",
+  "05": "TAMAGAWA", "06": "HAMANAKO", "07": "GAMAGORI", "08": "TOKONAME",
+  "09": "TSU", "10": "MIKUNI", "11": "BIWAKO", "12": "SUMINOE",
+  "13": "AMAGASAKI", "14": "NARUTO", "15": "MARUGAME", "16": "KOJIMA",
+  "17": "MIYAJIMA", "18": "TOKUYAMA", "19": "SHIMONOSEKI", "20": "WAKAMATSU",
+  "21": "ASHIYA", "22": "FUKUOKA", "23": "KARATSU", "24": "OMURA",
 };
 
 function shortTime(value) {
@@ -69,8 +49,7 @@ function isFemaleEntry(entry) {
 function isLadiesCourse(course) {
   const races = Array.isArray(course?.races) ? course.races : [];
   const sample = races.find((race) => Array.isArray(race?.entries) && race.entries.length >= 6);
-  if (!sample) return false;
-  return sample.entries.slice(0, 6).every(isFemaleEntry);
+  return sample ? sample.entries.slice(0, 6).every(isFemaleEntry) : false;
 }
 
 function latestDirectRace(course) {
@@ -102,27 +81,17 @@ function normalizeGradeText(value) {
 }
 
 function detectGrade(course) {
-  const races = Array.isArray(course?.races) ? course.races : [];
   const values = [];
-
-  for (const race of races) {
+  for (const race of Array.isArray(course?.races) ? course.races : []) {
     const event = race?.event ?? {};
     values.push(
-      event.grade,
-      event.race_grade,
-      event.series_grade,
-      event.grade_code,
-      event.event_grade,
-      event.meeting_grade,
-      event.race_name,
-      event.event_name,
-      event.series_name,
-      event.title
+      event.grade, event.race_grade, event.series_grade, event.grade_code,
+      event.event_grade, event.meeting_grade, event.race_name, event.event_name,
+      event.series_name, event.title
     );
   }
-
   const text = values.map(normalizeGradeText).filter(Boolean).join(" ");
-  if (/\bSG\b/.test(text) || text.includes("SG")) return "SG";
+  if (text.includes("SG")) return "SG";
   if (/G1/.test(text)) return "G1";
   if (/G2/.test(text)) return "G2";
   if (/G3/.test(text)) return "G3";
@@ -131,18 +100,13 @@ function detectGrade(course) {
 
 function detectStage(course, raceDate) {
   const races = Array.isArray(course?.races) ? course.races : [];
-  const kindCodes = new Set(
-    races.map((race) => String(race?.raceKindCode ?? race?.race_kind_code ?? "").padStart(4, "0"))
-  );
-
+  const kindCodes = new Set(races.map((race) => String(race?.raceKindCode ?? race?.race_kind_code ?? "").padStart(4, "0")));
   if (kindCodes.has("0021")) return "優勝戦";
   if (kindCodes.has("0011")) return "準優勝戦";
-
   const firstEvent = races.find((race) => race?.event)?.event ?? null;
   const raceDayNo = Number(firstEvent?.race_day_no ?? firstEvent?.raceDayNo ?? 0);
   const openingDate = String(firstEvent?.opening_date ?? "").slice(0, 10);
   if (raceDayNo === 1 || (openingDate && openingDate === String(raceDate))) return "初日";
-
   return null;
 }
 
@@ -171,8 +135,7 @@ function badgeClass(badge) {
 }
 
 export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
-  const numericCode = Number(course.courseCode);
-  const code = String(numericCode).padStart(2, "0");
+  const code = String(Number(course.courseCode)).padStart(2, "0");
   const type = sessionType(course);
   const background = SESSION_BACKGROUNDS[type] ?? SESSION_BACKGROUNDS.day;
   const englishName = COURSE_ENGLISH[code] ?? "BOATRACE";
@@ -182,10 +145,9 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const nextRaceNo = Number(course.nextRaceNo || 0) || null;
   const nextClosing = shortTime(course.nextClosingTime);
   const urgency = deadlineUrgency(course.nextClosingAt);
-  const specialBadges = eventBadges(course, raceDate);
   const infoBadges = [
     ...(ladies ? ["女子戦"] : []),
-    ...specialBadges,
+    ...eventBadges(course, raceDate),
   ].slice(0, 3);
 
   return (
@@ -193,18 +155,25 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
       href={`/races/${code}?date=${raceDate}`}
       prefetch={false}
       className={`${styles.card} ${styles[type]}`}
-      style={{ backgroundImage: `url("${background}")` }}
     >
-      <div className={styles.tint} aria-hidden="true" />
+      <img
+        src={background}
+        alt=""
+        aria-hidden="true"
+        className={layerStyles.backgroundImage}
+        loading="eager"
+        decoding="async"
+      />
+      <div className={`${styles.tint} ${layerStyles.tintLayer}`} aria-hidden="true" />
 
-      <div className={styles.topRow}>
+      <div className={`${styles.topRow} ${layerStyles.foreground}`}>
         <span className={styles.code}>#{code}</span>
         <div className={styles.tags}>
           <span className={styles.session}>{sessionLabel(type)}</span>
         </div>
       </div>
 
-      <div className={styles.mainInfo}>
+      <div className={`${styles.mainInfo} ${layerStyles.foreground}`}>
         <h3>{course.courseName}</h3>
         <div className={styles.englishName}>BoatRace {englishName}</div>
         {finished ? (
@@ -226,7 +195,7 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
         </div>
       </div>
 
-      <div className={styles.bottomRow}>
+      <div className={`${styles.bottomRow} ${layerStyles.foreground}`}>
         {!finished && directRace ? (
           <span className={styles.direct}>⚡ {directRace.raceNo}R 直前更新</span>
         ) : (
