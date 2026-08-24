@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/hatsune-news-ai",
+      "schedule": "40 13 * * *"
+    }
+  ]
+}
