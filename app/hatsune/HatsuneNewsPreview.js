@@ -7,6 +7,7 @@ import {
 
 function NewsCard({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
+  const thumbnail = item.image_url || "/news/fallback-default.webp";
 
   return (
     <Link
@@ -14,11 +15,7 @@ function NewsCard({ item }) {
       className={styles.newsItem}
     >
       <div className={styles.thumbWrap}>
-        {item.image_url ? (
-          <img src={item.image_url} alt="" className={styles.thumb} />
-        ) : (
-          <div className={styles.thumbFallback}>HATSUNE NEWS</div>
-        )}
+        <img src={thumbnail} alt="" className={styles.thumb} />
       </div>
 
       <div className={styles.newsBody}>

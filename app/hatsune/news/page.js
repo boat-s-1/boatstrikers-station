@@ -13,6 +13,7 @@ export const revalidate = 0;
 
 function NewsRow({ item }) {
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
+  const thumbnail = item.image_url || "/news/fallback-default.webp";
 
   return (
     <Link
@@ -20,11 +21,7 @@ function NewsRow({ item }) {
       href={`/hatsune/news/${item.id}`}
     >
       <div className={styles.imageBox}>
-        {item.image_url ? (
-          <img src={item.image_url} alt="" />
-        ) : (
-          <div className={styles.imageFallback}>HATSUNE NEWS</div>
-        )}
+        <img src={thumbnail} alt="" />
       </div>
 
       <div className={styles.rowBody}>
