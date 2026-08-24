@@ -3,9 +3,9 @@ import styles from "./CoursePortalCard.module.css";
 import layerStyles from "./CoursePortalCardLayers.module.css";
 
 const SESSION_BACKGROUNDS = {
-  morning: "/races/card-morning-640q88.jpg",
-  day: "/races/card-day-640q88.jpg",
-  night: "/races/card-night-640q88.jpg",
+  morning: "/races/course-cards/morning-v1.webp",
+  day: "/races/course-cards/day-v1.webp",
+  night: "/races/course-cards/night-v1.webp",
 };
 
 const MORNING_COURSE_CODES = new Set([10, 18, 21, 23]);
