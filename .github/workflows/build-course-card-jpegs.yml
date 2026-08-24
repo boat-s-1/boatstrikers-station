@@ -1,0 +1,91 @@
+name: Build high-quality course card JPEGs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/races/course-cards/*-v1.webp"
+      - ".github/workflows/build-course-card-jpegs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-course-card-jpegs:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Generate verified 640x640 quality-88 JPEGs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+
+          root = Path('public/races/course-cards')
+          mapping = {
+              'day': root / 'day-v1.webp',
+              'morning': root / 'morning-v1.webp',
+              'night': root / 'night-v1.webp',
+          }
+          manifest = []
+          for name, src in mapping.items():
+              dst = root / f'{name}-640q88-v2.jpg'
+              with Image.open(src) as im:
+                  im = im.convert('RGB')
+                  if im.size != (640, 640):
+                      im = im.resize((640, 640), Image.Resampling.LANCZOS)
+                  im.save(dst, format='JPEG', quality=88, subsampling=0, optimize=True)
+              with Image.open(dst) as check:
+                  if check.format != 'JPEG' or check.size != (640, 640):
+                      raise SystemExit(f'Invalid output: {dst} {check.format} {check.size}')
+              data = dst.read_bytes()
+              manifest.append(f'{dst.name}\t{len(data)} bytes\tsha256={hashlib.sha256(data).hexdigest()}')
+
+          (root / 'JPEG_MANIFEST.txt').write_text('\n'.join(manifest) + '\n', encoding='utf-8')
+
+          card = Path('app/races/components/CoursePortalCard.js')
+          text = card.read_text(encoding='utf-8')
+          replacements = {
+              '/races/course-cards/morning-v1.webp': '/races/course-cards/morning-640q88-v2.jpg',
+              '/races/course-cards/day-v1.webp': '/races/course-cards/day-640q88-v2.jpg',
+              '/races/course-cards/night-v1.webp': '/races/course-cards/night-640q88-v2.jpg',
+          }
+          for old, new in replacements.items():
+              if old not in text and new not in text:
+                  raise SystemExit(f'Expected card reference missing: {old}')
+              text = text.replace(old, new)
+          card.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit generated JPEGs and card references
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/races/course-cards/day-640q88-v2.jpg \
+                  public/races/course-cards/morning-640q88-v2.jpg \
+                  public/races/course-cards/night-640q88-v2.jpg \
+                  public/races/course-cards/JPEG_MANIFEST.txt \
+                  app/races/components/CoursePortalCard.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Generate 640x640 quality-88 course card JPEGs"
+            git push origin HEAD:main
+          fi
