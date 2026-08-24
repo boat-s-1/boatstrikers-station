@@ -43,6 +43,8 @@ function NewsCard({ item }) {
 }
 
 export default function HatsuneNewsPreview({ news = [] }) {
+  const previewNews = news.slice(0, 3);
+
   return (
     <section className={styles.wrap}>
       <div className={styles.headingRow}>
@@ -57,9 +59,9 @@ export default function HatsuneNewsPreview({ news = [] }) {
         </Link>
       </div>
 
-      {news.length > 0 ? (
+      {previewNews.length > 0 ? (
         <div className={styles.list}>
-          {news.map((item) => (
+          {previewNews.map((item) => (
             <NewsCard key={item.id} item={item} />
           ))}
         </div>
@@ -71,32 +73,6 @@ export default function HatsuneNewsPreview({ news = [] }) {
           </p>
         </div>
       )}
-
-      <div className={styles.quickGrid}>
-        <Link href="/hatsune/news?category=tomorrow" className={styles.quickCard}>
-          <span>📅</span>
-          <div>
-            <strong>明日の女子戦</strong>
-            <small>注目レース・優勝戦・準優</small>
-          </div>
-        </Link>
-
-        <Link href="/hatsune/news?category=motor" className={styles.quickCard}>
-          <span>⚙️</span>
-          <div>
-            <strong>高モーター女子</strong>
-            <small>エース機・上位機をチェック</small>
-          </div>
-        </Link>
-
-        <Link href="/hatsune/news?category=suijinsai" className={styles.quickCard}>
-          <span>💧</span>
-          <div>
-            <strong>水神祭・記録</strong>
-            <small>初勝利・節目勝利・昇格</small>
-          </div>
-        </Link>
-      </div>
 
       <Link href="/hatsune/news" className={styles.moreButton}>
         女子ボートNEWSをもっと見る →
