@@ -9,7 +9,7 @@ fs.mkdirSync(outputDir, { recursive: true });
 
 for (const type of ["night", "morning", "day"]) {
   const source = path.join(sourceDir, `${type}-v10.b64`);
-  const target = path.join(outputDir, `card-${type}-v10.webp`);
+  const target = path.join(outputDir, `card-${type}-hq.webp`);
   const base64 = fs.readFileSync(source, "utf8").replace(/\s+/g, "");
   const buffer = Buffer.from(base64, "base64");
 
