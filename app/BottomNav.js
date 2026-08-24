@@ -81,7 +81,6 @@ export default function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                prefetch={false}
                 className={`${styles.linkItem} ${styles[item.tone]} ${active ? styles.active : ""}`}
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}

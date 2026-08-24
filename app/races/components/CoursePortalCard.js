@@ -1,10 +1,13 @@
 import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
+import { MORNING_BACKGROUND } from "./courseCardBackgroundMorning";
+import { DAY_BACKGROUND } from "./courseCardBackgroundDay";
+import { NIGHT_BACKGROUND } from "./courseCardBackgroundNight";
 
 const SESSION_BACKGROUNDS = {
-  morning: "/api/course-card-background/morning",
-  day: "/api/course-card-background/day",
-  night: "/api/course-card-background/night",
+  morning: MORNING_BACKGROUND,
+  day: DAY_BACKGROUND,
+  night: NIGHT_BACKGROUND,
 };
 
 const COURSE_ENGLISH = {
@@ -196,7 +199,6 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   return (
     <Link
       href={`/races/${code}?date=${raceDate}`}
-      prefetch={false}
       className={`${styles.card} ${styles[type]}`}
       style={{ backgroundImage: `url("${background}")` }}
     >

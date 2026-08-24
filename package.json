@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev": "node scripts/patch-races-top-light.mjs && next dev",
-    "build": "node scripts/patch-races-top-light.mjs && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "shorts:render": "node scripts/render-short.mjs"
   },
