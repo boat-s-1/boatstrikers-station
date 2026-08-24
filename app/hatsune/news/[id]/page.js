@@ -64,6 +64,14 @@ export default async function HatsuneNewsDetailPage({ params }) {
           <p>{item.summary || "このニュースの詳細情報を確認しています。"}</p>
         </section>
 
+        {item.article_body && (
+          <section className={styles.articleBody}>
+            <span>BOATSTRIKERS EDIT</span>
+            <h2>初音NEWS 詳細</h2>
+            <p>{item.article_body}</p>
+          </section>
+        )}
+
         <section className={styles.infoBox}>
           <h2>この記事について</h2>
           <dl>
