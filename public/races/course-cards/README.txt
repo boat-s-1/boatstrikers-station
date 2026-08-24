@@ -1,0 +1,1 @@
+Versioned race card assets are used to avoid stale browser/CDN caches.
