@@ -1,17 +1,17 @@
 .card {
   position: relative;
-  min-height: 142px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
   padding: 11px;
   color: #fff;
   text-decoration: none;
   border: 2px solid rgba(74, 176, 255, .9);
   border-radius: 18px;
   background-position: center center;
-  background-size: auto 122%;
+  background-size: cover;
   background-repeat: no-repeat;
   box-shadow: 0 8px 18px rgba(22, 65, 112, .17), inset 0 0 0 1px rgba(255,255,255,.35);
   isolation: isolate;
@@ -26,12 +26,12 @@
 
 .morning .tint {
   background:
-    linear-gradient(180deg, rgba(6,75,171,.18), rgba(3,22,54,.62)),
-    linear-gradient(110deg, rgba(255,179,62,.12), transparent 50%);
+    linear-gradient(180deg, rgba(6,75,171,.08), rgba(3,22,54,.46)),
+    linear-gradient(110deg, rgba(255,179,62,.08), transparent 50%);
 }
 
 .day .tint {
-  background: linear-gradient(180deg, rgba(7,89,191,.10), rgba(2,24,61,.64));
+  background: linear-gradient(180deg, rgba(7,89,191,.04), rgba(2,24,61,.48));
 }
 
 .night {
@@ -40,7 +40,7 @@
 }
 
 .night .tint {
-  background: linear-gradient(180deg, rgba(25,10,82,.16), rgba(12,5,44,.74));
+  background: linear-gradient(180deg, rgba(25,10,82,.08), rgba(12,5,44,.58));
 }
 
 .topRow,
@@ -49,6 +49,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+}
+
+.topRow {
+  min-height: 25px;
 }
 
 .code,
@@ -97,13 +101,18 @@
 .night .session { color: #7133c7; }
 
 .mainInfo {
-  margin: auto -4px 0;
-  padding: 24px 4px 3px;
+  grid-row: 3;
+  align-self: end;
+  margin: 0 -4px;
+  padding: 6px 4px 3px;
   border-radius: 12px;
-  background: linear-gradient(180deg, transparent 0%, rgba(2,16,43,.10) 32%, rgba(2,16,43,.34) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(2,16,43,.10) 24%, rgba(2,16,43,.38) 100%);
 }
 
 .mainInfo h3 {
+  display: flex;
+  align-items: flex-end;
+  min-height: 28px;
   margin: 0;
   font-size: 28px;
   line-height: 1;
@@ -113,8 +122,9 @@
 }
 
 .englishName {
+  min-height: 10px;
   margin-top: 3px;
-  color: rgba(255,255,255,.82);
+  color: rgba(255,255,255,.88);
   font-size: 10px;
   line-height: 1;
   font-weight: 800;
@@ -124,7 +134,10 @@
 }
 
 .statusLine {
+  display: flex;
+  align-items: center;
   width: fit-content;
+  min-height: 22px;
   margin-top: 6px;
   padding: 5px 8px;
   border-radius: 8px;
@@ -144,6 +157,7 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
+  height: 22px;
   min-height: 22px;
   margin-top: 6px;
   max-width: 100%;
@@ -227,8 +241,10 @@
 .finished { background: rgba(44,58,74,.72); }
 
 .bottomRow {
+  grid-row: 4;
+  height: 22px;
   min-height: 22px;
-  margin-top: 5px;
+  margin-top: 4px;
   align-items: flex-end;
 }
 
@@ -265,7 +281,6 @@
 .card:focus-visible { outline: 3px solid #ffd43b; outline-offset: 2px; }
 
 @media (min-width: 680px) {
-  .card { min-height: 150px; }
   .englishName { font-size: 10.5px; }
   .infoTag { font-size: 8px; }
 }
@@ -284,32 +299,46 @@
 
 @media (max-width: 430px) {
   .card {
-    min-height: 128px;
+    min-height: 0;
     padding: 9px 10px;
     border-radius: 16px;
     background-position: center center;
-    background-size: auto 122%;
+    background-size: cover;
   }
 
   .mainInfo {
     margin-inline: -3px;
-    padding: 11px 3px 2px;
+    padding: 5px 3px 2px;
   }
 
-  .mainInfo h3 { font-size: 28px; }
-  .englishName { margin-top: 3px; font-size: 9px; letter-spacing: .06em; }
-  .statusLine { margin-top: 5px; font-size: 9.5px; padding: 5px 8px; }
+  .mainInfo h3 {
+    min-height: 28px;
+    font-size: 28px;
+  }
+
+  .englishName {
+    min-height: 9px;
+    margin-top: 3px;
+    font-size: 9px;
+    letter-spacing: .06em;
+  }
+
+  .statusLine {
+    min-height: 21px;
+    margin-top: 5px;
+    font-size: 9.5px;
+    padding: 5px 8px;
+  }
+
   .session { padding: 4px 7px; font-size: 7px; }
-  .infoTags { min-height: 18px; gap: 3px; margin-top: 5px; }
+  .infoTags { height: 18px; min-height: 18px; gap: 3px; margin-top: 5px; }
   .infoTag { padding: 3px 6px; font-size: 6.5px; }
   .direct, .newspaper { font-size: 7px; }
-  .bottomRow { min-height: 16px; margin-top: 3px; }
-  .card:nth-last-child(-n+2) { margin-bottom: 86px; }
+  .bottomRow { height: 16px; min-height: 16px; margin-top: 3px; }
 }
 
 @media (max-width: 370px) {
-  .card { min-height: 134px; }
-  .mainInfo h3 { font-size: 28px; }
+  .mainInfo h3 { min-height: 28px; font-size: 28px; }
   .englishName { font-size: 8.5px; letter-spacing: .05em; }
   .statusLine { font-size: 9px; }
   .session { font-size: 6.5px; }
