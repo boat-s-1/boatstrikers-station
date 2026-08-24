@@ -7,14 +7,22 @@ const outputDir = path.join(root, "public", "races");
 
 fs.mkdirSync(outputDir, { recursive: true });
 
+function isWebP(buffer) {
+  return (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  );
+}
+
 for (const type of ["night", "morning", "day"]) {
   const source = path.join(sourceDir, `${type}-v10.b64`);
   const target = path.join(outputDir, `card-${type}-hq.webp`);
   const base64 = fs.readFileSync(source, "utf8").replace(/\s+/g, "");
   const buffer = Buffer.from(base64, "base64");
 
-  if (buffer.length < 50000) {
-    throw new Error(`Course card ${type} asset is unexpectedly small: ${buffer.length} bytes`);
+  if (!isWebP(buffer)) {
+    throw new Error(`Course card ${type} asset is not a valid WebP file`);
   }
 
   fs.writeFileSync(target, buffer);
