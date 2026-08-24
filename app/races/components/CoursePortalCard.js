@@ -7,6 +7,12 @@ const SESSION_BACKGROUNDS = {
   night: "/races/card-night.webp",
 };
 
+// 開催場ごとの基本開催区分。
+// 締切時刻だけで判定すると、デイ開催でも最終Rが18時台の場を
+// ナイターと誤判定するため、場コードを優先します。
+const MORNING_COURSE_CODES = new Set([10, 18, 21, 23]);
+const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
+
 const COURSE_ENGLISH = {
   "01": "KIRYU",
   "02": "TODA",
@@ -34,12 +40,6 @@ const COURSE_ENGLISH = {
   "24": "OMURA",
 };
 
-function timeMinutes(value) {
-  const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
-  if (!match) return null;
-  return Number(match[1]) * 60 + Number(match[2]);
-}
-
 function shortTime(value) {
   const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
   if (!match) return "--:--";
@@ -47,14 +47,9 @@ function shortTime(value) {
 }
 
 function sessionType(course) {
-  const races = Array.isArray(course?.races) ? course.races : [];
-  const first = races.find((race) => timeMinutes(race?.closingTime) !== null);
-  const last = [...races].reverse().find((race) => timeMinutes(race?.closingTime) !== null);
-  const firstMinutes = timeMinutes(first?.closingTime);
-  const lastMinutes = timeMinutes(last?.closingTime);
-
-  if (firstMinutes !== null && firstMinutes < 10 * 60) return "morning";
-  if (lastMinutes !== null && lastMinutes >= 18 * 60) return "night";
+  const courseCode = Number(course?.courseCode);
+  if (MORNING_COURSE_CODES.has(courseCode)) return "morning";
+  if (NIGHT_COURSE_CODES.has(courseCode)) return "night";
   return "day";
 }
 
@@ -222,15 +217,13 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
           <div className={styles.statusLine}>出走表公開中</div>
         )}
 
-        {infoBadges.length > 0 && (
-          <div className={styles.infoTags}>
-            {infoBadges.map((badge) => (
-              <span key={badge} className={`${styles.infoTag} ${badgeClass(badge)}`}>
-                {badgeLabel(badge)}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className={styles.infoTags} aria-label={infoBadges.length ? "開催情報" : undefined}>
+          {infoBadges.map((badge) => (
+            <span key={badge} className={`${styles.infoTag} ${badgeClass(badge)}`}>
+              {badgeLabel(badge)}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className={styles.bottomRow}>
