@@ -265,6 +265,18 @@
   .infoTag { font-size: 8px; }
 }
 
+@media (max-width: 767px) {
+  .code,
+  .session,
+  .infoTag,
+  .direct,
+  .newspaper,
+  .statusLine {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 @media (max-width: 430px) {
   .card {
     min-height: 128px;
