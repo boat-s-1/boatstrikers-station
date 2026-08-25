@@ -1,18 +1,8 @@
 /* Races index: keep secondary/status blocks compact on mobile. */
 
-main[class*="portalPage"] img[alt="只今、開発中"] {
-  display: block;
-  width: min(100%, 520px) !important;
-  height: auto !important;
-  max-height: 118px;
-  margin: 0 auto;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 18px;
-}
-
+/* Hide the public development banner completely, including its spacing. */
 main[class*="portalPage"] div[class*="portalSection"]:has(> img[alt="只今、開発中"]) {
-  margin-block: 12px !important;
+  display: none !important;
 }
 
 #daily-newspaper [class*="portalEmpty"] {
@@ -45,11 +35,6 @@ main[class*="portalPage"] div[class*="portalSection"]:has(> img[alt="只今、�
 }
 
 @media (max-width: 560px) {
-  main[class*="portalPage"] img[alt="只今、開発中"] {
-    max-height: 94px;
-    border-radius: 15px;
-  }
-
   #daily-newspaper [class*="portalEmpty"] {
     padding: 12px 13px !important;
   }
