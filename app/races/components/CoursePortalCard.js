@@ -1,12 +1,5 @@
 import Link from "next/link";
 import styles from "./CoursePortalCard.module.css";
-import layerStyles from "./CoursePortalCardLayers.module.css";
-
-const SESSION_BACKGROUNDS = {
-  morning: "/races/card-morning-hq.webp",
-  day: "/races/card-day-hq.webp",
-  night: "/races/card-night-hq.webp",
-};
 
 const MORNING_COURSE_CODES = new Set([10, 18, 21, 23]);
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
@@ -34,9 +27,9 @@ function sessionType(course) {
 }
 
 function sessionLabel(type) {
-  if (type === "morning") return "🌅 モーニング";
-  if (type === "night") return "🌙 ナイター";
-  return "☀ デイ";
+  if (type === "morning") return "モーニング";
+  if (type === "night") return "ナイター";
+  return "デイ";
 }
 
 function isFemaleEntry(entry) {
@@ -95,7 +88,7 @@ function detectGrade(course) {
   if (/G1/.test(text)) return "G1";
   if (/G2/.test(text)) return "G2";
   if (/G3/.test(text)) return "G3";
-  return null;
+  return "一般";
 }
 
 function detectStage(course, raceDate) {
@@ -107,26 +100,15 @@ function detectStage(course, raceDate) {
   const raceDayNo = Number(firstEvent?.race_day_no ?? firstEvent?.raceDayNo ?? 0);
   const openingDate = String(firstEvent?.opening_date ?? "").slice(0, 10);
   if (raceDayNo === 1 || (openingDate && openingDate === String(raceDate))) return "初日";
+  if (raceDayNo > 1) return `${raceDayNo}日目`;
   return null;
-}
-
-function eventBadges(course, raceDate) {
-  return [detectGrade(course), detectStage(course, raceDate)].filter(Boolean).slice(0, 2);
-}
-
-function badgeLabel(badge) {
-  if (badge === "女子戦") return "🌸 女子戦";
-  if (badge === "優勝戦") return "🏆 優勝戦";
-  if (badge === "準優勝戦") return "🔥 準優勝戦";
-  if (badge === "初日") return "🚩 初日";
-  return badge;
 }
 
 function badgeClass(badge) {
   if (badge === "女子戦") return styles.infoTag_ladies;
-  if (badge === "優勝戦") return styles.infoTag_優勝戦;
-  if (badge === "準優勝戦") return styles.infoTag_準優勝戦;
-  if (badge === "初日") return styles.infoTag_初日;
+  if (badge === "優勝戦") return styles.infoTag_final;
+  if (badge === "準優勝戦") return styles.infoTag_semi;
+  if (badge === "初日") return styles.infoTag_first;
   if (badge === "SG") return styles.infoTag_sg;
   if (badge === "G1") return styles.infoTag_g1;
   if (badge === "G2") return styles.infoTag_g2;
@@ -137,7 +119,6 @@ function badgeClass(badge) {
 export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const code = String(Number(course.courseCode)).padStart(2, "0");
   const type = sessionType(course);
-  const background = SESSION_BACKGROUNDS[type] ?? SESSION_BACKGROUNDS.day;
   const englishName = COURSE_ENGLISH[code] ?? "BOATRACE";
   const ladies = isLadiesCourse(course);
   const finished = course.liveStatus === "finished";
@@ -145,10 +126,9 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
   const nextRaceNo = Number(course.nextRaceNo || 0) || null;
   const nextClosing = shortTime(course.nextClosingTime);
   const urgency = deadlineUrgency(course.nextClosingAt);
-  const infoBadges = [
-    ...(ladies ? ["女子戦"] : []),
-    ...eventBadges(course, raceDate),
-  ].slice(0, 3);
+  const grade = detectGrade(course);
+  const stage = detectStage(course, raceDate);
+  const infoBadges = [grade, stage, ...(ladies ? ["女子戦"] : [])].filter(Boolean).slice(0, 3);
 
   return (
     <Link
@@ -156,50 +136,49 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
       prefetch={false}
       className={`${styles.card} ${styles[type]}`}
     >
-      <img
-        src={background}
-        alt=""
-        aria-hidden="true"
-        className={layerStyles.backgroundImage}
-        loading="eager"
-        decoding="async"
-      />
-      <div className={`${styles.tint} ${layerStyles.tintLayer}`} aria-hidden="true" />
-
-      <div className={`${styles.topRow} ${layerStyles.foreground}`}>
-        <span className={styles.code}>#{code}</span>
-        <div className={styles.tags}>
-          <span className={styles.session}>{sessionLabel(type)}</span>
+      <div className={styles.topRow}>
+        <div className={styles.identity}>
+          <span className={styles.code}>#{code}</span>
+          <div>
+            <h3>{course.courseName}</h3>
+            <div className={styles.englishName}>BOATRACE {englishName}</div>
+          </div>
         </div>
+        <span className={styles.session}>{sessionLabel(type)}</span>
       </div>
 
-      <div className={`${styles.mainInfo} ${layerStyles.foreground}`}>
-        <h3>{course.courseName}</h3>
-        <div className={styles.englishName}>BoatRace {englishName}</div>
+      <div className={styles.infoTags} aria-label="開催情報">
+        {infoBadges.map((badge) => (
+          <span key={badge} className={`${styles.infoTag} ${badgeClass(badge)}`}>
+            {badge}
+          </span>
+        ))}
+      </div>
+
+      <div className={styles.raceRow}>
         {finished ? (
-          <div className={`${styles.statusLine} ${styles.finished}`}>✓ 本日終了</div>
+          <div className={`${styles.statusLine} ${styles.finished}`}>本日終了</div>
         ) : nextRaceNo ? (
-          <div className={`${styles.statusLine} ${styles[`deadline_${urgency}`]}`}>
-            ⏰ {nextRaceNo}R {nextClosing} 〆切
-          </div>
+          <>
+            <div className={styles.nextRace}>
+              <span className={styles.nextLabel}>次レース</span>
+              <strong>{nextRaceNo}R</strong>
+            </div>
+            <div className={`${styles.deadline} ${styles[`deadline_${urgency}`]}`}>
+              <span>締切</span>
+              <strong>{nextClosing}</strong>
+            </div>
+          </>
         ) : (
           <div className={styles.statusLine}>出走表公開中</div>
         )}
-
-        <div className={styles.infoTags} aria-label={infoBadges.length ? "開催情報" : undefined}>
-          {infoBadges.map((badge) => (
-            <span key={badge} className={`${styles.infoTag} ${badgeClass(badge)}`}>
-              {badgeLabel(badge)}
-            </span>
-          ))}
-        </div>
       </div>
 
-      <div className={`${styles.bottomRow} ${layerStyles.foreground}`}>
+      <div className={styles.bottomRow}>
         {!finished && directRace ? (
           <span className={styles.direct}>⚡ {directRace.raceNo}R 直前更新</span>
         ) : (
-          <span className={styles.spacer} aria-hidden="true" />
+          <span className={styles.hint}>タップして出走表を見る</span>
         )}
         {noteCount > 0 && <span className={styles.newspaper}>📰 {noteCount}</span>}
       </div>
