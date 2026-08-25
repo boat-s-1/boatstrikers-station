@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import {
   formatJstDateTime,
   getCourseName,
@@ -7,11 +8,25 @@ import {
   normalizeDate,
   normalizeRaceNo,
 } from "../../../lib/boatstrikersPlatform";
+import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../lib/memberEntitlement";
 import RaceDetailTabs from "../../components/RaceDetailTabs";
+import RacePremiumMemberGate from "../../components/RacePremiumMemberGate";
 import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
 
 export const dynamic = "force-dynamic";
+
+async function getPremiumAccess(){
+  try{
+    const cookieStore=await cookies();
+    const token=cookieStore.get(MEMBER_ACCESS_COOKIE)?.value||"";
+    const entitlement=await getMemberEntitlementFromToken(token);
+    return Boolean(entitlement.premium);
+  }catch(error){
+    console.error("race member entitlement error",error);
+    return false;
+  }
+}
 
 export default async function RaceDetailPage({
   params,
@@ -34,6 +49,7 @@ export default async function RaceDetailPage({
 
   let data = null;
   let loadError = null;
+  const premiumAccess = await getPremiumAccess();
 
   try {
     data = await getRaceDetail(
@@ -93,7 +109,7 @@ export default async function RaceDetailPage({
                 data.previousPrediction
               }
               noteFeature={data.noteFeature}
-              livePrediction={data.livePrediction}
+              livePrediction={premiumAccess ? data.livePrediction : null}
               syncedAt={
                 data?.event?.synced_at
                   ? formatJstDateTime(
@@ -109,6 +125,8 @@ export default async function RaceDetailPage({
               raceNo={raceNo}
               raceDate={raceDate}
             />
+
+            <RacePremiumMemberGate premiumAccess={premiumAccess} />
 
             <nav className={styles.moveNav}>
               {raceNo > 1 ? (
