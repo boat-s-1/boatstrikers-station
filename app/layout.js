@@ -14,6 +14,7 @@ import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
 import HomeCompactRealtime from "./components/HomeCompactRealtime";
 import RaceHitFlashDeduper from "./components/RaceHitFlashDeduper";
 import BetaMemberPlacementBanner from "./components/BetaMemberPlacementBanner";
+import MemberSessionBridge from "./components/MemberSessionBridge";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ja">
       <body>
+        <MemberSessionBridge />
         <PublicSiteHeader />
         {children}
         <BetaMemberPlacementBanner />

@@ -1,15 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MagazineSwipeViewer.module.css";
 
+function makeSupabase(){
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if(!url||!key)return null;
+  return createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+}
+
 export default function MagazineSwipeViewer({ magazine, issue }) {
+  const supabase=useMemo(()=>makeSupabase(),[]);
   const [page, setPage] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
-  const [password, setPassword] = useState("");
-  const [authState, setAuthState] = useState("idle");
-  const [authMessage, setAuthMessage] = useState("");
+  const [memberState, setMemberState] = useState("checking");
   const scroller = useRef(null);
 
   const freePages = issue.freePages || [];
@@ -31,6 +38,29 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
       src: `/api/magazine-premium-page?magazine=${encodeURIComponent(magazine.key)}&issue=${encodeURIComponent(issue.id)}&page=${pageNumber}&source=${encodeURIComponent(issue.source || "local")}`,
     };
   });
+
+  const syncMembership=useCallback(async()=>{
+    try{
+      let headers={};
+      if(supabase){
+        const {data}=await supabase.auth.getSession();
+        const token=data.session?.access_token;
+        if(token){
+          headers={Authorization:`Bearer ${token}`};
+          await fetch("/api/members/session",{method:"POST",headers,cache:"no-store"});
+        }
+      }
+      const response=await fetch("/api/members/entitlement",{headers,cache:"no-store"});
+      const result=await response.json().catch(()=>({}));
+      if(result.plus){setUnlocked(true);setMemberState("unlocked");}
+      else{setUnlocked(false);setMemberState(result.authenticated?"member-no-access":"locked");}
+    }catch(error){
+      console.error("[MagazineSwipeViewer membership]",error);
+      setUnlocked(false);setMemberState("locked");
+    }
+  },[supabase]);
+
+  useEffect(()=>{syncMembership();},[syncMembership]);
 
   const goTo = useCallback((next) => {
     if (!totalSlides) return;
@@ -55,44 +85,6 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
     if (!el || !el.clientWidth) return;
     const nextPage = Math.round(el.scrollLeft / el.clientWidth);
     if (nextPage !== page) setPage(nextPage);
-  };
-
-  const unlock = async (event) => {
-    event.preventDefault();
-    if (!password || authState === "loading") return;
-
-    setAuthState("loading");
-    setAuthMessage("");
-
-    try {
-      const response = await fetch("/api/magazine-unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok || !result.ok) {
-        setAuthState("error");
-        setAuthMessage(result.message || "認証できませんでした。");
-        return;
-      }
-
-      setUnlocked(true);
-      setAuthState("success");
-      setAuthMessage("認証しました。続きを表示します。");
-      setPassword("");
-      requestAnimationFrame(() => {
-        const el = scroller.current;
-        if (!el) return;
-        el.scrollTo({ left: gateIndex * el.clientWidth, behavior: "auto" });
-        setPage(gateIndex);
-      });
-    } catch (error) {
-      console.error("[MagazineSwipeViewer unlock]", error);
-      setAuthState("error");
-      setAuthMessage("通信エラーが発生しました。もう一度お試しください。");
-    }
   };
 
   if (!freeCount && !hasPremium) {
@@ -125,33 +117,35 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
           {freePages.map((src, index) => (
             <section className={styles.slide} key={`${src}-${index}`} aria-label={`${index + 1}ページ目`}>
               <div className={styles.pageWrap}>
-                <div className={styles.pagePaper}>
-                  <img src={src} alt={`${issue.title} ${index + 1}ページ`} className={styles.pageImage} />
-                </div>
+                <div className={styles.pagePaper}><img src={src} alt={`${issue.title} ${index + 1}ページ`} className={styles.pageImage} /></div>
                 <div className={styles.pageNumber}>{index + 1}</div>
               </div>
             </section>
           ))}
 
           {!unlocked && hasPremium && (
-            <section className={`${styles.slide} ${styles.premiumSlide}`} aria-label="Premium認証">
+            <section className={`${styles.slide} ${styles.premiumSlide}`} aria-label="Premium会員限定">
               <div className={styles.premiumGate}>
                 <div className={styles.premiumLock}>🔒</div>
                 <span className={styles.premiumEyebrow}>BOATSTRIKERS PREMIUM</span>
-                <h2>ここから先は<br />メンバー限定です</h2>
-                <p>メンバーの方は、案内されたパスワードを入力すると続きを読めます。</p>
-
-                <form className={styles.unlockForm} onSubmit={unlock}>
-                  <label htmlFor="magazine-password">閲覧パスワード</label>
-                  <div className={styles.unlockRow}>
-                    <input id="magazine-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="パスワードを入力" />
-                    <button type="submit" disabled={!password || authState === "loading"}>{authState === "loading" ? "確認中…" : "続きを読む"}</button>
-                  </div>
-                  {authMessage && <div className={`${styles.authMessage} ${authState === "error" ? styles.authError : styles.authSuccess}`}>{authMessage}</div>}
-                </form>
-
-                <div className={styles.premiumBenefits}><span>✓ Premiumページを解放</span><span>✓ 認証Cookieは31日間有効</span><span>✓ Premium画像は非公開領域から配信</span></div>
-                <Link className={styles.premiumBack} href={`/library/${magazine.slug}`}>雑誌一覧へ戻る</Link>
+                <h2>ここから先は<br />会員限定です</h2>
+                {memberState==="checking" ? (
+                  <p>会員ステータスを確認しています…</p>
+                ) : memberState==="member-no-access" ? (
+                  <p>現在の会員プランではこのコンテンツを利用できません。</p>
+                ) : (
+                  <p>BoatStrikers β会員に無料登録すると、12月31日までPREMIUMページをすべて読めます。</p>
+                )}
+                <div className={styles.premiumBenefits}>
+                  <span>✓ β期間は無料</span><span>✓ 攻略マガジン開放</span><span>✓ 会員限定コンテンツ</span>
+                </div>
+                {memberState==="checking" ? (
+                  <div className={styles.premiumButtonMuted}>確認中…</div>
+                ) : (
+                  <Link className={styles.premiumButton} href="/members">{memberState==="member-no-access"?"会員情報を確認する":"無料でβ会員登録"}</Link>
+                )}
+                <Link className={styles.premiumBack} href="/membership">会員特典を見る</Link>
+                <div className={styles.premiumNote}>PREMIUM画像は会員認証後のみ非公開領域から配信されます。</div>
               </div>
             </section>
           )}
@@ -159,10 +153,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
           {unlocked && premiumPages.map(({ src, pageNumber }) => (
             <section className={styles.slide} key={`premium-${pageNumber}`} aria-label={`${pageNumber}ページ目`}>
               <div className={styles.pageWrap}>
-                <div className={styles.pagePaper}>
-                  {/* Protected images are intentionally loaded directly so the browser sends the auth cookie. */}
-                  <img src={src} alt={`${issue.title} ${pageNumber}ページ`} className={styles.protectedImage} />
-                </div>
+                <div className={styles.pagePaper}><img src={src} alt={`${issue.title} ${pageNumber}ページ`} className={styles.protectedImage} /></div>
                 <div className={styles.pageNumber}>{pageNumber}</div>
               </div>
             </section>
@@ -181,7 +172,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
                 <button type="button" key={index} className={index === page ? styles.activeDot : ""} onClick={() => goTo(index)} aria-label={`${index + 1}ページへ`} />
               ))}
             </div>
-            <p>{isGate ? "パスワード認証で続きを読めます" : unlocked && page >= freeCount ? "Premiumコンテンツ" : "左右にスワイプしてページをめくれます"}</p>
+            <p>{isGate ? "無料会員登録で続きを読めます" : unlocked && page >= freeCount ? "Premiumコンテンツ" : "左右にスワイプしてページをめくれます"}</p>
           </div>
           <button type="button" className={styles.mobileNav} onClick={() => goTo(page + 1)} disabled={page === totalSlides - 1} aria-label="次のページ">›</button>
         </div>
