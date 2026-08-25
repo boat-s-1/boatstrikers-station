@@ -31,7 +31,7 @@ async function loadData() {
       .order("published_at", { ascending: false })
       .limit(80),
     supabase.from("hatsune_news_videos")
-      .select("id,video_type,target_date,period_start,period_end,title,status,ai_model,ai_generated_at,created_at")
+      .select("id,video_type,target_date,period_start,period_end,title,status,ai_model,ai_generated_at,created_at,rendered_at,render_meta,render_error")
       .order("created_at", { ascending: false })
       .limit(20),
   ]);
@@ -48,7 +48,7 @@ export default async function HatsuneVideoPage() {
           <div>
             <span>HATSUNE VENUS NEWS STUDIO</span>
             <h1>初音ヴィーナスNEWS 制作</h1>
-            <p>保存済みの女子ボートNEWSから、今日のショートと週間NEWSの台本・字幕・投稿文をAI生成して保存します。</p>
+            <p>NEWS選択 → AI台本 → AivisSpeech音声 → 字幕 → FFmpeg MP4までつなぐ制作画面です。</p>
           </div>
           <div className={styles.heroActions}>
             <Link href="/admin/hatsune-news-status" className={styles.secondary}>自動更新状況</Link>
