@@ -105,9 +105,9 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
       .from("hatsune_news")
       .select(HATSUNE_NEWS_SELECT)
       .eq("is_published", true)
+      .order("published_at", { ascending: false, nullsFirst: false })
       .order("is_featured", { ascending: false })
       .order("priority", { ascending: false })
-      .order("published_at", { ascending: false })
       .limit(limit);
 
     if (normalizedCategory === "race") {
