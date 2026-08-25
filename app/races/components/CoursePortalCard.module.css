@@ -159,6 +159,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 7px;
   margin-top: auto;
+  padding-inline: 2px;
 }
 
 .nextRace,
@@ -176,6 +177,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.deadline {
+  padding-inline: 4px;
 }
 
 .nextLabel,
@@ -282,7 +287,9 @@
   .session { padding: 4px 7px; font-size: 7px; }
   .infoTags { gap: 4px; min-height: 20px; }
   .infoTag { padding: 4px 6px; font-size: 6.5px; }
+  .raceRow { padding-inline: 3px; }
   .nextRace, .deadline, .statusLine { min-height: 42px; }
+  .deadline { padding-inline: 5px; }
   .nextRace strong, .deadline strong { font-size: 18px; }
   .nextLabel, .deadline span { font-size: 7px; }
   .statusLine { font-size: 11px; }
