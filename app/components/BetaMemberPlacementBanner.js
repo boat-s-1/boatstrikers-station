@@ -71,11 +71,13 @@ export default function BetaMemberPlacementBanner() {
       <div className="betaMemberImageCard">
         <img
           src={BANNER}
-          alt="BoatStrikers β MEMBERSHIP 12月31日まで無料。PREMIUM機能を無料で体験。無料で会員登録。"
+          alt="BoatStrikers β MEMBERSHIP 12月31日まで無料。PREMIUM機能を無料で体験。"
           className="betaMemberImage"
         />
-        <Link className="signupHotspot" href="/members" aria-label="無料で会員登録" />
-        <Link className="loginHotspot" href="/members?mode=login" aria-label="ログイン" />
+        <div className="betaMemberActions">
+          <Link href="/members" className="signupButton">無料で会員登録 →</Link>
+          <Link href="/members?mode=login" className="loginButton">ログイン</Link>
+        </div>
       </div>
 
       <style jsx>{`
@@ -84,16 +86,22 @@ export default function BetaMemberPlacementBanner() {
         .betaMemberImageCard{position:relative;overflow:hidden;border-radius:28px;box-shadow:0 14px 36px rgba(15,63,145,.24)}
         .isRaces .betaMemberImageCard{border-radius:24px}
         .betaMemberImage{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
-        .signupHotspot,.loginHotspot{position:absolute;display:block;z-index:2;border-radius:18px}
-        .signupHotspot{left:4.0%;bottom:7.0%;width:32.5%;height:16.0%}
-        .loginHotspot{left:36.8%;bottom:7.0%;width:22.0%;height:16.0%}
-        .signupHotspot:focus-visible,.loginHotspot:focus-visible{outline:4px solid #fff;outline-offset:-4px;box-shadow:0 0 0 6px #0a58ca}
+        .betaMemberActions{position:absolute;left:4.2%;right:4.2%;bottom:6.2%;display:flex;gap:2.2%;align-items:center;z-index:3}
+        .betaMemberActions :global(a){display:inline-flex;align-items:center;justify-content:center;height:clamp(48px,8vw,76px);border-radius:clamp(14px,2.2vw,24px);font-weight:1000;text-decoration:none;box-sizing:border-box;box-shadow:0 8px 20px rgba(0,24,92,.18);font-size:clamp(14px,2.3vw,24px);line-height:1;white-space:nowrap}
+        .signupButton{flex:1 1 64%;background:#fff;color:#083f9e;padding:0 18px}
+        .loginButton{flex:0 0 31%;background:rgba(92,82,233,.48);color:#fff;border:2px solid rgba(255,255,255,.9);backdrop-filter:blur(7px)}
+        .betaMemberActions :global(a:focus-visible){outline:4px solid #fff;outline-offset:-4px;box-shadow:0 0 0 6px #0a58ca}
         @media(max-width:720px){
           .betaMemberWrap{margin-top:8px;margin-bottom:14px;padding:0 8px}
           .betaMemberWrap.isRaces{margin:14px auto;padding:0 12px}
           .betaMemberImageCard{border-radius:22px}
-          .signupHotspot{left:4.2%;bottom:7.1%;width:32.7%;height:16.3%}
-          .loginHotspot{left:36.8%;bottom:7.1%;width:22.2%;height:16.3%}
+          .betaMemberActions{left:5%;right:5%;bottom:6.2%;gap:2.4%}
+          .betaMemberActions :global(a){height:46px;border-radius:15px;font-size:13px}
+          .signupButton{padding:0 8px}
+          .loginButton{flex-basis:30%}
+        }
+        @media(max-width:380px){
+          .betaMemberActions :global(a){height:42px;font-size:12px}
         }
       `}</style>
     </div>,
