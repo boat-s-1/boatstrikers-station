@@ -61,12 +61,36 @@ function modeTickets(top) {
   };
 }
 
+function expandTicket(ticket) {
+  const parts = String(ticket || "").split("-");
+  if (parts.length !== 3) return [];
+
+  const choices = parts.map((part) => {
+    if (part === "全") return [1, 2, 3, 4, 5, 6];
+    const n = Number(part);
+    return Number.isInteger(n) && n >= 1 && n <= 6 ? [n] : [];
+  });
+  if (choices.some((items) => items.length === 0)) return [];
+
+  const expanded = [];
+  for (const first of choices[0]) {
+    for (const second of choices[1]) {
+      for (const third of choices[2]) {
+        if (new Set([first, second, third]).size !== 3) continue;
+        expanded.push(`${first}-${second}-${third}`);
+      }
+    }
+  }
+  return [...new Set(expanded)];
+}
+
+function expandTickets(tickets) {
+  return [...new Set((tickets || []).flatMap(expandTicket))];
+}
+
 function ticketHits(ticket, result) {
   if (!ticket || !result) return false;
-  if (!ticket.includes("全")) return ticket === result;
-  const [t1, t2] = ticket.split("-");
-  const [r1, r2] = result.split("-");
-  return t1 === r1 && t2 === r2;
+  return expandTicket(ticket).includes(result);
 }
 
 async function fetchPredictions(supabase, date) {
@@ -116,9 +140,13 @@ async function settleDate(supabase, date) {
     if (!ticketsByMode) continue;
 
     for (const [modeKey, tickets] of Object.entries(ticketsByMode)) {
+      const expandedTickets = expandTickets(tickets);
+      if (!expandedTickets.length) continue;
+
       const hitTicket = tickets.find((ticket) => ticketHits(ticket, resultCombination)) || null;
       const isHit = Boolean(hitTicket);
-      const investment = tickets.length * 100;
+      const ticketCount = expandedTickets.length;
+      const investment = ticketCount * 100;
       const payout = isHit ? trifectaPayout : 0;
 
       rows.push({
@@ -130,7 +158,7 @@ async function settleDate(supabase, date) {
         mode_key: modeKey,
         mode_name: MODE_META[modeKey],
         tickets,
-        ticket_count: tickets.length,
+        ticket_count: ticketCount,
         unit_stake: 100,
         investment,
         result_combination: resultCombination,
@@ -162,7 +190,8 @@ async function settleDate(supabase, date) {
 export async function GET() {
   try {
     const supabase = getClient();
-    const dates = [jstDateOffset(0), jstDateOffset(-1), jstDateOffset(-2)];
+    // 過去7日分を毎回再精算して、前日版の取りこぼしや投資額ロジック変更も自動補正します。
+    const dates = Array.from({ length: 7 }, (_, index) => jstDateOffset(-index));
     const results = [];
     for (const date of dates) results.push(await settleDate(supabase, date));
     return NextResponse.json({ ok: true, timings: TIMINGS, results });
