@@ -55,6 +55,7 @@ export default function CourseQuickNav({ courseCode, raceDate, races = [] }) {
 
     let targetRace;
 
+    // 当日なら「まだ締切前の最も近いレース」。別日なら1Rへ。
     if (clock.date === raceDate && timed.length) {
       targetRace = timed.find((race) => clock.minutes < race.minutes) || timed.at(-1);
     } else {
@@ -67,7 +68,7 @@ export default function CourseQuickNav({ courseCode, raceDate, races = [] }) {
 
   return (
     <nav className={styles.courseQuickNav} aria-label="開催場メニュー">
-      <Link prefetch={false} href={`/races?date=${raceDate}`} className={styles.courseQuickNavItem}>
+      <Link href={`/races?date=${raceDate}`} className={styles.courseQuickNavItem}>
         <span>‹</span>
         <b>開催場一覧</b>
       </Link>
@@ -77,12 +78,12 @@ export default function CourseQuickNav({ courseCode, raceDate, races = [] }) {
         <b>直近のレース</b>
       </button>
 
-      <Link prefetch={false} href={`/races/${code}/info?date=${raceDate}`} className={styles.courseQuickNavItem}>
+      <Link href={`/races/${code}/info?date=${raceDate}`} className={styles.courseQuickNavItem}>
         <span>i</span>
         <b>場基本情報</b>
       </Link>
 
-      <Link prefetch={false} href={`/races/${code}/newspaper?date=${raceDate}`} className={styles.courseQuickNavItem}>
+      <Link href={`/races/${code}/newspaper?date=${raceDate}`} className={styles.courseQuickNavItem}>
         <span>▤</span>
         <b>今日の予想新聞</b>
       </Link>
