@@ -26,6 +26,7 @@ async function loadData() {
   const [{ data: articles, error: articleError }, { data: videos, error: videoError }] = await Promise.all([
     supabase.from("hatsune_news")
       .select("id,title,summary,category,place,published_at,article_body_source,is_published")
+      .eq("is_published", true)
       .gte("published_at", since)
       .order("published_at", { ascending: false })
       .limit(80),
