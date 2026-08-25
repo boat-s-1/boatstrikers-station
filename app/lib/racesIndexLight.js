@@ -28,6 +28,14 @@ function toNumber(value, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function toDbBoolean(value) {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0 || value == null || value === "") return false;
+
+  const text = String(value).trim().toLowerCase();
+  return ["true", "t", "1", "yes", "y"].includes(text);
+}
+
 function latestIso(values) {
   const timestamps = values
     .filter(Boolean)
@@ -137,7 +145,7 @@ export async function getCoursesForRacesIndex(raceDate) {
     const key = `${courseCode}:${raceNo}`;
     const entries = entriesByRace.get(key) ?? [];
     const closingAt = createClosingAt(normalizedDate, row.closing_time);
-    const resultAvailable = Boolean(row.result_available) || resultKeys.has(key);
+    const resultAvailable = toDbBoolean(row.result_available) || resultKeys.has(key);
     const hasExhibition = entries.some(
       (entry) => entry.exhibition_time != null || entry.exhibition_st != null
     );
@@ -187,7 +195,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       race_day_no: toNumber(row.race_day_no),
       race_kind_code: row.race_kind_code,
       closing_time: row.closing_time,
-      program_available: Boolean(row.program_available),
+      program_available: toDbBoolean(row.program_available),
       result_available: resultAvailable,
       synced_at: syncedAt,
       api_synced_at: syncedAt,
@@ -205,8 +213,8 @@ export async function getCoursesForRacesIndex(raceDate) {
       closing_at: closingAt,
       raceKindCode: row.race_kind_code,
       race_kind_code: row.race_kind_code,
-      programAvailable: Boolean(row.program_available),
-      program_available: Boolean(row.program_available),
+      programAvailable: toDbBoolean(row.program_available),
+      program_available: toDbBoolean(row.program_available),
       resultAvailable,
       result_available: resultAvailable,
       hasExhibition,
