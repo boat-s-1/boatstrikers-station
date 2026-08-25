@@ -5,327 +5,64 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-const CHARACTERS = [
-  { src: "/ichika-banner.jpg", alt: "一果" },
-  { src: "/hatsune-banner.jpg", alt: "初音" },
-  { src: "/kiina-banner.jpg", alt: "キイナ" },
-];
+const CHARACTER_ART = "data:image/jpeg;base64,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";
 
-export default function BetaMemberPlacementBanner() {
-  const pathname = usePathname();
-  const [mountNode, setMountNode] = useState(null);
+export default function BetaMemberPlacementBanner(){
+  const pathname=usePathname();
+  const [mountNode,setMountNode]=useState(null);
 
-  useEffect(() => {
-    if (pathname !== "/" && pathname !== "/races") {
-      setMountNode(null);
-      return;
-    }
-
-    let mount = null;
-    let observer = null;
-    let homeHero = null;
-    let previousHeroDisplay = "";
-
-    const place = () => {
-      const target = pathname === "/"
-        ? document.querySelector("main.page .hero")
-        : document.querySelector("#todays-courses");
-
-      if (!target) return false;
-
-      if (pathname === "/") {
-        homeHero = target;
-        previousHeroDisplay = homeHero.style.display;
-        homeHero.style.display = "none";
-      }
-
-      const existing = document.querySelector(`[data-beta-member-placement="${pathname}"]`);
-      if (existing) {
-        setMountNode(existing);
-        return true;
-      }
-
-      mount = document.createElement("div");
-      mount.dataset.betaMemberPlacement = pathname;
-
-      if (pathname === "/") target.insertAdjacentElement("afterend", mount);
-      else target.insertAdjacentElement("beforebegin", mount);
-
-      setMountNode(mount);
-      return true;
+  useEffect(()=>{
+    if(pathname!=="/"&&pathname!=="/races"){setMountNode(null);return;}
+    let mount=null,observer=null,homeHero=null,previousHeroDisplay="";
+    const place=()=>{
+      const target=pathname==="/"?document.querySelector("main.page .hero"):document.querySelector("#todays-courses");
+      if(!target)return false;
+      if(pathname==="/"){homeHero=target;previousHeroDisplay=homeHero.style.display;homeHero.style.display="none";}
+      const existing=document.querySelector(`[data-beta-member-placement="${pathname}"]`);
+      if(existing){setMountNode(existing);return true;}
+      mount=document.createElement("div");mount.dataset.betaMemberPlacement=pathname;
+      if(pathname==="/")target.insertAdjacentElement("afterend",mount);else target.insertAdjacentElement("beforebegin",mount);
+      setMountNode(mount);return true;
     };
-
-    if (!place()) {
-      observer = new MutationObserver(() => {
-        if (place() && observer) observer.disconnect();
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
+    if(!place()){
+      observer=new MutationObserver(()=>{if(place()&&observer)observer.disconnect();});
+      observer.observe(document.body,{childList:true,subtree:true});
     }
+    return()=>{if(observer)observer.disconnect();if(homeHero)homeHero.style.display=previousHeroDisplay;if(mount?.parentNode)mount.parentNode.removeChild(mount);setMountNode(null);};
+  },[pathname]);
 
-    return () => {
-      if (observer) observer.disconnect();
-      if (homeHero) homeHero.style.display = previousHeroDisplay;
-      if (mount?.parentNode) mount.parentNode.removeChild(mount);
-      setMountNode(null);
-    };
-  }, [pathname]);
-
-  if (!mountNode) return null;
-  const isRaces = pathname === "/races";
+  if(!mountNode)return null;
+  const isRaces=pathname==="/races";
 
   return createPortal(
-    <div
-      style={{
-        maxWidth: isRaces ? 1180 : 1120,
-        margin: isRaces ? "18px auto" : "10px auto 18px",
-        padding: isRaces ? "0 14px" : "0 8px",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        className="betaMembershipCard"
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          borderRadius: isRaces ? 24 : 28,
-          color: "#fff",
-          background:
-            "radial-gradient(circle at 82% 16%, rgba(244,127,255,.52), transparent 28%), radial-gradient(circle at 12% 92%, rgba(0,235,255,.38), transparent 31%), linear-gradient(118deg,#05267e 0%,#0754d6 45%,#7144e6 100%)",
-          boxShadow: "0 14px 36px rgba(15,63,145,.28)",
-          border: "1px solid rgba(255,255,255,.35)",
-          isolation: "isolate",
-        }}
-      >
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: .24,
-            backgroundImage:
-              "radial-gradient(circle, rgba(255,255,255,.75) 1px, transparent 1.5px)",
-            backgroundSize: "18px 18px",
-            maskImage: "linear-gradient(90deg,#000 0%,transparent 67%)",
-            zIndex: -1,
-          }}
-        />
-
-        <div
-          className="betaMembershipArt"
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            right: "-1%",
-            bottom: "-8%",
-            width: isRaces ? "43%" : "46%",
-            height: "72%",
-            zIndex: 0,
-            opacity: .28,
-            pointerEvents: "none",
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            gap: 0,
-            filter: "saturate(.9) brightness(1.08)",
-            maskImage: "linear-gradient(90deg,transparent 0%,#000 26%,#000 100%)",
-          }}
-        >
-          {CHARACTERS.map((character, index) => (
-            <img
-              key={character.alt}
-              src={character.src}
-              alt=""
-              style={{
-                width: "40%",
-                height: index === 1 ? "108%" : "96%",
-                marginLeft: index ? "-12%" : 0,
-                objectFit: "cover",
-                objectPosition: "50% 28%",
-                borderRadius: "42% 42% 8% 8%",
-                transform: index === 1 ? "translateY(-3%)" : "none",
-              }}
-            />
-          ))}
-        </div>
-
-        <div
-          style={{
-            position: "absolute",
-            right: 14,
-            top: 14,
-            zIndex: 4,
-            padding: "8px 13px",
-            borderRadius: 999,
-            color: "#073b9e",
-            background: "linear-gradient(180deg,#fff8a8,#ffd64e)",
-            border: "2px solid rgba(255,255,255,.9)",
-            boxShadow: "0 5px 16px rgba(28,34,116,.24)",
-            fontSize: "clamp(13px,2.8vw,18px)",
-            fontWeight: 1000,
-            whiteSpace: "nowrap",
-          }}
-        >
-          12/31まで無料
-        </div>
-
-        <div
-          className="betaMembershipGrid"
-          style={{
-            position: "relative",
-            zIndex: 2,
-            padding: isRaces ? "24px 24px 20px" : "26px 28px 22px",
-            boxSizing: "border-box",
-          }}
-        >
-          <div style={{ minWidth: 0, maxWidth: isRaces ? 700 : 720 }}>
-            <div
-              style={{
-                fontSize: "clamp(11px,2vw,16px)",
-                fontWeight: 900,
-                letterSpacing: ".12em",
-                opacity: .98,
-                marginBottom: 8,
-              }}
-            >
-              BOATSTRIKERS β MEMBERSHIP
-            </div>
-
-            <div
-              style={{
-                display: "inline-block",
-                paddingBottom: 5,
-                borderBottom: "2px solid rgba(134,245,255,.75)",
-                color: "#fff8a8",
-                fontSize: "clamp(15px,3.2vw,24px)",
-                fontWeight: 1000,
-                textShadow: "0 2px 10px rgba(0,0,0,.2)",
-              }}
-            >
-              PREMIUM機能を無料で体験
-            </div>
-
-            <h2
-              style={{
-                margin: "10px 0 8px",
-                fontSize: "clamp(30px,7vw,58px)",
-                lineHeight: 1.05,
-                letterSpacing: "-.04em",
-                fontWeight: 1000,
-                color: "#fff",
-                textShadow: "0 4px 14px rgba(0,27,102,.45)",
-              }}
-            >
-              無料で会員登録
-            </h2>
-
-            <p
-              style={{
-                margin: 0,
-                maxWidth: 620,
-                fontSize: "clamp(12px,2.5vw,17px)",
-                lineHeight: 1.58,
-                fontWeight: 800,
-                color: "rgba(255,255,255,.96)",
-              }}
-            >
-              BS展示・直前版AI・直前買い目など、会員限定機能をβメンバー向けに順次開放します。
-            </p>
-
-            <div
-              className="betaMembershipActions"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                flexWrap: "wrap",
-                marginTop: 14,
-              }}
-            >
-              <Link
-                href="/members"
-                aria-label="無料でBoatStrikers会員登録"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "12px 20px",
-                  minWidth: 190,
-                  borderRadius: 16,
-                  background: "#fff",
-                  color: "#0a42a6",
-                  boxShadow: "0 8px 22px rgba(0,22,92,.22)",
-                  fontSize: "clamp(14px,2.8vw,19px)",
-                  fontWeight: 1000,
-                  textDecoration: "none",
-                }}
-              >
-                無料で会員登録 →
-              </Link>
-
-              <Link
-                href="/members?mode=login"
-                aria-label="BoatStrikers会員ログイン"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "12px 18px",
-                  minWidth: 110,
-                  borderRadius: 16,
-                  background: "rgba(255,255,255,.12)",
-                  color: "#fff",
-                  border: "2px solid rgba(255,255,255,.82)",
-                  fontSize: "clamp(14px,2.8vw,18px)",
-                  fontWeight: 1000,
-                  textDecoration: "none",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                ログイン
-              </Link>
+    <div style={{maxWidth:isRaces?1180:1120,margin:isRaces?"18px auto":"10px auto 18px",padding:isRaces?"0 14px":"0 8px",boxSizing:"border-box"}}>
+      <div className="betaMembershipCard" style={{position:"relative",overflow:"hidden",borderRadius:isRaces?24:28,color:"#fff",background:"radial-gradient(circle at 82% 16%, rgba(244,127,255,.52), transparent 28%), radial-gradient(circle at 12% 92%, rgba(0,235,255,.38), transparent 31%), linear-gradient(118deg,#05267e 0%,#0754d6 45%,#7144e6 100%)",boxShadow:"0 14px 36px rgba(15,63,145,.28)",border:"1px solid rgba(255,255,255,.35)",isolation:"isolate"}}>
+        <div aria-hidden="true" style={{position:"absolute",inset:0,opacity:.24,backgroundImage:"radial-gradient(circle, rgba(255,255,255,.75) 1px, transparent 1.5px)",backgroundSize:"18px 18px",maskImage:"linear-gradient(90deg,#000 0%,transparent 67%)",zIndex:-1}}/>
+        <img className="betaMembershipArt" aria-hidden="true" src={CHARACTER_ART} alt="" style={{position:"absolute",right:"-1%",bottom:"-6%",width:isRaces?"43%":"46%",height:"74%",zIndex:0,opacity:.34,pointerEvents:"none",objectFit:"cover",objectPosition:"54% 42%",filter:"saturate(.95) brightness(1.08)",maskImage:"linear-gradient(90deg,transparent 0%,#000 20%,#000 100%)"}}/>
+        <div style={{position:"absolute",right:14,top:14,zIndex:4,padding:"8px 13px",borderRadius:999,color:"#073b9e",background:"linear-gradient(180deg,#fff8a8,#ffd64e)",border:"2px solid rgba(255,255,255,.9)",boxShadow:"0 5px 16px rgba(28,34,116,.24)",fontSize:"clamp(13px,2.8vw,18px)",fontWeight:1000,whiteSpace:"nowrap"}}>12/31まで無料</div>
+        <div className="betaMembershipGrid" style={{position:"relative",zIndex:2,padding:isRaces?"24px 24px 18px":"26px 28px 18px",boxSizing:"border-box"}}>
+          <div style={{minWidth:0,maxWidth:isRaces?700:720}}>
+            <div style={{fontSize:"clamp(11px,2vw,16px)",fontWeight:900,letterSpacing:".12em",opacity:.98,marginBottom:8}}>BOATSTRIKERS β MEMBERSHIP</div>
+            <div style={{display:"inline-block",paddingBottom:5,borderBottom:"2px solid rgba(134,245,255,.75)",color:"#fff8a8",fontSize:"clamp(15px,3.2vw,24px)",fontWeight:1000,textShadow:"0 2px 10px rgba(0,0,0,.2)"}}>PREMIUM機能を無料で体験</div>
+            <h2 style={{margin:"10px 0 8px",fontSize:"clamp(30px,7vw,58px)",lineHeight:1.05,letterSpacing:"-.04em",fontWeight:1000,color:"#fff",textShadow:"0 4px 14px rgba(0,27,102,.45)"}}>無料で会員登録</h2>
+            <p style={{margin:0,maxWidth:620,fontSize:"clamp(12px,2.5vw,17px)",lineHeight:1.58,fontWeight:800,color:"rgba(255,255,255,.96)"}}>BS展示・直前版AI・直前買い目など、会員限定機能をβメンバー向けに順次開放します。</p>
+            <div className="betaMembershipActions" style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginTop:14}}>
+              <Link href="/members" aria-label="無料でBoatStrikers会員登録" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 20px",minWidth:190,borderRadius:16,background:"#fff",color:"#0a42a6",boxShadow:"0 8px 22px rgba(0,22,92,.22)",fontSize:"clamp(14px,2.8vw,19px)",fontWeight:1000,textDecoration:"none"}}>無料で会員登録 →</Link>
+              <Link href="/members?mode=login" aria-label="BoatStrikers会員ログイン" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 18px",minWidth:110,borderRadius:16,background:"rgba(255,255,255,.12)",color:"#fff",border:"2px solid rgba(255,255,255,.82)",fontSize:"clamp(14px,2.8vw,18px)",fontWeight:1000,textDecoration:"none",backdropFilter:"blur(8px)"}}>ログイン</Link>
             </div>
           </div>
         </div>
-
         <style jsx>{`
-          @media (max-width: 720px) {
-            .betaMembershipGrid {
-              padding: 20px 18px 14px !important;
-            }
-            .betaMembershipGrid > div {
-              position: relative;
-              z-index: 2;
-            }
-            .betaMembershipArt {
-              right: -7% !important;
-              bottom: -3% !important;
-              width: 58% !important;
-              height: 56% !important;
-              opacity: .24 !important;
-              mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 100%) !important;
-            }
-            .betaMembershipArt img {
-              width: 44% !important;
-              height: 108% !important;
-              margin-left: -15% !important;
-              border-radius: 44% 44% 6% 6% !important;
-            }
-            .betaMembershipActions {
-              gap: 8px !important;
-              margin-top: 12px !important;
-            }
-            .betaMembershipActions a:first-child {
-              min-width: 0 !important;
-              flex: 1 1 190px;
-            }
-            .betaMembershipActions a:last-child {
-              min-width: 92px !important;
-              flex: 0 0 auto;
-            }
+          @media(max-width:720px){
+            .betaMembershipGrid{padding:20px 18px 12px !important}
+            .betaMembershipGrid>div{position:relative;z-index:2}
+            .betaMembershipArt{right:-9% !important;bottom:-5% !important;width:60% !important;height:58% !important;opacity:.28 !important;object-position:54% 42% !important;mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 100%) !important}
+            .betaMembershipActions{gap:8px !important;margin-top:12px !important}
+            .betaMembershipActions a:first-child{min-width:0 !important;flex:1 1 190px}
+            .betaMembershipActions a:last-child{min-width:92px !important;flex:0 0 auto}
           }
         `}</style>
       </div>
-    </div>,
-    mountNode
+    </div>,mountNode
   );
 }
