@@ -66,6 +66,13 @@ const GROUPS = [
         badge: "NEW",
       },
       {
+        href: "/admin/news",
+        icon: "🌙",
+        title: "BoatStrikersニュース",
+        text: "一果・初音・キイナを選んで縦型ニュース動画を作成",
+        badge: "NEW",
+      },
+      {
         href: "/admin/results",
         icon: "🏆",
         title: "予想実績管理",
@@ -164,6 +171,7 @@ const GROUPS = [
 
 const FAVORITES = [
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
+  { href: "/admin/news", icon: "🌙", title: "ニュース生成" },
   { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
   { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
