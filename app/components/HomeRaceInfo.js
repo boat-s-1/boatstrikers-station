@@ -43,14 +43,37 @@ function courseType(courseCode) {
   return { label: "デイ", icon: "☀️", key: "day" };
 }
 
+function getFutureRace(course) {
+  const now = Date.now();
+  const races = Array.isArray(course?.races) ? course.races : [];
+
+  return [...races]
+    .sort((a, b) => Number(a?.raceNo ?? a?.race_no ?? 0) - Number(b?.raceNo ?? b?.race_no ?? 0))
+    .find((race) => {
+      const closingAt = race?.closingAt ?? race?.closing_at;
+      if (!closingAt) return false;
+
+      const closingTime = new Date(closingAt).getTime();
+      return Number.isFinite(closingTime) && closingTime > now;
+    }) ?? null;
+}
+
 function statusInfo(course) {
   const raceCount = Number(course.raceCount || 0);
   const resultCount = Number(course.resultCount || 0);
-  const nextRaceNo = Number(course.nextRaceNo || 0);
+  const futureRace = getFutureRace(course);
+  const nextRaceNo = Number(
+    course.nextRaceNo || futureRace?.raceNo || futureRace?.race_no || 0
+  );
+
+  // トップページでは結果フラグだけで終了判定しない。
+  // 締切時刻が未来のレースが1つでも残っていれば開催中として扱う。
+  const hasFutureRace = Boolean(futureRace);
 
   if (
-    course.liveStatus === "finished" ||
-    (raceCount > 0 && resultCount >= raceCount)
+    !hasFutureRace &&
+    (course.liveStatus === "finished" ||
+      (raceCount > 0 && resultCount >= raceCount))
   ) {
     return { label: "開催終了", key: "finished" };
   }
@@ -66,6 +89,13 @@ function statusInfo(course) {
     return {
       label: nextRaceNo ? `${nextRaceNo}R 受付中` : "開催中",
       key: "live",
+    };
+  }
+
+  if (hasFutureRace) {
+    return {
+      label: nextRaceNo ? `${nextRaceNo}Rから` : "開催中",
+      key: "scheduled",
     };
   }
 
