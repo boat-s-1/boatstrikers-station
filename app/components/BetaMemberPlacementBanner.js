@@ -71,12 +71,13 @@ export default function BetaMemberPlacementBanner() {
       <div className="betaMemberImageCard">
         <img
           src={BANNER}
-          alt="BoatStrikers β MEMBERSHIP 12月31日まで無料。PREMIUM機能を無料で体験。"
+          alt="BoatStrikers β MEMBERSHIP 12月31日まで無料。PREMIUM機能を無料で体験。無料で会員登録。"
           className="betaMemberImage"
         />
-        <div className="betaMemberActions">
-          <Link href="/members" className="signupButton">無料で会員登録 →</Link>
-          <Link href="/members?mode=login" className="loginButton">ログイン</Link>
+        <div className="betaMemberActionArea">
+          <Link className="memberEntryButton" href="/members">
+            新規会員登録・会員ログイン <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
 
@@ -86,22 +87,16 @@ export default function BetaMemberPlacementBanner() {
         .betaMemberImageCard{position:relative;overflow:hidden;border-radius:28px;box-shadow:0 14px 36px rgba(15,63,145,.24)}
         .isRaces .betaMemberImageCard{border-radius:24px}
         .betaMemberImage{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
-        .betaMemberActions{position:absolute;left:4.2%;right:4.2%;bottom:6.2%;display:flex;gap:2.2%;align-items:center;z-index:3}
-        .betaMemberActions :global(a){display:inline-flex;align-items:center;justify-content:center;height:clamp(48px,8vw,76px);border-radius:clamp(14px,2.2vw,24px);font-weight:1000;text-decoration:none;box-sizing:border-box;box-shadow:0 8px 20px rgba(0,24,92,.18);font-size:clamp(14px,2.3vw,24px);line-height:1;white-space:nowrap}
-        .signupButton{flex:1 1 64%;background:#fff;color:#083f9e;padding:0 18px}
-        .loginButton{flex:0 0 31%;background:rgba(92,82,233,.48);color:#fff;border:2px solid rgba(255,255,255,.9);backdrop-filter:blur(7px)}
-        .betaMemberActions :global(a:focus-visible){outline:4px solid #fff;outline-offset:-4px;box-shadow:0 0 0 6px #0a58ca}
+        .betaMemberActionArea{position:absolute;left:4%;right:4%;bottom:6.5%;display:flex;justify-content:flex-start;z-index:3}
+        .memberEntryButton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:0 26px;border-radius:18px;background:#fff;color:#1647b8;text-decoration:none;font-weight:1000;font-size:clamp(14px,2.2vw,20px);box-shadow:0 8px 22px rgba(0,21,92,.28);border:2px solid rgba(255,255,255,.94);white-space:nowrap}
+        .memberEntryButton:hover{transform:translateY(-1px)}
+        .memberEntryButton:focus-visible{outline:4px solid #fff;outline-offset:3px;box-shadow:0 0 0 7px #0a58ca}
         @media(max-width:720px){
           .betaMemberWrap{margin-top:8px;margin-bottom:14px;padding:0 8px}
           .betaMemberWrap.isRaces{margin:14px auto;padding:0 12px}
           .betaMemberImageCard{border-radius:22px}
-          .betaMemberActions{left:5%;right:5%;bottom:6.2%;gap:2.4%}
-          .betaMemberActions :global(a){height:46px;border-radius:15px;font-size:13px}
-          .signupButton{padding:0 8px}
-          .loginButton{flex-basis:30%}
-        }
-        @media(max-width:380px){
-          .betaMemberActions :global(a){height:42px;font-size:12px}
+          .betaMemberActionArea{left:5%;right:5%;bottom:5.5%}
+          .memberEntryButton{width:100%;min-height:48px;padding:0 14px;border-radius:16px;font-size:clamp(13px,3.7vw,16px)}
         }
       `}</style>
     </div>,
