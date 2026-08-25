@@ -72,6 +72,30 @@ function getLiveStatus({ raceCount, resultCount, exhibitionCount }) {
   return "scheduled";
 }
 
+function isConfirmedResult(row) {
+  if (!row) return false;
+
+  const resultStatus = String(row.result_status ?? "").trim().toLowerCase();
+  const raceStatus = String(row.race_status ?? "").trim().toLowerCase();
+
+  if (["confirmed", "complete", "completed", "finished"].includes(resultStatus)) {
+    return true;
+  }
+
+  if (["finished", "complete", "completed"].includes(raceStatus)) {
+    return true;
+  }
+
+  return Boolean(
+    row.trifecta_result ||
+      row.winning_trifecta ||
+      row.trifecta_payout != null ||
+      row.first_boat != null ||
+      row.second_boat != null ||
+      row.third_boat != null
+  );
+}
+
 function mapLightEntry(row) {
   return {
     boat_no: toNumber(row.boat_no),
@@ -99,7 +123,7 @@ export async function getCoursesForRacesIndex(raceDate) {
     supabase
       .from("bs_race_events")
       .select(
-        "race_date,course_code,course_name,race_no,race_day_no,race_kind_code,opening_date,closing_time,program_available,result_available,api_synced_at,synced_at,updated_at"
+        "race_date,course_code,course_name,race_no,race_day_no,race_kind_code,opening_date,closing_time,program_available,api_synced_at,synced_at,updated_at"
       )
       .eq("race_date", normalizedDate)
       .order("course_code", { ascending: true })
@@ -117,7 +141,9 @@ export async function getCoursesForRacesIndex(raceDate) {
 
     supabase
       .from("bs_race_results")
-      .select("course_code,race_no")
+      .select(
+        "course_code,race_no,result_status,race_status,trifecta_result,winning_trifecta,trifecta_payout,first_boat,second_boat,third_boat"
+      )
       .eq("race_date", normalizedDate),
   ]);
 
@@ -133,8 +159,10 @@ export async function getCoursesForRacesIndex(raceDate) {
     entriesByRace.set(key, list);
   }
 
-  const resultKeys = new Set(
-    (resultRows ?? []).map((row) => `${Number(row.course_code)}:${Number(row.race_no)}`)
+  const confirmedResultKeys = new Set(
+    (resultRows ?? [])
+      .filter(isConfirmedResult)
+      .map((row) => `${Number(row.course_code)}:${Number(row.race_no)}`)
   );
 
   const courseMap = new Map();
@@ -145,7 +173,7 @@ export async function getCoursesForRacesIndex(raceDate) {
     const key = `${courseCode}:${raceNo}`;
     const entries = entriesByRace.get(key) ?? [];
     const closingAt = createClosingAt(normalizedDate, row.closing_time);
-    const resultAvailable = toDbBoolean(row.result_available) || resultKeys.has(key);
+    const resultAvailable = confirmedResultKeys.has(key);
     const hasExhibition = entries.some(
       (entry) => entry.exhibition_time != null || entry.exhibition_st != null
     );
