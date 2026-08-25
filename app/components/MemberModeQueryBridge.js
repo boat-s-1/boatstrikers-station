@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function MemberModeQueryBridge(){
   const pathname=usePathname();
-  const searchParams=useSearchParams();
 
   useEffect(()=>{
-    if(pathname!=="/members"||searchParams.get("mode")!=="login")return;
+    if(pathname!=="/members")return;
+    const params=new URLSearchParams(window.location.search);
+    if(params.get("mode")!=="login")return;
+
     let tries=0;
     const timer=setInterval(()=>{
       tries+=1;
@@ -20,8 +22,9 @@ export default function MemberModeQueryBridge(){
         clearInterval(timer);
       }
     },50);
+
     return()=>clearInterval(timer);
-  },[pathname,searchParams]);
+  },[pathname]);
 
   return null;
 }
