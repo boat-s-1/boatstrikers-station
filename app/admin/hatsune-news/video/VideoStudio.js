@@ -7,6 +7,18 @@ function datePart(value) {
   return value ? new Date(value).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric" }) : "—";
 }
 
+function jstDateKey(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 function typeLabel(type) {
   return type === "weekly_news" ? "週間ヴィーナスNEWS" : "今日のショート";
 }
@@ -25,7 +37,7 @@ export default function VideoStudio({ articles, videos: initialVideos, today, we
 
   const visibleArticles = useMemo(() => {
     return (articles || []).filter((item) => {
-      const d = String(item.published_at || "").slice(0, 10);
+      const d = jstDateKey(item.published_at);
       if (mode === "daily_short") return d === targetDate;
       return d >= periodStart && d <= periodEnd;
     });
@@ -35,7 +47,7 @@ export default function VideoStudio({ articles, videos: initialVideos, today, we
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
-  function selectRecommended() {
+  function selectTopCandidates() {
     const max = mode === "daily_short" ? 3 : 6;
     setSelected(visibleArticles.slice(0, max).map((x) => x.id));
   }
@@ -73,7 +85,7 @@ export default function VideoStudio({ articles, videos: initialVideos, today, we
       <section className={styles.panel}>
         <div className={styles.panelHeading}>
           <div><span>STEP 1</span><h2>対象期間とニュースを選ぶ</h2></div>
-          <button className={styles.smallButton} onClick={selectRecommended}>上からおすすめ選択</button>
+          <button className={styles.smallButton} onClick={selectTopCandidates}>上から候補を選択</button>
         </div>
 
         <div className={styles.controls}>
