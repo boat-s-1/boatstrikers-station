@@ -23,6 +23,29 @@ function typeLabel(type) {
   return type === "weekly_news" ? "週間ヴィーナスNEWS" : "今日のショート";
 }
 
+function RenderTools({ video, onMessage }) {
+  const command = `npm run hatsune:render -- --id=${video.id} --speaker=STYLE_ID`;
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(command);
+      onMessage("ローカルMP4生成コマンドをコピーしました。STYLE_IDを初音のAivisSpeechスタイルIDへ置き換えてください。");
+    } catch {
+      onMessage(`コピーできませんでした：${command}`);
+    }
+  }
+  return (
+    <div className={styles.renderTools}>
+      <code>{command}</code>
+      <div>
+        <button type="button" className={styles.smallButton} onClick={copy}>コマンドをコピー</button>
+        <a className={styles.smallLink} href={`/api/admin/hatsune-news/video/render-manifest?id=${video.id}`} target="_blank" rel="noreferrer">制作JSON</a>
+      </div>
+      {video.rendered_at && <small>MP4生成済み：{datePart(video.rendered_at)} / {video.render_meta?.duration_seconds ? `${video.render_meta.duration_seconds}秒` : "完了"}</small>}
+      {video.render_error && <small className={styles.renderError}>レンダーエラー：{video.render_error}</small>}
+    </div>
+  );
+}
+
 export default function VideoStudio({ articles, videos: initialVideos, today, weekStart }) {
   const [mode, setMode] = useState("daily_short");
   const [targetDate, setTargetDate] = useState(today);
@@ -67,7 +90,7 @@ export default function VideoStudio({ articles, videos: initialVideos, today, we
       if (!response.ok || !payload.ok) throw new Error(payload.error || "生成に失敗しました。");
       setGenerated(payload.item);
       setVideos((prev) => [payload.item, ...prev]);
-      setMessage("AI台本を生成してDBへ保存しました。");
+      setMessage("AI台本を生成してDBへ保存しました。次は下のコマンドでAivisSpeech＋FFmpegのMP4を作れます。");
     } catch (error) {
       setMessage(`エラー：${error.message}`);
     } finally {
@@ -124,20 +147,25 @@ export default function VideoStudio({ articles, videos: initialVideos, today, we
 
       {generated && (
         <section className={styles.panel}>
-          <div className={styles.panelHeading}><div><span>GENERATED</span><h2>{generated.title}</h2></div><span className={styles.status}>{generated.status}</span></div>
+          <div className={styles.panelHeading}><div><span>STEP 2 / GENERATED</span><h2>{generated.title}</h2></div><span className={styles.status}>{generated.status}</span></div>
           <div className={styles.outputGrid}>
             <article><h3>読み上げ台本</h3><pre>{generated.script}</pre></article>
             <article><h3>YouTubeタイトル</h3><p>{generated.youtube_title}</p><h3>概要欄</h3><pre>{generated.youtube_description}</pre><h3>X投稿文</h3><p>{generated.x_text}</p></article>
           </div>
           <div className={styles.captionBox}><h3>字幕</h3><div>{(generated.caption_json || []).map((x, i) => <span key={i}>{x.text}</span>)}</div></div>
+          <RenderTools video={generated} onMessage={setMessage} />
         </section>
       )}
 
       <section className={styles.panel}>
-        <div className={styles.panelHeading}><div><span>HISTORY</span><h2>保存済み動画台本</h2></div><small>直近20件</small></div>
+        <div className={styles.panelHeading}><div><span>STEP 3 / HISTORY</span><h2>保存済み動画台本・MP4状態</h2></div><small>直近20件</small></div>
         <div className={styles.history}>
           {videos.length === 0 ? <div className={styles.empty}>まだ動画台本はありません。</div> : videos.map((video) => (
-            <article key={video.id}><div><strong>{video.title}</strong><span>{typeLabel(video.video_type)} ・ {video.target_date || `${video.period_start}〜${video.period_end}`}</span></div><span className={styles.status}>{video.status}</span></article>
+            <article key={video.id}>
+              <div><strong>{video.title}</strong><span>{typeLabel(video.video_type)} ・ {video.target_date || `${video.period_start}〜${video.period_end}`}</span></div>
+              <span className={styles.status}>{video.status}</span>
+              <RenderTools video={video} onMessage={setMessage} />
+            </article>
           ))}
         </div>
       </section>
