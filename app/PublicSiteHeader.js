@@ -79,17 +79,9 @@ const GROUPS = [
 ];
 
 function SocialButton({ item }) {
-  const className = `${styles.socialButton} ${styles[item.className]}`;
+  if (!item.href) return null;
 
-  if (!item.href) {
-    return (
-      <div className={`${className} ${styles.socialDisabled}`} aria-disabled="true">
-        <span className={styles.socialCircle}>{item.icon}</span>
-        <span>{item.label}</span>
-        <small>設定待ち</small>
-      </div>
-    );
-  }
+  const className = `${styles.socialButton} ${styles[item.className]}`;
 
   return (
     <a

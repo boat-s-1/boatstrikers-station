@@ -15,7 +15,6 @@ const programs = [
     description: "イン逃げ研究や今週の注目情報を、一果が整理してお届けします。",
     image: "/radio/ichika-program.jpeg",
   },
-  
   {
     name: "初音",
     title: "初音のボート・ナイト・ジャパン",
@@ -30,7 +29,6 @@ const programs = [
     description: "5号艇や高配当レースを中心に、穴狙いを振り返ります。",
     image: "/radio/kiina-program.jpeg",
   },
-  
 ];
 
 export const metadata = {
@@ -85,15 +83,7 @@ export default function RadioPage() {
               allowFullScreen
             />
           </div>
-        ) : (
-          <div className={styles.playerPlaceholder}>
-            <strong>過去の放送プレーヤー</strong>
-            <p>
-              Vercelの環境変数に再生リストIDを登録すると、ここに過去の放送が表示されます。
-            </p>
-            <code>NEXT_PUBLIC_RADIO_YOUTUBE_PLAYLIST_ID</code>
-          </div>
-        )}
+        ) : null}
 
         <a
           className={styles.youtubeButton}
