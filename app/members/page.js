@@ -5,14 +5,15 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import styles from "./members.module.css";
 
+const LINE_ADD_URL="https://lin.ee/Pf3FEEQ";
+const PLAN_LABELS={free:"FREE",beta_premium:"β PREMIUM",plus:"PLUS",premium:"PREMIUM"};
+
 function makeSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!key)return null;
   return createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 }
-
-const PLAN_LABELS={free:"FREE",beta_premium:"β PREMIUM",plus:"PLUS",premium:"PREMIUM"};
 
 export default function MembersPage(){
   const supabase=useMemo(()=>makeSupabase(),[]);
@@ -29,16 +30,24 @@ export default function MembersPage(){
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
   const [error,setError]=useState("");
+  const [lineCode,setLineCode]=useState("");
+  const [lineExpiresAt,setLineExpiresAt]=useState("");
+  const [lineBusy,setLineBusy]=useState(false);
+
+  async function loadProfile(userId){
+    if(!supabase||!userId)return null;
+    const {data,error:profileError}=await supabase.from("bs_member_profiles")
+      .select("user_id,email,display_name,plan,membership_status,beta_member,terms_accepted_at,privacy_accepted_at,line_user_id,line_linked_at,created_at")
+      .eq("user_id",userId).maybeSingle();
+    if(profileError){setError("会員情報を読み込めませんでした。");return null;}
+    setProfile(data||null);
+    if(data?.line_user_id){setLineCode("");setLineExpiresAt("");}
+    return data||null;
+  }
 
   useEffect(()=>{
     if(!supabase){setLoading(false);setError("会員機能の設定を確認しています。しばらくしてからお試しください。");return;}
     let alive=true;
-    const loadProfile=async userId=>{
-      const {data}=await supabase.from("bs_member_profiles")
-        .select("user_id,email,display_name,plan,membership_status,beta_member,terms_accepted_at,privacy_accepted_at,created_at")
-        .eq("user_id",userId).maybeSingle();
-      if(alive)setProfile(data||null);
-    };
     supabase.auth.getSession().then(async({data})=>{
       if(!alive)return;
       setSession(data.session||null);
@@ -56,6 +65,12 @@ export default function MembersPage(){
     return()=>{alive=false;subscription.unsubscribe();};
   },[supabase]);
 
+  useEffect(()=>{
+    if(!session||!lineCode||profile?.line_user_id)return;
+    const timer=setInterval(()=>loadProfile(session.user.id),4000);
+    return()=>clearInterval(timer);
+  },[session,lineCode,profile?.line_user_id]);
+
   async function submit(e){
     e.preventDefault();
     if(!supabase||busy)return;
@@ -70,7 +85,7 @@ export default function MembersPage(){
           options:{emailRedirectTo,data:{display_name:displayName.trim()||null,terms_accepted:true,privacy_accepted:true}}
         });
         if(signError)throw signError;
-        setMessage(data.session?"β会員登録が完了しました。PREMIUM機能を無料で利用できます。":"確認メールを送信しました。メール内のリンクを開くと登録完了です。");
+        setMessage(data.session?"β会員登録が完了しました。次に公式LINEを連携してください。":"確認メールを送信しました。メール内のリンクを開くと登録完了です。");
       }else{
         const {error:loginError}=await supabase.auth.signInWithPassword({email:email.trim(),password});
         if(loginError)throw loginError;
@@ -110,6 +125,26 @@ export default function MembersPage(){
     finally{setBusy(false);}
   }
 
+  async function issueLineCode(){
+    if(!session||lineBusy)return;
+    setLineBusy(true);setError("");setMessage("");
+    try{
+      const res=await fetch("/api/members/line-link-code",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});
+      const body=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(body?.error||"LINE連携コードを発行できませんでした。");
+      if(body.linked){await loadProfile(session.user.id);return;}
+      setLineCode(body.code||"");setLineExpiresAt(body.expiresAt||"");
+      setMessage("LINE連携コードを発行しました。公式LINEにこのコードをそのまま送信してください。");
+    }catch(err){setError(String(err?.message||"")||"LINE連携コードを発行できませんでした。");}
+    finally{setLineBusy(false);}
+  }
+
+  async function copyLineCode(){
+    if(!lineCode)return;
+    try{await navigator.clipboard.writeText(lineCode);setMessage("LINE連携コードをコピーしました。");}
+    catch{setError("コピーできませんでした。コードを長押ししてコピーしてください。");}
+  }
+
   async function withdraw(){
     if(!supabase||!session||busy)return;
     const ok=window.confirm("退会すると会員アカウントと会員プロフィールが削除され、元に戻せません。退会しますか？");
@@ -119,8 +154,7 @@ export default function MembersPage(){
       const res=await fetch("/api/members/delete",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});
       const body=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(body?.error||"退会処理に失敗しました。");
-      await supabase.auth.signOut();
-      setSession(null);setProfile(null);setMode("login");setMessage("退会手続きが完了しました。ご利用ありがとうございました。");
+      await supabase.auth.signOut();setSession(null);setProfile(null);setMode("login");setMessage("退会手続きが完了しました。ご利用ありがとうございました。");
     }catch(err){setError(String(err?.message||"")||"退会処理に失敗しました。");}
     finally{setBusy(false);}
   }
@@ -144,6 +178,7 @@ export default function MembersPage(){
   if(session){
     const plan=profile?.plan||"beta_premium";
     const emailVerified=Boolean(session.user.email_confirmed_at);
+    const lineLinked=Boolean(profile?.line_user_id);
     return <main className={styles.page}>
       <section className={styles.hero}><p>BOATSTRIKERS MEMBERS</p><h1>βメンバーズ</h1><span>2026年12月31日までPREMIUM機能を無料開放中。</span></section>
       <section className={styles.memberCard}>
@@ -151,11 +186,36 @@ export default function MembersPage(){
         <div className={styles.statusGrid}>
           <div><span>会員ステータス</span><strong>{profile?.membership_status==="active"?"有効":"確認中"}</strong></div>
           <div><span>メール確認</span><strong>{emailVerified?"確認済み":"未確認"}</strong></div>
-          <div><span>PREMIUM開放</span><strong>12/31まで無料</strong></div>
+          <div><span>LINE連携</span><strong>{lineLinked?"連携済み":"未連携"}</strong></div>
         </div>
         {error&&<div className={styles.error}>{error}</div>}{message&&<div className={styles.success}>{message}</div>}
         <div className={styles.actions}><Link className={styles.primaryButton} href="/races">本日の出走表へ</Link><Link className={styles.secondaryButton} href="/ai-results">AI成績を見る</Link><button type="button" onClick={logout}>ログアウト</button></div>
       </section>
+
+      <section className={`${styles.lineCard} ${lineLinked?styles.lineLinked:""}`}>
+        <div className={styles.lineHead}><div><span className={styles.kicker}>OFFICIAL LINE</span><h2>{lineLinked?"✅ 公式LINE連携済み":"公式LINEを会員アカウントに連携"}</h2></div><strong>{lineLinked?"CONNECTED":"3 STEPS"}</strong></div>
+        {lineLinked?<>
+          <p>BoatStrikers会員IDと公式LINEの紐づけが完了しています。今後、会員ステータスに応じた限定通知を受け取れるようにできます。</p>
+          {profile?.line_linked_at&&<small>連携日時：{new Date(profile.line_linked_at).toLocaleString("ja-JP")}</small>}
+        </>:<>
+          <p>サイトから登録した方は、次の3ステップでLINEを連携してください。LINEから登録した方も同じ手順で会員IDとの紐づけができます。</p>
+          <div className={styles.lineSteps}>
+            <div><b>1</b><span><strong>公式LINEを友だち追加</strong><small>すでに登録済みならそのまま次へ</small></span></div>
+            <div><b>2</b><span><strong>連携コードを発行</strong><small>コードの有効期限は30分です</small></span></div>
+            <div><b>3</b><span><strong>LINEにコードを送信</strong><small>自動で会員IDと紐づきます</small></span></div>
+          </div>
+          <div className={styles.lineActions}>
+            <a href={LINE_ADD_URL} target="_blank" rel="noreferrer" className={styles.lineButton}>LINEを友だち追加・開く</a>
+            <button type="button" onClick={issueLineCode} disabled={lineBusy}>{lineBusy?"発行中...":lineCode?"新しいコードを発行":"LINE連携コードを発行"}</button>
+          </div>
+          {lineCode&&<div className={styles.codeBox}>
+            <span>この文字を公式LINEに送信</span><strong>{lineCode}</strong>
+            <button type="button" onClick={copyLineCode}>コードをコピー</button>
+            <small>有効期限：{lineExpiresAt?new Date(lineExpiresAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}):"30分"} ／ 送信後、この画面は自動で「連携済み」に切り替わります。</small>
+          </div>}
+        </>}
+      </section>
+
       <section className={styles.note}><strong>アカウント管理</strong><p><Link href="/terms">利用規約</Link> ・ <Link href="/privacy">プライバシーポリシー</Link></p><p>退会するとログイン情報とBoatStrikers会員プロフィールが削除されます。この操作は取り消せません。</p><div className={styles.actions}><button type="button" onClick={withdraw} disabled={busy}>{busy?"処理中...":"退会する"}</button></div></section>
     </main>;
   }
@@ -178,7 +238,7 @@ export default function MembersPage(){
         {mode==="login"&&<div className={styles.helperRow}><button type="button" className={styles.textButton} onClick={()=>{setMode("forgot");setPassword("");setError("");setMessage("");}}>パスワードを忘れた方</button></div>}
         {error&&<div className={styles.error}>{error}</div>}{message&&<div className={styles.success}>{message}</div>}
         <button className={styles.submit} disabled={busy||(mode==="signup"&&!accepted)}>{busy?"処理中...":mode==="signup"?"同意して無料登録":"ログイン"}</button>
-        {mode==="signup"&&<small>登録時の利用規約・プライバシーポリシーへの同意日時を会員情報として記録します。</small>}
+        {mode==="signup"&&<small>登録後、会員ページから公式LINEを連携できます。登録時の利用規約・プライバシーポリシーへの同意日時を記録します。</small>}
       </form>}
     </section>
     <section className={styles.note}><strong>β期間について</strong><p>2026年12月31日まで全登録会員をβPREMIUMとして扱います。2027年以降に有料プランへ移行する場合は事前にご案内し、自動で課金が始まることはありません。</p><Link href="/membership">会員プランを見る →</Link></section>
