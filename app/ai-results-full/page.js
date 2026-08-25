@@ -34,10 +34,40 @@ function yen(v){return `${Math.round(Number(v||0)).toLocaleString("ja-JP")}円`;
 function signedYen(v){const n=Math.round(Number(v||0));return `${n>0?"+":""}${n.toLocaleString("ja-JP")}円`;}
 function percent(v){return `${Number(v||0).toLocaleString("ja-JP",{maximumFractionDigits:1})}%`;}
 function shortDate(v){const t=String(v||"");if(!/^\d{4}-\d{2}-\d{2}$/.test(t))return t;const[,m,d]=t.split("-");return `${Number(m)}/${Number(d)}`;}
+
+function expandTicket(ticket){
+  const parts=String(ticket||"").split("-");
+  if(parts.length!==3)return[];
+  const choices=parts.map(part=>{
+    if(part==="全")return[1,2,3,4,5,6];
+    const n=Number(part);
+    return Number.isInteger(n)&&n>=1&&n<=6?[n]:[];
+  });
+  if(choices.some(items=>items.length===0))return[];
+  const expanded=[];
+  for(const first of choices[0]){
+    for(const second of choices[1]){
+      for(const third of choices[2]){
+        if(new Set([first,second,third]).size!==3)continue;
+        expanded.push(`${first}-${second}-${third}`);
+      }
+    }
+  }
+  return[...new Set(expanded)];
+}
+
+function effectiveInvestment(row){
+  if(Array.isArray(row?.tickets)&&row.tickets.length){
+    const points=new Set(row.tickets.flatMap(expandTicket)).size;
+    if(points>0)return points*100;
+  }
+  return Number(row?.investment||0);
+}
+
 function summarize(rows){
   const records=Array.isArray(rows)?rows:[];
   const hits=records.filter(r=>Boolean(r.is_hit)).length;
-  const investment=records.reduce((s,r)=>s+Number(r.investment||0),0);
+  const investment=records.reduce((s,r)=>s+effectiveInvestment(r),0);
   const payout=records.reduce((s,r)=>s+Number(r.payout||0),0);
   const profit=payout-investment;
   const recoveryRate=investment>0?(payout/investment)*100:0;
