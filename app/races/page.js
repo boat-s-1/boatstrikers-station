@@ -2,46 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   getAvailableDates,
-  getCoursesByDate,
   getPublishedNoteFeaturesByDate,
   getAiBetHitFlashByDate,
   getAiPredictionPickupsByDate,
   getCourseName,
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
+import { getCoursesForRacesIndex } from "../lib/racesIndexLight";
 import styles from "./phase2.module.css";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import CoursePortalCard from "./components/CoursePortalCard";
-
-const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
-
-const COURSE_BACKGROUNDS = {
-  1: "/backgrounds/6B178DB8-C92E-46CC-82A5-5451D7AC5AA0.png",
-  2: "/backgrounds/FC5BE741-F73B-4256-9F44-6956FBD20E6F.png",
-  3: "/backgrounds/BD55BDF9-EE60-49A1-BFDA-5B95FF2BC85F.png",
-  4: "/backgrounds/62DFF1EC-DE56-4368-AD4F-68AD6494C97D.png",
-  5: "/backgrounds/C6329CF8-BADE-44E0-838F-BE5B8605DCFC.png",
-  6: "/backgrounds/C93356BF-1F30-495D-9CCB-9DA45FD6E73A.png",
-  7: "/backgrounds/E4607E75-9DB1-4FA5-A5E7-3E6A03B7C9FE.png",
-  8: "/backgrounds/F80FCF3E-7D13-410C-8574-84417C142816.png",
-  9: "/backgrounds/9F98462B-9AF6-4354-8F4C-4EE8DFEDACAE.png",
-  10: "/backgrounds/E988F9B9-C704-4918-AC70-810A6D7F7073.png",
-  11: "/backgrounds/5B9AE3A1-48BD-4C9C-803C-04BEB7012EC7.png",
-  12: "/backgrounds/758979BE-A279-47EB-B2C1-D43E16E976A5.png",
-  13: "/backgrounds/3E4DBBD8-8744-44C2-A78E-2701DDC4296E.png",
-  14: "/backgrounds/C60FE24E-A424-4BDA-878A-112A2D41898C.png",
-  15: "/backgrounds/0355DF1E-8167-4230-A3F6-BE5E2EC6E068.png",
-  16: "/backgrounds/01725F6C-7DC9-4343-8D00-9DA2F3604D27.png",
-  17: "/backgrounds/758979BE-A279-47EB-B2C1-D43E16E976A5.png",
-  18: "/backgrounds/17914489-7354-4382-AD50-D12D6440E32F.png",
-  19: "/backgrounds/F72FBD4C-991A-4127-92DB-007206E0D31F.png",
-  20: "/backgrounds/BD69613E-C153-49E8-AE37-BF338F87FA51.png",
-  21: "/backgrounds/41ED7181-4C61-4F30-BDE3-E95F79F088A8.png",
-  22: "/backgrounds/B8091B1D-0189-4915-9594-4428C5B93339.png",
-  23: "/backgrounds/6E5D6CA0-3A66-47EB-99BD-9936F92D422E.png",
-  24: "/backgrounds/B5B45305-8C2B-4F52-A7A0-41B0917E8156.png",
-};
-
 
 export const dynamic = "force-dynamic";
 
@@ -52,42 +22,6 @@ function getJstDateString() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
-}
-
-function getCourseStatus(course, raceDate) {
-  const today = getJstDateString();
-  const raceCount = Number(course.raceCount ?? 0);
-  const resultCount = Number(course.resultCount ?? 0);
-  const exhibitionCount = Number(course.exhibitionCount ?? 0);
-
-  if (raceDate < today || course.liveStatus === "finished") {
-    return { key: "finished", label: "結果確定", detail: `${resultCount}/${raceCount}R` };
-  }
-  if (raceDate > today) {
-    return { key: "scheduled", label: "開催前", detail: "出走表公開中" };
-  }
-  if (course.liveStatus === "live") {
-    return {
-      key: "live",
-      label: "LIVE",
-      detail: course.liveRaceNo ? `${course.liveRaceNo}R進行中` : `${resultCount}R終了`,
-    };
-  }
-  if (course.liveStatus === "exhibition") {
-    return { key: "exhibition", label: "展示中", detail: `${exhibitionCount}R公開` };
-  }
-  return { key: "scheduled", label: "出走表公開", detail: "開催前" };
-}
-
-function noteTimingLabel(value) {
-  const timing = String(value ?? "both").toLowerCase();
-  if (["previous_day", "previous", "before"].includes(timing)) return "前日版";
-  if (["after_exhibition", "live", "direct", "last_minute"].includes(timing)) return "直前版";
-  return "新聞公開中";
-}
-
-function yen(value) {
-  return `${Number(value ?? 0).toLocaleString("ja-JP")}円`;
 }
 
 function shortTime(value) {
@@ -133,7 +67,6 @@ function buildFallbackPickups(courses, raceDate) {
 
       const entries = Array.isArray(race.entries) ? race.entries : [];
       if (entries.length < 6) continue;
-
       const byBoat = new Map(entries.map((entry) => [Number(entry.boat_no), entry]));
       const one = byBoat.get(1);
       if (!one) continue;
@@ -144,29 +77,35 @@ function buildFallbackPickups(courses, raceDate) {
         const motor = safeNumber(entry?.motor_2_rate, 30);
         const boat = safeNumber(entry?.boat_2_rate, 30);
         const st = safeNumber(entry?.average_st, 0.18);
-        return national * 8 + local * 4 + motor * 0.45 + boat * 0.20 - st * 45;
+        return national * 8 + local * 4 + motor * 0.45 + boat * 0.2 - st * 45;
       };
 
       const onePower = rate(one);
-      const rivals = [2,3,4,5,6].map((n) => ({ boatNo:n, entry:byBoat.get(n) })).filter((x) => x.entry);
-      const rivalScores = rivals.map((x) => ({ ...x, score: rate(x.entry) })).sort((a,b) => b.score-a.score);
+      const rivals = [2, 3, 4, 5, 6]
+        .map((n) => ({ boatNo: n, entry: byBoat.get(n) }))
+        .filter((x) => x.entry);
+      const rivalScores = rivals
+        .map((x) => ({ ...x, score: rate(x.entry) }))
+        .sort((a, b) => b.score - a.score);
       const bestRival = rivalScores[0]?.score ?? onePower;
       const gap = onePower - bestRival;
-
       const oneEx = safeNumber(one.exhibition_time, 0);
       const exTimes = entries.map((e) => safeNumber(e.exhibition_time, 0)).filter((v) => v > 0);
       const bestEx = exTimes.length ? Math.min(...exTimes) : 0;
-      const exhibitionBonus = oneEx > 0 && bestEx > 0 ? clampScore((bestEx - oneEx + 0.08) * 80, -6, 6) : 0;
-
+      const exhibitionBonus = oneEx > 0 && bestEx > 0
+        ? clampScore((bestEx - oneEx + 0.08) * 80, -6, 6)
+        : 0;
       const insideExpectation = clampScore(66 + gap * 1.25 + exhibitionBonus, 45, 94);
-
       const outer = rivalScores.filter((x) => x.boatNo >= 3);
       const outerBest = outer[0];
       const outerGap = (outerBest?.score ?? bestRival) - onePower;
-      const holeExpectation = clampScore(55 + outerGap * 1.15 + (insideExpectation < 62 ? 8 : 0), 38, 91);
+      const holeExpectation = clampScore(
+        55 + outerGap * 1.15 + (insideExpectation < 62 ? 8 : 0),
+        38,
+        91
+      );
       const dangerScore = clampScore(100 - insideExpectation + Math.max(0, outerGap * 1.1), 20, 92);
-      const totalScore = clampScore((insideExpectation + (100-dangerScore)) / 2, 45, 92);
-
+      const totalScore = clampScore((insideExpectation + (100 - dangerScore)) / 2, 45, 92);
       const second = rivalScores[0]?.boatNo ?? 2;
       const third = rivalScores.find((x) => x.boatNo !== second)?.boatNo ?? 3;
       const holeHead = outerBest?.boatNo ?? 5;
@@ -184,8 +123,8 @@ function buildFallbackPickups(courses, raceDate) {
         hole_expectation: holeExpectation,
         danger_score: dangerScore,
         total_score: totalScore,
-        diagnosis_code: 'fallback',
-        diagnosis_label: insideExpectation >= 72 ? 'イン有力' : holeExpectation >= 67 ? '穴期待' : 'データ注目',
+        diagnosis_code: "fallback",
+        diagnosis_label: insideExpectation >= 72 ? "イン有力" : holeExpectation >= 67 ? "穴期待" : "データ注目",
         tickets: insideExpectation >= holeExpectation
           ? [`1-${second}-${third}`, `1-${third}-${second}`]
           : [`${holeHead}-1-${second}`, `${holeHead}-${second}-1`],
@@ -193,7 +132,6 @@ function buildFallbackPickups(courses, raceDate) {
       });
     }
   }
-
   return candidates;
 }
 
@@ -208,6 +146,10 @@ function formatQuickDate(value) {
   } catch {
     return String(value || "").slice(5).replace("-", "/");
   }
+}
+
+function yen(value) {
+  return `${Number(value ?? 0).toLocaleString("ja-JP")}円`;
 }
 
 export const metadata = {
@@ -229,7 +171,7 @@ export default async function RacesPage({ searchParams }) {
 
   try {
     [courses, dates, newspapers, hitFlash, aiPickups] = await Promise.all([
-      getCoursesByDate(raceDate),
+      getCoursesForRacesIndex(raceDate),
       getAvailableDates(),
       getPublishedNoteFeaturesByDate(raceDate, false),
       getAiBetHitFlashByDate(raceDate, 6),
@@ -246,7 +188,6 @@ export default async function RacesPage({ searchParams }) {
     return map;
   }, new Map());
 
-  // 開催一覧から「まだ買えるレース」だけをAI注目候補として許可します。
   const raceMetaByKey = new Map();
   for (const course of courses) {
     for (const race of course.races ?? []) {
@@ -274,20 +215,17 @@ export default async function RacesPage({ searchParams }) {
     .filter(Boolean)
     .filter((item) => item.diagnosis_code !== "skip");
 
-  // AI診断VIEWがまだ生成されていない日でも空欄にしないため、
-  // 出走表の選手・モーター・展示データから簡易候補を補完します。
   const fallbackPickups = buildFallbackPickups(courses, raceDate);
   const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
 
   let insidePickups = pickupPool
-    .filter((item) =>
-      ["イン鉄板", "イン有力"].includes(item.diagnosis_label) ||
-      Number(item.inside_expectation ?? 0) >= 70
+    .filter(
+      (item) =>
+        ["イン鉄板", "イン有力"].includes(item.diagnosis_label) ||
+        Number(item.inside_expectation ?? 0) >= 70
     )
     .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
     .slice(0, 6);
-
-  // 閾値未満でも、その日の締切前候補から上位3件は表示します。
   if (insidePickups.length === 0) {
     insidePickups = pickupPool
       .slice()
@@ -295,19 +233,16 @@ export default async function RacesPage({ searchParams }) {
       .slice(0, 3);
   }
 
-  const insideKeys = new Set(insidePickups.map((item) => `${item.courseCode}:${item.raceNo}`));
   let holePickups = pickupPool
-    .filter((item) =>
-      ["穴期待", "5アタマ警戒"].includes(item.diagnosis_label) ||
-      Number(item.hole_expectation ?? 0) >= 65
+    .filter(
+      (item) =>
+        ["穴期待", "波乱警戒"].includes(item.diagnosis_label) ||
+        Number(item.hole_expectation ?? 0) >= 67
     )
-    .filter((item) => !insideKeys.has(`${item.courseCode}:${item.raceNo}`))
     .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
     .slice(0, 6);
-
   if (holePickups.length === 0) {
     holePickups = pickupPool
-      .filter((item) => !insideKeys.has(`${item.courseCode}:${item.raceNo}`))
       .slice()
       .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
       .slice(0, 3);
@@ -328,83 +263,51 @@ export default async function RacesPage({ searchParams }) {
 
       <nav className={styles.portalQuickNav} aria-label="出走表トップメニュー">
         <a href="#race-dates">
-          <span className={styles.portalQuickIcon} aria-hidden="true">📅</span>
+          <span className={styles.portalQuickIcon}>📅</span>
           <span className={styles.portalQuickText}><small>日付</small><strong>{formatQuickDate(raceDate)}</strong></span>
         </a>
         <a href="#todays-courses">
-          <span className={styles.portalQuickIcon} aria-hidden="true">🚤</span>
+          <span className={styles.portalQuickIcon}>🚤</span>
           <span className={styles.portalQuickText}><small>本日の開催場</small><strong>{courses.length}場</strong></span>
         </a>
         <a href="#daily-newspaper">
-          <span className={styles.portalQuickIcon} aria-hidden="true">📰</span>
+          <span className={styles.portalQuickIcon}>📰</span>
           <span className={styles.portalQuickText}><small>新聞</small><strong>{newspapers.length}件</strong></span>
         </a>
       </nav>
 
       <div className={styles.portalContent}>
-        {dates.length > 0 && (
-          <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
-            {dates.map((date) => (
-              <Link
-                key={date}
-                href={`/races?date=${date}`}
-                className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}
-              >
-                {date.slice(5).replace("-", "/")}
-              </Link>
-            ))}
-          </nav>
-        )}
+        <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
+          {dates.map((date) => (
+            <Link
+              key={date}
+              href={`/races?date=${date}`}
+              className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}
+            >
+              {String(date).slice(5).replace("-", "/")}
+            </Link>
+          ))}
+        </nav>
 
-
-<div className={styles.portalSection}>
-  <Image
-    src="/S__22142979.jpg"
-    alt="只今、開発中"
-    className={styles.developingBannerImage}
-  />
-</div>
-
+        <div className={styles.portalSection}>
+          <Image src="/S__22142979.jpg" alt="只今、開発中" className={styles.developingBannerImage} width={1536} height={360} />
+        </div>
 
         <section id="daily-newspaper" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
             <div><span>DAILY NEWSPAPER</span><h2>📰 今日公開の新聞</h2></div>
             <b>{newspapers.length}件公開</b>
           </div>
-
-          {newspapers.length > 0 ? (
-            <div className={styles.newspaperRail}>
-              {newspapers.map((item) => {
-                const code = String(item.course_code).padStart(2, "0");
-                const raceHref = `/races/${code}/${item.race_no}?date=${raceDate}`;
-                const external = Boolean(item.note_url);
-                return (
-                  <article key={item.id ?? `${item.course_code}-${item.race_no}-${item.sort_order}`} className={styles.newspaperCard}>
-                    <div className={styles.newspaperTop}>
-                      <span>{item.character_name || "BoatStrikers"}</span>
-                      <b>{noteTimingLabel(item.target_timing)}</b>
-                    </div>
-                    <div className={styles.newspaperRace}>
-                      <small>本日の注目レース</small>
-                      <strong>{getCourseName(item.course_code)} {item.race_no}R</strong>
-                    </div>
-                    <h3>{item.feature_title || "今日の予想新聞を公開中"}</h3>
-                    <p>{item.teaser_text || "展開・評価・買い目の詳しい解説を公開しています。"}</p>
-                    <div className={styles.newspaperActions}>
-                      <Link href={raceHref}>出走表を見る</Link>
-                      {external && (
-                        <a href={item.note_url} target="_blank" rel="noreferrer">
-                          {item.cta_label || "noteで読む"} ↗
-                        </a>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+          {newspapers.length === 0 ? (
+            <div className={styles.portalEmpty}><span>📰</span><strong>本日の新聞は準備中です</strong><p>公開されると、ここに自動で表示されます。</p></div>
           ) : (
-            <div className={styles.portalEmpty}>
-              <span>📰</span><strong>本日の新聞は準備中です</strong><p>公開されると、ここに自動で表示されます。</p>
+            <div className={styles.hitFlashList}>
+              {newspapers.slice(0, 6).map((item) => (
+                <Link key={item.id ?? `${item.course_code}-${item.race_no}-${item.title}`} href={item.url ?? `/races/${String(item.course_code).padStart(2, "0")}/${item.race_no}?date=${raceDate}`} className={styles.hitFlashCard}>
+                  <div className={styles.hitFlashIcon}>新聞</div>
+                  <div className={styles.hitFlashMain}><span>公開中</span><strong>{item.title ?? `${getCourseName(item.course_code)} ${item.race_no}R`}</strong></div>
+                </Link>
+              ))}
             </div>
           )}
         </section>
@@ -414,141 +317,86 @@ export default async function RacesPage({ searchParams }) {
             <div><span>TODAY&apos;S COURSES</span><h2>🚤 本日の開催場</h2></div>
             <b>{courses.length}場</b>
           </div>
-
           {loadError ? (
-            <div className={styles.portalEmpty}><span>⚠️</span><strong>データを取得できませんでした</strong><p>{loadError}</p></div>
-          ) : courses.length === 0 ? (
-            <div className={styles.portalEmpty}><span>🚤</span><strong>この日の開催データはありません</strong><p>上の日付から同期済みの日を選択してください。</p></div>
+            <div className={styles.portalEmpty}><strong>データを取得できませんでした</strong><p>{loadError}</p></div>
           ) : (
             <div className={styles.compactCourseGrid}>
-              {courses.map((course) => {
-                const numericCode = Number(course.courseCode);
-                const code = String(numericCode).padStart(2, "0");
-                const noteCount = noteCountByCourse.get(numericCode) ?? 0;
-                const background = COURSE_BACKGROUNDS[numericCode] ?? "/IMG_6460.jpeg";
-                return (
-                  <CoursePortalCard
-                    key={numericCode}
-                    course={course}
-                    raceDate={raceDate}
-                    background={background}
-                    noteCount={noteCount}
-                  />
-                );
-              })}
+              {courses.map((course) => (
+                <CoursePortalCard
+                  key={course.courseCode}
+                  course={course}
+                  raceDate={raceDate}
+                  noteCount={noteCountByCourse.get(Number(course.courseCode)) ?? 0}
+                />
+              ))}
             </div>
           )}
         </section>
 
         <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
           <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerInside}`}>
-            <div><span>AI PICKUP</span><h2>🍎 イン逃げ鉄板レース</h2></div>
-            <b>イン期待度 上位</b>
+            <div><span>AI PICKUP</span><h2>🍎 イン逃げ鉄板レース</h2></div><b>イン期待度 上位</b>
           </div>
-
-          {insidePickups.length > 0 ? (
-            <div className={styles.aiPickupRail}>
-              {insidePickups.map((item, index) => {
-                const code = String(item.courseCode).padStart(2, "0");
-                const tickets = pickupTickets(item.tickets);
-                return (
-                  <Link
-                    key={`inside-${item.id ?? `${code}-${item.raceNo}`}`}
-                    href={`/races/${code}/${item.raceNo}?date=${raceDate}`}
-                    className={`${styles.aiPickupCard} ${styles.aiPickupCardInside}`}
-                  >
-                    <div className={styles.aiPickupRank}>#{index + 1}</div>
-                    <div className={styles.aiPickupCardHead}>
-                      <div><small>イン逃げ鉄板</small><strong>{item.courseName} {item.raceNo}R</strong></div>
-                      <span>締切 {shortTime(item.closingTime)}</span>
-                    </div>
-                    <div className={styles.aiPickupScoreRow}>
-                      <div><small>イン期待度</small><strong>{scoreText(item.inside_expectation)}</strong></div>
-                      <div><small>AI総合</small><strong>{scoreText(item.total_score)}</strong></div>
-                    </div>
-                    <div className={styles.aiPickupMeter}><span style={{ width: `${Math.max(4, Math.min(100, Number(item.inside_expectation ?? 0)))}%` }} /></div>
-                    <div className={styles.aiPickupBottom}>
-                      <span>{item.diagnosis_label || "イン有力"}</span>
-                      <b>{tickets.length ? tickets.join(" / ") : "予想を見る"}</b>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.aiPickupEmpty}>現在、締切前のイン逃げ鉄板候補はありません。</div>
-          )}
+          <div className={styles.aiPickupRail}>
+            {insidePickups.map((item, index) => {
+              const code = String(item.courseCode ?? item.stadium_code).padStart(2, "0");
+              const raceNo = Number(item.raceNo ?? item.race_no);
+              const tickets = pickupTickets(item.tickets);
+              return (
+                <Link key={`inside-${item.id ?? `${code}-${raceNo}-${index}`}`} href={`/races/${code}/${raceNo}?date=${raceDate}`} className={`${styles.aiPickupCard} ${styles.aiPickupCardInside}`}>
+                  <div className={styles.aiPickupRank}>#{index + 1}</div>
+                  <div className={styles.aiPickupCardHead}><div><small>{item.diagnosis_label ?? "イン狙い"}</small><strong>{item.courseName ?? getCourseName(code)} {raceNo}R</strong></div><span>締切 {shortTime(item.closingTime ?? item.closing_time)}</span></div>
+                  <div className={styles.aiPickupScoreRow}><div><small>イン期待度</small><strong>{scoreText(item.inside_expectation)}</strong></div><div><small>AI総合</small><strong>{scoreText(item.total_score)}</strong></div></div>
+                  <div className={styles.aiPickupMeter}><span style={{ width: scoreText(item.inside_expectation) }} /></div>
+                  <div className={styles.aiPickupBottom}><span>{item.diagnosis_label ?? "注目"}</span><b>{tickets.join(" / ") || "詳細を見る"}</b></div>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
         <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
           <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerHole}`}>
-            <div><span>AI PICKUP</span><h2>🔥 穴狙いレース</h2></div>
-            <b>穴期待度 上位</b>
+            <div><span>AI PICKUP</span><h2>🔥 穴狙いレース</h2></div><b>穴期待度 上位</b>
           </div>
-
-          {holePickups.length > 0 ? (
-            <div className={styles.aiPickupRail}>
-              {holePickups.map((item, index) => {
-                const code = String(item.courseCode).padStart(2, "0");
-                const tickets = pickupTickets(item.tickets);
-                return (
-                  <Link
-                    key={`hole-${item.id ?? `${code}-${item.raceNo}`}`}
-                    href={`/races/${code}/${item.raceNo}?date=${raceDate}`}
-                    className={`${styles.aiPickupCard} ${styles.aiPickupCardHole}`}
-                  >
-                    <div className={styles.aiPickupRank}>#{index + 1}</div>
-                    <div className={styles.aiPickupCardHead}>
-                      <div><small>穴狙い</small><strong>{item.courseName} {item.raceNo}R</strong></div>
-                      <span>締切 {shortTime(item.closingTime)}</span>
-                    </div>
-                    <div className={styles.aiPickupScoreRow}>
-                      <div><small>穴期待度</small><strong>{scoreText(item.hole_expectation)}</strong></div>
-                      <div><small>波乱警戒</small><strong>{scoreText(item.danger_score)}</strong></div>
-                    </div>
-                    <div className={styles.aiPickupMeter}><span style={{ width: `${Math.max(4, Math.min(100, Number(item.hole_expectation ?? 0)))}%` }} /></div>
-                    <div className={styles.aiPickupBottom}>
-                      <span>{item.diagnosis_label || "穴期待"}</span>
-                      <b>{tickets.length ? tickets.join(" / ") : "予想を見る"}</b>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.aiPickupEmpty}>現在、締切前の穴狙い候補はありません。</div>
-          )}
+          <div className={styles.aiPickupRail}>
+            {holePickups.map((item, index) => {
+              const code = String(item.courseCode ?? item.stadium_code).padStart(2, "0");
+              const raceNo = Number(item.raceNo ?? item.race_no);
+              const tickets = pickupTickets(item.tickets);
+              return (
+                <Link key={`hole-${item.id ?? `${code}-${raceNo}-${index}`}`} href={`/races/${code}/${raceNo}?date=${raceDate}`} className={`${styles.aiPickupCard} ${styles.aiPickupCardHole}`}>
+                  <div className={styles.aiPickupRank}>#{index + 1}</div>
+                  <div className={styles.aiPickupCardHead}><div><small>穴狙い</small><strong>{item.courseName ?? getCourseName(code)} {raceNo}R</strong></div><span>締切 {shortTime(item.closingTime ?? item.closing_time)}</span></div>
+                  <div className={styles.aiPickupScoreRow}><div><small>穴期待度</small><strong>{scoreText(item.hole_expectation)}</strong></div><div><small>波乱警戒</small><strong>{scoreText(item.danger_score)}</strong></div></div>
+                  <div className={styles.aiPickupMeter}><span style={{ width: scoreText(item.hole_expectation) }} /></div>
+                  <div className={styles.aiPickupBottom}><span>{item.diagnosis_label ?? "穴期待"}</span><b>{tickets.join(" / ") || "詳細を見る"}</b></div>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
         <section className={styles.portalSection}>
           <div className={styles.portalSectionHead}>
-            <div><span>HIT FLASH</span><h2>🎯 的中速報</h2></div>
-            <Link href="/ai-results">成績を見る →</Link>
+            <div><span>HIT FLASH</span><h2>🎯 的中速報</h2></div><Link href="/ai-results">成績を見る →</Link>
           </div>
-
-          {hitFlash.length > 0 ? (
-            <div className={styles.hitFlashList}>
-              {hitFlash.map((item) => {
-                const code = String(item.course_code).padStart(2, "0");
-                return (
-                  <Link key={item.id ?? `${item.course_code}-${item.race_no}-${item.mode_key}`} href={`/races/${code}/${item.race_no}?date=${raceDate}`} className={styles.hitFlashCard}>
-                    <div className={styles.hitFlashIcon}>的中</div>
-                    <div className={styles.hitFlashMain}>
-                      <span>{item.mode_name || "AI予想"}</span>
-                      <strong>{getCourseName(item.course_code)} {item.race_no}R</strong>
-                      <small>{item.hit_ticket || item.result_combination}</small>
-                    </div>
-                    <div className={styles.hitFlashMoney}><small>払戻</small><strong>{yen(item.payout)}</strong></div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.portalEmpty}><span>🎯</span><strong>的中結果を集計中です</strong><p>結果確定後、AIの的中速報を表示します。</p></div>
-          )}
+          <div className={styles.hitFlashList}>
+            {hitFlash.map((item, index) => {
+              const code = String(item.course_code ?? item.stadium_code ?? "").padStart(2, "0");
+              const raceNo = Number(item.race_no ?? item.raceNo);
+              return (
+                <Link key={item.id ?? `${code}-${raceNo}-${index}`} className={styles.hitFlashCard} href={`/races/${code}/${raceNo}?date=${raceDate}`}>
+                  <div className={styles.hitFlashIcon}>的中</div>
+                  <div className={styles.hitFlashMain}><span>{item.label ?? item.prediction_type ?? "的中"}</span><strong>{getCourseName(code)} {raceNo}R</strong><small>{item.ticket ?? item.bet ?? ""}</small></div>
+                  <div className={styles.hitFlashMoney}><small>払戻</small><strong>{yen(item.payout ?? item.payout_yen ?? 0)}</strong></div>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
-        <RealtimeUpdates target="races" limit={5} />
+        <RealtimeUpdates compact />
       </div>
     </main>
   );
