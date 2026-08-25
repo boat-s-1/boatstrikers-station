@@ -13,6 +13,7 @@ import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
 import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
 import HomeCompactRealtime from "./components/HomeCompactRealtime";
 import RaceHitFlashDeduper from "./components/RaceHitFlashDeduper";
+import BetaMemberPlacementBanner from "./components/BetaMemberPlacementBanner";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
       <body>
         <PublicSiteHeader />
         {children}
+        <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
         <CharacterShortsShelf />
         <IchikaBackgroundOnly />
