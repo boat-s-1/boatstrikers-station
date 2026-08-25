@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const SETTLEMENT_LOGIC_VERSION = "expand-all-v2";
 const TIMINGS = ["previous_day", "after_exhibition"];
 const MODE_META = {
   oni: "鬼絞り",
@@ -190,15 +191,14 @@ async function settleDate(supabase, date) {
 export async function GET() {
   try {
     const supabase = getClient();
-    // 過去7日分を毎回再精算して、前日版の取りこぼしや投資額ロジック変更も自動補正します。
     const dates = Array.from({ length: 7 }, (_, index) => jstDateOffset(-index));
     const results = [];
     for (const date of dates) results.push(await settleDate(supabase, date));
-    return NextResponse.json({ ok: true, timings: TIMINGS, results });
+    return NextResponse.json({ ok: true, version: SETTLEMENT_LOGIC_VERSION, timings: TIMINGS, results });
   } catch (error) {
     console.error("AI bet settlement failed", error);
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      { ok: false, version: SETTLEMENT_LOGIC_VERSION, error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
