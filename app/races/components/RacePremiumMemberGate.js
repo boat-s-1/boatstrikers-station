@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const LOCKED_LABELS = new Set(["BS展示", "直前版", "直前買い目"]);
+const BANNER = "/beta-membership-banner.webp";
 
 export default function RacePremiumMemberGate({ premiumAccess = false }) {
   const [open, setOpen] = useState(false);
@@ -64,64 +65,37 @@ export default function RacePremiumMemberGate({ premiumAccess = false }) {
   if (premiumAccess || !open) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="BoatStrikers β会員限定"
-      onClick={() => setOpen(false)}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 10000,
-        display: "grid",
-        placeItems: "center",
-        padding: "20px",
-        background: "rgba(10, 24, 42, .64)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
-      <section
-        onClick={(event) => event.stopPropagation()}
-        style={{
-          width: "min(92vw, 470px)",
-          padding: "28px 22px 22px",
-          borderRadius: "24px",
-          background: "#fff",
-          color: "#172a41",
-          boxShadow: "0 24px 70px rgba(0,0,0,.28)",
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: "38px", lineHeight: 1 }}>🔒</div>
-        <span style={{ display: "block", marginTop: "12px", color: "#1671c9", fontSize: "11px", fontWeight: 900, letterSpacing: ".13em" }}>
-          BOATSTRIKERS β PREMIUM
-        </span>
-        <h2 style={{ margin: "8px 0 10px", fontSize: "25px" }}>{feature}は会員限定です</h2>
-        <p style={{ margin: 0, color: "#61738a", fontSize: "13px", fontWeight: 700, lineHeight: 1.8 }}>
-          2026年12月31日まで、β会員はPREMIUM機能を無料で利用できます。
-        </p>
-
-        <div style={{ display: "grid", gap: "9px", marginTop: "20px" }}>
-          <Link
-            href="/members"
-            style={{ padding: "14px 16px", borderRadius: "14px", background: "linear-gradient(135deg,#168be1,#1260b6)", color: "#fff", textDecoration: "none", fontWeight: 900 }}
-          >
-            無料でβ会員登録
-          </Link>
-          <Link
-            href="/members"
-            style={{ padding: "13px 16px", borderRadius: "14px", background: "#eef5fb", color: "#1f5f98", textDecoration: "none", fontWeight: 900 }}
-          >
-            すでに会員の方はログイン
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            style={{ border: 0, background: "transparent", color: "#7a8999", padding: "8px", fontWeight: 800 }}
-          >
-            閉じる
-          </button>
+    <div className="gateBackdrop" role="dialog" aria-modal="true" aria-label="BoatStrikers β会員限定" onClick={() => setOpen(false)}>
+      <section className="gateCard" onClick={(event) => event.stopPropagation()}>
+        <img src={BANNER} alt="BoatStrikers β MEMBERSHIP" className="gateImage" />
+        <div className="featureBadge">🔒 {feature} は会員限定</div>
+        <button className="closeButton" type="button" onClick={() => setOpen(false)} aria-label="閉じる">×</button>
+        <div className="gateActions">
+          <Link href="/members" className="signupButton">無料で会員登録 →</Link>
+          <Link href="/members?mode=login" className="loginButton">ログイン</Link>
         </div>
+
+        <style jsx>{`
+          .gateBackdrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px;background:rgba(7,19,43,.68);backdrop-filter:blur(8px)}
+          .gateCard{position:relative;width:min(94vw,680px);overflow:hidden;border-radius:24px;box-shadow:0 26px 80px rgba(0,0,0,.34);background:#0a2f88}
+          .gateImage{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
+          .featureBadge{position:absolute;left:50%;top:4.5%;transform:translateX(-50%);z-index:4;padding:9px 15px;border-radius:999px;background:rgba(7,33,104,.86);border:1px solid rgba(255,255,255,.72);box-shadow:0 5px 16px rgba(0,0,0,.2);color:#fff;font-size:clamp(12px,2.3vw,17px);font-weight:1000;white-space:nowrap;backdrop-filter:blur(8px)}
+          .closeButton{position:absolute;right:10px;top:10px;z-index:5;width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,22,75,.55);color:#fff;font-size:25px;line-height:1;cursor:pointer;backdrop-filter:blur(8px)}
+          .gateActions{position:absolute;left:4.5%;right:4.5%;bottom:6.2%;z-index:4;display:flex;align-items:center;gap:2.2%}
+          .gateActions :global(a){display:inline-flex;align-items:center;justify-content:center;height:clamp(48px,8vw,72px);border-radius:clamp(14px,2.2vw,22px);font-size:clamp(14px,2.4vw,22px);font-weight:1000;text-decoration:none;box-sizing:border-box;box-shadow:0 8px 20px rgba(0,24,92,.2);white-space:nowrap}
+          .signupButton{flex:1 1 65%;background:#fff;color:#083f9e;padding:0 14px}
+          .loginButton{flex:0 0 30%;background:rgba(91,82,232,.5);color:#fff;border:2px solid rgba(255,255,255,.92);backdrop-filter:blur(7px)}
+          .gateActions :global(a:focus-visible){outline:4px solid #fff;outline-offset:-4px;box-shadow:0 0 0 6px #0a58ca}
+          @media(max-width:520px){
+            .gateBackdrop{padding:12px}
+            .gateCard{width:min(96vw,680px);border-radius:20px}
+            .featureBadge{top:3.5%;padding:7px 11px;font-size:11px}
+            .closeButton{width:32px;height:32px;font-size:22px}
+            .gateActions{left:5%;right:5%;bottom:6.1%;gap:2.4%}
+            .gateActions :global(a){height:44px;border-radius:14px;font-size:12px}
+            .loginButton{flex-basis:29%}
+          }
+        `}</style>
       </section>
     </div>
   );
