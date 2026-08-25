@@ -55,6 +55,7 @@ export default async function HatsuneNewsStatusPage() {
           </div>
           <div className={styles.actions}>
             <Link href="/admin" className={styles.secondary}>管理TOP</Link>
+            <Link href="/admin/hatsune-news/video" className={styles.secondary}>ヴィーナスNEWS制作</Link>
             <Link href="/hatsune/news" className={styles.primary}>初音NEWSを見る</Link>
           </div>
         </header>
