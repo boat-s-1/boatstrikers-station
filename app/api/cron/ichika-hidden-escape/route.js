@@ -1,9 +1,12 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+const SUPABASE_CRON_TOKEN_SHA256 = "3247241c1042d3af555359797283b8b4e1c168a176f73fa5215da4e055ab787b";
 
 function getSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,7 +17,11 @@ function getSupabase(){
 
 function authorized(request){
   const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  if(secret&&request.headers.get("authorization")===`Bearer ${secret}`)return true;
+  const token=request.headers.get("x-supabase-cron-token")||"";
+  if(!token)return false;
+  const digest=crypto.createHash("sha256").update(token).digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(digest),Buffer.from(SUPABASE_CRON_TOKEN_SHA256));
 }
 
 function jstToday(){
