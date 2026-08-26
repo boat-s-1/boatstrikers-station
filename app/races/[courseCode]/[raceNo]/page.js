@@ -16,6 +16,46 @@ import styles from "../../phase2.module.css";
 
 export const dynamic = "force-dynamic";
 
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== "";
+}
+
+function preferRealtimeExhibition(entry) {
+  if (!entry || typeof entry !== "object") return entry;
+
+  const exhibitionTime = hasValue(entry.official_exhibition_time)
+    ? entry.official_exhibition_time
+    : entry.exhibition_time;
+  const lapTime = hasValue(entry.official_lap)
+    ? entry.official_lap
+    : entry.lap_time;
+  const turnTime = hasValue(entry.official_turn)
+    ? entry.official_turn
+    : entry.turn_time;
+  const straightTime = hasValue(entry.official_straight)
+    ? entry.official_straight
+    : entry.straight_time;
+
+  return {
+    ...entry,
+    exhibition_time: exhibitionTime,
+    lap_time: lapTime,
+    turn_time: turnTime,
+    straight_time: straightTime,
+    exhibition_source:
+      entry.official_exhibition_source ||
+      entry.exhibition_source ||
+      entry.data_source ||
+      null,
+    exhibition_synced_at:
+      entry.official_exhibition_synced_at ||
+      entry.exhibition_synced_at ||
+      entry.api_synced_at ||
+      entry.synced_at ||
+      null,
+  };
+}
+
 async function getPremiumAccess(){
   try{
     const cookieStore=await cookies();
@@ -65,6 +105,10 @@ export default async function RaceDetailPage({
         : "出走表の読み込みに失敗しました。";
   }
 
+  const displayEntries = Array.isArray(data?.entries)
+    ? data.entries.map(preferRealtimeExhibition)
+    : [];
+
   const courseName = getCourseName(courseCode);
   const paddedCourseCode = String(courseCode).padStart(
     2,
@@ -94,8 +138,7 @@ export default async function RaceDetailPage({
             {loadError}
           </div>
         ) : !data?.event ||
-          !Array.isArray(data?.entries) ||
-          data.entries.length === 0 ? (
+          displayEntries.length === 0 ? (
           <div className={styles.messageCard}>
             このレースの出走表はありません。
           </div>
@@ -103,7 +146,7 @@ export default async function RaceDetailPage({
           <>
             <RaceDetailTabs
               event={data.event}
-              entries={data.entries}
+              entries={displayEntries}
               venueBaselines={data.venueBaselines}
               previousPrediction={
                 data.previousPrediction
