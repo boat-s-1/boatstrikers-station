@@ -129,8 +129,8 @@ export default function ExhibitionAlertsPage() {
         <div style={{ display: "flex", gap: 16, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".12em", color: "#567" }}>BOATSTRIKERS ALERT</div>
-            <h1 style={{ margin: "6px 0 8px", fontSize: 30 }}>🚨 4号艇ダブル上位アラート</h1>
-            <p style={{ margin: 0, color: "#617184" }}>展示タイム2位以内 × 直線タイム2位以内。履歴・実績も自動集計します。</p>
+            <h1 style={{ margin: "6px 0 8px", fontSize: 30 }}>🚨 4→5展開理論</h1>
+            <p style={{ margin: 0, color: "#617184" }}>キイナの狙い目を通知します。履歴・実績も自動集計します。</p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button onClick={() => setSoundOn((v) => !v)} style={{ padding: "11px 14px", borderRadius: 12, border: "1px solid #ccd7e2", background: "#fff", fontWeight: 800 }}>
