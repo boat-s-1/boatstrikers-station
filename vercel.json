@@ -2,10 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "path": "/api/cron/ichika-hidden-escape",
-      "schedule": "*/5 * * * *"
-    },
-    {
       "path": "/api/cron/hatsune-news-pipeline",
       "schedule": "20 13 * * *"
     },
