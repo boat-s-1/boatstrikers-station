@@ -7,6 +7,14 @@ import styles from "./members.module.css";
 
 const LINE_ADD_URL="https://lin.ee/Pf3FEEQ";
 const PLAN_LABELS={free:"FREE",beta_premium:"β PREMIUM",plus:"PLUS",premium:"PREMIUM"};
+const DEFAULT_PREFS={boat4_double_top:true,ichika_escape:false,hatsune_venus:false,kiina_boat5:false,triple_match:false};
+const NOTIFICATIONS=[
+  {key:"boat4_double_top",icon:"🚨",title:"4号艇ダブル上位",text:"4号艇が展示2位以内＋直線2位以内で成立したレース",active:true},
+  {key:"ichika_escape",icon:"🏁",title:"一果・イン逃げ注目",text:"イン逃げ期待度が高いレースの通知",active:false},
+  {key:"hatsune_venus",icon:"🌸",title:"初音・女子戦激アツ",text:"女子戦で注目条件が成立したレース",active:false},
+  {key:"kiina_boat5",icon:"💥",title:"キイナ・5号艇頭チャンス",text:"5号艇頭を狙える穴条件の通知",active:false},
+  {key:"triple_match",icon:"⭐",title:"3人一致レース",text:"一果・初音・キイナの評価が重なったレース",active:false},
+];
 
 function makeSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,6 +27,8 @@ export default function MembersPage(){
   const supabase=useMemo(()=>makeSupabase(),[]);
   const [session,setSession]=useState(null);
   const [profile,setProfile]=useState(null);
+  const [prefs,setPrefs]=useState(DEFAULT_PREFS);
+  const [prefsBusy,setPrefsBusy]=useState("");
   const [loading,setLoading]=useState(true);
   const [mode,setMode]=useState("signup");
   const [recoveryMode,setRecoveryMode]=useState(false);
@@ -34,6 +44,18 @@ export default function MembersPage(){
   const [lineExpiresAt,setLineExpiresAt]=useState("");
   const [lineBusy,setLineBusy]=useState(false);
 
+  async function loadPreferences(userId){
+    if(!supabase||!userId)return;
+    const {data,error:prefError}=await supabase.from("bs_member_notification_preferences")
+      .select("boat4_double_top,ichika_escape,hatsune_venus,kiina_boat5,triple_match")
+      .eq("user_id",userId).maybeSingle();
+    if(prefError){console.error(prefError);return;}
+    if(data){setPrefs({...DEFAULT_PREFS,...data});return;}
+    const {data:created,error:createError}=await supabase.from("bs_member_notification_preferences")
+      .insert({user_id:userId}).select("boat4_double_top,ichika_escape,hatsune_venus,kiina_boat5,triple_match").single();
+    if(!createError&&created)setPrefs({...DEFAULT_PREFS,...created});
+  }
+
   async function loadProfile(userId){
     if(!supabase||!userId)return null;
     const {data,error:profileError}=await supabase.from("bs_member_profiles")
@@ -42,6 +64,7 @@ export default function MembersPage(){
     if(profileError){setError("会員情報を読み込めませんでした。");return null;}
     setProfile(data||null);
     if(data?.line_user_id){setLineCode("");setLineExpiresAt("");}
+    await loadPreferences(userId);
     return data||null;
   }
 
@@ -56,11 +79,9 @@ export default function MembersPage(){
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event,nextSession)=>{
       if(!alive)return;
-      if(event==="PASSWORD_RECOVERY"){
-        setRecoveryMode(true);setMode("login");setError("");setMessage("新しいパスワードを設定してください。");
-      }
+      if(event==="PASSWORD_RECOVERY"){setRecoveryMode(true);setMode("login");setError("");setMessage("新しいパスワードを設定してください。");}
       setSession(nextSession||null);
-      if(nextSession)await loadProfile(nextSession.user.id);else setProfile(null);
+      if(nextSession)await loadProfile(nextSession.user.id);else{setProfile(null);setPrefs(DEFAULT_PREFS);}
     });
     return()=>{alive=false;subscription.unsubscribe();};
   },[supabase]);
@@ -71,92 +92,64 @@ export default function MembersPage(){
     return()=>clearInterval(timer);
   },[session,lineCode,profile?.line_user_id]);
 
+  async function togglePreference(key){
+    if(!supabase||!session||prefsBusy)return;
+    const next=!prefs[key];
+    setPrefsBusy(key);setError("");setMessage("");
+    setPrefs(prev=>({...prev,[key]:next}));
+    const {error:updateError}=await supabase.from("bs_member_notification_preferences")
+      .upsert({user_id:session.user.id,[key]:next,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+    if(updateError){setPrefs(prev=>({...prev,[key]:!next}));setError("通知設定を保存できませんでした。");}
+    else setMessage(`${NOTIFICATIONS.find(x=>x.key===key)?.title||"通知"}を${next?"ON":"OFF"}にしました。`);
+    setPrefsBusy("");
+  }
+
   async function submit(e){
-    e.preventDefault();
-    if(!supabase||busy)return;
-    setBusy(true);setError("");setMessage("");
+    e.preventDefault();if(!supabase||busy)return;setBusy(true);setError("");setMessage("");
     try{
       if(mode==="signup"){
         if(!accepted)throw new Error("利用規約とプライバシーポリシーへの同意が必要です。");
         if(password.length<6)throw new Error("パスワードは6文字以上で設定してください。");
         const emailRedirectTo=typeof window!=="undefined"?`${window.location.origin}/members`:undefined;
-        const {data,error:signError}=await supabase.auth.signUp({
-          email:email.trim(),password,
-          options:{emailRedirectTo,data:{display_name:displayName.trim()||null,terms_accepted:true,privacy_accepted:true}}
-        });
+        const {data,error:signError}=await supabase.auth.signUp({email:email.trim(),password,options:{emailRedirectTo,data:{display_name:displayName.trim()||null,terms_accepted:true,privacy_accepted:true}}});
         if(signError)throw signError;
         setMessage(data.session?"β会員登録が完了しました。次に公式LINEを連携してください。":"確認メールを送信しました。メール内のリンクを開くと登録完了です。");
       }else{
-        const {error:loginError}=await supabase.auth.signInWithPassword({email:email.trim(),password});
-        if(loginError)throw loginError;
-        setMessage("ログインしました。");
+        const {error:loginError}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(loginError)throw loginError;setMessage("ログインしました。");
       }
-    }catch(err){
-      const raw=String(err?.message||"");
-      if(raw.includes("User already registered"))setError("このメールアドレスは登録済みです。ログインをご利用ください。");
-      else if(raw.includes("Invalid login credentials"))setError("メールアドレスまたはパスワードが違います。");
-      else setError(raw||"処理に失敗しました。もう一度お試しください。");
-    }finally{setBusy(false);}
+    }catch(err){const raw=String(err?.message||"");if(raw.includes("User already registered"))setError("このメールアドレスは登録済みです。ログインをご利用ください。");else if(raw.includes("Invalid login credentials"))setError("メールアドレスまたはパスワードが違います。");else setError(raw||"処理に失敗しました。もう一度お試しください。");}
+    finally{setBusy(false);}
   }
 
   async function requestPasswordReset(e){
-    e.preventDefault();if(!supabase||busy)return;
-    if(!email.trim()){setError("登録したメールアドレスを入力してください。");return;}
+    e.preventDefault();if(!supabase||busy)return;if(!email.trim()){setError("登録したメールアドレスを入力してください。");return;}
     setBusy(true);setError("");setMessage("");
-    try{
-      const redirectTo=typeof window!=="undefined"?`${window.location.origin}/members`:undefined;
-      const {error:resetError}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});
-      if(resetError)throw resetError;
-      setMessage("パスワード再設定メールを送信しました。メール内のリンクから新しいパスワードを設定してください。");
-    }catch(err){setError(String(err?.message||"")||"再設定メールを送信できませんでした。");}
-    finally{setBusy(false);}
+    try{const redirectTo=typeof window!=="undefined"?`${window.location.origin}/members`:undefined;const {error:resetError}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});if(resetError)throw resetError;setMessage("パスワード再設定メールを送信しました。メール内のリンクから新しいパスワードを設定してください。");}
+    catch(err){setError(String(err?.message||"")||"再設定メールを送信できませんでした。");}finally{setBusy(false);}
   }
 
   async function updatePassword(e){
-    e.preventDefault();if(!supabase||busy)return;
-    setError("");setMessage("");
+    e.preventDefault();if(!supabase||busy)return;setError("");setMessage("");
     if(password.length<6){setError("新しいパスワードは6文字以上で設定してください。");return;}
     if(password!==confirmPassword){setError("確認用パスワードが一致しません。");return;}
     setBusy(true);
-    try{
-      const {error:updateError}=await supabase.auth.updateUser({password});if(updateError)throw updateError;
-      setPassword("");setConfirmPassword("");setRecoveryMode(false);setMessage("パスワードを変更しました。");
-    }catch(err){setError(String(err?.message||"")||"パスワードを変更できませんでした。");}
-    finally{setBusy(false);}
+    try{const {error:updateError}=await supabase.auth.updateUser({password});if(updateError)throw updateError;setPassword("");setConfirmPassword("");setRecoveryMode(false);setMessage("パスワードを変更しました。");}
+    catch(err){setError(String(err?.message||"")||"パスワードを変更できませんでした。");}finally{setBusy(false);}
   }
 
   async function issueLineCode(){
-    if(!session||lineBusy)return;
-    setLineBusy(true);setError("");setMessage("");
-    try{
-      const res=await fetch("/api/members/line-link-code",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});
-      const body=await res.json().catch(()=>({}));
-      if(!res.ok)throw new Error(body?.error||"LINE連携コードを発行できませんでした。");
-      if(body.linked){await loadProfile(session.user.id);return;}
-      setLineCode(body.code||"");setLineExpiresAt(body.expiresAt||"");
-      setMessage("LINE連携コードを発行しました。公式LINEにこのコードをそのまま送信してください。");
-    }catch(err){setError(String(err?.message||"")||"LINE連携コードを発行できませんでした。");}
-    finally{setLineBusy(false);}
+    if(!session||lineBusy)return;setLineBusy(true);setError("");setMessage("");
+    try{const res=await fetch("/api/members/line-link-code",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body?.error||"LINE連携コードを発行できませんでした。");if(body.linked){await loadProfile(session.user.id);return;}setLineCode(body.code||"");setLineExpiresAt(body.expiresAt||"");setMessage("LINE連携コードを発行しました。公式LINEにこのコードをそのまま送信してください。");}
+    catch(err){setError(String(err?.message||"")||"LINE連携コードを発行できませんでした。");}finally{setLineBusy(false);}
   }
 
-  async function copyLineCode(){
-    if(!lineCode)return;
-    try{await navigator.clipboard.writeText(lineCode);setMessage("LINE連携コードをコピーしました。");}
-    catch{setError("コピーできませんでした。コードを長押ししてコピーしてください。");}
-  }
+  async function copyLineCode(){if(!lineCode)return;try{await navigator.clipboard.writeText(lineCode);setMessage("LINE連携コードをコピーしました。");}catch{setError("コピーできませんでした。コードを長押ししてコピーしてください。");}}
 
   async function withdraw(){
-    if(!supabase||!session||busy)return;
-    const ok=window.confirm("退会すると会員アカウントと会員プロフィールが削除され、元に戻せません。退会しますか？");
-    if(!ok)return;
+    if(!supabase||!session||busy)return;const ok=window.confirm("退会すると会員アカウントと会員プロフィールが削除され、元に戻せません。退会しますか？");if(!ok)return;
     setBusy(true);setError("");setMessage("");
-    try{
-      const res=await fetch("/api/members/delete",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});
-      const body=await res.json().catch(()=>({}));
-      if(!res.ok)throw new Error(body?.error||"退会処理に失敗しました。");
-      await supabase.auth.signOut();setSession(null);setProfile(null);setMode("login");setMessage("退会手続きが完了しました。ご利用ありがとうございました。");
-    }catch(err){setError(String(err?.message||"")||"退会処理に失敗しました。");}
-    finally{setBusy(false);}
+    try{const res=await fetch("/api/members/delete",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`}});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body?.error||"退会処理に失敗しました。");await supabase.auth.signOut();setSession(null);setProfile(null);setMode("login");setMessage("退会手続きが完了しました。ご利用ありがとうございました。");}
+    catch(err){setError(String(err?.message||"")||"退会処理に失敗しました。");}finally{setBusy(false);}
   }
 
   async function logout(){if(!supabase)return;await supabase.auth.signOut();setMessage("ログアウトしました。");}
@@ -194,26 +187,28 @@ export default function MembersPage(){
 
       <section className={`${styles.lineCard} ${lineLinked?styles.lineLinked:""}`}>
         <div className={styles.lineHead}><div><span className={styles.kicker}>OFFICIAL LINE</span><h2>{lineLinked?"✅ 公式LINE連携済み":"公式LINEを会員アカウントに連携"}</h2></div><strong>{lineLinked?"CONNECTED":"3 STEPS"}</strong></div>
-        {lineLinked?<>
-          <p>BoatStrikers会員IDと公式LINEの紐づけが完了しています。今後、会員ステータスに応じた限定通知を受け取れるようにできます。</p>
-          {profile?.line_linked_at&&<small>連携日時：{new Date(profile.line_linked_at).toLocaleString("ja-JP")}</small>}
-        </>:<>
+        {lineLinked?<><p>BoatStrikers会員IDと公式LINEの紐づけが完了しています。下の「LINE通知設定」から受け取りたい通知を選べます。</p>{profile?.line_linked_at&&<small>連携日時：{new Date(profile.line_linked_at).toLocaleString("ja-JP")}</small>}</>:<>
           <p>サイトから登録した方は、次の3ステップでLINEを連携してください。LINEから登録した方も同じ手順で会員IDとの紐づけができます。</p>
-          <div className={styles.lineSteps}>
-            <div><b>1</b><span><strong>公式LINEを友だち追加</strong><small>すでに登録済みならそのまま次へ</small></span></div>
-            <div><b>2</b><span><strong>連携コードを発行</strong><small>コードの有効期限は30分です</small></span></div>
-            <div><b>3</b><span><strong>LINEにコードを送信</strong><small>自動で会員IDと紐づきます</small></span></div>
-          </div>
-          <div className={styles.lineActions}>
-            <a href={LINE_ADD_URL} target="_blank" rel="noreferrer" className={styles.lineButton}>LINEを友だち追加・開く</a>
-            <button type="button" onClick={issueLineCode} disabled={lineBusy}>{lineBusy?"発行中...":lineCode?"新しいコードを発行":"LINE連携コードを発行"}</button>
-          </div>
-          {lineCode&&<div className={styles.codeBox}>
-            <span>この文字を公式LINEに送信</span><strong>{lineCode}</strong>
-            <button type="button" onClick={copyLineCode}>コードをコピー</button>
-            <small>有効期限：{lineExpiresAt?new Date(lineExpiresAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}):"30分"} ／ 送信後、この画面は自動で「連携済み」に切り替わります。</small>
-          </div>}
+          <div className={styles.lineSteps}><div><b>1</b><span><strong>公式LINEを友だち追加</strong><small>すでに登録済みならそのまま次へ</small></span></div><div><b>2</b><span><strong>連携コードを発行</strong><small>コードの有効期限は30分です</small></span></div><div><b>3</b><span><strong>LINEにコードを送信</strong><small>自動で会員IDと紐づきます</small></span></div></div>
+          <div className={styles.lineActions}><a href={LINE_ADD_URL} target="_blank" rel="noreferrer" className={styles.lineButton}>LINEを友だち追加・開く</a><button type="button" onClick={issueLineCode} disabled={lineBusy}>{lineBusy?"発行中...":lineCode?"新しいコードを発行":"LINE連携コードを発行"}</button></div>
+          {lineCode&&<div className={styles.codeBox}><span>この文字を公式LINEに送信</span><strong>{lineCode}</strong><button type="button" onClick={copyLineCode}>コードをコピー</button><small>有効期限：{lineExpiresAt?new Date(lineExpiresAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}):"30分"} ／ 送信後、この画面は自動で「連携済み」に切り替わります。</small></div>}
         </>}
+      </section>
+
+      <section className={styles.notificationCard}>
+        <div className={styles.notificationHead}><div><span className={styles.kicker}>LINE NOTIFICATIONS</span><h2>LINE通知設定</h2><p>受け取りたいアラートだけONにできます。</p></div><strong>{lineLinked?"設定可能":"LINE連携が必要"}</strong></div>
+        <div className={styles.notificationList}>
+          {NOTIFICATIONS.map(item=>{
+            const checked=Boolean(prefs[item.key]);
+            const disabled=!lineLinked||!item.active||prefsBusy===item.key;
+            return <div className={`${styles.notificationItem} ${!item.active?styles.notificationComing:""}`} key={item.key}>
+              <div className={styles.notificationText}><b>{item.icon}</b><span><strong>{item.title}</strong><small>{item.text}</small>{!item.active&&<em>準備中</em>}</span></div>
+              <button type="button" className={`${styles.switch} ${checked?styles.switchOn:""}`} onClick={()=>togglePreference(item.key)} disabled={disabled} aria-pressed={checked} aria-label={`${item.title} ${checked?"ON":"OFF"}`}><span /></button>
+            </div>;
+          })}
+        </div>
+        {!lineLinked&&<p className={styles.notificationHelp}>通知を受け取るには、先に上の「公式LINE連携」を完了してください。</p>}
+        <small className={styles.notificationNote}>現在実際に配信されるのは「4号艇ダブル上位」です。新しい通知機能は完成後に選択できるようになります。</small>
       </section>
 
       <section className={styles.note}><strong>アカウント管理</strong><p><Link href="/terms">利用規約</Link> ・ <Link href="/privacy">プライバシーポリシー</Link></p><p>退会するとログイン情報とBoatStrikers会員プロフィールが削除されます。この操作は取り消せません。</p><div className={styles.actions}><button type="button" onClick={withdraw} disabled={busy}>{busy?"処理中...":"退会する"}</button></div></section>
