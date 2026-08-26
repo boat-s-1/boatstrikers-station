@@ -90,3 +90,7 @@ npm run hatsune:render -- --manifest="C:\...\manifest.json" --speaker=456789
 ```
 
 この場合、レンダー完了状態の自動同期は行いません。
+
+## デプロイ確認
+
+Phase 2を本番へ反映する際は、`main` の最新コミットでProductionデプロイが `READY` になっていることを確認します。
