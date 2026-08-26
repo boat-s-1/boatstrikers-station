@@ -18,6 +18,60 @@ function authorized(request){
   const digest=crypto.createHash("sha256").update(token).digest("hex");
   return token.length>0&&crypto.timingSafeEqual(Buffer.from(digest),Buffer.from(SUPABASE_CRON_TOKEN_SHA256));
 }
+function formatClosingTime(value){
+  if(!value)return null;
+  return String(value).slice(0,5);
+}
+function buildLineText(alert){
+  const remaining=minutesUntil(alert.race_date,alert.closing_time);
+  const remainingText=remaining===null?"":`\n締切まで約${Math.max(0,Math.ceil(remaining))}分`;
+  const closing=formatClosingTime(alert.closing_time);
+  const closingText=closing?`\n締切 ${closing}`:"";
+  const raceUrl=`https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;
+  return [
+    "🚨【4号艇ダブル上位】",
+    `${alert.course_name||""} ${alert.race_no}R`,
+    `④ 展示 ${alert.exhibition_time??"-"}【${alert.exhibition_rank??"-"}位】`,
+    `④ 直線 ${alert.straight_time??"-"}【${alert.straight_rank??"-"}位】`,
+    `${closingText}${remainingText}`.trim(),
+    "BoatStrikersでレース詳細を見る",
+    raceUrl,
+  ].filter(Boolean).join("\n");
+}
+async function sendLineBroadcast(text){
+  const accessToken=process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  if(!accessToken)throw new Error("LINE_CHANNEL_ACCESS_TOKEN is not configured");
+  const response=await fetch("https://api.line.me/v2/bot/message/broadcast",{
+    method:"POST",
+    headers:{Authorization:`Bearer ${accessToken}`,"Content-Type":"application/json"},
+    body:JSON.stringify({messages:[{type:"text",text}],notificationDisabled:false}),
+  });
+  if(!response.ok){
+    const body=await response.text().catch(()=>"");
+    throw new Error(`LINE broadcast failed: ${response.status} ${body}`.trim());
+  }
+}
+async function sendPendingLineAlerts(supabase,raceDate){
+  const {data:alerts,error}=await supabase.from("bs_exhibition_alerts")
+    .select("id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,exhibition_rank,straight_time,straight_rank,detected_at,notified")
+    .eq("race_date",raceDate).eq("notified",false).order("detected_at",{ascending:true}).limit(10);
+  if(error)throw error;
+  const sent=[];
+  const failed=[];
+  for(const alert of alerts||[]){
+    try{
+      await sendLineBroadcast(buildLineText(alert));
+      const now=new Date().toISOString();
+      const {error:updateError}=await supabase.from("bs_exhibition_alerts")
+        .update({notified:true,notified_at:now,updated_at:now}).eq("id",alert.id).eq("notified",false);
+      if(updateError)throw updateError;
+      sent.push(alert.id);
+    }catch(error){
+      failed.push({id:alert.id,error:error?.message||"LINE send failed"});
+    }
+  }
+  return {pending:(alerts||[]).length,sent,failed};
+}
 
 export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
@@ -40,6 +94,7 @@ export async function GET(request){
       if(evalError)throw evalError;
       results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,rows:source.rows.length,inserted:Number(inserted||0)});
     }
-    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,ranAt:new Date().toISOString()});
+    const line=await sendPendingLineAlerts(supabase,raceDate);
+    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
   }catch(error){return NextResponse.json({ok:false,error:error?.message||"cron failed"},{status:500});}
 }
