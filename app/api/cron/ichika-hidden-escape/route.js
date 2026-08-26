@@ -6,7 +6,7 @@ import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji"
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const SUPABASE_CRON_TOKEN_SHA256 = "3247241c1042d3af555359797283b8b4e1c168a176f73fa5215da4e055ab787b";
+const SUPABASE_CRON_TOKEN_SHA256 = "d27064366c4812943a53cd5f8d8419c5cc95e9a4b4728488976f48f450510b8c";
 
 function getSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
