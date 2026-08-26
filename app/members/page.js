@@ -11,7 +11,7 @@ const DEFAULT_PREFS={boat4_double_top:true,ichika_escape:false,hatsune_venus:fal
 const NOTIFICATIONS=[
   {key:"boat4_double_top",icon:"🚨",title:"4→5展開理論",text:"キイナの狙い目を通知します",active:true},
   {key:"ichika_escape",icon:"🏁",title:"一果・イン逃げ注目",text:"B1×展示色なし×1周1位の隠れイン条件を通知",active:true},
-  {key:"hatsune_venus",icon:"🌸",title:"初音・女子戦激アツ",text:"女子戦で注目条件が成立したレース",active:false},
+  {key:"hatsune_venus",icon:"🌸",title:"初音・女子イン崩れ理論",text:"②が①より展示0.05秒・1周0.10秒以上速い女子戦を通知",active:true},
   {key:"kiina_boat5",icon:"💥",title:"キイナ・5号艇頭チャンス",text:"5号艇頭を狙える穴条件の通知",active:false},
   {key:"triple_match",icon:"⭐",title:"3人一致レース",text:"一果・初音・キイナの評価が重なったレース",active:false},
 ];
@@ -208,7 +208,7 @@ export default function MembersPage(){
           })}
         </div>
         {!lineLinked&&<p className={styles.notificationHelp}>通知を受け取るには、先に上の「公式LINE連携」を完了してください。</p>}
-        <small className={styles.notificationNote}>現在実際に配信されるのは「4→5展開理論」と「一果・イン逃げ注目」です。新しい通知機能は完成後に選択できるようになります。</small>
+        <small className={styles.notificationNote}>現在実際に配信されるのは「4→5展開理論」「一果・イン逃げ注目」「初音・女子イン崩れ理論」です。新しい通知機能は完成後に選択できるようになります。</small>
       </section>
 
       <section className={styles.note}><strong>アカウント管理</strong><p><Link href="/terms">利用規約</Link> ・ <Link href="/privacy">プライバシーポリシー</Link></p><p>退会するとログイン情報とBoatStrikers会員プロフィールが削除されます。この操作は取り消せません。</p><div className={styles.actions}><button type="button" onClick={withdraw} disabled={busy}>{busy?"処理中...":"退会する"}</button></div></section>
