@@ -2,10 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "path": "/api/cron/exhibition-alerts",
-      "schedule": "* * * * *"
-    },
-    {
       "path": "/api/cron/hatsune-news-pipeline",
       "schedule": "20 13 * * *"
     },
