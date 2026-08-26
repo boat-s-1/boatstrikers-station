@@ -26,6 +26,7 @@ const GROUPS = [
     items: [
       { href: "/admin/exhibition-alerts", icon: "🚨", title: "4号艇ダブル上位アラート", text: "展示タイム・直線タイムが両方2位以内の4号艇を監視・通知・成績追跡", badge: "NEW" },
       { href: "/admin/ichika-hidden-escape", icon: "🏁", title: "一果・隠れイン理論", text: "B1×展示色なし×1周1位の成立履歴・LINE通知・成績を確認", badge: "NEW" },
+      { href: "/admin/hatsune-womens-inner-break", icon: "🌸", title: "初音・女子イン崩れ理論", text: "女子戦のイン崩れ条件の成立履歴・LINE通知・成績を確認", badge: "NEW" },
       { href: "/admin/ai-candidates", icon: "✨", title: "AI今日の候補", text: "一果・初音・キイナの候補からホーム・SNS使用レースを選択", badge: "NEW" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "一果の前日イン逃げTOP3から台本・投稿素材を作成", badge: "NEW" },
       { href: "/admin/results", icon: "🏆", title: "予想実績管理", text: "予想・投資・払戻・的中画像を登録", badge: "よく使う" },
@@ -65,6 +66,7 @@ const GROUPS = [
 const FAVORITES = [
   { href: "/admin/exhibition-alerts", icon: "🚨", title: "4号艇アラート" },
   { href: "/admin/ichika-hidden-escape", icon: "🏁", title: "一果・隠れイン" },
+  { href: "/admin/hatsune-womens-inner-break", icon: "🌸", title: "初音・女子イン崩れ" },
   { href: "/admin/members", icon: "👥", title: "会員管理" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
   { href: "/admin/hatsune-news/video", icon: "🎥", title: "初音NEWS制作" },
