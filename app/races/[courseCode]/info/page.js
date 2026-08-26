@@ -48,6 +48,109 @@ function CourseCard({ course, rate, title, text }) {
   );
 }
 
+function WaterSchematic({ stadium, guide }) {
+  const code = String(stadium.courseCode).padStart(2, "0");
+  const rates = guide.courseWinRates || [];
+  const topOuter = guide.topOuter || { course: 2, rate: null };
+  const laneY = [190, 214, 238, 262, 286, 310];
+
+  return (
+    <div className={styles.waterSchematicWrap}>
+      <svg
+        className={styles.waterSchematic}
+        viewBox="0 0 1000 520"
+        role="img"
+        aria-label={`${stadium.name} 水面模式図。縮尺なし。`}
+      >
+        <defs>
+          <linearGradient id={`water-${code}`} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#073e6f" />
+            <stop offset="55%" stopColor="#087db0" />
+            <stop offset="100%" stopColor="#19a5c8" />
+          </linearGradient>
+          <linearGradient id={`panel-${code}`} x1="0" x2="1">
+            <stop offset="0%" stopColor="#071d36" stopOpacity=".94" />
+            <stop offset="100%" stopColor="#0b3152" stopOpacity=".86" />
+          </linearGradient>
+        </defs>
+
+        <rect width="1000" height="520" rx="28" fill="#061d35" />
+        <rect x="24" y="24" width="952" height="472" rx="24" fill={`url(#water-${code})`} />
+
+        <path
+          d="M165 150 H775 C860 150 910 195 910 250 C910 305 860 350 775 350 H165 C80 350 42 305 42 250 C42 195 80 150 165 150 Z"
+          fill="none"
+          stroke="#bcecff"
+          strokeWidth="3"
+          strokeOpacity=".78"
+        />
+        <path
+          d="M165 176 H770 C832 176 874 208 874 250 C874 292 832 324 770 324 H165 C104 324 78 292 78 250 C78 208 104 176 165 176 Z"
+          fill="none"
+          stroke="#8bd7f2"
+          strokeWidth="1.5"
+          strokeOpacity=".62"
+        />
+
+        {laneY.map((y, index) => {
+          const lane = index + 1;
+          const active = lane === Number(topOuter.course);
+          return (
+            <g key={lane}>
+              <line
+                x1="178"
+                y1={y}
+                x2="760"
+                y2={y}
+                stroke={active ? "#ffe38a" : "#dff6ff"}
+                strokeWidth={active ? "4" : "2"}
+                strokeOpacity={active ? ".95" : ".48"}
+              />
+              <circle cx="154" cy={y} r="13" fill={active ? "#ffe38a" : "#ffffff"} fillOpacity={active ? "1" : ".88"} />
+              <text x="154" y={y + 5} textAnchor="middle" fontSize="14" fontWeight="900" fill="#073454">
+                {lane}
+              </text>
+            </g>
+          );
+        })}
+
+        <line x1="724" y1="160" x2="724" y2="340" stroke="#fff" strokeWidth="4" strokeDasharray="10 8" />
+        <text x="724" y="142" textAnchor="middle" fontSize="17" fontWeight="900" fill="#fff">START</text>
+
+        <circle cx="828" cy="250" r="17" fill="#ff7557" stroke="#fff" strokeWidth="5" />
+        <circle cx="126" cy="250" r="17" fill="#ff7557" stroke="#fff" strokeWidth="5" />
+        <text x="828" y="286" textAnchor="middle" fontSize="16" fontWeight="900" fill="#fff">1M</text>
+        <text x="126" y="286" textAnchor="middle" fontSize="16" fontWeight="900" fill="#fff">2M</text>
+
+        <rect x="46" y="42" width="405" height="86" rx="18" fill={`url(#panel-${code})`} />
+        <text x="70" y="74" fontSize="14" fontWeight="900" fill="#83dfff" letterSpacing="2">BOATSTRIKERS WATER GUIDE</text>
+        <text x="70" y="111" fontSize="31" fontWeight="900" fill="#fff">#{code} {stadium.name}</text>
+
+        <rect x="760" y="48" width="176" height="46" rx="23" fill="#ffffff" fillOpacity=".92" />
+        <text x="848" y="77" textAnchor="middle" fontSize="15" fontWeight="900" fill="#174b6d">模式図・縮尺なし</text>
+
+        <g transform="translate(54 392)">
+          <rect width="892" height="78" rx="18" fill="#061a30" fillOpacity=".83" />
+          <text x="28" y="31" fontSize="13" fontWeight="800" fill="#84cbe9">水質</text>
+          <text x="28" y="56" fontSize="21" fontWeight="900" fill="#fff">{guide.waterType || "—"}</text>
+
+          <text x="202" y="31" fontSize="13" fontWeight="800" fill="#84cbe9">干満差</text>
+          <text x="202" y="56" fontSize="21" fontWeight="900" fill="#fff">{guide.tide || "—"}</text>
+
+          <text x="370" y="31" fontSize="13" fontWeight="800" fill="#84cbe9">1コース1着率</text>
+          <text x="370" y="56" fontSize="21" fontWeight="900" fill="#fff">{pct(rates[0])}</text>
+
+          <text x="602" y="31" fontSize="13" fontWeight="800" fill="#84cbe9">外で最も高い1着率</text>
+          <text x="602" y="56" fontSize="21" fontWeight="900" fill="#ffe38a">{topOuter.course}コース {pct(topOuter.rate)}</text>
+        </g>
+      </svg>
+      <p className={styles.waterSchematicNote}>
+        ※コース位置を分かりやすく示したBoatStrikers模式図です。実際の水面寸法・ターンマーク位置を正確な縮尺で再現した図ではありません。
+      </p>
+    </div>
+  );
+}
+
 export default async function StadiumInfoPage({ params, searchParams }) {
   const route = await params;
   const query = await searchParams;
@@ -144,15 +247,7 @@ export default async function StadiumInfoPage({ params, searchParams }) {
             alt={`${stadium.name} 水面レイアウト`}
           />
         ) : (
-          <div className={styles.layoutPlaceholder}>
-            <div className={styles.placeholderIcon}>WATER LAYOUT</div>
-            <strong>{stadium.name} 水面レイアウト</strong>
-            <p>
-              水面レイアウト画像は準備中です。
-              <br />
-              あとから画像を追加するだけで、この位置に自動表示できます。
-            </p>
-          </div>
+          <WaterSchematic stadium={stadium} guide={staticGuide} />
         )}
 
         <div className={styles.noteGrid}>
@@ -170,7 +265,7 @@ export default async function StadiumInfoPage({ params, searchParams }) {
             <strong>外で最も高い1着率</strong>
             <p>
               {topOuter.course}コース {pct(topOuter.rate)}。
-              水面図追加後は位置関係と合わせて確認できます。
+              コース傾向と当日の展示・スタート気配を合わせて確認します。
             </p>
           </article>
         </div>
@@ -192,7 +287,7 @@ export default async function StadiumInfoPage({ params, searchParams }) {
           <CourseCard
             course={topOuter.course}
             rate={topOuter.rate}
-            title={`外で最も高い1着率`}
+            title="外で最も高い1着率"
             text={`直近3か月では、1コース以外で最も1着率が高いのが${topOuter.course}コースです。スタートと展示気配を比較したい艇です。`}
           />
           <CourseCard
