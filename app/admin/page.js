@@ -126,6 +126,13 @@ const GROUPS = [
         badge: "NEW",
       },
       {
+        href: "/admin/hatsune-news/video",
+        icon: "🎥",
+        title: "初音ヴィーナスNEWS制作",
+        text: "今日のショート・週間ヴィーナスNEWSのAI台本と動画素材を作成",
+        badge: "NEW",
+      },
+      {
         href: "/admin/stadium-ai",
         icon: "🧭",
         title: "Stadium AI集計",
@@ -172,6 +179,7 @@ const GROUPS = [
 const FAVORITES = [
   { href: "/admin/members", icon: "👥", title: "会員管理" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
+  { href: "/admin/hatsune-news/video", icon: "🎥", title: "初音NEWS制作" },
   { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
   { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
