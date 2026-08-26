@@ -19,6 +19,11 @@ function jstToday() {
   }).format(new Date());
 }
 
+function formatDate(value) {
+  if (!value) return "—";
+  return String(value).replaceAll("-", "/");
+}
+
 function formatTime(value) {
   if (!value) return "—";
   try {
@@ -33,35 +38,109 @@ function formatTime(value) {
   }
 }
 
+function raceKey(row) {
+  return `${row.race_date}-${Number(row.course_code)}-${Number(row.race_no)}`;
+}
+
+async function getAlertPerformance(supabase) {
+  if (!supabase) {
+    return { matched: 0, finished: 0, hits: 0, hitRate: null };
+  }
+
+  const { data: history, error: historyError } = await supabase
+    .from("bs_ichika_hidden_escape_alerts")
+    .select("race_date,course_code,race_no")
+    .order("race_date", { ascending: false })
+    .limit(5000);
+
+  if (historyError || !history?.length) {
+    return { matched: history?.length || 0, finished: 0, hits: 0, hitRate: null };
+  }
+
+  const dates = history.map((row) => row.race_date).filter(Boolean).sort();
+  const minDate = dates[0];
+  const maxDate = dates[dates.length - 1];
+
+  const { data: entries, error: entryError } = await supabase
+    .from("bs_race_entries")
+    .select("race_date,course_code,race_no,boat_no,arrival_order")
+    .eq("boat_no", 1)
+    .gte("race_date", minDate)
+    .lte("race_date", maxDate);
+
+  if (entryError) {
+    return { matched: history.length, finished: 0, hits: 0, hitRate: null };
+  }
+
+  const resultMap = new Map((entries || []).map((row) => [raceKey(row), Number(row.arrival_order)]));
+  const results = history
+    .map((row) => resultMap.get(raceKey(row)))
+    .filter((rank) => Number.isFinite(rank) && rank > 0);
+  const hits = results.filter((rank) => rank === 1).length;
+
+  return {
+    matched: history.length,
+    finished: results.length,
+    hits,
+    hitRate: results.length ? (hits / results.length) * 100 : null,
+  };
+}
+
 export default async function IchikaAlertPanel() {
   const supabase = getSupabase();
+  const today = jstToday();
   let alerts = [];
 
   if (supabase) {
     const { data, error } = await supabase
       .from("bs_ichika_hidden_escape_alerts")
       .select("id,race_date,course_code,course_name,race_no,closing_time,racer_class,exhibition_rank,exhibition_gap,lap_rank,detected_at,notified")
-      .eq("race_date", jstToday())
+      .eq("race_date", today)
       .order("closing_time", { ascending: true })
       .limit(12);
 
     if (!error) alerts = data || [];
   }
 
+  const performance = await getAlertPerformance(supabase);
+
   return (
     <section style={{ margin: "18px 14px", borderRadius: 24, overflow: "hidden", background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.10)", border: "2px solid #ff7eaa" }}>
-      <div style={{ padding: "16px 18px", background: "linear-gradient(135deg,#fff0f6,#eef8ff)", borderBottom: "1px solid #f4d5e2" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: ".08em", color: "#ff4f93" }}>ICHIKA ALERT</div>
-            <h2 style={{ margin: "4px 0 0", fontSize: 23, color: "#17345c" }}>🏁 一果アラート｜隠れイン理論</h2>
+      <div style={{ position: "relative", overflow: "hidden", background: "#f7fbff" }}>
+        <img
+          src="/E8FA3EF7-0B20-4135-AD2D-6C592E64FCDA.png"
+          alt="一果アラート 隠れイン理論"
+          style={{ display: "block", width: "100%", height: "auto" }}
+        />
+        <span style={{ position: "absolute", top: 10, right: 10, padding: "7px 11px", borderRadius: 999, background: "rgba(255,255,255,.94)", color: "#526079", fontSize: 12, fontWeight: 900, boxShadow: "0 2px 8px rgba(0,0,0,.10)" }}>
+          {formatDate(today)}
+        </span>
+      </div>
+
+      <div style={{ padding: "14px 14px 4px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div style={{ padding: "14px 12px", borderRadius: 16, background: "linear-gradient(180deg,#fff1f7,#fff)", border: "1px solid #ffd3e3", textAlign: "center" }}>
+            <span style={{ display: "block", fontSize: 12, fontWeight: 900, color: "#e83e7e" }}>隠れイン的中率</span>
+            <strong style={{ display: "block", marginTop: 4, fontSize: 30, lineHeight: 1.1, color: "#e83e7e" }}>
+              {performance.hitRate == null ? "—%" : `${performance.hitRate.toFixed(1)}%`}
+            </strong>
+            <small style={{ display: "block", marginTop: 5, color: "#718096", fontWeight: 800 }}>
+              {performance.finished > 0 ? `${performance.hits} / ${performance.finished}R 的中` : "結果データ蓄積中"}
+            </small>
           </div>
-          <span style={{ flex: "0 0 auto", fontSize: 12, fontWeight: 900, padding: "7px 10px", borderRadius: 999, background: alerts.length ? "#e7fff0" : "#eef2f6", color: alerts.length ? "#0b8f49" : "#64748b" }}>
-            本日 {alerts.length}件
-          </span>
+
+          <div style={{ padding: "14px 12px", borderRadius: 16, background: "linear-gradient(180deg,#eef8ff,#fff)", border: "1px solid #cfe9fb", textAlign: "center" }}>
+            <span style={{ display: "block", fontSize: 12, fontWeight: 900, color: "#1266b3" }}>本日の成立</span>
+            <strong style={{ display: "block", marginTop: 4, fontSize: 30, lineHeight: 1.1, color: "#1266b3" }}>
+              {alerts.length}件
+            </strong>
+            <small style={{ display: "block", marginTop: 5, color: "#718096", fontWeight: 800 }}>
+              B1 × 展示色なし × 1周1位
+            </small>
+          </div>
         </div>
-        <p style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 700, color: "#637086", lineHeight: 1.6 }}>
-          B1 × 展示色なし × 1周1位。展示後に一果の狙い目条件が成立したレースを表示します。
+        <p style={{ margin: "10px 2px 4px", fontSize: 12, color: "#7b8798", lineHeight: 1.6 }}>
+          ※的中率は隠れイン理論が成立し、結果が確定したレースで①が1着だった割合です。
         </p>
       </div>
 
@@ -93,7 +172,7 @@ export default async function IchikaAlertPanel() {
           ))}
         </div>
       ) : (
-        <div style={{ padding: "24px 18px", textAlign: "center" }}>
+        <div style={{ padding: "20px 18px 22px", textAlign: "center" }}>
           <div style={{ fontSize: 30 }}>🏁</div>
           <strong style={{ display: "block", marginTop: 6, color: "#17345c" }}>現在、条件成立レースはありません</strong>
           <p style={{ margin: "7px 0 0", fontSize: 13, color: "#718096", lineHeight: 1.6 }}>
