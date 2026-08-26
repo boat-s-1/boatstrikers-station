@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
@@ -5,10 +6,18 @@ import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji"
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const SUPABASE_CRON_TOKEN_SHA256 = "dd4d900fc12d7c572d5623c84278f38a668619fdbb7653b1e109ff87f52eb529";
+
 function getSupabase(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error("Supabase環境変数が未設定です");return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
 function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 function minutesUntil(raceDate,closingTime){if(!closingTime)return null;const t=String(closingTime).slice(0,8);const ms=new Date(`${raceDate}T${t}+09:00`).getTime()-Date.now();return ms/60000;}
-function authorized(request){const secret=process.env.CRON_SECRET;if(!secret)return true;return request.headers.get("authorization")===`Bearer ${secret}`;}
+function authorized(request){
+  const secret=process.env.CRON_SECRET;
+  if(secret&&request.headers.get("authorization")===`Bearer ${secret}`)return true;
+  const token=request.headers.get("x-supabase-cron-token")||"";
+  const digest=crypto.createHash("sha256").update(token).digest("hex");
+  return token.length>0&&crypto.timingSafeEqual(Buffer.from(digest),Buffer.from(SUPABASE_CRON_TOKEN_SHA256));
+}
 
 export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
