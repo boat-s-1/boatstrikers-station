@@ -1,0 +1,59 @@
+.stadiumUnified24{background:#eef3f9;min-height:100vh}
+.stadiumUnifiedNav{position:sticky;top:48px;z-index:35;background:rgba(238,243,249,.94);backdrop-filter:blur(12px);border-bottom:1px solid #d9e3ef;padding:8px 10px}
+.stadiumUnifiedNavInner{max-width:1180px;margin:0 auto;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:1px 0}
+.stadiumUnifiedNavInner::-webkit-scrollbar{display:none}
+.stadiumUnifiedNav a{flex:0 0 auto;text-decoration:none;color:#244c78;background:#fff;border:1px solid #d7e2ef;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:900;box-shadow:0 4px 14px #19365c0a}
+.stadiumUnifiedNav a:last-child{background:#0d315c;color:#fff;border-color:#0d315c}
+.stadiumUnified24 main{scroll-behavior:smooth}
+.stadiumUnified24 main section{scroll-margin-top:108px}
+.stadiumUnified24 main>section:not(:first-of-type){border:1px solid #dde6f0}
+.stadiumUnified24 [class*="cover"]{border:1px solid #ffffff22}
+.stadiumUnified24 [class*="dashboard"]{border:1px solid #d9e5f1}
+.stadiumUnified24 [class*="sectionHeading"] h2{font-weight:950;letter-spacing:-.02em}
+.stadiumUnified24 [class*="sectionHeading"] p{font-size:9px}
+.stadiumUnified24 [class*="scoreCard"],
+.stadiumUnified24 [class*="statCard"],
+.stadiumUnified24 [class*="trifectaCard"]{box-shadow:0 7px 20px #17365b0a}
+.stadiumUnified24 [class*="aiComment"] p{font-size:14px}
+.stadiumUnified24 [class*="premiumGate"]{border:1px solid #ffffff1f}
+.stadiumUnified24 [class*="summaryPanel"]{border:1px solid #ffffff20}
+.stadiumUnified24 [class*="courseBar"]{padding:7px 0;border-bottom:1px solid #edf1f6}
+.stadiumUnified24 [class*="courseBar"]:last-child{border-bottom:0}
+.stadiumUnified24 [class*="empty"]{min-height:92px;display:grid;place-items:center}
+@media(max-width:640px){
+  .stadiumUnifiedNav{top:44px;padding:7px 8px}
+  .stadiumUnifiedNav a{padding:8px 11px;font-size:10px}
+  .stadiumUnified24 main section{scroll-margin-top:96px}
+  .stadiumUnified24 [class*="cover"]{min-height:265px!important;padding:20px!important}
+  .stadiumUnified24 [class*="cover"] h1{font-size:46px!important;line-height:.98!important}
+  .stadiumUnified24 [class*="coverMeta"]{gap:6px!important}
+  .stadiumUnified24 [class*="coverMeta"]>*{font-size:10px!important;padding:6px 9px!important}
+  .stadiumUnified24 [class*="coverScore"]{width:102px!important;right:14px!important;top:14px!important;padding:10px!important;border-radius:18px!important}
+  .stadiumUnified24 [class*="coverScore"] strong{font-size:40px!important}
+  .stadiumUnified24 [class*="dashboard"],
+  .stadiumUnified24 [class*="panel"],
+  .stadiumUnified24 [class*="premiumPanel"],
+  .stadiumUnified24 [class*="summaryPanel"],
+  .stadiumUnified24 [class*="premiumGate"]{padding:15px!important;border-radius:18px!important;margin-top:12px!important}
+  .stadiumUnified24 [class*="dashboardHeader"] h2,
+  .stadiumUnified24 [class*="sectionHeading"] h2,
+  .stadiumUnified24 [class*="summaryPanel"] h2{font-size:20px!important}
+  .stadiumUnified24 [class*="sectionHeading"]{margin-bottom:14px!important;padding-bottom:11px!important}
+  .stadiumUnified24 [class*="sectionHeading"]>div:first-child{width:44px!important}
+  .stadiumUnified24 [class*="sectionHeading"]>div:first-child span{font-size:25px!important}
+  .stadiumUnified24 [class*="scoreCard"],
+  .stadiumUnified24 [class*="statCard"]{padding:13px!important;border-radius:15px!important}
+  .stadiumUnified24 [class*="scoreCard"]>strong{font-size:31px!important}
+  .stadiumUnified24 [class*="statCard"]>strong{font-size:21px!important}
+  .stadiumUnified24 [class*="aiComment"]{padding:13px!important;gap:10px!important}
+  .stadiumUnified24 [class*="aiComment"] p{font-size:12px;line-height:1.7!important}
+  .stadiumUnified24 [class*="priorityRow"]{gap:6px!important}
+  .stadiumUnified24 [class*="priorityRow"] b{font-size:11px;padding:6px 9px!important}
+  .stadiumUnified24 [class*="courseBar"]{grid-template-columns:38px 1fr 56px!important;gap:9px!important}
+  .stadiumUnified24 [class*="courseBar"]>strong{font-size:15px!important}
+  .stadiumUnified24 [class*="trifectaCard"]{min-width:205px!important}
+  .stadiumUnified24 [class*="tabRow"]{margin-left:-2px;margin-right:-2px}
+  .stadiumUnified24 [class*="tabRow"] button{padding:9px 12px!important;font-size:11px!important}
+  .stadiumUnified24 [class*="premiumGate"] h2{font-size:21px!important;line-height:1.4}
+  .stadiumUnified24 [class*="premiumGate"] p{font-size:12px;line-height:1.7}
+}
