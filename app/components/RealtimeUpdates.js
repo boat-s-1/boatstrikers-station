@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPublicScheduleSupabase } from "../../lib/scheduleSupabase";
 import HatsuneNewsPreview from "../hatsune/HatsuneNewsPreview";
 import { getHatsuneNews } from "../hatsune/newsData";
+import IchikaAlertPanel from "./IchikaAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
 
 const KIND_META = {
@@ -63,6 +64,10 @@ async function getItems(target, limit) {
 }
 
 export default async function RealtimeUpdates({ target = "home", limit = 5, compact = false }) {
+  if (target === "ichika") {
+    return <IchikaAlertPanel />;
+  }
+
   const [items, hatsuneNews] = await Promise.all([
     getItems(target, limit),
     target === "hatsune" ? getHatsuneNews({ limit: 3 }) : Promise.resolve([]),
