@@ -56,6 +56,18 @@ async function sendPendingLineAlerts(supabase,raceDate){
   return {pending:(alerts||[]).length,eligibleRecipients:recipients.length,sent,failed};
 }
 
+function buildWeatherUpdate(weather,syncedAt){
+  if(!weather)return null;
+  const update={api_synced_at:syncedAt,updated_at:syncedAt};
+  if(weather.weather){update.weather=weather.weather;update.weather_code=weather.weather;update.api_weather_code=weather.weather;}
+  if(weather.windDirection){update.wind_direction=weather.windDirection;update.wind_direction_code=weather.windDirection;update.api_wind_direction_code=weather.windDirection;}
+  if(weather.windSpeed!==null&&weather.windSpeed!==undefined){update.wind_speed=weather.windSpeed;update.api_wind_speed=weather.windSpeed;}
+  if(weather.waveHeight!==null&&weather.waveHeight!==undefined){update.wave_height=weather.waveHeight;update.api_wave_height=weather.waveHeight;}
+  if(weather.airTemperature!==null&&weather.airTemperature!==undefined){update.air_temperature=weather.airTemperature;update.api_air_temperature=weather.airTemperature;}
+  if(weather.waterTemperature!==null&&weather.waterTemperature!==undefined){update.water_temperature=weather.waterTemperature;update.api_water_temperature=weather.waterTemperature;}
+  return update;
+}
+
 export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
   try{
@@ -73,8 +85,10 @@ export async function GET(request){
         if(row.exhibitionSymbol!==undefined)update.official_exhibition_symbol=row.exhibitionSymbol||null;
         const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);if(updateError)throw updateError;
       }
+      const weatherUpdate=buildWeatherUpdate(source.weather,syncedAt);
+      if(weatherUpdate){const {error:weatherError}=await supabase.from("bs_race_events").update(weatherUpdate).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no);if(weatherError)throw weatherError;}
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,startPublished:Boolean(source.startPublished),rows:source.rows.length,inserted:Number(inserted||0)});
+      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,inserted:Number(inserted||0)});
     }
     const line=await sendPendingLineAlerts(supabase,raceDate);
     return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
