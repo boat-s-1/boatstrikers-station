@@ -97,6 +97,56 @@ export default function CharacterAiRoomPanel() {
     const page = document.querySelector(meta.pageSelector);
     if (!target || !page) return undefined;
 
+    let ichikaBannerStyle = null;
+    if (character === "ichika") {
+      ichikaBannerStyle = document.createElement("style");
+      ichikaBannerStyle.dataset.ichikaFullWidthTitles = "true";
+      ichikaBannerStyle.textContent = `
+        .ichikaPage .sectionCard > .homeTitleImage,
+        .ichikaPage .sectionCard .sectionTitleRow .homeTitleImage {
+          display: block !important;
+          width: calc(100% + 36px) !important;
+          max-width: none !important;
+          height: auto !important;
+          margin-left: -18px !important;
+          margin-right: -18px !important;
+          margin-top: -18px !important;
+          margin-bottom: 18px !important;
+          border-radius: 22px 22px 14px 14px !important;
+          object-fit: cover !important;
+        }
+        .ichikaPage .sectionCard .sectionTitleRow:has(.homeTitleImage) {
+          display: block !important;
+          width: 100% !important;
+        }
+        section[aria-label="一果 AI予想"] > div:first-child {
+          width: calc(100% + 36px) !important;
+          margin: -18px -18px 18px !important;
+          border-radius: 18px 18px 14px 14px !important;
+          overflow: hidden !important;
+        }
+        section[aria-label="一果 AI予想"] > div:first-child img {
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          object-fit: cover !important;
+        }
+        @media (max-width: 760px) {
+          .ichikaPage .sectionCard > .homeTitleImage,
+          .ichikaPage .sectionCard .sectionTitleRow .homeTitleImage {
+            width: calc(100% + 36px) !important;
+            margin-left: -18px !important;
+            margin-right: -18px !important;
+          }
+          section[aria-label="一果 AI予想"] > div:first-child {
+            width: calc(100% + 28px) !important;
+            margin: -14px -14px 16px !important;
+          }
+        }
+      `;
+      document.head.appendChild(ichikaBannerStyle);
+    }
+
     const node = document.createElement("div");
     node.className = styles.portalMount;
     target.insertAdjacentElement("afterend", node);
@@ -163,6 +213,7 @@ export default function CharacterAiRoomPanel() {
       if (oldToolSection) oldToolSection.style.display = previousDisplay;
       if (ichikaTodayComment) ichikaTodayComment.style.display = previousTodayDisplay;
       if (ichikaBottomNav) ichikaBottomNav.style.display = previousBottomNavDisplay;
+      ichikaBannerStyle?.remove();
       node.remove();
       performanceNode?.remove();
       researchNode.remove();
