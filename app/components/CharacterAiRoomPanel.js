@@ -223,7 +223,7 @@ export default function CharacterAiRoomPanel() {
       {character === "ichika" ? (
         <div className={styles.ichikaBannerHeading}>
           <img
-            src="/89404A04-FCEE-4CD8-9CCC-DDEBDB116BC0.png"
+            src="/89404A04-FCEE-4CD8-9CCC-DDEBDB116BC0.png?v=20260827-0451"
             alt="今日の注目！ 一果AI イン逃げ予想"
             className={styles.ichikaBannerImage}
           />
