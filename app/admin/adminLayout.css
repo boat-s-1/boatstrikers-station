@@ -1,0 +1,72 @@
+.bs-admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  width: 100%;
+  border-bottom: 1px solid rgba(191, 219, 235, .9);
+  background: rgba(248, 252, 255, .94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.bs-admin-topbar-inner {
+  width: min(100% - 24px, 1080px);
+  min-height: 52px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bs-admin-backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #cfe5f2;
+  border-radius: 12px;
+  color: #176f9f;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(36, 102, 142, .06);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.bs-admin-backlink:hover {
+  transform: translateY(-1px);
+  border-color: #9dcee7;
+  box-shadow: 0 6px 16px rgba(36, 102, 142, .1);
+}
+
+.bs-admin-backlink span:first-child {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.bs-admin-topbar-label {
+  color: #8aa0b1;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+@media (max-width: 620px) {
+  .bs-admin-topbar-inner {
+    width: min(100% - 16px, 1080px);
+    min-height: 48px;
+  }
+
+  .bs-admin-backlink {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .bs-admin-topbar-label {
+    display: none;
+  }
+}
