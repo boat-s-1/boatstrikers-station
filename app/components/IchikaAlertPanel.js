@@ -108,7 +108,7 @@ export default async function IchikaAlertPanel() {
     <section style={{ margin: "18px 14px", borderRadius: 24, overflow: "hidden", background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.10)", border: "2px solid #ff7eaa" }}>
       <div style={{ position: "relative", overflow: "hidden", background: "#f7fbff" }}>
         <img
-          src="/E8FA3EF7-0B20-4135-AD2D-6C592E64FCDA.png?v=20260827-0503"
+          src="/E8FA3EF7-0B20-4135-AD2D-6C592E64FCDA.png?v=20260827-0651"
           alt="一果アラート 隠れイン理論"
           style={{ display: "block", width: "100%", height: "auto" }}
         />
