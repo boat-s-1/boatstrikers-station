@@ -220,17 +220,28 @@ export default function CharacterAiRoomPanel() {
       className={`${styles.panel} ${styles[meta.tone]} ${character === "hatsune" ? styles.hatsuneCompact : ""}`}
       aria-label={`${meta.name} AI予想`}
     >
-      <div className={styles.heading}>
-        <div>
-          <span className={styles.kicker}>BOATSTRIKERS AI V2</span>
-          <h2>🤖 {meta.title}</h2>
-          <p>{meta.subtitle}</p>
+      {character === "ichika" ? (
+        <div className={styles.ichikaBannerHeading}>
+          <img
+            src="/ichika-ai-banner.svg"
+            alt="今日の注目！ 一果AI イン逃げ予想"
+            className={styles.ichikaBannerImage}
+          />
+          <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
-        <div className={styles.headingActions}>
-          {character === "hatsune" ? <a href="/races">もっと見る →</a> : null}
-          <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
+      ) : (
+        <div className={styles.heading}>
+          <div>
+            <span className={styles.kicker}>BOATSTRIKERS AI V2</span>
+            <h2>🤖 {meta.title}</h2>
+            <p>{meta.subtitle}</p>
+          </div>
+          <div className={styles.headingActions}>
+            {character === "hatsune" ? <a href="/races">もっと見る →</a> : null}
+            <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {loading ? (
         <div className={styles.loading}>AI予想を読み込み中...</div>
