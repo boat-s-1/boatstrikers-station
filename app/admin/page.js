@@ -149,8 +149,15 @@ const GROUPS = [
     key: "system",
     icon: "⚙️",
     title: "システム",
-    description: "同期・データ・稼働状態を確認",
+    description: "同期・データ・会員・稼働状態を確認",
     items: [
+      {
+        href: "/admin/members",
+        icon: "👥",
+        title: "会員管理",
+        text: "登録会員・β会員・メール確認・LINE連携を確認",
+        badge: "NEW",
+      },
       {
         href: "/admin/sync",
         icon: "🔄",
@@ -163,6 +170,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/members", icon: "👥", title: "会員管理" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
   { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
   { href: "/admin/realtime", icon: "⚡", title: "速報更新" },
