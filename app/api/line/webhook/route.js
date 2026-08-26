@@ -19,18 +19,40 @@ function verifySignature(rawBody,signature,secret){
   return a.length===b.length&&timingSafeEqual(a,b);
 }
 
-async function replyMessage(replyToken,text){
+async function lineRequest(path,payload){
   const accessToken=process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  if(!accessToken||!replyToken)return;
+  if(!accessToken){
+    console.error("LINE_CHANNEL_ACCESS_TOKEN is not configured");
+    return {ok:false,status:0,body:"missing access token"};
+  }
   try{
-    await fetch("https://api.line.me/v2/bot/message/reply",{
+    const response=await fetch(`https://api.line.me/v2/bot/message/${path}`,{
       method:"POST",
       headers:{Authorization:`Bearer ${accessToken}`,"Content-Type":"application/json"},
-      body:JSON.stringify({replyToken,messages:[{type:"text",text}]})
+      body:JSON.stringify(payload),
     });
+    const body=await response.text().catch(()=>"");
+    if(!response.ok){
+      console.error(`LINE ${path} failed`,response.status,body);
+      return {ok:false,status:response.status,body};
+    }
+    return {ok:true,status:response.status,body};
   }catch(error){
-    console.error("LINE reply failed",error);
+    console.error(`LINE ${path} request failed`,error);
+    return {ok:false,status:0,body:String(error?.message||error||"")};
   }
+}
+
+async function replyOrPush({replyToken,lineUserId,text}){
+  if(replyToken){
+    const reply=await lineRequest("reply",{replyToken,messages:[{type:"text",text}]});
+    if(reply.ok)return true;
+  }
+  if(lineUserId){
+    const push=await lineRequest("push",{to:lineUserId,messages:[{type:"text",text}],notificationDisabled:false});
+    return push.ok;
+  }
+  return false;
 }
 
 export async function POST(request){
@@ -55,11 +77,11 @@ export async function POST(request){
         .eq("code",code).is("used_at",null).maybeSingle();
 
       if(codeError||!linkCode){
-        await replyMessage(event.replyToken,"連携コードを確認できませんでした。サイトの会員ページで新しいコードを発行してください。");
+        await replyOrPush({replyToken:event.replyToken,lineUserId,text:"連携コードを確認できませんでした。サイトの会員ページで新しいコードを発行してください。"});
         continue;
       }
       if(new Date(linkCode.expires_at).getTime()<Date.now()){
-        await replyMessage(event.replyToken,"連携コードの有効期限が切れています。サイトの会員ページで新しいコードを発行してください。");
+        await replyOrPush({replyToken:event.replyToken,lineUserId,text:"連携コードの有効期限が切れています。サイトの会員ページで新しいコードを発行してください。"});
         continue;
       }
 
@@ -69,10 +91,15 @@ export async function POST(request){
         .eq("user_id",linkCode.user_id);
       if(profileError)throw profileError;
 
-      await admin.from("bs_member_line_link_codes")
+      const {error:codeUpdateError}=await admin.from("bs_member_line_link_codes")
         .update({used_at:now,line_user_id:lineUserId}).eq("id",linkCode.id);
+      if(codeUpdateError)throw codeUpdateError;
 
-      await replyMessage(event.replyToken,"✅ BoatStrikers会員とのLINE連携が完了しました。会員限定のお知らせを受け取れるようになりました。");
+      await replyOrPush({
+        replyToken:event.replyToken,
+        lineUserId,
+        text:"✅ BoatStrikers会員とのLINE連携が完了しました。\n通知設定はBoatStrikers会員ページから変更できます。",
+      });
     }
 
     return NextResponse.json({ok:true});
