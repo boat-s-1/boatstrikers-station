@@ -67,9 +67,14 @@ export async function GET(request){
       const source=await fetchBoatersOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,status:source.status||null,error:source.error||null});continue;}
       const syncedAt=new Date().toISOString();
-      for(const row of source.rows){const {error:updateError}=await supabase.from("bs_race_entries").update({official_lap:row.lapTime,official_turn:row.turnTime,official_straight:row.straightTime,official_exhibition_time:row.exhibitionTime,official_exhibition_source:"boaters_realtime",official_exhibition_synced_at:syncedAt}).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);if(updateError)throw updateError;}
+      for(const row of source.rows){
+        const update={official_lap:row.lapTime,official_turn:row.turnTime,official_straight:row.straightTime,official_exhibition_time:row.exhibitionTime,official_exhibition_source:"boaters_realtime",official_exhibition_synced_at:syncedAt};
+        if(row.exhibitionSt!==null&&row.exhibitionSt!==undefined)update.official_exhibition_st=row.exhibitionSt;
+        if(row.exhibitionSymbol!==undefined)update.official_exhibition_symbol=row.exhibitionSymbol||null;
+        const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);if(updateError)throw updateError;
+      }
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,rows:source.rows.length,inserted:Number(inserted||0)});
+      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,startPublished:Boolean(source.startPublished),rows:source.rows.length,inserted:Number(inserted||0)});
     }
     const line=await sendPendingLineAlerts(supabase,raceDate);
     return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
