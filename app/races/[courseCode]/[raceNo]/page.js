@@ -56,6 +56,14 @@ function preferRealtimeExhibition(entry) {
   };
 }
 
+function isExhibitionReady(entries) {
+  return (
+    Array.isArray(entries) &&
+    entries.length === 6 &&
+    entries.every((entry) => hasValue(entry?.exhibition_time))
+  );
+}
+
 async function getPremiumAccess(){
   try{
     const cookieStore=await cookies();
@@ -108,6 +116,7 @@ export default async function RaceDetailPage({
   const displayEntries = Array.isArray(data?.entries)
     ? data.entries.map(preferRealtimeExhibition)
     : [];
+  const exhibitionReady = isExhibitionReady(displayEntries);
 
   const courseName = getCourseName(courseCode);
   const paddedCourseCode = String(courseCode).padStart(
@@ -152,7 +161,11 @@ export default async function RaceDetailPage({
                 data.previousPrediction
               }
               noteFeature={data.noteFeature}
-              livePrediction={premiumAccess ? data.livePrediction : null}
+              livePrediction={
+                premiumAccess && exhibitionReady
+                  ? data.livePrediction
+                  : null
+              }
               syncedAt={
                 data?.event?.synced_at
                   ? formatJstDateTime(
