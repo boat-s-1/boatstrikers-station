@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  padding: 28px 16px 90px;
+  padding: 28px 16px 110px;
   background:
     radial-gradient(circle at top right, rgba(36, 155, 222, .16), transparent 30%),
     linear-gradient(180deg, #edf9ff 0%, #f8fbff 46%, #ffffff 100%);
@@ -20,7 +20,7 @@
   padding: 24px 26px;
   border: 1px solid #d4eaf7;
   border-radius: 28px;
-  background: rgba(255, 255, 255, .92);
+  background: rgba(255, 255, 255, .94);
   box-shadow: 0 14px 36px rgba(26, 84, 126, .08);
 }
 
@@ -78,6 +78,7 @@
 
 .todayPanel,
 .alertSection,
+.notificationCenter,
 .favoriteSection,
 .group {
   margin-top: 18px;
@@ -86,6 +87,13 @@
   border-radius: 24px;
   background: #fff;
   box-shadow: 0 8px 25px rgba(24, 70, 108, .055);
+  scroll-margin-top: 16px;
+}
+
+.notificationCenter {
+  border-color: #cfe7f5;
+  background:
+    linear-gradient(180deg, rgba(239, 249, 255, .92), #fff 34%);
 }
 
 .panelHeading {
@@ -100,6 +108,14 @@
   margin: 4px 0 0;
   font-size: 22px;
   letter-spacing: -.02em;
+}
+
+.miniLink {
+  color: #1688c3;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .syncPill {
@@ -231,6 +247,182 @@
 .alertItem i {
   font-size: 22px;
   font-style: normal;
+}
+
+.theoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.theoryCard {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #dbeaf3;
+  border-radius: 20px;
+  color: inherit;
+  background: #fff;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(25, 75, 110, .04);
+}
+
+.theoryHead {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.theoryHead > b {
+  font-size: 24px;
+}
+
+.theoryHead strong,
+.theoryHead small {
+  display: block;
+}
+
+.theoryHead strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theoryHead small {
+  margin-top: 2px;
+  color: #8aa0b3;
+  font-size: 9px;
+}
+
+.theoryHead i {
+  color: #2a98cb;
+  font-size: 22px;
+  font-style: normal;
+}
+
+.theoryStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 13px;
+}
+
+.theoryStats > span {
+  min-width: 0;
+  padding: 9px 7px;
+  border-radius: 13px;
+  background: #f7fbfe;
+  text-align: center;
+}
+
+.theoryStats small,
+.theoryStats strong {
+  display: block;
+}
+
+.theoryStats small {
+  color: #8297aa;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.theoryStats strong {
+  margin-top: 4px;
+  color: #1d4668;
+  font-size: 16px;
+}
+
+.recentWrap {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e4eef5;
+}
+
+.recentTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.recentTitle strong {
+  font-size: 13px;
+}
+
+.recentTitle small {
+  color: #92a5b5;
+  font-size: 9px;
+}
+
+.recentList {
+  display: grid;
+  gap: 7px;
+}
+
+.recentItem {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 1px solid #e4edf4;
+  border-radius: 14px;
+  color: inherit;
+  background: #fff;
+  text-decoration: none;
+}
+
+.recentItem > b {
+  font-size: 19px;
+}
+
+.recentItem span,
+.recentItem strong,
+.recentItem small {
+  display: block;
+  min-width: 0;
+}
+
+.recentItem strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentItem small {
+  margin-top: 2px;
+  color: #8499ab;
+  font-size: 9px;
+}
+
+.recentItem em {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.sent {
+  color: #067647;
+  background: #ecfdf3;
+}
+
+.pending {
+  color: #b54708;
+  background: #fffaeb;
+}
+
+.emptyRecent {
+  padding: 16px;
+  border-radius: 14px;
+  color: #8ba0b3;
+  background: #f8fbfd;
+  text-align: center;
+  font-size: 11px;
 }
 
 .favoriteGrid {
@@ -402,6 +594,10 @@
   text-decoration: none;
 }
 
+.adminDock {
+  display: none;
+}
+
 @media (max-width: 820px) {
   .groups {
     grid-template-columns: 1fr;
@@ -411,16 +607,69 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .theoryGrid {
+    grid-template-columns: 1fr;
+  }
+
   .favoriteGrid {
     grid-template-columns: repeat(5, minmax(86px, 1fr));
     overflow-x: auto;
     padding-bottom: 4px;
   }
+
+  .adminDock {
+    position: fixed;
+    z-index: 50;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 7px;
+    border: 1px solid rgba(196, 222, 238, .95);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 12px 32px rgba(23, 73, 108, .18);
+    backdrop-filter: blur(14px);
+  }
+
+  .adminDock a {
+    display: flex;
+    min-width: 0;
+    min-height: 54px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border-radius: 15px;
+    color: #46657f;
+    text-decoration: none;
+  }
+
+  .adminDock a:active {
+    background: #eef8fd;
+  }
+
+  .adminDock b {
+    font-size: 18px;
+  }
+
+  .adminDock span {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 8px;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 620px) {
   .page {
-    padding: 13px 10px 90px;
+    padding: 13px 10px 112px;
   }
 
   .hero {
@@ -439,11 +688,16 @@
 
   .todayPanel,
   .alertSection,
+  .notificationCenter,
   .favoriteSection,
   .group {
     margin-top: 12px;
     padding: 14px;
     border-radius: 20px;
+  }
+
+  .panelHeading {
+    align-items: flex-start;
   }
 
   .panelHeading h2 {
@@ -461,6 +715,18 @@
   .syncMeta {
     display: grid;
     gap: 5px;
+  }
+
+  .theoryCard {
+    padding: 13px;
+  }
+
+  .theoryStats strong {
+    font-size: 15px;
+  }
+
+  .recentItem {
+    padding: 10px;
   }
 
   .favoriteGrid {
