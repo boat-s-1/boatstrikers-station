@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import SocialMaterialsPanel from "./SocialMaterialsPanel";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -63,21 +64,44 @@ function pct(value) {
   return `${(n * 100).toFixed(1)}%`;
 }
 
+function raceKey(courseCode, raceNo) {
+  return `${Number(courseCode)}:${Number(raceNo)}`;
+}
+
 async function loadRows(date, timing) {
   const client = getClient();
   if (!client) return { rows: [], error: "Supabase環境変数がありません。" };
 
-  const { data, error } = await client
-    .from("ai_v2_daily_rankings")
-    .select("ranking_date,character_code,ranking_type,rank_no,course_code,race_no,probability,model_version,summary,metrics,data_timing,selected_for_social,selected_for_home")
-    .eq("ranking_date", date)
-    .eq("data_timing", timing)
-    .in("ranking_type", TYPE_ORDER)
-    .order("ranking_type", { ascending: true })
-    .order("rank_no", { ascending: true });
+  const [rankingResult, eventResult] = await Promise.all([
+    client
+      .from("ai_v2_daily_rankings")
+      .select("ranking_date,character_code,ranking_type,rank_no,course_code,race_no,probability,model_version,summary,metrics,data_timing,selected_for_social,selected_for_home")
+      .eq("ranking_date", date)
+      .eq("data_timing", timing)
+      .in("ranking_type", TYPE_ORDER)
+      .order("ranking_type", { ascending: true })
+      .order("rank_no", { ascending: true }),
+    client
+      .from("bs_race_events")
+      .select("course_code,race_no,closing_time")
+      .eq("race_date", date),
+  ]);
 
-  if (error) return { rows: [], error: error.message };
-  return { rows: data || [], error: null };
+  if (rankingResult.error) return { rows: [], error: rankingResult.error.message };
+
+  const closingByRace = new Map();
+  if (!eventResult.error) {
+    for (const event of eventResult.data || []) {
+      closingByRace.set(raceKey(event.course_code, event.race_no), event.closing_time || null);
+    }
+  }
+
+  const rows = (rankingResult.data || []).map((row) => ({
+    ...row,
+    closing_time: closingByRace.get(raceKey(row.course_code, row.race_no)) || null,
+  }));
+
+  return { rows, error: null };
 }
 
 async function saveSelections(formData) {
@@ -143,6 +167,17 @@ export default async function AiCandidatesPage({ searchParams }) {
 
   const homeCount = rows.filter((row) => row.selected_for_home).length;
   const socialCount = rows.filter((row) => row.selected_for_social).length;
+  const ichikaSocialPicks = rows
+    .filter((row) => row.ranking_type === "ichika_escape_best10" && row.selected_for_social)
+    .sort((a, b) => Number(a.rank_no) - Number(b.rank_no))
+    .map((row) => ({
+      rankNo: Number(row.rank_no),
+      courseCode: Number(row.course_code),
+      courseName: STADIUMS[Number(row.course_code)] || `${row.course_code}場`,
+      raceNo: Number(row.race_no),
+      probability: row.probability == null ? null : Number(row.probability),
+      closingTime: row.closing_time,
+    }));
 
   return (
     <main className={styles.page}>
@@ -178,10 +213,12 @@ export default async function AiCandidatesPage({ searchParams }) {
           </div>
         </section>
 
-        {saved && <div className={styles.success}>✓ 選択内容を保存しました。</div>}
+        {saved && <div className={styles.success}>✓ 選択内容を保存しました。SNS素材も更新されています。</div>}
         {(error || actionError) && (
           <div className={styles.error}>保存・取得時にエラーが発生しました。{error ? ` ${error}` : ""}</div>
         )}
+
+        <SocialMaterialsPanel picks={ichikaSocialPicks} date={date} timing={timing} />
 
         {rows.length === 0 ? (
           <section className={styles.empty}>
@@ -222,6 +259,7 @@ export default async function AiCandidatesPage({ searchParams }) {
                           </div>
 
                           <div className={styles.metrics}>
+                            {row.closing_time ? <span>〆切 {String(row.closing_time).slice(0, 5)}</span> : null}
                             {Number.isFinite(raw) && <span>AI raw {pct(raw)}</span>}
                             {Number.isFinite(common) && <span>共通1着 {pct(common)}</span>}
                           </div>
@@ -257,7 +295,7 @@ export default async function AiCandidatesPage({ searchParams }) {
             <div className={styles.stickySave}>
               <div>
                 <strong>今日使うレースを選択</strong>
-                <span>チェックを変更したら保存してください。</span>
+                <span>チェックを変更したら保存してください。SNS素材は保存後に自動更新されます。</span>
               </div>
               <button type="submit">選択を保存</button>
             </div>
