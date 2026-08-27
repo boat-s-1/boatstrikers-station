@@ -36,9 +36,17 @@ function scripts(html, baseUrl) {
 function dataAttributes(html) {
   const out = [];
   for (const match of String(html || "").matchAll(/\b(data-[\w-]+)=["']([^"']+)["']/gi)) {
-    if (/(tab|race|tenji|cyokuzen|page|url|req)/i.test(`${match[1]} ${match[2]}`)) out.push(`${match[1]}=${match[2]}`);
+    if (/(tab|race|tenji|cyokuzen|page|url|req|run|day)/i.test(`${match[1]} ${match[2]}`)) out.push(`${match[1]}=${match[2]}`);
   }
-  return unique(out).slice(0, 160);
+  return unique(out).slice(0, 200);
+}
+
+function reqElements(html) {
+  const out = [];
+  for (const match of String(html || "").matchAll(/<[^>]+\bdata-req=["'](?:cyokuzen|sttenji)["'][^>]*>/gi)) {
+    out.push(match[0]);
+  }
+  return unique(out).slice(0, 20);
 }
 
 function endpointCandidates(text) {
@@ -72,6 +80,25 @@ async function fetchText(url, timeoutMs = 7000) {
   }
 }
 
+function detectTargetDay(html) {
+  const m = String(html || "").match(/getYosou\(\s*(\d{8})\s*,/);
+  return m?.[1] || null;
+}
+
+function summarizeProbe(result) {
+  const text = result?.text || "";
+  const keywords = ["一周", "まわり足", "回り足", "直線", "オリジナル展示", "展示タイム"];
+  return {
+    ok: Boolean(result?.ok),
+    status: result?.status ?? null,
+    url: result?.url ?? null,
+    length: text.length,
+    keywordPresence: Object.fromEntries(keywords.map((k) => [k, text.includes(k)])),
+    snippet: keywords.map((k) => snippet(text, k, 350)).find(Boolean) || text.slice(0, 1000),
+    error: result?.error || null,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const race = Math.min(12, Math.max(1, Number(searchParams.get("race") || 12)));
@@ -92,7 +119,7 @@ export async function GET(request) {
     const scriptDiagnostics = [];
     for (const scriptUrl of scriptUrls.filter((u) => u.includes("boatrace-tsu.com")).slice(0, 14)) {
       const fetched = await fetchText(scriptUrl, 6000);
-      const ajaxNeedles = ["getYosou", "$.ajax", "url:", "data:", "data-req", "cyokuzen", "sttenji", "resultrace"];
+      const ajaxNeedles = ["getYosou", "$.ajax", "url:", "data:", "data-req", "data-run", "cyokuzen", "sttenji", "resultrace"];
       scriptDiagnostics.push({
         url: scriptUrl,
         ok: fetched.ok,
@@ -105,19 +132,34 @@ export async function GET(request) {
       });
     }
 
+    const targetDay = detectTargetDay(html);
+    const ajaxProbes = [];
+    if (targetDay) {
+      for (const req of ["cyokuzen", "sttenji"]) {
+        for (const run of [0, 1, 2, 3]) {
+          const ajaxUrl = `https://www.boatrace-tsu.com/sp/ajax/ajax_yosou.php?targetday=${targetDay}&race=${race}&req=${req}&run=${run}`;
+          const result = await fetchText(ajaxUrl, 5000);
+          ajaxProbes.push({ req, run, ...summarizeProbe(result) });
+        }
+      }
+    }
+
     return NextResponse.json({
       ok: response.ok,
       status: response.status,
       race,
       url: response.url,
+      targetDay,
       length: html.length,
       keywordPresence: Object.fromEntries(keywords.map((k) => [k, html.includes(k)])),
       snippets,
       tables,
       links: links(html, response.url),
       dataAttributes: dataAttributes(html),
+      reqElements: reqElements(html),
       inlineEndpoints: endpointCandidates(html),
       scripts: scriptDiagnostics,
+      ajaxProbes,
       ranAt: new Date().toISOString(),
     });
   } catch (error) {
