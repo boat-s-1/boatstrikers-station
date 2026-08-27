@@ -1,0 +1,50 @@
+name: Hatsune NEWS Daily
+
+on:
+  schedule:
+    # 13:20 UTC = 22:20 JST
+    - cron: "20 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-hatsune-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run Hatsune NEWS pipeline
+        env:
+          CRON_SECRET: ${{ secrets.HATSUNE_NEWS_CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "HATSUNE_NEWS_CRON_SECRET is not configured."
+            exit 1
+          fi
+
+          response_file=$(mktemp)
+          status=$(curl \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 120 \
+            --output "$response_file" \
+            --write-out "%{http_code}" \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            --header "User-Agent: BoatStrikers-GitHub-Actions/1.0" \
+            "https://www.boat-strike.online/api/cron/hatsune-news-pipeline")
+
+          echo "HTTP status: $status"
+          cat "$response_file"
+          echo
+
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "Hatsune NEWS pipeline failed."
+            exit 1
+          fi
+
+          echo "### Hatsune NEWS Daily" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Scheduled time: 22:20 JST" >> "$GITHUB_STEP_SUMMARY"
+          echo "- HTTP status: $status" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Completed at: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')" >> "$GITHUB_STEP_SUMMARY"
