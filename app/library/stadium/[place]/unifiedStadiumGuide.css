@@ -10,6 +10,8 @@
 
 /* Important: target CSS-module class names precisely. Do not use [class*="cover"] because it also matches coverage. */
 .stadiumUnified24 [class*="_cover__"]{border:1px solid #ffffff22}
+.stadiumUnified24 [class*="_coverCopy__"]{max-width:100%!important}
+.stadiumUnified24 [class*="_coverScore__"]{display:none!important}
 .stadiumUnified24 [class*="_dashboard__"]{border:1px solid #d9e5f1}
 .stadiumUnified24 [class*="_sectionHeading__"] h2{font-weight:950;letter-spacing:-.02em}
 .stadiumUnified24 [class*="_sectionHeading__"] p{font-size:9px}
@@ -43,16 +45,12 @@
 
   /* Cover: magazine feel, but much shorter on mobile */
   .stadiumUnified24 [class*="_cover__"]{min-height:220px!important;padding:18px!important;border-radius:22px!important;align-items:flex-end!important}
-  .stadiumUnified24 [class*="_coverCopy__"]>small{font-size:9px!important;letter-spacing:.13em!important;max-width:58%;display:block;line-height:1.5}
+  .stadiumUnified24 [class*="_coverCopy__"]>small{font-size:9px!important;letter-spacing:.13em!important;max-width:100%!important;display:block;line-height:1.5}
   .stadiumUnified24 [class*="_cover__"] h1{font-size:42px!important;line-height:.98!important;margin:8px 0 4px!important}
   .stadiumUnified24 [class*="_cover__"] h1 span{font-size:13px!important;margin-bottom:6px!important}
   .stadiumUnified24 [class*="_cover__"] p{font-size:12px!important;margin:0 0 12px!important;letter-spacing:.08em!important}
-  .stadiumUnified24 [class*="_coverMeta__"]{gap:5px!important;max-width:72%!important}
+  .stadiumUnified24 [class*="_coverMeta__"]{gap:5px!important;max-width:100%!important}
   .stadiumUnified24 [class*="_coverMeta__"]>*{font-size:9px!important;padding:5px 8px!important;line-height:1.25}
-  .stadiumUnified24 [class*="_coverScore__"]{position:absolute!important;width:88px!important;right:12px!important;top:12px!important;padding:9px 7px!important;border-radius:16px!important}
-  .stadiumUnified24 [class*="_coverScore__"] span{font-size:9px!important}
-  .stadiumUnified24 [class*="_coverScore__"] strong{font-size:34px!important;margin:5px 0!important}
-  .stadiumUnified24 [class*="_stars__"]{font-size:12px!important;letter-spacing:.04em!important}
   .stadiumUnified24 [class*="_coverNumber__"]{font-size:125px!important;top:-22px!important}
 
   .stadiumUnified24 [class*="_sourceNotice__"]{padding:10px 12px!important;margin-top:10px!important}
