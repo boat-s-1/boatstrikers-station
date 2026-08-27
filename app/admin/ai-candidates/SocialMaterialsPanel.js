@@ -5,6 +5,30 @@ import styles from "./SocialMaterialsPanel.module.css";
 
 const MAX_PICKS = 3;
 
+const CHARACTER_META = {
+  ichika: {
+    heading: "一果の朝刊！今日のイン逃げ注目",
+    description: "SNS使用に保存した一果AI候補の上位3レースから自動作成します。",
+    postLead: "一果の朝刊🚤 今日のイン逃げ注目BEST3",
+    detail: "AI期待度から今日の注目レースを厳選。",
+    empty: "一果の候補で「SNS使用」にチェックして「選択を保存」すると、ここに画像作成プロンプトとX投稿文が表示されます。",
+  },
+  hatsune: {
+    heading: "初音の朝刊！今日のオススメ女子戦",
+    description: "SNS使用に保存した初音AI候補の上位3レースから自動作成します。",
+    postLead: "初音の朝刊🌸 今日のオススメ女子戦BEST3",
+    detail: "女子戦AIから今日チェックしたい3レースを厳選。",
+    empty: "初音の候補で「SNS使用」にチェックして「選択を保存」すると、ここに画像作成プロンプトとX投稿文が表示されます。",
+  },
+  kiina: {
+    heading: "キイナの朝刊！今日の穴狙い",
+    description: "SNS使用に保存したキイナAI候補の上位3レースから自動作成します。",
+    postLead: "キイナの朝刊🔥 今日の穴狙いBEST3",
+    detail: "5アタマAIから今日の穴狙い候補を厳選。",
+    empty: "キイナの候補で「SNS使用」にチェックして「選択を保存」すると、ここに画像作成プロンプトとX投稿文が表示されます。",
+  },
+};
+
 function formatClosingTime(value) {
   const text = String(value ?? "").trim();
   if (!text) return "時刻未取得";
@@ -41,7 +65,7 @@ function countChars(text) {
   return Array.from(text).length;
 }
 
-function buildXPost(picks) {
+function buildXPost(picks, meta) {
   const medals = ["🥇", "🥈", "🥉"];
   const raceLinesWithPct = picks.map((pick, index) => {
     const pct = probabilityText(pick.probability);
@@ -49,10 +73,18 @@ function buildXPost(picks) {
     return `${medals[index]}${pick.courseName}${pick.raceNo}R ${closing}${pct ? `｜AI ${pct}` : ""}`;
   });
 
+  const raceLines = picks.map(
+    (pick, index) => `${medals[index]}${pick.courseName}${pick.raceNo}R ${formatClosingTime(pick.closingTime)}`
+  );
+
+  const compactLines = picks.map(
+    (pick, index) => `${index + 1}位 ${pick.courseName}${pick.raceNo}R ${formatClosingTime(pick.closingTime)}`
+  );
+
   const variants = [
-    `一果の朝刊🚤 今日のイン逃げ注目BEST3\n${raceLinesWithPct.join("\n")}\nAI期待度から今日の注目レースを厳選。詳しくはBoatStrikersで！ #ボートレース`,
-    `一果の朝刊🚤 今日のイン逃げ注目BEST3\n${picks.map((pick, index) => `${medals[index]}${pick.courseName}${pick.raceNo}R ${formatClosingTime(pick.closingTime)}`).join("\n")}\nAI期待度から厳選しました。詳しくはBoatStrikersで！ #ボートレース`,
-    `一果の朝刊🚤 イン逃げ注目BEST3\n${picks.map((pick, index) => `${index + 1}位 ${pick.courseName}${pick.raceNo}R ${formatClosingTime(pick.closingTime)}`).join("\n")}\n詳しくはBoatStrikersで！ #ボートレース`,
+    `${meta.postLead}\n${raceLinesWithPct.join("\n")}\n${meta.detail}詳しくはBoatStrikersで！ #ボートレース`,
+    `${meta.postLead}\n${raceLines.join("\n")}\n${meta.detail}詳しくはBoatStrikersで！ #ボートレース`,
+    `${meta.postLead}\n${compactLines.join("\n")}\n詳しくはBoatStrikersで！ #ボートレース`,
   ];
 
   return variants.find((text) => countChars(text) <= 140) || Array.from(variants[2]).slice(0, 140).join("");
@@ -68,7 +100,8 @@ async function copyText(text, setter) {
   }
 }
 
-export default function SocialMaterialsPanel({ picks = [], date, timing }) {
+export default function SocialMaterialsPanel({ picks = [], date, timing, character = "ichika" }) {
+  const meta = CHARACTER_META[character] || CHARACTER_META.ichika;
   const selected = useMemo(
     () => picks.slice().sort((a, b) => Number(a.rankNo) - Number(b.rankNo)).slice(0, MAX_PICKS),
     [picks]
@@ -77,7 +110,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing }) {
   const [postCopied, setPostCopied] = useState(false);
 
   const imagePrompt = useMemo(() => buildImagePrompt(selected), [selected]);
-  const xPost = useMemo(() => buildXPost(selected), [selected]);
+  const xPost = useMemo(() => buildXPost(selected, meta), [selected, meta]);
   const xLength = countChars(xPost);
 
   return (
@@ -85,8 +118,8 @@ export default function SocialMaterialsPanel({ picks = [], date, timing }) {
       <div className={styles.heading}>
         <div>
           <span>SNS MATERIALS</span>
-          <h2>一果の朝刊・SNS素材</h2>
-          <p>SNS使用に保存した一果AI候補の上位3レースから自動作成します。</p>
+          <h2>{meta.heading}</h2>
+          <p>{meta.description}</p>
         </div>
         <div className={styles.meta}>
           <strong>{selected.length}/3レース</strong>
@@ -95,9 +128,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing }) {
       </div>
 
       {selected.length === 0 ? (
-        <div className={styles.empty}>
-          一果の候補で「SNS使用」にチェックして「選択を保存」すると、ここに画像作成プロンプトとX投稿文が表示されます。
-        </div>
+        <div className={styles.empty}>{meta.empty}</div>
       ) : (
         <>
           <div className={styles.pickPreview}>
