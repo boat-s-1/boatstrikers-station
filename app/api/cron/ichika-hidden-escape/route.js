@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
+import { fetchBestOriginalTenji } from "../../../../lib/originalTenjiSource";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -127,9 +127,9 @@ export async function GET(request){
 
     const results=[];
     for(const race of targets){
-      const source=await fetchBoatersOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      const source=await fetchBestOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       if(!source.ok){
-        results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,error:source.error||null});
+        results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null,diagnostics:source.diagnostics||null});
         continue;
       }
       const syncedAt=new Date().toISOString();
@@ -139,14 +139,14 @@ export async function GET(request){
           official_turn:row.turnTime,
           official_straight:row.straightTime,
           official_exhibition_time:row.exhibitionTime,
-          official_exhibition_source:"boaters_realtime",
+          official_exhibition_source:source.source||"unknown_realtime",
           official_exhibition_synced_at:syncedAt,
         }).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);
         if(updateError)throw updateError;
       }
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_ichika_hidden_escape_alerts");
       if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,published:true,inserted:Number(inserted||0)});
+      results.push({courseCode:race.course_code,raceNo:race.race_no,published:true,source:source.source,sourceKind:source.sourceKind,fallbackUsed:Boolean(source.fallbackUsed),inserted:Number(inserted||0)});
     }
 
     const line=await sendPendingAlerts(supabase,raceDate);
