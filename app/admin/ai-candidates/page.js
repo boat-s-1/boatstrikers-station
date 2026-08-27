@@ -68,6 +68,28 @@ function raceKey(courseCode, raceNo) {
   return `${Number(courseCode)}:${Number(raceNo)}`;
 }
 
+function buildSocialPicks(rows, rankingTypes) {
+  const seen = new Set();
+
+  return rows
+    .filter((row) => rankingTypes.includes(row.ranking_type) && row.selected_for_social)
+    .sort((a, b) => Number(a.rank_no) - Number(b.rank_no))
+    .filter((row) => {
+      const key = raceKey(row.course_code, row.race_no);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((row) => ({
+      rankNo: Number(row.rank_no),
+      courseCode: Number(row.course_code),
+      courseName: STADIUMS[Number(row.course_code)] || `${row.course_code}場`,
+      raceNo: Number(row.race_no),
+      probability: row.probability == null ? null : Number(row.probability),
+      closingTime: row.closing_time,
+    }));
+}
+
 async function loadRows(date, timing) {
   const client = getClient();
   if (!client) return { rows: [], error: "Supabase環境変数がありません。" };
@@ -167,17 +189,9 @@ export default async function AiCandidatesPage({ searchParams }) {
 
   const homeCount = rows.filter((row) => row.selected_for_home).length;
   const socialCount = rows.filter((row) => row.selected_for_social).length;
-  const ichikaSocialPicks = rows
-    .filter((row) => row.ranking_type === "ichika_escape_best10" && row.selected_for_social)
-    .sort((a, b) => Number(a.rank_no) - Number(b.rank_no))
-    .map((row) => ({
-      rankNo: Number(row.rank_no),
-      courseCode: Number(row.course_code),
-      courseName: STADIUMS[Number(row.course_code)] || `${row.course_code}場`,
-      raceNo: Number(row.race_no),
-      probability: row.probability == null ? null : Number(row.probability),
-      closingTime: row.closing_time,
-    }));
+  const ichikaSocialPicks = buildSocialPicks(rows, ["ichika_escape_best10"]);
+  const hatsuneSocialPicks = buildSocialPicks(rows, ["hatsune_dominant_best3", "hatsune_risky_best3"]);
+  const kiinaSocialPicks = buildSocialPicks(rows, ["kiina_boat5_best5"]);
 
   return (
     <main className={styles.page}>
@@ -218,7 +232,9 @@ export default async function AiCandidatesPage({ searchParams }) {
           <div className={styles.error}>保存・取得時にエラーが発生しました。{error ? ` ${error}` : ""}</div>
         )}
 
-        <SocialMaterialsPanel picks={ichikaSocialPicks} date={date} timing={timing} />
+        <SocialMaterialsPanel character="ichika" picks={ichikaSocialPicks} date={date} timing={timing} />
+        <SocialMaterialsPanel character="hatsune" picks={hatsuneSocialPicks} date={date} timing={timing} />
+        <SocialMaterialsPanel character="kiina" picks={kiinaSocialPicks} date={date} timing={timing} />
 
         {rows.length === 0 ? (
           <section className={styles.empty}>
