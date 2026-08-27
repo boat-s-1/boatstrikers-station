@@ -15,6 +15,41 @@ const SECTION_IMAGES = {
   check: "/stadium-guide/section-04-check.png",
 };
 
+// Verified against the official BOAT RACE course-code order and the actual
+// filenames under public/racekouryaku. Both code and stadium name must match
+// before the image is used, preventing an accidental cross-stadium image.
+const RACEKOURYAKU_WATER_IMAGES = {
+  1: { name: "桐生", src: "/racekouryaku/01_桐生.png" },
+  2: { name: "戸田", src: "/racekouryaku/02_戸田.png" },
+  3: { name: "江戸川", src: "/racekouryaku/03_江戸川.png" },
+  4: { name: "平和島", src: "/racekouryaku/04_平和島.png" },
+  5: { name: "多摩川", src: "/racekouryaku/05_多摩川.png" },
+  6: { name: "浜名湖", src: "/racekouryaku/06_浜名湖.png" },
+  7: { name: "蒲郡", src: "/racekouryaku/07_蒲郡.png" },
+  8: { name: "常滑", src: "/racekouryaku/08_常滑.png" },
+  9: { name: "津", src: "/racekouryaku/09_津.png" },
+  10: { name: "三国", src: "/racekouryaku/10_三国.png" },
+  11: { name: "びわこ", src: "/racekouryaku/11_びわこ.png" },
+  12: { name: "住之江", src: "/racekouryaku/12_住之江.png" },
+  13: { name: "尼崎", src: "/racekouryaku/13_尼崎.png" },
+  14: { name: "鳴門", src: "/racekouryaku/14_鳴門.png" },
+  15: { name: "丸亀", src: "/racekouryaku/15_丸亀.png" },
+  16: { name: "児島", src: "/racekouryaku/16_児島.png" },
+  17: { name: "宮島", src: "/racekouryaku/17_宮島.png" },
+  18: { name: "徳山", src: "/racekouryaku/18_徳山.png" },
+  19: { name: "下関", src: "/racekouryaku/19_下関.png" },
+  20: { name: "若松", src: "/racekouryaku/20_若松.png" },
+  21: { name: "芦屋", src: "/racekouryaku/21_芦屋.png" },
+  22: { name: "福岡", src: "/racekouryaku/22_福岡.png" },
+  23: { name: "唐津", src: "/racekouryaku/23_唐津.png" },
+  24: { name: "大村", src: "/racekouryaku/24_大村.png" },
+};
+
+function getVerifiedWaterImage(stadium) {
+  const item = RACEKOURYAKU_WATER_IMAGES[Number(stadium?.courseCode)];
+  return item && item.name === stadium?.name ? item.src : null;
+}
+
 function pct(value) {
   const n = Number(value);
   return Number.isFinite(n) ? `${n.toFixed(1)}%` : "集計中";
@@ -172,7 +207,9 @@ export default async function StadiumInfoPage({ params, searchParams }) {
   }
 
   const rates = staticGuide.courseWinRates || [];
+  const verifiedWaterImage = getVerifiedWaterImage(stadium);
   const layoutImage =
+    verifiedWaterImage ||
     dbGuide?.layout_image_url ||
     staticGuide.layoutImageUrl ||
     null;
