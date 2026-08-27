@@ -36,7 +36,7 @@ function scripts(html, baseUrl) {
 function dataAttributes(html) {
   const out = [];
   for (const match of String(html || "").matchAll(/\b(data-[\w-]+)=["']([^"']+)["']/gi)) {
-    if (/(tab|race|tenji|cyokuzen|page|url)/i.test(`${match[1]} ${match[2]}`)) out.push(`${match[1]}=${match[2]}`);
+    if (/(tab|race|tenji|cyokuzen|page|url|req)/i.test(`${match[1]} ${match[2]}`)) out.push(`${match[1]}=${match[2]}`);
   }
   return unique(out).slice(0, 160);
 }
@@ -45,7 +45,7 @@ function endpointCandidates(text) {
   const out = [];
   for (const match of String(text || "").matchAll(/["'`]([^"'`]{2,220})["'`]/g)) {
     const value = match[1];
-    if (/(yosou|cyokuzen|tenji|sttenji|ajax|api|race=|rno)/i.test(value)) out.push(value);
+    if (/(yosou|cyokuzen|tenji|sttenji|ajax|api|race=|rno|req=)/i.test(value)) out.push(value);
   }
   return unique(out).slice(0, 160);
 }
@@ -92,12 +92,14 @@ export async function GET(request) {
     const scriptDiagnostics = [];
     for (const scriptUrl of scriptUrls.filter((u) => u.includes("boatrace-tsu.com")).slice(0, 14)) {
       const fetched = await fetchText(scriptUrl, 6000);
+      const ajaxNeedles = ["getYosou", "$.ajax", "url:", "data:", "data-req", "cyokuzen", "sttenji", "resultrace"];
       scriptDiagnostics.push({
         url: scriptUrl,
         ok: fetched.ok,
         status: fetched.status,
         contentType: fetched.contentType,
         endpoints: fetched.ok ? endpointCandidates(fetched.text) : [],
+        ajaxSnippets: fetched.ok ? Object.fromEntries(ajaxNeedles.map((k) => [k, snippet(fetched.text, k, 1200)])) : null,
         keywordPresence: fetched.ok ? Object.fromEntries(keywords.map((k) => [k, fetched.text.includes(k)])) : null,
         error: fetched.error || null,
       });
