@@ -1,8 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
-import { fetchOfficialOriginalTenji } from "../../../../lib/officialOriginalTenji";
+import { fetchBestOriginalTenji } from "../../../../lib/originalTenjiSource";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import {
   predictionToDatabaseRow,
@@ -117,25 +116,6 @@ function buildWeatherUpdate(weather,syncedAt){
   return update;
 }
 
-async function fetchBestOriginalTenji(race){
-  const request={raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no};
-  const boaters=await fetchBoatersOriginalTenji(request);
-  if(boaters.ok)return{...boaters,sourceKey:"boaters_realtime",fallbackUsed:false};
-
-  const official=await fetchOfficialOriginalTenji(request);
-  if(official.ok)return{...official,sourceKey:official.source||"venue_official",fallbackUsed:true,boatersError:boaters.error||null};
-
-  return{
-    ok:false,
-    rows:[],
-    sourceKey:null,
-    fallbackUsed:true,
-    error:official.error||boaters.error||"original_tenji_unavailable",
-    boaters:{status:boaters.status||null,error:boaters.error||null},
-    official:{supported:Boolean(official.supported),source:official.source||null,error:official.error||null,attempts:official.attempts||[]},
-  };
-}
-
 export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
   try{
@@ -144,11 +124,11 @@ export async function GET(request){
     const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=18&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,8);
     const results=[];
     for(const race of targets){
-      const source=await fetchBestOriginalTenji(race);
-      if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,boaters:source.boaters||null,official:source.official||null});continue;}
+      const source=await fetchBestOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null});continue;}
       const syncedAt=new Date().toISOString();
       for(const row of source.rows){
-        const update={official_lap:row.lapTime,official_turn:row.turnTime,official_straight:row.straightTime,official_exhibition_time:row.exhibitionTime,official_exhibition_source:source.sourceKey,official_exhibition_synced_at:syncedAt};
+        const update={official_lap:row.lapTime,official_turn:row.turnTime,official_straight:row.straightTime,official_exhibition_time:row.exhibitionTime,official_exhibition_source:source.source||"venue_official",official_exhibition_synced_at:syncedAt};
         if(row.exhibitionSt!==null&&row.exhibitionSt!==undefined)update.official_exhibition_st=row.exhibitionSt;
         if(row.exhibitionSymbol!==undefined)update.official_exhibition_symbol=row.exhibitionSymbol||null;
         if(row.exhibitionCourse!==null&&row.exhibitionCourse!==undefined)update.official_exhibition_course=row.exhibitionCourse;
@@ -158,7 +138,7 @@ export async function GET(request){
       if(weatherUpdate){const {error:weatherError}=await supabase.from("bs_race_events").update(weatherUpdate).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no);if(weatherError)throw weatherError;}
       const liveAi=await generateLivePredictionForRace(supabase,race);
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.sourceKey,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,liveAi,inserted:Number(inserted||0)});
+      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,liveAi,inserted:Number(inserted||0)});
     }
     const line=await sendPendingLineAlerts(supabase,raceDate);
     return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
