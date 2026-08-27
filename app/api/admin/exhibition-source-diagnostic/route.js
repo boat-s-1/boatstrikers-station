@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
+import { fetchOfficialOriginalTenji, getOfficialOriginalTenjiSupport } from "../../../../lib/officialOriginalTenji";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,12 +28,14 @@ function summarize(result) {
     ok: Boolean(result?.ok),
     status: result?.status ?? null,
     error: result?.error ?? null,
+    reason: result?.reason ?? null,
     url: result?.url ?? null,
     rows: rows.length,
     lapRows: rows.filter((r) => r.lapTime != null).length,
     turnRows: rows.filter((r) => r.turnTime != null).length,
     straightRows: rows.filter((r) => r.straightTime != null).length,
     exhibitionRows: rows.filter((r) => r.exhibitionTime != null).length,
+    originalFieldCounts: result?.originalFieldCounts || null,
   };
 }
 
@@ -59,23 +62,32 @@ export async function GET(request) {
     for (let i = 0; i < targets.length; i += 3) {
       const chunk = targets.slice(i, i + 3);
       const settled = await Promise.all(chunk.map(async (race) => {
-        const result = await fetchBoatersOriginalTenji({
+        const input = {
           raceDate: race.race_date,
           courseCode: race.course_code,
           raceNo: race.race_no,
-        }, { timeoutMs: 7000 });
+        };
+        const boatersResult = await fetchBoatersOriginalTenji(input, { timeoutMs: 7000 });
+        const support = getOfficialOriginalTenjiSupport(race.course_code);
+        let officialResult = null;
+        if (!boatersResult.ok && support.supported) {
+          officialResult = await fetchOfficialOriginalTenji(input, { timeoutMs: 7000 });
+        }
         return {
           courseCode: race.course_code,
           courseName: race.course_name,
           raceNo: race.race_no,
-          ...summarize(result),
+          boaters: summarize(boatersResult),
+          officialSupport: support,
+          official: officialResult ? summarize(officialResult) : null,
+          usableSource: boatersResult.ok ? "boaters" : (officialResult?.ok ? support.sourceKey : null),
         };
       }));
       results.push(...settled);
     }
 
     const counts = results.reduce((acc, r) => {
-      const key = r.ok ? "ok" : (r.error || r.status || "unknown");
+      const key = r.usableSource || r.boaters.reason || r.boaters.error || `http_${r.boaters.status || "unknown"}`;
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});
