@@ -82,7 +82,7 @@ async function inspect(url) {
     return { ok: true, upstreamStatus: res.status, bytes: size, charset,
       title: clean(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || ''),
       pageText: clean(html).slice(0, 18000),
-      identityMarkup: url.startsWith('https://www.boatrace.jp/owpc/pc/race/beforeinfo?') ? html.slice(0, 35000) : undefined,
+      identityMarkup: /^(https:\/\/www\.boatrace\.jp\/owpc\/pc\/race\/beforeinfo\?|http:\/\/www\.boatrace-tokuyama\.jp\/tenji-keisoku\/m\/|https:\/\/www\.boatrace-suminoe\.jp\/asp\/kyogi\/12\/sp\/|https:\/\/omurakyotei\.jp\/yosou\/m\/)/.test(url) ? html.slice(0, 100000) : undefined,
       timingTables: tables.slice(0, 8).map(t => t.slice(0, 20000)),
       links: [...new Set(links)].filter(x => /\.js|yosou|tenji|race|cyokuzen|chokuzen/i.test(x)).slice(0, 100),
       snippets, fetchedAt: new Date().toISOString(),
