@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { isExhibitionReady } from "../../../../lib/exhibitionDisplay";
+import ExhibitionAutoRefresh from "../../components/ExhibitionAutoRefresh";
 import { cookies } from "next/headers";
 import {
   formatJstDateTime,
@@ -15,54 +17,6 @@ import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
 
 export const dynamic = "force-dynamic";
-
-function hasValue(value) {
-  return value !== null && value !== undefined && value !== "";
-}
-
-function preferRealtimeExhibition(entry) {
-  if (!entry || typeof entry !== "object") return entry;
-
-  const exhibitionTime = hasValue(entry.official_exhibition_time)
-    ? entry.official_exhibition_time
-    : entry.exhibition_time;
-  const lapTime = hasValue(entry.official_lap)
-    ? entry.official_lap
-    : entry.lap_time;
-  const turnTime = hasValue(entry.official_turn)
-    ? entry.official_turn
-    : entry.turn_time;
-  const straightTime = hasValue(entry.official_straight)
-    ? entry.official_straight
-    : entry.straight_time;
-
-  return {
-    ...entry,
-    exhibition_time: exhibitionTime,
-    lap_time: lapTime,
-    turn_time: turnTime,
-    straight_time: straightTime,
-    exhibition_source:
-      entry.official_exhibition_source ||
-      entry.exhibition_source ||
-      entry.data_source ||
-      null,
-    exhibition_synced_at:
-      entry.official_exhibition_synced_at ||
-      entry.exhibition_synced_at ||
-      entry.api_synced_at ||
-      entry.synced_at ||
-      null,
-  };
-}
-
-function isExhibitionReady(entries) {
-  return (
-    Array.isArray(entries) &&
-    entries.length === 6 &&
-    entries.every((entry) => hasValue(entry?.exhibition_time))
-  );
-}
 
 async function getPremiumAccess(){
   try{
@@ -114,7 +68,7 @@ export default async function RaceDetailPage({
   }
 
   const displayEntries = Array.isArray(data?.entries)
-    ? data.entries.map(preferRealtimeExhibition)
+    ? data.entries
     : [];
   const exhibitionReady = isExhibitionReady(displayEntries);
 
@@ -153,6 +107,7 @@ export default async function RaceDetailPage({
           </div>
         ) : (
           <>
+            <ExhibitionAutoRefresh raceDate={raceDate} closingTime={data.event.closing_time} />
             <RaceDetailTabs
               event={data.event}
               entries={displayEntries}

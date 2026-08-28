@@ -1,4 +1,5 @@
 import "server-only";
+import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
 import { buildPhase2Predictions } from "./phase2PredictionEngine";
@@ -359,6 +360,7 @@ function mapEntry(row) {
     synced_at: syncedAt,
     api_synced_at: syncedAt,
     updated_at: firstValue(row.updated_at, syncedAt),
+    ...resolveExhibition(row),
   };
 }
 

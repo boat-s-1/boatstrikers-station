@@ -14,7 +14,7 @@ async function loadCollection(date) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('collection_configuration_missing');
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-  const fields = 'race_date,course_code,race_no,boat_no,official_lap,official_turn,official_straight,official_half_lap,lap_time,turn_time,straight_time,half_lap_time,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at,data_source';
+  const fields = 'race_date,course_code,race_no,boat_no,official_lap,official_turn,official_straight,official_half_lap,lap_time,turn_time,straight_time,half_lap_time,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at,data_source,exhibition_field_meta';
   // Explicit paging: a full 24-venue day has 1,728 boats, exceeding the default 1,000-row API limit.
   const [events, first, second] = await Promise.all([
     client.from('bs_race_events').select('race_date,course_code,race_no').eq('race_date', date).limit(288),
