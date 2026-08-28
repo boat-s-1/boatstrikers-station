@@ -170,17 +170,11 @@
 
 @media(prefers-reduced-motion:reduce){.track{animation:none}.track span{padding-left:14px}.track span+span{display:none}}
 
-
 /* 今日の予定バナー */
-.todayBannerWrap{position:relative;overflow:hidden;border-radius:16px;background:#eaf8ff;box-shadow:0 6px 16px rgba(16,105,165,.14)}
-.todayBanner{display:block;width:100%;height:auto;aspect-ratio:3/1;object-fit:cover}
-.todayDate{position:absolute;right:10px;bottom:9px;padding:6px 11px;border:2px solid rgba(255,255,255,.9);border-radius:999px;color:#fff;background:linear-gradient(135deg,rgba(18,110,201,.96),rgba(25,181,230,.96));font-size:12px;font-weight:900;box-shadow:0 4px 12px rgba(0,84,145,.2)}
-@media(max-width:520px){.card{padding:11px}.todayBannerWrap{border-radius:13px}.todayDate{right:7px;bottom:7px;padding:5px 9px;font-size:11px}.list{margin-top:10px}}
+.todayBannerWrap{position:relative;overflow:hidden;background:#eaf8ff}
+.todayBanner{display:block;width:100%;height:auto;object-fit:contain}
 
-
-/* =========================================================
-   TOP PAGE / 今日の予定バナーを外枠上端いっぱいに表示
-========================================================= */
+/* 本日のレース情報と同じように、バナーをカード上端へぴったり合わせる */
 .card {
   overflow: hidden;
   padding: 0 15px 15px;
@@ -188,38 +182,29 @@
 
 .todayBannerWrap {
   width: calc(100% + 30px);
-  margin: 0 -15px 0;
+  margin: 0 -15px;
   border-radius: 20px 20px 0 0;
   box-shadow: none;
 }
 
 .todayBanner {
+  display: block;
   width: 100%;
-  aspect-ratio: 3 / 1;
-  object-fit: cover;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
 }
 
-.list {
-  margin-top: 12px;
-}
-
-.more {
-  margin-top: 13px;
-}
+.list { margin-top: 12px; }
+.more { margin-top: 13px; }
 
 @media (max-width: 520px) {
-  .card {
-    padding: 0 11px 12px;
-  }
-
+  .card { padding: 0 11px 12px; }
   .todayBannerWrap {
     width: calc(100% + 22px);
     margin-left: -11px;
     margin-right: -11px;
     border-radius: 20px 20px 0 0;
   }
-
-  .list {
-    margin-top: 10px;
-  }
+  .list { margin-top: 10px; }
 }
