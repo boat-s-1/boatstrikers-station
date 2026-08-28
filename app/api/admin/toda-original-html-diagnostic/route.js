@@ -24,7 +24,7 @@ async function fetchText(url, timeoutMs = 7000) {
       signal: controller.signal,
       headers: {
         "user-agent": "Mozilla/5.0 (compatible; BoatStrikers/1.0; +https://www.boat-strike.online/)",
-        accept: "text/html,application/javascript,text/javascript,*/*;q=0.8",
+        accept: "text/html,application/javascript,text/javascript,application/xml,text/xml,*/*;q=0.8",
         "accept-language": "ja,en-US;q=0.8,en;q=0.6",
       },
     });
@@ -47,11 +47,11 @@ function scriptUrls(html, baseUrl) {
 function endpointCandidates(text) {
   const out = [];
   const source = String(text || "");
-  for (const match of source.matchAll(/["'`]([^"'`]{2,260})["'`]/g)) {
+  for (const match of source.matchAll(/["'`]([^"'`]{2,300})["'`]/g)) {
     const value = match[1];
-    if (/(api|ajax|race|tenji|exhibit|display|original|chokuzen|直前|展示|syussou|json|php)/i.test(value)) out.push(value);
+    if (/(api|ajax|race|tenji|exhibit|display|original|chokuzen|直前|展示|syussou|xml|kaisai|json|php)/i.test(value)) out.push(value);
   }
-  return unique(out).slice(0, 220);
+  return unique(out).slice(0, 300);
 }
 
 function dataAttributes(html) {
@@ -60,25 +60,42 @@ function dataAttributes(html) {
     const value = `${match[1]}=${match[2]}`;
     if (/(race|tenji|original|display|ajax|api|tab|url|req|day|date)/i.test(value)) out.push(value);
   }
-  return unique(out).slice(0, 220);
+  return unique(out).slice(0, 300);
+}
+
+function xmlPaths(text) {
+  const out = [];
+  for (const match of String(text || "").matchAll(/["'`]([^"'`]*\.xml(?:\?[^"'`]*)?)["'`]/gi)) out.push(match[1]);
+  return unique(out).slice(0, 300);
 }
 
 export async function GET() {
   const response = await fetchText("https://www.boatrace-toda.jp/");
   const html = response.text;
   const keywords = ["オリジナル展示データ", "オリジナル展示", "一周", "まわり足", "直線", "展示タイム", "直前情報", "展示情報"];
+  const allScripts = scriptUrls(html, response.url).filter((u) => /boatrace-toda\.jp/.test(u));
+  const interestingScripts = allScripts.filter((u) => /(race|tenji|choku|display|syus|series|xml|index|top)/i.test(u));
   const scripts = [];
-  for (const url of scriptUrls(html, response.url).filter((u) => /boatrace-toda\.jp/.test(u)).slice(0, 24)) {
+  for (const url of unique([...interestingScripts, ...allScripts]).slice(0, 60)) {
     const fetched = await fetchText(url, 6000);
+    if (!fetched.ok) {
+      scripts.push({ url, ok: false, status: fetched.status, error: fetched.error || null });
+      continue;
+    }
+    const endpoints = endpointCandidates(fetched.text);
+    const xml = xmlPaths(fetched.text);
+    const hasUseful = endpoints.length || xml.length || keywords.some((k) => fetched.text.includes(k)) || /(TENJI|CHOKUZEN|RACE_NO|kaisai)/i.test(fetched.text);
+    if (!hasUseful) continue;
     scripts.push({
       url,
-      ok: fetched.ok,
+      ok: true,
       status: fetched.status,
       contentType: fetched.contentType,
-      endpoints: fetched.ok ? endpointCandidates(fetched.text) : [],
-      keywordPresence: fetched.ok ? Object.fromEntries(keywords.map((k) => [k, fetched.text.includes(k)])) : null,
-      snippets: fetched.ok ? Object.fromEntries(["オリジナル展示", "一周", "まわり足", "直線", "ajax", "api", "race"].map((k) => [k, snippet(fetched.text, k, 1200)])) : null,
-      error: fetched.error || null,
+      endpoints,
+      xmlPaths: xml,
+      keywordPresence: Object.fromEntries(keywords.map((k) => [k, fetched.text.includes(k)])),
+      snippets: Object.fromEntries(["オリジナル展示", "一周", "まわり足", "直線", "tenji", "chokuzen", "xml/kaisai", "RACE_NO", "download("].map((k) => [k, snippet(fetched.text, k, 1400)])),
+      error: null,
     });
   }
 
@@ -98,6 +115,8 @@ export async function GET() {
     snippets: Object.fromEntries(keywords.map((k) => [k, snippet(html, k)])),
     dataAttributes: dataAttributes(html),
     inlineEndpoints: endpointCandidates(html),
+    inlineXmlPaths: xmlPaths(html),
+    allScriptUrls: allScripts,
     tables,
     scripts,
     ranAt: new Date().toISOString(),
