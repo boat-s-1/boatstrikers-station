@@ -44,7 +44,7 @@ export function normalizeHatsuneNewsCategory(value) {
 }
 
 export function getHatsuneNewsImage(item) {
-  if (item?.image_url) return item.image_url;
+  if (item?.hero_image_url) return item.hero_image_url;
 
   const category = String(item?.category || "").toLowerCase();
   const sourceType = String(item?.source_type || "").toLowerCase();
@@ -88,6 +88,7 @@ const HATSUNE_NEWS_SELECT = `
   source_type,
   source_name,
   source_url,
+  hero_image_url,
   image_url,
   place,
   published_at,

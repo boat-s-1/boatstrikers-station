@@ -31,6 +31,7 @@ export async function saveHatsuneNewsArticle(formData) {
     title: clean(formData.get("title")),
     summary: clean(formData.get("summary")),
     article_body: clean(formData.get("article_body")),
+    hero_image_url: clean(formData.get("hero_image_url")),
     image_url: clean(formData.get("image_url")),
     source_url: clean(formData.get("source_url")),
     source_name: clean(formData.get("source_name")),

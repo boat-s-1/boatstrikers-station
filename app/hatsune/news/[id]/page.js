@@ -32,8 +32,7 @@ export default async function HatsuneNewsDetailPage({ params }) {
   if (!item) notFound();
 
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  // 記事内写真とヘッダー画像が重複しないよう、ヘッダーはカテゴリ画像を使う。
-  const heroImage = getHatsuneNewsImage({ ...item, image_url: null });
+  const heroImage = getHatsuneNewsImage(item);
 
   return (
     <main className={styles.page}>
@@ -56,7 +55,7 @@ export default async function HatsuneNewsDetailPage({ params }) {
         </div>
 
         <div className={styles.heroImage}>
-          <img src={heroImage} alt="" decoding="async" />
+          <img src={heroImage} alt={`${item.title} 見出し画像`} decoding="async" />
         </div>
 
         <section className={styles.summary}>
