@@ -32,7 +32,8 @@ export default async function HatsuneNewsDetailPage({ params }) {
   if (!item) notFound();
 
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  const heroImage = getHatsuneNewsImage(item);
+  // 記事内写真とヘッダー画像が重複しないよう、ヘッダーはカテゴリ画像を使う。
+  const heroImage = getHatsuneNewsImage({ ...item, image_url: null });
 
   return (
     <main className={styles.page}>
@@ -72,6 +73,12 @@ export default async function HatsuneNewsDetailPage({ params }) {
           </section>
         )}
 
+        {item.image_url && (
+          <figure className={styles.articlePhoto}>
+            <img src={item.image_url} alt={`${item.title} 関連画像`} loading="lazy" decoding="async" />
+          </figure>
+        )}
+
         <section className={styles.infoBox}>
           <h2>この記事について</h2>
           <dl>
@@ -101,12 +108,12 @@ export default async function HatsuneNewsDetailPage({ params }) {
         {item.source_url && (
           <section className={styles.sourceBox}>
             <div>
-              <span>SOURCE</span>
-              <h2>元情報を確認する</h2>
-              <p>詳細・正式発表は、元の公式情報・報道ページもあわせてご確認ください。</p>
+              <span>LINK / SOURCE</span>
+              <h2>{item.source_name || "関連情報を見る"}</h2>
+              <p>関連ページや公式情報をあわせて確認できます。</p>
             </div>
             <a href={item.source_url} target="_blank" rel="noopener noreferrer">
-              {item.source_name || "元情報"}を見る ↗
+              {item.source_name || "関連情報"}を見る ↗
             </a>
           </section>
         )}
