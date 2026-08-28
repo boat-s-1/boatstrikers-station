@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchBestOriginalTenji } from "../../../../lib/verifiedOriginalTenjiSource";
+import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -127,7 +127,7 @@ export async function GET(request){
 
     const results=[];
     for(const race of targets){
-      const source=await fetchBestOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      const source=await fetchTrackedOriginalTenji(supabase,"ichika",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       if(!source.ok){
         results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null,diagnostics:source.diagnostics||null});
         continue;

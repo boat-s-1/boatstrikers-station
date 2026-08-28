@@ -5,7 +5,7 @@ import styles from './alerts.module.css';
 
 export const dynamic = 'force-dynamic';
 const tools = [
- ['/admin/alerts/collection','🕒','24場のオリ展収集状況','オリ展更新時間・更新済R・収集元を一覧表示'],
+ ['/admin/alerts/collection','🕒','24場のオリ展収集状況','更新時間・更新済R・収集元・同期状態・取得失敗理由を確認'],
  ['/admin/alerts/exhibition','📡','24場の展示データ対応状況','接続状況・個別取得結果・不足項目を確認'],
  ['#notifications','📣','LINE通知センター','本日の成立件数・通知済み件数・直近の履歴'],
  ['/admin/exhibition-alerts','🚨','キイナ・4→5展開理論','条件成立・通知履歴・成績を管理'],

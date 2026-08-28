@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchBestOriginalTenji } from "../../../../lib/verifiedOriginalTenjiSource";
+import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import {
   predictionToDatabaseRow,
@@ -124,7 +124,7 @@ export async function GET(request){
     const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=18&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,8);
     const results=[];
     for(const race of targets){
-      const source=await fetchBestOriginalTenji({raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      const source=await fetchTrackedOriginalTenji(supabase,"kiina",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null});continue;}
       const syncedAt=new Date().toISOString();
       for(const row of source.rows){
