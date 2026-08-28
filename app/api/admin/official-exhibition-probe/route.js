@@ -39,7 +39,8 @@ function source(course, day, race, mode) {
     14: `/modules/yosou/group-cyokuzen.php?day=${day}&race=${race}&kind=2&if=1`,
     15: `/asp/kyogi/15/sp/yoso05${rr}.htm`,
     16: `/asp/kyogi/16/sp/yoso05${rr}.htm`,
-    18: `/tenji-keisoku/m/?day=${day}&race=${race}`,
+    // The official HTTPS endpoint redirects to this exact HTTP URL.
+    18: `http://www.boatrace-tokuyama.jp/tenji-keisoku/m/?day=${day}&race=${race}`,
     21: `/sp/index.php?page=yosou&race=${race}`,
     22: `/sp/ajax/ajax_cyokuzen.php?race=${race}`,
     23: `/sp/index.php?page=yosou-cyokuzen&race=${race}`,
@@ -94,7 +95,7 @@ export async function GET(request) {
   const date = q.get('date') || new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
   const mode = q.get('mode') || 'data';
   const reply = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
-  if (!Number.isInteger(course) || course < 1 || course > 24 || !Number.isInteger(race) || race < 1 || race > 12 || !/^20\d{2}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !['home', 'data'].includes(mode) || [...q.keys()].some(k => !['course', 'race', 'date', 'mode'].includes(k))) return reply({ ok: false, error: 'invalid_parameters' }, 400);
+  if (!Number.isInteger(course) || course < 1 || course > 24 || !Number.isInteger(race) || race < 1 || race > 12 || !/^20\d{2}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !['home', 'data'].includes(mode) || [...q.keys()].some(k => !['course', 'race', 'date', 'mode', '_vercel_share', 'x-vercel-protection-bypass', 'x-vercel-set-bypass-cookie'].includes(k))) return reply({ ok: false, error: 'invalid_parameters' }, 400);
   const url = source(course, date.replaceAll('-', ''), race, mode);
   if (!url) return reply({ ok: false, error: 'data_source_not_registered', hint: 'Use mode=home to inspect official links.' }, 422);
   for (const [key, entry] of cache) if (entry.expires < Date.now()) cache.delete(key);
