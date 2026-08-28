@@ -54,6 +54,58 @@
   letter-spacing: .12em;
 }
 
+.bs-admin-hatsune-shortcut-wrap {
+  width: min(100% - 24px, 1080px);
+  margin: 12px auto 0;
+}
+
+.bs-admin-hatsune-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 1px solid #e7d6f3;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #fff 0%, #fbf5ff 100%);
+  color: #3e2854;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(92, 50, 125, .07);
+}
+
+.bs-admin-hatsune-shortcut-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #f1e4fb;
+  font-size: 21px;
+}
+
+.bs-admin-hatsune-shortcut > span:nth-child(2) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-admin-hatsune-shortcut strong {
+  font-size: 14px;
+  color: #5e347d;
+}
+
+.bs-admin-hatsune-shortcut small {
+  color: #8a7b94;
+  font-size: 11px;
+}
+
+.bs-admin-hatsune-shortcut b {
+  flex: none;
+  color: #7b43a4;
+  font-size: 12px;
+}
+
 @media (max-width: 620px) {
   .bs-admin-topbar-inner {
     width: min(100% - 16px, 1080px);
@@ -67,6 +119,18 @@
   }
 
   .bs-admin-topbar-label {
+    display: none;
+  }
+
+  .bs-admin-hatsune-shortcut-wrap {
+    width: min(100% - 16px, 1080px);
+  }
+
+  .bs-admin-hatsune-shortcut {
+    padding: 11px 12px;
+  }
+
+  .bs-admin-hatsune-shortcut b {
     display: none;
   }
 }
