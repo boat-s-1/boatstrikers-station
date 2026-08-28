@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchBestOriginalTenji } from "../../../../lib/originalTenjiSource";
+import { fetchBestOriginalTenji } from "../../../../lib/verifiedOriginalTenjiSource";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import {
   predictionToDatabaseRow,
