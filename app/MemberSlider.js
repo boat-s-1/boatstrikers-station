@@ -8,24 +8,21 @@ import styles from "./MemberSlider.module.css";
 const members = [
   {
     name: "一果",
-    role: "イン逃げ担当",
     href: "/ichika",
     image: "/top/6C8FAEF3-220F-4FEB-B881-220116EDDDCE.png",
-    alt: "一果の部屋",
+    alt: "一果 イン逃げ",
   },
   {
     name: "初音",
-    role: "女子戦担当",
     href: "/hatsune",
     image: "/top/2394562F-D79D-4ECA-B618-834D5BFDDDFB.png",
-    alt: "初音の部屋",
+    alt: "初音 女子戦",
   },
   {
     name: "キイナ",
-    role: "5アタマ担当",
     href: "/kiina",
     image: "/top/5BA49F25-D24F-4A8E-BA45-094A604E4EDB.png",
-    alt: "キイナの部屋",
+    alt: "キイナ 穴狙い",
   },
 ];
 
@@ -78,32 +75,23 @@ export default function MemberSlider() {
         aria-label="メンバー紹介"
       >
         {members.map((member) => (
-          <article className={styles.card} key={member.name}>
+          <Link
+            href={member.href}
+            className={styles.card}
+            key={member.name}
+            aria-label={`${member.name}の部屋へ`}
+          >
             <Image
               src={member.image}
               alt={member.alt}
               width={1536}
-              height={1080}
+              height={2048}
               className={styles.image}
               sizes="(max-width: 720px) 88vw, 600px"
             />
-
-            <div className={styles.cardFooter}>
-              <div>
-                <strong>{member.name}</strong>
-                <span>{member.role}</span>
-              </div>
-
-              <Link href={member.href} className={styles.roomLink}>
-                {member.name}の部屋へ
-                <span aria-hidden="true">›</span>
-              </Link>
-            </div>
-          </article>
+          </Link>
         ))}
       </div>
-
-      <p className={styles.swipeHint}>← 横にスワイプ →</p>
 
       <div className={styles.dots} aria-label="表示中のメンバー">
         {members.map((member, index) => (
