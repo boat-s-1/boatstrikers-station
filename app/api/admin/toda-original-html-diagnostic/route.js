@@ -51,7 +51,7 @@ function endpointCandidates(text) {
     const value = match[1];
     if (/(api|ajax|race|tenji|exhibit|display|original|chokuzen|直前|展示|syussou|xml|kaisai|json|php)/i.test(value)) out.push(value);
   }
-  return unique(out).slice(0, 300);
+  return unique(out).slice(0, 400);
 }
 
 function dataAttributes(html) {
@@ -60,65 +60,70 @@ function dataAttributes(html) {
     const value = `${match[1]}=${match[2]}`;
     if (/(race|tenji|original|display|ajax|api|tab|url|req|day|date)/i.test(value)) out.push(value);
   }
-  return unique(out).slice(0, 300);
+  return unique(out).slice(0, 400);
 }
 
 function xmlPaths(text) {
   const out = [];
   for (const match of String(text || "").matchAll(/["'`]([^"'`]*\.xml(?:\?[^"'`]*)?)["'`]/gi)) out.push(match[1]);
-  return unique(out).slice(0, 300);
+  return unique(out).slice(0, 400);
 }
 
-export async function GET() {
-  const response = await fetchText("https://www.boatrace-toda.jp/");
+function tableSnippets(html) {
+  const tables = [];
+  for (const match of String(html || "").matchAll(/<table\b[^>]*>[\s\S]*?<\/table>/gi)) {
+    const table = match[0];
+    if (/(オリジナル展示|一周|まわり足|直線|展示タイム)/.test(table)) tables.push(table.slice(0, 18000));
+    if (tables.length >= 6) break;
+  }
+  return tables;
+}
+
+async function diagnosePage(url, keywords) {
+  const response = await fetchText(url);
   const html = response.text;
-  const keywords = ["オリジナル展示データ", "オリジナル展示", "一周", "まわり足", "直線", "展示タイム", "直前情報", "展示情報"];
   const allScripts = scriptUrls(html, response.url).filter((u) => /boatrace-toda\.jp/.test(u));
-  const interestingScripts = allScripts.filter((u) => /(race|tenji|choku|display|syus|series|xml|index|top)/i.test(u));
   const scripts = [];
-  for (const url of unique([...interestingScripts, ...allScripts]).slice(0, 60)) {
-    const fetched = await fetchText(url, 6000);
-    if (!fetched.ok) {
-      scripts.push({ url, ok: false, status: fetched.status, error: fetched.error || null });
-      continue;
-    }
+  for (const scriptUrl of allScripts.slice(0, 80)) {
+    const fetched = await fetchText(scriptUrl, 6000);
+    if (!fetched.ok) continue;
     const endpoints = endpointCandidates(fetched.text);
     const xml = xmlPaths(fetched.text);
-    const hasUseful = endpoints.length || xml.length || keywords.some((k) => fetched.text.includes(k)) || /(TENJI|CHOKUZEN|RACE_NO|kaisai)/i.test(fetched.text);
+    const hasUseful = endpoints.length || xml.length || keywords.some((k) => fetched.text.includes(k)) || /(TENJI|CHOKUZEN|RACE_NO|kaisai|original)/i.test(fetched.text);
     if (!hasUseful) continue;
     scripts.push({
-      url,
-      ok: true,
+      url: scriptUrl,
       status: fetched.status,
-      contentType: fetched.contentType,
       endpoints,
       xmlPaths: xml,
       keywordPresence: Object.fromEntries(keywords.map((k) => [k, fetched.text.includes(k)])),
-      snippets: Object.fromEntries(["オリジナル展示", "一周", "まわり足", "直線", "tenji", "chokuzen", "xml/kaisai", "RACE_NO", "download("].map((k) => [k, snippet(fetched.text, k, 1400)])),
-      error: null,
+      snippets: Object.fromEntries(["オリジナル展示", "一周", "まわり足", "直線", "展示タイム", "tenji", "chokuzen", "xml/kaisai", "RACE_NO", "download("].map((k) => [k, snippet(fetched.text, k, 1800)])),
     });
   }
-
-  const tables = [];
-  for (const match of html.matchAll(/<table\b[^>]*>[\s\S]*?<\/table>/gi)) {
-    const table = match[0];
-    if (/(オリジナル展示|一周|まわり足|直線)/.test(table)) tables.push(table.slice(0, 16000));
-    if (tables.length >= 4) break;
-  }
-
-  return NextResponse.json({
+  return {
     ok: response.ok,
     status: response.status,
     url: response.url,
     length: html.length,
     keywordPresence: Object.fromEntries(keywords.map((k) => [k, html.includes(k)])),
-    snippets: Object.fromEntries(keywords.map((k) => [k, snippet(html, k)])),
+    snippets: Object.fromEntries(keywords.map((k) => [k, snippet(html, k, 1400)])),
     dataAttributes: dataAttributes(html),
     inlineEndpoints: endpointCandidates(html),
     inlineXmlPaths: xmlPaths(html),
     allScriptUrls: allScripts,
-    tables,
+    tables: tableSnippets(html),
     scripts,
-    ranAt: new Date().toISOString(),
-  });
+  };
+}
+
+export async function GET() {
+  const keywords = ["オリジナル展示データ", "オリジナル展示", "一周", "まわり足", "直線", "展示タイム", "直前情報", "展示情報"];
+  const candidates = [
+    "https://www.boatrace-toda.jp/",
+    "https://www.boatrace-toda.jp/race/shusso_list.html",
+    "https://www.boatrace-toda.jp/race/",
+  ];
+  const pages = [];
+  for (const url of candidates) pages.push(await diagnosePage(url, keywords));
+  return NextResponse.json({ ok: true, pages, ranAt: new Date().toISOString() });
 }
