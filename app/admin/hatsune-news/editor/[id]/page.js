@@ -19,7 +19,7 @@ async function loadArticle(id) {
   if (!supabase) return null;
   const { data } = await supabase
     .from("hatsune_news")
-    .select("id,title,summary,article_body,article_body_source,image_url,source_url,source_name,category,place,published_at,is_published,article_ai_model,article_ai_generated_at")
+    .select("id,title,summary,article_body,article_body_source,hero_image_url,image_url,source_url,source_name,category,place,published_at,is_published,article_ai_model,article_ai_generated_at")
     .eq("id", id)
     .maybeSingle();
   return data || null;
@@ -80,13 +80,30 @@ export default async function HatsuneNewsEditPage({ params, searchParams }) {
 
           <section className={styles.card}>
             <div className={styles.cardTitle}>
+              <span>HERO</span>
+              <h2>見出し画像</h2>
+            </div>
+            <label>
+              <span>見出し画像URL</span>
+              <input name="hero_image_url" type="url" placeholder="https://..." defaultValue={item.hero_image_url || ""} />
+              <small>推奨サイズ：1200 × 675 px（16:9）／最低 800 × 450 px。WebP・JPG・PNG、500KB以下を目安にしてください。ニュース一覧と記事詳細上部に表示します。未設定時はカテゴリ画像を自動表示します。</small>
+            </label>
+            {item.hero_image_url && (
+              <div className={styles.preview}>
+                <img src={item.hero_image_url} alt="見出し画像プレビュー" />
+              </div>
+            )}
+          </section>
+
+          <section className={styles.card}>
+            <div className={styles.cardTitle}>
               <span>PHOTO</span>
               <h2>記事内写真</h2>
             </div>
             <label>
               <span>画像URL</span>
               <input name="image_url" type="url" placeholder="https://..." defaultValue={item.image_url || ""} />
-              <small>画像URLを入れると、公開記事の本文内にも写真を表示します。</small>
+              <small>本文中に表示する写真です。見出し画像とは別に設定できます。</small>
             </label>
             {item.image_url && (
               <div className={styles.preview}>
