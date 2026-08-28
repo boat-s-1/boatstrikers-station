@@ -14,7 +14,7 @@ function snippet(text, keyword, radius = 1000) {
   return source.slice(Math.max(0, index - radius), Math.min(source.length, index + keyword.length + radius));
 }
 
-async function fetchText(url, timeoutMs = 7000) {
+async function fetchText(url, timeoutMs = 7000, init = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -26,7 +26,9 @@ async function fetchText(url, timeoutMs = 7000) {
         "user-agent": "Mozilla/5.0 (compatible; BoatStrikers/1.0; +https://www.boat-strike.online/)",
         accept: "text/html,application/javascript,text/javascript,application/json,application/xml,text/xml,*/*;q=0.8",
         "accept-language": "ja,en-US;q=0.8,en;q=0.6",
+        ...(init.headers || {}),
       },
+      ...init,
     });
     return { ok: response.ok, status: response.status, url: response.url, text: await response.text(), contentType: response.headers.get("content-type") };
   } catch (error) {
@@ -62,10 +64,36 @@ function dataAttributes(html) {
   return unique(out).slice(0, 300);
 }
 
-export async function GET() {
+function stripTags(value) {
+  return String(value || "")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function summarizeFragment(fragment) {
+  const raw = String(fragment || "");
+  const text = stripTags(raw);
+  const keywords = ["オリジナル展示", "展示タイム", "周回", "一周", "まわり足", "回り足", "直線", "スタート展示"];
+  return {
+    length: raw.length,
+    text: text.slice(0, 5000),
+    keywordPresence: Object.fromEntries(keywords.map((k) => [k, raw.includes(k) || text.includes(k)])),
+    rawSnippet: raw.slice(0, 7000),
+  };
+}
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const race = Math.min(12, Math.max(1, Number(searchParams.get("race") || 12)));
+  const date = String(searchParams.get("date") || "20260828").replace(/\D/g, "").slice(0, 8);
+
   const targets = [
     "https://www.boatrace-miyajima.com/index.html",
-    "https://www.boatrace-miyajima.com/race_info.html",
     "https://www.boatrace-miyajima.com/racedata.html",
   ];
   const keywords = ["オリジナル展示", "展示航走", "展示タイム", "一周", "まわり足", "回り足", "直線", "直前情報", "展示情報"];
@@ -116,5 +144,31 @@ export async function GET() {
     });
   }
 
-  return NextResponse.json({ ok: pages.some((p) => p.ok), pages, ranAt: new Date().toISOString() });
+  const body = new URLSearchParams({ race: String(race), date }).toString();
+  const reload = await fetchText("https://www.boatrace-miyajima.com/race_common/require/kaisai_reload.php", 9000, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "x-requested-with": "XMLHttpRequest",
+      referer: "https://www.boatrace-miyajima.com/index.html",
+    },
+    body,
+  });
+  const parts = reload.text ? reload.text.split("####") : [];
+  const reloadProbe = {
+    ok: reload.ok,
+    status: reload.status,
+    url: reload.url,
+    date,
+    race,
+    responseLength: reload.text.length,
+    partCount: parts.length,
+    startInfo: summarizeFragment(parts[6]),
+    startExhibition: summarizeFragment(parts[7]),
+    lapTimes: summarizeFragment(parts[8]),
+    nearby: [5, 6, 7, 8, 9].map((index) => ({ index, ...summarizeFragment(parts[index]) })),
+    error: reload.error || null,
+  };
+
+  return NextResponse.json({ ok: pages.some((p) => p.ok) || reload.ok, pages, reloadProbe, ranAt: new Date().toISOString() });
 }
