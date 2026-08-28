@@ -20,7 +20,6 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
   const today=useMemo(()=>scheduleItems.filter(i=>i.event_date===current.date && i.status==="published").sort((a,b)=>String(a.start_time).localeCompare(String(b.start_time))).slice(0,3),[scheduleItems,current.date]);
   const ticker=tickerItems.filter(i=>i.is_active).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   const text=ticker.map(i=>i.message).join("　　◆　　") || "BoatStrikersからのお知らせをこちらに表示します";
-  const dateLabel=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",month:"numeric",day:"numeric",weekday:"short"}).format(now);
 
   return <section className={styles.wrap}>
     <div className={styles.ticker}>
@@ -31,10 +30,9 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <div className={styles.todayBannerWrap}>
         <img
           className={styles.todayBanner}
-          src="/schedule-banners/today-schedule-banner.jpg"
+          src="/top/IMG_7640.jpeg"
           alt="今日の予定 本日の配信をチェック"
         />
-        <b className={styles.todayDate}>{dateLabel}</b>
       </div>
       <div className={styles.list}>
         {today.length ? today.map(item=>{
