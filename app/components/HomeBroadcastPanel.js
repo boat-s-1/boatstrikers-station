@@ -30,7 +30,7 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <div className={styles.todayBannerWrap}>
         <img
           className={styles.todayBanner}
-          src="/top/IMG_7640.jpeg"
+          src="/top/Untitled design.png"
           alt="今日の予定 本日の配信をチェック"
         />
       </div>
