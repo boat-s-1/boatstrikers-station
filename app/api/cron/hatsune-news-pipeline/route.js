@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { collectHatsuneNews } from "../../../../lib/hatsuneNewsCollector";
+import { syncHatsuneMediaNews } from "../../../../lib/hatsuneMediaNewsSync";
 import { generatePendingHatsuneArticles } from "../../../../lib/hatsuneNewsAi";
 import { startHatsuneCronRun, finishHatsuneCronRun } from "../../../../lib/hatsuneCronLog";
 import { ensureHatsuneDailyMinimum } from "../../../../lib/hatsuneDailyFallback";
@@ -33,10 +34,22 @@ export async function GET(request) {
 
   try {
     const collection = await collectHatsuneNews();
+    let media = { found: 0, inserted: 0, skipped: 0, errors: [] };
+    let mediaError = null;
+
+    try {
+      media = await syncHatsuneMediaNews();
+    } catch (error) {
+      mediaError = error?.message || String(error);
+    }
+
+    const baseInserted = countValue(collection?.inserted) || countValue(collection?.results?.inserted);
+    const mediaInserted = countValue(media?.inserted);
+
     let fallback = null;
     let fallbackError = null;
 
-    if (countValue(collection?.inserted) === 0) {
+    if (baseInserted + mediaInserted === 0) {
       try {
         fallback = await ensureHatsuneDailyMinimum();
       } catch (error) {
@@ -58,15 +71,15 @@ export async function GET(request) {
     }
 
     const collectionErrors = Array.isArray(collection?.errors) ? collection.errors : [];
-    const baseInserted = countValue(collection?.inserted) || countValue(collection?.results?.inserted);
+    const mediaErrors = Array.isArray(media?.errors) ? media.errors : [];
     const fallbackInserted = fallback?.inserted ? 1 : 0;
-    const inserted = baseInserted + fallbackInserted;
-    const skipped = countValue(collection?.skipped) || countValue(collection?.results?.skipped);
-    const found = countValue(collection?.official?.found) + countValue(collection?.raceData?.found);
+    const inserted = baseInserted + mediaInserted + fallbackInserted;
+    const skipped = (countValue(collection?.skipped) || countValue(collection?.results?.skipped)) + countValue(media?.skipped);
+    const found = countValue(collection?.official?.found) + countValue(collection?.raceData?.found) + countValue(media?.found);
     const collected = countValue(collection?.collected) || countValue(collection?.candidate_count) || found || inserted + skipped;
     const generated = ai.filter((x) => !x.error && !x.skipped).length;
     const aiErrors = ai.filter((x) => x.error);
-    const errorCount = collectionErrors.length + aiErrors.length + (aiError ? 1 : 0) + (fallbackError ? 1 : 0);
+    const errorCount = collectionErrors.length + mediaErrors.length + aiErrors.length + (aiError ? 1 : 0) + (mediaError ? 1 : 0) + (fallbackError ? 1 : 0);
     const ok = errorCount === 0;
 
     if (logContext) {
@@ -82,14 +95,16 @@ export async function GET(request) {
           errorCount,
         },
         errorMessage:
-          aiError || fallbackError || collectionErrors.map((x) => x?.message || String(x)).join(" | ") || null,
-        details: { collection, fallback, fallbackError, aiErrors },
+          aiError || mediaError || fallbackError || [...collectionErrors, ...mediaErrors].map((x) => x?.message || String(x)).join(" | ") || null,
+        details: { collection, media, mediaError, fallback, fallbackError, aiErrors },
       });
     }
 
     return NextResponse.json({
       ok,
       collection,
+      media,
+      media_error: mediaError,
       fallback,
       fallback_error: fallbackError,
       ai: {
