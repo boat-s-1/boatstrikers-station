@@ -30,7 +30,7 @@ export default function ExhibitionStatus(){
    <label>開催日（日本時間）<input type="date" value={date} disabled={busy!==null} onChange={e=>setDate(e.target.value)}/></label>
    <label>レース<select value={race} disabled={busy!==null} onChange={e=>setRace(e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={i+1}>{i+1}R</option>)}</select></label>
    <label>絞り込み<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">全24場</option><option value="checkable">個別確認できる場</option>{['接続済み','検証用実装','既存取得経路','調査中'].map(s=><option key={s}>{s}</option>)}</select></label>
-   <Link href="/admin/exhibition-data-status">保存済み展示データの集計を見る →</Link>
+   <Link href="/admin/alerts/collection">オリ展更新時間・更新済R・収集元を見る →</Link>
   </div>
   <p role="status" aria-live="polite">{busy!==null?`${VENUES[busy-1].name}を確認中…`:`${shown.length}場を表示。1場ずつ確認できます。`}</p>
   <div className={styles.tableWrap}><table className={styles.table}><caption>{date||'日付準備中'}・{race}R の個別診断（自動更新なし）</caption><thead><tr><th scope="col">場</th><th scope="col">実装・接続</th><th scope="col">直線項目</th><th scope="col">今回の取得結果</th><th scope="col">確認</th></tr></thead><tbody>{shown.map(v=>{
