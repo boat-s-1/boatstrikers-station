@@ -12,7 +12,7 @@ export const HATSUNE_NEWS_LABELS = {
   result: "🏁 結果",
   women: "🌸 女子戦",
   suijinsai: "💧 水神祭",
-  win: "🏆 優勝",
+  win: "🏆 優勝・優出",
   grade: "⬆️ 昇格",
   motor: "⚙️ モーター",
   tomorrow: "📅 明日",
@@ -50,7 +50,6 @@ export function getHatsuneNewsImage(item) {
   const sourceType = String(item?.source_type || "").toLowerCase();
   const text = `${item?.title || ""} ${item?.summary || ""}`;
 
-  // 翌日情報はBS DATAであってもTOMORROW画像を最優先する。
   if (category === "tomorrow" || /(明日|翌日|あす)/.test(text)) {
     return HATSUNE_NEWS_IMAGES.tomorrow;
   }
