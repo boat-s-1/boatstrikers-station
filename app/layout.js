@@ -12,6 +12,7 @@ import HatsuneWallpaper from "./components/HatsuneWallpaper";
 import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
 import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
 import HomeCompactRealtime from "./components/HomeCompactRealtime";
+import HomeTopCleanup from "./components/HomeTopCleanup";
 import RaceHitFlashDeduper from "./components/RaceHitFlashDeduper";
 import BetaMemberPlacementBanner from "./components/BetaMemberPlacementBanner";
 import MemberSessionBridge from "./components/MemberSessionBridge";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }) {
         <KiinaFixedWallpaper />
         <HomeFixedWallpaper />
         <HomeCompactRealtime />
+        <HomeTopCleanup />
         <RaceHitFlashDeduper />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
