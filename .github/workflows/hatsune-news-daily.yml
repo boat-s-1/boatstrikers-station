@@ -2,12 +2,20 @@ name: Hatsune NEWS Daily
 
 on:
   schedule:
-    # 13:20 UTC = 22:20 JST
+    # Primary: 13:20 UTC = 22:20 JST
     - cron: "20 13 * * *"
+    # Retry: 14:20 UTC = 23:20 JST
+    # GitHub scheduled workflows can be delayed or occasionally skipped,
+    # so run a second daily check. The pipeline is idempotent and avoids duplicates.
+    - cron: "20 14 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: hatsune-news-daily
+  cancel-in-progress: false
 
 jobs:
   update-hatsune-news:
@@ -45,6 +53,6 @@ jobs:
           fi
 
           echo "### Hatsune NEWS Daily" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Scheduled time: 22:20 JST" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Schedule: primary 22:20 JST / retry 23:20 JST" >> "$GITHUB_STEP_SUMMARY"
           echo "- HTTP status: $status" >> "$GITHUB_STEP_SUMMARY"
           echo "- Completed at: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')" >> "$GITHUB_STEP_SUMMARY"
