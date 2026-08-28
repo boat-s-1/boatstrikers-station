@@ -72,29 +72,51 @@ function endpointCandidates(text) {
   return uniq(out).slice(0, 400);
 }
 
+function getYosouCalls(html) {
+  return [...String(html || "").matchAll(/getYosou\s*\(\s*([^)]{1,240})\)/g)]
+    .map((m) => m[1].replace(/\s+/g, " ").trim())
+    .slice(0, 30);
+}
+
+function dataReqs(html) {
+  return uniq([...String(html || "").matchAll(/data-req=["']([^"']+)["']/gi)].map((m) => m[1])).slice(0, 30);
+}
+
+function summarizeAjax(response, req, run) {
+  const raw = String(response.text || "");
+  const text = stripTags(raw);
+  const keywords = ["オリジナル展示", "展示タイム", "1周", "一周", "まわり足", "回り足", "直線", "直前情報", "スタート展示"];
+  return {
+    req,
+    run,
+    ok: response.ok,
+    status: response.status,
+    url: response.url,
+    length: raw.length,
+    text: text.slice(0, 6000),
+    keywordPresence: Object.fromEntries(keywords.map((k) => [k, raw.includes(k) || text.includes(k)])),
+    rawSnippet: raw.slice(0, 9000),
+    error: response.error || null,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const race = Math.min(12, Math.max(1, Number(searchParams.get("race") || 10)));
-  const targets = [
-    "https://www.boatrace-amagasaki.jp/sp/index.php",
-    `https://www.boatrace-amagasaki.jp/sp/index.php?page=raceinfo-chokuzen&race=${race}`,
-    `https://www.boatrace-amagasaki.jp/sp/index.php?page=raceinfo-before&race=${race}`,
-    `https://www.boatrace-amagasaki.jp/sp/index.php?page=yosou-cyokuzen&race=${race}`,
-    `https://www.boatrace-amagasaki.jp/sp/index.php?page=raceinfo-race&race=${race}`,
-  ];
+  const day = String(searchParams.get("date") || "20260828").replace(/\D/g, "").slice(0, 8);
+  const targets = ["https://www.boatrace-amagasaki.jp/sp/index.php"];
   const keywords = ["オリジナル展示", "展示タイム", "1周", "一周", "まわり足", "回り足", "直線", "直前情報", "周回展示"];
   const pages = [];
+  const discoveredReqs = [];
 
   for (const target of targets) {
     const response = await fetchText(target);
     const html = response.text;
     const scriptResults = [];
+    discoveredReqs.push(...dataReqs(html));
     for (const url of scripts(html, response.url).filter((u) => /boatrace-amagasaki\.jp/.test(u)).slice(0, 60)) {
       const fetched = await fetchText(url, 6000);
-      if (!fetched.ok) {
-        scriptResults.push({ url, ok: false, status: fetched.status, error: fetched.error || null });
-        continue;
-      }
+      if (!fetched.ok) continue;
       const endpoints = endpointCandidates(fetched.text);
       const useful = endpoints.length || keywords.some((k) => fetched.text.includes(k));
       if (!useful) continue;
@@ -102,20 +124,12 @@ export async function GET(request) {
         url,
         ok: true,
         status: fetched.status,
-        contentType: fetched.contentType,
         endpoints,
-        keywordPresence: Object.fromEntries(keywords.map((k) => [k, fetched.text.includes(k)])),
-        snippets: Object.fromEntries(["オリジナル展示", "展示タイム", "一周", "1周", "まわり足", "回り足", "直線", "ajax", "race", "chokuzen"].map((k) => [k, snippet(fetched.text, k)])),
+        getYosouCalls: getYosouCalls(fetched.text),
+        dataReqs: dataReqs(fetched.text),
+        snippets: { ajax: snippet(fetched.text, "ajax_yosou.php", 2500), getYosou: snippet(fetched.text, "function getYosou", 2500) },
       });
-    }
-
-    const tables = [];
-    for (const m of String(html || "").matchAll(/<table\b[^>]*>[\s\S]*?<\/table>/gi)) {
-      const table = m[0];
-      if (/(オリジナル展示|展示タイム|一周|1周|まわり足|回り足|直線)/.test(table)) {
-        tables.push({ text: stripTags(table).slice(0, 10000), raw: table.slice(0, 18000) });
-      }
-      if (tables.length >= 8) break;
+      discoveredReqs.push(...dataReqs(fetched.text));
     }
 
     pages.push({
@@ -123,13 +137,22 @@ export async function GET(request) {
       status: response.status,
       url: response.url,
       length: html.length,
-      keywordPresence: Object.fromEntries(keywords.map((k) => [k, html.includes(k)])),
-      snippets: Object.fromEntries(keywords.map((k) => [k, snippet(html, k)])),
-      inlineEndpoints: endpointCandidates(html),
-      tables,
+      getYosouCalls: getYosouCalls(html),
+      dataReqs: dataReqs(html),
+      snippets: { getYosou: snippet(html, "getYosou", 2200), ajaxYosou: snippet(html, "ajax_yosou.php", 2200) },
       scripts: scriptResults,
     });
   }
 
-  return NextResponse.json({ ok: pages.some((p) => p.ok), race, pages, ranAt: new Date().toISOString() });
+  const reqCandidates = uniq([...discoveredReqs, "cyokuzen", "sttenji", "tenji", "chokuzen"]).slice(0, 12);
+  const ajaxProbes = [];
+  for (const req of reqCandidates) {
+    for (const run of [0, 1]) {
+      const url = `https://www.boatrace-amagasaki.jp/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=${encodeURIComponent(req)}&run=${run}`;
+      const fetched = await fetchText(url, 7000, { headers: { referer: "https://www.boatrace-amagasaki.jp/sp/index.php", "x-requested-with": "XMLHttpRequest" } });
+      ajaxProbes.push(summarizeAjax(fetched, req, run));
+    }
+  }
+
+  return NextResponse.json({ ok: pages.some((p) => p.ok), race, day, reqCandidates, pages, ajaxProbes, ranAt: new Date().toISOString() });
 }
