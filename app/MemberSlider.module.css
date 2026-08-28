@@ -29,71 +29,13 @@
   border-radius: 22px;
   background: #fff;
   box-shadow: 0 10px 24px rgba(76, 42, 130, 0.14);
+  text-decoration: none;
 }
 
 .image {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.cardFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 13px 14px;
-  background: linear-gradient(180deg, #ffffff, #faf7ff);
-}
-
-.cardFooter div {
-  min-width: 0;
-}
-
-.cardFooter strong {
-  display: block;
-  color: #382161;
-  font-size: 19px;
-  line-height: 1.15;
-}
-
-.cardFooter span {
-  display: block;
-  margin-top: 4px;
-  color: #746786;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.roomLink {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 0 13px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #7249db, #9d5be8);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 900;
-  text-decoration: none;
-  box-shadow: 0 5px 12px rgba(108, 63, 191, 0.25);
-}
-
-.roomLink span {
-  margin: 0;
-  color: inherit;
-  font-size: 20px;
-  line-height: 1;
-}
-
-.swipeHint {
-  margin: 0;
-  color: #7b6d8f;
-  font-size: 12px;
-  font-weight: 800;
-  text-align: center;
 }
 
 .dots {
@@ -135,14 +77,5 @@
 @media (max-width: 370px) {
   .card {
     flex-basis: 90%;
-  }
-
-  .cardFooter {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .roomLink {
-    justify-content: center;
   }
 }
