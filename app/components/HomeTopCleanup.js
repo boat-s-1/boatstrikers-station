@@ -25,6 +25,11 @@ function hideHomeExtras() {
     }
   });
 
+  const newspaperBanner = root.querySelector('img[alt="新聞"]');
+  if (newspaperBanner) {
+    newspaperBanner.setAttribute("src", "/top/IMG_7652.jpeg");
+  }
+
   const memberBanner = root.querySelector('img[alt="メンバー紹介"]');
   if (memberBanner) {
     memberBanner.setAttribute(
