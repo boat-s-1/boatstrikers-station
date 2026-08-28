@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { isAdminAuthenticated } from "../../sync/_lib/adminAuth";
+import HatsuneSnsMaker from "./HatsuneSnsMaker";
 import styles from "./editor.module.css";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,8 @@ async function loadArticles() {
   if (!supabase) return { articles: [], error: "Supabase管理用環境変数がありません。" };
   const { data, error } = await supabase
     .from("hatsune_news")
-    .select("id,title,category,place,published_at,is_published,article_body_source,image_url,source_url")
+    .select("id,title,summary,category,place,published_at,is_published,article_body_source,image_url,source_url,source_type,source_name")
+    .eq("is_published", true)
     .order("published_at", { ascending: false })
     .limit(100);
   return { articles: data || [], error: error?.message || null };
@@ -46,7 +48,7 @@ export default async function HatsuneNewsEditorPage() {
           <div>
             <span>HATSUNE NEWS CMS</span>
             <h1>初音NEWS 記事編集</h1>
-            <p>本文の手直し、AI再生成、記事内写真、外部URLをまとめて編集できます。</p>
+            <p>本文編集・AI再生成・記事内写真・SNS投稿素材まで、この画面でまとめて管理できます。</p>
           </div>
           <div className={styles.actions}>
             <Link href="/admin/hatsune-news-status">自動更新状況</Link>
@@ -56,6 +58,8 @@ export default async function HatsuneNewsEditorPage() {
         </header>
 
         {error && <div className={styles.error}>取得エラー：{error}</div>}
+
+        {!error && <HatsuneSnsMaker articles={articles} />}
 
         <section className={styles.panel}>
           <div className={styles.panelHeading}>
@@ -80,7 +84,7 @@ export default async function HatsuneNewsEditorPage() {
                     {item.source_url && <span>🔗 URL</span>}
                   </div>
                   <h3>{item.title}</h3>
-                  <p>{[item.place, formatJst(item.published_at)].filter(Boolean).join(" ・ ")}</p>
+                  <p>{[item.source_name, item.place, formatJst(item.published_at)].filter(Boolean).join(" ・ ")}</p>
                 </div>
                 <strong>編集 →</strong>
               </Link>
