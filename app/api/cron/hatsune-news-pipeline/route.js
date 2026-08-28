@@ -62,7 +62,8 @@ export async function GET(request) {
 
     if (process.env.OPENAI_API_KEY) {
       try {
-        ai = await generatePendingHatsuneArticles({ limit: 10 });
+        // 1日3回動くため、1回あたりのAI生成数を抑えて60秒制限内に収める。
+        ai = await generatePendingHatsuneArticles({ limit: 4 });
       } catch (error) {
         aiError = error?.message || String(error);
       }
