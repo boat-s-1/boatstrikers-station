@@ -9,18 +9,30 @@ export default function IchikaNewspaperBannerOverride() {
   useEffect(() => {
     if (pathname !== "/ichika") return;
 
-    const replaceBanner = () => {
-      const image = document.querySelector('.ichikaPage img[alt="一果新聞"]');
-      if (!image) return false;
-      image.setAttribute("src", "/top/IMG_7702.jpeg?v=20260829-2121");
-      image.setAttribute("alt", "最新の一果新聞");
-      return true;
+    const replaceBanners = () => {
+      let changed = false;
+
+      const newspaperImage = document.querySelector('.ichikaPage img[alt="一果新聞"], .ichikaPage img[alt="最新の一果新聞"]');
+      if (newspaperImage) {
+        newspaperImage.setAttribute("src", "/top/IMG_7702.jpeg?v=20260829-2121");
+        newspaperImage.setAttribute("alt", "最新の一果新聞");
+        changed = true;
+      }
+
+      const performanceImage = document.querySelector('.ichikaPage img[alt="一果成績"]');
+      if (performanceImage) {
+        performanceImage.setAttribute("src", "/top/IMG_7720.jpeg?v=20260829-2238");
+        performanceImage.setAttribute("alt", "今月の成績");
+        changed = true;
+      }
+
+      return changed;
     };
 
-    if (replaceBanner()) return;
+    replaceBanners();
 
     const observer = new MutationObserver(() => {
-      if (replaceBanner()) observer.disconnect();
+      replaceBanners();
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
