@@ -24,6 +24,8 @@ const clean = (s) => s.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replac
 
 function source(course, day, race, mode) {
   if (mode === 'reference') return course === 5 ? `https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=${race}&jcd=05&hd=${day}` : null;
+  if (mode === 'ajax') return course === 9 ? `https://www.boatrace-tsu.com/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=cyokuzen&run=0` : null;
+  if (mode === 'asset') return course === 9 ? 'https://www.boatrace-tsu.com/sp/page/yosou/js/get_yosou.js' : null;
   if (mode === 'home') return homes[course - 1];
   const rr = String(race).padStart(2, '0');
   const paths = {
@@ -97,7 +99,7 @@ export async function GET(request) {
   const date = q.get('date') || new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
   const mode = q.get('mode') || 'data';
   const reply = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
-  if (!Number.isInteger(course) || course < 1 || course > 24 || !Number.isInteger(race) || race < 1 || race > 12 || !/^20\d{2}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !['home', 'data', 'reference'].includes(mode) || [...q.keys()].some(k => !['course', 'race', 'date', 'mode', '_vercel_share', 'x-vercel-protection-bypass', 'x-vercel-set-bypass-cookie'].includes(k))) return reply({ ok: false, error: 'invalid_parameters' }, 400);
+  if (!Number.isInteger(course) || course < 1 || course > 24 || !Number.isInteger(race) || race < 1 || race > 12 || !/^20\d{2}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !['home', 'data', 'reference', 'ajax', 'asset'].includes(mode) || [...q.keys()].some(k => !['course', 'race', 'date', 'mode', '_vercel_share', 'x-vercel-protection-bypass', 'x-vercel-set-bypass-cookie'].includes(k))) return reply({ ok: false, error: 'invalid_parameters' }, 400);
   const url = source(course, date.replaceAll('-', ''), race, mode);
   if (!url) return reply({ ok: false, error: 'data_source_not_registered', hint: 'Use mode=home to inspect official links.' }, 422);
   for (const [key, entry] of cache) if (entry.expires < Date.now()) cache.delete(key);
