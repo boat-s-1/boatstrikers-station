@@ -73,47 +73,61 @@ export default function IchikaNewspaperBannerOverride() {
     if (pathname !== "/ichika") return;
 
     const replaceBanners = () => {
-      let changed = false;
-
-      const newspaperImage = document.querySelector('.ichikaPage img[alt="一果新聞"], .ichikaPage img[alt="最新の一果新聞"]');
+      const newspaperImage = document.querySelector(
+        '.ichikaPage img[alt="一果新聞"], .ichikaPage img[alt="最新の一果新聞"]'
+      );
       if (newspaperImage) {
         newspaperImage.setAttribute("src", "/top/IMG_7702.jpeg?v=20260829-2121");
         newspaperImage.setAttribute("alt", "最新の一果新聞");
-        changed = true;
       }
 
-      const performanceImage = document.querySelector('.ichikaPage img[alt="一果成績"], .ichikaPage img[alt="今月の成績"]');
+      const performanceImage = document.querySelector(
+        '.ichikaPage img[alt="一果成績"], .ichikaPage img[alt="今月の成績"]'
+      );
       if (performanceImage) {
         performanceImage.setAttribute("src", "/top/IMG_7720.jpeg?v=20260830-0016");
         performanceImage.setAttribute("alt", "今月の成績");
-        changed = true;
       }
 
-      const labImage = document.querySelector('.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]');
+      const labImage = document.querySelector(
+        '.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]'
+      );
       if (labImage) {
-        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0146");
+        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0152");
         labImage.setAttribute("alt", "イン逃げラボ");
 
         const labSection = labImage.closest("section.sectionCard");
         if (labSection) {
           labSection.classList.add("ichikaLabSection");
         }
-        changed = true;
       }
+    };
 
-      return changed;
+    let cleanupDots = () => {};
+    let dotsInitialized = false;
+
+    const ensureLabDots = () => {
+      if (dotsInitialized) return;
+
+      const rail = document.querySelector(
+        ".ichikaPage .ichikaLabSection .labList"
+      );
+      if (!rail || rail.children.length < 2) return;
+
+      cleanupDots = setupLabDots();
+      dotsInitialized = rail.dataset.labDotsReady === "true";
     };
 
     replaceBanners();
-    let cleanupDots = setupLabDots();
+    ensureLabDots();
 
     const observer = new MutationObserver(() => {
       replaceBanners();
-      cleanupDots();
-      cleanupDots = setupLabDots();
+      ensureLabDots();
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+
     return () => {
       observer.disconnect();
       cleanupDots();
