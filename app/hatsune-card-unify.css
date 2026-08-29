@@ -1,0 +1,120 @@
+/* Hatsune room card unification
+ * Match the Ichika design rules while keeping Hatsune's purple/pink identity.
+ * - same outer width rhythm and spacing
+ * - rounded outer card on all four corners
+ * - 2px accent borders
+ * - title banners sit flush at the top and have square lower corners
+ */
+
+/* Legacy Hatsune content cards */
+.hatsunePage .sectionCard {
+  overflow: hidden !important;
+  border: 2px solid #c79af3 !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(117, 74, 160, 0.10) !important;
+}
+
+/* Hatsune newspaper and other purple title-card sections */
+.hatsunePage .sectionCard.purpleCard {
+  border-color: #c58be8 !important;
+}
+
+/* Make title banners connect directly to card body. */
+.hatsunePage .sectionCard > .homeTitleImage,
+.hatsunePage .sectionCard .sectionTitleRow .homeTitleImage {
+  display: block !important;
+  width: calc(100% + 36px) !important;
+  max-width: none !important;
+  height: auto !important;
+  margin-left: -18px !important;
+  margin-right: -18px !important;
+  margin-top: -18px !important;
+  margin-bottom: 18px !important;
+  border-top-left-radius: 22px !important;
+  border-top-right-radius: 22px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  object-fit: cover !important;
+}
+
+.hatsunePage .sectionCard .sectionTitleRow:has(.homeTitleImage) {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Newspaper banner should be flush with the card frame too. */
+.hatsunePage .sectionCard.purpleCard:has(> img[alt="初音新聞"]) {
+  padding: 0 18px 18px !important;
+}
+
+.hatsunePage .sectionCard.purpleCard:has(> img[alt="初音新聞"]) > img[alt="初音新聞"] {
+  width: calc(100% + 36px) !important;
+  margin: 0 -18px 0 !important;
+  border-radius: 0 !important;
+}
+
+.hatsunePage .sectionCard.purpleCard:has(> img[alt="初音新聞"]) > .newsFeature {
+  margin-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* AI V2 panel */
+section[aria-label="初音 AI予想"] {
+  overflow: hidden !important;
+  border: 2px solid #c58be8 !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(117, 74, 160, 0.10) !important;
+}
+
+/* Separate Hatsune AI performance card created by CharacterAiRoomPanel */
+.hatsunePage ~ div section[aria-label="初音 研究ツール"],
+section[aria-label="初音 研究ツール"] {
+  overflow: hidden !important;
+  border: 2px solid #c58be8 !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(117, 74, 160, 0.10) !important;
+}
+
+/* CharacterAiRoomPanel's Hatsune performance block has no aria-label,
+ * so normalize it through the portal wrapper position next to the Hatsune page. */
+.hatsunePage + div [class*="hatsunePerformance"],
+.hatsunePage ~ div [class*="hatsunePerformance"] {
+  border: 2px solid #c58be8 !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(117, 74, 160, 0.10) !important;
+}
+
+@media (max-width: 760px) {
+  .hatsunePage .sectionCard,
+  section[aria-label="初音 AI予想"],
+  section[aria-label="初音 研究ツール"] {
+    border-radius: 20px !important;
+  }
+
+  .hatsunePage .sectionCard > .homeTitleImage,
+  .hatsunePage .sectionCard .sectionTitleRow .homeTitleImage {
+    width: calc(100% + 28px) !important;
+    margin-left: -14px !important;
+    margin-right: -14px !important;
+    margin-top: -14px !important;
+    margin-bottom: 16px !important;
+    border-top-left-radius: 18px !important;
+    border-top-right-radius: 18px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  .hatsunePage .sectionCard.purpleCard:has(> img[alt="初音新聞"]) {
+    padding: 0 14px 16px !important;
+  }
+
+  .hatsunePage .sectionCard.purpleCard:has(> img[alt="初音新聞"]) > img[alt="初音新聞"] {
+    width: calc(100% + 28px) !important;
+    margin: 0 -14px 0 !important;
+  }
+}
