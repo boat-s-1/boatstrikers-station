@@ -317,8 +317,25 @@ export default function CharacterAiRoomPanel() {
             })}
           </div>
           {character !== "hatsune" ? (
-            <div className={styles.moreRow}>
-              <a href="/races">もっと見る → 出走表へ</a>
+            <div
+              className={styles.moreRow}
+              style={{ justifyContent: "center", marginTop: 12, marginBottom: 6 }}
+            >
+              <a
+                href="/races"
+                style={{
+                  minWidth: 180,
+                  justifyContent: "center",
+                  padding: "10px 22px",
+                  border: "2px solid #0f4c81",
+                  borderRadius: 999,
+                  background: "#fff",
+                  boxShadow: "0 4px 12px rgba(15,76,129,.10)",
+                  fontSize: 14,
+                }}
+              >
+                出走表を見る
+              </a>
             </div>
           ) : null}
         </>
