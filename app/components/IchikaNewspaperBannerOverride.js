@@ -91,7 +91,7 @@ export default function IchikaNewspaperBannerOverride() {
 
       const labImage = document.querySelector('.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]');
       if (labImage) {
-        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0043");
+        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0146");
         labImage.setAttribute("alt", "イン逃げラボ");
 
         const labSection = labImage.closest("section.sectionCard");
