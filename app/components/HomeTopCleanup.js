@@ -32,7 +32,7 @@ function hideHomeExtras() {
 
   const memberBanner = root.querySelector('img[alt="メンバー紹介"]');
   if (memberBanner) {
-    memberBanner.setAttribute("src", "/top/IMG_7658.jpeg");
+    memberBanner.setAttribute("src", "/top/IMG_7658.jpeg?v=20260829-1158");
   }
 
   document.querySelectorAll('[data-home-compact-realtime="true"]').forEach((node) => {
