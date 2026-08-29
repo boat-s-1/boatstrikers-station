@@ -1,21 +1,13 @@
-name: Hatsune NEWS Daily
+name: Hatsune NEWS Manual Backup
 
 on:
-  schedule:
-    # GitHub Actionsは毎時00分に遅延・取りこぼしが起きやすいため7分ずらす
-    # 01:07 UTC = 10:07 JST
-    - cron: "7 1 * * *"
-    # 05:07 UTC = 14:07 JST
-    - cron: "7 5 * * *"
-    # 13:07 UTC = 22:07 JST
-    - cron: "7 13 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: hatsune-news-daily
+  group: hatsune-news-manual-backup
   cancel-in-progress: false
 
 jobs:
@@ -53,7 +45,7 @@ jobs:
             exit 1
           fi
 
-          echo "### Hatsune NEWS Daily" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Schedule: 10:07 / 14:07 / 22:07 JST" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Hatsune NEWS Manual Backup" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Trigger: manual only" >> "$GITHUB_STEP_SUMMARY"
           echo "- HTTP status: $status" >> "$GITHUB_STEP_SUMMARY"
           echo "- Completed at: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')" >> "$GITHUB_STEP_SUMMARY"
