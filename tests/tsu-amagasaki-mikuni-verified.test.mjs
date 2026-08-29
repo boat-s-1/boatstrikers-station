@@ -27,6 +27,8 @@ test("Mikuni actual official table keeps half-lap separate from one-lap", () => 
   const rows = parseMikuniOfficialOriginalTenji(mikuni);
   assert.equal(rows.length, 6);
   assert.deepEqual(rows[0], { boatNo: 1, racerNo: "4546", exhibitionTime: null, lapTime: null, halfLapTime: 18.68, turnTime: 5.73, straightTime: 6.67 });
+  assert.deepEqual(parseMikuniOfficialOriginalTenji(mikuni + mikuni), rows);
+  assert.deepEqual(parseMikuniOfficialOriginalTenji(mikuni + mikuni.replace("18.68", "18.69")), []);
 });
 
 test("adapters fail closed on missing values, duplicate boat identity, or renamed half-lap", () => {
