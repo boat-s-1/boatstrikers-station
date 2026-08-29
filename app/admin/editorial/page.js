@@ -19,9 +19,16 @@ const STATUS_META = {
   rejected: { label: "不採用", tone: "rejected" },
 };
 
-function getClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+function getReadClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+function getWriteClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
@@ -37,8 +44,14 @@ function jstDate(value) {
   }).format(new Date(value));
 }
 
+function errorRedirect(character, filterStatus, code, detail = "") {
+  const qs = new URLSearchParams({ character, status: filterStatus, error: code });
+  if (detail) qs.set("detail", detail.slice(0, 300));
+  redirect(`/admin/editorial?${qs.toString()}`);
+}
+
 async function loadNews(character, status) {
-  const client = getClient();
+  const client = getReadClient();
   if (!client) return { rows: [], error: "Supabase環境変数がありません。" };
 
   let query = client
@@ -57,25 +70,54 @@ async function loadNews(character, status) {
 
 async function updateStatus(formData) {
   "use server";
+
   const id = Number(formData.get("id"));
   const nextStatus = String(formData.get("status") || "unreviewed");
   const character = validFilter(String(formData.get("character") || "all"), ["all", ...Object.keys(CHARACTER_META)]);
   const filterStatus = validFilter(String(formData.get("filterStatus") || "all"), ["all", ...Object.keys(STATUS_META)]);
 
-  if (!Number.isFinite(id) || !STATUS_META[nextStatus]) redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=invalid`);
+  if (!Number.isFinite(id) || !STATUS_META[nextStatus]) {
+    errorRedirect(character, filterStatus, "invalid", "ニュースIDまたは保存先ステータスが不正です。");
+  }
 
-  const client = getClient();
-  if (!client) redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=missing_supabase`);
+  const client = getWriteClient();
+  if (!client) {
+    errorRedirect(
+      character,
+      filterStatus,
+      "missing_service_key",
+      "VercelにSUPABASE_SERVICE_ROLE_KEYが設定されていません。"
+    );
+  }
 
-  const { error } = await client
+  const { data, error } = await client
     .from("bs_news_candidates")
     .update({ status: nextStatus, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id,status")
+    .maybeSingle();
 
-  if (error) redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=save_failed`);
+  if (error) {
+    errorRedirect(character, filterStatus, "save_failed", error.message || "Supabase更新に失敗しました。");
+  }
+
+  if (!data) {
+    errorRedirect(character, filterStatus, "not_updated", "対象ニュースが見つからず、更新されませんでした。");
+  }
 
   revalidatePath("/admin/editorial");
   redirect(`/admin/editorial?character=${character}&status=${filterStatus}&saved=1`);
+}
+
+function errorMessage(code, detail) {
+  if (detail) return detail;
+  switch (code) {
+    case "missing_service_key": return "保存用のSupabase管理キーがVercelに設定されていません。";
+    case "save_failed": return "Supabaseへの保存に失敗しました。";
+    case "not_updated": return "対象ニュースを更新できませんでした。";
+    case "invalid": return "保存するデータが不正です。";
+    default: return code ? "取得・保存時にエラーが発生しました。" : "";
+  }
 }
 
 export default async function EditorialPage({ searchParams }) {
@@ -83,6 +125,7 @@ export default async function EditorialPage({ searchParams }) {
   const character = validFilter(params?.character, ["all", ...Object.keys(CHARACTER_META)]);
   const status = validFilter(params?.status, ["all", ...Object.keys(STATUS_META)]);
   const { rows, error } = await loadNews(character, status);
+  const actionError = errorMessage(params?.error, params?.detail);
 
   const counts = rows.reduce((acc, row) => {
     acc[row.status] = (acc[row.status] || 0) + 1;
@@ -123,7 +166,8 @@ export default async function EditorialPage({ searchParams }) {
         </section>
 
         {params?.saved === "1" && <div className={styles.success}>✓ 判定を保存しました。</div>}
-        {(error || params?.error) && <div className={styles.error}>取得・保存時にエラーが発生しました。{error ? ` ${error}` : ""}</div>}
+        {error && <div className={styles.error}>ニュース取得エラー：{error}</div>}
+        {actionError && <div className={styles.error}>保存エラー：{actionError}</div>}
 
         <section className={styles.newsList}>
           {rows.length === 0 ? <div className={styles.empty}>該当するニュース候補はありません。</div> : rows.map((row) => {
