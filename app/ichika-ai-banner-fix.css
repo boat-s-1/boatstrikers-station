@@ -49,6 +49,23 @@ section[aria-label="一果 AI予想"] > div:first-child img {
   margin: 0 !important;
 }
 
+/* Hidden-in Theory alert panel: force the outer card to round on ALL four corners.
+ * The component still has an older inline top-only radius, so this !important rule
+ * intentionally overrides it and keeps the pink framed card consistent with the page.
+ */
+.ichikaPage section:has(img[alt="一果アラート 隠れイン理論"]) {
+  overflow: hidden !important;
+  border: 2px solid #ff7eaa !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(149, 64, 108, 0.10) !important;
+}
+
+.ichikaPage section:has(img[alt="一果アラート 隠れイン理論"]) > div:first-child,
+.ichikaPage section:has(img[alt="一果アラート 隠れイン理論"]) > div:first-child img {
+  border-radius: 0 !important;
+}
+
 /* Latest Ichika newspaper: gold accent to match its title art. */
 .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) {
   overflow: hidden !important;
@@ -85,7 +102,8 @@ section[aria-label="一果 AI予想"] > div:first-child img {
 
 @media (max-width: 760px) {
   .ichikaPage .sectionCard,
-  section[aria-label="一果 AI予想"] {
+  section[aria-label="一果 AI予想"],
+  .ichikaPage section:has(img[alt="一果アラート 隠れイン理論"]) {
     border-radius: 20px !important;
   }
 
