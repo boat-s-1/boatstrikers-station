@@ -99,6 +99,7 @@ function SocialButton({ item }) {
 export default function PublicSiteHeader() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const hidden = useMemo(() => {
     const isMagazineViewer =
@@ -117,6 +118,13 @@ export default function PublicSiteHeader() {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const updateScrolled = () => setScrolled(window.scrollY > 56);
+    updateScrolled();
+    window.addEventListener("scroll", updateScrolled, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrolled);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -140,7 +148,7 @@ export default function PublicSiteHeader() {
   return (
     <>
       <header
-        className={`${styles.header} PublicSiteHeader_header__glass ${compact ? `${styles.compact} PublicSiteHeader_compact__glass` : ""}`}
+        className={`${styles.header} PublicSiteHeader_header__glass ${compact ? `${styles.compact} PublicSiteHeader_compact__glass` : ""} ${scrolled && !open ? "PublicSiteHeader_scrolled__glass" : ""}`}
       >
         <Link
           href="/"
