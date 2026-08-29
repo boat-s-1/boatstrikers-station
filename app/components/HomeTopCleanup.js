@@ -35,6 +35,12 @@ function hideHomeExtras() {
     memberBanner.setAttribute("src", "/top/IMG_7658.jpeg?v=20260829-1158");
   }
 
+  const monthlyForecastBanner = root.querySelector('img[alt="今月の予想実績"]');
+  if (monthlyForecastBanner) {
+    monthlyForecastBanner.setAttribute("src", "/top/IMG_7665.jpeg?v=20260829-1438");
+    monthlyForecastBanner.setAttribute("alt", "今月の予想数");
+  }
+
   document.querySelectorAll('[data-home-compact-realtime="true"]').forEach((node) => {
     node.style.display = "none";
   });
