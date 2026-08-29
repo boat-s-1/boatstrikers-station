@@ -26,6 +26,13 @@ export default function IchikaNewspaperBannerOverride() {
         changed = true;
       }
 
+      const labImage = document.querySelector('.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]');
+      if (labImage) {
+        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0027");
+        labImage.setAttribute("alt", "イン逃げラボ");
+        changed = true;
+      }
+
       return changed;
     };
 
