@@ -12,13 +12,15 @@ const CHARACTER_TYPES = {
 
 const DEFAULT_LIMIT = 3;
 
+function jstDateOffset(offsetDays = 0) {
+  const now = new Date();
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  jst.setUTCDate(jst.getUTCDate() + offsetDays);
+  return jst.toISOString().slice(0, 10);
+}
+
 function jstToday() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+  return jstDateOffset(0);
 }
 
 function getClient() {
@@ -39,6 +41,29 @@ function normalizeStat(row) {
   };
 }
 
+function statsMap(rows) {
+  return new Map((rows || []).map((row) => [row.ranking_type, normalizeStat(row)]));
+}
+
+function buildYesterdayStats(types, throughYesterdayRows, throughDayBeforeRows) {
+  const yesterdayMap = statsMap(throughYesterdayRows);
+  const dayBeforeMap = statsMap(throughDayBeforeRows);
+
+  return types.map((rankingType) => {
+    const yesterday = yesterdayMap.get(rankingType) || { predictions: 0, hits: 0 };
+    const dayBefore = dayBeforeMap.get(rankingType) || { predictions: 0, hits: 0 };
+    const predictions = Math.max(0, Number(yesterday.predictions || 0) - Number(dayBefore.predictions || 0));
+    const hits = Math.max(0, Number(yesterday.hits || 0) - Number(dayBefore.hits || 0));
+
+    return {
+      rankingType,
+      predictions,
+      hits,
+      hitRate: predictions > 0 ? (hits / predictions) * 100 : null,
+    };
+  });
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const character = String(searchParams.get("character") || "").toLowerCase();
@@ -54,8 +79,10 @@ export async function GET(request) {
   }
 
   const today = jstToday();
+  const yesterday = jstDateOffset(-1);
+  const dayBeforeYesterday = jstDateOffset(-2);
 
-  const [rankingResult, statResult, startResult] = await Promise.all([
+  const [rankingResult, statResult, statYesterdayResult, statDayBeforeResult, startResult] = await Promise.all([
     client
       .from("ai_v2_daily_rankings")
       .select("ranking_type,rank_no,course_code,race_no,probability,selected_for_home")
@@ -65,6 +92,8 @@ export async function GET(request) {
       .order("ranking_type", { ascending: true })
       .order("rank_no", { ascending: true }),
     client.rpc("ai_v2_public_character_stats", { p_as_of: today }),
+    client.rpc("ai_v2_public_character_stats", { p_as_of: yesterday }),
+    client.rpc("ai_v2_public_character_stats", { p_as_of: dayBeforeYesterday }),
     client
       .from("ai_v2_daily_rankings")
       .select("ranking_date")
@@ -103,12 +132,18 @@ export async function GET(request) {
     ? []
     : (statResult.data || []).map(normalizeStat).filter((row) => types.includes(row.rankingType));
 
+  const yesterdayStats = statYesterdayResult.error || statDayBeforeResult.error
+    ? []
+    : buildYesterdayStats(types, statYesterdayResult.data || [], statDayBeforeResult.data || []);
+
   return NextResponse.json({
     character,
     date: today,
+    yesterdayDate: yesterday,
     startDate: startResult.data?.[0]?.ranking_date || null,
     selectionMode: anySelected ? "manual" : "auto",
     picks,
     stats,
+    yesterdayStats,
   });
 }
