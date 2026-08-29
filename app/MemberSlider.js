@@ -9,7 +9,7 @@ const members = [
   {
     name: "一果",
     href: "/ichika",
-    image: "/top/6C8FAEF3-220F-4FEB-B881-220116EDDDCE.png",
+    image: "/top/IMG_7676.jpeg",
     alt: "一果 イン逃げ",
   },
   {
