@@ -19,9 +19,9 @@ export default function IchikaNewspaperBannerOverride() {
         changed = true;
       }
 
-      const performanceImage = document.querySelector('.ichikaPage img[alt="一果成績"]');
+      const performanceImage = document.querySelector('.ichikaPage img[alt="一果成績"], .ichikaPage img[alt="今月の成績"]');
       if (performanceImage) {
-        performanceImage.setAttribute("src", "/top/IMG_7720.jpeg?v=20260829-2238");
+        performanceImage.setAttribute("src", "/top/IMG_7720.jpeg?v=20260830-0016");
         performanceImage.setAttribute("alt", "今月の成績");
         changed = true;
       }
