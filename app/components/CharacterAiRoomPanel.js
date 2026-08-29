@@ -274,7 +274,7 @@ export default function CharacterAiRoomPanel() {
       {character === "ichika" ? (
         <div className={styles.ichikaBannerHeading}>
           <img
-            src="/89404A04-FCEE-4CD8-9CCC-DDEBDB116BC0.png?v=20260827-0451"
+            src="/top/IMG_7683.jpeg?v=20260829-1555"
             alt="今日の注目！ 一果AI イン逃げ予想"
             className={styles.ichikaBannerImage}
           />
@@ -336,13 +336,10 @@ export default function CharacterAiRoomPanel() {
         <summary>
           <span>🔬 自分で調べたい人向け</span>
           <strong>{meta.researchTitle}</strong>
-          <small>研究ツールを開く</small>
         </summary>
         <div className={styles.researchBody}>
           <p>{meta.researchText}</p>
-          <a href={meta.researchHref} target="_blank" rel="noopener noreferrer">
-            研究ツールを使う ↗
-          </a>
+          <a href={meta.researchHref} target="_blank" rel="noopener noreferrer">研究ツールを開く →</a>
         </div>
       </details>
     </section>
@@ -350,9 +347,9 @@ export default function CharacterAiRoomPanel() {
 
   return (
     <>
-      {mount && panel ? createPortal(panel, mount) : null}
+      {mount ? createPortal(panel, mount) : null}
       {performanceMount && character === "hatsune" ? createPortal(performance, performanceMount) : null}
-      {researchMount && research ? createPortal(research, researchMount) : null}
+      {researchMount ? createPortal(research, researchMount) : null}
     </>
   );
 }
