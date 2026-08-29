@@ -94,6 +94,9 @@ async function sendPendingAlerts(supabase,raceDate){
     .eq("race_date",raceDate).eq("notified",false).order("detected_at",{ascending:true}).limit(20);
   if(error)throw error;
   const recipients=await getRecipients(supabase);
+  if(!recipients.length){
+    console.warn("[line-notification] no eligible recipients",{theory:"ichika_hidden_escape",raceDate,pending:(alerts||[]).length});
+  }
   const sent=[];
   const failed=[];
   for(const alert of alerts||[]){
@@ -104,7 +107,11 @@ async function sendPendingAlerts(supabase,raceDate){
         .update({notified:true,notified_at:now,updated_at:now}).eq("id",alert.id).eq("notified",false);
       if(updateError)throw updateError;
       sent.push({id:alert.id,recipients:recipientCount});
-    }catch(error){failed.push({id:alert.id,error:error?.message||"LINE send failed"});}
+    }catch(error){
+      const message=String(error?.message||"LINE send failed").slice(0,1000);
+      console.error("[line-notification] send failed",{theory:"ichika_hidden_escape",alertId:alert.id,raceDate:alert.race_date,courseCode:alert.course_code,raceNo:alert.race_no,recipientCount:recipients.length,error:message});
+      failed.push({id:alert.id,error:message});
+    }
   }
   return {pending:(alerts||[]).length,eligibleRecipients:recipients.length,sent,failed};
 }
