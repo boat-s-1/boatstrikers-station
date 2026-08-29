@@ -13,10 +13,12 @@ const CHARACTER_META = {
   boatstrikers: { label: "BoatStrikers", icon: "🚤" },
 };
 
+// DB constraint: unreviewed / adopted / rejected / published
 const STATUS_META = {
   unreviewed: { label: "未確認", tone: "pending" },
-  approved: { label: "採用", tone: "approved" },
+  adopted: { label: "採用", tone: "approved" },
   rejected: { label: "不採用", tone: "rejected" },
+  published: { label: "公開済み", tone: "approved" },
 };
 
 function getReadClient() {
@@ -82,12 +84,7 @@ async function updateStatus(formData) {
 
   const client = getWriteClient();
   if (!client) {
-    errorRedirect(
-      character,
-      filterStatus,
-      "missing_service_key",
-      "VercelにSUPABASE_SERVICE_ROLE_KEYが設定されていません。"
-    );
+    errorRedirect(character, filterStatus, "missing_service_key", "VercelにSUPABASE_SERVICE_ROLE_KEYが設定されていません。");
   }
 
   const { data, error } = await client
@@ -97,13 +94,8 @@ async function updateStatus(formData) {
     .select("id,status")
     .maybeSingle();
 
-  if (error) {
-    errorRedirect(character, filterStatus, "save_failed", error.message || "Supabase更新に失敗しました。");
-  }
-
-  if (!data) {
-    errorRedirect(character, filterStatus, "not_updated", "対象ニュースが見つからず、更新されませんでした。");
-  }
+  if (error) errorRedirect(character, filterStatus, "save_failed", error.message || "Supabase更新に失敗しました。");
+  if (!data) errorRedirect(character, filterStatus, "not_updated", "対象ニュースが見つからず、更新されませんでした。");
 
   revalidatePath("/admin/editorial");
   redirect(`/admin/editorial?character=${character}&status=${filterStatus}&saved=1`);
@@ -130,7 +122,7 @@ export default async function EditorialPage({ searchParams }) {
   const counts = rows.reduce((acc, row) => {
     acc[row.status] = (acc[row.status] || 0) + 1;
     return acc;
-  }, { unreviewed: 0, approved: 0, rejected: 0 });
+  }, { unreviewed: 0, adopted: 0, rejected: 0, published: 0 });
 
   return (
     <main className={styles.page}>
@@ -147,7 +139,7 @@ export default async function EditorialPage({ searchParams }) {
         <section className={styles.summaryGrid}>
           <article><span>表示中</span><strong>{rows.length}</strong><small>件</small></article>
           <article><span>未確認</span><strong>{counts.unreviewed}</strong><small>件</small></article>
-          <article><span>採用</span><strong>{counts.approved}</strong><small>件</small></article>
+          <article><span>採用</span><strong>{counts.adopted}</strong><small>件</small></article>
           <article><span>不採用</span><strong>{counts.rejected}</strong><small>件</small></article>
         </section>
 
@@ -175,6 +167,7 @@ export default async function EditorialPage({ searchParams }) {
             const stat = STATUS_META[row.status] || STATUS_META.unreviewed;
             const rule = row.raw_payload?.classification_rule;
             const hasMaterials = Boolean(row.raw_payload?.editorial_materials);
+            const isAdopted = row.status === "adopted" || row.status === "published";
 
             return (
               <article className={styles.newsCard} key={row.id}>
@@ -200,13 +193,13 @@ export default async function EditorialPage({ searchParams }) {
                 <div className={styles.actions}>
                   <div>
                     <a href={row.source_url} target="_blank" rel="noreferrer" className={styles.sourceButton}>元記事を見る ↗</a>
-                    {row.status === "approved" && <Link href={`/admin/editorial/produce/${row.id}`} className={styles.produceButton}>{hasMaterials ? "制作素材を開く →" : "制作へ進む →"}</Link>}
+                    {isAdopted && <Link href={`/admin/editorial/produce/${row.id}`} className={styles.produceButton}>{hasMaterials ? "制作素材を開く →" : "制作へ進む →"}</Link>}
                   </div>
                   <form action={updateStatus}>
                     <input type="hidden" name="id" value={row.id} />
                     <input type="hidden" name="character" value={character} />
                     <input type="hidden" name="filterStatus" value={status} />
-                    <button name="status" value="approved" className={styles.approveButton}>採用</button>
+                    <button name="status" value="adopted" className={styles.approveButton}>採用</button>
                     <button name="status" value="rejected" className={styles.rejectButton}>不採用</button>
                     <button name="status" value="unreviewed" className={styles.resetButton}>未確認へ戻す</button>
                   </form>
