@@ -155,6 +155,9 @@ export default async function EditorialPage({ searchParams }) {
             </select></label>
             <button type="submit">絞り込む</button>
           </form>
+          <div style={{ marginTop: 14 }}>
+            <Link href="/admin/editorial/daily/hatsune" className={styles.produceButton}>🌸 今日の初音NEWSをまとめて作る →</Link>
+          </div>
         </section>
 
         {params?.saved === "1" && <div className={styles.success}>✓ 判定を保存しました。</div>}
