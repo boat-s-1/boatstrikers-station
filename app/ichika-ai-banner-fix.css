@@ -56,9 +56,16 @@ section[aria-label="一果 AI予想"] > div:first-child img {
   width: calc(100% + 36px) !important;
   max-width: none !important;
   height: auto !important;
-  margin: 0 -18px 18px !important;
+  margin: 0 -18px 0 !important;
   border-radius: 0 !important;
   object-fit: cover !important;
+}
+
+/* Remove the rounded seam where the newspaper banner meets the article card. */
+.ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) > .newsFeature {
+  margin-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }
 
 @media (max-width: 760px) {
@@ -73,6 +80,6 @@ section[aria-label="一果 AI予想"] > div:first-child img {
 
   .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) > img[alt="一果新聞"] {
     width: calc(100% + 28px) !important;
-    margin: 0 -14px 14px !important;
+    margin: 0 -14px 0 !important;
   }
 }
