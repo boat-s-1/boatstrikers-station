@@ -128,7 +128,12 @@ export async function GET(request){
       if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null});continue;}
       const syncedAt=new Date().toISOString();
       for(const row of source.rows){
-        const update={official_lap:row.lapTime,official_turn:row.turnTime,official_straight:row.straightTime,official_exhibition_time:row.exhibitionTime,official_exhibition_source:source.source||"venue_official",official_exhibition_synced_at:syncedAt};
+        const update={official_exhibition_source:source.source||"venue_official",official_exhibition_synced_at:syncedAt};
+        if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;
+        if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;
+        if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;
+        if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;
+        if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;
         if(row.exhibitionSt!==null&&row.exhibitionSt!==undefined)update.official_exhibition_st=row.exhibitionSt;
         if(row.exhibitionSymbol!==undefined)update.official_exhibition_symbol=row.exhibitionSymbol||null;
         if(row.exhibitionCourse!==null&&row.exhibitionCourse!==undefined)update.official_exhibition_course=row.exhibitionCourse;

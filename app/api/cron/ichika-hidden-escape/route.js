@@ -134,14 +134,16 @@ export async function GET(request){
       }
       const syncedAt=new Date().toISOString();
       for(const row of source.rows){
-        const {error:updateError}=await supabase.from("bs_race_entries").update({
-          official_lap:row.lapTime,
-          official_turn:row.turnTime,
-          official_straight:row.straightTime,
-          official_exhibition_time:row.exhibitionTime,
+        const update={
           official_exhibition_source:source.source||"unknown_realtime",
           official_exhibition_synced_at:syncedAt,
-        }).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);
+        };
+        if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;
+        if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;
+        if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;
+        if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;
+        if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;
+        const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);
         if(updateError)throw updateError;
       }
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_ichika_hidden_escape_alerts");
