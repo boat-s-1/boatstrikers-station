@@ -2,12 +2,13 @@ name: Hatsune NEWS Daily
 
 on:
   schedule:
-    # 01:00 UTC = 10:00 JST
-    - cron: "0 1 * * *"
-    # 05:00 UTC = 14:00 JST
-    - cron: "0 5 * * *"
-    # 13:00 UTC = 22:00 JST
-    - cron: "0 13 * * *"
+    # GitHub Actionsは毎時00分に遅延・取りこぼしが起きやすいため7分ずらす
+    # 01:07 UTC = 10:07 JST
+    - cron: "7 1 * * *"
+    # 05:07 UTC = 14:07 JST
+    - cron: "7 5 * * *"
+    # 13:07 UTC = 22:07 JST
+    - cron: "7 13 * * *"
   workflow_dispatch:
 
 permissions:
@@ -53,6 +54,6 @@ jobs:
           fi
 
           echo "### Hatsune NEWS Daily" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Schedule: 10:00 / 14:00 / 22:00 JST" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Schedule: 10:07 / 14:07 / 22:07 JST" >> "$GITHUB_STEP_SUMMARY"
           echo "- HTTP status: $status" >> "$GITHUB_STEP_SUMMARY"
           echo "- Completed at: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S JST')" >> "$GITHUB_STEP_SUMMARY"
