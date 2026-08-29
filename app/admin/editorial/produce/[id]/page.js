@@ -48,7 +48,7 @@ async function generateMaterials(formData) {
     .maybeSingle();
 
   if (readError || !item) redirect(`/admin/editorial/produce/${id}?error=not_found`);
-  if (item.status !== "approved") redirect(`/admin/editorial/produce/${id}?error=not_approved`);
+  if (item.status !== "adopted") redirect(`/admin/editorial/produce/${id}?error=not_adopted`);
 
   try {
     const materials = await generateEditorialMaterials(item);
@@ -118,6 +118,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
 
   const char = CHARACTER_META[item.target_character] || CHARACTER_META.boatstrikers;
   const materials = item.raw_payload?.editorial_materials || null;
+  const isAdopted = item.status === "adopted";
 
   return (
     <main className={styles.page}>
@@ -139,7 +140,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
         <section className={styles.sourceCard}>
           <div className={styles.sourceTop}>
             <span>{"★".repeat(Math.max(1, Math.min(5, Number(item.importance || 1))))}</span>
-            <strong>{item.status === "approved" ? "採用済み" : "未採用"}</strong>
+            <strong>{isAdopted ? "採用済み" : "未採用"}</strong>
           </div>
           <h2>{item.title}</h2>
           {item.summary && <p>{item.summary}</p>}
@@ -157,7 +158,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
             <h2>{materials ? "制作素材を再生成" : "4媒体の下書きを一括生成"}</h2>
             <p>ニュースの事実データと担当キャラを引き継ぎ、X・ショート・note・サイトNEWS用の文章を生成します。</p>
           </div>
-          <button type="submit" disabled={item.status !== "approved"}>{materials ? "AIで作り直す" : "制作素材を作る"}</button>
+          <button type="submit" disabled={!isAdopted}>{materials ? "AIで作り直す" : "制作素材を作る"}</button>
         </form>
 
         {!materials ? (
