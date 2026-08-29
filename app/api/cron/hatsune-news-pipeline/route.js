@@ -1,4 +1,6 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { collectHatsuneNews } from "../../../../lib/hatsuneNewsCollector";
 import { syncHatsuneMediaNews } from "../../../../lib/hatsuneMediaNewsSync";
 import { generatePendingHatsuneArticles } from "../../../../lib/hatsuneNewsAi";
@@ -9,9 +11,41 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-function isAuthorized(request) {
+function getAdminSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+function safeEqual(left, right) {
+  const a = Buffer.from(String(left || ""));
+  const b = Buffer.from(String(right || ""));
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+async function isAuthorized(request) {
   const secret = process.env.CRON_SECRET;
-  return Boolean(secret) && request.headers.get("authorization") === `Bearer ${secret}`;
+  if (secret && request.headers.get("authorization") === `Bearer ${secret}`) return true;
+
+  const schedulerToken = request.headers.get("x-hatsune-scheduler-token");
+  if (!schedulerToken) return false;
+
+  const supabase = getAdminSupabase();
+  if (!supabase) return false;
+
+  try {
+    const { data, error } = await supabase
+      .from("hatsune_scheduler_config")
+      .select("token")
+      .eq("id", "primary")
+      .maybeSingle();
+
+    if (error || !data?.token) return false;
+    return safeEqual(schedulerToken, data.token);
+  } catch {
+    return false;
+  }
 }
 
 function countValue(value) {
@@ -21,7 +55,7 @@ function countValue(value) {
 }
 
 export async function GET(request) {
-  if (!isAuthorized(request)) {
+  if (!(await isAuthorized(request))) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
@@ -62,7 +96,6 @@ export async function GET(request) {
 
     if (process.env.OPENAI_API_KEY) {
       try {
-        // 1日3回動くため、1回あたりのAI生成数を抑えて60秒制限内に収める。
         ai = await generatePendingHatsuneArticles({ limit: 4 });
       } catch (error) {
         aiError = error?.message || String(error);
