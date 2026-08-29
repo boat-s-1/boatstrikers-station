@@ -3,6 +3,34 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+function forceLabCarousel() {
+  const section = document.querySelector(".ichikaPage .ichikaLabSection");
+  const rail = section?.querySelector(".labList");
+  if (!section || !rail) return;
+
+  rail.style.setProperty("display", "flex", "important");
+  rail.style.setProperty("flex-wrap", "nowrap", "important");
+  rail.style.setProperty("gap", "14px", "important");
+  rail.style.setProperty("overflow-x", "auto", "important");
+  rail.style.setProperty("overflow-y", "hidden", "important");
+  rail.style.setProperty("width", "100%", "important");
+  rail.style.setProperty("max-width", "100%", "important");
+  rail.style.setProperty("grid-template-columns", "none", "important");
+  rail.style.setProperty("scroll-snap-type", "x mandatory", "important");
+  rail.style.setProperty("-webkit-overflow-scrolling", "touch");
+  rail.style.setProperty("padding", "18px 16px 8px", "important");
+  rail.style.setProperty("margin", "0", "important");
+
+  Array.from(rail.children).forEach((card) => {
+    card.style.setProperty("display", "block", "important");
+    card.style.setProperty("flex", "0 0 88%", "important");
+    card.style.setProperty("width", "88%", "important");
+    card.style.setProperty("min-width", "88%", "important");
+    card.style.setProperty("max-width", "88%", "important");
+    card.style.setProperty("scroll-snap-align", "start", "important");
+  });
+}
+
 function setupLabDots() {
   const section = document.querySelector(".ichikaPage .ichikaLabSection");
   const rail = section?.querySelector(".labList");
@@ -21,14 +49,9 @@ function setupLabDots() {
     const button = document.createElement("button");
     button.type = "button";
     button.setAttribute("aria-label", `${index + 1}件目の記事を表示`);
-
     button.addEventListener("click", () => {
-      rail.scrollTo({
-        left: card.offsetLeft - rail.offsetLeft,
-        behavior: "smooth",
-      });
+      rail.scrollTo({ left: card.offsetLeft - rail.offsetLeft, behavior: "smooth" });
     });
-
     dots.appendChild(button);
     return button;
   });
@@ -39,7 +62,6 @@ function setupLabDots() {
     const railCenter = rail.scrollLeft + rail.clientWidth / 2;
     let activeIndex = 0;
     let closest = Number.POSITIVE_INFINITY;
-
     cards.forEach((card, index) => {
       const center = card.offsetLeft - rail.offsetLeft + card.clientWidth / 2;
       const distance = Math.abs(center - railCenter);
@@ -48,7 +70,6 @@ function setupLabDots() {
         activeIndex = index;
       }
     });
-
     buttons.forEach((button, index) => {
       const active = index === activeIndex;
       button.classList.toggle("isActive", active);
@@ -73,47 +94,37 @@ export default function IchikaNewspaperBannerOverride() {
     if (pathname !== "/ichika") return;
 
     const replaceBanners = () => {
-      const newspaperImage = document.querySelector(
-        '.ichikaPage img[alt="一果新聞"], .ichikaPage img[alt="最新の一果新聞"]'
-      );
+      const newspaperImage = document.querySelector('.ichikaPage img[alt="一果新聞"], .ichikaPage img[alt="最新の一果新聞"]');
       if (newspaperImage) {
         newspaperImage.setAttribute("src", "/top/IMG_7702.jpeg?v=20260829-2121");
         newspaperImage.setAttribute("alt", "最新の一果新聞");
       }
 
-      const performanceImage = document.querySelector(
-        '.ichikaPage img[alt="一果成績"], .ichikaPage img[alt="今月の成績"]'
-      );
+      const performanceImage = document.querySelector('.ichikaPage img[alt="一果成績"], .ichikaPage img[alt="今月の成績"]');
       if (performanceImage) {
         performanceImage.setAttribute("src", "/top/IMG_7720.jpeg?v=20260830-0016");
         performanceImage.setAttribute("alt", "今月の成績");
       }
 
-      const labImage = document.querySelector(
-        '.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]'
-      );
+      const labImage = document.querySelector('.ichikaPage img[alt="一果ラボ"], .ichikaPage img[alt="イン逃げラボ"]');
       if (labImage) {
-        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0152");
+        labImage.setAttribute("src", "/top/IMG_7732.jpeg?v=20260830-0155");
         labImage.setAttribute("alt", "イン逃げラボ");
-
         const labSection = labImage.closest("section.sectionCard");
-        if (labSection) {
-          labSection.classList.add("ichikaLabSection");
-        }
+        if (labSection) labSection.classList.add("ichikaLabSection");
       }
+
+      forceLabCarousel();
     };
 
     let cleanupDots = () => {};
     let dotsInitialized = false;
 
     const ensureLabDots = () => {
+      forceLabCarousel();
       if (dotsInitialized) return;
-
-      const rail = document.querySelector(
-        ".ichikaPage .ichikaLabSection .labList"
-      );
+      const rail = document.querySelector(".ichikaPage .ichikaLabSection .labList");
       if (!rail || rail.children.length < 2) return;
-
       cleanupDots = setupLabDots();
       dotsInitialized = rail.dataset.labDotsReady === "true";
     };
@@ -125,7 +136,6 @@ export default function IchikaNewspaperBannerOverride() {
       replaceBanners();
       ensureLabDots();
     });
-
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
