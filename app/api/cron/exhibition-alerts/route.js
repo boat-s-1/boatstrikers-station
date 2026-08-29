@@ -91,6 +91,9 @@ async function sendPendingLineAlerts(supabase,raceDate){
   const {data:alerts,error}=await supabase.from("bs_exhibition_alerts").select("id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,exhibition_rank,straight_time,straight_rank,detected_at,notified").eq("race_date",raceDate).eq("notified",false).order("detected_at",{ascending:true}).limit(10);
   if(error)throw error;
   const recipients=await getBoat4Recipients(supabase);
+  if(!recipients.length){
+    console.warn("[line-notification] no eligible recipients",{theory:"boat4_double_top",raceDate,pending:(alerts||[]).length});
+  }
   const sent=[];const failed=[];
   for(const alert of alerts||[]){
     try{
@@ -99,7 +102,11 @@ async function sendPendingLineAlerts(supabase,raceDate){
       const {error:updateError}=await supabase.from("bs_exhibition_alerts").update({notified:true,notified_at:now,updated_at:now}).eq("id",alert.id).eq("notified",false);
       if(updateError)throw updateError;
       sent.push({id:alert.id,recipients:recipientCount});
-    }catch(error){failed.push({id:alert.id,error:error?.message||"LINE send failed"});}
+    }catch(error){
+      const message=String(error?.message||"LINE send failed").slice(0,1000);
+      console.error("[line-notification] send failed",{theory:"boat4_double_top",alertId:alert.id,raceDate:alert.race_date,courseCode:alert.course_code,raceNo:alert.race_no,recipientCount:recipients.length,error:message});
+      failed.push({id:alert.id,error:message});
+    }
   }
   return {pending:(alerts||[]).length,eligibleRecipients:recipients.length,sent,failed};
 }
