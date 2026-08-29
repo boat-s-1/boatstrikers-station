@@ -105,6 +105,72 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
   border-radius: 0 !important;
 }
 
+/* Ichika lab: swipeable horizontal article cards. */
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]),
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) {
+  padding-bottom: 16px !important;
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labList,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labList {
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  margin: 12px -4px 0 !important;
+  padding: 2px 4px 8px !important;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labList::-webkit-scrollbar,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labList::-webkit-scrollbar {
+  display: none;
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labItem,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labItem {
+  flex: 0 0 64% !important;
+  min-width: 0 !important;
+  display: block !important;
+  padding: 9px !important;
+  border: 1px solid #f0c8db !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  text-decoration: none !important;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 12px rgba(149, 64, 108, 0.08);
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labItem img,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labItem img {
+  display: block !important;
+  width: 100% !important;
+  height: 112px !important;
+  object-fit: cover !important;
+  border-radius: 11px !important;
+  margin-bottom: 8px !important;
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labItem h3,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labItem h3 {
+  margin: 0 0 7px !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  color: #17345c !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labItem small,
+.ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labItem small {
+  color: #d34f8c !important;
+  font-size: 11px !important;
+}
+
 @media (max-width: 760px) {
   .ichikaPage .sectionCard,
   section[aria-label="一果 AI予想"],
@@ -120,5 +186,10 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
   .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) > img[alt="一果新聞"] {
     width: calc(100% + 28px) !important;
     margin: 0 -14px 0 !important;
+  }
+
+  .ichikaPage .sectionCard:has(img[alt="一果ラボ"]) .labItem,
+  .ichikaPage .sectionCard:has(img[alt="イン逃げラボ"]) .labItem {
+    flex-basis: 68% !important;
   }
 }
