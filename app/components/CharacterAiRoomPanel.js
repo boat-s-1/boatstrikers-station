@@ -202,7 +202,7 @@ export default function CharacterAiRoomPanel() {
         if (!cancelled) setData(json);
       })
       .catch(() => {
-        if (!cancelled) setData({ picks: [], stats: [], error: true });
+        if (!cancelled) setData({ picks: [], stats: [], yesterdayStats: [], error: true });
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -228,6 +228,7 @@ export default function CharacterAiRoomPanel() {
   const meta = CHARACTER_META[character];
   const picks = Array.isArray(data?.picks) ? data.picks : [];
   const stats = Array.isArray(data?.stats) ? data.stats : [];
+  const yesterdayStats = Array.isArray(data?.yesterdayStats) ? data.yesterdayStats : [];
 
   const performance = (
     <div className={`${styles.recordArea} ${character === "hatsune" ? styles.hatsunePerformance : ""}`}>
@@ -236,29 +237,76 @@ export default function CharacterAiRoomPanel() {
           <span>AI PERFORMANCE</span>
           <h3>過去のAI予想 的中率</h3>
         </div>
-        <small>結果確定分のみ</small>
+        {character !== "ichika" ? <small>結果確定分のみ</small> : null}
       </div>
 
-      <div className={styles.statGrid}>
-        {(character === "hatsune"
-          ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
-          : character === "ichika"
-            ? ["ichika_escape_best10"]
+      {character === "ichika" ? (() => {
+        const typeKey = "ichika_escape_best10";
+        const allStat = stats.find((item) => item.rankingType === typeKey);
+        const yesterdayStat = yesterdayStats.find((item) => item.rankingType === typeKey);
+        const allPredictions = Number(allStat?.predictions || 0);
+        const allHits = Number(allStat?.hits || 0);
+        const yesterdayPredictions = Number(yesterdayStat?.predictions || 0);
+        const yesterdayHits = Number(yesterdayStat?.hits || 0);
+
+        const cards = [
+          {
+            label: "昨日",
+            predictions: yesterdayPredictions,
+            hits: yesterdayHits,
+            hitRate: yesterdayStat?.hitRate,
+          },
+          {
+            label: "全期間",
+            predictions: allPredictions,
+            hits: allHits,
+            hitRate: allStat?.hitRate,
+          },
+        ];
+
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {cards.map((card) => (
+              <div
+                key={card.label}
+                className={styles.statCard}
+                style={{ textAlign: "center", padding: "15px 10px" }}
+              >
+                <span style={{ fontSize: 13 }}>{card.label}</span>
+                <strong style={{ fontSize: 28 }}>
+                  {card.predictions > 0 && card.hitRate != null
+                    ? `${Number(card.hitRate).toFixed(1)}%`
+                    : "—%"}
+                </strong>
+                <small>
+                  {card.predictions > 0
+                    ? `${card.hits} / ${card.predictions}R 的中`
+                    : "結果データなし"}
+                </small>
+              </div>
+            ))}
+          </div>
+        );
+      })() : (
+        <div className={styles.statGrid}>
+          {(character === "hatsune"
+            ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
             : ["kiina_boat5_best5"]
-        ).map((typeKey) => {
-          const stat = stats.find((item) => item.rankingType === typeKey);
-          const type = TYPE_META[typeKey];
-          const predictions = Number(stat?.predictions || 0);
-          const hits = Number(stat?.hits || 0);
-          return (
-            <div className={styles.statCard} key={typeKey}>
-              <span>{type.statLabel}</span>
-              <strong>{predictions > 0 && stat?.hitRate != null ? `${Number(stat.hitRate).toFixed(1)}%` : "—%"}</strong>
-              <small>{predictions > 0 ? `${hits} / ${predictions}R 的中` : "結果データ蓄積中"}</small>
-            </div>
-          );
-        })}
-      </div>
+          ).map((typeKey) => {
+            const stat = stats.find((item) => item.rankingType === typeKey);
+            const type = TYPE_META[typeKey];
+            const predictions = Number(stat?.predictions || 0);
+            const hits = Number(stat?.hits || 0);
+            return (
+              <div className={styles.statCard} key={typeKey}>
+                <span>{type.statLabel}</span>
+                <strong>{predictions > 0 && stat?.hitRate != null ? `${Number(stat.hitRate).toFixed(1)}%` : "—%"}</strong>
+                <small>{predictions > 0 ? `${hits} / ${predictions}R 的中` : "結果データ蓄積中"}</small>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <p className={styles.note}>
         AI v2集計開始：{formatDate(data?.startDate)} ／ 前日版AIランキングと確定結果を集計しています。
