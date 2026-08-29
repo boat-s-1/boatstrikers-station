@@ -6,6 +6,7 @@ import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
+// Keep this page server-rendered so newly collected editorial candidates appear immediately.
 const CHARACTER_META = {
   ichika: { label: "一果", icon: "🍓" },
   hatsune: { label: "初音", icon: "🌸" },
