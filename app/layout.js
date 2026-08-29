@@ -2,6 +2,7 @@ import "./globals.css";
 import "./public-header-glass.css";
 import "./public-header-logo-boost.css";
 import "./races-compact-overrides.css";
+import "./ichika-ai-banner-fix.css";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
