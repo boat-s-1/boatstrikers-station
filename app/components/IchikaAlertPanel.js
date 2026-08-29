@@ -254,10 +254,6 @@ export default async function IchikaAlertPanel() {
           <AlertCountCard label="全期間" count={totalAlertCount} tone="all" />
         </div>
 
-        <p style={{ margin: "9px 2px 0", fontSize: 11, color: "#7b8798", lineHeight: 1.6 }}>
-          B1 × 展示色なし × 1周1位
-        </p>
-
         <div style={{ marginTop: 14 }}>
           <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 900, color: "#17345c" }}>
             的中率
@@ -267,10 +263,6 @@ export default async function IchikaAlertPanel() {
             <PerformanceCard label="全期間" performance={allPerformance} tone="blue" />
           </div>
         </div>
-
-        <p style={{ margin: "10px 2px 2px", fontSize: 11, color: "#7b8798", lineHeight: 1.6 }}>
-          ※的中率は隠れイン理論が成立し、結果が確定したレースで①が1着だった割合です。
-        </p>
       </div>
 
       <div style={{ padding: "8px 14px 2px" }}>
@@ -335,7 +327,7 @@ export default async function IchikaAlertPanel() {
               <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <strong style={{ fontSize: 14, color: "#17345c" }}>締切 {formatTime(alert.closing_time)}</strong>
                 <Link href="/races" style={{ fontSize: 13, fontWeight: 900, color: "#1266b3", textDecoration: "none" }}>
-                  出走表を見る →
+                  出走表を見る
                 </Link>
               </div>
             </article>
@@ -368,7 +360,7 @@ export default async function IchikaAlertPanel() {
             fontSize: 14,
           }}
         >
-          LINEで成立時に通知を受け取る →
+          LINEで成立時に通知を受け取る
         </Link>
       </div>
     </section>
