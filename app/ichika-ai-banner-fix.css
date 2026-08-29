@@ -13,20 +13,28 @@ section[aria-label="一果 AI予想"] > div:first-child img {
 }
 
 /*
- * Ichika room section-card unification
- * Match the Hidden-In-Theory card treatment:
- * - the whole section is one bordered card
- * - the banner sits flush against the outer frame
- * - banner itself has no rounded lower corners
- * - lower corners of the whole card are square
+ * Ichika room card unification
+ * Keep every major section visually consistent:
+ * - rounded corners on all four sides
+ * - visible character-color outline
+ * - white card surface + soft shadow
+ * - title banners stay flush with the upper edge
  */
 
-/* Today's Ichika AI escape prediction */
+/* Base card treatment for the legacy Ichika sections rendered in app/ichika/page.js. */
+.ichikaPage .sectionCard {
+  overflow: hidden !important;
+  border: 2px solid #ef9bc5 !important;
+  border-radius: 24px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgba(149, 64, 108, 0.10) !important;
+}
+
+/* Today's Ichika AI escape prediction: use its yellow/orange accent. */
 section[aria-label="一果 AI予想"] {
   overflow: hidden !important;
   border: 2px solid #f2b23f !important;
-  border-top: 2px solid #f2b23f !important;
-  border-radius: 24px 24px 0 0 !important;
+  border-radius: 24px !important;
   background: #fff !important;
   box-shadow: 0 8px 24px rgba(15, 76, 129, 0.10) !important;
 }
@@ -41,12 +49,12 @@ section[aria-label="一果 AI予想"] > div:first-child img {
   margin: 0 !important;
 }
 
-/* Latest Ichika newspaper */
+/* Latest Ichika newspaper: gold accent to match its title art. */
 .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) {
   overflow: hidden !important;
   padding: 0 18px 18px !important;
   border: 2px solid #b8a06d !important;
-  border-radius: 24px 24px 0 0 !important;
+  border-radius: 24px !important;
   background: #fff !important;
   box-shadow: 0 8px 24px rgba(84, 67, 36, 0.10) !important;
 }
@@ -68,14 +76,22 @@ section[aria-label="一果 AI予想"] > div:first-child img {
   border-top-right-radius: 0 !important;
 }
 
+/* Keep title images attached to the card, while the OUTER card stays rounded. */
+.ichikaPage .sectionCard > .homeTitleImage,
+.ichikaPage .sectionCard .sectionTitleRow .homeTitleImage {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
 @media (max-width: 760px) {
+  .ichikaPage .sectionCard,
   section[aria-label="一果 AI予想"] {
-    border-radius: 20px 20px 0 0 !important;
+    border-radius: 20px !important;
   }
 
   .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) {
     padding: 0 14px 16px !important;
-    border-radius: 20px 20px 0 0 !important;
+    border-radius: 20px !important;
   }
 
   .ichikaPage .sectionCard.pinkCard:has(> img[alt="一果新聞"]) > img[alt="一果新聞"] {
