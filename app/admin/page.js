@@ -39,6 +39,7 @@ const GROUPS = [
     title: "コンテンツ制作",
     description: "記事・動画・雑誌・配信素材を作成",
     items: [
+      { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け", badge: "NEW" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "前日予想などから台本・投稿素材を作成", badge: "よく使う" },
       { href: "/admin/seminar-magazines", icon: "📚", title: "攻略マガジン管理", text: "月・水・金の週刊3誌を画像登録・予約公開", badge: "よく使う" },
       { href: "/admin/newspaper", icon: "📰", title: "新聞・画像作成", text: "一果・初音・キイナ・12R特別紙を作成" },
@@ -64,6 +65,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/editorial", icon: "🗞️", title: "AI編集部" },
   { href: "/admin/alerts", icon: "🔔", title: "アラート管理" },
   { href: "/admin/members", icon: "👥", title: "会員管理" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
@@ -160,11 +162,10 @@ export default async function AdminHome() {
       <nav className={styles.adminDock} aria-label="管理画面クイックメニュー">
         <Link href="/admin#today"><b>🏠</b><span>管理TOP</span></Link>
         <Link href="/admin/alerts"><b>📣</b><span>通知</span></Link>
-        <Link href="/admin/ai-candidates"><b>🤖</b><span>AI</span></Link>
+        <Link href="/admin/editorial"><b>🗞️</b><span>編集部</span></Link>
         <Link href="/admin/shorts"><b>🎬</b><span>制作</span></Link>
         <Link href="/admin/sync"><b>⚙️</b><span>同期</span></Link>
       </nav>
     </main>
   );
 }
-
