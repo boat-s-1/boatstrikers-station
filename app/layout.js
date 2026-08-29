@@ -9,6 +9,7 @@ import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
 import CharacterShortsShelf from "./components/CharacterShortsShelf";
 import IchikaBackgroundOnly from "./components/IchikaBackgroundOnly";
 import IchikaFixedWallpaperLayer from "./components/IchikaFixedWallpaperLayer";
+import IchikaNewspaperBannerOverride from "./components/IchikaNewspaperBannerOverride";
 import HatsuneWallpaper from "./components/HatsuneWallpaper";
 import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
 import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
@@ -45,6 +46,7 @@ export default function RootLayout({ children }) {
         <CharacterShortsShelf />
         <IchikaBackgroundOnly />
         <IchikaFixedWallpaperLayer />
+        <IchikaNewspaperBannerOverride />
         <HatsuneWallpaper />
         <KiinaFixedWallpaper />
         <HomeFixedWallpaper />
