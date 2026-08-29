@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getHatsuneNews, getHatsuneNewsImage, formatHatsuneNewsDate } from "../hatsune/newsData";
+import { getHatsuneNews, formatHatsuneNewsDate } from "../hatsune/newsData";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 const TABS = [
-  { key: "all", label: "すべて" },
+  { key: "all", label: "主要" },
   { key: "women", label: "女子" },
   { key: "grade", label: "SG・G1" },
   { key: "win", label: "優勝" },
@@ -35,7 +35,6 @@ function bucket(item) {
 }
 
 function categoryLabel(item) {
-  const b = bucket(item);
   return {
     women: "女子",
     grade: "SG・G1",
@@ -43,7 +42,7 @@ function categoryLabel(item) {
     motor: "モーター",
     tomorrow: "明日の注目",
     all: "ニュース",
-  }[b];
+  }[bucket(item)];
 }
 
 function matches(item, category, q) {
@@ -53,17 +52,27 @@ function matches(item, category, q) {
   return categoryOk && textOf(item).toLowerCase().includes(keyword);
 }
 
+function isNew(item) {
+  const published = new Date(item?.published_at || 0).getTime();
+  if (!published) return false;
+  return Date.now() - published < 24 * 60 * 60 * 1000;
+}
+
+function categoryClass(item) {
+  return styles[`cat_${bucket(item)}`] || styles.cat_all;
+}
+
 export default async function NewsTopPage({ searchParams }) {
   const params = await searchParams;
   const category = TABS.some((x) => x.key === params?.category) ? params.category : "all";
   const q = String(params?.q || "");
-  const allNews = await getHatsuneNews({ limit: 80, category: "all" });
+  const allNews = await getHatsuneNews({ limit: 100, category: "all" });
   const news = allNews.filter((item) => matches(item, category, q));
   const featured = news.find((item) => item.is_featured) || news[0] || null;
-  const latest = news.filter((item) => item.id !== featured?.id).slice(0, 10);
-  const women = news.filter((item) => bucket(item) === "women").slice(0, 4);
-  const grades = news.filter((item) => bucket(item) === "grade").slice(0, 4);
-  const motors = news.filter((item) => bucket(item) === "motor").slice(0, 4);
+  const latest = news.filter((item) => item.id !== featured?.id).slice(0, 14);
+  const women = news.filter((item) => bucket(item) === "women").slice(0, 6);
+  const grades = news.filter((item) => bucket(item) === "grade").slice(0, 6);
+  const motors = news.filter((item) => bucket(item) === "motor").slice(0, 6);
 
   return (
     <main className={styles.page}>
@@ -72,14 +81,14 @@ export default async function NewsTopPage({ searchParams }) {
           <div>
             <span className={styles.eyebrow}>BOATSTRIKERS MEDIA</span>
             <h1>BoatStrikers NEWS</h1>
-            <p>今日のボートレース情報を、ぱっと見で探せるニューストップ。</p>
+            <p>ボートレースの最新情報を、見出しで素早くチェック。</p>
           </div>
-          <Link href="/" className={styles.homeLink}>BoatStrikers TOP</Link>
+          <Link href="/" className={styles.homeLink}>TOP</Link>
         </header>
 
         <form className={styles.search} method="get">
           <input type="hidden" name="category" value={category} />
-          <span>🔍</span>
+          <span>⌕</span>
           <input name="q" defaultValue={q} placeholder="選手名・場名・キーワードで検索" />
           <button type="submit">検索</button>
         </form>
@@ -92,28 +101,32 @@ export default async function NewsTopPage({ searchParams }) {
         </nav>
 
         {featured && (
-          <section className={styles.featuredSection}>
-            <div className={styles.sectionTitle}><span>🔥</span><h2>いま注目</h2></div>
-            <Link href={`/news/${featured.id}`} className={styles.featuredCard}>
-              <div className={styles.featuredImage}><img src={getHatsuneNewsImage(featured)} alt="" /></div>
-              <div className={styles.featuredBody}>
-                <div className={styles.meta}><span>{categoryLabel(featured)}</span><time>{formatHatsuneNewsDate(featured.published_at)}</time></div>
-                <h2>{featured.title}</h2>
-                {featured.summary && <p>{featured.summary}</p>}
-                <strong>記事を読む →</strong>
+          <section className={styles.breaking}>
+            <div className={styles.breakingLabel}>注目</div>
+            <Link href={`/news/${featured.id}`} className={styles.breakingLink}>
+              <div className={styles.breakingMeta}>
+                <span className={`${styles.categoryBadge} ${categoryClass(featured)}`}>{categoryLabel(featured)}</span>
+                <time>{formatHatsuneNewsDate(featured.published_at)}</time>
+                {isNew(featured) && <span className={styles.newBadge}>NEW</span>}
               </div>
+              <h2>{featured.title}</h2>
+              {featured.summary && <p>{featured.summary}</p>}
             </Link>
           </section>
         )}
 
         <section className={styles.latestSection}>
-          <div className={styles.sectionTitle}><span>🕒</span><h2>最新ニュース</h2></div>
-          <div className={styles.latestList}>
+          <div className={styles.sectionHeading}>
+            <h2>最新ニュース</h2>
+            <span>{news.length}件</span>
+          </div>
+          <div className={styles.headlineList}>
             {latest.map((item) => (
-              <Link key={item.id} href={`/news/${item.id}`} className={styles.latestRow}>
+              <Link key={item.id} href={`/news/${item.id}`} className={styles.headlineRow}>
                 <time>{formatHatsuneNewsDate(item.published_at)}</time>
-                <span className={styles.category}>{categoryLabel(item)}</span>
+                <span className={`${styles.categoryBadge} ${categoryClass(item)}`}>{categoryLabel(item)}</span>
                 <strong>{item.title}</strong>
+                {isNew(item) && <span className={styles.newBadge}>NEW</span>}
                 <span className={styles.arrow}>›</span>
               </Link>
             ))}
@@ -122,30 +135,39 @@ export default async function NewsTopPage({ searchParams }) {
 
         {news.length === 0 && <div className={styles.empty}>該当するニュースはありません。</div>}
 
-        {women.length > 0 && <NewsGrid title="🌸 女子ボートNEWS" items={women} />}
-        {grades.length > 0 && <NewsGrid title="🚤 SG・G1" items={grades} />}
-        {motors.length > 0 && <NewsGrid title="⚙️ モーター・機力" items={motors} />}
+        {category === "all" && (
+          <>
+            {women.length > 0 && <HeadlineSection title="女子ボートNEWS" emoji="🌸" items={women} />}
+            {grades.length > 0 && <HeadlineSection title="SG・G1" emoji="🚤" items={grades} />}
+            {motors.length > 0 && <HeadlineSection title="モーター・機力" emoji="⚙️" items={motors} />}
+          </>
+        )}
 
         <section className={styles.cta}>
-          <div><span>BOATSTRIKERS AI</span><h2>今日のレースもチェック</h2><p>ニュースの次は、出走表・AI予想・直前情報へ。</p></div>
-          <Link href="/races">今日のレースを見る →</Link>
+          <div>
+            <span>BOATSTRIKERS AI</span>
+            <strong>今日のレースもチェック</strong>
+          </div>
+          <Link href="/races">出走表・AI予想を見る →</Link>
         </section>
       </div>
     </main>
   );
 }
 
-function NewsGrid({ title, items }) {
+function HeadlineSection({ title, emoji, items }) {
   return (
-    <section className={styles.gridSection}>
-      <div className={styles.sectionTitle}><h2>{title}</h2></div>
-      <div className={styles.grid}>
+    <section className={styles.topicSection}>
+      <div className={styles.sectionHeading}>
+        <h2>{emoji} {title}</h2>
+      </div>
+      <div className={styles.topicList}>
         {items.map((item) => (
-          <Link href={`/news/${item.id}`} key={item.id} className={styles.card}>
-            <div className={styles.cardMeta}><span>{categoryLabel(item)}</span><time>{formatHatsuneNewsDate(item.published_at)}</time></div>
-            <h3>{item.title}</h3>
-            {item.summary && <p>{item.summary}</p>}
-            <small>🌸 初音 / BoatStrikers NEWS</small>
+          <Link href={`/news/${item.id}`} key={item.id} className={styles.topicRow}>
+            <span className={`${styles.categoryDot} ${categoryClass(item)}`} />
+            <strong>{item.title}</strong>
+            <time>{formatHatsuneNewsDate(item.published_at)}</time>
+            <span className={styles.arrow}>›</span>
           </Link>
         ))}
       </div>
