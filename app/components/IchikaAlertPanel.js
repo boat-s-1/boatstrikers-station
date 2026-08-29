@@ -92,6 +92,48 @@ async function getAlertPerformance(supabase, raceDate = null) {
   };
 }
 
+async function getAlertCount(supabase, raceDate = null) {
+  if (!supabase) return 0;
+
+  let query = supabase
+    .from("bs_ichika_hidden_escape_alerts")
+    .select("id", { count: "exact", head: true });
+
+  if (raceDate) query = query.eq("race_date", raceDate);
+
+  const { count, error } = await query;
+  if (error) return 0;
+  return Number(count || 0);
+}
+
+function AlertCountCard({ label, count, tone }) {
+  const palette = {
+    today: { bg: "linear-gradient(180deg,#fff3f8,#fff)", border: "#ffd0e1", text: "#e83e7e" },
+    yesterday: { bg: "linear-gradient(180deg,#fffafc,#fff)", border: "#eedbe4", text: "#aa607b" },
+    all: { bg: "linear-gradient(180deg,#eef8ff,#fff)", border: "#cfe9fb", text: "#1266b3" },
+  }[tone];
+
+  return (
+    <div
+      style={{
+        minWidth: 0,
+        padding: "13px 8px 12px",
+        borderRadius: 16,
+        background: palette.bg,
+        border: `1px solid ${palette.border}`,
+        textAlign: "center",
+      }}
+    >
+      <span style={{ display: "block", fontSize: 12, fontWeight: 900, color: palette.text }}>
+        {label}
+      </span>
+      <strong style={{ display: "block", marginTop: 5, fontSize: 28, lineHeight: 1, color: "#17345c" }}>
+        {count}<small style={{ fontSize: 14, marginLeft: 2 }}>件</small>
+      </strong>
+    </div>
+  );
+}
+
 function PerformanceCard({ label, performance, tone }) {
   const isPink = tone === "pink";
   return (
@@ -160,9 +202,11 @@ export default async function IchikaAlertPanel() {
     if (!error) alerts = data || [];
   }
 
-  const [yesterdayPerformance, allPerformance] = await Promise.all([
+  const [yesterdayPerformance, allPerformance, yesterdayAlertCount, totalAlertCount] = await Promise.all([
     getAlertPerformance(supabase, yesterday),
     getAlertPerformance(supabase),
+    getAlertCount(supabase, yesterday),
+    getAlertCount(supabase),
   ]);
 
   return (
@@ -201,33 +245,20 @@ export default async function IchikaAlertPanel() {
       </div>
 
       <div style={{ padding: "16px 14px 8px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            padding: "14px 16px",
-            borderRadius: 18,
-            background: "linear-gradient(135deg,#fff7fb,#f3faff)",
-            border: "1px solid #e8d9e5",
-          }}
-        >
-          <div>
-            <span style={{ display: "block", fontSize: 12, fontWeight: 900, color: "#7b8798" }}>
-              本日のアラート
-            </span>
-            <strong style={{ display: "block", marginTop: 2, fontSize: 34, lineHeight: 1, color: "#17345c" }}>
-              {alerts.length}<small style={{ fontSize: 16, marginLeft: 3 }}>件</small>
-            </strong>
-          </div>
-          <div style={{ textAlign: "right", color: "#718096", fontSize: 11, fontWeight: 800, lineHeight: 1.5 }}>
-            <div>B1 × 展示色なし</div>
-            <div>× 1周1位</div>
-          </div>
+        <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 900, color: "#17345c" }}>
+          アラート本数
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
+          <AlertCountCard label="本日" count={alerts.length} tone="today" />
+          <AlertCountCard label="昨日" count={yesterdayAlertCount} tone="yesterday" />
+          <AlertCountCard label="全期間" count={totalAlertCount} tone="all" />
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <p style={{ margin: "9px 2px 0", fontSize: 11, color: "#7b8798", lineHeight: 1.6 }}>
+          B1 × 展示色なし × 1周1位
+        </p>
+
+        <div style={{ marginTop: 14 }}>
           <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 900, color: "#17345c" }}>
             的中率
           </div>
