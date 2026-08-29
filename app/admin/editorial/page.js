@@ -33,12 +33,7 @@ function validFilter(value, allowed, fallback = "all") {
 function jstDate(value) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+    timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
   }).format(new Date(value));
 }
 
@@ -67,9 +62,7 @@ async function updateStatus(formData) {
   const character = validFilter(String(formData.get("character") || "all"), ["all", ...Object.keys(CHARACTER_META)]);
   const filterStatus = validFilter(String(formData.get("filterStatus") || "all"), ["all", ...Object.keys(STATUS_META)]);
 
-  if (!Number.isFinite(id) || !STATUS_META[nextStatus]) {
-    redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=invalid`);
-  }
+  if (!Number.isFinite(id) || !STATUS_META[nextStatus]) redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=invalid`);
 
   const client = getClient();
   if (!client) redirect(`/admin/editorial?character=${character}&status=${filterStatus}&error=missing_supabase`);
@@ -103,7 +96,7 @@ export default async function EditorialPage({ searchParams }) {
           <div>
             <span className={styles.eyebrow}>BOATSTRIKERS AI EDITORIAL DESK</span>
             <h1>AI編集部</h1>
-            <p>Geminiが集めたニュース候補を確認し、採用・不採用を決めます。</p>
+            <p>Geminiが集めたニュース候補を確認し、採用したニュースから各媒体の制作へ進めます。</p>
           </div>
           <Link href="/admin" className={styles.backButton}>管理トップへ</Link>
         </header>
@@ -137,6 +130,8 @@ export default async function EditorialPage({ searchParams }) {
             const char = CHARACTER_META[row.target_character] || CHARACTER_META.boatstrikers;
             const stat = STATUS_META[row.status] || STATUS_META.unreviewed;
             const rule = row.raw_payload?.classification_rule;
+            const hasMaterials = Boolean(row.raw_payload?.editorial_materials);
+
             return (
               <article className={styles.newsCard} key={row.id}>
                 <div className={styles.cardTop}>
@@ -144,6 +139,7 @@ export default async function EditorialPage({ searchParams }) {
                     <span className={styles.characterBadge}>{char.icon} {char.label}</span>
                     <span className={`${styles.statusBadge} ${styles[stat.tone]}`}>{stat.label}</span>
                     <span className={styles.importance}>{"★".repeat(Math.max(1, Math.min(5, Number(row.importance || 1))))}</span>
+                    {hasMaterials && <span className={`${styles.statusBadge} ${styles.approved}`}>制作済み</span>}
                   </div>
                   <time>{jstDate(row.published_at || row.collected_at)}</time>
                 </div>
@@ -158,7 +154,10 @@ export default async function EditorialPage({ searchParams }) {
                 </div>
 
                 <div className={styles.actions}>
-                  <a href={row.source_url} target="_blank" rel="noreferrer" className={styles.sourceButton}>元記事を見る ↗</a>
+                  <div>
+                    <a href={row.source_url} target="_blank" rel="noreferrer" className={styles.sourceButton}>元記事を見る ↗</a>
+                    {row.status === "approved" && <Link href={`/admin/editorial/produce/${row.id}`} className={styles.produceButton}>{hasMaterials ? "制作素材を開く →" : "制作へ進む →"}</Link>}
+                  </div>
                   <form action={updateStatus}>
                     <input type="hidden" name="id" value={row.id} />
                     <input type="hidden" name="character" value={character} />
