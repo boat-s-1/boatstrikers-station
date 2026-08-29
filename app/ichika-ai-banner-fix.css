@@ -1,0 +1,13 @@
+/* Remove the legacy 3:1 banner box so the new thin Ichika AI banner keeps its natural height. */
+section[aria-label="一果 AI予想"] > div:first-child {
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+section[aria-label="一果 AI予想"] > div:first-child img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
