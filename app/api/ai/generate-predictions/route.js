@@ -79,7 +79,9 @@ function mapEntry(row) {
     ),
     average_st: numberOrNull(row.average_st),
 
-    exhibition_time: numberOrNull(row.exhibition_time),
+    exhibition_time: numberOrNull(
+      firstValue(row.official_exhibition_time, row.exhibition_time)
+    ),
     exhibition_st: numberOrNull(
       firstValue(row.official_exhibition_st, row.exhibition_st)
     ),
@@ -118,6 +120,23 @@ function mapEntry(row) {
 
 function raceKey(courseCode, raceNo) {
   return `${Number(courseCode)}:${Number(raceNo)}`;
+}
+
+function hasCompleteExhibition(entries) {
+  if (!Array.isArray(entries)) return false;
+
+  const boats = new Map(
+    entries
+      .filter((entry) => Number(entry?.boat_no) >= 1 && Number(entry?.boat_no) <= 6)
+      .map((entry) => [Number(entry.boat_no), entry])
+  );
+
+  if (boats.size !== 6) return false;
+
+  return [1, 2, 3, 4, 5, 6].every((boatNo) => {
+    const value = boats.get(boatNo)?.exhibition_time;
+    return value !== null && value !== undefined && Number.isFinite(Number(value));
+  });
 }
 
 function normalizeClosingTime(value) {
@@ -169,10 +188,7 @@ function createClosingAt(raceDate, closingTime) {
 function isRaceClosed(event, raceDate, now = new Date()) {
   const today = jstDateString();
 
-  // 過去日はすべて締切済み扱い。後知恵予想を絶対に作らない。
   if (raceDate < today) return true;
-
-  // 未来日は未締切。
   if (raceDate > today) return false;
 
   const closingAt = createClosingAt(raceDate, event?.closing_time);
@@ -228,6 +244,7 @@ export async function GET(request) {
         "結果確定済みレースは生成しない",
         "締切時刻を過ぎたレースは生成しない",
         "前日版は既存データを上書きしない",
+        "直前版は6艇すべての展示タイム取得後のみ生成する",
       ],
     });
   } catch (error) {
@@ -329,23 +346,20 @@ export async function POST(request) {
     let skippedResultRaces = 0;
     let skippedClosedRaces = 0;
     let skippedNoEntries = 0;
+    let skippedIncompleteExhibition = 0;
     let previousCreated = 0;
     let liveCreatedOrUpdated = 0;
 
-    // 当日すでに結果が1件でも入っている場合、
-    // 欠損している「前日版」を後から新規作成しない。
     const canCreateMissingPrevious = resultKeys.size === 0;
 
     for (const event of events) {
       const key = raceKey(event.course_code, event.race_no);
 
-      // 結果確定済みは絶対に予想生成しない。
       if (resultKeys.has(key)) {
         skippedResultRaces += 1;
         continue;
       }
 
-      // 結果同期が遅れていても締切後レースは生成しない。
       if (isRaceClosed(event, raceDate, now)) {
         skippedClosedRaces += 1;
         continue;
@@ -366,7 +380,6 @@ export async function POST(request) {
           entries: raceEntries,
         });
 
-      // 前日版は初回のみ保存。
       if (
         canCreateMissingPrevious &&
         previousPrediction &&
@@ -390,8 +403,9 @@ export async function POST(request) {
         previousCreated += 1;
       }
 
-      // 展示後版は締切前なら最新展示値でupsert。
-      if (livePrediction) {
+      const exhibitionReady = hasCompleteExhibition(raceEntries);
+
+      if (livePrediction && exhibitionReady) {
         rows.push(
           predictionToDatabaseRow({
             raceDate,
@@ -402,6 +416,8 @@ export async function POST(request) {
         );
 
         liveCreatedOrUpdated += 1;
+      } else if (!exhibitionReady) {
+        skippedIncompleteExhibition += 1;
       }
     }
 
@@ -418,6 +434,7 @@ export async function POST(request) {
       skipped_result_races: skippedResultRaces,
       skipped_closed_races: skippedClosedRaces,
       skipped_no_entries: skippedNoEntries,
+      skipped_incomplete_exhibition: skippedIncompleteExhibition,
       previous_created: previousCreated,
       live_created_or_updated: liveCreatedOrUpdated,
       written_rows: writtenRows,
