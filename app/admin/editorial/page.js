@@ -6,7 +6,6 @@ import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
-// Keep this page server-rendered so newly collected editorial candidates appear immediately.
 const CHARACTER_META = {
   ichika: { label: "一果", icon: "🍓" },
   hatsune: { label: "初音", icon: "🌸" },
@@ -14,7 +13,6 @@ const CHARACTER_META = {
   boatstrikers: { label: "BoatStrikers", icon: "🚤" },
 };
 
-// DB constraint: unreviewed / adopted / rejected / published
 const STATUS_META = {
   unreviewed: { label: "未確認", tone: "pending" },
   adopted: { label: "採用", tone: "approved" },
@@ -156,8 +154,9 @@ export default async function EditorialPage({ searchParams }) {
             </select></label>
             <button type="submit">絞り込む</button>
           </form>
-          <div style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Link href="/admin/editorial/daily/hatsune" className={styles.produceButton}>🌸 今日の初音NEWSをまとめて作る →</Link>
+            <Link href="/admin/editorial/media" className={styles.produceButton}>🎥 MEDIA AI編集 →</Link>
           </div>
         </section>
 
