@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPublicScheduleSupabase } from "../../lib/scheduleSupabase";
 import HatsuneNewsPreview from "../hatsune/HatsuneNewsPreview";
+import HatsuneSchedulePreview from "../hatsune/HatsuneSchedulePreview";
 import { getHatsuneNews } from "../hatsune/newsData";
 import IchikaAlertPanel from "./IchikaAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
@@ -137,6 +138,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
         )}
       </section>
 
+      {target === "hatsune" ? <HatsuneSchedulePreview /> : null}
       {target === "hatsune" ? <HatsuneNewsPreview news={hatsuneNews} /> : null}
     </>
   );
