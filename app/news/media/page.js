@@ -11,6 +11,17 @@ export const metadata = {
   description: "ボートレース場の公式YouTube最新動画をBoatStrikers独自の紹介ページからチェック。",
 };
 
+const TABS = [
+  { label: "メイン", href: "/news" },
+  { label: "BS記事", href: "/news?category=bs" },
+  { label: "女子", href: "/news?category=women" },
+  { label: "SG・G1", href: "/news?category=grade" },
+  { label: "注目レース", href: "/news?category=focus" },
+  { label: "今日の結果", href: "/news?category=result" },
+  { label: "選手情報", href: "/news?category=racer" },
+  { label: "メディア", href: "/news/media", active: true },
+];
+
 function shortHeadline(title) {
   const clean = String(title || "公式YouTube更新").replace(/[【\[].*?[】\]]/g, " ").replace(/#\S+/g, " ").replace(/\s+/g, " ").trim();
   return clean.length > 30 ? `${clean.slice(0, 29)}…` : clean;
@@ -32,8 +43,10 @@ export default async function MediaPage() {
           <Link href="/news" className={styles.back}>← NEWS</Link>
         </header>
 
-        <nav className={styles.tabs}>
-          <Link href="/news">主要</Link><Link href="/news?category=women">女子</Link><Link href="/news?category=grade">SG・G1</Link><Link href="/news?category=win">優勝</Link><Link href="/news?category=motor">モーター</Link><Link href="/news/media" className={styles.active}>MEDIA</Link>
+        <nav className={styles.tabs} aria-label="ニュースカテゴリ">
+          {TABS.map((tab) => (
+            <Link key={tab.label} href={tab.href} className={tab.active ? styles.active : ""}>{tab.label}</Link>
+          ))}
         </nav>
 
         <section className={styles.listSection}>
