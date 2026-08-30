@@ -82,6 +82,7 @@ export function getHatsuneNewsImage(item) {
 const HATSUNE_NEWS_SELECT = `
   id,
   title,
+  list_headline,
   summary,
   article_body,
   category,
