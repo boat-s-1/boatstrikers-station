@@ -36,12 +36,6 @@ export default async function MediaPage() {
           <Link href="/news">主要</Link><Link href="/news?category=women">女子</Link><Link href="/news?category=grade">SG・G1</Link><Link href="/news?category=win">優勝</Link><Link href="/news?category=motor">モーター</Link><Link href="/news/media" className={styles.active}>MEDIA</Link>
         </nav>
 
-        <section className={styles.channelStrip}>
-          {OFFICIAL_YOUTUBE_CHANNELS.map((channel) => (
-            <a key={channel.key} href={channel.channelUrl} target="_blank" rel="noreferrer"><strong>{channel.place}</strong><span>公式YouTube ↗</span></a>
-          ))}
-        </section>
-
         <section className={styles.listSection}>
           <div className={styles.sectionHeading}><h2>最新の公式動画</h2><span>{updates.length}件</span></div>
           {updates.length ? (
@@ -58,6 +52,18 @@ export default async function MediaPage() {
               ))}
             </div>
           ) : <div className={styles.empty}>現在、公式YouTubeの更新情報を取得できません。</div>}
+        </section>
+
+        <section className={styles.channelSection}>
+          <div className={styles.sectionHeading}><h2>24場 公式YouTube</h2><span>全24場</span></div>
+          <div className={styles.channelStrip}>
+            {OFFICIAL_YOUTUBE_CHANNELS.map((channel) => (
+              <a key={channel.key} href={channel.channelUrl} target="_blank" rel="noreferrer">
+                <strong>{channel.place}</strong>
+                <span>YouTube ↗</span>
+              </a>
+            ))}
+          </div>
         </section>
       </div>
     </main>
