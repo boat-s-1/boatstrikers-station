@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
+import { getRecentOfficialExhibitionCache } from "../../../../lib/recentOfficialExhibitionCache";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,4 +19,49 @@ async function getRecipients(supabase){const {data:prefs,error:prefsError}=await
 async function sendLineMulticast(userIds,text){if(!userIds.length)return 0;const accessToken=process.env.LINE_CHANNEL_ACCESS_TOKEN;if(!accessToken)throw new Error("LINE_CHANNEL_ACCESS_TOKEN is not configured");let sent=0;for(let i=0;i<userIds.length;i+=500){const to=userIds.slice(i,i+500);const response=await fetch("https://api.line.me/v2/bot/message/multicast",{method:"POST",headers:{Authorization:`Bearer ${accessToken}`,"Content-Type":"application/json"},body:JSON.stringify({to,messages:[{type:"text",text}],notificationDisabled:false})});if(!response.ok){const body=await response.text().catch(()=>"");throw new Error(`LINE multicast failed: ${response.status} ${body}`.trim());}sent+=to.length;}return sent;}
 async function sendPendingAlerts(supabase,raceDate){const {data:alerts,error}=await supabase.from("bs_hatsune_womens_inner_break_alerts").select("*").eq("race_date",raceDate).eq("notified",false).order("detected_at",{ascending:true}).limit(20);if(error)throw error;const recipients=await getRecipients(supabase);if(!recipients.length){console.warn("[line-notification] no eligible recipients",{theory:"hatsune_womens_inner_break",raceDate,pending:(alerts||[]).length});}const sent=[];const failed=[];for(const alert of alerts||[]){try{const recipientCount=await sendLineMulticast(recipients,buildLineText(alert));const now=new Date().toISOString();const {error:updateError}=await supabase.from("bs_hatsune_womens_inner_break_alerts").update({notified:true,notified_at:now,updated_at:now}).eq("id",alert.id).eq("notified",false);if(updateError)throw updateError;sent.push({id:alert.id,recipients:recipientCount});}catch(error){const message=String(error?.message||"LINE send failed").slice(0,1000);console.error("[line-notification] send failed",{theory:"hatsune_womens_inner_break",alertId:alert.id,raceDate:alert.race_date,courseCode:alert.course_code,raceNo:alert.race_no,recipientCount:recipients.length,error:message});failed.push({id:alert.id,error:message});}}return {pending:(alerts||[]).length,eligibleRecipients:recipients.length,sent,failed};}
 
-export async function GET(request){if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});try{const supabase=getSupabase();const raceDate=jstToday();const {data:events,error:eventError}=await supabase.from("bs_race_events").select("race_date,course_code,course_name,race_no,closing_time").eq("race_date",raceDate).not("closing_time","is",null);if(eventError)throw eventError;const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=20&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,12);const results=[];for(const race of targets){const source=await fetchTrackedOriginalTenji(supabase,"hatsune",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null});continue;}const syncedAt=new Date().toISOString();for(const row of source.rows){const update={official_exhibition_source:source.source||"unknown_realtime",official_exhibition_synced_at:syncedAt};if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);if(updateError)throw updateError;}const {data:inserted,error:evalError}=await supabase.rpc("evaluate_hatsune_womens_inner_break_alerts");if(evalError)throw evalError;results.push({courseCode:race.course_code,raceNo:race.race_no,published:true,source:source.source,sourceKind:source.sourceKind,fallbackUsed:Boolean(source.fallbackUsed),inserted:Number(inserted||0)});}const line=await sendPendingAlerts(supabase,raceDate);return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});}catch(error){return NextResponse.json({ok:false,error:error?.message||"hatsune cron failed"},{status:500});}}
+export async function GET(request){
+  if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
+  try{
+    const supabase=getSupabase();
+    const raceDate=jstToday();
+    const {data:events,error:eventError}=await supabase.from("bs_race_events").select("race_date,course_code,course_name,race_no,closing_time").eq("race_date",raceDate).not("closing_time","is",null);
+    if(eventError)throw eventError;
+    const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=20&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,12);
+    const results=[];
+
+    for(const race of targets){
+      const cached=await getRecentOfficialExhibitionCache(supabase,race,{maxAgeMs:180_000,requireLap:true});
+      let source=cached;
+      let reused=false;
+
+      if(cached.ok){
+        reused=true;
+      }else{
+        source=await fetchTrackedOriginalTenji(supabase,"hatsune",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      }
+
+      if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null,cacheReason:cached.reason||null});continue;}
+
+      if(!reused){
+        const syncedAt=new Date().toISOString();
+        for(const row of source.rows){
+          const update={official_exhibition_source:source.source||"unknown_realtime",official_exhibition_synced_at:syncedAt};
+          if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;
+          if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;
+          if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;
+          if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;
+          if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;
+          const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);
+          if(updateError)throw updateError;
+        }
+      }
+
+      const {data:inserted,error:evalError}=await supabase.rpc("evaluate_hatsune_womens_inner_break_alerts");
+      if(evalError)throw evalError;
+      results.push({courseCode:race.course_code,raceNo:race.race_no,published:true,source:source.source,sourceKind:source.sourceKind,fallbackUsed:Boolean(source.fallbackUsed),reusedRecentExhibition:reused,cacheAgeMs:reused?source.ageMs:null,inserted:Number(inserted||0)});
+    }
+
+    const line=await sendPendingAlerts(supabase,raceDate);
+    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
+  }catch(error){return NextResponse.json({ok:false,error:error?.message||"hatsune cron failed"},{status:500});}
+}
