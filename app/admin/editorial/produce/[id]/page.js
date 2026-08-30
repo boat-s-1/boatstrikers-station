@@ -87,13 +87,14 @@ async function sendToHatsune(formData) {
   if (existing?.id) redirect(`/admin/hatsune-news/editor/${existing.id}`);
 
   const materials = item.raw_payload?.editorial_materials || {};
+  const autoHeadline = item.raw_payload?.editorial_list_headline?.headline || null;
   const { data, error } = await client
     .from("hatsune_news")
     .insert({
       source_key: sourceKey,
       source_type: "news",
       title: materials.news_title || item.title,
-      list_headline: materials.list_headline || null,
+      list_headline: materials.list_headline || autoHeadline,
       summary: item.summary,
       category: item.category || "women",
       source_name: item.source_name,
@@ -119,6 +120,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
 
   const char = CHARACTER_META[item.target_character] || CHARACTER_META.boatstrikers;
   const materials = item.raw_payload?.editorial_materials || null;
+  const autoHeadline = item.raw_payload?.editorial_list_headline?.headline || null;
   const isAdopted = item.status === "adopted";
 
   return (
@@ -144,6 +146,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
             <strong>{isAdopted ? "採用済み" : "未採用"}</strong>
           </div>
           <h2>{item.title}</h2>
+          {autoHeadline && <p>一覧用短見出し：{autoHeadline}</p>}
           {item.summary && <p>{item.summary}</p>}
           <div className={styles.sourceMeta}>
             {item.category && <span>カテゴリ：{item.category}</span>}
@@ -163,7 +166,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
         </form>
 
         {!materials ? (
-          <section className={styles.empty}>まだ制作素材はありません。「制作素材を作る」を押してください。</section>
+          <section className={styles.empty}>短見出しは採用時に自動生成済みです。必要に応じて4媒体の制作素材も作成できます。</section>
         ) : (
           <div className={styles.materialGrid}>
             {materials.list_headline && (
