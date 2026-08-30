@@ -93,11 +93,12 @@ async function sendToHatsune(formData) {
       source_key: sourceKey,
       source_type: "news",
       title: materials.news_title || item.title,
+      list_headline: materials.list_headline || null,
       summary: item.summary,
       category: item.category || "women",
       source_name: item.source_name,
       source_url: item.source_url,
-      published_at: item.published_at,
+      published_at: item.published_at || new Date().toISOString(),
       article_body: materials.news_body || null,
       article_body_source: materials.news_body ? "manual" : "template",
       is_published: false,
@@ -134,7 +135,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
           <p>採用ニュース1件から、X・ショート・note・サイトNEWSの下書きをまとめて作ります。</p>
         </section>
 
-        {query?.generated === "1" && <div className={styles.success}>✓ 4媒体の制作素材を生成して保存しました。</div>}
+        {query?.generated === "1" && <div className={styles.success}>✓ 制作素材と短い一覧見出しを生成して保存しました。</div>}
         {query?.error && <div className={styles.error}>エラー: {decodeURIComponent(String(query.error))}</div>}
 
         <section className={styles.sourceCard}>
@@ -156,7 +157,7 @@ export default async function EditorialProducePage({ params, searchParams }) {
           <div>
             <span>AI DRAFT</span>
             <h2>{materials ? "制作素材を再生成" : "4媒体の下書きを一括生成"}</h2>
-            <p>ニュースの事実データと担当キャラを引き継ぎ、X・ショート・note・サイトNEWS用の文章を生成します。</p>
+            <p>ニュースの事実データと担当キャラを引き継ぎ、一覧用短見出し・X・ショート・note・サイトNEWS用の文章を生成します。</p>
           </div>
           <button type="submit" disabled={!isAdopted}>{materials ? "AIで作り直す" : "制作素材を作る"}</button>
         </form>
@@ -165,6 +166,13 @@ export default async function EditorialProducePage({ params, searchParams }) {
           <section className={styles.empty}>まだ制作素材はありません。「制作素材を作る」を押してください。</section>
         ) : (
           <div className={styles.materialGrid}>
+            {materials.list_headline && (
+              <section className={styles.materialCard}>
+                <div className={styles.cardHeading}><div><span>LIST HEADLINE</span><h2>ニュース一覧用見出し</h2></div><CopyButton text={materials.list_headline} /></div>
+                <input readOnly value={materials.list_headline} />
+              </section>
+            )}
+
             <section className={styles.materialCard}>
               <div className={styles.cardHeading}><div><span>X POST</span><h2>X投稿</h2></div><CopyButton text={materials.x_post} /></div>
               <textarea readOnly rows={7} value={materials.x_post} />
