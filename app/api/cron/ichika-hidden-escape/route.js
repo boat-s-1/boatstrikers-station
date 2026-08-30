@@ -1,8 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
-import { getRecentOfficialExhibitionCache } from "../../../../lib/recentOfficialExhibitionCache";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -38,46 +36,28 @@ export async function GET(request){
   try{
     const supabase=getSupabase();
     const raceDate=jstToday();
-    const {data:events,error:eventError}=await supabase.from("bs_race_events").select("race_date,course_code,course_name,race_no,closing_time").eq("race_date",raceDate).not("closing_time","is",null);
-    if(eventError)throw eventError;
-    const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=20&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,12);
-    const results=[];
 
-    for(const race of targets){
-      const cached=await getRecentOfficialExhibitionCache(supabase,race,{maxAgeMs:180_000,requireLap:true});
-      let source=cached;
-      let reused=false;
+    // Exhibition collection is owned by /api/cron/exhibition-alerts.
+    // Ichika only evaluates already-persisted official exhibition data.
+    const {data:inserted,error:evalError}=await supabase.rpc("evaluate_ichika_hidden_escape_alerts");
+    if(evalError)throw evalError;
 
-      if(cached.ok){
-        reused=true;
-      }else{
-        source=await fetchTrackedOriginalTenji(supabase,"ichika",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
-      }
-
-      console.info("[exhibition-cache]",{consumer:"ichika",raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no,reused,cacheAgeMs:reused?cached.ageMs:null,cacheReason:reused?null:(cached.reason||null)});
-
-      if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null,diagnostics:source.diagnostics||null,cacheReason:cached.reason||null});continue;}
-
-      if(!reused){
-        const syncedAt=new Date().toISOString();
-        for(const row of source.rows){
-          const update={official_exhibition_source:source.source||"unknown_realtime",official_exhibition_synced_at:syncedAt};
-          if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;
-          if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;
-          if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;
-          if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;
-          if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;
-          const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);
-          if(updateError)throw updateError;
-        }
-      }
-
-      const {data:inserted,error:evalError}=await supabase.rpc("evaluate_ichika_hidden_escape_alerts");
-      if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,published:true,source:source.source,sourceKind:source.sourceKind,fallbackUsed:Boolean(source.fallbackUsed),reusedRecentExhibition:reused,cacheAgeMs:reused?source.ageMs:null,inserted:Number(inserted||0)});
-    }
+    console.info("[theory-eval]",{
+      theory:"ichika_hidden_escape",
+      exhibitionSource:"shared_database",
+      externalFetch:false,
+      inserted:Number(inserted||0),
+    });
 
     const line=await sendPendingAlerts(supabase,raceDate);
-    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
+    return NextResponse.json({
+      ok:true,
+      raceDate,
+      exhibitionSource:"shared_database",
+      externalFetch:false,
+      inserted:Number(inserted||0),
+      line,
+      ranAt:new Date().toISOString(),
+    });
   }catch(error){return NextResponse.json({ok:false,error:error?.message||"ichika cron failed"},{status:500});}
 }
