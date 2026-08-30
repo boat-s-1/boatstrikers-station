@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getOfficialYoutubeUpdates, formatMediaDate, OFFICIAL_YOUTUBE_CHANNELS } from "./mediaData";
+import { getMediaEditorialMap } from "../../../lib/mediaEditorialData";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ function shortHeadline(title) {
 
 export default async function MediaPage() {
   const updates = await getOfficialYoutubeUpdates({ limit: 24 });
+  const editorialMap = await getMediaEditorialMap(updates.map((item) => item.videoId));
 
   return (
     <main className={styles.page}>
@@ -49,7 +51,7 @@ export default async function MediaPage() {
                   {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" loading="lazy" /> : <div className={styles.noImage}>YouTube</div>}
                   <div className={styles.body}>
                     <div className={styles.meta}><span>{item.place}公式</span><time>{formatMediaDate(item.publishedAt)}</time>{item.womenRelated && <b>女子</b>}</div>
-                    <h3>{shortHeadline(item.title)}</h3>
+                    <h3>{editorialMap[item.videoId]?.short_headline || shortHeadline(item.title)}</h3>
                     <small>BoatStrikersで内容を見る →</small>
                   </div>
                 </Link>
