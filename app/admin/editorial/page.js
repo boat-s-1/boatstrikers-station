@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { generateEditorialListHeadline } from "../../../lib/editorialHeadlineAi";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -86,9 +87,50 @@ async function updateStatus(formData) {
     errorRedirect(character, filterStatus, "missing_service_key", "VercelにSUPABASE_SERVICE_ROLE_KEYが設定されていません。");
   }
 
+  let updatePayload = { status: nextStatus, updated_at: new Date().toISOString() };
+  let headlineGenerated = false;
+
+  if (nextStatus === "adopted") {
+    const { data: item, error: readError } = await client
+      .from("bs_news_candidates")
+      .select("id,title,summary,category,source_name,published_at,raw_payload")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (readError || !item) {
+      errorRedirect(character, filterStatus, "not_updated", readError?.message || "対象ニュースが見つかりませんでした。");
+    }
+
+    const existingHeadline = item.raw_payload?.editorial_materials?.list_headline || item.raw_payload?.editorial_list_headline?.headline;
+    if (!existingHeadline) {
+      try {
+        const generated = await generateEditorialListHeadline(item);
+        updatePayload = {
+          ...updatePayload,
+          raw_payload: {
+            ...(item.raw_payload || {}),
+            editorial_list_headline: generated,
+          },
+        };
+        headlineGenerated = true;
+      } catch (headlineError) {
+        updatePayload = {
+          ...updatePayload,
+          raw_payload: {
+            ...(item.raw_payload || {}),
+            editorial_list_headline_error: {
+              message: headlineError?.message || "headline_generate_failed",
+              at: new Date().toISOString(),
+            },
+          },
+        };
+      }
+    }
+  }
+
   const { data, error } = await client
     .from("bs_news_candidates")
-    .update({ status: nextStatus, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq("id", id)
     .select("id,status")
     .maybeSingle();
@@ -97,7 +139,7 @@ async function updateStatus(formData) {
   if (!data) errorRedirect(character, filterStatus, "not_updated", "対象ニュースが見つからず、更新されませんでした。");
 
   revalidatePath("/admin/editorial");
-  redirect(`/admin/editorial?character=${character}&status=${filterStatus}&saved=1`);
+  redirect(`/admin/editorial?character=${character}&status=${filterStatus}&saved=1${headlineGenerated ? "&headline=1" : ""}`);
 }
 
 function errorMessage(code, detail) {
@@ -160,7 +202,7 @@ export default async function EditorialPage({ searchParams }) {
           </div>
         </section>
 
-        {params?.saved === "1" && <div className={styles.success}>✓ 判定を保存しました。</div>}
+        {params?.saved === "1" && <div className={styles.success}>✓ 判定を保存しました。{params?.headline === "1" ? " 一覧用の短見出しも自動生成しました。" : ""}</div>}
         {error && <div className={styles.error}>ニュース取得エラー：{error}</div>}
         {actionError && <div className={styles.error}>保存エラー：{actionError}</div>}
 
@@ -170,6 +212,7 @@ export default async function EditorialPage({ searchParams }) {
             const stat = STATUS_META[row.status] || STATUS_META.unreviewed;
             const rule = row.raw_payload?.classification_rule;
             const hasMaterials = Boolean(row.raw_payload?.editorial_materials);
+            const autoHeadline = row.raw_payload?.editorial_materials?.list_headline || row.raw_payload?.editorial_list_headline?.headline;
             const isAdopted = row.status === "adopted" || row.status === "published";
 
             return (
@@ -179,12 +222,14 @@ export default async function EditorialPage({ searchParams }) {
                     <span className={styles.characterBadge}>{char.icon} {char.label}</span>
                     <span className={`${styles.statusBadge} ${styles[stat.tone]}`}>{stat.label}</span>
                     <span className={styles.importance}>{"★".repeat(Math.max(1, Math.min(5, Number(row.importance || 1))))}</span>
+                    {autoHeadline && <span className={`${styles.statusBadge} ${styles.approved}`}>短見出し済み</span>}
                     {hasMaterials && <span className={`${styles.statusBadge} ${styles.approved}`}>制作済み</span>}
                   </div>
                   <time>{jstDate(row.published_at || row.collected_at)}</time>
                 </div>
 
                 <h2>{row.title}</h2>
+                {autoHeadline && <p className={styles.summary}>一覧見出し：{autoHeadline}</p>}
                 {row.summary && <p className={styles.summary}>{row.summary}</p>}
 
                 <div className={styles.meta}>
