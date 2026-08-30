@@ -21,18 +21,26 @@ function raceKey(row) {
 
 async function loadData() {
   const supabase = getSupabase();
-  if (!supabase) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, error: "Supabase未接続" };
+  if (!supabase) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, recipients: 0, error: "Supabase未接続" };
 
-  const { data: alerts, error } = await supabase
-    .from("bs_ichika_escape_surge_alerts")
-    .select("id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,lap_time,recommended_second_boat,recommended_second_national_win_rate,baseline_win_rate,signal_win_rate,uplift_points,detected_at")
-    .order("race_date", { ascending: false })
-    .order("closing_time", { ascending: false })
-    .limit(5000);
-  if (error) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, error: error.message };
+  const [alertsResult, prefsResult] = await Promise.all([
+    supabase
+      .from("bs_ichika_escape_surge_alerts")
+      .select("id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,lap_time,recommended_second_boat,recommended_second_national_win_rate,baseline_win_rate,signal_win_rate,uplift_points,detected_at,notified,notified_at")
+      .order("race_date", { ascending: false })
+      .order("closing_time", { ascending: false })
+      .limit(5000),
+    supabase
+      .from("bs_member_notification_preferences")
+      .select("user_id", { count: "exact", head: true })
+      .eq("ichika_escape_surge", true),
+  ]);
 
-  const rows = alerts || [];
-  if (!rows.length) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, error: "" };
+  if (alertsResult.error) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, recipients: 0, error: alertsResult.error.message };
+  const rows = alertsResult.data || [];
+  const recipients = Number(prefsResult.count || 0);
+  if (!rows.length) return { alerts: [], stats: { matched: 0, finished: 0, first: 0, rate: null }, recipients, error: "" };
+
   const dates = rows.map((x) => x.race_date).sort();
   const { data: results } = await supabase
     .from("bs_race_entries")
@@ -43,16 +51,18 @@ async function loadData() {
   const map = new Map((results || []).map((x) => [raceKey(x), Number(x.arrival_order)]));
   const finished = rows.map((x) => map.get(raceKey(x))).filter((x) => Number.isFinite(x) && x > 0);
   const first = finished.filter((x) => x === 1).length;
-  return { alerts: rows, stats: { matched: rows.length, finished: finished.length, first, rate: finished.length ? first / finished.length : null }, error: "" };
+  return { alerts: rows, stats: { matched: rows.length, finished: finished.length, first, rate: finished.length ? first / finished.length : null }, recipients, error: "" };
 }
 
 const card = { border: "1px solid #f0d9b5", borderRadius: 18, background: "#fff", padding: 18 };
 const td = { padding: "11px 8px", borderBottom: "1px solid #eef2f6", fontSize: 14, whiteSpace: "nowrap" };
 
 export default async function IchikaEscapeSurgeAdminPage() {
-  const { alerts, stats, error } = await loadData();
+  const { alerts, stats, recipients, error } = await loadData();
   const today = todayJst();
   const todayAlerts = alerts.filter((x) => x.race_date === today);
+  const todaySent = todayAlerts.filter((x) => x.notified).length;
+  const todayPending = todayAlerts.filter((x) => !x.notified).length;
 
   return (
     <main style={{ minHeight: "100vh", background: "#fff9ef", padding: "28px 16px 56px", color: "#102033" }}>
@@ -69,7 +79,7 @@ export default async function IchikaEscapeSurgeAdminPage() {
         <section style={{ ...card, marginBottom: 20, background: "linear-gradient(135deg,#fff4dc,#fff)" }}>
           <div style={{ fontWeight: 900, marginBottom: 8 }}>成立条件・表示ルール</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {["① 展示タイム1位", "① 一周タイム1位", "研究値 51.70% → 66.36%", "通常比 約+14.66pt", "2着おすすめ＝②〜⑥の全国勝率トップ"].map((x) => (
+            {["① 展示タイム1位", "① 一周タイム1位", "研究値 51.70% → 66.36%", "通常比 約+14.66pt", "2着おすすめ＝②〜⑥の全国勝率トップ", "LINE通知は2分ごとに送信確認"].map((x) => (
               <span key={x} style={{ padding: "7px 10px", borderRadius: 999, background: "#fff0d2", color: "#955500", fontSize: 13, fontWeight: 900 }}>{x}</span>
             ))}
           </div>
@@ -77,10 +87,12 @@ export default async function IchikaEscapeSurgeAdminPage() {
 
         {error ? <div style={{ ...card, borderColor: "#f0b7b7", color: "#a12", marginBottom: 16 }}>{error}</div> : null}
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12, marginBottom: 20 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 20 }}>
           <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>本日成立</div><strong style={{ fontSize: 30 }}>{todayAlerts.length}R</strong></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>本日通知済み</div><strong style={{ fontSize: 30, color: "#16833d" }}>{todaySent}R</strong></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>通知待ち</div><strong style={{ fontSize: 30, color: todayPending ? "#d97706" : "#17345c" }}>{todayPending}R</strong></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>通知ON会員</div><strong style={{ fontSize: 30 }}>{recipients}</strong></div>
           <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>全期間成立</div><strong style={{ fontSize: 30 }}>{stats.matched}R</strong></div>
-          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>結果確定</div><strong style={{ fontSize: 30 }}>{stats.finished}R</strong></div>
           <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>実績1着率</div><strong style={{ fontSize: 30, color: "#e56a00" }}>{stats.rate == null ? "—" : `${(stats.rate * 100).toFixed(1)}%`}</strong></div>
         </section>
 
@@ -101,8 +113,8 @@ export default async function IchikaEscapeSurgeAdminPage() {
 function AlertTable({ alerts, showDate = false }) {
   return (
     <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
-        <thead><tr>{[showDate ? "日付" : null, "レース", "締切", "①展示", "①一周", "上昇幅", "2着おすすめ", "全国勝率"].filter(Boolean).map((h) => <th key={h} style={{ textAlign: "left", padding: "10px 8px", borderBottom: "1px solid #dbe4ee", fontSize: 12, color: "#718096" }}>{h}</th>)}</tr></thead>
+      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 920 }}>
+        <thead><tr>{[showDate ? "日付" : null, "レース", "締切", "①展示", "①一周", "上昇幅", "2着おすすめ", "全国勝率", "LINE"].filter(Boolean).map((h) => <th key={h} style={{ textAlign: "left", padding: "10px 8px", borderBottom: "1px solid #dbe4ee", fontSize: 12, color: "#718096" }}>{h}</th>)}</tr></thead>
         <tbody>
           {alerts.map((a) => (
             <tr key={a.id}>
@@ -114,6 +126,7 @@ function AlertTable({ alerts, showDate = false }) {
               <td style={{ ...td, color: "#e56a00", fontWeight: 900 }}>+{Number(a.uplift_points || 14.66).toFixed(2)}pt</td>
               <td style={td}><strong>{a.recommended_second_boat ? `${a.recommended_second_boat}号艇` : "—"}</strong></td>
               <td style={td}>{a.recommended_second_national_win_rate ?? "—"}</td>
+              <td style={{ ...td, fontWeight: 900, color: a.notified ? "#16833d" : "#d97706" }}>{a.notified ? "通知済み" : "待機中"}</td>
             </tr>
           ))}
         </tbody>
