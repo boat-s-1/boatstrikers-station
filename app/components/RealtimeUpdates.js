@@ -4,6 +4,7 @@ import HatsuneNewsPreview from "../hatsune/HatsuneNewsPreview";
 import HatsuneSchedulePreview from "../hatsune/HatsuneSchedulePreview";
 import HatsuneMediaPreview from "../hatsune/HatsuneMediaPreview";
 import { getHatsuneNews } from "../hatsune/newsData";
+import IchikaEscapeSurgePanel from "./IchikaEscapeSurgePanel";
 import IchikaAlertPanel from "./IchikaAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
 
@@ -67,7 +68,12 @@ async function getItems(target, limit) {
 
 export default async function RealtimeUpdates({ target = "home", limit = 5, compact = false }) {
   if (target === "ichika") {
-    return <IchikaAlertPanel />;
+    return (
+      <>
+        <IchikaEscapeSurgePanel />
+        <IchikaAlertPanel />
+      </>
+    );
   }
 
   const [items, hatsuneNews] = await Promise.all([
