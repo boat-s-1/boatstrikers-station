@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Parser from "rss-parser";
+import { unstable_cache } from "next/cache";
 import { supabase } from "./bsc2/lib/supabaseClient";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
@@ -131,75 +132,76 @@ async function getMonthlyForecastStats() {
   }
 }
 
-async function getTodayNewspapers() {
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+const getHomeNoteData = unstable_cache(
+  async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-  const targets = [
-    {
-      name: "一果新聞 前日版",
-      keyword: "【一果前日版】",
-      tag: "イン逃げ",
-      href: "/ichika",
-      fallback: "/ichika-banner.jpg",
-    },
-    {
-      name: "初音新聞 女子戦版",
-      keyword: "【初音前日版】",
-      tag: "女子戦",
-      href: "/hatsune",
-      fallback: "/hatsune-banner.jpg",
-    },
-    {
-      name: "キイナ新聞 5アタマ版",
-      keyword: "【キイナ前日版】",
-      tag: "穴狙い",
-      href: "/kiina",
-      fallback: "/kiina-banner.jpg",
-    },
-  ];
+    const targets = [
+      {
+        name: "一果新聞 前日版",
+        keyword: "【一果前日版】",
+        tag: "イン逃げ",
+        href: "/ichika",
+        fallback: "/ichika-banner.jpg",
+      },
+      {
+        name: "初音新聞 女子戦版",
+        keyword: "【初音前日版】",
+        tag: "女子戦",
+        href: "/hatsune",
+        fallback: "/hatsune-banner.jpg",
+      },
+      {
+        name: "キイナ新聞 5アタマ版",
+        keyword: "【キイナ前日版】",
+        tag: "穴狙い",
+        href: "/kiina",
+        fallback: "/kiina-banner.jpg",
+      },
+    ];
 
-  return targets.map((t) => {
-    const item = feed.items.find((feedItem) =>
-      feedItem.title.includes(t.keyword)
-    );
+    const news = targets.map((t) => {
+      const item = feed.items.find((feedItem) =>
+        feedItem.title.includes(t.keyword)
+      );
 
-    const image =
-      item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || t.fallback;
+      const image =
+        item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || t.fallback;
 
-    return {
-      title: item ? item.title : t.name,
-      date: item ? item.pubDate : "",
-      link: item ? item.link : t.href,
-      tag: t.tag,
-      image: image,
-    };
-  });
-}
+      return {
+        title: item ? item.title : t.name,
+        date: item ? item.pubDate : "",
+        link: item ? item.link : t.href,
+        tag: t.tag,
+        image,
+      };
+    });
 
-async function getLatestInfo() {
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+    const latestInfo = feed.items.slice(0, 5).map((item) => {
+      let category = "note";
 
-  return feed.items.slice(0, 5).map((item) => {
-    let category = "note";
+      if (item.title.includes("【一果前日版】")) category = "一果新聞";
+      if (item.title.includes("【初音前日版】")) category = "初音新聞";
+      if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
+      if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
+      if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
+      if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
+      if (item.title.includes("場攻略】")) category = "24場攻略";
 
-    if (item.title.includes("【一果前日版】")) category = "一果新聞";
-    if (item.title.includes("【初音前日版】")) category = "初音新聞";
-    if (item.title.includes("【キイナ前日版】")) category = "キイナ新聞";
-    if (item.title.includes("【一果ゼミ")) category = "一果ゼミ";
-    if (item.title.includes("【初音ゼミ")) category = "初音ゼミ";
-    if (item.title.includes("【キイナゼミ")) category = "キイナゼミ";
-    if (item.title.includes("場攻略】")) category = "24場攻略";
+      return {
+        title: item.title,
+        link: item.link,
+        date: item.pubDate,
+        category,
+      };
+    });
 
-    return {
-      title: item.title,
-      link: item.link,
-      date: item.pubDate,
-      category,
-    };
-  });
-}
+    return { news, latestInfo };
+  },
+  ["home-note-rss-v1"],
+  { revalidate: 300 },
+);
 
 export const metadata = {
   title: {
@@ -249,18 +251,18 @@ async function getHomeRaceData() {
 
 export default async function Home() {
   const [
-    news,
-    latestInfo,
+    noteData,
     results,
     cms,
     raceData,
   ] = await Promise.all([
-    getTodayNewspapers(),
-    getLatestInfo(),
+    getHomeNoteData(),
     getMonthlyForecastStats(),
     getHomeCmsData(),
     getHomeRaceData(),
   ]);
+
+  const { news, latestInfo } = noteData;
 
   return (
     <main className="page">
