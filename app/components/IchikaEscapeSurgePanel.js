@@ -125,7 +125,7 @@ export default async function IchikaEscapeSurgePanel() {
         </div>
 
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[['昨日', yPerf], ['全期間', allPerf]].map(([label, perf]) => (
+          {[["昨日", yPerf], ["全期間", allPerf]].map(([label, perf]) => (
             <div key={label} style={{ padding: "13px 10px", borderRadius: 17, background: "#f7fbff", border: "1px solid #d8e9f6", textAlign: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 900, color: "#1266b3" }}>{label} 1着率</span>
               <strong style={{ display: "block", marginTop: 3, fontSize: 28, color: "#1266b3" }}>{perf.hitRate == null ? "—%" : `${perf.hitRate.toFixed(1)}%`}</strong>
@@ -163,6 +163,15 @@ export default async function IchikaEscapeSurgePanel() {
           <p style={{ margin: "7px 0 0", fontSize: 13, color: "#718096", lineHeight: 1.6 }}>展示情報が出た後、①が展示1位＋一周1位になると表示されます。</p>
         </div>
       )}
+
+      <div style={{ padding: "0 14px 16px" }}>
+        <Link
+          href="/members/ichika-escape-surge"
+          style={{ display: "block", textAlign: "center", textDecoration: "none", padding: "12px 14px", borderRadius: 14, background: "#06c755", color: "#fff", fontWeight: 900, fontSize: 14 }}
+        >
+          LINE通知のON / OFFを設定する
+        </Link>
+      </div>
     </section>
   );
 }
