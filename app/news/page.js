@@ -17,6 +17,7 @@ const TABS = [
   { key: "win", label: "優勝" },
   { key: "motor", label: "モーター" },
   { key: "tomorrow", label: "明日の注目" },
+  { key: "media", label: "MEDIA", href: "/news/media" },
 ];
 
 function textOf(item) {
@@ -68,7 +69,7 @@ function categoryClass(item) {
 
 export default async function NewsTopPage({ searchParams }) {
   const params = await searchParams;
-  const category = TABS.some((x) => x.key === params?.category) ? params.category : "all";
+  const category = TABS.some((x) => !x.href && x.key === params?.category) ? params.category : "all";
   const q = String(params?.q || "");
   const allNews = await getHatsuneNews({ limit: 100, category: "all" });
   const news = allNews.filter((item) => matches(item, category, q));
@@ -99,8 +100,8 @@ export default async function NewsTopPage({ searchParams }) {
 
         <nav className={styles.tabs} aria-label="ニュースカテゴリ">
           {TABS.map((tab) => {
-            const href = `/news?category=${tab.key}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-            return <Link key={tab.key} href={href} className={category === tab.key ? styles.activeTab : ""}>{tab.label}</Link>;
+            const href = tab.href || `/news?category=${tab.key}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+            return <Link key={tab.key} href={href} className={!tab.href && category === tab.key ? styles.activeTab : ""}>{tab.label}</Link>;
           })}
         </nav>
 
