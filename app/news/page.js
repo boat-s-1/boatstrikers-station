@@ -20,7 +20,11 @@ const TABS = [
 ];
 
 function textOf(item) {
-  return `${item?.title || ""} ${item?.summary || ""} ${item?.category || ""}`;
+  return `${item?.list_headline || ""} ${item?.title || ""} ${item?.summary || ""} ${item?.category || ""}`;
+}
+
+function headlineOf(item) {
+  return String(item?.list_headline || item?.title || "ニュース").trim();
 }
 
 function bucket(item) {
@@ -109,7 +113,7 @@ export default async function NewsTopPage({ searchParams }) {
                 <time>{formatHatsuneNewsDate(featured.published_at)}</time>
                 {isNew(featured) && <span className={styles.newBadge}>NEW</span>}
               </div>
-              <h2>{featured.title}</h2>
+              <h2>{headlineOf(featured)}</h2>
               {featured.summary && <p>{featured.summary}</p>}
             </Link>
           </section>
@@ -125,7 +129,7 @@ export default async function NewsTopPage({ searchParams }) {
               <Link key={item.id} href={`/news/${item.id}`} className={styles.headlineRow}>
                 <time>{formatHatsuneNewsDate(item.published_at)}</time>
                 <span className={`${styles.categoryBadge} ${categoryClass(item)}`}>{categoryLabel(item)}</span>
-                <strong>{item.title}</strong>
+                <strong>{headlineOf(item)}</strong>
                 {isNew(item) && <span className={styles.newBadge}>NEW</span>}
                 <span className={styles.arrow}>›</span>
               </Link>
@@ -165,7 +169,7 @@ function HeadlineSection({ title, emoji, items }) {
         {items.map((item) => (
           <Link href={`/news/${item.id}`} key={item.id} className={styles.topicRow}>
             <span className={`${styles.categoryDot} ${categoryClass(item)}`} />
-            <strong>{item.title}</strong>
+            <strong>{headlineOf(item)}</strong>
             <time>{formatHatsuneNewsDate(item.published_at)}</time>
             <span className={styles.arrow}>›</span>
           </Link>
