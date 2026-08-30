@@ -40,6 +40,8 @@ export async function GET(request){
         source=await fetchTrackedOriginalTenji(supabase,"hatsune",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       }
 
+      console.info("[exhibition-cache]",{consumer:"hatsune",raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no,reused,cacheAgeMs:reused?cached.ageMs:null,cacheReason:reused?null:(cached.reason||null)});
+
       if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,published:false,status:source.status||null,reason:source.reason||null,error:source.error||null,cacheReason:cached.reason||null});continue;}
 
       if(!reused){
