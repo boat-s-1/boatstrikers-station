@@ -16,13 +16,12 @@ export default function HatsuneSchedulePreview() {
 
   return (
     <section className={styles.section}>
-      <div className={styles.heading}>
-        <div>
-          <span>WOMEN'S RACE SCHEDULE</span>
-          <h2>🌸 女子戦スケジュール</h2>
-          <p>開催中と、これから始まる女子戦をまとめています。</p>
-        </div>
-        <Link href="/hatsune/schedule" className={styles.moreTop}>一覧を見る →</Link>
+      <div className={styles.bannerHeading}>
+        <img
+          src="/top/IMG_7836.jpeg?v=20260831-2142"
+          alt="女子戦スケジュール"
+          className={styles.bannerImage}
+        />
       </div>
 
       <div className={styles.list}>
