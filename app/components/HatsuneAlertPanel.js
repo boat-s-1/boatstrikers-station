@@ -59,11 +59,12 @@ export default async function HatsuneAlertPanel(){
   const [todayRows,yRows,allRows]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
   const [yPerf,allPerf]=await Promise.all([getPerformance(supabase,yRows),getPerformance(supabase,allRows)]);
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(101,56,122,.10)",border:"2px solid #bb79d8"}}>
-    <div style={{position:"relative",padding:"18px 18px 16px",background:"linear-gradient(135deg,#f5d9ff 0%,#eedfff 45%,#fff 100%)",borderBottom:"1px solid #ead7f5"}}>
-      <div style={{fontSize:11,fontWeight:900,letterSpacing:".08em",color:"#8b3fa0"}}>🌸 今日の初音アラート</div>
-      <h2 style={{margin:"4px 0 2px",fontSize:25,color:"#3f2d5a",lineHeight:1.15}}>女子イン崩れ理論</h2>
-      <div style={{fontSize:12,fontWeight:800,color:"#74577d"}}>女子戦で②の展示・1周が①を明確に上回るレースを検知</div>
-      <span style={{position:"absolute",top:13,right:12,padding:"7px 10px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
+    <div style={{background:"linear-gradient(135deg,#fff4fa 0%,#f5edff 100%)",borderBottom:"1px solid #ead7f5"}}>
+      <img src="/top/IMG_7867.jpeg?v=20260901-0445" alt="女子イン崩れ理論" style={{display:"block",width:"100%",height:"auto"}} />
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,padding:"11px 14px 12px"}}>
+        <div style={{fontSize:12,fontWeight:800,color:"#74577d"}}>女子戦で②の展示・1周が①を明確に上回るレースを検知</div>
+        <span style={{flex:"0 0 auto",padding:"6px 9px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
+      </div>
     </div>
     <div style={{padding:"15px 14px 8px"}}>
       <div style={{marginBottom:8,fontSize:13,fontWeight:900,color:"#17345c"}}>アラート本数</div>
