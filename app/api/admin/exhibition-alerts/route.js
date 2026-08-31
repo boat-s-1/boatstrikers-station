@@ -22,12 +22,37 @@ function jstToday() {
   }).format(new Date());
 }
 
+function raceKey(row) {
+  return `${row.race_date}-${Number(row.course_code)}-${Number(row.race_no)}`;
+}
+
+async function enrichBoat5Results(supabase, rows) {
+  if (!rows?.length) return [];
+  const dates = rows.map((row) => row.race_date).filter(Boolean).sort();
+  const minDate = dates[0];
+  const maxDate = dates[dates.length - 1];
+  const { data, error } = await supabase
+    .from("bs_race_entries")
+    .select("race_date,course_code,race_no,boat_no,arrival_order")
+    .eq("boat_no", 5)
+    .gte("race_date", minDate)
+    .lte("race_date", maxDate);
+  if (error) throw error;
+  const resultMap = new Map((data || []).map((row) => [raceKey(row), Number(row.arrival_order)]));
+  return rows.map((row) => ({
+    ...row,
+    boat5_result_rank: resultMap.get(raceKey(row)) ?? null,
+  }));
+}
+
 function calcStats(rows) {
   const alerts = rows || [];
   const finished = alerts.filter((row) => row.result_synced_at);
   const first = finished.filter((row) => Number(row.result_rank) === 1).length;
   const top2 = finished.filter((row) => [1, 2].includes(Number(row.result_rank))).length;
   const top3 = finished.filter((row) => [1, 2, 3].includes(Number(row.result_rank))).length;
+  const boat5Finished = alerts.filter((row) => Number.isFinite(Number(row.boat5_result_rank)) && Number(row.boat5_result_rank) > 0);
+  const boat5First = boat5Finished.filter((row) => Number(row.boat5_result_rank) === 1).length;
   const payoutTotal = finished.reduce((sum, row) => sum + Number(row.trifecta_payout || 0), 0);
   return {
     matched: alerts.length,
@@ -38,6 +63,9 @@ function calcStats(rows) {
     firstRate: finished.length ? first / finished.length : null,
     top2Rate: finished.length ? top2 / finished.length : null,
     top3Rate: finished.length ? top3 / finished.length : null,
+    boat5Finished: boat5Finished.length,
+    boat5First,
+    boat5FirstRate: boat5Finished.length ? boat5First / boat5Finished.length : null,
     payoutTotal,
   };
 }
@@ -63,17 +91,6 @@ export async function GET(request) {
 
     const fields = "id,race_date,course_code,course_name,race_no,boat_no,closing_time,exhibition_time,exhibition_rank,straight_time,straight_rank,detected_at,notified,notified_at,result_rank,trifecta,trifecta_payout,result_synced_at";
 
-    let dayRows = [];
-    if (mode !== "all") {
-      const { data, error } = await supabase
-        .from("bs_exhibition_alerts")
-        .select(fields)
-        .eq("race_date", date)
-        .order("closing_time", { ascending: false });
-      if (error) throw error;
-      dayRows = data || [];
-    }
-
     const { data: allRows, error: allError } = await supabase
       .from("bs_exhibition_alerts")
       .select(fields)
@@ -82,14 +99,16 @@ export async function GET(request) {
       .limit(5000);
     if (allError) throw allError;
 
-    const history = allRows || [];
+    const history = await enrichBoat5Results(supabase, allRows || []);
+    const dayRows = mode === "all" ? [] : history.filter((row) => row.race_date === date);
+    const activeRows = mode === "all" ? history : dayRows;
 
     return NextResponse.json({
       ok: true,
       date,
       mode,
-      alerts: mode === "all" ? history : dayRows,
-      stats: calcStats(mode === "all" ? history : dayRows),
+      alerts: activeRows,
+      stats: calcStats(activeRows),
       allStats: calcStats(history),
       daily: buildDaily(history),
       fetchedAt: new Date().toISOString(),
