@@ -419,7 +419,7 @@ export default async function HatsunePage() {
 
       <section className="sectionCard purpleCard">
         <img
-          src="/CD2CB810-B702-49DE-85AD-5927730A753A.png"
+          src="/top/IMG_7884.jpeg?v=20260901-0532"
           alt="初音新聞"
           className="homeTitleImage"
         />
@@ -494,7 +494,7 @@ export default async function HatsunePage() {
 
       <section className="sectionCard purpleCard">
         <img
-          src="/CE8FD370-10F1-4A75-BA44-04E1CBA0D52D.png"
+          src="/top/IMG_7883.jpeg?v=20260901-0532"
           alt="初音成績"
           className="homeTitleImage"
         />
