@@ -212,7 +212,7 @@ export default async function IchikaEscapeSurgePanel() {
           href="/members/ichika-escape-surge"
           style={{ display: "block", textAlign: "center", textDecoration: "none", padding: "12px 14px", borderRadius: 14, background: "#06c755", color: "#fff", fontWeight: 900, fontSize: 14 }}
         >
-          LINE通知のON / OFFを設定する
+          LINE通知を設定する
         </Link>
       </div>
     </section>
