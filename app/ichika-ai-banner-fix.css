@@ -222,6 +222,44 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
   scroll-snap-align: start;
 }
 
+/* Hatsune lab carousel */
+.hatsunePage .sectionCard:has(.sectionTitleRow img[alt="初音ラボ"]) {
+  padding-bottom: 14px !important;
+  overflow: hidden !important;
+}
+
+.hatsunePage .sectionCard:has(.sectionTitleRow img[alt="初音ラボ"]) .labList {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 18px 16px 8px !important;
+  grid-template-columns: none !important;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.hatsunePage .sectionCard:has(.sectionTitleRow img[alt="初音ラボ"]) .labList::-webkit-scrollbar {
+  display: none;
+}
+
+.hatsunePage .sectionCard:has(.sectionTitleRow img[alt="初音ラボ"]) .labItem {
+  flex: 0 0 86% !important;
+  width: 86% !important;
+  min-width: 86% !important;
+  max-width: 86% !important;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
 @media (max-width: 760px) {
   .ichikaPage .sectionCard,
   section[aria-label="一果 AI予想"],
@@ -250,5 +288,12 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
 
   .ichikaPage .ichikaLabSection .labItem img {
     height: 146px !important;
+  }
+
+  .hatsunePage .sectionCard:has(.sectionTitleRow img[alt="初音ラボ"]) .labItem {
+    flex-basis: 88% !important;
+    width: 88% !important;
+    min-width: 88% !important;
+    max-width: 88% !important;
   }
 }
