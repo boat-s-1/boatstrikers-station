@@ -79,15 +79,15 @@ export default function SurgeNotificationBridge(){
 
   if(!target)return null;
   return createPortal(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,padding:"22px 28px",border:"1px solid #dfe6ee",borderRadius:22,background:"#fff",minHeight:118,marginBottom:16,boxSizing:"border-box"}}>
-      <div style={{display:"flex",alignItems:"flex-start",gap:14,minWidth:0}}>
-        <b style={{fontSize:30,lineHeight:1}}>🔥</b>
-        <span style={{display:"grid",gap:5,minWidth:0}}>
-          <strong style={{fontSize:22,lineHeight:1.25,color:"#14243d"}}>一果・イン逃げ急上昇アラート</strong>
-          <small style={{fontSize:16,lineHeight:1.45,color:"#8a96a6"}}>展示1位＋一周1位でイン逃げ率が約15pt上昇した時に通知します</small>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:14,padding:"18px 24px",border:"1px solid #dfe6ee",borderRadius:22,background:"#fff",minHeight:104,marginBottom:14,boxSizing:"border-box"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14,minWidth:0,flex:1}}>
+        <b style={{fontSize:28,lineHeight:1,flex:"0 0 auto"}}>🔥</b>
+        <span style={{display:"grid",gap:5,minWidth:0,flex:1}}>
+          <strong style={{fontSize:20,lineHeight:1.2,color:"#14243d",whiteSpace:"nowrap"}}>一果・イン逃げ急上昇</strong>
+          <small style={{fontSize:15,lineHeight:1.35,color:"#8a96a6",whiteSpace:"nowrap"}}>展示1位＋一周1位で通知</small>
         </span>
       </div>
-      <button type="button" onClick={toggle} disabled={!lineLinked||busy} aria-pressed={checked} aria-label={`一果・イン逃げ急上昇アラート ${checked?"ON":"OFF"}`} style={{width:82,height:48,border:0,borderRadius:999,padding:4,background:checked?"#06c755":"#e9eef6",display:"flex",justifyContent:checked?"flex-end":"flex-start",alignItems:"center",flex:"0 0 auto",opacity:(!lineLinked||busy)?.65:1,cursor:(!lineLinked||busy)?"default":"pointer",transition:".2s"}}>
+      <button type="button" onClick={toggle} disabled={!lineLinked||busy} aria-pressed={checked} aria-label={`一果・イン逃げ急上昇 ${checked?"ON":"OFF"}`} style={{width:82,height:48,border:0,borderRadius:999,padding:4,background:checked?"#06c755":"#e9eef6",display:"flex",justifyContent:checked?"flex-end":"flex-start",alignItems:"center",flex:"0 0 auto",opacity:(!lineLinked||busy)?.65:1,cursor:(!lineLinked||busy)?"default":"pointer",transition:".2s"}}>
         <span style={{display:"block",width:40,height:40,borderRadius:"50%",background:"#fff",boxShadow:"0 2px 8px rgba(0,0,0,.12)"}} />
       </button>
     </div>,
