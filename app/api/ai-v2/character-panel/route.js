@@ -64,6 +64,17 @@ function buildYesterdayStats(types, throughYesterdayRows, throughDayBeforeRows) 
   });
 }
 
+async function loadRankings(client, today, types, timing) {
+  return client
+    .from("ai_v2_daily_rankings")
+    .select("ranking_type,rank_no,course_code,race_no,probability,selected_for_home")
+    .eq("ranking_date", today)
+    .eq("data_timing", timing)
+    .in("ranking_type", types)
+    .order("ranking_type", { ascending: true })
+    .order("rank_no", { ascending: true });
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const character = String(searchParams.get("character") || "").toLowerCase();
@@ -82,15 +93,8 @@ export async function GET(request) {
   const yesterday = jstDateOffset(-1);
   const dayBeforeYesterday = jstDateOffset(-2);
 
-  const [rankingResult, statResult, statYesterdayResult, statDayBeforeResult, startResult] = await Promise.all([
-    client
-      .from("ai_v2_daily_rankings")
-      .select("ranking_type,rank_no,course_code,race_no,probability,selected_for_home")
-      .eq("ranking_date", today)
-      .eq("data_timing", "previous_day")
-      .in("ranking_type", types)
-      .order("ranking_type", { ascending: true })
-      .order("rank_no", { ascending: true }),
+  const [previousDayResult, statResult, statYesterdayResult, statDayBeforeResult, startResult] = await Promise.all([
+    loadRankings(client, today, types, "previous_day"),
     client.rpc("ai_v2_public_character_stats", { p_as_of: today }),
     client.rpc("ai_v2_public_character_stats", { p_as_of: yesterday }),
     client.rpc("ai_v2_public_character_stats", { p_as_of: dayBeforeYesterday }),
@@ -103,11 +107,22 @@ export async function GET(request) {
       .limit(1),
   ]);
 
-  if (rankingResult.error) {
-    return NextResponse.json({ error: rankingResult.error.message }, { status: 500 });
+  if (previousDayResult.error) {
+    return NextResponse.json({ error: previousDayResult.error.message }, { status: 500 });
   }
 
-  const allRows = rankingResult.data || [];
+  let rankingTiming = "previous_day";
+  let allRows = previousDayResult.data || [];
+
+  if (!allRows.length) {
+    const fallbackResult = await loadRankings(client, today, types, "after_exhibition");
+    if (fallbackResult.error) {
+      return NextResponse.json({ error: fallbackResult.error.message }, { status: 500 });
+    }
+    allRows = fallbackResult.data || [];
+    if (allRows.length) rankingTiming = "after_exhibition";
+  }
+
   const anySelected = allRows.some((row) => row.selected_for_home === true);
 
   const picks = [];
@@ -141,6 +156,8 @@ export async function GET(request) {
     date: today,
     yesterdayDate: yesterday,
     startDate: startResult.data?.[0]?.ranking_date || null,
+    rankingTiming,
+    fallbackUsed: rankingTiming !== "previous_day",
     selectionMode: anySelected ? "manual" : "auto",
     picks,
     stats,
