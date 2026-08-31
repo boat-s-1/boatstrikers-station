@@ -120,7 +120,7 @@ export default function ExhibitionAlertsPage() {
 
   const summaryText = useMemo(() => {
     const s = mode === "all" ? allStats : stats;
-    return `成立${s.matched ?? 0}R / 1着${s.first ?? 0}R / 2連対${s.top2 ?? 0}R / 3連対${s.top3 ?? 0}R`;
+    return `成立${s.matched ?? 0}R / ④1着${s.first ?? 0}R / ⑤1着${s.boat5First ?? 0}R`;
   }, [mode, stats, allStats]);
 
   return (
@@ -130,7 +130,7 @@ export default function ExhibitionAlertsPage() {
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".12em", color: "#567" }}>BOATSTRIKERS ALERT</div>
             <h1 style={{ margin: "6px 0 8px", fontSize: 30 }}>🚨 4→5展開理論</h1>
-            <p style={{ margin: 0, color: "#617184" }}>キイナの狙い目を通知します。履歴・実績も自動集計します。</p>
+            <p style={{ margin: 0, color: "#617184" }}>キイナの狙い目を通知します。4号艇・5号艇の着順実績も自動集計します。</p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button onClick={() => setSoundOn((v) => !v)} style={{ padding: "11px 14px", borderRadius: 12, border: "1px solid #ccd7e2", background: "#fff", fontWeight: 800 }}>
@@ -162,9 +162,10 @@ export default function ExhibitionAlertsPage() {
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 20 }}>
           <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>{mode === "all" ? "全期間成立" : "成立"}</div><strong style={{ fontSize: 30 }}>{stats.matched ?? "—"}</strong></div>
-          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>1着率</div><strong style={{ fontSize: 30 }}>{pct(stats.firstRate)}</strong></div>
-          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>2連対率</div><strong style={{ fontSize: 30 }}>{pct(stats.top2Rate)}</strong></div>
-          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>3連対率</div><strong style={{ fontSize: 30 }}>{pct(stats.top3Rate)}</strong></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>④ 1着率</div><strong style={{ fontSize: 30 }}>{pct(stats.firstRate)}</strong><div style={{ color: "#718096", fontSize: 12 }}>{stats.first ?? 0}/{stats.finished ?? 0}R</div></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>⑤ 1着率</div><strong style={{ fontSize: 30, color: "#a96b00" }}>{pct(stats.boat5FirstRate)}</strong><div style={{ color: "#718096", fontSize: 12 }}>{stats.boat5First ?? 0}/{stats.boat5Finished ?? 0}R</div></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>④ 2連対率</div><strong style={{ fontSize: 30 }}>{pct(stats.top2Rate)}</strong></div>
+          <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>④ 3連対率</div><strong style={{ fontSize: 30 }}>{pct(stats.top3Rate)}</strong></div>
           <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>3連単払戻合計</div><strong style={{ fontSize: 24 }}>{Number(stats.payoutTotal || 0).toLocaleString()}円</strong></div>
         </section>
 
@@ -180,23 +181,24 @@ export default function ExhibitionAlertsPage() {
         <section style={{ ...card, marginBottom: 20 }}>
           <div style={{ marginBottom: 14 }}>
             <h2 style={{ margin: 0, fontSize: 20 }}>📅 日別実績</h2>
-            <div style={{ color: "#718096", fontSize: 13, marginTop: 5 }}>日ごとの成立数と着順実績を一覧表示</div>
+            <div style={{ color: "#718096", fontSize: 13, marginTop: 5 }}>日ごとの成立数と4号艇・5号艇の着順実績を一覧表示</div>
           </div>
           {!daily.length ? (
             <div style={{ padding: "20px 0", color: "#718096" }}>履歴がありません。</div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
-                <thead><tr>{["日付","成立","1着","2連対","3連対","1着率","3連対率","払戻合計"].map((h) => <th key={h} style={{ textAlign: "left", padding: "10px 8px", borderBottom: "1px solid #dbe4ee", fontSize: 12, color: "#718096" }}>{h}</th>)}</tr></thead>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+                <thead><tr>{["日付","成立","④1着","④1着率","⑤1着","⑤1着率","④2連対率","④3連対率","払戻合計"].map((h) => <th key={h} style={{ textAlign: "left", padding: "10px 8px", borderBottom: "1px solid #dbe4ee", fontSize: 12, color: "#718096" }}>{h}</th>)}</tr></thead>
                 <tbody>
                   {daily.map((d) => (
                     <tr key={d.date} onClick={() => { setDate(d.date); setMode("day"); }} style={{ cursor: "pointer" }}>
                       <td style={td}><strong>{d.date}</strong></td>
                       <td style={td}>{d.matched}R</td>
                       <td style={td}>{d.first}R</td>
-                      <td style={td}>{d.top2}R</td>
-                      <td style={td}>{d.top3}R</td>
                       <td style={td}>{pct(d.firstRate)}</td>
+                      <td style={td}>{d.boat5First ?? 0}R</td>
+                      <td style={td}>{pct(d.boat5FirstRate)}</td>
+                      <td style={td}>{pct(d.top2Rate)}</td>
                       <td style={td}>{pct(d.top3Rate)}</td>
                       <td style={td}>{Number(d.payoutTotal || 0).toLocaleString()}円</td>
                     </tr>
@@ -224,14 +226,15 @@ function AlertList({ alerts, showDate = false }) {
   return (
     <div style={{ display: "grid", gap: 10 }}>
       {alerts.map((a) => (
-        <article key={a.id} style={{ border: "1px solid #e2e8f0", borderRadius: 14, padding: 14, display: "grid", gridTemplateColumns: "minmax(150px,1.4fr) repeat(3,minmax(95px,1fr))", gap: 12, alignItems: "center" }}>
+        <article key={a.id} style={{ border: "1px solid #e2e8f0", borderRadius: 14, padding: 14, display: "grid", gridTemplateColumns: "minmax(150px,1.4fr) repeat(4,minmax(95px,1fr))", gap: 12, alignItems: "center" }}>
           <div>
             <strong style={{ fontSize: 18 }}>{a.course_name || `場${a.course_code}`} {a.race_no}R</strong>
             <div style={{ marginTop: 4, color: "#718096", fontSize: 13 }}>{showDate ? `${a.race_date} / ` : ""}締切 {formatTime(a.closing_time)}</div>
           </div>
-          <div><div style={{ fontSize: 12, color: "#718096" }}>展示</div><strong>{a.exhibition_time} / {a.exhibition_rank}位</strong></div>
-          <div><div style={{ fontSize: 12, color: "#718096" }}>直線</div><strong>{a.straight_time} / {a.straight_rank}位</strong></div>
-          <div><div style={{ fontSize: 12, color: "#718096" }}>4号艇結果</div><strong>{rankLabel(a.result_rank)}</strong>{a.trifecta_payout ? <div style={{ fontSize: 12, color: "#718096" }}>3連単 {Number(a.trifecta_payout).toLocaleString()}円</div> : null}</div>
+          <div><div style={{ fontSize: 12, color: "#718096" }}>④展示</div><strong>{a.exhibition_time} / {a.exhibition_rank}位</strong></div>
+          <div><div style={{ fontSize: 12, color: "#718096" }}>④直線</div><strong>{a.straight_time} / {a.straight_rank}位</strong></div>
+          <div><div style={{ fontSize: 12, color: "#718096" }}>④結果</div><strong>{rankLabel(a.result_rank)}</strong>{a.trifecta_payout ? <div style={{ fontSize: 12, color: "#718096" }}>3連単 {Number(a.trifecta_payout).toLocaleString()}円</div> : null}</div>
+          <div><div style={{ fontSize: 12, color: "#718096" }}>⑤結果</div><strong style={{ color: Number(a.boat5_result_rank) === 1 ? "#a96b00" : "inherit" }}>{rankLabel(a.boat5_result_rank)}</strong></div>
         </article>
       ))}
     </div>
