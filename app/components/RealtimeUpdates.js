@@ -76,78 +76,76 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
     );
   }
 
-  const [items, hatsuneNews] = await Promise.all([
-    getItems(target, limit),
-    target === "hatsune" ? getHatsuneNews({ limit: 3 }) : Promise.resolve([]),
-  ]);
+  if (target === "hatsune") {
+    const hatsuneNews = await getHatsuneNews({ limit: 3 });
+    return (
+      <>
+        <HatsuneSchedulePreview />
+        <HatsuneNewsPreview news={hatsuneNews} />
+        <HatsuneMediaPreview />
+      </>
+    );
+  }
 
+  const items = await getItems(target, limit);
   const isCompact = compact || target === "races";
   const visibleItems = isCompact ? items.slice(0, 1) : items;
-  const isHatsuneEmpty = target === "hatsune" && visibleItems.length === 0;
 
   return (
-    <>
-      <section className={`${styles.section} ${isCompact ? styles.compact : ""} ${isHatsuneEmpty ? styles.emptySectionCompact : ""}`}>
-        <div className={styles.heading}>
-          <div>
-            <span>REALTIME UPDATE</span>
-            <h2>リアルタイム予想・更新情報</h2>
-          </div>
-          <a
-            href={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || "https://x.com"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.xButton}
-          >
-            Xを見る ↗
-          </a>
+    <section className={`${styles.section} ${isCompact ? styles.compact : ""}`}>
+      <div className={styles.heading}>
+        <div>
+          <span>REALTIME UPDATE</span>
+          <h2>リアルタイム予想・更新情報</h2>
         </div>
+        <a
+          href={process.env.NEXT_PUBLIC_BOATSTRIKERS_X_URL || "https://x.com"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.xButton}
+        >
+          Xを見る ↗
+        </a>
+      </div>
 
-        {visibleItems.length ? (
-          <div className={styles.list}>
-            {visibleItems.map((item) => {
-              const kind = KIND_META[item.kind] || KIND_META.notice;
-              const chara = CHARACTER_META[item.character] || CHARACTER_META.all;
-              const inner = (
-                <>
-                  <div className={styles.cardTop}>
-                    <div className={styles.badges}>
-                      <span className={styles.kind}>{kind.icon} {kind.label}</span>
-                      <span className={`${styles.character} ${chara.className}`}>{chara.label}</span>
-                    </div>
-                    <time>{formatDate(item.published_at || item.created_at)}</time>
+      {visibleItems.length ? (
+        <div className={styles.list}>
+          {visibleItems.map((item) => {
+            const kind = KIND_META[item.kind] || KIND_META.notice;
+            const chara = CHARACTER_META[item.character] || CHARACTER_META.all;
+            const inner = (
+              <>
+                <div className={styles.cardTop}>
+                  <div className={styles.badges}>
+                    <span className={styles.kind}>{kind.icon} {kind.label}</span>
+                    <span className={`${styles.character} ${chara.className}`}>{chara.label}</span>
                   </div>
-                  <h3>{item.title}</h3>
-                  {!isCompact && item.body ? <p>{item.body}</p> : null}
-                  {item.image_url ? (
-                    <div className={styles.imageWrap}>
-                      <img src={item.image_url} alt={item.title || "更新画像"} className={styles.image} />
-                    </div>
-                  ) : null}
-                  {item.link_url ? <span className={styles.cta}>詳しく見る →</span> : null}
-                </>
+                  <time>{formatDate(item.published_at || item.created_at)}</time>
+                </div>
+                <h3>{item.title}</h3>
+                {!isCompact && item.body ? <p>{item.body}</p> : null}
+                {item.image_url ? (
+                  <div className={styles.imageWrap}>
+                    <img src={item.image_url} alt={item.title || "更新画像"} className={styles.image} />
+                  </div>
+                ) : null}
+                {item.link_url ? <span className={styles.cta}>詳しく見る →</span> : null}
+              </>
+            );
+            if (item.link_url) {
+              const external = /^https?:\/\//.test(item.link_url);
+              return external ? (
+                <a key={item.id} href={item.link_url} target="_blank" rel="noopener noreferrer" className={styles.card}>{inner}</a>
+              ) : (
+                <Link key={item.id} href={item.link_url} className={styles.card}>{inner}</Link>
               );
-              if (item.link_url) {
-                const external = /^https?:\/\//.test(item.link_url);
-                return external ? (
-                  <a key={item.id} href={item.link_url} target="_blank" rel="noopener noreferrer" className={styles.card}>{inner}</a>
-                ) : (
-                  <Link key={item.id} href={item.link_url} className={styles.card}>{inner}</Link>
-                );
-              }
-              return <article key={item.id} className={styles.card}>{inner}</article>;
-            })}
-          </div>
-        ) : (
-          <div className={`${styles.empty} ${isHatsuneEmpty ? styles.emptyCompact : ""}`}>
-            現在、新しいリアルタイム更新はありません。
-          </div>
-        )}
-      </section>
-
-      {target === "hatsune" ? <HatsuneSchedulePreview /> : null}
-      {target === "hatsune" ? <HatsuneNewsPreview news={hatsuneNews} /> : null}
-      {target === "hatsune" ? <HatsuneMediaPreview /> : null}
-    </>
+            }
+            return <article key={item.id} className={styles.card}>{inner}</article>;
+          })}
+        </div>
+      ) : (
+        <div className={styles.empty}>現在、新しいリアルタイム更新はありません。</div>
+      )}
+    </section>
   );
 }
