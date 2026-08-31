@@ -18,7 +18,7 @@ export default function HatsuneSchedulePreview() {
     <section className={styles.section}>
       <div className={styles.bannerHeading}>
         <img
-          src="/top/IMG_7836.jpeg?v=20260831-2142"
+          src="/top/IMG_7846.jpeg?v=20260831-2321"
           alt="女子戦スケジュール"
           className={styles.bannerImage}
         />
