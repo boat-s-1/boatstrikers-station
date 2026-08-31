@@ -78,7 +78,6 @@ export default function CharacterAiRoomPanel() {
   const pathname = usePathname();
   const character = useMemo(() => getCharacter(pathname), [pathname]);
   const [mount, setMount] = useState(null);
-  const [performanceMount, setPerformanceMount] = useState(null);
   const [researchMount, setResearchMount] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -86,7 +85,6 @@ export default function CharacterAiRoomPanel() {
   useEffect(() => {
     if (!character) {
       setMount(null);
-      setPerformanceMount(null);
       setResearchMount(null);
       setData(null);
       return undefined;
@@ -152,19 +150,6 @@ export default function CharacterAiRoomPanel() {
     target.insertAdjacentElement("afterend", node);
     setMount(node);
 
-    let performanceNode = null;
-    if (character === "hatsune") {
-      const newsSection = Array.from(page.querySelectorAll("section")).find((section) =>
-        String(section.textContent || "").includes("女子ボートNEWS")
-      );
-      if (newsSection) {
-        performanceNode = document.createElement("div");
-        performanceNode.className = styles.performanceMount;
-        newsSection.insertAdjacentElement("afterend", performanceNode);
-        setPerformanceMount(performanceNode);
-      }
-    }
-
     const oldToolSection = Array.from(page.querySelectorAll("section.sectionCard")).find((section) =>
       String(section.textContent || "").includes(meta.legacyNeedle)
     );
@@ -215,10 +200,8 @@ export default function CharacterAiRoomPanel() {
       if (ichikaBottomNav) ichikaBottomNav.style.display = previousBottomNavDisplay;
       ichikaBannerStyle?.remove();
       node.remove();
-      performanceNode?.remove();
       researchNode.remove();
       setMount(null);
-      setPerformanceMount(null);
       setResearchMount(null);
     };
   }, [character]);
@@ -250,39 +233,19 @@ export default function CharacterAiRoomPanel() {
         const yesterdayHits = Number(yesterdayStat?.hits || 0);
 
         const cards = [
-          {
-            label: "昨日",
-            predictions: yesterdayPredictions,
-            hits: yesterdayHits,
-            hitRate: yesterdayStat?.hitRate,
-          },
-          {
-            label: "全期間",
-            predictions: allPredictions,
-            hits: allHits,
-            hitRate: allStat?.hitRate,
-          },
+          { label: "昨日", predictions: yesterdayPredictions, hits: yesterdayHits, hitRate: yesterdayStat?.hitRate },
+          { label: "全期間", predictions: allPredictions, hits: allHits, hitRate: allStat?.hitRate },
         ];
 
         return (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {cards.map((card) => (
-              <div
-                key={card.label}
-                className={styles.statCard}
-                style={{ textAlign: "center", padding: "15px 10px" }}
-              >
+              <div key={card.label} className={styles.statCard} style={{ textAlign: "center", padding: "15px 10px" }}>
                 <span style={{ fontSize: 13 }}>{card.label}</span>
                 <strong style={{ fontSize: 28 }}>
-                  {card.predictions > 0 && card.hitRate != null
-                    ? `${Number(card.hitRate).toFixed(1)}%`
-                    : "—%"}
+                  {card.predictions > 0 && card.hitRate != null ? `${Number(card.hitRate).toFixed(1)}%` : "—%"}
                 </strong>
-                <small>
-                  {card.predictions > 0
-                    ? `${card.hits} / ${card.predictions}R 的中`
-                    : "結果データなし"}
-                </small>
+                <small>{card.predictions > 0 ? `${card.hits} / ${card.predictions}R 的中` : "結果データなし"}</small>
               </div>
             ))}
           </div>
@@ -321,11 +284,7 @@ export default function CharacterAiRoomPanel() {
     >
       {character === "ichika" ? (
         <div className={styles.ichikaBannerHeading}>
-          <img
-            src="/top/IMG_7683.jpeg?v=20260829-1555"
-            alt="今日の注目！ 一果AI イン逃げ予想"
-            className={styles.ichikaBannerImage}
-          />
+          <img src="/top/IMG_7683.jpeg?v=20260829-1555" alt="今日の注目！ 一果AI イン逃げ予想" className={styles.ichikaBannerImage} />
           <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
       ) : (
@@ -364,34 +323,29 @@ export default function CharacterAiRoomPanel() {
               );
             })}
           </div>
-          {character !== "hatsune" ? (
-            <div
-              className={styles.moreRow}
-              style={{ justifyContent: "center", marginTop: 12, marginBottom: 6 }}
+          <div className={styles.moreRow} style={{ justifyContent: "center", marginTop: 12, marginBottom: 6 }}>
+            <a
+              href="/races"
+              style={{
+                minWidth: 180,
+                justifyContent: "center",
+                padding: "10px 22px",
+                border: "2px solid #0f4c81",
+                borderRadius: 999,
+                background: "#fff",
+                boxShadow: "0 4px 12px rgba(15,76,129,.10)",
+                fontSize: 14,
+              }}
             >
-              <a
-                href="/races"
-                style={{
-                  minWidth: 180,
-                  justifyContent: "center",
-                  padding: "10px 22px",
-                  border: "2px solid #0f4c81",
-                  borderRadius: 999,
-                  background: "#fff",
-                  boxShadow: "0 4px 12px rgba(15,76,129,.10)",
-                  fontSize: 14,
-                }}
-              >
-                出走表を見る
-              </a>
-            </div>
-          ) : null}
+              出走表を見る
+            </a>
+          </div>
         </>
       ) : (
         <div className={styles.empty}>本日のAI予想は準備中です。</div>
       )}
 
-      {character !== "hatsune" ? performance : null}
+      {performance}
     </section>
   ) : null;
 
@@ -413,7 +367,6 @@ export default function CharacterAiRoomPanel() {
   return (
     <>
       {mount ? createPortal(panel, mount) : null}
-      {performanceMount && character === "hatsune" ? createPortal(performance, performanceMount) : null}
       {researchMount ? createPortal(research, researchMount) : null}
     </>
   );
