@@ -51,7 +51,7 @@ export default function HatsuneNewsPreview({ news = [] }) {
     <section className={styles.wrap}>
       <div className={styles.bannerHeading}>
         <img
-          src="/top/IMG_7840.jpeg?v=20260831-2214"
+          src="/top/IMG_7847.jpeg?v=20260831-2321"
           alt="女子ボートNEWS"
           className={styles.bannerImage}
         />
