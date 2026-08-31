@@ -182,6 +182,46 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
   background: #d34f8c;
 }
 
+/* Robust fallback: carousel works even before the JS helper adds .ichikaLabSection. */
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="一果ラボ"]),
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="イン逃げラボ"]) {
+  padding: 0 0 14px !important;
+}
+
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="一果ラボ"]) .labList,
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="イン逃げラボ"]) .labList {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 18px 16px 8px !important;
+  grid-template-columns: none !important;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="一果ラボ"]) .labList::-webkit-scrollbar,
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="イン逃げラボ"]) .labList::-webkit-scrollbar {
+  display: none;
+}
+
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="一果ラボ"]) .labItem,
+.ichikaPage .sectionCard:has(.sectionTitleRow img[alt="イン逃げラボ"]) .labItem {
+  flex: 0 0 86% !important;
+  width: 86% !important;
+  min-width: 86% !important;
+  max-width: 86% !important;
+  scroll-snap-align: start;
+}
+
 @media (max-width: 760px) {
   .ichikaPage .sectionCard,
   section[aria-label="一果 AI予想"],
@@ -199,7 +239,9 @@ html body .ichikaPage section:has(img[alt="一果アラート 隠れイン理論
     margin: 0 -14px 0 !important;
   }
 
-  .ichikaPage .ichikaLabSection .labItem {
+  .ichikaPage .ichikaLabSection .labItem,
+  .ichikaPage .sectionCard:has(.sectionTitleRow img[alt="一果ラボ"]) .labItem,
+  .ichikaPage .sectionCard:has(.sectionTitleRow img[alt="イン逃げラボ"]) .labItem {
     flex-basis: 88% !important;
     width: 88% !important;
     min-width: 88% !important;
