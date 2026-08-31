@@ -49,16 +49,12 @@ export default function HatsuneNewsPreview({ news = [] }) {
 
   return (
     <section className={styles.wrap}>
-      <div className={styles.headingRow}>
-        <div>
-          <span className={styles.kicker}>HATSUNE</span>
-          <h2>女子ボートNEWS</h2>
-          <p>今日の結果と、明日の注目情報をひとまとめ。</p>
-        </div>
-
-        <Link href="/hatsune/news" className={styles.moreTop}>
-          一覧を見る
-        </Link>
+      <div className={styles.bannerHeading}>
+        <img
+          src="/top/IMG_7840.jpeg?v=20260831-2214"
+          alt="女子ボートNEWS"
+          className={styles.bannerImage}
+        />
       </div>
 
       {previewNews.length > 0 ? (
