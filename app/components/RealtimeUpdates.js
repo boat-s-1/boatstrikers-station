@@ -6,6 +6,7 @@ import HatsuneMediaPreview from "../hatsune/HatsuneMediaPreview";
 import { getHatsuneNews } from "../hatsune/newsData";
 import IchikaEscapeSurgePanel from "./IchikaEscapeSurgePanel";
 import IchikaAlertPanel from "./IchikaAlertPanel";
+import HatsuneAlertPanel from "./HatsuneAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
 
 const KIND_META = {
@@ -83,6 +84,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
         <HatsuneSchedulePreview />
         <HatsuneNewsPreview news={hatsuneNews} />
         <HatsuneMediaPreview />
+        <HatsuneAlertPanel />
       </>
     );
   }
