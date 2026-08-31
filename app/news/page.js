@@ -25,14 +25,12 @@ function bucket(item) {
   const c = String(item?.category || "").toLowerCase();
   const source = String(item?.source_name || "");
 
-  // 具体的なニュース種別を最優先。BoatStrikers配信でも結果やモーター記事は専用タブへ送る。
   if (["result", "win"].includes(c) || /結果を更新|レース結果|払戻|着順|優勝(?:した|を飾|決定|達成)|優出決定|V達成|初優勝|レース後/.test(t)) return "result";
-  if (["motor", "tomorrow"].includes(c) || /明日|翌日|あす|注目レース|高モーター|モーター|機力|展示|2連対率|優勝戦前|開催初日|初日注目/.test(t)) return "focus";
   if (c === "grade" || /\bSG\b|\bG1\b|GⅠ|\bG2\b|GⅡ|グランプリ|周年記念|グレードレース/.test(t)) return "grade";
   if (c === "women" || /女子戦|女子レーサー|ヴィーナス|オールレディース|レディース|クイーンズ|女子ボート/.test(t)) return "women";
   if (c === "suijinsai" || /水神祭|昇級|A1昇格|A2昇格|インタビュー|トークショー|結婚|引退|復帰|記録達成|選手特集|レーサー特集/.test(t)) return "racer";
+  if (["motor", "tomorrow"].includes(c) || /明日|翌日|あす|注目レース|高モーター|モーター|機力|展示|2連対率|優勝戦前|開催初日|初日注目/.test(t)) return "focus";
 
-  // 独自記事は、上の専用カテゴリに当てはまらないBoatStrikers独自制作だけ。
   if (/BoatStrikers AI編集部|BoatStrikers編集部|BSオリジナル/i.test(source) || /BoatStrikers独自|独自分析|独自記事|AI分析|データ研究/.test(t)) return "bs";
   return "all";
 }
