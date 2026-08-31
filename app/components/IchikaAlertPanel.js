@@ -179,7 +179,7 @@ function PerformanceCard({ label, performance, tone }) {
         }}
       >
         {performance.finished > 0
-          ? `${performance.hits}/${performance.finished}R 的中${pending > 0 ? `（${pending}R結果待ち）` : ""}`
+          ? `${performance.hits}/${performance.finished}R${pending > 0 ? `（${pending}R結果待ち）` : ""}`
           : pending > 0 ? `${pending}R結果待ち` : "結果データなし"}
       </small>
       <small style={{ display: "block", marginTop: 4, color: "#95a0af", fontWeight: 700, fontSize: 10 }}>
