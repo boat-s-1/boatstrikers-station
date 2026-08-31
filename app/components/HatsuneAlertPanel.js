@@ -59,12 +59,9 @@ export default async function HatsuneAlertPanel(){
   const [todayRows,yRows,allRows]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
   const [yPerf,allPerf]=await Promise.all([getPerformance(supabase,yRows),getPerformance(supabase,allRows)]);
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(101,56,122,.10)",border:"2px solid #bb79d8"}}>
-    <div style={{background:"linear-gradient(135deg,#fff4fa 0%,#f5edff 100%)",borderBottom:"1px solid #ead7f5"}}>
-      <img src="/top/IMG_7867.jpeg?v=20260901-0445" alt="女子イン崩れ理論" style={{display:"block",width:"100%",height:"auto"}} />
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,padding:"11px 14px 12px"}}>
-        <div style={{fontSize:12,fontWeight:800,color:"#74577d"}}>女子戦で②の展示・1周が①を明確に上回るレースを検知</div>
-        <span style={{flex:"0 0 auto",padding:"6px 9px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
-      </div>
+    <div style={{position:"relative",overflow:"hidden",background:"#fff4fa",borderBottom:"1px solid #ead7f5"}}>
+      <img src="/top/IMG_7873.jpeg?v=20260901-0506" alt="女子イン崩れ理論" style={{display:"block",width:"100%",height:"auto",margin:0,borderRadius:0}} />
+      <span style={{position:"absolute",top:10,right:10,padding:"7px 10px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
     </div>
     <div style={{padding:"15px 14px 8px"}}>
       <div style={{marginBottom:8,fontSize:13,fontWeight:900,color:"#17345c"}}>アラート本数</div>
