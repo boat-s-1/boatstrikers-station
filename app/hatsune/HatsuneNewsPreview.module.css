@@ -1,10 +1,28 @@
 .wrap {
-  margin: 18px 14px 22px;
-  padding: 18px;
-  border-radius: 24px;
+  margin: 18px auto 22px;
+  max-width: 1120px;
+  padding: 20px;
+  border-radius: 22px;
+  overflow: hidden;
   background: linear-gradient(180deg, #fff 0%, #fbf8ff 100%);
   border: 1px solid #eadff7;
   box-shadow: 0 10px 30px rgba(87, 47, 128, 0.08);
+}
+
+.bannerHeading {
+  width: calc(100% + 40px);
+  margin: -20px -20px 16px;
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+  background: #f6efff;
+}
+
+.bannerImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0;
 }
 
 .headingRow {
@@ -202,9 +220,15 @@
 
 @media (max-width: 640px) {
   .wrap {
-    margin-inline: 10px;
-    padding: 15px;
+    margin: 14px 10px 22px;
+    padding: 16px;
     border-radius: 20px;
+  }
+
+  .bannerHeading {
+    width: calc(100% + 32px);
+    margin: -16px -16px 14px;
+    border-radius: 18px 18px 0 0;
   }
 
   .newsItem {
