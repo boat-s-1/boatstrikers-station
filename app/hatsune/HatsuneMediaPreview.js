@@ -15,13 +15,13 @@ export default async function HatsuneMediaPreview() {
 
   return (
     <section className={styles.section}>
-      <div className={styles.heading}>
-        <div>
-          <span>OFFICIAL YOUTUBE</span>
-          <h2>🌸 女子ボート関連動画</h2>
-        </div>
-        <Link href="/news/media">MEDIAを見る →</Link>
-      </div>
+      <Link href="/news/media" className={styles.bannerHeading}>
+        <img
+          src="/top/IMG_7863.jpeg?v=20260901-0445"
+          alt="女子ボート関連動画"
+          className={styles.bannerImage}
+        />
+      </Link>
 
       <div className={styles.list}>
         {videos.map((item) => (
@@ -38,6 +38,10 @@ export default async function HatsuneMediaPreview() {
           </Link>
         ))}
       </div>
+
+      <Link href="/news/media" className={styles.moreButton}>
+        女子ボート関連動画をもっと見る →
+      </Link>
     </section>
   );
 }
