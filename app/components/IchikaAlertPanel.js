@@ -359,7 +359,7 @@ export default async function IchikaAlertPanel() {
 
       <div style={{ padding: "0 14px 16px" }}>
         <Link
-          href="/members"
+          href="/members/ichika-hidden-escape"
           style={{
             display: "block",
             textAlign: "center",
@@ -372,7 +372,7 @@ export default async function IchikaAlertPanel() {
             fontSize: 14,
           }}
         >
-          LINEで成立時に通知を受け取る
+          LINE通知を設定する
         </Link>
       </div>
     </section>
