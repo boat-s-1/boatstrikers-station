@@ -136,6 +136,7 @@ function AlertCountCard({ label, count, tone }) {
 
 function PerformanceCard({ label, performance, tone }) {
   const isPink = tone === "pink";
+  const pending = Math.max(0, Number(performance.matched || 0) - Number(performance.finished || 0));
   return (
     <div
       style={{
@@ -178,8 +179,11 @@ function PerformanceCard({ label, performance, tone }) {
         }}
       >
         {performance.finished > 0
-          ? `${performance.hits} / ${performance.finished}R 的中`
-          : "結果データなし"}
+          ? `${performance.hits} / ${performance.finished}R 的中${pending > 0 ? `（${pending}R結果待ち）` : ""}`
+          : pending > 0 ? `${pending}R結果待ち` : "結果データなし"}
+      </small>
+      <small style={{ display: "block", marginTop: 4, color: "#95a0af", fontWeight: 700, fontSize: 10 }}>
+        結果確定 {performance.finished}/{performance.matched}R
       </small>
     </div>
   );
