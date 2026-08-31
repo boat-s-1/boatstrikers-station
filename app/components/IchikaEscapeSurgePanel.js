@@ -73,6 +73,23 @@ function CountCard({ label, count, tone }) {
   );
 }
 
+function PerformanceCard({ label, perf }) {
+  const pending = Math.max(0, Number(perf.matched || 0) - Number(perf.finished || 0));
+  return (
+    <div style={{ padding: "13px 10px", borderRadius: 17, background: "#f7fbff", border: "1px solid #d8e9f6", textAlign: "center" }}>
+      <span style={{ fontSize: 12, fontWeight: 900, color: "#1266b3" }}>{label} 1着率</span>
+      <strong style={{ display: "block", marginTop: 3, fontSize: 28, color: "#1266b3" }}>{perf.hitRate == null ? "—%" : `${perf.hitRate.toFixed(1)}%`}</strong>
+      <small style={{ display: "block", color: "#718096", fontWeight: 800 }}>
+        {perf.finished ? `${perf.hits}/${perf.finished}R` : "結果待ち"}
+        {pending > 0 ? `（${pending}R結果待ち）` : ""}
+      </small>
+      <small style={{ display: "block", marginTop: 4, color: "#95a0af", fontWeight: 700, fontSize: 10 }}>
+        結果確定 {perf.finished}/{perf.matched}R
+      </small>
+    </div>
+  );
+}
+
 export default async function IchikaEscapeSurgePanel() {
   const supabase = getSupabase();
   const today = jstDateOffset(0);
@@ -125,13 +142,8 @@ export default async function IchikaEscapeSurgePanel() {
         </div>
 
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[["昨日", yPerf], ["全期間", allPerf]].map(([label, perf]) => (
-            <div key={label} style={{ padding: "13px 10px", borderRadius: 17, background: "#f7fbff", border: "1px solid #d8e9f6", textAlign: "center" }}>
-              <span style={{ fontSize: 12, fontWeight: 900, color: "#1266b3" }}>{label} 1着率</span>
-              <strong style={{ display: "block", marginTop: 3, fontSize: 28, color: "#1266b3" }}>{perf.hitRate == null ? "—%" : `${perf.hitRate.toFixed(1)}%`}</strong>
-              <small style={{ color: "#718096", fontWeight: 800 }}>{perf.finished ? `${perf.hits}/${perf.finished}R` : "結果待ち"}</small>
-            </div>
-          ))}
+          <PerformanceCard label="昨日" perf={yPerf} />
+          <PerformanceCard label="全期間" perf={allPerf} />
         </div>
       </div>
 
