@@ -15,6 +15,7 @@ function jstDateOffset(offset=0){
 }
 function formatDate(v){return v?String(v).replaceAll("-","/"):"—";}
 function formatTime(v){return v?String(v).slice(0,5):"—";}
+function raceKey(r){return `${r.race_date}-${Number(r.course_code)}-${Number(r.race_no)}`;}
 
 async function getRows(supabase,date=null){
   if(!supabase)return [];
@@ -25,10 +26,28 @@ async function getRows(supabase,date=null){
   const {data,error}=await q;
   return error?[]:(data||[]);
 }
-function getPerformance(rows){
-  const finished=(rows||[]).filter(r=>r.result_synced_at&&Number(r.result_rank)>0);
-  const hits=finished.filter(r=>Number(r.result_rank)===1).length;
-  return {matched:(rows||[]).length,finished:finished.length,hits,hitRate:finished.length?hits/finished.length*100:null};
+
+async function enrichBoat5Results(supabase,rows){
+  if(!supabase||!rows?.length)return rows||[];
+  const dates=rows.map(r=>r.race_date).filter(Boolean).sort();
+  const minDate=dates[0],maxDate=dates[dates.length-1];
+  const {data,error}=await supabase.from("bs_race_entries")
+    .select("race_date,course_code,race_no,boat_no,arrival_order")
+    .eq("boat_no",5)
+    .gte("race_date",minDate)
+    .lte("race_date",maxDate);
+  if(error)return rows.map(r=>({...r,boat5_result_rank:null}));
+  const map=new Map((data||[]).map(r=>[raceKey(r),Number(r.arrival_order)]));
+  return rows.map(r=>({...r,boat5_result_rank:map.get(raceKey(r))??null}));
+}
+
+function getPerformance(rows,boatNo=4){
+  const list=rows||[];
+  const finished=boatNo===5
+    ? list.filter(r=>Number.isFinite(Number(r.boat5_result_rank))&&Number(r.boat5_result_rank)>0)
+    : list.filter(r=>r.result_synced_at&&Number(r.result_rank)>0);
+  const hits=finished.filter(r=>Number(boatNo===5?r.boat5_result_rank:r.result_rank)===1).length;
+  return {matched:list.length,finished:finished.length,hits,hitRate:finished.length?hits/finished.length*100:null};
 }
 function CountCard({label,count,blue=false}){
   return <div style={{padding:"13px 8px 12px",borderRadius:16,background:blue?"linear-gradient(180deg,#fff7e8,#fff)":"linear-gradient(180deg,#fffbed,#fff)",border:`1px solid ${blue?"#f3d99a":"#f5e3a8"}`,textAlign:"center"}}>
@@ -36,11 +55,12 @@ function CountCard({label,count,blue=false}){
     <strong style={{display:"block",marginTop:5,fontSize:28,lineHeight:1,color:"#17345c"}}>{count}<small style={{fontSize:14,marginLeft:2}}>件</small></strong>
   </div>;
 }
-function PerfCard({label,perf}){
+function PerfCard({label,perf,boatNo=4}){
   const pending=Math.max(0,perf.matched-perf.finished);
-  return <div style={{padding:"13px 10px",borderRadius:17,background:"#fffaf0",border:"1px solid #f1dfb4",textAlign:"center"}}>
-    <span style={{fontSize:12,fontWeight:900,color:"#a96b00"}}>{label} 4号艇1着率</span>
-    <strong style={{display:"block",marginTop:3,fontSize:28,color:"#a96b00"}}>{perf.hitRate==null?"—%":`${perf.hitRate.toFixed(1)}%`}</strong>
+  const isFive=boatNo===5;
+  return <div style={{padding:"13px 10px",borderRadius:17,background:isFive?"#fff7e9":"#fffaf0",border:`1px solid ${isFive?"#efd29a":"#f1dfb4"}`,textAlign:"center"}}>
+    <span style={{fontSize:12,fontWeight:900,color:isFive?"#9a5f00":"#a96b00"}}>{label} {boatNo}号艇1着率</span>
+    <strong style={{display:"block",marginTop:3,fontSize:28,color:isFive?"#9a5f00":"#a96b00"}}>{perf.hitRate==null?"—%":`${perf.hitRate.toFixed(1)}%`}</strong>
     <small style={{display:"block",color:"#718096",fontWeight:800}}>{perf.finished?`${perf.hits}/${perf.finished}R`:"結果待ち"}{pending>0?`（${pending}R結果待ち）`:""}</small>
     <small style={{display:"block",marginTop:4,color:"#95a0af",fontWeight:700,fontSize:10}}>結果確定 {perf.finished}/{perf.matched}R</small>
   </div>;
@@ -49,8 +69,14 @@ function PerfCard({label,perf}){
 export default async function KiinaAlertPanel(){
   const supabase=getSupabase();
   const today=jstDateOffset(0),yesterday=jstDateOffset(-1);
-  const [todayRows,yRows,allRows]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
-  const yPerf=getPerformance(yRows),allPerf=getPerformance(allRows);
+  const [todayBase,yBase,allBase]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
+  const [todayRows,yRows,allRows]=await Promise.all([
+    enrichBoat5Results(supabase,todayBase),
+    enrichBoat5Results(supabase,yBase),
+    enrichBoat5Results(supabase,allBase),
+  ]);
+  const yPerf4=getPerformance(yRows,4),allPerf4=getPerformance(allRows,4);
+  const yPerf5=getPerformance(yRows,5),allPerf5=getPerformance(allRows,5);
 
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(141,105,20,.10)",border:"2px solid #e8bc48"}}>
     <div style={{position:"relative",padding:"18px 18px 16px",background:"linear-gradient(135deg,#fff0a8 0%,#ffe28b 45%,#fff 100%)",borderBottom:"1px solid #f1ddb0"}}>
@@ -65,7 +91,10 @@ export default async function KiinaAlertPanel(){
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
         <CountCard label="本日" count={todayRows.length}/><CountCard label="昨日" count={yRows.length}/><CountCard label="全期間" count={allRows.length} blue/>
       </div>
-      <div style={{marginTop:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><PerfCard label="昨日" perf={yPerf}/><PerfCard label="全期間" perf={allPerf}/></div>
+      <div style={{marginTop:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <PerfCard label="昨日" perf={yPerf4} boatNo={4}/><PerfCard label="全期間" perf={allPerf4} boatNo={4}/>
+        <PerfCard label="昨日" perf={yPerf5} boatNo={5}/><PerfCard label="全期間" perf={allPerf5} boatNo={5}/>
+      </div>
     </div>
 
     <div style={{padding:"8px 14px 2px",fontSize:13,fontWeight:900,color:"#17345c"}}>今日のアラート一覧</div>
