@@ -7,6 +7,7 @@ import { getHatsuneNews } from "../hatsune/newsData";
 import IchikaEscapeSurgePanel from "./IchikaEscapeSurgePanel";
 import IchikaAlertPanel from "./IchikaAlertPanel";
 import HatsuneAlertPanel from "./HatsuneAlertPanel";
+import KiinaAlertPanel from "./KiinaAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
 
 const KIND_META = {
@@ -93,7 +94,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
   const isCompact = compact || target === "races";
   const visibleItems = isCompact ? items.slice(0, 1) : items;
 
-  return (
+  const realtimeSection = (
     <section className={`${styles.section} ${isCompact ? styles.compact : ""}`}>
       <div className={styles.heading}>
         <div>
@@ -150,4 +151,15 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
       )}
     </section>
   );
+
+  if (target === "kiina") {
+    return (
+      <>
+        <KiinaAlertPanel />
+        {realtimeSection}
+      </>
+    );
+  }
+
+  return realtimeSection;
 }
