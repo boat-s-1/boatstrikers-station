@@ -223,8 +223,8 @@ export default function CharacterAiRoomPanel() {
         {character !== "ichika" ? <small>結果確定分のみ</small> : null}
       </div>
 
-      {character === "ichika" ? (() => {
-        const typeKey = "ichika_escape_best10";
+      {(character === "ichika" || character === "kiina") ? (() => {
+        const typeKey = character === "ichika" ? "ichika_escape_best10" : "kiina_boat5_best5";
         const allStat = stats.find((item) => item.rankingType === typeKey);
         const yesterdayStat = yesterdayStats.find((item) => item.rankingType === typeKey);
         const allPredictions = Number(allStat?.predictions || 0);
@@ -252,10 +252,7 @@ export default function CharacterAiRoomPanel() {
         );
       })() : (
         <div className={styles.statGrid}>
-          {(character === "hatsune"
-            ? ["hatsune_dominant_best3", "hatsune_risky_best3"]
-            : ["kiina_boat5_best5"]
-          ).map((typeKey) => {
+          {["hatsune_dominant_best3", "hatsune_risky_best3"].map((typeKey) => {
             const stat = stats.find((item) => item.rankingType === typeKey);
             const type = TYPE_META[typeKey];
             const predictions = Number(stat?.predictions || 0);
