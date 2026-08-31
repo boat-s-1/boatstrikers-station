@@ -115,25 +115,18 @@ export default async function IchikaEscapeSurgePanel() {
 
   return (
     <section style={{ margin: "18px 14px", borderRadius: "24px 24px 0 0", overflow: "hidden", background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.10)", border: "2px solid #ff9a3d" }}>
-      <div style={{ position: "relative", padding: "18px 18px 16px", background: "linear-gradient(135deg,#ff9b33 0%,#ffcf4a 42%,#fff4c9 100%)", borderBottom: "1px solid rgba(255,154,61,.35)" }}>
-        <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".08em", color: "#a34a00" }}>🔥 今日の一果アラート</div>
-        <h2 style={{ margin: "4px 0 2px", fontSize: 25, color: "#17345c", lineHeight: 1.15 }}>イン逃げ急上昇アラート</h2>
-        <div style={{ fontSize: 12, fontWeight: 800, color: "#7a5524" }}>展示1位＋一周1位でイン逃げ期待が急上昇</div>
-        <span style={{ position: "absolute", top: 13, right: 12, padding: "7px 10px", borderRadius: 999, background: "rgba(255,255,255,.92)", color: "#526079", fontSize: 12, fontWeight: 900 }}>
+      <div style={{ position: "relative", overflow: "hidden", background: "#f7fbff", borderBottom: "1px solid rgba(255,154,61,.35)" }}>
+        <img
+          src="/top/IMG_7810.jpeg?v=20260831-1755"
+          alt="イン逃げ急上昇アラート"
+          style={{ display: "block", width: "100%", height: "auto", margin: 0, borderRadius: 0 }}
+        />
+        <span style={{ position: "absolute", top: 10, right: 10, padding: "7px 10px", borderRadius: 999, background: "rgba(255,255,255,.92)", color: "#526079", fontSize: 12, fontWeight: 900 }}>
           {formatDate(today)}
         </span>
       </div>
 
       <div style={{ padding: "15px 14px 8px" }}>
-        <div style={{ padding: "13px 14px", borderRadius: 17, background: "linear-gradient(180deg,#fff9e9,#fff)", border: "1px solid #ffe2a7", marginBottom: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 900, color: "#a45a00" }}>過去データ研究値</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
-            <strong style={{ fontSize: 30, color: "#ef6c00" }}>約+15pt</strong>
-            <span style={{ fontSize: 13, fontWeight: 800, color: "#526079" }}>51.70% → 66.36%</span>
-          </div>
-          <div style={{ marginTop: 3, fontSize: 11, color: "#718096" }}>※過去集計の比較値。各レースの的中を保証するものではありません。</div>
-        </div>
-
         <div style={{ marginBottom: 8, fontSize: 13, fontWeight: 900, color: "#17345c" }}>アラート本数</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
           <CountCard label="本日" count={alerts.length} />
@@ -185,7 +178,7 @@ export default async function IchikaEscapeSurgePanel() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
                 <strong style={{ fontSize: 20, color: "#17345c" }}>{a.course_name || `${a.course_code}場`} {a.race_no}R</strong>
-                <span style={{ padding: "6px 9px", borderRadius: 999, background: "#fff0db", color: "#e56a00", fontSize: 12, fontWeight: 900 }}>約+15pt</span>
+                <span style={{ padding: "6px 9px", borderRadius: 999, background: "#fff0db", color: "#e56a00", fontSize: 12, fontWeight: 900 }}>条件成立</span>
               </div>
               <div style={{ marginTop: 9, display: "flex", flexWrap: "wrap", gap: 7, fontSize: 12, fontWeight: 800, color: "#526079" }}>
                 <span style={{ padding: "6px 9px", borderRadius: 10, background: "#f3f6fa" }}>① 展示1位 {a.exhibition_time ?? "—"}</span>
