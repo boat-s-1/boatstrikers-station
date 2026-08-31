@@ -149,9 +149,40 @@ export default async function IchikaEscapeSurgePanel() {
 
       <div style={{ padding: "8px 14px 2px", fontSize: 13, fontWeight: 900, color: "#17345c" }}>今日のアラート一覧</div>
       {alerts.length ? (
-        <div style={{ padding: 14, display: "grid", gap: 10 }}>
+        <div
+          className="ichikaEscapeSurgeAlertRail"
+          style={{
+            padding: "14px 14px 8px",
+            display: "flex",
+            flexWrap: "nowrap",
+            gap: 12,
+            overflowX: "auto",
+            overflowY: "hidden",
+            width: "100%",
+            maxWidth: "100%",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehaviorX: "contain",
+          }}
+        >
           {alerts.map((a) => (
-            <article key={a.id} style={{ border: "1px solid #ffe0b5", borderRadius: 17, padding: 14, background: "#fffdf8" }}>
+            <article
+              key={a.id}
+              className="ichikaEscapeSurgeAlertCard"
+              style={{
+                flex: "0 0 88%",
+                width: "88%",
+                minWidth: "88%",
+                maxWidth: "88%",
+                scrollSnapAlign: "start",
+                scrollSnapStop: "always",
+                border: "1px solid #ffe0b5",
+                borderRadius: 17,
+                padding: 14,
+                background: "#fffdf8",
+                boxSizing: "border-box",
+              }}
+            >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
                 <strong style={{ fontSize: 20, color: "#17345c" }}>{a.course_name || `${a.course_code}場`} {a.race_no}R</strong>
                 <span style={{ padding: "6px 9px", borderRadius: 999, background: "#fff0db", color: "#e56a00", fontSize: 12, fontWeight: 900 }}>約+15pt</span>
