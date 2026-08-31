@@ -7,7 +7,7 @@ import { validShimonosekiWakamatsuRace } from '../../../../lib/shimonosekiWakama
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 15;
+export const maxDuration = 25;
 let lastRequest = 0;
 
 function validCurrentDayVenue(race) {
