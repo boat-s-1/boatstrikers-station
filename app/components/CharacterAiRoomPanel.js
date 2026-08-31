@@ -284,6 +284,11 @@ export default function CharacterAiRoomPanel() {
           <img src="/top/IMG_7683.jpeg?v=20260829-1555" alt="今日の注目！ 一果AI イン逃げ予想" className={styles.ichikaBannerImage} />
           <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
+      ) : character === "hatsune" ? (
+        <div className={styles.ichikaBannerHeading}>
+          <img src="/top/IMG_7827.jpeg?v=20260831-2113" alt="今日の注目 初音AI予想" className={styles.ichikaBannerImage} />
+          <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
+        </div>
       ) : (
         <div className={styles.heading}>
           <div>
@@ -292,7 +297,6 @@ export default function CharacterAiRoomPanel() {
             <p>{meta.subtitle}</p>
           </div>
           <div className={styles.headingActions}>
-            {character === "hatsune" ? <a href="/races">もっと見る →</a> : null}
             <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
           </div>
         </div>
