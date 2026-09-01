@@ -283,6 +283,16 @@ export default async function Home() {
 
       </section>
 
+      <section className="homeMediaIntro" aria-labelledby="home-media-intro-title">
+        <span>BOAT RACE INFORMATION MEDIA</span>
+        <h1 id="home-media-intro-title">ボートレースを、もっと楽しく、もっと分かりやすく。</h1>
+        <p>
+          BoatStrikersは、全国24場の水面特徴、展示データ、選手情報、
+          女子戦ニュース、初心者向け講座などを発信するボートレース情報メディアです。
+          一果・初音・キイナの3人と一緒に、レースの見方やデータの活用方法を分かりやすく紹介します。
+        </p>
+      </section>
+
       <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
       <HomeRaceInfo
@@ -290,6 +300,44 @@ export default async function Home() {
         raceDate={raceData.raceDate}
         realtimeLimit={3}
       />
+
+      <section className="homeMediaGuide" aria-labelledby="home-media-guide-title">
+        <div className="homeMediaGuideHeading">
+          <span>LEARN &amp; DISCOVER</span>
+          <h2 id="home-media-guide-title">ニュース・攻略・データを読む</h2>
+          <p>予想を見る前に知っておきたい情報を、BoatStrikersが分かりやすくまとめています。</p>
+        </div>
+        <div className="homeMediaGuideGrid">
+          <a href="/news" className="homeMediaGuideCard homeMediaGuideCard--news">
+            <span className="homeMediaGuideIcon" aria-hidden="true">📰</span>
+            <small>BOATSTRIKERS NEWS</small>
+            <h3>最新ニュース</h3>
+            <p>女子戦、グレードレース、選手、モーターなどの注目情報。</p>
+            <b>ニュースを見る <i>›</i></b>
+          </a>
+          <a href="/ichika-sensei" className="homeMediaGuideCard homeMediaGuideCard--beginner">
+            <span className="homeMediaGuideIcon" aria-hidden="true">📖</span>
+            <small>FOR BEGINNERS</small>
+            <h3>はじめての方へ</h3>
+            <p>レースの基本や展示の見方を、一果センセーがやさしく解説。</p>
+            <b>初心者講座を見る <i>›</i></b>
+          </a>
+          <a href="/library/stadiums" className="homeMediaGuideCard homeMediaGuideCard--stadiums">
+            <span className="homeMediaGuideIcon" aria-hidden="true">🌊</span>
+            <small>24 STADIUMS</small>
+            <h3>全国24場攻略</h3>
+            <p>水面、風、コース別傾向など、全国24場の特徴を場別に紹介。</p>
+            <b>24場攻略を見る <i>›</i></b>
+          </a>
+          <a href="/library" className="homeMediaGuideCard homeMediaGuideCard--research">
+            <span className="homeMediaGuideIcon" aria-hidden="true">📊</span>
+            <small>DATA &amp; RESEARCH</small>
+            <h3>独自研究・データ</h3>
+            <p>イン逃げ、女子戦、穴狙いなどの研究記事とバックナンバー。</p>
+            <b>研究記事を読む <i>›</i></b>
+          </a>
+        </div>
+      </section>
 
       
 
@@ -352,6 +400,7 @@ export default async function Home() {
       <span aria-hidden="true">📊</span>
       <strong>今月の予想実績は集計中です</strong>
       <p>予想実績が登録されると、ここに自動で表示されます。</p>
+      <a href="/library" className="resultEmptyLink">最新の攻略記事・データを見る ›</a>
     </div>
   ) : (
     <>
