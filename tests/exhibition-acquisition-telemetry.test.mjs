@@ -20,4 +20,13 @@ function client(error=null,throws=false) {
 test('records and returns exact original result, never runs other RPCs',async()=>{const c=client(),result={ok:true,rows:[{boatNo:1}],sourceKind:'official'};assert.equal(await trackExhibitionFetch(c,'ichika',race,async()=>result),result);assert.equal(c.calls[0].name,'bs_record_exhibition_acquisition');assert.equal(c.calls[0].args.p_record.reason_code,'ready');});
 test('logging failure cannot stop collection, error logs are fixed safe strings',async()=>{for(const c of [client({message:'SECRET'}),client(null,true)]) {const logs=[],result={ok:false,error:'timeout'};assert.equal(await trackExhibitionFetch(c,'hatsune',race,async()=>result,{}, {warn:m=>logs.push(m)}),result);assert.deepEqual(logs,['exhibition_acquisition_record_failed']);}});
 test('fetch exceptions are recorded then rethrown unchanged',async()=>{const c=client(),error=new Error('fetch failed');await assert.rejects(trackExhibitionFetch(c,'kiina',race,async()=>{throw error;}),e=>e===error);assert.equal(c.calls[0].args.p_record.reason_code,'network');});
-test('all three production consumers tracked, no notification logic in telemetry',()=>{for(const [path,consumer] of [['exhibition-alerts','kiina'],['ichika-hidden-escape','ichika'],['hatsune-womens-inner-break','hatsune']]) {const code=fs.readFileSync(new URL(`../app/api/cron/${path}/route.js`,import.meta.url),'utf8');assert.ok(code.includes(`fetchTrackedOriginalTenji(supabase,"${consumer}",`));assert.equal(code.includes('await fetchBestOriginalTenji('),false);} });
+test('one collector records acquisition; theory crons consume the shared database',()=>{
+ const collector=fs.readFileSync(new URL('../app/api/cron/exhibition-alerts/route.js',import.meta.url),'utf8');
+ assert.ok(collector.includes('fetchTrackedOriginalTenji(supabase,"kiina",'));
+ assert.equal(collector.includes('await fetchBestOriginalTenji('),false);
+ for(const path of ['ichika-hidden-escape','hatsune-womens-inner-break']){
+  const code=fs.readFileSync(new URL(`../app/api/cron/${path}/route.js`,import.meta.url),'utf8');
+  assert.equal(code.includes('fetchTrackedOriginalTenji'),false);
+  assert.ok(code.includes('.rpc('));
+ }
+});
