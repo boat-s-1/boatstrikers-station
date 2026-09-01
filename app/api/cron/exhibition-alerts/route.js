@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
+import { persistOfficialExhibition } from "../../../../lib/officialExhibitionPersistence";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import {
   predictionToDatabaseRow,
@@ -132,25 +133,19 @@ export async function GET(request){
     const results=[];
     for(const race of targets){
       const source=await fetchTrackedOriginalTenji(supabase,"kiina",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
-      if(!source.ok){results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null});continue;}
-      const syncedAt=new Date().toISOString();
-      for(const row of source.rows){
-        const update={official_exhibition_source:source.source||"venue_official",official_exhibition_synced_at:syncedAt};
-        if(row.lapTime!==null&&row.lapTime!==undefined)update.official_lap=row.lapTime;
-        if(row.halfLapTime!==null&&row.halfLapTime!==undefined)update.official_half_lap=row.halfLapTime;
-        if(row.turnTime!==null&&row.turnTime!==undefined)update.official_turn=row.turnTime;
-        if(row.straightTime!==null&&row.straightTime!==undefined)update.official_straight=row.straightTime;
-        if(row.exhibitionTime!==null&&row.exhibitionTime!==undefined)update.official_exhibition_time=row.exhibitionTime;
-        if(row.exhibitionSt!==null&&row.exhibitionSt!==undefined)update.official_exhibition_st=row.exhibitionSt;
-        if(row.exhibitionSymbol!==undefined)update.official_exhibition_symbol=row.exhibitionSymbol||null;
-        if(row.exhibitionCourse!==null&&row.exhibitionCourse!==undefined)update.official_exhibition_course=row.exhibitionCourse;
-        const {error:updateError}=await supabase.from("bs_race_entries").update(update).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no).eq("boat_no",row.boatNo);if(updateError)throw updateError;
+      if(!source.ok){
+        // PC-KYOTEI may already have populated the shared entry rows. Evaluate those
+        // values even while an official page is unpublished or temporarily failing.
+        const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
+        results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null,pcFallbackEvaluated:true,inserted:Number(inserted||0)});continue;
       }
+      const persisted=await persistOfficialExhibition(supabase,race,source);
+      const syncedAt=persisted.syncedAt;
       const weatherUpdate=buildWeatherUpdate(source.weather,syncedAt);
       if(weatherUpdate){const {error:weatherError}=await supabase.from("bs_race_events").update(weatherUpdate).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no);if(weatherError)throw weatherError;}
       const liveAi=await generateLivePredictionForRace(supabase,race);
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,liveAi,inserted:Number(inserted||0)});
+      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,saved:persisted.saved,rosterVerified:persisted.rosterVerified,liveAi,inserted:Number(inserted||0)});
     }
     const line=await sendPendingLineAlerts(supabase,raceDate);
     return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
