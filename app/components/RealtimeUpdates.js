@@ -7,6 +7,7 @@ import { getHatsuneNews } from "../hatsune/newsData";
 import IchikaEscapeSurgePanel from "./IchikaEscapeSurgePanel";
 import IchikaAlertPanel from "./IchikaAlertPanel";
 import HatsuneAlertPanel from "./HatsuneAlertPanel";
+import HatsuneBoxAlertPanel from "./HatsuneBoxAlertPanel";
 import KiinaAlertPanel from "./KiinaAlertPanel";
 import styles from "./RealtimeUpdates.module.css";
 
@@ -86,6 +87,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
         <HatsuneNewsPreview news={hatsuneNews} />
         <HatsuneMediaPreview />
         <HatsuneAlertPanel />
+        <HatsuneBoxAlertPanel />
       </>
     );
   }
