@@ -56,7 +56,11 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           </>;
           const rowClass=`${preset?styles.hasIcon:""} ${ended?styles.past:""}`.trim();
           return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
-        }):<div className={styles.empty}>📅 本日の予定はありません</div>}
+        }):<div className={styles.empty}>
+          <strong>📅 本日の配信予定はありません</strong>
+          <span>初心者講座や全国24場攻略の最新記事をお楽しみください。</span>
+          <div><a href="/ichika-sensei">初心者講座</a><a href="/library/stadiums">24場攻略</a></div>
+        </div>}
       </div>
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
     </div>
