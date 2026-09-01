@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { VENUES, INVENTORY_DATE, diagnosticStatus } from '../../../../lib/exhibitionStatusCatalog';
+import { VENUES, INVENTORY_DATE, STAGES, diagnosticStatus } from '../../../../lib/exhibitionStatusCatalog';
 import styles from '../alerts.module.css';
 
 export default function ExhibitionStatus(){
@@ -24,12 +24,12 @@ export default function ExhibitionStatus(){
  return <main className={styles.page}><div className={styles.shell}>
   <Link className={styles.back} href="/admin/alerts">← アラート管理に戻る</Link>
   <header className={styles.hero}><span>OFFICIAL EXHIBITION / 24 VENUES</span><h1>24場の展示データ対応状況</h1><p>実装状況と、指定レースの取得結果を分けて確認します。</p></header>
-  <div className={styles.summary}>{['接続済み','検証用実装','既存取得経路','調査中'].map(stage=><span key={stage}>{stage} <strong>{VENUES.filter(v=>v.stage===stage).length}場</strong></span>)}</div>
+  <div className={styles.summary}>{STAGES.map(stage=><span key={stage}>{stage} <strong>{VENUES.filter(v=>v.stage===stage).length}場</strong></span>)}</div>
   <div className={styles.notice}>実装台帳：{INVENTORY_DATE}時点。「接続済み」は当日の展示公開や通知成功を保証しません。確認ボタンは読み取り専用で、LINE送信・DB保存はしません。取得結果はこの画面を開いている間だけ保持します。<br/>「対象項目なし」は確認済み取得元に直線がない場です。未確認・欠測・取得失敗とは区別しています。開催日程の自動判定は行いません。</div>
   <div className={styles.controls}>
    <label>開催日（日本時間）<input type="date" value={date} disabled={busy!==null} onChange={e=>setDate(e.target.value)}/></label>
    <label>レース<select value={race} disabled={busy!==null} onChange={e=>setRace(e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={i+1}>{i+1}R</option>)}</select></label>
-   <label>絞り込み<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">全24場</option><option value="checkable">個別確認できる場</option>{['接続済み','検証用実装','既存取得経路','調査中'].map(s=><option key={s}>{s}</option>)}</select></label>
+   <label>絞り込み<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">全24場</option><option value="checkable">個別確認できる場</option>{STAGES.map(s=><option key={s}>{s}</option>)}</select></label>
    <Link href="/admin/alerts/collection">オリ展更新時間・更新済R・収集元を見る →</Link>
   </div>
   <p role="status" aria-live="polite">{busy!==null?`${VENUES[busy-1].name}を確認中…`:`${shown.length}場を表示。1場ずつ確認できます。`}</p>
