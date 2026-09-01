@@ -33,6 +33,7 @@ export default function sitemap() {
   const staticPages = [
     { path: "", changeFrequency: "daily", priority: 1 },
     { path: "/races", changeFrequency: "daily", priority: 0.9 },
+    { path: "/news", changeFrequency: "daily", priority: 0.9 },
     { path: "/schedule", changeFrequency: "daily", priority: 0.8 },
     { path: "/results", changeFrequency: "daily", priority: 0.8 },
     { path: "/comic", changeFrequency: "weekly", priority: 0.8 },
@@ -52,6 +53,8 @@ export default function sitemap() {
     { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
     { path: "/disclaimer", changeFrequency: "yearly", priority: 0.4 },
     { path: "/contact", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/about", changeFrequency: "yearly", priority: 0.5 },
+    { path: "/sitemap", changeFrequency: "monthly", priority: 0.4 },
   ];
 
   const staticEntries = staticPages.map((page) => ({
