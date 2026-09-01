@@ -330,7 +330,7 @@ export default async function Home() {
             <p>女子戦、グレードレース、選手、モーターなどの注目情報。</p>
             <b>ニュースを見る <i>›</i></b>
           </a>
-          <a href="/ichika-sensei" className="homeMediaGuideCard homeMediaGuideCard--beginner">
+          <a href="/guide" className="homeMediaGuideCard homeMediaGuideCard--beginner">
             <span className="homeMediaGuideIcon" aria-hidden="true">📖</span>
             <small>FOR BEGINNERS</small>
             <h3>はじめての方へ</h3>
@@ -642,6 +642,7 @@ export default async function Home() {
         <h2>学ぶ・楽しむ</h2>
 
         <a href="/library">一果図書館</a>
+        <a href="/guide">ボートレース初心者ガイド</a>
         <a href="/library/stadiums">全国24場攻略</a>
         <a href="/ichika-sensei">教えて！一果センセー</a>
         <a href="/comic">ふなけん研究部</a>
