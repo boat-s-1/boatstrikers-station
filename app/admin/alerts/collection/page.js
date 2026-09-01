@@ -16,7 +16,7 @@ async function loadCollection(date) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('collection_configuration_missing');
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-  const fields = 'race_date,course_code,race_no,boat_no,official_lap,official_turn,official_straight,official_half_lap,lap_time,turn_time,straight_time,half_lap_time,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at,data_source,exhibition_field_meta';
+  const fields = 'race_date,course_code,race_no,boat_no,gender_code,official_exhibition_time,exhibition_time,official_lap,official_turn,official_straight,official_half_lap,lap_time,turn_time,straight_time,half_lap_time,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at,data_source,exhibition_field_meta';
   // Explicit paging: a full 24-venue day has 1,728 boats, exceeding the default 1,000-row API limit.
   const safeRead = query => Promise.resolve(query).catch(() => ({ error: true, data: null }));
   const [events, first, second, runtime, attempts] = await Promise.all([
@@ -63,7 +63,7 @@ export default async function CollectionPage({ searchParams }) {
         <tbody>{rows.map(row => <tr key={row.code}>
           <th scope="row">{String(row.code).padStart(2, '0')} {row.name}</th>
           <td>{row.latest ? <time dateTime={row.latest} title={new Date(row.latest).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}>{jstTime(row.latest)}</time> : row.sources.length ? '時刻不明' : '—'}</td>
-          <td>{row.completed.length ? <><strong>{row.completed.at(-1).race}R</strong><small>更新済：{row.completed.map(race => `${race.race}R`).join('・')}</small><details><summary>揃った項目</summary>{row.completed.map(race => <small key={race.race}><Link href={`/races/${String(row.code).padStart(2, '0')}/${race.race}?date=${date}`}>{race.race}R</Link>：{race.metrics.join('・')}</small>)}</details></> : row.state}
+          <td>{row.completed.length ? <><strong>{row.completed.at(-1).race}R</strong><small>更新済：{row.completed.map(race => `${race.race}R`).join('・')}</small><details><summary>揃った項目・通知判定接続</summary>{row.completed.map(race => <small key={race.race}><Link href={`/races/${String(row.code).padStart(2, '0')}/${race.race}?date=${date}`}>{race.race}R</Link>：{race.metrics.join('・')}<br />判定可能：{[['kiina','キイナ'],['ichika','一果'],['hatsune','初音']].filter(([key])=>race.theories[key]).map(([,label])=>label).join('・')||'なし'}</small>)}</details></> : row.state}
             {row.partial.length > 0 && <small>一部取得・要確認：{row.partial.map(race => `${race}R`).join('・')}</small>}
           </td>
           <td>{row.sources.length ? row.sources.join(' / ') : '—'}</td>
