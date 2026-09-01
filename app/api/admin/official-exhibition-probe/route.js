@@ -24,7 +24,11 @@ const clean = (s) => s.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replac
 
 function source(course, day, race, mode) {
   if (mode === 'reference') return course === 5 ? `https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=${race}&jcd=05&hd=${day}` : null;
-  if (mode === 'ajax') return course === 9 ? `https://www.boatrace-tsu.com/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=cyokuzen&run=0` : null;
+  if (mode === 'ajax') {
+    if (course === 9) return `https://www.boatrace-tsu.com/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=cyokuzen&run=0`;
+    if (course === 21) return `https://boatrace-ashiya.com/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=cyokuzen&run=0`;
+    return null;
+  }
   if (mode === 'sttenji') return course === 9 ? `https://www.boatrace-tsu.com/sp/ajax/ajax_yosou.php?targetday=${day}&race=${race}&req=sttenji&run=0` : null;
   if (mode === 'asset') return course === 9 ? 'https://www.boatrace-tsu.com/sp/page/yosou/js/get_yosou.js' : null;
   if (mode === 'home') return homes[course - 1];
@@ -34,6 +38,7 @@ function source(course, day, race, mode) {
     3: `/sp/index.php?page=yosou-race_index&race=${race}`,
     4: `/asp/kyogi/04/sp/yoso05${rr}.htm`,
     5: `/modules/yosou/oriten.php?day=${day}&race=${race}&jo=05&if=1`,
+    6: `/modules/yosou/group-cyokuzen.php?day=${day}&race=${race}&kind=2&if=1`,
     7: `https://www1.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend${day}07${rr}.htm`,
     9: `/sp/index.php?page=yosou-yosou&race=${race}`,
     10: '/races',
