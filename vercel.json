@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/news-editorials",
-      "schedule": "20 14 * * *"
+      "schedule": "20 3,6,9,14 * * *"
     }
   ]
 }
