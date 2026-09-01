@@ -4,6 +4,7 @@ import "./public-header-logo-boost.css";
 import "./races-compact-overrides.css";
 import "./ichika-ai-banner-fix.css";
 import "./hatsune-card-unify.css";
+import Script from "next/script";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
@@ -36,6 +37,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
+      <head>
+        <Script
+          id="google-adsense"
+          async
+          strategy="beforeInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9145518658275668"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <MemberSessionBridge />
         <MemberModeQueryBridge />
