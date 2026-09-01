@@ -1,5 +1,5 @@
--- Deployment source for the Supabase-managed exhibition_write_guard migration.
--- No historical data rewrite. Metadata is populated lazily on the next write.
+-- Official venue measurements outrank PC-KYOTEI and secondary sources.
+-- Missing fields remain fillable by the highest available valid fallback.
 set lock_timeout = '3s';
 alter table public.bs_race_entries add column if not exists exhibition_field_meta jsonb not null default '{}'::jsonb;
 

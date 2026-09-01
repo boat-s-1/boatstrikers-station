@@ -1,16 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveExhibition,selectExhibitionField,isExhibitionReady,positiveTime} from '../lib/exhibitionDisplay.js';
+import {resolveExhibition,selectExhibitionField,isExhibitionReady,positiveTime,exhibitionSourcePriority} from '../lib/exhibitionDisplay.js';
 const first='2026-08-28T10:00:00Z', later='2026-08-28T10:01:00Z';
 test('PC first is immediately usable without official response',()=>assert.equal(resolveExhibition({exhibition_time:6.8,lap_time:37,exhibition_source:'PC-KYOTEI'}).official_lap,37));
 test('official first is immediately usable without PC response',()=>assert.equal(resolveExhibition({official_exhibition_time:6.8,official_lap:37}).exhibition_time,6.8));
 test('invalid official value does not hide valid PC',()=>assert.equal(resolveExhibition({official_lap:0,lap_time:37}).lap_time,37));
-test('newer valid PC correction replaces older official display',()=>assert.equal(resolveExhibition({official_lap:37,lap_time:36.9,official_exhibition_synced_at:first,exhibition_synced_at:later}).lap_time,36.9));
+test('newer valid PC cannot replace an official venue value',()=>assert.equal(resolveExhibition({official_lap:37,lap_time:36.9,official_exhibition_source:'venue_official',exhibition_source:'PC-KYOTEI',official_exhibition_synced_at:first,exhibition_synced_at:later}).lap_time,37));
 test('newer official correction replaces older PC',()=>assert.equal(resolveExhibition({official_lap:37,lap_time:36.9,official_exhibition_synced_at:later,exhibition_synced_at:first}).lap_time,37));
 test('per-field provenance wins over group poll timestamp',()=>{
  const row={official_lap:37,lap_time:36.9,official_exhibition_synced_at:later,exhibition_synced_at:first,exhibition_field_meta:{official_lap:{value:37,source:'venue_official',updated_at:first},lap_time:{value:36.9,source:'PC-KYOTEI',updated_at:later}}};
- const chosen=selectExhibitionField(row,'official_lap','lap_time'); assert.equal(chosen.value,36.9);assert.equal(chosen.source,'PC-KYOTEI');
+ const chosen=selectExhibitionField(row,'official_lap','lap_time'); assert.equal(chosen.value,37);assert.equal(chosen.source,'venue_official');
 });
+test('PC fills a metric missing from the official payload',()=>{const row=resolveExhibition({official_lap:37,straight_time:7,official_exhibition_source:'venue_official',exhibition_source:'PC-KYOTEI'});assert.equal(row.lap_time,37);assert.equal(row.straight_time,7);assert.equal(row.exhibition_display_fields.straight_time.source,'PC-KYOTEI');});
+test('source priority is official, PC, Boaters, API, unknown',()=>assert.deepEqual(['venue_official','PC-KYOTEI','boaters_realtime','open_api','unknown'].map(exhibitionSourcePriority),[400,300,200,100,0]));
 test('half lap never fills lap',()=>{const row=resolveExhibition({official_half_lap:18});assert.equal(row.lap_time,null);assert.equal(row.half_lap_time,18);});
 test('missing field filled independently',()=>{const row=resolveExhibition({official_lap:37,straight_time:7});assert.equal(row.lap_time,37);assert.equal(row.straight_time,7);});
 test('all display aliases agree',()=>{const row=resolveExhibition({lap_time:37,official_turn:11,straight_time:7});assert.equal(row.official_lap,row.lap_time);assert.equal(row.official_straight,row.straight_time);});

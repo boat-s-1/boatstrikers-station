@@ -283,7 +283,7 @@ function mapEntry(row) {
 
     exhibition_time: toNumberOrNull(row.exhibition_time),
     exhibition_course: toIntegerOrNull(row.exhibition_course),
-    // v10.1: PC-KYOTEI公式展示列を最優先で採用します。
+    // 公式展示列を採用し、欠測時は共通表示レイヤーでPC-KYOTEIを補完します。
     // exhibition_fl が NULL の場合でも official_exhibition_symbol の F/L を確実に表示します。
     exhibition_st: toNumberOrNull(
       firstValue(row.official_exhibition_st, row.exhibition_st)

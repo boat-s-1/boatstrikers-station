@@ -22,6 +22,14 @@ begin
   select * into r from exhibition_guard_test where id=1;
   assert r.official_lap=37.2 and r.official_turn=11.2 and r.official_straight=7.2, 'new correction accepted, missing straight retained';
   assert r.exhibition_field_meta->'official_straight'->>'source'='venue_official' and r.exhibition_field_meta->'official_lap'->>'source'='PC-KYOTEI', 'per-field sources retained';
+  update exhibition_guard_test set official_lap=37.9,official_exhibition_source='venue_official',official_exhibition_synced_at='2026-08-28T12:01:00Z' where id=1;
+  update exhibition_guard_test set official_lap=36.8,official_exhibition_source='PC-KYOTEI',official_exhibition_synced_at='2026-08-28T12:02:00Z' where id=1;
+  select * into r from exhibition_guard_test where id=1;
+  assert r.official_lap=37.9 and r.exhibition_field_meta->'official_lap'->>'source'='venue_official', 'newer PC payload cannot replace official value';
+  update exhibition_guard_test set official_turn=null,official_exhibition_source='venue_official',official_exhibition_synced_at='2026-08-28T12:03:00Z' where id=1;
+  update exhibition_guard_test set official_turn=11.3,official_exhibition_source='PC-KYOTEI',official_exhibition_synced_at='2026-08-28T12:04:00Z' where id=1;
+  select * into r from exhibition_guard_test where id=1;
+  assert r.official_turn=11.2 and r.exhibition_field_meta->'official_turn'->>'source'='PC-KYOTEI', 'retained PC field accepts a newer PC correction';
   before_meta:=r.exhibition_field_meta;
   update exhibition_guard_test set official_exhibition_synced_at='2026-08-28T13:00:00Z' where id=1;
   select * into r from exhibition_guard_test where id=1;
