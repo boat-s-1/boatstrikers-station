@@ -18,7 +18,7 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
   useEffect(()=>{ const id=setInterval(()=>setNow(new Date()),30000); return()=>clearInterval(id); },[]);
   const current=jstParts(now);
   const today=useMemo(()=>scheduleItems.filter(i=>i.event_date===current.date && i.status==="published").sort((a,b)=>String(a.start_time).localeCompare(String(b.start_time))).slice(0,3),[scheduleItems,current.date]);
-  const ticker=tickerItems.filter(i=>i.is_active).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  const ticker=tickerItems.filter(i=>i.is_active && !/サイト(?:製作|制作)中/.test(String(i.message || "").replace(/[！!、,\s]/g, ""))).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   const text=ticker.map(i=>i.message).join("　　◆　　") || "BoatStrikersからのお知らせをこちらに表示します";
 
   return <section className={styles.wrap}>
