@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { getHatsuneNews } from "../hatsune/newsData";
 import styles from "./HomeRaceInfo.module.css";
 
 const NIGHT_COURSE_CODES = new Set([1, 7, 12, 15, 19, 20, 24]);
@@ -17,6 +18,23 @@ const MODE_META = {
   hit: { label: "的中率", emoji: "🎯" },
   recovery: { label: "回収率", emoji: "💰" },
   hole: { label: "穴狙い", emoji: "🚀" },
+};
+
+const NEWS_CATEGORY_LABELS = {
+  result: "結果",
+  women: "女子",
+  "女子戦": "女子",
+  suijinsai: "選手情報",
+  "A1/A2・級別": "選手情報",
+  grade: "SG・G1",
+  SG: "SG・G1",
+  G1: "SG・G1",
+  G2: "SG・G1",
+  G3: "G3",
+  motor: "モーター",
+  tomorrow: "注目",
+  topic: "NEWS",
+  win: "結果",
 };
 
 function getClient() {
@@ -66,8 +84,6 @@ function statusInfo(course) {
     course.nextRaceNo || futureRace?.raceNo || futureRace?.race_no || 0
   );
 
-  // トップページでは結果フラグだけで終了判定しない。
-  // 締切時刻が未来のレースが1つでも残っていれば開催中として扱う。
   const hasFutureRace = Boolean(futureRace);
 
   if (
@@ -110,6 +126,19 @@ function formatHitDate(value) {
   const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match) return String(value);
   return `${Number(match[2])}/${Number(match[3])}`;
+}
+
+function formatNewsDate(value) {
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      month: "numeric",
+      day: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
 }
 
 function groupHitRows(rows, limit) {
@@ -174,6 +203,16 @@ async function getLatestAiHits(limit = 5) {
   }
 }
 
+async function getLatestHomeNews() {
+  try {
+    const items = await getHatsuneNews({ limit: 3, category: "all" });
+    return Array.isArray(items) ? items.slice(0, 3) : [];
+  } catch (error) {
+    console.error("トップページ最新NEWS取得エラー:", error);
+    return [];
+  }
+}
+
 function HitCard({ item }) {
   const payout = Number(item.payout || 0);
   const courseName = COURSE_NAMES[Number(item.course_code)] || `#${item.course_code}`;
@@ -211,111 +250,158 @@ function HitCard({ item }) {
   );
 }
 
+function LatestNewsBlock({ items }) {
+  if (!items.length) return null;
+
+  return (
+    <section className={styles.latestNewsSection} aria-labelledby="home-latest-news-title">
+      <div className={styles.latestNewsHeader}>
+        <div>
+          <span>BOATSTRIKERS NEWS</span>
+          <h2 id="home-latest-news-title">最新ニュース</h2>
+        </div>
+        <Link href="/news" className={styles.latestNewsAllLink}>一覧を見る ›</Link>
+      </div>
+
+      <div className={styles.latestNewsList}>
+        {items.map((item, index) => (
+          <Link
+            key={item.id}
+            href={`/news/${item.id}`}
+            className={`${styles.latestNewsRow} ${index === 0 ? styles.latestNewsRowFeatured : ""}`}
+          >
+            <div className={styles.latestNewsMeta}>
+              {index === 0 ? <span className={styles.latestNewsNew}>NEW</span> : null}
+              <time>{formatNewsDate(item.published_at)}</time>
+              <span className={styles.latestNewsCategory}>
+                {NEWS_CATEGORY_LABELS[item.category] || "NEWS"}
+              </span>
+            </div>
+            <strong>{item.list_headline || item.title}</strong>
+            <span className={styles.latestNewsArrow} aria-hidden="true">›</span>
+          </Link>
+        ))}
+      </div>
+
+      <Link href="/news" className={styles.latestNewsCta}>
+        もっとニュースを見る <span aria-hidden="true">→</span>
+      </Link>
+    </section>
+  );
+}
+
 export default async function HomeRaceInfo({ courses = [], raceDate = "" }) {
-  const hitItems = await getLatestAiHits(5);
+  const [hitItems, latestNews] = await Promise.all([
+    getLatestAiHits(5),
+    getLatestHomeNews(),
+  ]);
   const hasCourses = Array.isArray(courses) && courses.length > 0;
 
   return (
-    <section className={styles.section} aria-labelledby="home-race-info-title">
-      <div className={styles.bannerWrap}>
-        <img
-          src="/home/today-race-info-banner.jpg"
-          alt="本日のレース情報"
-          className={styles.banner}
-        />
-      </div>
-
-      <div className={styles.block}>
-        <div className={styles.subHeader}>
-          <div className={styles.subTitleWrap}>
-            <span className={styles.subIcon} aria-hidden="true">🚤</span>
-            <h3>開催場</h3>
-          </div>
-
-          <Link href={`/races?date=${raceDate}`} className={styles.subLink}>
-            一覧を見る <span aria-hidden="true">›</span>
-          </Link>
+    <>
+      <section className={styles.section} aria-labelledby="home-race-info-title">
+        <div className={styles.bannerWrap}>
+          <img
+            src="/home/today-race-info-banner.jpg"
+            alt="本日のレース情報"
+            className={styles.banner}
+          />
         </div>
 
-        {hasCourses ? (
-          <div className={styles.courseRail}>
-            {courses.map((course) => {
-              const code = String(course.courseCode).padStart(2, "0");
-              const type = courseType(course.courseCode);
-              const status = statusInfo(course);
-              const href = `/races/${code}?date=${raceDate}`;
-
-              return (
-                <Link
-                  href={href}
-                  className={`${styles.courseCard} ${styles[type.key]} ${
-                    status.key === "finished" ? styles.finished : ""
-                  }`}
-                  key={course.courseCode}
-                >
-                  <div className={styles.courseCardTop}>
-                    <span className={styles.courseNo}>#{code}</span>
-                    <span className={styles.courseType}>
-                      {type.icon} {type.label}
-                    </span>
-                  </div>
-
-                  <strong className={styles.courseName}>
-                    {course.courseName}
-                  </strong>
-
-                  <span
-                    className={`${styles.courseStatus} ${styles[`status_${status.key}`]}`}
-                  >
-                    {status.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className={styles.courseEmpty}>
-            本日の開催場情報を取得中です。
-          </div>
-        )}
-      </div>
-
-      <div className={styles.divider} />
-
-      <div className={`${styles.block} ${styles.hitsBlock}`}>
-        <div className={styles.subHeader}>
-          <div className={styles.subTitleWrap}>
-            <span className={styles.subIcon} aria-hidden="true">🎯</span>
-            <h3>AI的中レース</h3>
-          </div>
-          <span className={styles.swipeHint}>最新5レース・横にスワイプ →</span>
-        </div>
-
-        {hitItems.length > 0 ? (
-          <div className={styles.hitsRail}>
-            {hitItems.map((item) => (
-              <HitCard
-                item={item}
-                key={`${item.race_date}-${item.course_code}-${item.race_no}`}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className={styles.hitEmpty}>
-            <span aria-hidden="true">📊</span>
-            <div>
-              <strong>AI的中実績を集計中です。</strong>
-              <p>AI予想が的中すると、最新順にここへ表示されます。</p>
+        <div className={styles.block}>
+          <div className={styles.subHeader}>
+            <div className={styles.subTitleWrap}>
+              <span className={styles.subIcon} aria-hidden="true">🚤</span>
+              <h3>開催場</h3>
             </div>
-          </div>
-        )}
 
-        <div className={styles.resultsLinkRow}>
-          <Link href="/ai-results?period=all" className={styles.resultsLink}>
-            AIの過去成績をすべて見る →
-          </Link>
+            <Link href={`/races?date=${raceDate}`} className={styles.subLink}>
+              一覧を見る <span aria-hidden="true">›</span>
+            </Link>
+          </div>
+
+          {hasCourses ? (
+            <div className={styles.courseRail}>
+              {courses.map((course) => {
+                const code = String(course.courseCode).padStart(2, "0");
+                const type = courseType(course.courseCode);
+                const status = statusInfo(course);
+                const href = `/races/${code}?date=${raceDate}`;
+
+                return (
+                  <Link
+                    href={href}
+                    className={`${styles.courseCard} ${styles[type.key]} ${
+                      status.key === "finished" ? styles.finished : ""
+                    }`}
+                    key={course.courseCode}
+                  >
+                    <div className={styles.courseCardTop}>
+                      <span className={styles.courseNo}>#{code}</span>
+                      <span className={styles.courseType}>
+                        {type.icon} {type.label}
+                      </span>
+                    </div>
+
+                    <strong className={styles.courseName}>
+                      {course.courseName}
+                    </strong>
+
+                    <span
+                      className={`${styles.courseStatus} ${styles[`status_${status.key}`]}`}
+                    >
+                      {status.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={styles.courseEmpty}>
+              本日の開催場情報を取得中です。
+            </div>
+          )}
         </div>
-      </div>
-    </section>
+
+        <div className={styles.divider} />
+
+        <div className={`${styles.block} ${styles.hitsBlock}`}>
+          <div className={styles.subHeader}>
+            <div className={styles.subTitleWrap}>
+              <span className={styles.subIcon} aria-hidden="true">🎯</span>
+              <h3>AI的中レース</h3>
+            </div>
+            <span className={styles.swipeHint}>最新5レース・横にスワイプ →</span>
+          </div>
+
+          {hitItems.length > 0 ? (
+            <div className={styles.hitsRail}>
+              {hitItems.map((item) => (
+                <HitCard
+                  item={item}
+                  key={`${item.race_date}-${item.course_code}-${item.race_no}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.hitEmpty}>
+              <span aria-hidden="true">📊</span>
+              <div>
+                <strong>AI的中実績を集計中です。</strong>
+                <p>AI予想が的中すると、最新順にここへ表示されます。</p>
+              </div>
+            </div>
+          )}
+
+          <div className={styles.resultsLinkRow}>
+            <Link href="/ai-results?period=all" className={styles.resultsLink}>
+              AIの過去成績をすべて見る →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <LatestNewsBlock items={latestNews} />
+    </>
   );
 }
