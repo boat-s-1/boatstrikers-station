@@ -3,11 +3,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {VENUES,diagnosticStatus} from '../lib/exhibitionStatusCatalog.js';
 test('all 24 venues have unique codes',()=>assert.deepEqual(VENUES.map(v=>v.code),Array.from({length:24},(_,i)=>i+1)));
-test('diagnostics only enabled for connected verified or staging adapters',()=>assert.deepEqual(VENUES.filter(v=>v.endpoint).map(v=>v.code),[5,6,10,12,14,15,18,19,20,21,23,24]));
+test('diagnostics only enabled for connected verified adapters',()=>assert.deepEqual(VENUES.filter(v=>v.endpoint).map(v=>v.code),[5,6,10,12,14,15,18,19,20,21,22,23,24]));
 test('Hamanako, Mikuni, and Ashiya are shown as connected',()=>assert.ok(VENUES.filter(v=>[6,10,21].includes(v.code)).every(v=>v.stage==='接続済み')));
 test('Suminoe and Omura are connected verified adapters',()=>assert.ok(VENUES.filter(v=>[12,24].includes(v.code)).every(v=>v.stage==='接続済み')));
 test('Tokuyama is verified but never marked as straight-capable',()=>{const venue=VENUES.find(v=>v.code===18);assert.equal(venue.stage,'接続済み');assert.equal(venue.straightAbsent,true);});
 test('Shimonoseki and Wakamatsu are connected with all four metrics',()=>{for(const code of [19,20]){const venue=VENUES.find(v=>v.code===code);assert.equal(venue.stage,'接続済み');assert.equal(venue.straightAbsent,false);}});
+test('Fukuoka is connected while Edogawa and suspended Tokoname are classified explicitly',()=>{
+ assert.equal(VENUES.find(v=>v.code===22).stage,'接続済み');
+ assert.equal(VENUES.find(v=>v.code===3).stage,'公式対象項目なし');
+ assert.equal(VENUES.find(v=>v.code===8).stage,'公式休止中');
+});
 test('only confirmed straight absence displayed',()=>assert.deepEqual(VENUES.filter(v=>v.straightAbsent).map(v=>v.code),[12,13,18]));
 test('unverified success cannot become green',()=>assert.notEqual(diagnosticStatus({ok:true,rows:Array(6).fill({})}).tone,'good'));
 test('six verified rows show acquisition success, not notification success',()=>assert.equal(diagnosticStatus({ok:true,identity:{verified:true},rows:Array(6).fill({})}).label,'取得成功'));
