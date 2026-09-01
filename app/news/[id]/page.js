@@ -25,7 +25,7 @@ export async function generateMetadata({ params }) {
 }
 
 function words(item) {
-  return `${item?.list_headline || ""} ${item?.title || ""} ${item?.summary || ""} ${item?.place || ""}`;
+  return `${item?.list_headline || ""} ${item?.title || ""} ${item?.summary || ""} ${item?.article_body || ""} ${item?.place || ""}`;
 }
 
 function relatedScore(base, candidate) {
@@ -34,7 +34,7 @@ function relatedScore(base, candidate) {
   const b = words(candidate);
   if (base.place && candidate.place && base.place === candidate.place) score += 8;
   if (base.category && candidate.category && base.category === candidate.category) score += 5;
-  const terms = ["女子", "ヴィーナス", "オールレディース", "モーター", "優勝", "結果", "SG", "G1", "水神祭", "A1", "A2"];
+  const terms = ["女子", "ヴィーナス", "オールレディース", "モーター", "優勝", "結果", "SG", "G1", "GⅠ", "水神祭", "A1", "A2"];
   for (const term of terms) if (a.includes(term) && b.includes(term)) score += 2;
   const published = new Date(candidate.published_at || 0).getTime();
   if (published) score += Math.max(0, 3 - (Date.now() - published) / 86400000 / 7);
@@ -44,12 +44,65 @@ function relatedScore(base, candidate) {
 function shortDate(value) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  return new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric" }).format(d);
 }
 
 function shortMediaTitle(title) {
   const clean = String(title || "公式YouTube更新").replace(/[【\[].*?[】\]]/g, " ").replace(/#\S+/g, " ").replace(/\s+/g, " ").trim();
   return clean.length > 34 ? `${clean.slice(0, 33)}…` : clean;
+}
+
+function summaryPoints(summary) {
+  const text = String(summary || "").replace(/\s+/g, " ").trim();
+  if (!text) return [];
+  const parts = text.split(/(?<=[。！？!?])/).map((v) => v.trim()).filter(Boolean);
+  return (parts.length > 1 ? parts : text.split(/[・\n]/)).map((v) => v.replace(/[。！？!?]+$/, "").trim()).filter(Boolean).slice(0, 3);
+}
+
+function renderArticleBody(body) {
+  const lines = String(body || "").split(/\r?\n/);
+  const nodes = [];
+  let paragraph = [];
+  let bullets = [];
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    nodes.push(<p key={`p-${nodes.length}`}>{paragraph.join(" ")}</p>);
+    paragraph = [];
+  };
+  const flushBullets = () => {
+    if (!bullets.length) return;
+    nodes.push(<ul key={`ul-${nodes.length}`}>{bullets.map((b, i) => <li key={i}>{b}</li>)}</ul>);
+    bullets = [];
+  };
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { flushParagraph(); flushBullets(); continue; }
+    if (/^##\s+/.test(line)) {
+      flushParagraph(); flushBullets();
+      const title = line.replace(/^##\s+/, "").trim();
+      const isCheck = /CHECK/i.test(title);
+      nodes.push(<h3 key={`h-${nodes.length}`} className={isCheck ? styles.checkHeading : undefined}>{title}</h3>);
+      continue;
+    }
+    if (/^[-・]\s*/.test(line)) {
+      flushParagraph();
+      bullets.push(line.replace(/^[-・]\s*/, ""));
+      continue;
+    }
+    flushBullets();
+    paragraph.push(line);
+  }
+  flushParagraph(); flushBullets();
+  return nodes;
+}
+
+function getCheckLabel(item) {
+  const text = words(item);
+  if (/女子|ヴィーナス|オールレディース|レディース/.test(text)) return "初音 CHECK";
+  if (/イン逃げ|1コース|イン戦/.test(text)) return "一果 CHECK";
+  if (/5号艇|穴狙い|カド攻め/.test(text)) return "キイナ CHECK";
+  return "BoatStrikers CHECK";
 }
 
 export default async function BoatStrikersNewsDetailPage({ params }) {
@@ -59,6 +112,8 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
 
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
   const heroImage = getHatsuneNewsImage(item);
+  const points = summaryPoints(item.summary);
+  const checkLabel = getCheckLabel(item);
 
   const [allNews, media] = await Promise.all([
     getHatsuneNews({ limit: 80, category: "all" }),
@@ -102,6 +157,24 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           <img src={heroImage} alt={`${item.title} 見出し画像`} decoding="async" />
         </div>
 
+        {points.length > 0 && (
+          <section className={styles.quickSummary}>
+            <span>3 POINTS</span>
+            <h2>この記事を3行で</h2>
+            <ul>{points.map((point, index) => <li key={index}>{point}</li>)}</ul>
+          </section>
+        )}
+
+        <section className={styles.dataCard}>
+          <div className={styles.dataCardTitle}><span>NEWS DATA</span><strong>記事データ</strong></div>
+          <dl>
+            {item.place && <div><dt>開催場</dt><dd>{item.place}</dd></div>}
+            <div><dt>カテゴリ</dt><dd>{label.replace(/^\S+\s*/, "")}</dd></div>
+            <div><dt>公開</dt><dd>{formatHatsuneNewsDate(item.published_at)}</dd></div>
+            {item.source_name && <div><dt>情報元</dt><dd>{item.source_name}</dd></div>}
+          </dl>
+        </section>
+
         <section className={styles.summary}>
           <span>BOATSTRIKERS NEWS</span>
           <h2>ニュース概要</h2>
@@ -112,25 +185,21 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           <section className={styles.articleBody}>
             <span>BOATSTRIKERS EDIT</span>
             <h2>詳しく見る</h2>
-            <p>{item.article_body}</p>
+            <div className={styles.bodyContent}>{renderArticleBody(item.article_body)}</div>
           </section>
         )}
+
+        <section className={styles.checkBox}>
+          <span>{checkLabel}</span>
+          <strong>ここをチェック</strong>
+          <p>このニュースの続報や次走情報、展示・直前情報が出た場合は、BoatStrikers NEWSであわせて確認できます。</p>
+        </section>
 
         {item.image_url && (
           <figure className={styles.articlePhoto}>
             <img src={item.image_url} alt={`${item.title} 関連画像`} loading="lazy" decoding="async" />
           </figure>
         )}
-
-        <section className={styles.infoBox}>
-          <h2>この記事について</h2>
-          <dl>
-            {item.place && <div><dt>開催場</dt><dd>{item.place}</dd></div>}
-            <div><dt>カテゴリ</dt><dd>{label.replace(/^\S+\s*/, "")}</dd></div>
-            <div><dt>情報区分</dt><dd>{item.source_type === "bs_data" ? "BoatStrikers独自データ" : "ニュース・公式情報"}</dd></div>
-            {item.source_name && <div><dt>出典</dt><dd>{item.source_name}</dd></div>}
-          </dl>
-        </section>
 
         {item.source_url && (
           <section className={styles.sourceBox}>
