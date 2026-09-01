@@ -136,6 +136,11 @@ const getHomeNoteData = unstable_cache(
   async () => {
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+    const recentCutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const isRecent = (item) => {
+      const publishedAt = new Date(item?.pubDate || 0).getTime();
+      return Number.isFinite(publishedAt) && publishedAt >= recentCutoff;
+    };
 
     const targets = [
       {
@@ -163,7 +168,7 @@ const getHomeNoteData = unstable_cache(
 
     const news = targets.map((t) => {
       const item = feed.items.find((feedItem) =>
-        feedItem.title.includes(t.keyword)
+        feedItem.title.includes(t.keyword) && isRecent(feedItem)
       );
 
       const image =
@@ -209,6 +214,16 @@ export const metadata = {
   },
   description:
     "BoatStrikersは、出走表、展示比較、キャラクター予想、初心者講座、漫画、ラジオ、24場攻略を楽しめるボートレース情報サイトです。",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "BoatStrikers｜ボートレースをもっと楽しく、分かりやすく",
+    description:
+      "全国24場攻略、展示データ、選手・女子戦ニュース、初心者講座を発信するボートレース情報メディアです。",
+    url: "/",
+    type: "website",
+  },
 };
 
 
