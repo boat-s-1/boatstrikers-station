@@ -1,10 +1,5 @@
 /* Races index: keep secondary/status blocks compact on mobile. */
 
-/* Hide the public development banner completely, including its spacing. */
-main[class*="portalPage"] div[class*="portalSection"]:has(> img[alt="只今、開発中"]) {
-  display: none !important;
-}
-
 #daily-newspaper [class*="portalEmpty"] {
   min-height: 0 !important;
   padding: 14px 16px !important;
