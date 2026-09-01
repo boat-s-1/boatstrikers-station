@@ -91,3 +91,9 @@ test('production wrapper uses fixed official and national HTTPS sources', async 
     globalThis.fetch = saved;
   }
 });
+
+test('read-only verified diagnostic allows both venues', () => {
+  const code = readFileSync(new URL('../app/api/admin/verified-exhibition-check/route.js', import.meta.url), 'utf8');
+  assert.ok(code.includes("validSuminoeOmuraRace(race)"));
+  assert.ok(code.includes("suminoeOmuraVerifiedOriginalTenji.js"));
+});
