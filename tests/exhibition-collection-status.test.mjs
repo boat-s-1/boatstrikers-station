@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildCollectionStatus, collectionSource, normalizeCollectionDate, validMeasurement } from '../lib/exhibitionCollectionStatus.js';
+import { buildCollectionStatus, collectionSource, normalizeCollectionDate, notificationReadiness, validMeasurement } from '../lib/exhibitionCollectionStatus.js';
 
 const date = '2026-08-28';
 const rows = (race = 3, extra = {}) => Array.from({ length: 6 }, (_, i) => ({ race_date: date, course_code: 1, race_no: race, boat_no: i + 1, official_lap: 37 + i / 10, official_exhibition_source: 'kiryu_official', official_exhibition_synced_at: `${date}T04:00:00Z`, ...extra }));
@@ -9,7 +9,7 @@ const venue = (entries, events = []) => buildCollectionStatus({ date, entries, e
 test('all 24 venues in code order, even without data', () => assert.deepEqual(buildCollectionStatus({ date }).map(row => row.code), Array.from({ length: 24 }, (_, i) => i + 1)));
 test('real persisted time and official source, sorted boats', () => {
   const result = venue(rows().reverse());
-  assert.deepEqual(result.completed, [{ race: 3, metrics: ['一周'] }]);
+  assert.deepEqual(result.completed, [{ race: 3, metrics: ['一周'], theories: { kiina:false, ichika:false, hatsune:false } }]);
   assert.equal(result.latest, `${date}T04:00:00.000Z`);
   assert.deepEqual(result.sources, ['公式']);
 });
@@ -28,6 +28,12 @@ test('PC data fills missing official metrics', () => {
   assert.equal(result.completed.length, 1);
   assert.deepEqual(result.sources, ['PC-KYOTEI']);
   assert.equal(result.latest, `${date}T03:00:00.000Z`);
+});
+test('notification readiness accepts PC fallback and requires six complete boats', () => {
+  const ready = rows(3, { official_lap:null, lap_time:37, official_exhibition_time:null, exhibition_time:6.8, official_straight:null, straight_time:7.5, gender_code:'2', exhibition_source:'PC-KYOTEI', exhibition_synced_at:`${date}T03:00:00Z` });
+  assert.deepEqual(notificationReadiness(ready), { kiina:true, ichika:true, hatsune:true });
+  assert.deepEqual(notificationReadiness(ready.slice(0,5)), { kiina:false, ichika:false, hatsune:false });
+  assert.equal(notificationReadiness(ready.map(row=>({...row,gender_code:'1'}))).hatsune,false);
 });
 test('official column can be populated by PC and must retain PC label', () => assert.deepEqual(venue(rows(3, { official_exhibition_source: 'PC_KYOTEI' })).sources, ['PC-KYOTEI']));
 test('mixed sources retained', () => assert.deepEqual(venue(rows().map((row, i) => ({ ...row, official_exhibition_source: i < 3 ? 'PC-KYOTEI' : 'kiryu_official' }))).sources, ['PC-KYOTEI', '公式']));
