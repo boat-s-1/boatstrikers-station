@@ -76,7 +76,8 @@ test('production wrapper uses fixed official and national HTTPS sources', async 
       const item = cases.find((entry) => entry.code === code);
       calls.push(value);
       assert.equal(options.redirect, 'manual');
-      const body = value.includes('boatrace.jp/owpc/pc/race/beforeinfo') ? referenceFor(item) : item.original;
+      const body = value.includes('boatrace.jp/owpc/pc/race/beforeinfo') ? referenceFor(item)
+        : item.code === 24 ? item.original.replace('charset=shift_jis', 'charset=utf-8') : item.original;
       return new Response(body, { headers: { 'content-type': 'text/html; charset=utf-8' } });
     };
     for (const item of cases) {
