@@ -11,7 +11,7 @@ const tools = [
  ['/admin/exhibition-alerts','🚨','キイナ・4→5展開理論','条件成立・通知履歴・成績を管理'],
  ['/admin/ichika-escape-surge','🔥','一果・イン逃げ急上昇アラート','展示1位＋一周1位の成立履歴・実績・おすすめ2着を確認'],
  ['/admin/ichika-hidden-escape','🏁','一果・隠れイン理論','隠れイン条件・通知履歴・成績を管理'],
- ['/admin/hatsune-womens-inner-break','🌸','初音・女子イン崩れ理論','女子戦の条件・通知履歴・成績を管理'],
+ ['/admin/hatsune-womens-inner-break','🎀','初音の箱推し理論','女子戦のイン圏外候補を検知し、234・235・345 BOXを◎○△評価'],
 ];
 export default function AlertsPage(){
  return <main className={styles.page}><div className={styles.shell}>
