@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/media-editorials",
       "schedule": "10 3,6,9,13 * * *"
+    },
+    {
+      "path": "/api/cron/news-editorials",
+      "schedule": "20 14 * * *"
     }
   ]
 }
