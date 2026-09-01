@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Parser from "rss-parser";
 import BookCard from "./BookCard";
 import arrivalStyles from "./newArrivals.module.css";
@@ -253,15 +252,7 @@ export default async function LibraryPage() {
         />
       </section>
 
-<div className={arrivalStyles.developingBanner}>
-  <Image
-    src="/S__22142979.jpg"
-    alt="只今、開発中"
-    className={arrivalStyles.developingBannerImage}
-  />
-</div>
 
-            
       <section className={arrivalStyles.section} aria-labelledby="library-arrivals-title">
         <div className={arrivalStyles.titleBox}>
           <img
