@@ -289,10 +289,6 @@ export default async function RacesPage({ searchParams }) {
           ))}
         </nav>
 
-        <div className={styles.portalSection}>
-          <Image src="/S__22142979.jpg" alt="只今、開発中" className={styles.developingBannerImage} width={1536} height={360} />
-        </div>
-
         <section id="daily-newspaper" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
             <div><span>DAILY NEWSPAPER</span><h2>📰 今日公開の新聞</h2></div>
