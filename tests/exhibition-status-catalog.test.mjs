@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {VENUES,diagnosticStatus} from '../lib/exhibitionStatusCatalog.js';
+import {VENUES,LIVE_STATES,diagnosticStatus} from '../lib/exhibitionStatusCatalog.js';
 test('all 24 venues have unique codes',()=>assert.deepEqual(VENUES.map(v=>v.code),Array.from({length:24},(_,i)=>i+1)));
-test('diagnostics only enabled for connected verified adapters',()=>assert.deepEqual(VENUES.filter(v=>v.endpoint).map(v=>v.code),[2,5,6,10,12,14,15,18,19,20,21,22,23,24]));
+test('diagnostics include Kiryu staging and connected verified adapters',()=>assert.deepEqual(VENUES.filter(v=>v.endpoint).map(v=>v.code),[1,2,5,6,10,12,14,15,18,19,20,21,22,23,24]));
+test('all venues have one operational state',()=>assert.ok(VENUES.every(v=>LIVE_STATES.includes(v.operationalState))));
+test('Kiryu ranking-only diagnostic never reports acquisition success',()=>assert.equal(diagnosticStatus({ok:true,kiryu:{classification:'rank_only'}}).label,'順位のみ取得'));
 test('Toda is connected through its fixed XML and national verification route',()=>assert.equal(VENUES.find(v=>v.code===2).stage,'接続済み'));
 test('Hamanako, Mikuni, and Ashiya are shown as connected',()=>assert.ok(VENUES.filter(v=>[6,10,21].includes(v.code)).every(v=>v.stage==='接続済み')));
 test('Suminoe and Omura are connected verified adapters',()=>assert.ok(VENUES.filter(v=>[12,24].includes(v.code)).every(v=>v.stage==='接続済み')));
