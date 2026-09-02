@@ -1,3 +1,4 @@
+import { classifyKiryuExhibition } from '../../../../lib/kiryuExhibitionDiagnostic.js';
 // Isolated, read-only investigation endpoint. No database or notification imports.
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,7 +35,7 @@ function source(course, day, race, mode) {
   if (mode === 'home') return homes[course - 1];
   const rr = String(race).padStart(2, '0');
   const paths = {
-    1: `/sp/ajax/ajax_cyokuzen.php?race=${race}`,
+    1: `/sp/index.php?page=yosou-cyokuzen&race=${race}`,
     3: `/sp/index.php?page=yosou-race_index&race=${race}`,
     4: `/asp/kyogi/04/sp/yoso05${rr}.htm`,
     5: `/modules/yosou/oriten.php?day=${day}&race=${race}&jo=05&if=1`,
@@ -94,6 +95,7 @@ async function inspect(url) {
       timingTables: tables.slice(0, 8).map(t => t.slice(0, 20000)),
       links: [...new Set(links)].filter(x => /\.js|yosou|tenji|race|cyokuzen|chokuzen/i.test(x)).slice(0, 100),
       snippets, fetchedAt: new Date().toISOString(),
+      kiryu: new URL(url).hostname === 'www.kiryu-kyotei.com' ? classifyKiryuExhibition(html) : undefined,
       warning: 'Inspection only; requested date/race are NOT proof of source freshness or six-boat completeness.' };
   } finally { clearTimeout(timer); }
 }
