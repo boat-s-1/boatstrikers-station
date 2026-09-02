@@ -67,8 +67,12 @@ async function inspect(url) {
     const res = await fetch(url, { redirect: 'manual', cache: 'no-store', signal: controller.signal,
       headers: { 'User-Agent': 'BoatStrikers-ExhibitionDiagnostic/1.0', 'X-Requested-With': 'XMLHttpRequest', Referer: new URL('/', url).href } });
     if (!res.ok) {
+      const location = res.headers.get('location');
       await res.body?.cancel();
-      return { ok: false, upstreamStatus: res.status, location: res.headers.get('location') };
+      if (new URL(url).hostname === 'www.kiryu-kyotei.com' && res.status === 302 && location === '/sp/index.php?page=yosou-nokaisai') {
+        return { ok:true, upstreamStatus:res.status, location, kiryu:{ classification:'not_published', persistenceAllowed:false, reason:'venue_not_racing' }, fetchedAt:new Date().toISOString() };
+      }
+      return { ok: false, upstreamStatus: res.status, location };
     }
     const reader = res.body?.getReader();
     if (!reader) return { ok: false, error: 'empty_body' };
