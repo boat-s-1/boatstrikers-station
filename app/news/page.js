@@ -20,16 +20,23 @@ function textOf(item) {
 }
 function headlineOf(item) { return String(item?.list_headline || item?.title || "ニュース").trim(); }
 
+const GRADE_RE = /(?:^|[\s・／/【\[(（])(?:SG|G\s*[123]|GⅠ|GⅡ|GⅢ|GI|GII|GIII)(?:$|[\s・／/】\])）])|グランプリ|チャレンジカップ|ボートレース(?:クラシック|オールスター|メモリアル|ダービー)|グランドチャンピオン|オーシャンカップ|ヤングダービー|周年記念|周年競走|地区選手権|グレードレース/i;
+const RESULT_RE = /結果を更新|レース結果|払戻|着順|確定|優勝(?:した|を飾|決定|達成)|優出決定|V達成|初優勝|レース後|決着|万舟|高配当/;
+const RACER_RE = /水神祭|昇級|A1昇格|A2昇格|級別|インタビュー|トークショー|結婚|引退|復帰|欠場|追加斡旋|斡旋|登録|記録達成|選手特集|レーサー特集|デビュー|連勝|予選\d*位通過|予選トップ|前走地|近況|当地初|通算\d+勝|節目|フライング休み|復帰戦|選手が|レーサーが/;
+const WOMEN_RE = /女子戦|女子レーサー|ヴィーナス|オールレディース|レディース|クイーンズ|女子ボート/;
+const FOCUS_RE = /明日|翌日|あす|注目レース|高モーター|モーター|機力|展示|2連対率|優勝戦前|開催初日|初日注目|ドリーム戦|予選注目|好枠|絶好枠/;
+
 function bucket(item) {
   const t = textOf(item);
   const c = String(item?.category || "").toLowerCase();
   const source = String(item?.source_name || "");
 
-  if (["result", "win"].includes(c) || /結果を更新|レース結果|払戻|着順|優勝(?:した|を飾|決定|達成)|優出決定|V達成|初優勝|レース後/.test(t)) return "result";
-  if (c === "grade" || /\bSG\b|\bG1\b|GⅠ|\bG2\b|GⅡ|グランプリ|周年記念|グレードレース/.test(t)) return "grade";
-  if (c === "women" || /女子戦|女子レーサー|ヴィーナス|オールレディース|レディース|クイーンズ|女子ボート/.test(t)) return "women";
-  if (c === "suijinsai" || /水神祭|昇級|A1昇格|A2昇格|インタビュー|トークショー|結婚|引退|復帰|記録達成|選手特集|レーサー特集/.test(t)) return "racer";
-  if (["motor", "tomorrow"].includes(c) || /明日|翌日|あす|注目レース|高モーター|モーター|機力|展示|2連対率|優勝戦前|開催初日|初日注目/.test(t)) return "focus";
+  // 具体的なテーマを先に判定する。女子記事でもSG/G1や選手ニュースなら専用タブへ振り分ける。
+  if (c === "grade" || GRADE_RE.test(t)) return "grade";
+  if (["result", "win"].includes(c) || RESULT_RE.test(t)) return "result";
+  if (c === "suijinsai" || RACER_RE.test(t)) return "racer";
+  if (["motor", "tomorrow"].includes(c) || FOCUS_RE.test(t)) return "focus";
+  if (c === "women" || WOMEN_RE.test(t)) return "women";
 
   if (/BoatStrikers AI編集部|BoatStrikers編集部|BSオリジナル/i.test(source) || /BoatStrikers独自|独自分析|独自記事|AI分析|データ研究/.test(t)) return "bs";
   return "all";
