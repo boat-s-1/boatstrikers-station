@@ -41,10 +41,13 @@ test("official no-data is reported as unavailable rather than a layout change", 
   assert.equal(acquisitionReason({ ok: false, error: "official_measurements_unavailable" }), "unavailable");
 });
 
-test("all notification collectors persist only present values and support half-lap", () => {
-  for (const path of ["exhibition-alerts", "ichika-hidden-escape", "hatsune-womens-inner-break"]) {
-    const code = fs.readFileSync(new URL(`../app/api/cron/${path}/route.js`, import.meta.url), "utf8");
-    assert.ok(code.includes("row.halfLapTime!==null&&row.halfLapTime!==undefined"));
-    assert.ok(code.includes("update.official_half_lap=row.halfLapTime"));
+test("shared collector persists half-lap while theory crons consume saved data", () => {
+  const persistence = fs.readFileSync(new URL('../lib/officialExhibitionPersistence.js', import.meta.url), 'utf8');
+  const collector = fs.readFileSync(new URL('../app/api/cron/exhibition-alerts/route.js', import.meta.url), 'utf8');
+  assert.ok(persistence.includes("['halfLapTime', 'official_half_lap']"));
+  assert.ok(collector.includes('persistOfficialExhibition'));
+  for (const path of ['ichika-hidden-escape','hatsune-womens-inner-break']) {
+    const code=fs.readFileSync(new URL(`../app/api/cron/${path}/route.js`,import.meta.url),'utf8');
+    assert.ok(!code.includes('fetchBestOriginalTenji'));
   }
 });
