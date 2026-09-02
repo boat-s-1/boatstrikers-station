@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { classifyKiryuExhibition } from '../lib/kiryuExhibitionDiagnostic.js';
 
 const ranking=`<table><tr><th></th><th>1位</th><th>2位</th><th>3位</th></tr>
@@ -16,6 +17,11 @@ test('Kiryu rank table is kept separate from measurement times',()=>{
  assert.equal('rows' in result,false);
 });
 test('Kiryu non-racing page is explicit',()=>assert.equal(classifyKiryuExhibition('<h2>非開催</h2><p>次節開催までお待ちください</p>').classification,'not_published'));
+test('read-only probe recognizes only the fixed Kiryu non-racing redirect',()=>{
+ const route=readFileSync(new URL('../app/api/admin/official-exhibition-probe/route.js',import.meta.url),'utf8');
+ assert.ok(route.includes("location === '/sp/index.php?page=yosou-nokaisai'"));
+ assert.ok(route.includes("redirect: 'manual'"));
+});
 test('labels without verified six-boat values remain candidates only',()=>{
  const result=classifyKiryuExhibition('<p>半周ラップ/まわり足/直線/展示の測定位置とは</p>');
  assert.equal(result.classification,'measurement_candidate');assert.equal(result.persistenceAllowed,false);
