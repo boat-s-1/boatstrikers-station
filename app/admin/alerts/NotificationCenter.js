@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { loadStatus, formatJst, countText } from "../../../lib/adminDashboardStatus";
+import { loadStatus, formatJst, countText, sourceLabel, durationText } from "../../../lib/adminDashboardStatus";
 import styles from "../adminHome.module.css";
 
 export default async function NotificationCenter() {
@@ -29,7 +29,11 @@ export default async function NotificationCenter() {
                 {status.recentAlerts.map((row, index) => (
                   <Link href={row.href} className={styles.recentItem} key={`${row.theoryKey}-${row.race_date}-${row.course_code}-${row.race_no}-${index}`}>
                     <b>{row.icon}</b>
-                    <span><strong>{row.course_name || `場コード${row.course_code}`} {row.race_no}R</strong><small>{row.theoryName} ・ {formatJst(row.detected_at)}</small></span>
+                    <span>
+                      <strong>{row.course_name || `場コード${row.course_code}`} {row.race_no}R</strong>
+                      <small>{row.theoryName} ・ {formatJst(row.detected_at)}</small>
+                      <small>{sourceLabel(row.exhibition_source_kind)} ・ 取得→成立 {durationText(row.exhibition_synced_at, row.detected_at)} ・ 成立→LINE {durationText(row.detected_at, row.notified_at)}</small>
+                    </span>
                     <em className={row.notified ? styles.sent : styles.pending}>{row.notified ? "通知済" : "未通知"}</em>
                   </Link>
                 ))}
@@ -41,4 +45,3 @@ export default async function NotificationCenter() {
 
  );
 }
-
