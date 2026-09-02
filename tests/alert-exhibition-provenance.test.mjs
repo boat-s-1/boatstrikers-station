@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const migration = fs.readFileSync("supabase/migrations/20260902190000_alert_exhibition_provenance.sql", "utf8");
+const backfill = fs.readFileSync("supabase/migrations/20260902193000_backfill_alert_exhibition_provenance.sql", "utf8");
 const dashboard = fs.readFileSync("lib/adminDashboardStatus.js", "utf8");
 const center = fs.readFileSync("app/admin/alerts/NotificationCenter.js", "utf8");
 
@@ -32,4 +33,10 @@ test("notification center shows source and both latency stages", () => {
   assert.match(center, /取得→成立/);
   assert.match(center, /成立→LINE/);
   assert.match(center, /sourceLabel/);
+});
+
+test("recent history is backfilled without touching notification fields", () => {
+  assert.match(backfill, /race_date >= current_date - 30/);
+  assert.match(backfill, /update of exhibition_source_kind/);
+  assert.doesNotMatch(backfill, /notified\s*=/);
 });
