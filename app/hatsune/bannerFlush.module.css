@@ -1,0 +1,37 @@
+.shell {
+  display: contents;
+}
+
+.shell :global(.sectionCard:has(> img[src*="IMG_7883.jpeg"])) {
+  overflow: hidden;
+}
+
+.shell :global(.sectionCard > img[src*="IMG_7883.jpeg"]) {
+  display: block;
+  width: calc(100% + 36px);
+  max-width: none;
+  height: auto;
+  margin: -18px -18px 18px;
+  border-radius: 22px 22px 0 0;
+}
+
+.shell :global(.sectionCard:has(.sectionTitleRow img[src*="IMG_7960.jpeg"])),
+.shell :global(.sectionCard:has(.sectionTitleRow img[src*="IMG_7954.jpeg"])) {
+  overflow: hidden;
+}
+
+.shell :global(.sectionTitleRow:has(img[src*="IMG_7960.jpeg"])),
+.shell :global(.sectionTitleRow:has(img[src*="IMG_7954.jpeg"])) {
+  margin: -18px -18px 18px;
+  display: block;
+}
+
+.shell :global(.sectionTitleRow img[src*="IMG_7960.jpeg"]),
+.shell :global(.sectionTitleRow img[src*="IMG_7954.jpeg"]) {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  border-radius: 22px 22px 0 0;
+}
