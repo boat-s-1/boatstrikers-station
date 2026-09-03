@@ -30,9 +30,8 @@ export default async function HatsuneBoxAlertPanel(){
   const today=jstDateOffset(0),yesterday=jstDateOffset(-1);
   const [todayRows,yRows,allRows]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(101,56,122,.10)",border:"2px solid #ef79ac"}}>
-    <div style={{position:"relative",padding:"16px 14px 14px",background:"linear-gradient(135deg,#fff0f8,#fde8f5 50%,#fff8fc)",borderBottom:"1px solid #f3cadd",textAlign:"center"}}>
-      <div style={{fontSize:11,fontWeight:900,color:"#c93d78",letterSpacing:".08em"}}>🎀 女子戦の箱推しBOX 🎀</div>
-      <h2 style={{margin:"4px 0 0",fontSize:27,color:"#b72f70",textShadow:"0 1px #fff"}}>箱推し理論</h2>
+    <div style={{position:"relative",background:"#fff",borderBottom:"1px solid #f3cadd"}}>
+      <img src="/top/IMG_7970.jpeg?v=20260904-0340" alt="ヴィーナス箱推し理論" style={{display:"block",width:"100%",height:"auto"}} />
       <span style={{position:"absolute",top:10,right:10,padding:"7px 10px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
     </div>
     <div style={{padding:"15px 14px 8px"}}><div style={{marginBottom:8,fontSize:13,fontWeight:900,color:"#17345c"}}>アラート本数</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}><CountCard label="本日" count={todayRows.length}/><CountCard label="昨日" count={yRows.length}/><CountCard label="全期間" count={allRows.length} blue/></div></div>
