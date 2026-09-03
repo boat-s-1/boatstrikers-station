@@ -6,6 +6,22 @@
       "schedule": "10 3,6,9,13 * * *"
     },
     {
+      "path": "/api/cron/news-verify",
+      "schedule": "10 3,6,9,14,21 * * *"
+    },
+    {
+      "path": "/api/cron/news-verify",
+      "schedule": "40 13 * * *"
+    },
+    {
+      "path": "/api/cron/news-x-drafts",
+      "schedule": "15 3,6,9,14,21 * * *"
+    },
+    {
+      "path": "/api/cron/news-x-drafts",
+      "schedule": "45 13 * * *"
+    },
+    {
       "path": "/api/cron/news-editorials",
       "schedule": "20 3,6,9,14 * * *"
     }
