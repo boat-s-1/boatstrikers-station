@@ -75,6 +75,11 @@
   border-top-right-radius: 0 !important;
 }
 
+/* Hide the old page-local footer nav. The fixed global bottom nav is used instead. */
+.hatsunePage > nav.bottomNav {
+  display: none !important;
+}
+
 /* AI V2 panel */
 section[aria-label="初音 AI予想"] {
   overflow: hidden !important;
