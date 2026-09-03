@@ -22,6 +22,8 @@
 
 .shell :global(.sectionTitleRow:has(img[src*="IMG_7960.jpeg"])),
 .shell :global(.sectionTitleRow:has(img[src*="IMG_7954.jpeg"])) {
+  width: calc(100% + 36px);
+  max-width: none;
   margin: -18px -18px 18px;
   display: block;
 }
@@ -29,9 +31,9 @@
 .shell :global(.sectionTitleRow img[src*="IMG_7960.jpeg"]),
 .shell :global(.sectionTitleRow img[src*="IMG_7954.jpeg"]) {
   display: block;
-  width: 100%;
-  max-width: none;
+  width: 100% !important;
+  max-width: none !important;
   height: auto;
-  margin: 0;
+  margin: 0 !important;
   border-radius: 22px 22px 0 0;
 }
