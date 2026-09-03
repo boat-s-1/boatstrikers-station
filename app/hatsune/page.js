@@ -591,7 +591,7 @@ export default async function HatsunePage() {
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
           <img
-            src="/BFCC135A-C4EE-4AEB-B2E0-176AF51FFBD8.png"
+            src="/top/IMG_7960.jpeg?v=20260904-0315"
             alt="初音ラボ"
             className="homeTitleImage"
           />
@@ -649,7 +649,7 @@ export default async function HatsunePage() {
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow">
           <img
-            src="/691DC1E8-DDE7-4F33-A245-939DBA4BCDC2.png"
+            src="/top/IMG_7954.jpeg?v=20260904-0315"
             alt="初音ラジオ"
             className="homeTitleImage"
           />
