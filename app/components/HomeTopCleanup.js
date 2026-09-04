@@ -65,22 +65,32 @@ function setupLatestNewsBanner() {
   }
   if (!target) return;
 
+  const targetStyle = window.getComputedStyle(target);
+  const paddingTop = Number.parseFloat(targetStyle.paddingTop) || 0;
+  const paddingRight = Number.parseFloat(targetStyle.paddingRight) || 0;
+  const paddingLeft = Number.parseFloat(targetStyle.paddingLeft) || 0;
+
+  target.style.overflow = "hidden";
+
   const bannerLink = document.createElement("a");
   bannerLink.href = "/news";
   bannerLink.dataset.homeLatestNewsBanner = "true";
   bannerLink.setAttribute("aria-label", "最新ニュースを見る");
   bannerLink.style.display = "block";
-  bannerLink.style.width = "100%";
-  bannerLink.style.margin = "0 0 16px";
+  bannerLink.style.width = `calc(100% + ${paddingLeft + paddingRight}px)`;
+  bannerLink.style.margin = `-${paddingTop}px -${paddingRight}px 16px -${paddingLeft}px`;
+  bannerLink.style.padding = "0";
+  bannerLink.style.lineHeight = "0";
   bannerLink.style.textDecoration = "none";
 
   const banner = document.createElement("img");
-  banner.src = "/top/IMG_7985.jpeg?v=20260905-0756";
+  banner.src = "/top/IMG_7985.jpeg?v=20260905-0802";
   banner.alt = "最新のニュース 注目ニュースをチェック";
   banner.style.display = "block";
   banner.style.width = "100%";
   banner.style.height = "auto";
-  banner.style.borderRadius = "18px";
+  banner.style.margin = "0";
+  banner.style.borderRadius = "0";
   banner.style.objectFit = "cover";
 
   bannerLink.appendChild(banner);
