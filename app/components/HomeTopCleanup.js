@@ -46,6 +46,47 @@ function hideHomeExtras() {
   });
 }
 
+function setupLatestNewsBanner() {
+  const root = document.querySelector("main.page");
+  if (!root) return;
+
+  const existing = root.querySelector('[data-home-latest-news-banner="true"]');
+  if (existing) return;
+
+  const heading = Array.from(root.querySelectorAll("h1, h2, h3, strong, div")).find(
+    (element) => element.textContent?.trim() === "最新ニュース"
+  );
+
+  if (!heading) return;
+
+  let target = heading.closest("section");
+  if (!target) {
+    target = heading.parentElement?.parentElement || heading.parentElement;
+  }
+  if (!target) return;
+
+  const bannerLink = document.createElement("a");
+  bannerLink.href = "/news";
+  bannerLink.dataset.homeLatestNewsBanner = "true";
+  bannerLink.setAttribute("aria-label", "最新ニュースを見る");
+  bannerLink.style.display = "block";
+  bannerLink.style.width = "100%";
+  bannerLink.style.margin = "0 0 16px";
+  bannerLink.style.textDecoration = "none";
+
+  const banner = document.createElement("img");
+  banner.src = "/top/IMG_7985.jpeg?v=20260905-0756";
+  banner.alt = "最新のニュース 注目ニュースをチェック";
+  banner.style.display = "block";
+  banner.style.width = "100%";
+  banner.style.height = "auto";
+  banner.style.borderRadius = "18px";
+  banner.style.objectFit = "cover";
+
+  bannerLink.appendChild(banner);
+  target.prepend(bannerLink);
+}
+
 function setupNewspaperDots() {
   const rail = document.querySelector("main.page .todayNewsGrid");
   if (!rail || rail.dataset.newsDotsReady === "true") return () => {};
@@ -129,10 +170,12 @@ export default function HomeTopCleanup() {
     if (pathname !== "/") return;
 
     hideHomeExtras();
+    setupLatestNewsBanner();
     const cleanupDots = setupNewspaperDots();
 
     const observer = new MutationObserver(() => {
       hideHomeExtras();
+      setupLatestNewsBanner();
       setupNewspaperDots();
     });
 
@@ -141,6 +184,7 @@ export default function HomeTopCleanup() {
     return () => {
       observer.disconnect();
       cleanupDots();
+      document.querySelector('[data-home-latest-news-banner="true"]')?.remove();
     };
   }, [pathname]);
 
