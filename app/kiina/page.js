@@ -603,7 +603,7 @@ export default async function KiinaPage() {
       <section className="sectionCard yellowCard">
         <div className="sectionTitleRow">
           <img
-            src="/4879FC8D-D7D5-43FA-A5AB-EA44F595846D.png"
+            src="/top/IMG_7992.jpeg?v=20260905-0810"
             alt="キイナラボ"
             className="homeTitleImage"
           />
@@ -660,7 +660,7 @@ export default async function KiinaPage() {
       <section className="sectionCard yellowCard">
         <div className="sectionTitleRow">
           <img
-            src="/C339D52D-DD8D-4C57-AE7C-98B215DE002C.png"
+            src="/top/IMG_7993.jpeg?v=20260905-0810"
             alt="キイナラジオ"
             className="homeTitleImage"
           />
