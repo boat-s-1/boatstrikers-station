@@ -214,37 +214,17 @@ async function getKiinaResults() {
           )
         : "";
 
-    /*
-     * 的中画像
-     * 画像URLが登録されているデータを最大6件表示
-     */
     const hits = rows
-      .filter((row) =>
-        Boolean(row.hit_image_url)
-      )
+      .filter((row) => Boolean(row.hit_image_url))
       .slice(0, 6)
       .map((row) => {
-        const payout = Number(
-          row.payout || 0
-        );
+        const payout = Number(row.payout || 0);
 
         return {
           image: row.hit_image_url,
-
-          title:
-            row.hit_title ||
-            `${row.place}${row.race_no}R`,
-
-          race:
-            `${formatRaceDate(
-              row.race_date
-            )} ` +
-            `${row.place}${row.race_no}R`,
-
-          note:
-            row.hit_note ||
-            row.memo ||
-            `払戻 ${payout.toLocaleString()}円`,
+          title: row.hit_title || `${row.place}${row.race_no}R`,
+          race: `${formatRaceDate(row.race_date)} ${row.place}${row.race_no}R`,
+          note: row.hit_note || row.memo || `払戻 ${payout.toLocaleString()}円`,
         };
       });
 
@@ -260,16 +240,11 @@ async function getKiinaResults() {
       errorMessage: "",
     };
   } catch (error) {
-    console.error(
-      "キイナ成績の予期しないエラー:",
-      error
-    );
+    console.error("キイナ成績の予期しないエラー:", error);
 
     return {
       ...emptyKiinaResult,
-      errorMessage:
-        error?.message ||
-        "不明な取得エラー",
+      errorMessage: error?.message || "不明な取得エラー",
     };
   }
 }
@@ -278,14 +253,10 @@ async function getKiinaResults() {
    RSS画像取得
 ========================= */
 
-function getRssImage(
-  item,
-  fallbackImage
-) {
+function getRssImage(item, fallbackImage) {
   return (
-    item?.content?.match(
-      /<img[^>]+src="([^">]+)"/
-    )?.[1] || fallbackImage
+    item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
+    fallbackImage
   );
 }
 
@@ -296,40 +267,22 @@ function getRssImage(
 async function getKiinaNewspaper() {
   try {
     const parser = new Parser();
+    const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
-    const feed =
-      await parser.parseURL(
-        "https://note.com/boat_strikers/rss"
-      );
-
-    const item = feed.items.find(
-      (feedItem) =>
-        feedItem.title?.includes(
-          "【キイナ前日版】"
-        )
+    const item = feed.items.find((feedItem) =>
+      feedItem.title?.includes("【キイナ前日版】")
     );
 
-    if (!item) {
-      return null;
-    }
+    if (!item) return null;
 
     return {
-      title:
-        item.title ||
-        "キイナ前日版",
+      title: item.title || "キイナ前日版",
       link: item.link || "",
       date: item.pubDate || "",
-      image: getRssImage(
-        item,
-        "/kiina-banner.jpg"
-      ),
+      image: getRssImage(item, "/kiina-banner.jpg"),
     };
   } catch (error) {
-    console.error(
-      "キイナ新聞取得エラー:",
-      error
-    );
-
+    console.error("キイナ新聞取得エラー:", error);
     return null;
   }
 }
@@ -341,36 +294,19 @@ async function getKiinaNewspaper() {
 async function getKiinaArticles() {
   try {
     const parser = new Parser();
-
-    const feed =
-      await parser.parseURL(
-        "https://note.com/boat_strikers/rss"
-      );
+    const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
 
     return feed.items
-      .filter((item) =>
-        item.title?.includes(
-          "【キイナゼミ"
-        )
-      )
+      .filter((item) => item.title?.includes("【キイナゼミ"))
       .slice(0, 6)
       .map((item) => ({
-        title:
-          item.title ||
-          "キイナゼミ",
+        title: item.title || "キイナゼミ",
         link: item.link || "",
         date: item.pubDate || "",
-        image: getRssImage(
-          item,
-          "/kiina-banner.jpg"
-        ),
+        image: getRssImage(item, "/kiina-banner.jpg"),
       }));
   } catch (error) {
-    console.error(
-      "キイナゼミ取得エラー:",
-      error
-    );
-
+    console.error("キイナゼミ取得エラー:", error);
     return [];
   }
 }
@@ -380,20 +316,28 @@ async function getKiinaArticles() {
 ========================= */
 
 export default async function KiinaPage() {
-  const [
-    articles,
-    newspaper,
-    result,
-  ] = await Promise.all([
+  const [articles, newspaper, result] = await Promise.all([
     getKiinaArticles(),
     getKiinaNewspaper(),
     getKiinaResults(),
   ]);
 
+  const edgeBannerRowStyle = {
+    margin: "-18px -18px 16px",
+    width: "calc(100% + 36px)",
+  };
+
+  const edgeBannerImageStyle = {
+    display: "block",
+    width: "100%",
+    maxWidth: "none",
+    height: "auto",
+    margin: 0,
+    borderRadius: "22px 22px 0 0",
+  };
+
   return (
     <main className="page kiinaPage">
-      {/* ヘッダー */}
-
       <header className="header">
         <div className="logo">
           BOAT
@@ -411,8 +355,6 @@ export default async function KiinaPage() {
         </a>
       </header>
 
-      {/* ヒーロー */}
-
       <section className="hero">
         <Image
           src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png"
@@ -426,14 +368,12 @@ export default async function KiinaPage() {
 
       <RealtimeUpdates target="kiina" limit={5} />
 
-      {/* キイナ新聞 */}
-
       <section className="sectionCard yellowCard">
-                  <img
-            src="/1B69AC06-7A4F-40A9-A199-AD15FC0AD5FB.png"
-            alt="キイナ新聞"
-            className="homeTitleImage"
-          />
+        <img
+          src="/1B69AC06-7A4F-40A9-A199-AD15FC0AD5FB.png"
+          alt="キイナ新聞"
+          className="homeTitleImage"
+        />
 
         {newspaper ? (
           <a
@@ -449,39 +389,22 @@ export default async function KiinaPage() {
             />
 
             <div>
-              <h3>
-                {newspaper.title}
-              </h3>
-
+              <h3>{newspaper.title}</h3>
               <p>
                 {newspaper.date
-                  ? new Date(
-                      newspaper.date
-                    ).toLocaleDateString(
-                      "ja-JP"
-                    )
+                  ? new Date(newspaper.date).toLocaleDateString("ja-JP")
                   : ""}
               </p>
-
-              <span className="yellowBtn">
-                📖 新聞を読む
-              </span>
+              <span className="yellowBtn">📖 新聞を読む</span>
             </div>
           </a>
         ) : (
-          <p>
-            今日のキイナ新聞は
-            まだありません。
-          </p>
+          <p>今日のキイナ新聞はまだありません。</p>
         )}
       </section>
 
-      {/* 5アタマ予想ツール */}
-
       <section className="sectionCard">
-        <h2>
-          5アタマ予想ツール（β版）
-        </h2>
+        <h2>5アタマ予想ツール（β版）</h2>
 
         <a
           href="https://www.boat-strike.com/kiina5.html"
@@ -502,174 +425,123 @@ export default async function KiinaPage() {
         </a>
       </section>
 
-      {/* 今月の成績 */}
-
       <section className="sectionCard purpleCard">
         <img
-            src="/7356D909-4CCD-4D17-AA82-6173A350D2DC.png"
-            alt="キイナ成績"
-            className="homeTitleImage"
-          />
+          src="/7356D909-4CCD-4D17-AA82-6173A350D2DC.png"
+          alt="キイナ成績"
+          className="homeTitleImage"
+        />
 
         <p className="recordLead">
-          最終更新：
-          {result.updated ||
-            "まだ登録がありません"}
+          最終更新：{result.updated || "まだ登録がありません"}
         </p>
 
         {result.errorMessage && (
           <p
             className="recordLead"
-            style={{
-              color: "#d93025",
-              wordBreak: "break-word",
-            }}
+            style={{ color: "#d93025", wordBreak: "break-word" }}
           >
-            成績取得エラー：
-            {result.errorMessage}
+            成績取得エラー：{result.errorMessage}
           </p>
         )}
 
         <div className="recordGrid">
           <div className="recordCard">
-            <span>
-              予想レース数
-            </span>
-
-            <strong>
-              {result.raceCount}R
-            </strong>
-
+            <span>予想レース数</span>
+            <strong>{result.raceCount}R</strong>
             <p>今月の予想数</p>
           </div>
 
           <div className="recordCard">
             <span>的中率</span>
-
-            <strong>
-              {result.hitRate}%
-            </strong>
-
-            <p>
-              {result.hitCount}R的中
-            </p>
+            <strong>{result.hitRate}%</strong>
+            <p>{result.hitCount}R的中</p>
           </div>
 
           <div className="recordCard">
             <span>回収率</span>
-
-            <strong>
-              {result.returnRate}%
-            </strong>
-
+            <strong>{result.returnRate}%</strong>
             <p>
-              収支
-              {result.profit > 0
-                ? "+"
-                : ""}
-              {result.profit.toLocaleString()}
-              円
+              収支{result.profit > 0 ? "+" : ""}
+              {result.profit.toLocaleString()}円
             </p>
           </div>
 
           <div className="recordCard">
             <span>最高配当</span>
-
-            <strong>
-              {result.bestHit.toLocaleString()}
-              円
-            </strong>
-
+            <strong>{result.bestHit.toLocaleString()}円</strong>
             <p>今月最高払戻</p>
           </div>
         </div>
 
-        {/* 的中画像 */}
-
         {result.hits.length > 0 ? (
-          <HitGallery
-            hits={result.hits}
-          />
+          <HitGallery hits={result.hits} />
         ) : (
-          <p className="recordLead">
-            的中画像は
-            まだ登録されていません。
-          </p>
+          <p className="recordLead">的中画像はまだ登録されていません。</p>
         )}
       </section>
 
       {/* 穴党ラボ */}
-
-      <section className="sectionCard yellowCard">
-        <div className="sectionTitleRow">
+      <section
+        className="sectionCard yellowCard"
+        style={{ overflow: "hidden" }}
+      >
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img
             src="/top/IMG_7992.jpeg?v=20260905-0810"
             alt="キイナラボ"
             className="homeTitleImage"
+            style={edgeBannerImageStyle}
           />
         </div>
 
         {articles.length > 0 ? (
           <div className="labList">
-            {articles.map(
-              (article) => (
-                <a
-                  key={article.link}
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="labItem"
-                >
-                  <img
-                    src={
-                      article.image ||
-                      "/kiina-banner.jpg"
-                    }
-                    alt={article.title}
-                  />
+            {articles.map((article) => (
+              <a
+                key={article.link}
+                href={article.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="labItem"
+              >
+                <img
+                  src={article.image || "/kiina-banner.jpg"}
+                  alt={article.title}
+                />
 
-                  <div>
-                    <h3>
-                      {article.title}
-                    </h3>
-
-                    <small>
-                      {article.date
-                        ? new Date(
-                            article.date
-                          ).toLocaleDateString(
-                            "ja-JP"
-                          )
-                        : ""}
-                    </small>
-                  </div>
-                </a>
-              )
-            )}
+                <div>
+                  <h3>{article.title}</h3>
+                  <small>
+                    {article.date
+                      ? new Date(article.date).toLocaleDateString("ja-JP")
+                      : ""}
+                  </small>
+                </div>
+              </a>
+            ))}
           </div>
         ) : (
-          <p>
-            穴党ラボの記事は
-            まだありません。
-          </p>
+          <p>穴党ラボの記事はまだありません。</p>
         )}
       </section>
 
       {/* ラジオ */}
-
-      <section className="sectionCard yellowCard">
-        <div className="sectionTitleRow">
+      <section
+        className="sectionCard yellowCard"
+        style={{ overflow: "hidden" }}
+      >
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img
             src="/top/IMG_7993.jpeg?v=20260905-0810"
             alt="キイナラジオ"
             className="homeTitleImage"
+            style={edgeBannerImageStyle}
           />
         </div>
 
         <p className="radioLead">
-          キイナが高配当狙い・
-          5アタマの考え方・
-          穴党反省会を配信中！
+          キイナが高配当狙い・5アタマの考え方・穴党反省会を配信中！
         </p>
 
         <div className="radioPlayer">
@@ -694,8 +566,6 @@ export default async function KiinaPage() {
         </a>
       </section>
 
-      {/* LINE登録 */}
-
       <section className="sectionCard lineBannerCard">
         <a
           href="https://lin.ee/Pf3FEEQ"
@@ -711,20 +581,12 @@ export default async function KiinaPage() {
         </a>
       </section>
 
-      {/* 下部ナビ */}
-
       <nav className="bottomNav">
         <a href="/">ホーム</a>
         <a href="/ichika">一果</a>
-        <a href="/hatsune">
-          初音
-        </a>
-        <a href="/kiina">
-          キイナ
-        </a>
-        <a href="/library">
-          図書館
-        </a>
+        <a href="/hatsune">初音</a>
+        <a href="/kiina">キイナ</a>
+        <a href="/library">図書館</a>
       </nav>
     </main>
   );
