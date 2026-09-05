@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { buildTrifectaProbabilities, probabilityFor } from "./eliminationProbability";
 import styles from "./elimination-lab.module.css";
 
+const BOATS = [1, 2, 3, 4, 5, 6];
 const ALL_BETS = (() => {
   const bets = [];
-  for (let a = 1; a <= 6; a += 1) {
-    for (let b = 1; b <= 6; b += 1) {
+  for (const a of BOATS) {
+    for (const b of BOATS) {
       if (a === b) continue;
-      for (let c = 1; c <= 6; c += 1) {
+      for (const c of BOATS) {
         if (c === a || c === b) continue;
         bets.push([a, b, c]);
       }
@@ -46,12 +47,14 @@ function bottomBoats(entries, keys, count = 2, options = {}) {
   return ranked.length >= 4 ? ranked.slice(-count).map((row) => row.boat) : [];
 }
 function buildMarketProbabilities(odds) {
-  const raw = {}; let total = 0;
+  const raw = {};
+  let total = 0;
   for (const bet of ALL_BETS) {
     const currentOdds = oddsFor(odds, bet);
     if (!currentOdds) continue;
     const p = 1 / currentOdds;
-    raw[betKey(bet)] = p; total += p;
+    raw[betKey(bet)] = p;
+    total += p;
   }
   if (!total) return {};
   return Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, value / total]));
@@ -71,6 +74,32 @@ function valueMetrics(probabilities, marketProbabilities, odds, bet) {
   return { corrected, market: Number.isFinite(market) ? market : null, currentOdds, ratio, ev };
 }
 
+function OddsRow({ bet, odds, evaluation, probabilities, marketProbabilities, expanded, onToggle }) {
+  const key = betKey(bet);
+  const state = evaluation.map[key] || { eliminated: false, restored: false, reasons: [] };
+  const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
+  const currentOdds = metrics.currentOdds;
+  const className = state.restored ? styles.oddsRowRestored : state.eliminated ? styles.oddsRowEliminated : styles.oddsRowAlive;
+  return (
+    <button type="button" className={`${styles.oddsRow} ${className}`} onClick={onToggle}>
+      <div className={styles.oddsMain}>
+        <strong>{key}</strong>
+        <span>{currentOdds ? `${currentOdds}倍` : "-"}</span>
+      </div>
+      <div className={styles.oddsStatus}>{state.restored ? "補正復活" : state.eliminated ? "消去" : "残す"}</div>
+      {expanded && (
+        <div className={styles.oddsDetail}>
+          <span>補正推定 {metrics.corrected !== null ? `${(metrics.corrected * 100).toFixed(2)}%` : "-"}</span>
+          <span>市場 {metrics.market !== null ? `${(metrics.market * 100).toFixed(2)}%` : "-"}</span>
+          <span>市場比 {metrics.ratio !== null ? `${metrics.ratio.toFixed(2)}倍` : "-"}</span>
+          <span>推定EV {metrics.ev !== null ? `${metrics.ev.toFixed(0)}%` : "-"}</span>
+          {state.reasons.length > 0 && <small>{state.reasons.join(" / ")}</small>}
+        </div>
+      )}
+    </button>
+  );
+}
+
 export default function EliminationLabClient({
   entries, premiumAccess = false, syncedAt, exhibitionReady,
   odds = {}, oddsCount = 0, oddsFetchedAt = null, oddsSource = null, oddsError = null,
@@ -81,6 +110,8 @@ export default function EliminationLabClient({
   const [a1Correction, setA1Correction] = useState(false);
   const [valueEnabled, setValueEnabled] = useState(false);
   const [evThreshold, setEvThreshold] = useState(100);
+  const [activeFirst, setActiveFirst] = useState(1);
+  const [expandedBet, setExpandedBet] = useState(null);
 
   const exhibitionBottom3 = useMemo(() => bottomBoats(entries, ["exhibition_time", "official_exhibition_time", "tenji_time", "display_time"], 3, { lowerIsBetter: true }), [entries]);
   const exhibitionBottom2 = useMemo(() => bottomBoats(entries, ["exhibition_time", "official_exhibition_time", "tenji_time", "display_time"], 2, { lowerIsBetter: true }), [entries]);
@@ -127,6 +158,15 @@ export default function EliminationLabClient({
     return { map, remain };
   }, [enabled, premiumAccess, a1Correction, a1Boats, valueEnabled, valueAvailable, evThreshold, probabilities, marketProbabilities, odds, exhibitionBottom3, exhibitionBottom2, stBottom2, motorBottom2, winBottom2]);
 
+  const headCounts = useMemo(() => {
+    const result = {};
+    for (const first of BOATS) {
+      const bets = ALL_BETS.filter((bet) => bet[0] === first);
+      result[first] = bets.filter((bet) => !evaluation.map[betKey(bet)]?.eliminated).length;
+    }
+    return result;
+  }, [evaluation]);
+
   const toggleRule = (rule) => {
     if (!rule.available) return;
     if (!premiumAccess && !rule.free) return;
@@ -135,13 +175,14 @@ export default function EliminationLabClient({
   const refresh = () => startTransition(() => router.refresh());
   const removed = 120 - evaluation.remain;
   const removalRate = Math.round((removed / 120) * 1000) / 10;
+  const activeBets = ALL_BETS.filter((bet) => bet[0] === activeFirst);
 
   return (
     <div className={styles.wrap}>
       {!premiumAccess && (
-        <section style={{ padding: 16, borderRadius: 16, background: "#fff7ed", border: "1px solid #fed7aa", marginBottom: 14 }}>
-          <strong style={{ color: "#9a4a12" }}>FREE TRIAL</strong>
-          <p style={{ margin: "6px 0 0", color: "#76553b", fontSize: 12, lineHeight: 1.7, fontWeight: 700 }}>無料では「展示4〜6位を1着から消す」を体験できます。その他の消去条件・A1補正・VALUE判定はプレミアム会員限定です。</p>
+        <section className={styles.freeTrial}>
+          <strong>FREE TRIAL</strong>
+          <p>無料では「展示4〜6位を1着から消す」を体験できます。その他の消去条件・A1補正・VALUE判定はプレミアム会員限定です。</p>
         </section>
       )}
 
@@ -182,38 +223,43 @@ export default function EliminationLabClient({
           <span className={styles.switch}>{!premiumAccess ? "🔒" : valueEnabled ? "ON" : "OFF"}</span>
           <span><strong>市場補正VALUEでさらに消す</strong><small>{!premiumAccess ? "プレミアム会員限定" : valueAvailable ? `EV ${evThreshold}%以上を残す（最低確率0.5%・市場比1.15倍も併用）` : "確率またはオッズデータ待ち"}</small></span>
         </button>
-        {premiumAccess && <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6, marginTop: 8 }}>{[80,100,120].map((v) => <button key={v} onClick={() => setEvThreshold(v)} style={{ padding: 9, borderRadius: 10, border: evThreshold === v ? "2px solid #ef7b22" : "1px solid #dfe6ef", background: evThreshold === v ? "#fff7ed" : "#fff", fontWeight: 900 }}>{v}%</button>)}</div>}
+        {premiumAccess && <div className={styles.evButtons}>{[80,100,120].map((v) => <button key={v} onClick={() => setEvThreshold(v)} className={evThreshold === v ? styles.evActive : ""}>{v}%</button>)}</div>}
       </section>
 
       <section className={styles.betPanel}>
         <div className={styles.sectionTitle}><span>STEP 2</span><h2>3連単オッズ表</h2></div>
-        {oddsError && <p style={{ color: "#a23434", fontWeight: 800 }}>オッズ取得エラー：{oddsError}</p>}
-        <p style={{ margin: "0 0 10px", color: "#738195", fontSize: 11, fontWeight: 700 }}>白＝残す / グレー＝消去 / 黄＝補正で復活。条件をONにすると該当セルが塗りつぶされます。</p>
-        <div style={{ overflowX: "auto", paddingBottom: 8 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 170px)", gap: 8, minWidth: 1060 }}>
-            {[1,2,3,4,5,6].map((first) => (
-              <div key={first} style={{ background: "#fff", borderRadius: 14, border: "1px solid #e3e9f0", overflow: "hidden" }}>
-                <div style={{ padding: "10px 8px", fontWeight: 1000, textAlign: "center", background: first === 1 ? "#f4f4f4" : "#eef4fb" }}>{first}号艇 1着</div>
-                {ALL_BETS.filter((bet) => bet[0] === first).map((bet) => {
-                  const state = evaluation.map[betKey(bet)] || {};
-                  const currentOdds = oddsFor(odds, bet);
-                  const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
-                  const bg = state.restored ? "#fff4b8" : state.eliminated ? "#e5e7eb" : "#fff";
-                  return (
-                    <div key={betKey(bet)} title={(state.reasons || []).join(" / ")} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 6, padding: "8px 9px", borderTop: "1px solid #edf0f4", background: bg, opacity: state.eliminated ? .58 : 1 }}>
-                      <span style={{ fontWeight: 900 }}>{betKey(bet)}</span>
-                      <span style={{ fontWeight: 900, color: "#b85b16" }}>{currentOdds ? `${currentOdds}倍` : "-"}</span>
-                      {premiumAccess && metrics.corrected !== null && <small style={{ gridColumn: "1 / -1", color: "#718096" }}>推定 {(metrics.corrected * 100).toFixed(2)}%{metrics.ev !== null ? ` / EV ${metrics.ev.toFixed(0)}%` : ""}</small>}
-                    </div>
-                  );
-                })}
-              </div>
+        {oddsError && <p className={styles.oddsError}>オッズ取得エラー：{oddsError}</p>}
+        <p className={styles.legend}>白＝残す / グレー＝消去 / 黄＝補正で復活。買い目をタップすると詳細を表示します。</p>
+
+        <div className={styles.mobileOdds}>
+          <div className={styles.headTabs}>
+            {BOATS.map((first) => (
+              <button key={first} type="button" className={activeFirst === first ? styles.headTabActive : ""} onClick={() => { setActiveFirst(first); setExpandedBet(null); }}>
+                <strong>{first}頭</strong><small>{headCounts[first]}/20</small>
+              </button>
+            ))}
+          </div>
+          <div className={styles.mobileOddsHeader}><strong>{activeFirst}号艇 1着</strong><span>残り {headCounts[activeFirst]}/20</span></div>
+          <div className={styles.mobileRows}>
+            {activeBets.map((bet) => (
+              <OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={expandedBet === betKey(bet)} onToggle={() => setExpandedBet((prev) => prev === betKey(bet) ? null : betKey(bet))} />
             ))}
           </div>
         </div>
+
+        <div className={styles.desktopOdds}>
+          {BOATS.map((first) => (
+            <div className={styles.oddsColumn} key={first}>
+              <div className={styles.oddsColumnHeader}><strong>{first}号艇 1着</strong><small>{headCounts[first]}/20</small></div>
+              {ALL_BETS.filter((bet) => bet[0] === first).map((bet) => (
+                <OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={false} onToggle={() => {}} />
+              ))}
+            </div>
+          ))}
+        </div>
       </section>
 
-      <aside className={styles.note}>{premiumAccess ? "消去条件と補正条件を組み合わせて、120通りから買わない目を削れます。" : "無料体験では1条件のみ利用できます。ロック中の条件はプレミアム会員で解放されます。"}</aside>
+      <aside className={styles.note}>条件を追加するほどセルが消えていきます。0通りになった場合は「買える目なし＝見送り」という使い方を想定しています。VALUEは推定指標で、回収率や利益を保証するものではありません。</aside>
     </div>
   );
 }
