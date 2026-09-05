@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { formatJstDateTime, getCourseName, getRaceDetail, normalizeCourseCode, normalizeDate, normalizeRaceNo } from "../../../../lib/boatstrikersPlatform";
 import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../../lib/memberEntitlement";
+import { getOfficialTrifectaOdds } from "../../../../../lib/boatraceOdds";
 import EliminationLabClient from "./EliminationLabClient";
 
 export const dynamic = "force-dynamic";
@@ -53,8 +54,18 @@ export default async function EliminationLabPage({ params, searchParams }) {
 
   let data = null;
   let loadError = null;
+  let oddsData = null;
+  let oddsError = null;
+
   try {
-    data = await getRaceDetail(raceDate, courseCode, raceNo);
+    [data, oddsData] = await Promise.all([
+      getRaceDetail(raceDate, courseCode, raceNo),
+      getOfficialTrifectaOdds({ raceDate, courseCode, raceNo }).catch((error) => {
+        oddsError = error instanceof Error ? error.message : "3連単オッズを取得できませんでした。";
+        console.error("elimination lab odds error", error);
+        return null;
+      }),
+    ]);
   } catch (error) {
     console.error(error);
     loadError = error instanceof Error ? error.message : "レースデータの読み込みに失敗しました。";
@@ -81,7 +92,16 @@ export default async function EliminationLabPage({ params, searchParams }) {
       ) : entries.length === 0 ? (
         <div style={{ padding: 18, borderRadius: 16, background: "#fff", color: "#66788a", fontWeight: 800 }}>このレースの出走データがありません。</div>
       ) : (
-        <EliminationLabClient entries={entries} syncedAt={data?.event?.synced_at ? formatJstDateTime(data.event.synced_at) : null} exhibitionReady={hasExhibition(entries)} />
+        <EliminationLabClient
+          entries={entries}
+          syncedAt={data?.event?.synced_at ? formatJstDateTime(data.event.synced_at) : null}
+          exhibitionReady={hasExhibition(entries)}
+          odds={oddsData?.odds || {}}
+          oddsCount={oddsData?.count || 0}
+          oddsFetchedAt={oddsData?.fetchedAt ? formatJstDateTime(oddsData.fetchedAt) : null}
+          oddsSource={oddsData?.source || null}
+          oddsError={oddsError}
+        />
       )}
     </main>
   );
