@@ -377,19 +377,27 @@ export default async function RacesPage({ searchParams }) {
           <div className={styles.portalSectionHead}>
             <div><span>HIT FLASH</span><h2>🎯 的中速報</h2></div><Link href="/ai-results">成績を見る →</Link>
           </div>
-          <div className={styles.hitFlashList}>
-            {hitFlash.map((item, index) => {
-              const code = String(item.course_code ?? item.stadium_code ?? "").padStart(2, "0");
-              const raceNo = Number(item.race_no ?? item.raceNo);
-              return (
-                <Link key={item.id ?? `${code}-${raceNo}-${index}`} className={styles.hitFlashCard} href={`/races/${code}/${raceNo}?date=${raceDate}`}>
-                  <div className={styles.hitFlashIcon}>的中</div>
-                  <div className={styles.hitFlashMain}><span>{item.label ?? item.prediction_type ?? "的中"}</span><strong>{getCourseName(code)} {raceNo}R</strong><small>{item.ticket ?? item.bet ?? ""}</small></div>
-                  <div className={styles.hitFlashMoney}><small>払戻</small><strong>{yen(item.payout ?? item.payout_yen ?? 0)}</strong></div>
-                </Link>
-              );
-            })}
-          </div>
+          {hitFlash.length > 0 ? (
+            <div className={styles.hitFlashList}>
+              {hitFlash.map((item, index) => {
+                const code = String(item.course_code ?? item.stadium_code ?? "").padStart(2, "0");
+                const raceNo = Number(item.race_no ?? item.raceNo);
+                return (
+                  <Link key={item.id ?? `${code}-${raceNo}-${index}`} className={styles.hitFlashCard} href={`/races/${code}/${raceNo}?date=${raceDate}`}>
+                    <div className={styles.hitFlashIcon}>的中</div>
+                    <div className={styles.hitFlashMain}><span>{item.label ?? item.prediction_type ?? "的中"}</span><strong>{getCourseName(code)} {raceNo}R</strong><small>{item.ticket ?? item.bet ?? ""}</small></div>
+                    <div className={styles.hitFlashMoney}><small>払戻</small><strong>{yen(item.payout ?? item.payout_yen ?? 0)}</strong></div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={styles.portalEmpty}>
+              <span>🎯</span>
+              <strong>現在、的中速報はありません</strong>
+              <p>的中が確定すると、ここに自動で表示されます。</p>
+            </div>
+          )}
         </section>
 
         <AlertFlash />
