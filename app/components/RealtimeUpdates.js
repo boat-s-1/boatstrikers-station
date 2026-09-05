@@ -96,8 +96,12 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
     return <KiinaAlertPanel />;
   }
 
+  if (compact) {
+    return null;
+  }
+
   const items = await getItems(target, limit);
-  const isCompact = compact || target === "races";
+  const isCompact = target === "races";
   const visibleItems = isCompact ? items.slice(0, 1) : items;
 
   const realtimeSection = (
