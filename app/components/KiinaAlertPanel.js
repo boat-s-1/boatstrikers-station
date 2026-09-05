@@ -62,11 +62,9 @@ export default async function KiinaAlertPanel(){
   const yPerf4=getPerformance(yRows),allPerf4=getPerformance(allRows);
 
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(141,105,20,.10)",border:"2px solid #e8bc48"}}>
-    <div style={{position:"relative",padding:"18px 18px 16px",background:"linear-gradient(135deg,#fff0a8 0%,#ffe28b 45%,#fff 100%)",borderBottom:"1px solid #f1ddb0"}}>
-      <div style={{fontSize:11,fontWeight:900,letterSpacing:".08em",color:"#9c6700"}}>🚨 今日のキイナアラート</div>
-      <h2 style={{margin:"4px 0 2px",fontSize:25,color:"#4c3a12",lineHeight:1.15}}>カド攻め理論</h2>
-      <div style={{fontSize:12,fontWeight:800,color:"#765d22"}}>4号艇のカド攻めが期待できる狙い目を検知</div>
-      <span style={{position:"absolute",top:13,right:12,padding:"7px 10px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
+    <div style={{position:"relative",lineHeight:0,background:"#fff",overflow:"hidden"}}>
+      <img src="/top/IMG_8030.jpeg?v=20260906-0706" alt="今日のキイナアラート カド攻め理論" style={{display:"block",width:"100%",height:"auto",margin:0,objectFit:"cover"}} />
+      <span style={{position:"absolute",top:10,right:10,padding:"6px 9px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900,lineHeight:1.2}}>{formatDate(today)}</span>
     </div>
 
     <div style={{padding:"15px 14px 8px"}}>
