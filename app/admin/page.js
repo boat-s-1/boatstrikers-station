@@ -30,6 +30,7 @@ const GROUPS = [
       { href: "/admin/ai-candidates", icon: "✨", title: "AI今日の候補", text: "一果・初音・キイナの候補からホーム・SNS使用レースを選択", badge: "NEW" },
       { href: "/admin/results", icon: "🏆", title: "予想実績管理", text: "予想・投資・払戻・的中画像を登録", badge: "よく使う" },
       { href: "/admin/ai-bet-stats", icon: "📊", title: "AI買い目成績", text: "AI予想の的中率・回収率・収支を確認", badge: "よく使う" },
+      { href: "/admin/condition-research", icon: "🧪", title: "回収率100%条件リサーチ", text: "一果・初音・キイナの理論成立履歴を条件別に比較してプラス条件を探す", badge: "NEW" },
       { href: "/ai-results", icon: "👀", title: "公開成績を見る", text: "ユーザーに見えているAI成績ページを確認" },
     ],
   },
@@ -74,6 +75,7 @@ const FAVORITES = [
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
   { href: "/admin/results", icon: "🏆", title: "予想実績" },
   { href: "/admin/ai-bet-stats", icon: "📊", title: "AI成績" },
+  { href: "/admin/condition-research", icon: "🧪", title: "条件研究" },
   { href: "/admin/sync", icon: "🔄", title: "同期状態" },
 ];
 
