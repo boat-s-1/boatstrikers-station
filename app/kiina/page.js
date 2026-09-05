@@ -368,12 +368,18 @@ export default async function KiinaPage() {
 
       <RealtimeUpdates target="kiina" limit={5} />
 
-      <section className="sectionCard yellowCard">
-        <img
-          src="/1B69AC06-7A4F-40A9-A199-AD15FC0AD5FB.png"
-          alt="キイナ新聞"
-          className="homeTitleImage"
-        />
+      <section
+        className="sectionCard yellowCard"
+        style={{ overflow: "hidden" }}
+      >
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
+          <img
+            src="/top/IMG_8019.jpeg?v=20260906-0649"
+            alt="5アタマ攻略新聞"
+            className="homeTitleImage"
+            style={edgeBannerImageStyle}
+          />
+        </div>
 
         {newspaper ? (
           <a
@@ -425,12 +431,18 @@ export default async function KiinaPage() {
         </a>
       </section>
 
-      <section className="sectionCard purpleCard">
-        <img
-          src="/7356D909-4CCD-4D17-AA82-6173A350D2DC.png"
-          alt="キイナ成績"
-          className="homeTitleImage"
-        />
+      <section
+        className="sectionCard purpleCard"
+        style={{ overflow: "hidden" }}
+      >
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
+          <img
+            src="/top/IMG_8020.jpeg?v=20260906-0649"
+            alt="今月の成績"
+            className="homeTitleImage"
+            style={edgeBannerImageStyle}
+          />
+        </div>
 
         <p className="recordLead">
           最終更新：{result.updated || "まだ登録がありません"}
