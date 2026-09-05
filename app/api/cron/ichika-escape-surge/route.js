@@ -45,31 +45,28 @@ function minutesUntil(raceDate, closingTime) {
 function buildLineText(alert) {
   const closing = formatClosingTime(alert.closing_time);
   const remaining = minutesUntil(alert.race_date, alert.closing_time);
-  const remainingText = remaining == null ? "" : `締切まで約${Math.max(0, Math.ceil(remaining))}分`;
+  const remainingMinutes = remaining == null ? null : Math.max(0, Math.ceil(remaining));
   const raceUrl = `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;
   const recommended = alert.recommended_second_boat
-    ? `🎯 2着おすすめ：${alert.recommended_second_boat}号艇\n※2着は参考候補です`
-    : "※2着おすすめは参考情報です";
+    ? `🎯 2着候補：${alert.recommended_second_boat}号艇`
+    : "🎯 2着候補：-";
+  const raceLine = `${alert.course_name || ""} ${alert.race_no}R`;
+  const closingLine = [
+    closing ? `〆切 ${closing}` : "",
+    remainingMinutes == null ? "" : `あと${remainingMinutes}分`,
+  ].filter(Boolean).join("｜");
 
   return [
-    "🔥【一果・イン逃げ急上昇アラート】",
-    `${alert.course_name || ""} ${alert.race_no}R`,
+    "【速報】一果イン逃げアラート成立！",
     "",
-    "①号艇が",
-    "展示タイム1位 ＋ 一周タイム1位",
-    "条件成立！",
-    "",
-    "📈 イン逃げ率",
-    `通常 ${Number(alert.baseline_win_rate || 51.7).toFixed(1)}% → 条件時 ${Number(alert.signal_win_rate || 66.36).toFixed(1)}%`,
-    `約${Math.round(Number(alert.uplift_points || 14.66))}ポイント上昇中！`,
+    raceLine,
+    closingLine,
     "",
     recommended,
     "",
-    closing ? `締切 ${closing}` : "",
-    remainingText,
-    "レース詳細を見る",
+    "出走表・展示情報はコチラ",
     raceUrl,
-  ].filter((line) => line !== "").join("\n");
+  ].filter((line, index, lines) => line !== "" || (index > 0 && lines[index - 1] !== "")).join("\n");
 }
 
 async function getRecipients(supabase) {
