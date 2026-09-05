@@ -19,7 +19,7 @@ function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo
 function minutesUntil(raceDate,closingTime){if(!closingTime)return null;const t=String(closingTime).slice(0,8);const ms=new Date(`${raceDate}T${t}+09:00`).getTime()-Date.now();return ms/60000;}
 function authorized(request){const secret=process.env.CRON_SECRET;if(secret&&request.headers.get("authorization")===`Bearer ${secret}`)return true;const token=request.headers.get("x-supabase-cron-token")||"";const digest=crypto.createHash("sha256").update(token).digest("hex");return token.length>0&&crypto.timingSafeEqual(Buffer.from(digest),Buffer.from(SUPABASE_CRON_TOKEN_SHA256));}
 function formatClosingTime(value){return value?String(value).slice(0,5):null;}
-function buildLineText(alert){const remaining=minutesUntil(alert.race_date,alert.closing_time);const remainingMinutes=remaining===null?null:Math.max(0,Math.ceil(remaining));const closing=formatClosingTime(alert.closing_time);const raceUrl=`https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;const raceLine=`${alert.course_name||""} ${alert.race_no}R`;const closingLine=[closing?`〆切 ${closing}`:"",remainingMinutes===null?"":`あと${remainingMinutes}分`].filter(Boolean).join("｜");const rankLine=`展示${alert.exhibition_rank??"-"}位 ＋ 直線${alert.straight_rank??"-"}位`;return ["【速報】4→5理論成立！","",raceLine,closingLine,"",rankLine,"","出走表・展示情報はコチラ",raceUrl].filter((line,index,lines)=>line!==""||(index>0&&lines[index-1]!=="")).join("\n");}
+function buildLineText(alert){const remaining=minutesUntil(alert.race_date,alert.closing_time);const remainingMinutes=remaining===null?null:Math.max(0,Math.ceil(remaining));const closing=formatClosingTime(alert.closing_time);const raceUrl=`https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;const raceLine=`${alert.course_name||""} ${alert.race_no}R`;const closingLine=[closing?`〆切 ${closing}`:"",remainingMinutes===null?"":`あと${remainingMinutes}分`].filter(Boolean).join("｜");const rankLine=`展示${alert.exhibition_rank??"-"}位 ＋ 直線${alert.straight_rank??"-"}位`;return ["【速報】カド攻め理論成立！","",raceLine,closingLine,"",rankLine,"","出走表・展示情報はコチラ",raceUrl].filter((line,index,lines)=>line!==""||(index>0&&lines[index-1]!=="")).join("\n");}
 
 function hasValue(value){return value!==null&&value!==undefined&&value!=="";}
 function numberOrNull(value){if(!hasValue(value))return null;const n=Number(value);return Number.isFinite(n)?n:null;}
@@ -119,7 +119,7 @@ function buildWeatherUpdate(weather,syncedAt){
   if(weather.windDirection){update.wind_direction=weather.windDirection;update.wind_direction_code=weather.windDirection;update.api_wind_direction_code=weather.windDirection;}
   if(weather.windSpeed!==null&&weather.windSpeed!==undefined){update.wind_speed=weather.windSpeed;update.api_wind_speed=weather.windSpeed;}
   if(weather.waveHeight!==null&&weather.waveHeight!==undefined){update.wave_height=weather.waveHeight;update.api_wave_height=weather.waveHeight;}
-  if(weather.airTemperature!==null&&weather.airTemperature!==undefined){update.air_temperature=weather.airTemperature;update.api_air_temperature=weather.airTemperature;}
+  if(weather.airTemperature!==null&&weather.airTemperature!==undefined){update.air_temperature=weather.airTemperature;update.api_air_temperature=weather.air_temperature;}
   if(weather.waterTemperature!==null&&weather.waterTemperature!==undefined){update.water_temperature=weather.waterTemperature;update.api_water_temperature=weather.waterTemperature;}
   return update;
 }
