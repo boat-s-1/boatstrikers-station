@@ -80,13 +80,14 @@ function OddsRow({ bet, odds, evaluation, probabilities, marketProbabilities, ex
   const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
   const currentOdds = metrics.currentOdds;
   const className = state.restored ? styles.oddsRowRestored : state.eliminated ? styles.oddsRowEliminated : styles.oddsRowAlive;
+  const status = state.restored ? "補正復活" : state.eliminated ? "消去" : state.lane1Protected ? "1号艇保護" : "残す";
   return (
     <button type="button" className={`${styles.oddsRow} ${className}`} onClick={onToggle}>
       <div className={styles.oddsMain}>
         <strong>{key}</strong>
         <span>{currentOdds ? `${currentOdds}倍` : "-"}</span>
       </div>
-      <div className={styles.oddsStatus}>{state.restored ? "補正復活" : state.eliminated ? "消去" : "残す"}</div>
+      <div className={styles.oddsStatus}>{status}</div>
       {expanded && (
         <div className={styles.oddsDetail}>
           <span>補正推定 {metrics.corrected !== null ? `${(metrics.corrected * 100).toFixed(2)}%` : "-"}</span>
@@ -125,38 +126,80 @@ export default function EliminationLabClient({
   const valueAvailable = Object.keys(probabilities).length === 120 && oddsCount > 0 && Object.keys(marketProbabilities).length > 0;
 
   const rules = [
-    { key: "exhibition456", free: true, label: "展示4〜6位を1着から消す", desc: exhibitionBottom3.length ? `${exhibitionBottom3.join("・")}号艇の1着目を消去` : "展示データ待ち", available: exhibitionReady && exhibitionBottom3.length === 3, test: (bet) => exhibitionBottom3.includes(bet[0]) },
-    { key: "exhibition56top2", label: "展示5〜6位を2着以内から消す", desc: exhibitionBottom2.length ? `${exhibitionBottom2.join("・")}号艇の1・2着目を消去` : "展示データ待ち", available: exhibitionReady && exhibitionBottom2.length === 2, test: (bet) => exhibitionBottom2.includes(bet[0]) || exhibitionBottom2.includes(bet[1]) },
-    { key: "st", label: "ST下位2艇を1着から消す", desc: stBottom2.length ? `${stBottom2.join("・")}号艇の1着目を消去` : "STデータ不足", available: stBottom2.length === 2, test: (bet) => stBottom2.includes(bet[0]) },
-    { key: "motor", label: "モーター下位2艇を1着から消す", desc: motorBottom2.length ? `${motorBottom2.join("・")}号艇の1着目を消去` : "モーターデータ不足", available: motorBottom2.length === 2, test: (bet) => motorBottom2.includes(bet[0]) },
-    { key: "win", label: "勝率下位2艇を1着から消す", desc: winBottom2.length ? `${winBottom2.join("・")}号艇の1着目を消去` : "勝率データ不足", available: winBottom2.length === 2, test: (bet) => winBottom2.includes(bet[0]) },
+    { key: "exhibition456", free: true, label: "展示4〜6位を1着から消す", desc: exhibitionBottom3.length ? `${exhibitionBottom3.join("・")}号艇の1着目を消去` : "展示データ待ち", available: exhibitionReady && exhibitionBottom3.length === 3, firstBoats: exhibitionBottom3, secondBoats: [] },
+    { key: "exhibition56top2", label: "展示5〜6位を2着以内から消す", desc: exhibitionBottom2.length ? `${exhibitionBottom2.join("・")}号艇の1・2着目を消去` : "展示データ待ち", available: exhibitionReady && exhibitionBottom2.length === 2, firstBoats: exhibitionBottom2, secondBoats: exhibitionBottom2 },
+    { key: "st", label: "ST下位2艇を1着から消す", desc: stBottom2.length ? `${stBottom2.join("・")}号艇の1着目を消去` : "STデータ不足", available: stBottom2.length === 2, firstBoats: stBottom2, secondBoats: [] },
+    { key: "motor", label: "モーター下位2艇を1着から消す", desc: motorBottom2.length ? `${motorBottom2.join("・")}号艇の1着目を消去` : "モーターデータ不足", available: motorBottom2.length === 2, firstBoats: motorBottom2, secondBoats: [] },
+    { key: "win", label: "勝率下位2艇を1着から消す", desc: winBottom2.length ? `${winBottom2.join("・")}号艇の1着目を消去` : "勝率データ不足", available: winBottom2.length === 2, firstBoats: winBottom2, secondBoats: [] },
   ];
+
+  const lane1Danger = useMemo(() => {
+    const factors = [];
+    const exhibitionSelected = (enabled.exhibition456 && exhibitionReady && exhibitionBottom3.includes(1))
+      || (premiumAccess && enabled.exhibition56top2 && exhibitionReady && exhibitionBottom2.includes(1));
+    if (exhibitionSelected) factors.push("展示劣勢");
+    if (premiumAccess && enabled.st && stBottom2.includes(1)) factors.push("ST劣勢");
+    if (premiumAccess && enabled.motor && motorBottom2.includes(1)) factors.push("モーター劣勢");
+    if (premiumAccess && enabled.win && winBottom2.includes(1)) factors.push("勝率劣勢");
+    return { score: factors.length, factors, eliminate: factors.length >= 3 };
+  }, [enabled, premiumAccess, exhibitionReady, exhibitionBottom3, exhibitionBottom2, stBottom2, motorBottom2, winBottom2]);
 
   const evaluation = useMemo(() => {
     const map = {};
     let remain = 0;
     for (const bet of ALL_BETS) {
       const reasons = [];
+      const firstReasons = [];
+      let secondElimination = false;
+
       for (const rule of rules) {
         if (!enabled[rule.key] || !rule.available) continue;
         if (!premiumAccess && !rule.free) continue;
-        if (rule.test(bet)) reasons.push(rule.label);
+
+        const firstHit = rule.firstBoats.includes(bet[0]);
+        const secondHit = rule.secondBoats.includes(bet[1]);
+
+        if (firstHit) {
+          if (bet[0] === 1) firstReasons.push(rule.label);
+          else reasons.push(rule.label);
+        }
+        if (secondHit) {
+          secondElimination = true;
+          reasons.push(`${rule.label}（2着条件）`);
+        }
       }
-      const rawEliminated = reasons.length > 0;
-      const restored = rawEliminated && premiumAccess && a1Correction && a1Boats.includes(bet[0]) && reasons.every((reason) => reason.includes("1着") || reason.includes("1・2着"));
+
+      let lane1Protected = false;
+      if (bet[0] === 1 && firstReasons.length > 0) {
+        if (lane1Danger.eliminate) {
+          reasons.push(`1号艇危険スコア ${lane1Danger.score}/4`);
+          reasons.push(...lane1Danger.factors);
+        } else {
+          lane1Protected = true;
+          reasons.push(`1号艇保護 ${lane1Danger.score}/4（3条件未満）`);
+        }
+      }
+
+      const lane1HeadEliminated = bet[0] === 1 && firstReasons.length > 0 && lane1Danger.eliminate;
+      const rawEliminated = reasons.some((reason) => !reason.startsWith("1号艇保護")) && (bet[0] !== 1 || lane1HeadEliminated || secondElimination || reasons.some((reason) => !reason.includes("1号艇" ) && !lane1Danger.factors.includes(reason)));
+      const hasNonHeadElimination = secondElimination || (bet[0] !== 1 && reasons.length > 0);
+      const restored = rawEliminated && premiumAccess && a1Correction && a1Boats.includes(bet[0]) && !hasNonHeadElimination;
       let eliminated = rawEliminated && !restored;
+
       if (!eliminated && premiumAccess && valueEnabled && valueAvailable) {
         const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
         if (metrics.corrected === null || metrics.corrected * 100 < 0.5 || metrics.ratio === null || metrics.ratio < 1.15 || metrics.ev === null || metrics.ev < evThreshold) {
           eliminated = true;
+          lane1Protected = false;
           reasons.push(`VALUE ${evThreshold}%未満`);
         }
       }
+
       if (!eliminated) remain += 1;
-      map[betKey(bet)] = { eliminated, restored, reasons };
+      map[betKey(bet)] = { eliminated, restored, lane1Protected: lane1Protected && !eliminated, reasons };
     }
     return { map, remain };
-  }, [enabled, premiumAccess, a1Correction, a1Boats, valueEnabled, valueAvailable, evThreshold, probabilities, marketProbabilities, odds, exhibitionBottom3, exhibitionBottom2, stBottom2, motorBottom2, winBottom2]);
+  }, [enabled, premiumAccess, a1Correction, a1Boats, valueEnabled, valueAvailable, evThreshold, probabilities, marketProbabilities, odds, lane1Danger, exhibitionBottom3, exhibitionBottom2, stBottom2, motorBottom2, winBottom2]);
 
   const headCounts = useMemo(() => {
     const result = {};
@@ -182,7 +225,7 @@ export default function EliminationLabClient({
       {!premiumAccess && (
         <section className={styles.freeTrial}>
           <strong>FREE TRIAL</strong>
-          <p>無料では「展示4〜6位を1着から消す」を体験できます。その他の消去条件・A1補正・VALUE判定はプレミアム会員限定です。</p>
+          <p>無料では「展示4〜6位を1着から消す」を体験できます。1号艇は単独条件では消さず、複数の危険条件が重なった時だけ1着消去になります。</p>
         </section>
       )}
 
@@ -193,6 +236,18 @@ export default function EliminationLabClient({
 
       <button className={styles.refresh} onClick={refresh} disabled={isPending}>{isPending ? "再診断中…" : "最新データで再診断"}</button>
       <p className={styles.synced}>レースデータ同期: {syncedAt || "-"} / オッズ: {oddsFetchedAt || "-"}</p>
+
+      <section className={styles.processPanel}>
+        <div className={styles.sectionTitle}><span>LANE 1 GUARD</span><h2>1号艇保護判定</h2></div>
+        <div style={{ display: "grid", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <strong style={{ fontSize: 18, color: lane1Danger.eliminate ? "#b42318" : "#17663a" }}>危険スコア {lane1Danger.score}/4</strong>
+            <span style={{ padding: "6px 10px", borderRadius: 999, fontSize: 11, fontWeight: 1000, background: lane1Danger.eliminate ? "#fff0f0" : "#eefaf3", color: lane1Danger.eliminate ? "#b42318" : "#17663a" }}>{lane1Danger.eliminate ? "1頭消去条件成立" : "1頭は保護"}</span>
+          </div>
+          <small style={{ color: "#6f7f90", lineHeight: 1.7, fontWeight: 700 }}>展示・ST・モーター・勝率の4系統のうち、選択中の条件で1号艇に3つ以上の危険要素が重なった時だけ「1号艇1着」を消します。</small>
+          {lane1Danger.factors.length > 0 && <div style={{ fontSize: 12, fontWeight: 800, color: "#526477" }}>該当：{lane1Danger.factors.join(" / ")}</div>}
+        </div>
+      </section>
 
       <section className={styles.rulePanel}>
         <div className={styles.sectionTitle}><span>STEP 1</span><h2>消去条件を選ぶ</h2></div>
@@ -229,7 +284,7 @@ export default function EliminationLabClient({
       <section className={styles.betPanel}>
         <div className={styles.sectionTitle}><span>STEP 2</span><h2>3連単オッズ表</h2></div>
         {oddsError && <p className={styles.oddsError}>オッズ取得エラー：{oddsError}</p>}
-        <p className={styles.legend}>白＝残す / グレー＝消去 / 黄＝補正で復活。買い目をタップすると詳細を表示します。</p>
+        <p className={styles.legend}>白＝残す / グレー＝消去 / 黄＝補正で復活。1号艇は単独条件では保護されます。買い目をタップすると詳細を表示します。</p>
 
         <div className={styles.mobileOdds}>
           <div className={styles.headTabs}>
@@ -259,7 +314,7 @@ export default function EliminationLabClient({
         </div>
       </section>
 
-      <aside className={styles.note}>条件を追加するほどセルが消えていきます。0通りになった場合は「買える目なし＝見送り」という使い方を想定しています。VALUEは推定指標で、回収率や利益を保証するものではありません。</aside>
+      <aside className={styles.note}>1号艇は単独の消去条件では切らず、選択した危険条件が3系統以上重なった時だけ1着消去します。2〜6号艇は従来どおり各条件で消去します。VALUEは推定指標で、回収率や利益を保証するものではありません。</aside>
     </div>
   );
 }
