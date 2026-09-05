@@ -40,7 +40,7 @@ function rankBoats(entries, keys, { lowerIsBetter = false } = {}) {
   return entries
     .map((entry) => ({ boat: boatNo(entry), value: get(entry, keys) }))
     .filter((row) => row.boat >= 1 && row.boat <= 6 && row.value !== null)
-    .sort((a, b) => lowerIsBetter ? a.value - b.value : b.value - a.value);
+    .sort((a, b) => (lowerIsBetter ? a.value - b.value : b.value - a.value));
 }
 
 function bottomBoats(entries, keys, count = 2, options = {}) {
@@ -54,16 +54,46 @@ function worstBoat(entries, keys, options = {}) {
   return ranked.length >= 4 ? ranked[ranked.length - 1]?.boat : null;
 }
 
+function betKey(bet) {
+  return bet.join("-");
+}
+
 function oddsFor(odds, bet) {
-  const value = Number(odds?.[bet.join("-")]);
+  const value = Number(odds?.[betKey(bet)]);
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
-function expectedValue(probabilities, odds, bet) {
-  const probability = probabilityFor(probabilities, bet);
+function buildMarketProbabilities(odds) {
+  const inverse = {};
+  let total = 0;
+  for (const bet of ALL_BETS) {
+    const currentOdds = oddsFor(odds, bet);
+    if (!currentOdds) continue;
+    const value = 1 / currentOdds;
+    inverse[betKey(bet)] = value;
+    total += value;
+  }
+  if (!total) return {};
+  return Object.fromEntries(Object.entries(inverse).map(([key, value]) => [key, value / total]));
+}
+
+function correctedProbability(probabilities, marketProbabilities, bet) {
+  const model = probabilityFor(probabilities, bet);
+  const market = Number(marketProbabilities?.[betKey(bet)]);
+  if (model === null) return null;
+  if (!Number.isFinite(market) || market <= 0) return model;
+  // v2 beta: 市場をアンカーにして極端なモデル推定を縮める。
+  return model * 0.75 + market * 0.25;
+}
+
+function valueMetrics(probabilities, marketProbabilities, odds, bet) {
+  const model = probabilityFor(probabilities, bet);
+  const market = Number(marketProbabilities?.[betKey(bet)]);
+  const corrected = correctedProbability(probabilities, marketProbabilities, bet);
   const currentOdds = oddsFor(odds, bet);
-  if (probability === null || currentOdds === null) return null;
-  return probability * currentOdds * 100;
+  const marketRatio = corrected !== null && Number.isFinite(market) && market > 0 ? corrected / market : null;
+  const ev = corrected !== null && currentOdds !== null ? corrected * currentOdds * 100 : null;
+  return { model, market: Number.isFinite(market) ? market : null, corrected, currentOdds, marketRatio, ev };
 }
 
 export default function EliminationLabClient({
@@ -79,8 +109,10 @@ export default function EliminationLabClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [enabled, setEnabled] = useState({ win: true, motor: true, st: false, exhibition: false, exhibitionTop2: false });
-  const [evEnabled, setEvEnabled] = useState(false);
+  const [valueEnabled, setValueEnabled] = useState(false);
   const [evThreshold, setEvThreshold] = useState(100);
+  const [minProbability, setMinProbability] = useState(0.5);
+  const [minMarketRatio, setMinMarketRatio] = useState(1.15);
 
   const winWeak = useMemo(() => bottomBoats(entries, ["win_rate", "national_win_rate", "rate", "racer_win_rate"]), [entries]);
   const motorWeak = useMemo(() => bottomBoats(entries, ["motor_2ren_rate", "motor_2rate", "motor_rate", "motor2_rate", "motor_2_rate"]), [entries]);
@@ -88,8 +120,18 @@ export default function EliminationLabClient({
   const exhibitionWeak = useMemo(() => bottomBoats(entries, ["exhibition_time", "official_exhibition_time", "tenji_time", "display_time"], 2, { lowerIsBetter: true }), [entries]);
   const exhibitionWorst = useMemo(() => worstBoat(entries, ["exhibition_time", "official_exhibition_time", "tenji_time", "display_time"], { lowerIsBetter: true }), [entries]);
   const probabilities = useMemo(() => buildTrifectaProbabilities(entries, { live: exhibitionReady }), [entries, exhibitionReady]);
+  const marketProbabilities = useMemo(() => buildMarketProbabilities(odds), [odds]);
   const probabilityCount = Object.keys(probabilities).length;
-  const evAvailable = probabilityCount === 120 && oddsCount > 0;
+  const valueAvailable = probabilityCount === 120 && oddsCount > 0 && Object.keys(marketProbabilities).length > 0;
+
+  const headProbabilities = useMemo(() => {
+    const out = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    for (const bet of ALL_BETS) {
+      const probability = probabilityFor(probabilities, bet);
+      if (probability !== null) out[bet[0]] += probability;
+    }
+    return out;
+  }, [probabilities]);
 
   const rules = [
     { key: "win", label: "低勝率艇の1着を消す", description: winWeak.length ? `${winWeak.join("・")}号艇を1着候補から除外` : "勝率データ不足", available: winWeak.length > 0, test: (bet) => !winWeak.includes(bet[0]) },
@@ -108,18 +150,35 @@ export default function EliminationLabClient({
       current = current.filter(rule.test);
       history.push({ key: rule.key, label: rule.label, before, after: current.length, removed: before - current.length });
     }
-    if (evEnabled && evAvailable) {
+    if (valueEnabled && valueAvailable) {
       const before = current.length;
       current = current.filter((bet) => {
-        const ev = expectedValue(probabilities, odds, bet);
-        return ev !== null && ev >= evThreshold;
+        const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
+        return metrics.corrected !== null
+          && metrics.corrected * 100 >= minProbability
+          && metrics.marketRatio !== null
+          && metrics.marketRatio >= minMarketRatio
+          && metrics.ev !== null
+          && metrics.ev >= evThreshold;
       });
-      history.push({ key: "ev", label: `推定期待値 ${evThreshold}%以上`, before, after: current.length, removed: before - current.length });
+      history.push({
+        key: "value",
+        label: `価値フィルター（確率${minProbability}%・市場比${minMarketRatio.toFixed(2)}倍・EV${evThreshold}%）`,
+        before,
+        after: current.length,
+        removed: before - current.length,
+      });
     }
     return { bets: current, history };
-  }, [enabled, winWeak, motorWeak, stWeak, exhibitionWeak, exhibitionWorst, exhibitionReady, evEnabled, evAvailable, evThreshold, probabilities, odds]);
+  }, [enabled, winWeak, motorWeak, stWeak, exhibitionWeak, exhibitionWorst, exhibitionReady, valueEnabled, valueAvailable, minProbability, minMarketRatio, evThreshold, probabilities, marketProbabilities, odds]);
 
-  const displayBets = useMemo(() => [...result.bets].sort((a, b) => (expectedValue(probabilities, odds, b) || -1) - (expectedValue(probabilities, odds, a) || -1)), [result.bets, probabilities, odds]);
+  const displayBets = useMemo(() => [...result.bets].sort((a, b) => {
+    const ma = valueMetrics(probabilities, marketProbabilities, odds, a);
+    const mb = valueMetrics(probabilities, marketProbabilities, odds, b);
+    if (valueEnabled) return (mb.ev || -1) - (ma.ev || -1);
+    return (mb.corrected || mb.model || -1) - (ma.corrected || ma.model || -1);
+  }), [result.bets, probabilities, marketProbabilities, odds, valueEnabled]);
+
   const toggle = (key) => setEnabled((prev) => ({ ...prev, [key]: !prev[key] }));
   const refresh = () => startTransition(() => router.refresh());
   const removed = 120 - result.bets.length;
@@ -134,86 +193,75 @@ export default function EliminationLabClient({
         <div><span>消去率</span><strong>{removalRate}%</strong></div>
       </section>
 
-      <button className={styles.refresh} onClick={refresh} disabled={isPending}>
-        {isPending ? "再診断中…" : "最新データで再診断"}
-      </button>
+      <button className={styles.refresh} onClick={refresh} disabled={isPending}>{isPending ? "再診断中…" : "最新データで再診断"}</button>
       <p className={styles.synced}>レースデータ同期: {syncedAt || "-"}</p>
 
       <section className={styles.processPanel}>
-        <div className={styles.sectionTitle}><span>MODEL β</span><h2>{exhibitionReady ? "直前" : "事前"}確率モデル</h2></div>
+        <div className={styles.sectionTitle}><span>MODEL β2</span><h2>{exhibitionReady ? "直前" : "事前"}確率モデル</h2></div>
         <div style={{ display: "grid", gap: 6, color: "#45586d", fontSize: 13, fontWeight: 800 }}>
           <div>3連単推定確率：{probabilityCount}/120通り</div>
-          <div>1着トップ予測の最終テスト：{exhibitionReady ? "55.1%" : "54.4%"}</div>
-          <small style={{ color: "#7a8797", lineHeight: 1.6 }}>過去データから枠・勝率・当地勝率・モーターを評価し、直前版では展示タイムと展示STも加えています。</small>
+          <div>1着トップ予測：{exhibitionReady ? "55.1%" : "54.4%"}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6,minmax(0,1fr))", gap: 5, marginTop: 5 }}>
+            {[1,2,3,4,5,6].map((boat) => <span key={boat} style={{ textAlign: "center", padding: "7px 2px", borderRadius: 10, background: "#f3f6fa", fontSize: 10 }}>{boat}頭<br/><strong>{(headProbabilities[boat] * 100).toFixed(1)}%</strong></span>)}
+          </div>
+          <small style={{ color: "#7a8797", lineHeight: 1.6 }}>各艇の「頭確率」の中で3連単20通りへ配分しているため、高配当だけを理由に6号艇頭が膨らまない構造です。</small>
         </div>
       </section>
 
       <section className={styles.processPanel}>
         <div className={styles.sectionTitle}><span>LIVE ODDS</span><h2>3連単オッズ</h2></div>
-        {oddsError ? (
-          <div style={{ color: "#a23434", fontSize: 13, fontWeight: 800, lineHeight: 1.7 }}>オッズ取得エラー：{oddsError}</div>
-        ) : oddsCount > 0 ? (
-          <div style={{ display: "grid", gap: 6, color: "#45586d", fontSize: 13, fontWeight: 800 }}>
-            <div>取得：{oddsCount}/120通り</div><div>更新：{oddsFetchedAt || "-"}</div><div>取得元：{oddsSource || "-"}</div>
-          </div>
+        {oddsError ? <div style={{ color: "#a23434", fontSize: 13, fontWeight: 800 }}>オッズ取得エラー：{oddsError}</div> : oddsCount > 0 ? (
+          <div style={{ display: "grid", gap: 6, color: "#45586d", fontSize: 13, fontWeight: 800 }}><div>取得：{oddsCount}/120通り</div><div>更新：{oddsFetchedAt || "-"}</div><div>取得元：{oddsSource || "-"}</div></div>
         ) : <p className={styles.empty}>現在オッズはまだ取得できません。</p>}
       </section>
 
       <section className={styles.rulePanel}>
         <div className={styles.sectionTitle}><span>STEP 1</span><h2>消去条件を選ぶ</h2></div>
-        <div className={styles.rules}>
-          {rules.map((rule) => (
-            <button key={rule.key} className={`${styles.rule} ${enabled[rule.key] && rule.available ? styles.active : ""}`} onClick={() => rule.available && toggle(rule.key)} disabled={!rule.available}>
-              <span className={styles.switch}>{enabled[rule.key] && rule.available ? "ON" : "OFF"}</span>
-              <span><strong>{rule.label}</strong><small>{rule.description}</small></span>
-            </button>
-          ))}
-        </div>
+        <div className={styles.rules}>{rules.map((rule) => (
+          <button key={rule.key} className={`${styles.rule} ${enabled[rule.key] && rule.available ? styles.active : ""}`} onClick={() => rule.available && toggle(rule.key)} disabled={!rule.available}>
+            <span className={styles.switch}>{enabled[rule.key] && rule.available ? "ON" : "OFF"}</span>
+            <span><strong>{rule.label}</strong><small>{rule.description}</small></span>
+          </button>
+        ))}</div>
       </section>
 
       <section className={styles.rulePanel}>
-        <div className={styles.sectionTitle}><span>EV β</span><h2>期待値フィルター</h2></div>
-        <button className={`${styles.rule} ${evEnabled && evAvailable ? styles.active : ""}`} onClick={() => evAvailable && setEvEnabled((value) => !value)} disabled={!evAvailable}>
-          <span className={styles.switch}>{evEnabled && evAvailable ? "ON" : "OFF"}</span>
-          <span><strong>推定期待値が低い目を消す</strong><small>{evAvailable ? `現在の基準：${evThreshold}%以上を残す` : "確率またはオッズデータ待ち"}</small></span>
+        <div className={styles.sectionTitle}><span>VALUE β2</span><h2>価値フィルター</h2></div>
+        <button className={`${styles.rule} ${valueEnabled && valueAvailable ? styles.active : ""}`} onClick={() => valueAvailable && setValueEnabled((value) => !value)} disabled={!valueAvailable}>
+          <span className={styles.switch}>{valueEnabled && valueAvailable ? "ON" : "OFF"}</span>
+          <span><strong>高オッズだけの目を除外して価値のある目を残す</strong><small>{valueAvailable ? `最低確率 ${minProbability}% / 市場比 ${minMarketRatio.toFixed(2)}倍 / EV ${evThreshold}%` : "確率またはオッズデータ待ち"}</small></span>
         </button>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginTop: 10 }}>
-          {[80, 100, 120].map((value) => (
-            <button key={value} onClick={() => setEvThreshold(value)} style={{ border: value === evThreshold ? "2px solid #ef7b22" : "1px solid #dfe6ef", borderRadius: 12, padding: "10px 6px", background: value === evThreshold ? "#fff7ed" : "#fff", fontWeight: 900, color: "#34485d" }}>{value}%以上</button>
-          ))}
+
+        <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+          <div><small style={{ fontWeight: 900, color: "#657487" }}>最低推定確率</small><div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6, marginTop: 5 }}>{[0.3,0.5,1.0].map((value) => <button key={value} onClick={() => setMinProbability(value)} style={{ padding: 9, borderRadius: 10, border: value === minProbability ? "2px solid #ef7b22" : "1px solid #dfe6ef", background: value === minProbability ? "#fff7ed" : "#fff", fontWeight: 900 }}>{value}%</button>)}</div></div>
+          <div><small style={{ fontWeight: 900, color: "#657487" }}>市場よりどれだけ高く評価するか</small><div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6, marginTop: 5 }}>{[1.05,1.15,1.30].map((value) => <button key={value} onClick={() => setMinMarketRatio(value)} style={{ padding: 9, borderRadius: 10, border: value === minMarketRatio ? "2px solid #ef7b22" : "1px solid #dfe6ef", background: value === minMarketRatio ? "#fff7ed" : "#fff", fontWeight: 900 }}>{value.toFixed(2)}倍</button>)}</div></div>
+          <div><small style={{ fontWeight: 900, color: "#657487" }}>推定EV</small><div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6, marginTop: 5 }}>{[80,100,120].map((value) => <button key={value} onClick={() => setEvThreshold(value)} style={{ padding: 9, borderRadius: 10, border: value === evThreshold ? "2px solid #ef7b22" : "1px solid #dfe6ef", background: value === evThreshold ? "#fff7ed" : "#fff", fontWeight: 900 }}>{value}%</button>)}</div></div>
         </div>
-        <p style={{ margin: "10px 0 0", color: "#7a8797", fontSize: 11, lineHeight: 1.7, fontWeight: 700 }}>推定期待値＝モデル推定確率 × 現在オッズ。100%以上でも将来の利益を保証するものではありません。</p>
+        <p style={{ margin: "10px 0 0", color: "#7a8797", fontSize: 11, lineHeight: 1.7, fontWeight: 700 }}>推定確率はモデル75%＋市場25%で補正。単純な「確率×高オッズ」だけでは残しません。</p>
       </section>
 
       <section className={styles.processPanel}>
         <div className={styles.sectionTitle}><span>STEP 2</span><h2>消去の流れ</h2></div>
-        {result.history.length === 0 ? <p className={styles.empty}>条件をONにすると、120通りから順番に削られます。</p> : result.history.map((item) => (
-          <div className={styles.process} key={item.key}><span>{item.label}</span><strong>{item.before} → {item.after}</strong><em>-{item.removed}通り</em></div>
-        ))}
+        {result.history.length === 0 ? <p className={styles.empty}>条件をONにすると、120通りから順番に削られます。</p> : result.history.map((item) => <div className={styles.process} key={item.key}><span>{item.label}</span><strong>{item.before} → {item.after}</strong><em>-{item.removed}通り</em></div>)}
       </section>
 
       <section className={styles.betPanel}>
         <div className={styles.sectionTitle}><span>STEP 3</span><h2>残った買い目</h2></div>
-        {displayBets.length === 0 ? (
-          <div className={styles.skip}><strong>見送り</strong><p>現在の条件では買い目が残りません。無理に買い目を作らない判定です。</p></div>
-        ) : (
+        {displayBets.length === 0 ? <div className={styles.skip}><strong>見送り</strong><p>現在の条件では買い目が残りません。無理に買い目を作らない判定です。</p></div> : (
           <div className={styles.bets}>{displayBets.map((bet) => {
-            const currentOdds = oddsFor(odds, bet);
-            const probability = probabilityFor(probabilities, bet);
-            const ev = expectedValue(probabilities, odds, bet);
-            return (
-              <span key={bet.join("-")} style={{ display: "grid", gap: 3 }}>
-                <strong>{bet.join("-")}</strong>
-                <small style={{ fontSize: 10, color: "#66778a" }}>{probability ? `推定 ${(probability * 100).toFixed(2)}%` : "確率未算出"}</small>
-                <small style={{ fontSize: 10, color: currentOdds ? "#c45b12" : "#8b98a6" }}>{currentOdds ? `${currentOdds}倍` : "オッズ未取得"}</small>
-                <small style={{ fontSize: 10, color: ev !== null && ev >= 100 ? "#16834d" : "#8b5560", fontWeight: 1000 }}>{ev !== null ? `期待値 ${ev.toFixed(0)}%` : "期待値 -"}</small>
-              </span>
-            );
+            const m = valueMetrics(probabilities, marketProbabilities, odds, bet);
+            return <span key={betKey(bet)} style={{ display: "grid", gap: 3 }}>
+              <strong>{betKey(bet)}</strong>
+              <small style={{ fontSize: 10, color: "#66778a" }}>補正推定 {m.corrected !== null ? `${(m.corrected * 100).toFixed(2)}%` : "-"}</small>
+              <small style={{ fontSize: 10, color: "#66778a" }}>市場 {m.market !== null ? `${(m.market * 100).toFixed(2)}%` : "-"} / 比 {m.marketRatio !== null ? `${m.marketRatio.toFixed(2)}倍` : "-"}</small>
+              <small style={{ fontSize: 10, color: m.currentOdds ? "#c45b12" : "#8b98a6" }}>{m.currentOdds ? `${m.currentOdds}倍` : "オッズ未取得"}</small>
+              <small style={{ fontSize: 10, color: m.ev !== null && m.ev >= 100 ? "#16834d" : "#8b5560", fontWeight: 1000 }}>{m.ev !== null ? `推定EV ${m.ev.toFixed(0)}%` : "EV -"}</small>
+            </span>;
           })}</div>
         )}
       </section>
 
-      <aside className={styles.note}>期待値機能はβ版です。推定確率は過去データで検証した初期モデルを使い、オッズ変化に応じて「最新データで再診断」時に期待値も変わります。回収率や利益を保証するものではありません。</aside>
+      <aside className={styles.note}>VALUE β2は「最低確率」「市場との乖離」「推定EV」の3条件で消去します。高オッズだけを理由に残す設計ではありません。推定値は回収率や利益を保証するものではありません。</aside>
     </div>
   );
 }
