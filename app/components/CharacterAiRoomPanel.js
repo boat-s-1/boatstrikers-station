@@ -291,7 +291,7 @@ export default function CharacterAiRoomPanel() {
         </div>
       ) : (
         <div className={styles.ichikaBannerHeading}>
-          <img src="/top/IMG_8031.jpeg?v=20260906-0707" alt="キイナAI 今日のAI予想" className={styles.ichikaBannerImage} />
+          <img src="/top/IMG_8038.jpeg?v=20260906-0735" alt="今日のAI予想" className={styles.ichikaBannerImage} />
           <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
       )}
