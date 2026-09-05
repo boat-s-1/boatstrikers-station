@@ -137,6 +137,25 @@ export default async function RaceDetailPage({
               raceDate={raceDate}
             />
 
+            <div style={{ margin: "18px 0" }}>
+              <Link
+                href={`/tools/elimination/${paddedCourseCode}/${raceNo}?date=${raceDate}`}
+                style={{
+                  display: "block",
+                  padding: "16px 18px",
+                  borderRadius: "16px",
+                  background: "linear-gradient(135deg,#17253a,#274b72)",
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontWeight: 1000,
+                  textAlign: "center",
+                  boxShadow: "0 10px 24px rgba(23,37,58,.18)",
+                }}
+              >
+                🧹 BoatStrikers 消去ラボ β を開く
+              </Link>
+            </div>
+
             <RacePremiumMemberGate premiumAccess={premiumAccess} />
 
             <nav className={styles.moveNav}>
