@@ -290,15 +290,9 @@ export default function CharacterAiRoomPanel() {
           <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
       ) : (
-        <div className={styles.heading}>
-          <div>
-            <span className={styles.kicker}>BOATSTRIKERS AI V2</span>
-            <h2>🤖 {meta.title}</h2>
-            <p>{meta.subtitle}</p>
-          </div>
-          <div className={styles.headingActions}>
-            <span className={styles.dateBadge}>{formatDate(data?.date)}</span>
-          </div>
+        <div className={styles.ichikaBannerHeading}>
+          <img src="/top/IMG_8031.jpeg?v=20260906-0707" alt="キイナAI 今日のAI予想" className={styles.ichikaBannerImage} />
+          <span className={styles.ichikaBannerDate}>{formatDate(data?.date)}</span>
         </div>
       )}
 
