@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { collectHatsuneNews } from "../../../../lib/hatsuneNewsCollector";
 import { syncHatsuneMediaNews } from "../../../../lib/hatsuneMediaNewsSync";
+import { syncBoatstrikersGeneralNews } from "../../../../lib/boatstrikersGeneralNewsSync";
 import { generatePendingHatsuneArticles } from "../../../../lib/hatsuneNewsAi";
 import { startHatsuneCronRun, finishHatsuneCronRun } from "../../../../lib/hatsuneCronLog";
 import { ensureHatsuneDailyMinimum } from "../../../../lib/hatsuneDailyFallback";
@@ -70,6 +71,8 @@ export async function GET(request) {
     const collection = await collectHatsuneNews();
     let media = { found: 0, inserted: 0, skipped: 0, errors: [] };
     let mediaError = null;
+    let general = { found: 0, inserted: 0, skipped: 0, errors: [] };
+    let generalError = null;
 
     try {
       media = await syncHatsuneMediaNews();
@@ -77,12 +80,20 @@ export async function GET(request) {
       mediaError = error?.message || String(error);
     }
 
+    try {
+      general = await syncBoatstrikersGeneralNews();
+    } catch (error) {
+      generalError = error?.message || String(error);
+    }
+
     const baseInserted = countValue(collection?.inserted) || countValue(collection?.results?.inserted);
     const mediaInserted = countValue(media?.inserted);
+    const generalInserted = countValue(general?.inserted);
 
     let fallback = null;
     let fallbackError = null;
 
+    // 初音NEWSの日次最低1件は一般ニュースとは別に維持する。
     if (baseInserted + mediaInserted === 0) {
       try {
         fallback = await ensureHatsuneDailyMinimum();
@@ -106,14 +117,30 @@ export async function GET(request) {
 
     const collectionErrors = Array.isArray(collection?.errors) ? collection.errors : [];
     const mediaErrors = Array.isArray(media?.errors) ? media.errors : [];
+    const generalErrors = Array.isArray(general?.errors) ? general.errors : [];
     const fallbackInserted = fallback?.inserted ? 1 : 0;
-    const inserted = baseInserted + mediaInserted + fallbackInserted;
-    const skipped = (countValue(collection?.skipped) || countValue(collection?.results?.skipped)) + countValue(media?.skipped);
-    const found = countValue(collection?.official?.found) + countValue(collection?.raceData?.found) + countValue(media?.found);
+    const inserted = baseInserted + mediaInserted + generalInserted + fallbackInserted;
+    const skipped =
+      (countValue(collection?.skipped) || countValue(collection?.results?.skipped)) +
+      countValue(media?.skipped) +
+      countValue(general?.skipped);
+    const found =
+      countValue(collection?.official?.found) +
+      countValue(collection?.raceData?.found) +
+      countValue(media?.found) +
+      countValue(general?.found);
     const collected = countValue(collection?.collected) || countValue(collection?.candidate_count) || found || inserted + skipped;
     const generated = ai.filter((x) => !x.error && !x.skipped).length;
     const aiErrors = ai.filter((x) => x.error);
-    const errorCount = collectionErrors.length + mediaErrors.length + aiErrors.length + (aiError ? 1 : 0) + (mediaError ? 1 : 0) + (fallbackError ? 1 : 0);
+    const errorCount =
+      collectionErrors.length +
+      mediaErrors.length +
+      generalErrors.length +
+      aiErrors.length +
+      (aiError ? 1 : 0) +
+      (mediaError ? 1 : 0) +
+      (generalError ? 1 : 0) +
+      (fallbackError ? 1 : 0);
     const ok = errorCount === 0;
 
     if (logContext) {
@@ -129,8 +156,13 @@ export async function GET(request) {
           errorCount,
         },
         errorMessage:
-          aiError || mediaError || fallbackError || [...collectionErrors, ...mediaErrors].map((x) => x?.message || String(x)).join(" | ") || null,
-        details: { collection, media, mediaError, fallback, fallbackError, aiErrors },
+          aiError ||
+          mediaError ||
+          generalError ||
+          fallbackError ||
+          [...collectionErrors, ...mediaErrors, ...generalErrors].map((x) => x?.message || String(x)).join(" | ") ||
+          null,
+        details: { collection, media, mediaError, general, generalError, fallback, fallbackError, aiErrors },
       });
     }
 
@@ -139,6 +171,8 @@ export async function GET(request) {
       collection,
       media,
       media_error: mediaError,
+      general,
+      general_error: generalError,
       fallback,
       fallback_error: fallbackError,
       ai: {
