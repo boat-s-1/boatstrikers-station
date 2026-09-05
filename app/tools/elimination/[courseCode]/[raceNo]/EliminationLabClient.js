@@ -53,7 +53,21 @@ function worstBoat(entries, keys, options = {}) {
   return ranked.length >= 4 ? ranked[ranked.length - 1]?.boat : null;
 }
 
-export default function EliminationLabClient({ entries, syncedAt, exhibitionReady }) {
+function oddsFor(odds, bet) {
+  const value = Number(odds?.[bet.join("-")]);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+export default function EliminationLabClient({
+  entries,
+  syncedAt,
+  exhibitionReady,
+  odds = {},
+  oddsCount = 0,
+  oddsFetchedAt = null,
+  oddsSource = null,
+  oddsError = null,
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [enabled, setEnabled] = useState({ win: true, motor: true, st: false, exhibition: false, exhibitionTop2: false });
@@ -101,7 +115,24 @@ export default function EliminationLabClient({ entries, syncedAt, exhibitionRead
       <button className={styles.refresh} onClick={refresh} disabled={isPending}>
         {isPending ? "再診断中…" : "最新データで再診断"}
       </button>
-      <p className={styles.synced}>データ同期: {syncedAt || "-"}</p>
+      <p className={styles.synced}>レースデータ同期: {syncedAt || "-"}</p>
+
+      <section className={styles.processPanel}>
+        <div className={styles.sectionTitle}><span>LIVE ODDS</span><h2>3連単オッズ</h2></div>
+        {oddsError ? (
+          <div style={{ color: "#a23434", fontSize: 13, fontWeight: 800, lineHeight: 1.7 }}>
+            オッズ取得エラー：{oddsError}
+          </div>
+        ) : oddsCount > 0 ? (
+          <div style={{ display: "grid", gap: 6, color: "#45586d", fontSize: 13, fontWeight: 800 }}>
+            <div>取得：{oddsCount}/120通り</div>
+            <div>更新：{oddsFetchedAt || "-"}</div>
+            <div>取得元：{oddsSource || "-"}</div>
+          </div>
+        ) : (
+          <p className={styles.empty}>現在オッズはまだ取得できません。</p>
+        )}
+      </section>
 
       <section className={styles.rulePanel}>
         <div className={styles.sectionTitle}><span>STEP 1</span><h2>消去条件を選ぶ</h2></div>
@@ -129,11 +160,23 @@ export default function EliminationLabClient({ entries, syncedAt, exhibitionRead
         {result.bets.length === 0 ? (
           <div className={styles.skip}><strong>見送り</strong><p>現在の消去条件では買い目が残りません。無理に買い目を作らない判定です。</p></div>
         ) : (
-          <div className={styles.bets}>{result.bets.map((bet) => <span key={bet.join("-")}>{bet.join("-")}</span>)}</div>
+          <div className={styles.bets}>
+            {result.bets.map((bet) => {
+              const currentOdds = oddsFor(odds, bet);
+              return (
+                <span key={bet.join("-")} style={{ display: "grid", gap: 3 }}>
+                  <strong>{bet.join("-")}</strong>
+                  <small style={{ fontSize: 10, color: currentOdds ? "#c45b12" : "#8b98a6" }}>
+                    {currentOdds ? `${currentOdds}倍` : "オッズ未取得"}
+                  </small>
+                </span>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      <aside className={styles.note}>β版では「来にくい条件の消去」に集中しています。オッズ・期待値フィルターは未接続のため、回収率100%以上を保証・表示する仕様ではありません。</aside>
+      <aside className={styles.note}>現在は公式3連単オッズの取得・表示まで接続しています。次段階で、予測確率とオッズを組み合わせた期待値フィルターを追加します。過去回収率や将来の利益を保証する表示は行いません。</aside>
     </div>
   );
 }
