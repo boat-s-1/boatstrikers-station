@@ -10,8 +10,8 @@ import {
 } from "../lib/boatstrikersPlatform";
 import { getCoursesForRacesIndex } from "../lib/racesIndexLight";
 import styles from "./phase2.module.css";
-import RealtimeUpdates from "../components/RealtimeUpdates";
 import CoursePortalCard from "./components/CoursePortalCard";
+import AlertFlash from "./components/AlertFlash";
 
 export const dynamic = "force-dynamic";
 
@@ -392,7 +392,7 @@ export default async function RacesPage({ searchParams }) {
           </div>
         </section>
 
-        <RealtimeUpdates compact />
+        <AlertFlash />
       </div>
     </main>
   );
