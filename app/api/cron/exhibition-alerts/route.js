@@ -119,7 +119,7 @@ function buildWeatherUpdate(weather,syncedAt){
   if(weather.windDirection){update.wind_direction=weather.windDirection;update.wind_direction_code=weather.windDirection;update.api_wind_direction_code=weather.windDirection;}
   if(weather.windSpeed!==null&&weather.windSpeed!==undefined){update.wind_speed=weather.windSpeed;update.api_wind_speed=weather.windSpeed;}
   if(weather.waveHeight!==null&&weather.waveHeight!==undefined){update.wave_height=weather.waveHeight;update.api_wave_height=weather.waveHeight;}
-  if(weather.airTemperature!==null&&weather.airTemperature!==undefined){update.air_temperature=weather.airTemperature;update.api_air_temperature=weather.air_temperature;}
+  if(weather.airTemperature!==null&&weather.airTemperature!==undefined){update.air_temperature=weather.airTemperature;update.api_air_temperature=weather.airTemperature;}
   if(weather.waterTemperature!==null&&weather.waterTemperature!==undefined){update.water_temperature=weather.waterTemperature;update.api_water_temperature=weather.waterTemperature;}
   return update;
 }
