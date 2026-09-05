@@ -3,8 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-const UNIT_BET = 100;
-
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -14,34 +12,17 @@ function getSupabase() {
 
 async function loadRows(supabase, table) {
   if (!supabase) return { rows: [], error: "Supabase未接続" };
+  const { data, error } = await supabase.from(table).select("*").order("race_date", { ascending: false }).limit(5000);
+  return { rows: data || [], error: error?.message || "" };
+}
+
+async function loadRecommendations(supabase) {
+  if (!supabase) return { rows: [], error: "Supabase未接続" };
   const { data, error } = await supabase
-    .from(table)
+    .from("bs_theory_recommendations")
     .select("*")
-    .order("race_date", { ascending: false })
-    .limit(5000);
-  return { rows: data || [], error: error?.message || "" };
-}
-
-async function loadRaceResults(supabase) {
-  if (!supabase) return { rows: [], error: "Supabase未接続" };
-  const { data, error } = await supabase
-    .from("bs_race_events")
-    .select("race_date,course_code,race_no,result_available,trifecta,trifecta_payout")
-    .not("trifecta", "is", null)
-    .order("race_date", { ascending: false })
-    .limit(5000);
-  return { rows: data || [], error: error?.message || "" };
-}
-
-async function loadBoat1Results(supabase) {
-  if (!supabase) return { rows: [], error: "Supabase未接続" };
-  const { data, error } = await supabase
-    .from("bs_race_entries")
-    .select("race_date,course_code,race_no,boat_no,arrival_order")
-    .eq("boat_no", 1)
-    .not("arrival_order", "is", null)
-    .order("race_date", { ascending: false })
-    .limit(5000);
+    .order("recommended_at", { ascending: false })
+    .limit(10000);
   return { rows: data || [], error: error?.message || "" };
 }
 
@@ -50,181 +31,82 @@ function num(value) {
   return Number.isFinite(n) ? n : null;
 }
 
-function raceKey(row) {
-  return `${String(row?.race_date || "")}:${Number(row?.course_code)}:${Number(row?.race_no)}`;
+function pct(value) {
+  return value == null ? "—" : `${Number(value).toFixed(1)}%`;
 }
 
-function normalizeTicket(value) {
-  return String(value || "")
-    .trim()
-    .replace(/[－ー−]/g, "-")
-    .replace(/\s+/g, "");
+function yen(value) {
+  return value == null ? "—" : `${Number(value).toLocaleString("ja-JP")}円`;
 }
 
-function ticketParts(value) {
-  const normalized = normalizeTicket(value);
-  const parts = normalized.split("-").map((part) => Number(part));
-  return parts.length === 3 && parts.every((part) => Number.isInteger(part) && part >= 1 && part <= 6)
-    ? parts
-    : [];
+function sourceKey(table, id) {
+  return `${table}:${id}`;
 }
 
-function permutations3(a, b, c) {
-  return [
-    `${a}-${b}-${c}`,
-    `${a}-${c}-${b}`,
-    `${b}-${a}-${c}`,
-    `${b}-${c}-${a}`,
-    `${c}-${a}-${b}`,
-    `${c}-${b}-${a}`,
-  ];
-}
-
-function makeIchikaBet(result) {
-  if (!result?.trifecta) return null;
-  const winner = ticketParts(result.trifecta);
-  const hit = winner[0] === 1;
-  return {
-    invest: 20 * UNIT_BET,
-    payout: hit ? Number(result.trifecta_payout || 0) : 0,
-    hit,
-    label: "1-全-全（20点）",
-  };
-}
-
-function activeHatsuneBoxes(row) {
-  const boxes = [];
-  const add = (rating, boats) => {
-    if (["◎", "○"].includes(String(rating || "").trim())) boxes.push(boats);
-  };
-  add(row.box_234_rating, [2, 3, 4]);
-  add(row.box_235_rating, [2, 3, 5]);
-  add(row.box_345_rating, [3, 4, 5]);
-  return boxes;
-}
-
-function makeHatsuneBet(row, result) {
-  if (!result?.trifecta) return null;
-  const tickets = new Set();
-  for (const box of activeHatsuneBoxes(row)) {
-    for (const ticket of permutations3(...box)) tickets.add(ticket);
-  }
-  if (!tickets.size) return null;
-  const winner = normalizeTicket(result.trifecta);
-  const hit = tickets.has(winner);
-  return {
-    invest: tickets.size * UNIT_BET,
-    payout: hit ? Number(result.trifecta_payout || 0) : 0,
-    hit,
-    label: `評価◎○BOX（${tickets.size}点）`,
-  };
-}
-
-function makeKiinaBet(row, result) {
-  if (!result?.trifecta) return null;
-  const head = Number(row.boat_no || 4);
-  const winner = ticketParts(result.trifecta);
-  const hit = winner[0] === head;
-  return {
-    invest: 20 * UNIT_BET,
-    payout: hit ? Number(result.trifecta_payout || 0) : 0,
-    hit,
-    label: `${head}-全-全（20点）`,
-  };
-}
-
-function enrichRows(rows, resultMap, boat1Map, theoryKey) {
-  return rows.map((row) => {
-    const key = raceKey(row);
-    const result = resultMap.get(key) || null;
-    const boat1Rank = boat1Map.get(key) ?? null;
-    let bet = null;
-    if (theoryKey === "ichika") bet = makeIchikaBet(result);
-    if (theoryKey === "hatsune") bet = makeHatsuneBet(row, result);
-    if (theoryKey === "kiina") bet = makeKiinaBet(row, result);
-    return {
-      ...row,
-      linked_result_rank: theoryKey === "ichika" ? boat1Rank : row.result_rank,
-      linked_trifecta: result?.trifecta ?? row.trifecta,
-      linked_trifecta_payout: result?.trifecta_payout ?? row.trifecta_payout,
-      linked_invest: bet?.invest ?? null,
-      linked_payout: bet?.payout ?? null,
-      linked_hit: bet?.hit ?? null,
-      linked_bet_label: bet?.label ?? null,
-    };
-  });
-}
-
-function firstNumber(row, keys) {
-  for (const key of keys) {
-    const value = num(row?.[key]);
-    if (value != null) return value;
-  }
-  return null;
-}
-
-function rowResultRank(row) {
-  return firstNumber(row, ["linked_result_rank", "result_rank", "boat1_result_rank", "arrival_order", "result"]);
-}
-
-function rowPayout(row) {
-  return firstNumber(row, ["linked_payout", "trifecta_payout", "payout", "payout_yen", "return_yen"]);
-}
-
-function rowInvest(row) {
-  return firstNumber(row, ["linked_invest", "invest", "investment", "bet_amount", "stake_yen"]);
-}
-
-function bucketGap(value) {
+function signalBucket(value) {
   const n = num(value);
-  if (n == null) return "差不明";
-  if (n <= 0.02) return "トップ差0.02秒以内";
-  if (n <= 0.04) return "トップ差0.03〜0.04秒";
-  return "トップ差0.05秒以上";
+  if (n == null) return "条件時率不明";
+  if (n >= 70) return "条件時70%+";
+  if (n >= 65) return "条件時65〜69%";
+  return "条件時65%未満";
+}
+
+function upliftBucket(value) {
+  const n = num(value);
+  if (n == null) return "上昇幅不明";
+  if (n >= 15) return "上昇15pt+";
+  if (n >= 10) return "上昇10〜14pt";
+  return "上昇10pt未満";
 }
 
 const THEORY = {
   ichika: {
     name: "一果",
-    subtitle: "イン逃げ条件研究",
-    table: "bs_ichika_hidden_escape_alerts",
+    subtitle: "イン逃げアラート条件研究",
+    table: "bs_ichika_escape_surge_alerts",
+    theoryKey: "ichika_escape_surge",
     accent: "#e83e7e",
     soft: "#fff1f6",
-    betRule: "1号艇1着固定「1-全-全」20点・各100円で回収率を計算",
+    note: "通知時に表示した『2着候補』を 1-候補-全 の4点へ展開して保存。保存された買い目だけで回収率を計算します。",
     groupKey: (row) => [
-      row.racer_class || "級別不明",
-      `展示${row.exhibition_rank ?? "?"}位`,
-      `1周${row.lap_rank ?? "?"}位`,
-      bucketGap(row.exhibition_gap),
+      signalBucket(row.signal_win_rate),
+      upliftBucket(row.uplift_points),
+      `2着候補${row.recommended_second_boat ?? "?"}号艇`,
     ].join(" × "),
-    hit: (row) => row.linked_hit === true || rowResultRank(row) === 1,
   },
   hatsune: {
     name: "初音",
-    subtitle: "女子戦・箱推し条件研究",
+    subtitle: "箱推し理論条件研究",
     table: "bs_hatsune_box_alerts",
+    theoryKey: "hatsune_box",
     accent: "#8b5cf6",
     soft: "#f6f1ff",
-    betRule: "評価◎・○の234/235/345 BOXを各100円購入（重複買い目は1点に統合）",
+    note: "成立時に◎・○だった推奨BOXを、その時点の買い目として保存。重複買い目は1点に統合しています。",
     groupKey: (row) => [
       `234:${row.box_234_rating || "△"}`,
       `235:${row.box_235_rating || "△"}`,
       `345:${row.box_345_rating || "△"}`,
       `①展示${row.boat1_exhibition_rank ?? "?"}位`,
     ].join(" / "),
-    hit: (row) => row.linked_hit === true || row.box_hit === true || row.hit === true || row.is_hit === true,
   },
   kiina: {
     name: "キイナ",
-    subtitle: "カド攻め条件研究",
+    subtitle: "カド攻め理論条件研究",
     table: "bs_exhibition_alerts",
+    theoryKey: "kiina_kado",
     accent: "#d38a00",
     soft: "#fff8e8",
-    betRule: "4号艇1着固定「4-全-全」20点・各100円で参考回収率を計算",
+    note: "現在のカド攻め理論は『成立条件』のみ通知し、買い目は推奨していません。実買い目が定義されるまで回収率は出しません。",
     groupKey: (row) => `展示${row.exhibition_rank ?? "?"}位 × 直線${row.straight_rank ?? "?"}位`,
-    hit: (row) => row.linked_hit === true || rowResultRank(row) === 1,
   },
 };
+
+function attachRecommendations(rows, config, recommendationMap) {
+  return rows.map((row) => ({
+    ...row,
+    recommendation: recommendationMap.get(sourceKey(config.table, row.id)) || null,
+  }));
+}
 
 function summarize(rows, config) {
   const groups = new Map();
@@ -235,101 +117,76 @@ function summarize(rows, config) {
   }
 
   return Array.from(groups.entries()).map(([condition, items]) => {
-    const resultRows = items.filter((row) => row.linked_hit != null || rowResultRank(row) != null || row.hit != null || row.box_hit != null || row.is_hit != null);
-    const hits = resultRows.filter(config.hit).length;
-    const payoutRows = items.filter((row) => rowPayout(row) != null && rowInvest(row) != null && rowInvest(row) > 0);
-    const invest = payoutRows.reduce((sum, row) => sum + (rowInvest(row) || 0), 0);
-    const payout = payoutRows.reduce((sum, row) => sum + (rowPayout(row) || 0), 0);
+    const recs = items.map((row) => row.recommendation).filter(Boolean);
+    const ticketRecs = recs.filter((rec) => rec.recommendation_type === "tickets" && Number(rec.investment || 0) > 0);
+    const settled = ticketRecs.filter((rec) => rec.status === "settled");
+    const hits = settled.filter((rec) => rec.is_hit === true).length;
+    const invest = settled.reduce((sum, rec) => sum + Number(rec.investment || 0), 0);
+    const payout = settled.reduce((sum, rec) => sum + Number(rec.payout || 0), 0);
     const roi = invest > 0 ? (payout / invest) * 100 : null;
     return {
       condition,
       sample: items.length,
-      finished: resultRows.length,
+      recommended: ticketRecs.length,
+      settled: settled.length,
       hits,
-      hitRate: resultRows.length ? (hits / resultRows.length) * 100 : null,
-      payoutRows: payoutRows.length,
+      hitRate: settled.length ? (hits / settled.length) * 100 : null,
       invest,
       payout,
       roi,
     };
-  }).sort((a, b) => {
-    const aScore = a.roi ?? a.hitRate ?? -1;
-    const bScore = b.roi ?? b.hitRate ?? -1;
-    return bScore - aScore || b.sample - a.sample;
-  });
-}
-
-function pct(value) {
-  return value == null ? "—" : `${value.toFixed(1)}%`;
-}
-
-function yen(value) {
-  return Number(value || 0).toLocaleString("ja-JP") + "円";
+  }).sort((a, b) => (b.roi ?? -1) - (a.roi ?? -1) || b.settled - a.settled || b.sample - a.sample);
 }
 
 function TheorySection({ config, rows, error }) {
-  const summary = summarize(rows, config).slice(0, 12);
-  const roiReady = summary.filter((item) => item.roi != null).length;
+  const summary = summarize(rows, config).slice(0, 15);
+  const ticketRows = rows.filter((row) => row.recommendation?.recommendation_type === "tickets");
+  const settledRows = ticketRows.filter((row) => row.recommendation?.status === "settled");
+  const totalInvest = settledRows.reduce((sum, row) => sum + Number(row.recommendation?.investment || 0), 0);
+  const totalPayout = settledRows.reduce((sum, row) => sum + Number(row.recommendation?.payout || 0), 0);
+  const overallRoi = totalInvest > 0 ? (totalPayout / totalInvest) * 100 : null;
   const winners = summary.filter((item) => item.roi != null && item.roi >= 100).length;
-  const linkedRaces = rows.filter((row) => row.linked_invest != null).length;
 
   return (
     <section style={{ background: "#fff", borderRadius: 22, padding: 18, boxShadow: "0 8px 24px rgba(22,52,92,.07)", border: `1px solid ${config.soft}` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", marginBottom: 14 }}>
-        <div>
-          <span style={{ color: config.accent, fontSize: 12, fontWeight: 900, letterSpacing: ".08em" }}>{config.name.toUpperCase()} RESEARCH</span>
-          <h2 style={{ margin: "4px 0 3px", color: "#17345c", fontSize: 22 }}>{config.name}｜{config.subtitle}</h2>
-          <p style={{ margin: 0, color: "#718096", fontSize: 13 }}>保存済み理論成立データを条件ごとに自動集計します。</p>
-          <p style={{ margin: "7px 0 0", color: config.accent, fontSize: 12, fontWeight: 800 }}>回収率ルール：{config.betRule}</p>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", flexWrap: "wrap", marginBottom: 12 }}>
+        <div style={{ flex: "1 1 560px" }}>
+          <span style={{ color: config.accent, fontSize: 12, fontWeight: 900, letterSpacing: ".08em" }}>{config.name.toUpperCase()} ACTUAL BET RESEARCH</span>
+          <h2 style={{ margin: "4px 0", color: "#17345c", fontSize: 22 }}>{config.name}｜{config.subtitle}</h2>
+          <p style={{ margin: 0, color: "#718096", fontSize: 13, lineHeight: 1.65 }}>{config.note}</p>
         </div>
-        <div style={{ minWidth: 94, textAlign: "center", borderRadius: 14, padding: "9px 10px", background: config.soft }}>
-          <small style={{ display: "block", color: "#718096", fontWeight: 800 }}>全データ</small>
-          <strong style={{ color: config.accent, fontSize: 24 }}>{rows.length}</strong>
+        <div style={{ minWidth: 110, textAlign: "center", borderRadius: 14, padding: "9px 10px", background: config.soft }}>
+          <small style={{ display: "block", color: "#718096", fontWeight: 800 }}>実買い目ROI</small>
+          <strong style={{ color: overallRoi != null && overallRoi >= 100 ? "#067647" : config.accent, fontSize: 25 }}>{pct(overallRoi)}</strong>
         </div>
       </div>
 
       {error ? <div style={{ padding: 12, borderRadius: 12, background: "#fff1f2", color: "#b42318", marginBottom: 12 }}>取得エラー：{error}</div> : null}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, marginBottom: 14 }}>
-        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>条件パターン</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{summary.length}</strong></div>
-        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>払戻連携R</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{linkedRaces}</strong></div>
-        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>回収率算出可</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{roiReady}</strong></div>
-        <div style={{ padding: 11, borderRadius: 13, background: winners ? "#ecfdf3" : "#f7f9fc" }}><small style={{ color: "#718096" }}>回収率100%+</small><strong style={{ display: "block", color: winners ? "#067647" : "#17345c", fontSize: 21 }}>{winners}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>理論成立</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{rows.length}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>買い目保存</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{ticketRows.length}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>結果確定</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{settledRows.length}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: winners ? "#ecfdf3" : "#f7f9fc" }}><small style={{ color: "#718096" }}>回収率100%+条件</small><strong style={{ display: "block", color: winners ? "#067647" : "#17345c", fontSize: 21 }}>{winners}</strong></div>
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800, fontSize: 13 }}>
-          <thead>
-            <tr style={{ color: "#718096", textAlign: "left", borderBottom: "1px solid #e7ebf0" }}>
-              <th style={{ padding: "9px 8px" }}>条件</th>
-              <th style={{ padding: "9px 8px" }}>母数</th>
-              <th style={{ padding: "9px 8px" }}>結果確定</th>
-              <th style={{ padding: "9px 8px" }}>的中/1着率</th>
-              <th style={{ padding: "9px 8px" }}>投資</th>
-              <th style={{ padding: "9px 8px" }}>払戻</th>
-              <th style={{ padding: "9px 8px" }}>回収率</th>
-              <th style={{ padding: "9px 8px" }}>判定</th>
-            </tr>
-          </thead>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820, fontSize: 13 }}>
+          <thead><tr style={{ color: "#718096", textAlign: "left", borderBottom: "1px solid #e7ebf0" }}>
+            <th style={{ padding: 9 }}>条件</th><th style={{ padding: 9 }}>母数</th><th style={{ padding: 9 }}>買い目保存</th><th style={{ padding: 9 }}>結果確定</th><th style={{ padding: 9 }}>的中率</th><th style={{ padding: 9 }}>投資</th><th style={{ padding: 9 }}>払戻</th><th style={{ padding: 9 }}>回収率</th><th style={{ padding: 9 }}>判定</th>
+          </tr></thead>
           <tbody>
             {summary.map((item) => {
               const good = item.roi != null && item.roi >= 100;
-              return (
-                <tr key={item.condition} style={{ borderBottom: "1px solid #edf0f4" }}>
-                  <td style={{ padding: "11px 8px", fontWeight: 800, color: "#17345c" }}>{item.condition}</td>
-                  <td style={{ padding: "11px 8px" }}>{item.sample}</td>
-                  <td style={{ padding: "11px 8px" }}>{item.finished}</td>
-                  <td style={{ padding: "11px 8px", fontWeight: 800 }}>{pct(item.hitRate)}</td>
-                  <td style={{ padding: "11px 8px", whiteSpace: "nowrap" }}>{item.invest ? yen(item.invest) : "—"}</td>
-                  <td style={{ padding: "11px 8px", whiteSpace: "nowrap" }}>{item.invest ? yen(item.payout) : "—"}</td>
-                  <td style={{ padding: "11px 8px", fontWeight: 900, color: good ? "#067647" : "#526079" }}>{pct(item.roi)}</td>
-                  <td style={{ padding: "11px 8px" }}>
-                    {good ? <span style={{ background: "#dcfae6", color: "#067647", borderRadius: 999, padding: "5px 8px", fontWeight: 900 }}>候補</span> : item.roi == null ? <span style={{ color: "#98a2b3" }}>結果連携待ち</span> : <span style={{ color: "#667085" }}>継続検証</span>}
-                  </td>
-                </tr>
-              );
+              return <tr key={item.condition} style={{ borderBottom: "1px solid #edf0f4" }}>
+                <td style={{ padding: 10, fontWeight: 800, color: "#17345c" }}>{item.condition}</td>
+                <td style={{ padding: 10 }}>{item.sample}</td><td style={{ padding: 10 }}>{item.recommended}</td><td style={{ padding: 10 }}>{item.settled}</td>
+                <td style={{ padding: 10, fontWeight: 800 }}>{pct(item.hitRate)}</td><td style={{ padding: 10 }}>{yen(item.invest)}</td><td style={{ padding: 10 }}>{yen(item.payout)}</td>
+                <td style={{ padding: 10, fontWeight: 900, color: good ? "#067647" : "#526079" }}>{pct(item.roi)}</td>
+                <td style={{ padding: 10 }}>{good ? <span style={{ background: "#dcfae6", color: "#067647", borderRadius: 999, padding: "5px 8px", fontWeight: 900 }}>候補</span> : item.roi == null ? <span style={{ color: "#98a2b3" }}>実買い目なし</span> : <span style={{ color: "#667085" }}>継続検証</span>}</td>
+              </tr>;
             })}
-            {!summary.length ? <tr><td colSpan="8" style={{ padding: 18, textAlign: "center", color: "#98a2b3" }}>まだ研究対象データがありません。</td></tr> : null}
+            {!summary.length ? <tr><td colSpan="9" style={{ padding: 18, textAlign: "center", color: "#98a2b3" }}>まだ研究対象データがありません。</td></tr> : null}
           </tbody>
         </table>
       </div>
@@ -337,50 +194,51 @@ function TheorySection({ config, rows, error }) {
   );
 }
 
+function RecentRecommendations({ rows }) {
+  const recent = rows.slice(0, 20);
+  return <section style={{ background: "#fff", borderRadius: 22, padding: 18, boxShadow: "0 8px 24px rgba(22,52,92,.07)" }}>
+    <h2 style={{ margin: "0 0 5px", color: "#17345c" }}>最近の保存済み推奨</h2>
+    <p style={{ margin: "0 0 12px", color: "#718096", fontSize: 13 }}>理論成立時点の買い目を後から書き換えず保存しています。</p>
+    <div style={{ display: "grid", gap: 8 }}>
+      {recent.map((rec) => <div key={rec.id} style={{ padding: 12, border: "1px solid #e8edf3", borderRadius: 14, display: "grid", gridTemplateColumns: "minmax(160px,1fr) 2fr auto", gap: 10, alignItems: "center" }}>
+        <div><strong style={{ color: "#17345c" }}>{rec.course_name || `${rec.course_code}場`} {rec.race_no}R</strong><small style={{ display: "block", color: "#98a2b3", marginTop: 3 }}>{rec.race_date} / {rec.character_code}</small></div>
+        <div><b style={{ color: "#526079" }}>{rec.recommendation_label || "条件成立"}</b><small style={{ display: "block", color: "#98a2b3", marginTop: 3 }}>{rec.recommendation_type === "tickets" ? `${rec.ticket_count}点・${yen(rec.investment)}` : "買い目未設定"}</small></div>
+        <div style={{ textAlign: "right" }}><strong style={{ color: rec.is_hit ? "#067647" : "#526079" }}>{rec.status === "settled" ? (rec.is_hit ? "的中" : "不的中") : rec.status === "no_ticket" ? "条件のみ" : "結果待ち"}</strong><small style={{ display: "block", marginTop: 3, color: "#718096" }}>{rec.status === "settled" ? `回収 ${pct(rec.recovery_rate)}` : ""}</small></div>
+      </div>)}
+      {!recent.length ? <div style={{ color: "#98a2b3", padding: 12 }}>保存済み推奨はまだありません。</div> : null}
+    </div>
+  </section>;
+}
+
 export default async function ConditionResearchPage() {
   const supabase = getSupabase();
-  const [ichika, hatsune, kiina, raceResults, boat1Results] = await Promise.all([
+  const [ichika, hatsune, kiina, recommendationResult] = await Promise.all([
     loadRows(supabase, THEORY.ichika.table),
     loadRows(supabase, THEORY.hatsune.table),
     loadRows(supabase, THEORY.kiina.table),
-    loadRaceResults(supabase),
-    loadBoat1Results(supabase),
+    loadRecommendations(supabase),
   ]);
 
-  const resultMap = new Map(raceResults.rows.map((row) => [raceKey(row), row]));
-  const boat1Map = new Map(boat1Results.rows.map((row) => [raceKey(row), Number(row.arrival_order)]));
+  const recommendationMap = new Map(recommendationResult.rows.map((rec) => [sourceKey(rec.source_table, rec.source_alert_id), rec]));
+  const ichikaRows = attachRecommendations(ichika.rows, THEORY.ichika, recommendationMap);
+  const hatsuneRows = attachRecommendations(hatsune.rows, THEORY.hatsune, recommendationMap);
+  const kiinaRows = attachRecommendations(kiina.rows, THEORY.kiina, recommendationMap);
 
-  const ichikaRows = enrichRows(ichika.rows, resultMap, boat1Map, "ichika");
-  const hatsuneRows = enrichRows(hatsune.rows, resultMap, boat1Map, "hatsune");
-  const kiinaRows = enrichRows(kiina.rows, resultMap, boat1Map, "kiina");
+  return <main style={{ minHeight: "100vh", background: "#f4f7fb", padding: "24px 14px 90px" }}>
+    <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+      <header style={{ background: "linear-gradient(135deg,#102a52,#1d4f82)", color: "#fff", borderRadius: 24, padding: 22, marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><div><span style={{ fontSize: 12, fontWeight: 900, letterSpacing: ".1em", opacity: .78 }}>BOATSTRIKERS RESEARCH ENGINE</span><h1 style={{ margin: "6px 0 8px", fontSize: 28 }}>実推奨買い目・回収率研究</h1><p style={{ margin: 0, lineHeight: 1.7, opacity: .9 }}>理論成立時に実際に出した推奨を保存し、結果確定後にその買い目だけで的中率・回収率を自動計算します。</p></div><Link href="/admin" style={{ alignSelf: "flex-start", color: "#17345c", background: "#fff", textDecoration: "none", borderRadius: 12, padding: "10px 13px", fontWeight: 900 }}>管理TOPへ</Link></div>
+      </header>
 
-  const sharedError = [raceResults.error, boat1Results.error].filter(Boolean).join(" / ");
+      <div style={{ background: "#ecfdf3", border: "1px solid #abefc6", borderRadius: 16, padding: 14, marginBottom: 16, color: "#067647", fontSize: 13, lineHeight: 1.7 }}><strong>実買い目スナップショット方式：</strong> 理論成立時の推奨を <code>bs_theory_recommendations</code> に固定保存します。結果が後から入ると自動照合し、投資・払戻・利益・回収率を確定します。後知恵で買い目を作り直さないため、研究値の信頼性を高められます。</div>
+      {recommendationResult.error ? <div style={{ padding: 12, background: "#fff1f2", color: "#b42318", borderRadius: 14, marginBottom: 16 }}>推奨履歴取得エラー：{recommendationResult.error}</div> : null}
 
-  return (
-    <main style={{ minHeight: "100vh", background: "#f4f7fb", padding: "24px 14px 90px" }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
-        <header style={{ background: "linear-gradient(135deg,#102a52,#1d4f82)", color: "#fff", borderRadius: 24, padding: 22, marginBottom: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div>
-              <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: ".1em", opacity: .78 }}>BOATSTRIKERS RESEARCH</span>
-              <h1 style={{ margin: "6px 0 8px", fontSize: 28 }}>回収率100%条件リサーチ</h1>
-              <p style={{ margin: 0, lineHeight: 1.7, opacity: .9 }}>一果・初音・キイナの理論成立履歴を公式結果と自動照合し、条件別の勝率・投資・払戻・回収率を比較します。</p>
-            </div>
-            <Link href="/admin" style={{ alignSelf: "flex-start", color: "#17345c", background: "#fff", textDecoration: "none", borderRadius: 12, padding: "10px 13px", fontWeight: 900 }}>管理TOPへ</Link>
-          </div>
-        </header>
-
-        <div style={{ background: "#ecfdf3", border: "1px solid #abefc6", borderRadius: 16, padding: 14, marginBottom: 16, color: "#067647", fontSize: 13, lineHeight: 1.65 }}>
-          <strong>結果・払戻 自動連携：</strong> bs_race_events の3連単結果・払戻と、bs_race_entries の着順を「日付＋場＋R」で理論成立履歴に自動紐付けします。回収率は下記に明記した固定買い方・1点100円で計算し、結果が未取得のレースは集計対象から除外します。
-        </div>
-        {sharedError ? <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", color: "#b42318", borderRadius: 14, padding: 12, marginBottom: 16 }}>結果連携エラー：{sharedError}</div> : null}
-
-        <div style={{ display: "grid", gap: 16 }}>
-          <TheorySection config={THEORY.ichika} rows={ichikaRows} error={ichika.error} />
-          <TheorySection config={THEORY.hatsune} rows={hatsuneRows} error={hatsune.error} />
-          <TheorySection config={THEORY.kiina} rows={kiinaRows} error={kiina.error} />
-        </div>
+      <div style={{ display: "grid", gap: 16 }}>
+        <TheorySection config={THEORY.ichika} rows={ichikaRows} error={ichika.error} />
+        <TheorySection config={THEORY.hatsune} rows={hatsuneRows} error={hatsune.error} />
+        <TheorySection config={THEORY.kiina} rows={kiinaRows} error={kiina.error} />
+        <RecentRecommendations rows={recommendationResult.rows} />
       </div>
-    </main>
-  );
+    </div>
+  </main>;
 }
