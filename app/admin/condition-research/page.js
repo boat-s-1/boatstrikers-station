@@ -59,6 +59,26 @@ function upliftBucket(value) {
   return "上昇10pt未満";
 }
 
+function researchDecision(item) {
+  if (item.roi == null || item.settled === 0) {
+    return { key: "no_data", label: "データ蓄積中", background: "#f2f4f7", color: "#667085", reason: "実買い目または結果確定データが不足" };
+  }
+
+  if (item.settled < 30) {
+    return { key: "watch", label: "様子見", background: "#fff7e6", color: "#b54708", reason: `結果確定${item.settled}R。30Rまでは判断を固定しない` };
+  }
+
+  if (item.roi >= 110) {
+    return { key: "adopt", label: "採用候補", background: "#dcfae6", color: "#067647", reason: `結果確定${item.settled}R・回収率${item.roi.toFixed(1)}%` };
+  }
+
+  if (item.settled >= 50 && item.roi < 80) {
+    return { key: "exclude", label: "除外候補", background: "#fee4e2", color: "#b42318", reason: `結果確定${item.settled}R・回収率${item.roi.toFixed(1)}%` };
+  }
+
+  return { key: "continue", label: "継続検証", background: "#eef4ff", color: "#3538cd", reason: `結果確定${item.settled}R・回収率${item.roi.toFixed(1)}%` };
+}
+
 const THEORY = {
   ichika: {
     name: "一果",
@@ -124,7 +144,7 @@ function summarize(rows, config) {
     const invest = settled.reduce((sum, rec) => sum + Number(rec.investment || 0), 0);
     const payout = settled.reduce((sum, rec) => sum + Number(rec.payout || 0), 0);
     const roi = invest > 0 ? (payout / invest) * 100 : null;
-    return {
+    const summary = {
       condition,
       sample: items.length,
       recommended: ticketRecs.length,
@@ -135,7 +155,30 @@ function summarize(rows, config) {
       payout,
       roi,
     };
-  }).sort((a, b) => (b.roi ?? -1) - (a.roi ?? -1) || b.settled - a.settled || b.sample - a.sample);
+    return { ...summary, decision: researchDecision(summary) };
+  }).sort((a, b) => {
+    const rank = { adopt: 0, continue: 1, watch: 2, exclude: 3, no_data: 4 };
+    return (rank[a.decision.key] ?? 9) - (rank[b.decision.key] ?? 9) || (b.roi ?? -1) - (a.roi ?? -1) || b.settled - a.settled;
+  });
+}
+
+function DecisionLegend() {
+  const items = [
+    ["採用候補", "結果確定30R以上 ＋ 回収率110%以上", "#dcfae6", "#067647"],
+    ["様子見", "結果確定30R未満。高回収でもまだ固定しない", "#fff7e6", "#b54708"],
+    ["継続検証", "30R以上でも採用・除外基準には未到達", "#eef4ff", "#3538cd"],
+    ["除外候補", "結果確定50R以上 ＋ 回収率80%未満", "#fee4e2", "#b42318"],
+  ];
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, marginBottom: 16 }}>
+      {items.map(([label, text, background, color]) => (
+        <div key={label} style={{ padding: 11, borderRadius: 13, background, minWidth: 0 }}>
+          <strong style={{ color, display: "block", fontSize: 13 }}>{label}</strong>
+          <small style={{ color: "#667085", lineHeight: 1.45 }}>{text}</small>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function TheorySection({ config, rows, error }) {
@@ -145,7 +188,9 @@ function TheorySection({ config, rows, error }) {
   const totalInvest = settledRows.reduce((sum, row) => sum + Number(row.recommendation?.investment || 0), 0);
   const totalPayout = settledRows.reduce((sum, row) => sum + Number(row.recommendation?.payout || 0), 0);
   const overallRoi = totalInvest > 0 ? (totalPayout / totalInvest) * 100 : null;
-  const winners = summary.filter((item) => item.roi != null && item.roi >= 100).length;
+  const adoptionCount = summary.filter((item) => item.decision.key === "adopt").length;
+  const watchCount = summary.filter((item) => item.decision.key === "watch").length;
+  const excludeCount = summary.filter((item) => item.decision.key === "exclude").length;
 
   return (
     <section style={{ background: "#fff", borderRadius: 22, padding: 18, boxShadow: "0 8px 24px rgba(22,52,92,.07)", border: `1px solid ${config.soft}` }}>
@@ -163,30 +208,33 @@ function TheorySection({ config, rows, error }) {
 
       {error ? <div style={{ padding: 12, borderRadius: 12, background: "#fff1f2", color: "#b42318", marginBottom: 12 }}>取得エラー：{error}</div> : null}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(6,minmax(0,1fr))", gap: 8, marginBottom: 14 }}>
         <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>理論成立</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{rows.length}</strong></div>
-        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>買い目保存</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{ticketRows.length}</strong></div>
         <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>結果確定</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{settledRows.length}</strong></div>
-        <div style={{ padding: 11, borderRadius: 13, background: winners ? "#ecfdf3" : "#f7f9fc" }}><small style={{ color: "#718096" }}>回収率100%+条件</small><strong style={{ display: "block", color: winners ? "#067647" : "#17345c", fontSize: 21 }}>{winners}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#ecfdf3" }}><small style={{ color: "#067647" }}>採用候補</small><strong style={{ display: "block", color: "#067647", fontSize: 21 }}>{adoptionCount}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#fff7e6" }}><small style={{ color: "#b54708" }}>様子見</small><strong style={{ display: "block", color: "#b54708", fontSize: 21 }}>{watchCount}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#fee4e2" }}><small style={{ color: "#b42318" }}>除外候補</small><strong style={{ display: "block", color: "#b42318", fontSize: 21 }}>{excludeCount}</strong></div>
+        <div style={{ padding: 11, borderRadius: 13, background: "#f7f9fc" }}><small style={{ color: "#718096" }}>買い目保存</small><strong style={{ display: "block", color: "#17345c", fontSize: 21 }}>{ticketRows.length}</strong></div>
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820, fontSize: 13 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 940, fontSize: 13 }}>
           <thead><tr style={{ color: "#718096", textAlign: "left", borderBottom: "1px solid #e7ebf0" }}>
-            <th style={{ padding: 9 }}>条件</th><th style={{ padding: 9 }}>母数</th><th style={{ padding: 9 }}>買い目保存</th><th style={{ padding: 9 }}>結果確定</th><th style={{ padding: 9 }}>的中率</th><th style={{ padding: 9 }}>投資</th><th style={{ padding: 9 }}>払戻</th><th style={{ padding: 9 }}>回収率</th><th style={{ padding: 9 }}>判定</th>
+            <th style={{ padding: 9 }}>条件</th><th style={{ padding: 9 }}>母数</th><th style={{ padding: 9 }}>買い目保存</th><th style={{ padding: 9 }}>結果確定</th><th style={{ padding: 9 }}>的中率</th><th style={{ padding: 9 }}>投資</th><th style={{ padding: 9 }}>払戻</th><th style={{ padding: 9 }}>回収率</th><th style={{ padding: 9 }}>研究判定</th><th style={{ padding: 9 }}>判定理由</th>
           </tr></thead>
           <tbody>
             {summary.map((item) => {
-              const good = item.roi != null && item.roi >= 100;
+              const decision = item.decision;
               return <tr key={item.condition} style={{ borderBottom: "1px solid #edf0f4" }}>
                 <td style={{ padding: 10, fontWeight: 800, color: "#17345c" }}>{item.condition}</td>
                 <td style={{ padding: 10 }}>{item.sample}</td><td style={{ padding: 10 }}>{item.recommended}</td><td style={{ padding: 10 }}>{item.settled}</td>
                 <td style={{ padding: 10, fontWeight: 800 }}>{pct(item.hitRate)}</td><td style={{ padding: 10 }}>{yen(item.invest)}</td><td style={{ padding: 10 }}>{yen(item.payout)}</td>
-                <td style={{ padding: 10, fontWeight: 900, color: good ? "#067647" : "#526079" }}>{pct(item.roi)}</td>
-                <td style={{ padding: 10 }}>{good ? <span style={{ background: "#dcfae6", color: "#067647", borderRadius: 999, padding: "5px 8px", fontWeight: 900 }}>候補</span> : item.roi == null ? <span style={{ color: "#98a2b3" }}>実買い目なし</span> : <span style={{ color: "#667085" }}>継続検証</span>}</td>
+                <td style={{ padding: 10, fontWeight: 900, color: item.roi != null && item.roi >= 100 ? "#067647" : "#526079" }}>{pct(item.roi)}</td>
+                <td style={{ padding: 10 }}><span style={{ background: decision.background, color: decision.color, borderRadius: 999, padding: "5px 8px", fontWeight: 900, whiteSpace: "nowrap" }}>{decision.label}</span></td>
+                <td style={{ padding: 10, color: "#667085", fontSize: 12 }}>{decision.reason}</td>
               </tr>;
             })}
-            {!summary.length ? <tr><td colSpan="9" style={{ padding: 18, textAlign: "center", color: "#98a2b3" }}>まだ研究対象データがありません。</td></tr> : null}
+            {!summary.length ? <tr><td colSpan="10" style={{ padding: 18, textAlign: "center", color: "#98a2b3" }}>まだ研究対象データがありません。</td></tr> : null}
           </tbody>
         </table>
       </div>
@@ -230,7 +278,8 @@ export default async function ConditionResearchPage() {
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><div><span style={{ fontSize: 12, fontWeight: 900, letterSpacing: ".1em", opacity: .78 }}>BOATSTRIKERS RESEARCH ENGINE</span><h1 style={{ margin: "6px 0 8px", fontSize: 28 }}>実推奨買い目・回収率研究</h1><p style={{ margin: 0, lineHeight: 1.7, opacity: .9 }}>理論成立時に実際に出した推奨を保存し、結果確定後にその買い目だけで的中率・回収率を自動計算します。</p></div><Link href="/admin" style={{ alignSelf: "flex-start", color: "#17345c", background: "#fff", textDecoration: "none", borderRadius: 12, padding: "10px 13px", fontWeight: 900 }}>管理TOPへ</Link></div>
       </header>
 
-      <div style={{ background: "#ecfdf3", border: "1px solid #abefc6", borderRadius: 16, padding: 14, marginBottom: 16, color: "#067647", fontSize: 13, lineHeight: 1.7 }}><strong>実買い目スナップショット方式：</strong> 理論成立時の推奨を <code>bs_theory_recommendations</code> に固定保存します。結果が後から入ると自動照合し、投資・払戻・利益・回収率を確定します。後知恵で買い目を作り直さないため、研究値の信頼性を高められます。</div>
+      <div style={{ background: "#ecfdf3", border: "1px solid #abefc6", borderRadius: 16, padding: 14, marginBottom: 12, color: "#067647", fontSize: 13, lineHeight: 1.7 }}><strong>実買い目スナップショット方式：</strong> 理論成立時の推奨を <code>bs_theory_recommendations</code> に固定保存します。結果が後から入ると自動照合し、投資・払戻・利益・回収率を確定します。後知恵で買い目を作り直さないため、研究値の信頼性を高められます。</div>
+      <DecisionLegend />
       {recommendationResult.error ? <div style={{ padding: 12, background: "#fff1f2", color: "#b42318", borderRadius: 14, marginBottom: 16 }}>推奨履歴取得エラー：{recommendationResult.error}</div> : null}
 
       <div style={{ display: "grid", gap: 16 }}>
