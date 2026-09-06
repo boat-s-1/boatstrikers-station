@@ -99,11 +99,7 @@ function buildFallbackPickups(courses, raceDate) {
       const outer = rivalScores.filter((x) => x.boatNo >= 3);
       const outerBest = outer[0];
       const outerGap = (outerBest?.score ?? bestRival) - onePower;
-      const holeExpectation = clampScore(
-        55 + outerGap * 1.15 + (insideExpectation < 62 ? 8 : 0),
-        38,
-        91
-      );
+      const holeExpectation = clampScore(55 + outerGap * 1.15 + (insideExpectation < 62 ? 8 : 0), 38, 91);
       const dangerScore = clampScore(100 - insideExpectation + Math.max(0, outerGap * 1.1), 20, 92);
       const totalScore = clampScore((insideExpectation + (100 - dangerScore)) / 2, 45, 92);
       const second = rivalScores[0]?.boatNo ?? 2;
@@ -150,6 +146,10 @@ function formatQuickDate(value) {
 
 function yen(value) {
   return `${Number(value ?? 0).toLocaleString("ja-JP")}円`;
+}
+
+function pickupRaceKey(item) {
+  return `${Number(item.courseCode ?? item.stadium_code)}:${Number(item.raceNo ?? item.race_no)}`;
 }
 
 export const metadata = {
@@ -219,34 +219,22 @@ export default async function RacesPage({ searchParams }) {
   const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
 
   let insidePickups = pickupPool
-    .filter(
-      (item) =>
-        ["イン鉄板", "イン有力"].includes(item.diagnosis_label) ||
-        Number(item.inside_expectation ?? 0) >= 70
-    )
+    .filter((item) => ["イン鉄板", "イン有力"].includes(item.diagnosis_label) || Number(item.inside_expectation ?? 0) >= 70)
     .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
     .slice(0, 6);
   if (insidePickups.length === 0) {
-    insidePickups = pickupPool
-      .slice()
-      .sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0))
-      .slice(0, 3);
+    insidePickups = pickupPool.slice().sort((a, b) => Number(b.inside_expectation ?? 0) - Number(a.inside_expectation ?? 0)).slice(0, 3);
   }
 
   let holePickups = pickupPool
-    .filter(
-      (item) =>
-        ["穴期待", "波乱警戒"].includes(item.diagnosis_label) ||
-        Number(item.hole_expectation ?? 0) >= 67
-    )
+    .filter((item) => ["穴期待", "波乱警戒"].includes(item.diagnosis_label) || Number(item.hole_expectation ?? 0) >= 67)
     .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
     .slice(0, 6);
   if (holePickups.length === 0) {
-    holePickups = pickupPool
-      .slice()
-      .sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0))
-      .slice(0, 3);
+    holePickups = pickupPool.slice().sort((a, b) => Number(b.hole_expectation ?? 0) - Number(a.hole_expectation ?? 0)).slice(0, 3);
   }
+
+  const aiRaceKeys = Array.from(new Set([...insidePickups, ...holePickups].map(pickupRaceKey)));
 
   return (
     <main className={`${styles.page} ${styles.portalPage}`}>
@@ -262,76 +250,45 @@ export default async function RacesPage({ searchParams }) {
       </header>
 
       <nav className={styles.portalQuickNav} aria-label="出走表トップメニュー">
-        <a href="#race-dates">
-          <span className={styles.portalQuickIcon}>📅</span>
-          <span className={styles.portalQuickText}><small>日付</small><strong>{formatQuickDate(raceDate)}</strong></span>
-        </a>
-        <a href="#todays-courses">
-          <span className={styles.portalQuickIcon}>🚤</span>
-          <span className={styles.portalQuickText}><small>本日の開催場</small><strong>{courses.length}場</strong></span>
-        </a>
-        <a href="#daily-newspaper">
-          <span className={styles.portalQuickIcon}>📰</span>
-          <span className={styles.portalQuickText}><small>新聞</small><strong>{newspapers.length}件</strong></span>
-        </a>
+        <a href="#race-dates"><span className={styles.portalQuickIcon}>📅</span><span className={styles.portalQuickText}><small>日付</small><strong>{formatQuickDate(raceDate)}</strong></span></a>
+        <a href="#todays-courses"><span className={styles.portalQuickIcon}>🚤</span><span className={styles.portalQuickText}><small>本日の開催場</small><strong>{courses.length}場</strong></span></a>
+        <a href="#ai-picks"><span className={styles.portalQuickIcon}>🤖</span><span className={styles.portalQuickText}><small>AI注目</small><strong>{aiRaceKeys.length}R</strong></span></a>
       </nav>
 
       <div className={styles.portalContent}>
         <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
           {dates.map((date) => (
-            <Link
-              key={date}
-              href={`/races?date=${date}`}
-              className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}
-            >
+            <Link key={date} href={`/races?date=${date}`} className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}>
               {String(date).slice(5).replace("-", "/")}
             </Link>
           ))}
         </nav>
 
-        <section id="daily-newspaper" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
-          <div className={styles.portalSectionHead}>
-            <div><span>DAILY NEWSPAPER</span><h2>📰 今日公開の新聞</h2></div>
-            <b>{newspapers.length}件公開</b>
-          </div>
-          {newspapers.length === 0 ? (
-            <div className={styles.portalEmpty}><span>📰</span><strong>本日の新聞は準備中です</strong><p>公開されると、ここに自動で表示されます。</p></div>
-          ) : (
-            <div className={styles.hitFlashList}>
-              {newspapers.slice(0, 6).map((item) => (
-                <Link key={item.id ?? `${item.course_code}-${item.race_no}-${item.title}`} href={item.url ?? `/races/${String(item.course_code).padStart(2, "0")}/${item.race_no}?date=${raceDate}`} className={styles.hitFlashCard}>
-                  <div className={styles.hitFlashIcon}>新聞</div>
-                  <div className={styles.hitFlashMain}><span>公開中</span><strong>{item.title ?? `${getCourseName(item.course_code)} ${item.race_no}R`}</strong></div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
         <section id="todays-courses" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
-            <div><span>TODAY&apos;S COURSES</span><h2>🚤 本日の開催場</h2></div>
-            <b>{courses.length}場</b>
+            <div><span>TODAY&apos;S COURSES</span><h2>🚤 本日の開催場</h2></div><b>{courses.length}場</b>
           </div>
           {loadError ? (
             <div className={styles.portalEmpty}><strong>データを取得できませんでした</strong><p>{loadError}</p></div>
           ) : (
             <div className={styles.compactCourseGrid}>
               {courses.map((course) => (
-                <CoursePortalCard
-                  key={course.courseCode}
-                  course={course}
-                  raceDate={raceDate}
-                  noteCount={noteCountByCourse.get(Number(course.courseCode)) ?? 0}
-                />
+                <CoursePortalCard key={course.courseCode} course={course} raceDate={raceDate} noteCount={noteCountByCourse.get(Number(course.courseCode)) ?? 0} />
               ))}
             </div>
           )}
         </section>
 
-        <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
+        <section id="ai-picks" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
+          <div className={styles.portalSectionHead}>
+            <div><span>AI PICKS</span><h2>🤖 今日のAI注目レース</h2></div><b>{aiRaceKeys.length}R</b>
+          </div>
+          <p style={{ margin: "0 0 14px", color: "#65758b", fontSize: 13, fontWeight: 700 }}>
+            AIが総合データから選んだ注目レースです。下の「理論アラート」とは別判定です。
+          </p>
+
           <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerInside}`}>
-            <div><span>AI PICKUP</span><h2>🍎 イン逃げ鉄板レース</h2></div><b>イン期待度 上位</b>
+            <div><span>ICHIKA AI</span><h2>🍎 一果AI・イン逃げ注目</h2></div><b>イン期待度 上位</b>
           </div>
           <div className={styles.aiPickupRail}>
             {insidePickups.map((item, index) => {
@@ -349,11 +306,9 @@ export default async function RacesPage({ searchParams }) {
               );
             })}
           </div>
-        </section>
 
-        <section className={`${styles.portalSection} ${styles.aiPickupSection}`}>
-          <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerHole}`}>
-            <div><span>AI PICKUP</span><h2>🔥 穴狙いレース</h2></div><b>穴期待度 上位</b>
+          <div className={`${styles.aiPickupBanner} ${styles.aiPickupBannerHole}`} style={{ marginTop: 18 }}>
+            <div><span>KIINA AI</span><h2>💛 キイナAI・穴狙い注目</h2></div><b>穴期待度 上位</b>
           </div>
           <div className={styles.aiPickupRail}>
             {holePickups.map((item, index) => {
@@ -372,6 +327,8 @@ export default async function RacesPage({ searchParams }) {
             })}
           </div>
         </section>
+
+        <AlertFlash aiRaceKeys={aiRaceKeys} />
 
         <section className={styles.portalSection}>
           <div className={styles.portalSectionHead}>
@@ -392,15 +349,27 @@ export default async function RacesPage({ searchParams }) {
               })}
             </div>
           ) : (
-            <div className={styles.portalEmpty}>
-              <span>🎯</span>
-              <strong>現在、的中速報はありません</strong>
-              <p>的中が確定すると、ここに自動で表示されます。</p>
-            </div>
+            <div className={styles.portalEmpty}><span>🎯</span><strong>現在、的中速報はありません</strong><p>的中が確定すると、ここに自動で表示されます。</p></div>
           )}
         </section>
 
-        <AlertFlash />
+        <section id="daily-newspaper" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
+          <div className={styles.portalSectionHead}>
+            <div><span>DAILY NEWSPAPER</span><h2>📰 今日公開の新聞</h2></div><b>{newspapers.length}件公開</b>
+          </div>
+          {newspapers.length === 0 ? (
+            <div className={styles.portalEmpty}><span>📰</span><strong>本日の新聞は準備中です</strong><p>公開されると、ここに自動で表示されます。</p></div>
+          ) : (
+            <div className={styles.hitFlashList}>
+              {newspapers.slice(0, 6).map((item) => (
+                <Link key={item.id ?? `${item.course_code}-${item.race_no}-${item.title}`} href={item.url ?? `/races/${String(item.course_code).padStart(2, "0")}/${item.race_no}?date=${raceDate}`} className={styles.hitFlashCard}>
+                  <div className={styles.hitFlashIcon}>新聞</div>
+                  <div className={styles.hitFlashMain}><span>公開中</span><strong>{item.title ?? `${getCourseName(item.course_code)} ${item.race_no}R`}</strong></div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );
