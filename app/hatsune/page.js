@@ -198,10 +198,6 @@ export default async function HatsunePage() {
           <img src="/90F7EE0F-5EE8-4E71-BF86-D254BB00750D.png" alt="公式LINE登録" className="lineBannerImage" />
         </a>
       </section>
-
-      <nav className="bottomNav">
-        <a href="/">ホーム</a><a href="/ichika">一果</a><a href="/hatsune">初音</a><a href="/kiina">キイナ</a><a href="/library">図書館</a>
-      </nav>
     </main>
   );
 }
