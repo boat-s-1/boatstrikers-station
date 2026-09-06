@@ -21,6 +21,41 @@ const LEVELS = {
   attack: { label: "攻め", fg: "#b42318", bg: "#fff0f0", border: "#f1b8b5" },
 };
 
+const PRESET_BACKTESTS = [
+  {
+    key: "safe",
+    label: "安全重視",
+    sub: "勝率＋ST",
+    rules: ["win", "st"],
+    races: 7095,
+    elimination: 41.8,
+    survival: 87.82,
+    miss: 12.18,
+    recommended: true,
+  },
+  {
+    key: "balance",
+    label: "バランス",
+    sub: "勝率＋モーター",
+    rules: ["win", "motor"],
+    races: 7095,
+    elimination: 47.7,
+    survival: 81.76,
+    miss: 18.24,
+  },
+  {
+    key: "safeStandardAll",
+    label: "安全＋標準 全部",
+    sub: "勝率＋ST＋モーター＋展示4〜6位＋展示6位2着内",
+    rules: ["win", "st", "motor", "exhibition456", "exhibition6top2"],
+    races: 7095,
+    elimination: 76.3,
+    survival: 55.84,
+    miss: 44.16,
+    warning: "削りすぎ注意",
+  },
+];
+
 const ALL_BETS = (() => {
   const bets = [];
   for (const a of BOATS) {
@@ -248,6 +283,28 @@ export default function EliminationLabClient({
     if (!premiumAccess && !rule.free) return;
     setEnabled((prev) => ({ ...prev, [rule.key]: !prev[rule.key] }));
   };
+
+  const applyPreset = (preset) => {
+    if (!premiumAccess) return;
+    const keys = new Set(preset.rules);
+    setEnabled({
+      exhibition456: keys.has("exhibition456"),
+      exhibition6top2: keys.has("exhibition6top2"),
+      exhibition56top2: keys.has("exhibition56top2"),
+      st: keys.has("st"),
+      motor: keys.has("motor"),
+      win: keys.has("win"),
+    });
+    setA1Correction(false);
+    setValueEnabled(false);
+  };
+
+  const resetRules = () => {
+    setEnabled({ exhibition456: false, exhibition6top2: false, exhibition56top2: false, st: false, motor: false, win: false });
+    setA1Correction(false);
+    setValueEnabled(false);
+  };
+
   const refresh = () => startTransition(() => router.refresh());
   const removed = 120 - evaluation.remain;
   const removalRate = Math.round((removed / 120) * 1000) / 10;
@@ -280,6 +337,40 @@ export default function EliminationLabClient({
           <small style={{ color: "#6f7f90", lineHeight: 1.7, fontWeight: 700 }}>展示・ST・モーター・勝率の4系統のうち、選択中の条件で1号艇に3つ以上の危険要素が重なった時だけ「1号艇1着」を消します。</small>
           {lane1Danger.factors.length > 0 && <div style={{ fontSize: 12, fontWeight: 800, color: "#526477" }}>該当：{lane1Danger.factors.join(" / ")}</div>}
         </div>
+      </section>
+
+      <section className={styles.rulePanel}>
+        <div className={styles.sectionTitle}><span>PRESET</span><h2>組み合わせプリセット</h2></div>
+        <p style={{ margin: "-4px 0 12px", color: "#718096", fontSize: 11, lineHeight: 1.7, fontWeight: 700 }}>複数条件を同時ONにした過去7,095レースの実測値です。単独条件の数字とは違い、条件同士の重なりも含めて集計しています。</p>
+        <div style={{ display: "grid", gap: 8 }}>
+          {PRESET_BACKTESTS.map((preset) => (
+            <button
+              key={preset.key}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              disabled={!premiumAccess}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                padding: 13,
+                borderRadius: 14,
+                border: preset.warning ? "1px solid #f1b8b5" : preset.recommended ? "1px solid #b8e3c7" : "1px solid #dfe6ef",
+                background: preset.warning ? "#fff6f6" : preset.recommended ? "#f5fcf7" : "#fff",
+                opacity: premiumAccess ? 1 : .62,
+                cursor: premiumAccess ? "pointer" : "not-allowed",
+              }}
+            >
+              <span style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+                <strong style={{ color: "#243549", fontSize: 14 }}>{preset.label}{preset.recommended ? "  おすすめ" : ""}</strong>
+                <span style={{ color: preset.survival >= 85 ? "#17663a" : preset.survival >= 75 ? "#9a6700" : "#b42318", fontWeight: 1000, fontSize: 12 }}>残存 {preset.survival}%</span>
+              </span>
+              <small style={{ display: "block", marginTop: 4, color: "#728196", fontWeight: 800 }}>{premiumAccess ? preset.sub : "🔒 プレミアム会員限定"}</small>
+              <small style={{ display: "block", marginTop: 6, color: "#607084", fontWeight: 900 }}>平均消去率 {preset.elimination}%｜的中目を消した率 {preset.miss}%</small>
+              {preset.warning && <small style={{ display: "block", marginTop: 5, color: "#b42318", fontWeight: 1000 }}>⚠ {preset.warning}</small>}
+            </button>
+          ))}
+        </div>
+        <button type="button" onClick={resetRules} style={{ marginTop: 9, width: "100%", padding: 10, borderRadius: 12, border: "1px solid #dfe6ef", background: "#f8fafc", color: "#526477", fontWeight: 900 }}>条件をすべてOFF</button>
       </section>
 
       <section className={styles.rulePanel}>
@@ -363,7 +454,7 @@ export default function EliminationLabClient({
         </div>
       </section>
 
-      <aside className={styles.note}>「安全・標準・攻め」は過去の的中残存率による目安です。攻め条件は買い目を大きく削れますが、的中目も多く消します。1号艇は単独条件では切らず、危険条件が3系統以上重なった時だけ1着消去します。過去成績やVALUEは将来の結果・回収率・利益を保証するものではありません。</aside>
+      <aside className={styles.note}>組み合わせ成績は、複数条件を同時に適用した過去7,095レースの参考値です。「安全＋標準 全部」は平均76.3%まで買い目を削れますが、的中残存率は55.84%まで下がるため強くおすすめしません。過去成績やVALUEは将来の結果・回収率・利益を保証するものではありません。</aside>
     </div>
   );
 }
