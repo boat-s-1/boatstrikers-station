@@ -185,22 +185,12 @@ export default async function KiinaPage() {
         ) : <p>穴党ラボの記事はまだありません。</p>}
       </section>
 
-      <section className="sectionCard">
-        <h2>5アタマ予想ツール（β版）</h2>
-        <a href="https://www.boat-strike.com/kiina5.html" target="_blank" rel="noopener noreferrer">
-          <Image src="/A81A852F-2EF6-4045-B5B9-EFBDB078636D.png" alt="キイナ5アタマ予想ツール" width={1536} height={864} style={{ width: "100%", height: "auto", borderRadius: "20px" }} />
-        </a>
-      </section>
-
-      {/* 動画・ラジオ */}
+      {/* ラジオ */}
       <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_7993.jpeg?v=20260905-0810" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} />
         </div>
         <p className="radioLead">キイナが高配当狙い・5アタマの考え方・穴党反省会を配信中！</p>
-        <div className="radioPlayer">
-          <iframe width="100%" height="240" src="https://www.youtube.com/embed/videoseries?list=プレイリストID" title="Boat Strikers Radio" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-        </div>
         <a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="yellowBtn fullBtn">🎙 ラジオ一覧を見る</a>
       </section>
 
