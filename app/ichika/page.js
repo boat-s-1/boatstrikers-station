@@ -165,11 +165,6 @@ export default async function IchikaPage() {
       {/* AI予想はCharacterAiRoomPanelがヒーロー直下に表示。ここから理論アラート。 */}
       <RealtimeUpdates target="ichika" limit={5} />
 
-      <section className="sectionCard todayCommentCard">
-        <div className="todayCommentIcon">🌸</div>
-        <div><span>今日の一言</span><p>今日はイン逃げ信頼度<br />高めの日だよ♪</p></div>
-      </section>
-
       {/* 新聞 */}
       <section className="sectionCard pinkCard">
         <img src="/IMG_6130.jpeg" alt="一果新聞" className="homeTitleImage" />
@@ -214,20 +209,10 @@ export default async function IchikaPage() {
         ) : <p>一果ラボの記事はまだありません。</p>}
       </section>
 
-      <section className="sectionCard">
-        <h2>一果のイン逃げツール（β版）</h2>
-        <a href="https://www.boat-strike.com/ichika" target="_blank" rel="noopener noreferrer">
-          <Image src="/F7854611-D2F7-4CF6-B549-FDB9F581F530.png" alt="一果鬼絞り判定所" width={1536} height={864} style={{ width: "100%", height: "auto", borderRadius: "20px" }} />
-        </a>
-      </section>
-
-      {/* 動画・ラジオ */}
+      {/* ラジオ */}
       <section className="sectionCard pinkCard">
         <div className="sectionTitleRow"><img src="/IMG_6133.jpeg" alt="一果ラジオ" className="homeTitleImage" /></div>
         <p className="radioLead">一果・初音・キイナがお届けする競艇ラジオ♪ イン飛び研究や女子戦考察、穴党反省会を配信中！</p>
-        <div className="radioPlayer">
-          <iframe width="100%" height="240" src="https://www.youtube.com/embed/videoseries?list=プレイリストID" title="Boat Strikers Radio" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-        </div>
         <a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="pinkBtn fullBtn">🎙 ラジオ一覧を見る</a>
       </section>
 
