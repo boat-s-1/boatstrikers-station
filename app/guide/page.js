@@ -5,7 +5,7 @@ import { CHARACTERS, GUIDE_ARTICLES, GUIDE_UPDATED_AT } from "./guideData";
 
 export const metadata = {
   title: "ボートレース初心者ガイド｜基本・出走表・展示・進入をやさしく解説",
-  description: "ボートレース初心者向けガイド。基本ルール、舟券、出走表、展示航走、イン逃げ、モーター、平均ST、風、水面、進入・前付け、級別、チルト、コース別特徴、当地勝率、今節成績などを分かりやすく解説します。",
+  description: "ボートレース初心者向けガイド。基本ルール、舟券、出走表、展示航走、イン逃げ、モーター、平均ST、風、水面、進入・前付け、級別、チルト、展示タイム、直線、安定板、潮位などを分かりやすく解説します。",
   alternates: { canonical: "/guide" },
   openGraph: {
     title: "ボートレース初心者ガイド｜BoatStrikers",
@@ -26,6 +26,11 @@ const DEEP_DIVE_ARTICLES = [
   { number: "18", title: "周回展示とは？", description: "ターンの安定感、出口の加速、直線の気配の見方を解説。", href: "/guide/lap-exhibition", keyword: "周回展示" },
   { number: "19", title: "当地勝率とは？", description: "全国勝率との違いと、そのレース場での過去成績の使い方を解説。", href: "/guide/local-win-rate", keyword: "当地勝率" },
   { number: "20", title: "今節成績とは？", description: "着順・コース・ST・展示から、今開催での状態を見る方法を解説。", href: "/guide/series-performance", keyword: "今節成績" },
+  { number: "21", title: "展示タイムとは？", description: "展示タイムの意味、展示1位の見方、直線や周回展示との合わせ方を解説。", href: "/guide/exhibition-time", keyword: "展示タイム" },
+  { number: "22", title: "直線タイムとは？", description: "直線の伸び、展示タイムとの違い、外枠やカド攻めを見るポイントを解説。", href: "/guide/straight-line-time", keyword: "直線タイム" },
+  { number: "23", title: "モーター交換とは？", description: "交換後に過去データをどう扱うか、展示で確認したいポイントを解説。", href: "/guide/motor-change", keyword: "モーター交換" },
+  { number: "24", title: "安定板とは？", description: "荒天時に装着される安定板と、展示・風・波を見るときの注意点を解説。", href: "/guide/stabilizer", keyword: "安定板" },
+  { number: "25", title: "潮位とは？", description: "満潮・干潮と水面条件、レース場ごとに潮位を見るポイントを解説。", href: "/guide/tide-level", keyword: "潮位" },
 ];
 
 export default function GuidePage() {
