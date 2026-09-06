@@ -176,20 +176,10 @@ export default async function HatsunePage() {
         ) : <p>初音ラボの記事はまだありません。</p>}
       </section>
 
-      <section className="sectionCard">
-        <h2>女子戦データツール（β版）</h2>
-        <a href="https://www.boat-strike.com/hastune" target="_blank" rel="noopener noreferrer">
-          <Image src="/A3494785-9903-43D3-9FDB-048D521B3008.png" alt="初音女子戦データツール" width={1536} height={864} style={{ width: "100%", height: "auto", borderRadius: "20px" }} />
-        </a>
-      </section>
-
-      {/* 動画・ラジオ */}
+      {/* ラジオ */}
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow"><img src="/top/IMG_7954.jpeg?v=20260904-0315" alt="初音ラジオ" className="homeTitleImage" /></div>
         <p className="radioLead">初音が女子戦の流れやデータの見方をやさしく解説♪ 一果・キイナとの掛け合いも配信中！</p>
-        <div className="radioPlayer">
-          <iframe width="100%" height="240" src="https://www.youtube.com/embed/videoseries?list=プレイリストID" title="Boat Strikers Radio" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-        </div>
         <a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="purpleBtn fullBtn">🎙 ラジオ一覧を見る</a>
       </section>
 
