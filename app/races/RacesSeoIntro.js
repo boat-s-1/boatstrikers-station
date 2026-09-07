@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import styles from './racesSeo.module.css';
 
-export default function RacesSeoIntro({ raceDate, courseCount, courseNames = [], femaleRaceCount = 0 }) {
+export default function RacesSeoIntro({ raceDate, courseCount = null, courseNames = [], femaleRaceCount = 0 }) {
   const dateLabel = String(raceDate || '').replaceAll('-', '/');
   const visibleCourses = courseNames.slice(0, 8);
+  const courseCountText = Number.isFinite(Number(courseCount)) ? `本日の開催場は${Number(courseCount)}場です。` : '';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -24,7 +25,7 @@ export default function RacesSeoIntro({ raceDate, courseCount, courseNames = [],
       <div className={styles.eyebrow}>TODAY&apos;S BOAT RACE</div>
       <h1 id="races-seo-title">本日のボートレース出走表・開催日程</h1>
       <p className={styles.lead}>
-        {dateLabel}のボートレース開催情報をまとめています。本日の開催場は{courseCount}場です。
+        {dateLabel}のボートレース開催情報をまとめています。{courseCountText}
         各場の出走表、締切時刻、選手・モーター・展示情報を確認し、BoatStrikersのAI注目レースや理論アラートまで続けてチェックできます。
       </p>
 
