@@ -89,6 +89,7 @@ function buildSocialPicks(rows, rankingTypes) {
       probability: row.probability == null ? null : Number(row.probability),
       closingTime: row.closing_time,
       summary: row.summary || "",
+      socialComment: row.social_comment || "",
     }));
 }
 
@@ -99,7 +100,7 @@ async function loadRows(date, timing) {
   const [rankingResult, eventResult] = await Promise.all([
     client
       .from("ai_v2_daily_rankings")
-      .select("ranking_date,character_code,ranking_type,rank_no,course_code,race_no,probability,model_version,summary,metrics,data_timing,selected_for_social,selected_for_home")
+      .select("ranking_date,character_code,ranking_type,rank_no,course_code,race_no,probability,model_version,summary,social_comment,metrics,data_timing,selected_for_social,selected_for_home")
       .eq("ranking_date", date)
       .eq("data_timing", timing)
       .in("ranking_type", TYPE_ORDER)
@@ -153,12 +154,15 @@ async function saveSelections(formData) {
   for (const row of rows || []) {
     const selectedForHome = formData.has(fieldKey(row, "home"));
     const selectedForSocial = formData.has(fieldKey(row, "social"));
+    const socialCommentRaw = String(formData.get(fieldKey(row, "comment")) || "").trim();
+    const socialComment = socialCommentRaw ? socialCommentRaw.slice(0, 80) : null;
 
     const { error } = await client
       .from("ai_v2_daily_rankings")
       .update({
         selected_for_home: selectedForHome,
         selected_for_social: selectedForSocial,
+        social_comment: socialComment,
         updated_at: new Date().toISOString(),
       })
       .eq("ranking_date", date)
@@ -229,7 +233,7 @@ export default async function AiCandidatesPage({ searchParams }) {
           </div>
         </section>
 
-        {saved && <div className={styles.success}>✓ 選択内容を保存しました。SNS素材も更新されています。</div>}
+        {saved && <div className={styles.success}>✓ 選択内容と一言コメントを保存しました。SNS素材も更新されています。</div>}
         {(error || actionError) && (
           <div className={styles.error}>保存・取得時にエラーが発生しました。{error ? ` ${error}` : ""}</div>
         )}
@@ -301,6 +305,18 @@ export default async function AiCandidatesPage({ searchParams }) {
                             </label>
                           </div>
 
+                          <label className={styles.commentField}>
+                            <span>SNS用 一言コメント</span>
+                            <input
+                              type="text"
+                              name={fieldKey(row, "comment")}
+                              defaultValue={row.social_comment || ""}
+                              maxLength={80}
+                              placeholder="空欄ならAIコメントを自動使用"
+                            />
+                            <small>入力したコメントを縦長朝刊画像で優先使用します。</small>
+                          </label>
+
                           <small className={styles.model}>{row.model_version}</small>
                         </article>
                       );
@@ -313,7 +329,7 @@ export default async function AiCandidatesPage({ searchParams }) {
             <div className={styles.stickySave}>
               <div>
                 <strong>今日使うレースを選択</strong>
-                <span>チェックを変更したら保存してください。SNS素材は保存後に自動更新されます。</span>
+                <span>チェック・一言コメントを変更したら保存してください。SNS素材は保存後に自動更新されます。</span>
               </div>
               <button type="submit">選択を保存</button>
             </div>
