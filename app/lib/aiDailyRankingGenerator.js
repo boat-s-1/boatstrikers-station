@@ -64,10 +64,8 @@ function raceKey(courseCode, raceNo) {
   return `${Number(courseCode)}:${Number(raceNo)}`;
 }
 
-function pick(rows, limit, direction = "desc") {
-  return [...rows]
-    .sort((a, b) => direction === "asc" ? a.score - b.score : b.score - a.score)
-    .slice(0, limit);
+function pick(rows, limit) {
+  return [...rows].sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
 function makeRows(races, rankingDate, dataTiming) {
@@ -165,13 +163,13 @@ export async function generateAiDailyRankings(supabase, rankingDate, dataTiming 
   const [eventsResult, entriesResult] = await Promise.all([
     supabase
       .from("bs_race_events")
-      .select("race_date,course_code,race_no,course_name,race_name,closing_time,wind_speed")
+      .select("*")
       .eq("race_date", rankingDate)
       .order("course_code", { ascending: true })
       .order("race_no", { ascending: true }),
     supabase
       .from("bs_race_entries")
-      .select("race_date,course_code,race_no,boat_no,teiban,racer_name,shimei,sex_code,gender,gender_code,national_win_rate,local_win_rate,motor_top2_rate,motor_2_rate,race_boat_top2_rate,boat_2_rate,average_st")
+      .select("*")
       .eq("race_date", rankingDate)
       .order("course_code", { ascending: true })
       .order("race_no", { ascending: true })
