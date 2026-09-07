@@ -66,13 +66,14 @@ async function runPredictionRecovery(request, raceDate) {
 
 async function recordHealth(supabase, raceDate, status, message) {
   const now = new Date().toISOString();
+  // ai_jobs_job_type_v8_check で許可済みの種別を使い、healthであることはworker/messageで識別する。
   const { error } = await supabase.from("ai_jobs").insert({
-    job_type: "previous_day_health",
+    job_type: "run_product_daily",
     status,
     progress: status === "completed" ? 100 : 0,
-    requested_by: "supabase-cron",
-    worker_name: "vercel-ai-health",
-    message: `${raceDate} ${message}`.slice(0, 1000),
+    requested_by: "supabase-cron-health",
+    worker_name: "vercel-ai-previous-day-health",
+    message: `[health] ${raceDate} ${message}`.slice(0, 1000),
     started_at: now,
     completed_at: now,
     error_message: status === "failed" ? message.slice(0, 1800) : null,
