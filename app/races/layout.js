@@ -27,7 +27,7 @@ export default function RacesLayout({ children }) {
   return (
     <>
       {children}
-      <RacesSeoIntro raceDate={today} courseCount={24} courseNames={[]} />
+      <RacesSeoIntro raceDate={today} />
     </>
   );
 }
