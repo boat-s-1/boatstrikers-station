@@ -132,6 +132,7 @@ export async function GET(request){
     const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=18&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,8);
     const results=[];
     for(const race of targets){
+      try{
       const source=await fetchTrackedOriginalTenji(supabase,"kiina",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
       if(!source.ok){
         // PC-KYOTEI may already have populated the shared entry rows. Evaluate those
@@ -146,6 +147,11 @@ export async function GET(request){
       const liveAi=await generateLivePredictionForRace(supabase,race);
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
       results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,saved:persisted.saved,rosterVerified:persisted.rosterVerified,liveAi,inserted:Number(inserted||0)});
+      }catch(error){
+        const message=String(error?.message||error).slice(0,500);
+        console.error(JSON.stringify({level:"error",message:"exhibition race collection failed",raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no,error:message}));
+        results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:message,isolated:true});
+      }
     }
     return NextResponse.json({ok:true,raceDate,checked:targets.length,results,notification:"separate_cron",ranAt:new Date().toISOString()});
   }catch(error){return NextResponse.json({ok:false,error:error?.message||"cron failed"},{status:500});}
