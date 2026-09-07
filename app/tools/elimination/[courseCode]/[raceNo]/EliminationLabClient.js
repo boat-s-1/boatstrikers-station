@@ -5,229 +5,108 @@ import { useRouter } from "next/navigation";
 import { buildTrifectaProbabilities, probabilityFor } from "./eliminationProbability";
 import styles from "./elimination-lab.module.css";
 
-const BOATS = [1, 2, 3, 4, 5, 6];
+const BOATS = [1,2,3,4,5,6];
 const RULE_BACKTESTS = {
-  exhibition456: { races: 59843, elimination: 44.9, survival: 81.86, miss: 18.14 },
-  exhibition6top2: { races: 59843, elimination: 32.1, survival: 82.38, miss: 17.62 },
-  exhibition56top2: { races: 59843, elimination: 57.7, survival: 62.8, miss: 37.2 },
-  st: { races: 7123, elimination: 29.7, survival: 91.13, miss: 8.87 },
-  motor: { races: 59847, elimination: 28.1, survival: 87.1, miss: 12.9 },
-  win: { races: 59847, elimination: 29.8, survival: 93.23, miss: 6.77 },
+  exhibition456:{races:59843,elimination:44.9,survival:81.86,miss:18.14},
+  exhibition6top2:{races:59843,elimination:32.1,survival:82.38,miss:17.62},
+  exhibition56top2:{races:59843,elimination:57.7,survival:62.8,miss:37.2},
+  st:{races:7123,elimination:29.7,survival:91.13,miss:8.87},
+  motor:{races:59847,elimination:28.1,survival:87.1,miss:12.9},
+  win:{races:59847,elimination:29.8,survival:93.23,miss:6.77},
 };
-const RULE_BITS = { win: 1, st: 2, motor: 4, exhibition456: 8, exhibition6top2: 16, exhibition56top2: 32 };
-const TEST_RACES = 5969;
-const TEST_SURVIVAL = [null,93.72,90.55,87.52,85.76,81.39,79.18,77.06,81.44,78.05,76.19,74.52,73.97,71.49,70.16,68.45,81.15,76.58,74.15,71.96,70.65,67.40,65.66,64.01,69.71,66.86,65.34,63.91,63.14,61.05,59.94,58.50,61.33,58.28,56.86,55.44,54.33,52.17,51.01,49.77,56.41,54.08,53.01,51.87,51.11,49.46,48.60,47.39,61.33,58.28,56.86,55.44,54.33,52.17,51.01,49.77,56.41,54.08,53.01,51.87,51.11,49.46,48.60,47.39];
-const TEST_ELIMINATION = [null,29.9,27.6,41.9,27.6,47.8,46.4,56.0,43.6,56.7,55.9,62.4,55.1,64.5,63.9,69.0,31.7,50.5,49.4,58.5,48.8,61.9,61.1,67.6,54.6,65.0,64.4,69.6,63.7,71.3,70.8,74.9,57.0,67.8,67.1,72.5,66.7,74.3,73.8,77.8,65.4,73.3,72.8,76.7,72.3,77.9,77.6,80.7,57.0,67.8,67.1,72.5,66.7,74.3,73.8,77.8,65.4,73.3,72.8,76.7,72.3,77.9,77.6,80.7];
-const TEST_REMOVED = [null,35.9,33.2,50.3,33.1,57.3,55.7,67.2,52.3,68.0,67.1,74.9,66.1,77.4,76.6,82.8,38.0,60.6,59.2,70.2,58.6,74.3,73.4,81.1,65.5,78.0,77.3,83.5,76.5,85.5,84.9,89.8,68.4,81.4,80.5,87.0,80.0,89.2,88.6,93.4,78.5,87.9,87.4,92.0,86.8,93.5,93.1,96.8,68.4,81.4,80.5,87.0,80.0,89.2,88.6,93.4,78.5,87.9,87.4,92.0,86.8,93.5,93.1,96.8];
-const LANE1_TEST = {
-  0: { races: 1529, win: 67.76 }, 1: { races: 741, win: 60.19 }, 2: { races: 518, win: 55.21 }, 3: { races: 314, win: 43.63 },
-  4: { races: 766, win: 64.75 }, 5: { races: 469, win: 52.67 }, 6: { races: 239, win: 51.46 }, 7: { races: 163, win: 41.72 },
-  8: { races: 178, win: 45.51 }, 9: { races: 109, win: 34.86 }, 10: { races: 276, win: 30.07 }, 11: { races: 254, win: 28.74 },
-  12: { races: 71, win: 29.58 }, 13: { races: 70, win: 27.14 }, 14: { races: 108, win: 37.96 }, 15: { races: 164, win: 17.68 },
-};
-const LEVELS = {
-  safe: { label: "安全", fg: "#17663a", bg: "#eefaf3", border: "#b8e3c7" },
-  standard: { label: "標準", fg: "#9a6700", bg: "#fff8e6", border: "#f2d58b" },
-  attack: { label: "攻め", fg: "#b42318", bg: "#fff0f0", border: "#f1b8b5" },
-};
-const PRESET_BACKTESTS = [
-  { key: "safe", label: "安全重視", sub: "勝率＋ST", rules: ["win", "st"], elimination: 41.9, survival: 87.52, recommended: true },
-  { key: "balance", label: "バランス", sub: "勝率＋モーター", rules: ["win", "motor"], elimination: 47.8, survival: 81.39 },
-  { key: "safeStandardAll", label: "安全＋標準 全部", sub: "勝率＋ST＋モーター＋展示4〜6位＋展示6位2着内", rules: ["win", "st", "motor", "exhibition456", "exhibition6top2"], elimination: 74.9, survival: 58.50, warning: "削りすぎ注意" },
+const RULE_BITS={win:1,st:2,motor:4,exhibition456:8,exhibition6top2:16,exhibition56top2:32};
+const TEST_RACES=5969;
+const TEST_SURVIVAL=[null,93.72,90.55,87.52,85.76,81.39,79.18,77.06,81.44,78.05,76.19,74.52,73.97,71.49,70.16,68.45,81.15,76.58,74.15,71.96,70.65,67.40,65.66,64.01,69.71,66.86,65.34,63.91,63.14,61.05,59.94,58.50,61.33,58.28,56.86,55.44,54.33,52.17,51.01,49.77,56.41,54.08,53.01,51.87,51.11,49.46,48.60,47.39,61.33,58.28,56.86,55.44,54.33,52.17,51.01,49.77,56.41,54.08,53.01,51.87,51.11,49.46,48.60,47.39];
+const TEST_ELIMINATION=[null,29.9,27.6,41.9,27.6,47.8,46.4,56.0,43.6,56.7,55.9,62.4,55.1,64.5,63.9,69.0,31.7,50.5,49.4,58.5,48.8,61.9,61.1,67.6,54.6,65.0,64.4,69.6,63.7,71.3,70.8,74.9,57.0,67.8,67.1,72.5,66.7,74.3,73.8,77.8,65.4,73.3,72.8,76.7,72.3,77.9,77.6,80.7,57.0,67.8,67.1,72.5,66.7,74.3,73.8,77.8,65.4,73.3,72.8,76.7,72.3,77.9,77.6,80.7];
+const TEST_REMOVED=[null,35.9,33.2,50.3,33.1,57.3,55.7,67.2,52.3,68.0,67.1,74.9,66.1,77.4,76.6,82.8,38.0,60.6,59.2,70.2,58.6,74.3,73.4,81.1,65.5,78.0,77.3,83.5,76.5,85.5,84.9,89.8,68.4,81.4,80.5,87.0,80.0,89.2,88.6,93.4,78.5,87.9,87.4,92.0,86.8,93.5,93.1,96.8,68.4,81.4,80.5,87.0,80.0,89.2,88.6,93.4,78.5,87.9,87.4,92.0,86.8,93.5,93.1,96.8];
+const LANE1_TEST={0:{races:1529,win:67.76},1:{races:741,win:60.19},2:{races:518,win:55.21},3:{races:314,win:43.63},4:{races:766,win:64.75},5:{races:469,win:52.67},6:{races:239,win:51.46},7:{races:163,win:41.72},8:{races:178,win:45.51},9:{races:109,win:34.86},10:{races:276,win:30.07},11:{races:254,win:28.74},12:{races:71,win:29.58},13:{races:70,win:27.14},14:{races:108,win:37.96},15:{races:164,win:17.68}};
+const ROI_BACKTEST={baseline:{races:5829,avgBets:120,roi:59.60},safe:{races:5817,avgBets:69.7,roi:64.98},balance:{races:5817,avgBets:62.7,roi:63.19}};
+const LEVELS={safe:{label:"安全",fg:"#17663a",bg:"#eefaf3",border:"#b8e3c7"},standard:{label:"標準",fg:"#9a6700",bg:"#fff8e6",border:"#f2d58b"},attack:{label:"攻め",fg:"#b42318",bg:"#fff0f0",border:"#f1b8b5"}};
+const PRESET_BACKTESTS=[
+  {key:"safe",label:"安全重視",sub:"勝率＋ST",rules:["win","st"],elimination:41.9,survival:87.52,roi:64.98,recommended:true},
+  {key:"balance",label:"バランス",sub:"勝率＋モーター",rules:["win","motor"],elimination:47.8,survival:81.39,roi:63.19},
+  {key:"safeStandardAll",label:"安全＋標準 全部",sub:"勝率＋ST＋モーター＋展示4〜6位＋展示6位2着内",rules:["win","st","motor","exhibition456","exhibition6top2"],elimination:74.9,survival:58.50,warning:"削りすぎ注意"},
 ];
-const ALL_BETS = (() => {
-  const bets = [];
-  for (const a of BOATS) for (const b of BOATS) if (a !== b) for (const c of BOATS) if (c !== a && c !== b) bets.push([a,b,c]);
-  return bets;
-})();
+const ALL_BETS=(()=>{const bets=[];for(const a of BOATS)for(const b of BOATS)if(a!==b)for(const c of BOATS)if(c!==a&&c!==b)bets.push([a,b,c]);return bets;})();
 
-function n(value) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : null; }
-function get(entry, keys) { for (const key of keys) { const value = n(entry?.[key]); if (value !== null) return value; } return null; }
-function boatNo(entry) { return Number(entry?.boat_no ?? entry?.teiban ?? entry?.boatNo); }
-function betKey(bet) { return bet.join("-"); }
-function oddsFor(odds, bet) { const value = Number(odds?.[betKey(bet)]); return Number.isFinite(value) && value > 0 ? value : null; }
-function rankBoats(entries, keys, { lowerIsBetter = false } = {}) {
-  return entries.map((entry) => ({ boat: boatNo(entry), value: get(entry, keys) }))
-    .filter((row) => row.boat >= 1 && row.boat <= 6 && row.value !== null)
-    .sort((a,b) => lowerIsBetter ? a.value - b.value : b.value - a.value);
-}
-function bottomBoats(entries, keys, count = 2, options = {}) { const ranked = rankBoats(entries, keys, options); return ranked.length >= 4 ? ranked.slice(-count).map((row) => row.boat) : []; }
-function worstBoat(entries, keys, options = {}) { const ranked = rankBoats(entries, keys, options); return ranked.length >= 4 ? ranked[ranked.length - 1]?.boat ?? null : null; }
-function buildMarketProbabilities(odds) {
-  const raw = {}; let total = 0;
-  for (const bet of ALL_BETS) { const currentOdds = oddsFor(odds, bet); if (!currentOdds) continue; const p = 1/currentOdds; raw[betKey(bet)] = p; total += p; }
-  if (!total) return {};
-  return Object.fromEntries(Object.entries(raw).map(([key,value]) => [key,value/total]));
-}
-function correctedProbability(probabilities, marketProbabilities, bet) {
-  const model = probabilityFor(probabilities, bet); const market = Number(marketProbabilities?.[betKey(bet)]);
-  if (model === null) return null;
-  return Number.isFinite(market) && market > 0 ? model * 0.75 + market * 0.25 : model;
-}
-function valueMetrics(probabilities, marketProbabilities, odds, bet) {
-  const corrected = correctedProbability(probabilities, marketProbabilities, bet); const market = Number(marketProbabilities?.[betKey(bet)]); const currentOdds = oddsFor(odds, bet);
-  return { corrected, market: Number.isFinite(market) ? market : null, currentOdds, ratio: corrected !== null && market > 0 ? corrected/market : null, ev: corrected !== null && currentOdds !== null ? corrected*currentOdds*100 : null };
-}
-function levelFor(backtest) { return backtest.survival >= 90 ? "safe" : backtest.survival >= 80 ? "standard" : "attack"; }
-function researchStats(mask) {
-  if (!mask || TEST_SURVIVAL[mask] == null) return null;
-  return { races: TEST_RACES, survival: TEST_SURVIVAL[mask], elimination: TEST_ELIMINATION[mask], removed: TEST_REMOVED[mask], remain: Math.round((120-TEST_REMOVED[mask])*10)/10 };
-}
+function n(v){const x=Number(v);return Number.isFinite(x)?x:null;}
+function get(entry,keys){for(const key of keys){const value=n(entry?.[key]);if(value!==null)return value;}return null;}
+function boatNo(entry){return Number(entry?.boat_no??entry?.teiban??entry?.boatNo);}
+function betKey(bet){return bet.join("-");}
+function oddsFor(odds,bet){const value=Number(odds?.[betKey(bet)]);return Number.isFinite(value)&&value>0?value:null;}
+function rankBoats(entries,keys,{lowerIsBetter=false}={}){return entries.map((entry)=>({boat:boatNo(entry),value:get(entry,keys)})).filter((row)=>row.boat>=1&&row.boat<=6&&row.value!==null).sort((a,b)=>lowerIsBetter?a.value-b.value:b.value-a.value);}
+function bottomBoats(entries,keys,count=2,options={}){const ranked=rankBoats(entries,keys,options);return ranked.length>=4?ranked.slice(-count).map((row)=>row.boat):[];}
+function worstBoat(entries,keys,options={}){const ranked=rankBoats(entries,keys,options);return ranked.length>=4?ranked[ranked.length-1]?.boat??null:null;}
+function buildMarketProbabilities(odds){const raw={};let total=0;for(const bet of ALL_BETS){const currentOdds=oddsFor(odds,bet);if(!currentOdds)continue;const p=1/currentOdds;raw[betKey(bet)]=p;total+=p;}if(!total)return{};return Object.fromEntries(Object.entries(raw).map(([key,value])=>[key,value/total]));}
+function correctedProbability(probabilities,marketProbabilities,bet){const model=probabilityFor(probabilities,bet);const market=Number(marketProbabilities?.[betKey(bet)]);if(model===null)return null;return Number.isFinite(market)&&market>0?model*.75+market*.25:model;}
+function valueMetrics(probabilities,marketProbabilities,odds,bet){const corrected=correctedProbability(probabilities,marketProbabilities,bet);const market=Number(marketProbabilities?.[betKey(bet)]);const currentOdds=oddsFor(odds,bet);return{corrected,market:Number.isFinite(market)?market:null,currentOdds,ratio:corrected!==null&&market>0?corrected/market:null,ev:corrected!==null&&currentOdds!==null?corrected*currentOdds*100:null};}
+function levelFor(backtest){return backtest.survival>=90?"safe":backtest.survival>=80?"standard":"attack";}
+function researchStats(mask){if(!mask||TEST_SURVIVAL[mask]==null)return null;return{races:TEST_RACES,survival:TEST_SURVIVAL[mask],elimination:TEST_ELIMINATION[mask],removed:TEST_REMOVED[mask],remain:Math.round((120-TEST_REMOVED[mask])*10)/10};}
 
-function OddsRow({ bet, odds, evaluation, probabilities, marketProbabilities, expanded, onToggle }) {
-  const key = betKey(bet); const state = evaluation.map[key] || { eliminated:false, restored:false, reasons:[] }; const metrics = valueMetrics(probabilities, marketProbabilities, odds, bet);
-  const className = state.restored ? styles.oddsRowRestored : state.eliminated ? styles.oddsRowEliminated : styles.oddsRowAlive;
-  const status = state.restored ? "補正復活" : state.eliminated ? "消去" : state.lane1Protected ? "1号艇保護" : "残す";
-  return <button type="button" className={`${styles.oddsRow} ${className}`} onClick={onToggle}>
-    <div className={styles.oddsMain}><strong>{key}</strong><span>{metrics.currentOdds ? `${metrics.currentOdds}倍` : "-"}</span></div>
-    <div className={styles.oddsStatus}>{status}</div>
-    {expanded && <div className={styles.oddsDetail}>
-      <span>補正推定 {metrics.corrected !== null ? `${(metrics.corrected*100).toFixed(2)}%` : "-"}</span>
-      <span>市場 {metrics.market !== null ? `${(metrics.market*100).toFixed(2)}%` : "-"}</span>
-      <span>市場比 {metrics.ratio !== null ? `${metrics.ratio.toFixed(2)}倍` : "-"}</span>
-      <span>推定EV {metrics.ev !== null ? `${metrics.ev.toFixed(0)}%` : "-"}</span>
-      {state.reasons.length > 0 && <small>{state.reasons.join(" / ")}</small>}
-    </div>}
-  </button>;
-}
+function OddsRow({bet,odds,evaluation,probabilities,marketProbabilities,expanded,onToggle}){const key=betKey(bet);const state=evaluation.map[key]||{eliminated:false,restored:false,reasons:[]};const metrics=valueMetrics(probabilities,marketProbabilities,odds,bet);const className=state.restored?styles.oddsRowRestored:state.eliminated?styles.oddsRowEliminated:styles.oddsRowAlive;const status=state.restored?"補正復活":state.eliminated?"消去":state.lane1Protected?"1号艇保護":"残す";return <button type="button" className={`${styles.oddsRow} ${className}`} onClick={onToggle}><div className={styles.oddsMain}><strong>{key}</strong><span>{metrics.currentOdds?`${metrics.currentOdds}倍`:"-"}</span></div><div className={styles.oddsStatus}>{status}</div>{expanded&&<div className={styles.oddsDetail}><span>補正推定 {metrics.corrected!==null?`${(metrics.corrected*100).toFixed(2)}%`:"-"}</span><span>市場 {metrics.market!==null?`${(metrics.market*100).toFixed(2)}%`:"-"}</span><span>市場比 {metrics.ratio!==null?`${metrics.ratio.toFixed(2)}倍`:"-"}</span><span>推定EV {metrics.ev!==null?`${metrics.ev.toFixed(0)}%`:"-"}</span>{state.reasons.length>0&&<small>{state.reasons.join(" / ")}</small>}</div>}</button>;}
 
-export default function EliminationLabClient({ entries, premiumAccess=false, syncedAt, exhibitionReady, odds={}, oddsCount=0, oddsFetchedAt=null, oddsError=null }) {
-  const router = useRouter(); const [isPending,startTransition] = useTransition();
-  const [enabled,setEnabled] = useState({ exhibition456:false, exhibition6top2:false, exhibition56top2:false, st:false, motor:false, win:false });
-  const [a1Correction,setA1Correction] = useState(false); const [valueEnabled,setValueEnabled] = useState(false); const [evThreshold,setEvThreshold] = useState(100); const [activeFirst,setActiveFirst] = useState(1); const [expandedBet,setExpandedBet] = useState(null);
+function CandidateList({title,items,empty}){return <div style={{padding:12,border:"1px solid #e4e9f0",borderRadius:14,background:"#fff"}}><strong style={{display:"block",fontSize:13,color:"#243549",marginBottom:8}}>{title}</strong>{items.length?items.map((item)=><div key={item.key} style={{display:"grid",gridTemplateColumns:"1fr auto",gap:8,padding:"8px 0",borderTop:"1px solid #eef1f5"}}><span style={{fontWeight:1000,color:"#243549"}}>{item.key}</span><span style={{fontSize:12,fontWeight:900,color:"#526477"}}>{item.odds?`${item.odds}倍`:"-"}</span><small style={{gridColumn:"1 / -1",color:"#7b8795",fontWeight:800}}>推定 {item.prob!==null?`${(item.prob*100).toFixed(2)}%`:"-"} / 市場比 {item.ratio!==null?`${item.ratio.toFixed(2)}倍`:"-"} / EV {item.ev!==null?`${item.ev.toFixed(0)}%`:"-"}</small></div>):<small style={{color:"#8a97a6",fontWeight:800}}>{empty}</small>}</div>;}
 
-  const exhibitionBottom3 = useMemo(() => bottomBoats(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],3,{lowerIsBetter:true}),[entries]);
-  const exhibitionBottom2 = useMemo(() => bottomBoats(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],2,{lowerIsBetter:true}),[entries]);
-  const exhibitionWorst = useMemo(() => worstBoat(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],{lowerIsBetter:true}),[entries]);
-  const stBottom2 = useMemo(() => bottomBoats(entries,["average_st","avg_st","st_average"],2,{lowerIsBetter:true}),[entries]);
-  const motorBottom2 = useMemo(() => bottomBoats(entries,["motor_2_rate","motor_top2_rate","motor_2ren_rate","motor_rate"],2),[entries]);
-  const winBottom2 = useMemo(() => bottomBoats(entries,["national_win_rate","win_rate","racer_win_rate"],2),[entries]);
-  const a1Boats = useMemo(() => entries.filter((entry) => String(entry?.racer_class ?? entry?.class ?? "").toUpperCase()==="A1").map(boatNo),[entries]);
-  const probabilities = useMemo(() => buildTrifectaProbabilities(entries,{live:exhibitionReady}),[entries,exhibitionReady]);
-  const marketProbabilities = useMemo(() => buildMarketProbabilities(odds),[odds]);
-  const valueAvailable = Object.keys(probabilities).length===120 && oddsCount>0 && Object.keys(marketProbabilities).length>0;
+export default function EliminationLabClient({entries,premiumAccess=false,syncedAt,exhibitionReady,odds={},oddsCount=0,oddsFetchedAt=null,oddsError=null}){
+  const router=useRouter();const[isPending,startTransition]=useTransition();
+  const[enabled,setEnabled]=useState({exhibition456:false,exhibition6top2:false,exhibition56top2:false,st:false,motor:false,win:false});
+  const[a1Correction,setA1Correction]=useState(false);const[valueEnabled,setValueEnabled]=useState(false);const[evThreshold,setEvThreshold]=useState(100);const[activeFirst,setActiveFirst]=useState(1);const[expandedBet,setExpandedBet]=useState(null);
 
-  const rules = [
-    { key:"win", label:"勝率下位2艇を1着から消す", desc:winBottom2.length?`${winBottom2.join("・")}号艇の1着目を消去`:"勝率データ不足", available:winBottom2.length===2, firstBoats:winBottom2, secondBoats:[], backtest:RULE_BACKTESTS.win },
-    { key:"st", label:"ST下位2艇を1着から消す", desc:stBottom2.length?`${stBottom2.join("・")}号艇の1着目を消去`:"STデータ不足", available:stBottom2.length===2, firstBoats:stBottom2, secondBoats:[], backtest:RULE_BACKTESTS.st },
-    { key:"motor", label:"モーター下位2艇を1着から消す", desc:motorBottom2.length?`${motorBottom2.join("・")}号艇の1着目を消去`:"モーターデータ不足", available:motorBottom2.length===2, firstBoats:motorBottom2, secondBoats:[], backtest:RULE_BACKTESTS.motor },
-    { key:"exhibition456", free:true, label:"展示4〜6位を1着から消す", desc:exhibitionBottom3.length?`${exhibitionBottom3.join("・")}号艇の1着目を消去`:"展示データ待ち", available:exhibitionReady&&exhibitionBottom3.length===3, firstBoats:exhibitionBottom3, secondBoats:[], backtest:RULE_BACKTESTS.exhibition456 },
-    { key:"exhibition6top2", label:"展示6位を2着以内から消す", desc:exhibitionWorst?`${exhibitionWorst}号艇の1・2着目を消去`:"展示データ待ち", available:exhibitionReady&&Boolean(exhibitionWorst), firstBoats:exhibitionWorst?[exhibitionWorst]:[], secondBoats:exhibitionWorst?[exhibitionWorst]:[], backtest:RULE_BACKTESTS.exhibition6top2, recommended:true },
-    { key:"exhibition56top2", label:"展示5〜6位を2着以内から消す", desc:exhibitionBottom2.length?`${exhibitionBottom2.join("・")}号艇の1・2着目を消去`:"展示データ待ち", available:exhibitionReady&&exhibitionBottom2.length===2, firstBoats:exhibitionBottom2, secondBoats:exhibitionBottom2, backtest:RULE_BACKTESTS.exhibition56top2, warning:"的中目を37.2%消す強攻め条件" },
-  ].map((rule) => ({...rule,level:levelFor(rule.backtest)}));
+  const exhibitionBottom3=useMemo(()=>bottomBoats(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],3,{lowerIsBetter:true}),[entries]);
+  const exhibitionBottom2=useMemo(()=>bottomBoats(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],2,{lowerIsBetter:true}),[entries]);
+  const exhibitionWorst=useMemo(()=>worstBoat(entries,["exhibition_time","official_exhibition_time","tenji_time","display_time"],{lowerIsBetter:true}),[entries]);
+  const stBottom2=useMemo(()=>bottomBoats(entries,["average_st","avg_st","st_average"],2,{lowerIsBetter:true}),[entries]);
+  const motorBottom2=useMemo(()=>bottomBoats(entries,["motor_2_rate","motor_top2_rate","motor_2ren_rate","motor_rate"],2),[entries]);
+  const winBottom2=useMemo(()=>bottomBoats(entries,["national_win_rate","win_rate","racer_win_rate"],2),[entries]);
+  const a1Boats=useMemo(()=>entries.filter((entry)=>String(entry?.racer_class??entry?.class??"").toUpperCase()==="A1").map(boatNo),[entries]);
+  const probabilities=useMemo(()=>buildTrifectaProbabilities(entries,{live:exhibitionReady}),[entries,exhibitionReady]);
+  const marketProbabilities=useMemo(()=>buildMarketProbabilities(odds),[odds]);
+  const valueAvailable=Object.keys(probabilities).length===120&&oddsCount>0&&Object.keys(marketProbabilities).length>0;
 
-  const activeRuleKeys = useMemo(() => rules.filter((rule) => enabled[rule.key] && rule.available && (premiumAccess || rule.free)).map((rule) => rule.key),[enabled,premiumAccess,exhibitionReady,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
-  const selectedMask = activeRuleKeys.reduce((mask,key) => mask | RULE_BITS[key],0);
-  const currentResearch = researchStats(selectedMask);
+  const rules=[
+    {key:"win",label:"勝率下位2艇を1着から消す",desc:winBottom2.length?`${winBottom2.join("・")}号艇の1着目を消去`:"勝率データ不足",available:winBottom2.length===2,firstBoats:winBottom2,secondBoats:[],backtest:RULE_BACKTESTS.win},
+    {key:"st",label:"ST下位2艇を1着から消す",desc:stBottom2.length?`${stBottom2.join("・")}号艇の1着目を消去`:"STデータ不足",available:stBottom2.length===2,firstBoats:stBottom2,secondBoats:[],backtest:RULE_BACKTESTS.st},
+    {key:"motor",label:"モーター下位2艇を1着から消す",desc:motorBottom2.length?`${motorBottom2.join("・")}号艇の1着目を消去`:"モーターデータ不足",available:motorBottom2.length===2,firstBoats:motorBottom2,secondBoats:[],backtest:RULE_BACKTESTS.motor},
+    {key:"exhibition456",free:true,label:"展示4〜6位を1着から消す",desc:exhibitionBottom3.length?`${exhibitionBottom3.join("・")}号艇の1着目を消去`:"展示データ待ち",available:exhibitionReady&&exhibitionBottom3.length===3,firstBoats:exhibitionBottom3,secondBoats:[],backtest:RULE_BACKTESTS.exhibition456},
+    {key:"exhibition6top2",label:"展示6位を2着以内から消す",desc:exhibitionWorst?`${exhibitionWorst}号艇の1・2着目を消去`:"展示データ待ち",available:exhibitionReady&&Boolean(exhibitionWorst),firstBoats:exhibitionWorst?[exhibitionWorst]:[],secondBoats:exhibitionWorst?[exhibitionWorst]:[],backtest:RULE_BACKTESTS.exhibition6top2,recommended:true},
+    {key:"exhibition56top2",label:"展示5〜6位を2着以内から消す",desc:exhibitionBottom2.length?`${exhibitionBottom2.join("・")}号艇の1・2着目を消去`:"展示データ待ち",available:exhibitionReady&&exhibitionBottom2.length===2,firstBoats:exhibitionBottom2,secondBoats:exhibitionBottom2,backtest:RULE_BACKTESTS.exhibition56top2,warning:"的中目を37.2%消す強攻め条件"},
+  ].map((rule)=>({...rule,level:levelFor(rule.backtest)}));
 
-  const lane1Danger = useMemo(() => {
-    const factorKeys=[]; const factors=[];
-    const exhibitionSelected = (enabled.exhibition456&&exhibitionReady&&exhibitionBottom3.includes(1)) || (premiumAccess&&enabled.exhibition6top2&&exhibitionReady&&exhibitionWorst===1) || (premiumAccess&&enabled.exhibition56top2&&exhibitionReady&&exhibitionBottom2.includes(1));
-    if (exhibitionSelected) { factorKeys.push("ex"); factors.push("展示劣勢"); }
-    if (premiumAccess&&enabled.st&&stBottom2.includes(1)) { factorKeys.push("st"); factors.push("ST劣勢"); }
-    if (premiumAccess&&enabled.motor&&motorBottom2.includes(1)) { factorKeys.push("motor"); factors.push("モーター劣勢"); }
-    if (premiumAccess&&enabled.win&&winBottom2.includes(1)) { factorKeys.push("win"); factors.push("勝率劣勢"); }
-    let mask=0; if (factorKeys.includes("ex")) mask|=1; if (factorKeys.includes("st")) mask|=2; if (factorKeys.includes("motor")) mask|=4; if (factorKeys.includes("win")) mask|=8;
-    const hist=LANE1_TEST[mask] || null; const score=factorKeys.length; const eliminate=mask===15;
-    const state = eliminate ? "消去" : hist && hist.win<40 ? "危険" : hist && hist.win<55 ? "注意" : "保護";
-    return { score,factors,mask,hist,eliminate,state };
-  },[enabled,premiumAccess,exhibitionReady,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
+  const activeRuleKeys=useMemo(()=>rules.filter((rule)=>enabled[rule.key]&&rule.available&&(premiumAccess||rule.free)).map((rule)=>rule.key),[enabled,premiumAccess,exhibitionReady,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
+  const selectedMask=activeRuleKeys.reduce((mask,key)=>mask|RULE_BITS[key],0);const currentResearch=researchStats(selectedMask);
+  const currentRoi=selectedMask===3?ROI_BACKTEST.safe:selectedMask===5?ROI_BACKTEST.balance:null;
 
-  const evaluation = useMemo(() => {
-    const map={}; let remain=0;
-    for (const bet of ALL_BETS) {
-      const reasons=[]; const firstReasons=[]; let secondElimination=false;
-      for (const rule of rules) {
-        if (!enabled[rule.key] || !rule.available || (!premiumAccess && !rule.free)) continue;
-        const firstHit=rule.firstBoats.includes(bet[0]); const secondHit=rule.secondBoats.includes(bet[1]);
-        if (firstHit) { if (bet[0]===1) firstReasons.push(rule.label); else reasons.push(rule.label); }
-        if (secondHit) { secondElimination=true; reasons.push(`${rule.label}（2着条件）`); }
-      }
-      let lane1Protected=false;
-      if (bet[0]===1 && firstReasons.length>0) {
-        if (lane1Danger.eliminate) { reasons.push("1号艇4条件すべて劣勢"); reasons.push(...lane1Danger.factors); }
-        else { lane1Protected=true; reasons.push(`1号艇${lane1Danger.state} ${lane1Danger.score}/4`); }
-      }
-      const lane1HeadEliminated = bet[0]===1 && firstReasons.length>0 && lane1Danger.eliminate;
-      const nonHeadReason = bet[0]!==1 && reasons.length>0;
-      const rawEliminated = lane1HeadEliminated || secondElimination || nonHeadReason;
-      const hasNonHeadElimination = secondElimination || nonHeadReason;
-      const restored = rawEliminated && premiumAccess && a1Correction && a1Boats.includes(bet[0]) && !hasNonHeadElimination;
-      let eliminated = rawEliminated && !restored;
-      if (!eliminated && premiumAccess && valueEnabled && valueAvailable) {
-        const metrics=valueMetrics(probabilities,marketProbabilities,odds,bet);
-        if (metrics.corrected===null || metrics.corrected*100<0.5 || metrics.ratio===null || metrics.ratio<1.15 || metrics.ev===null || metrics.ev<evThreshold) { eliminated=true; lane1Protected=false; reasons.push(`VALUE ${evThreshold}%未満`); }
-      }
-      if (!eliminated) remain++;
-      map[betKey(bet)]={eliminated,restored,lane1Protected:lane1Protected&&!eliminated,reasons};
-    }
-    return {map,remain};
-  },[enabled,premiumAccess,a1Correction,a1Boats,valueEnabled,valueAvailable,evThreshold,probabilities,marketProbabilities,odds,lane1Danger,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
+  const lane1Danger=useMemo(()=>{const factorKeys=[];const factors=[];const exhibitionSelected=(enabled.exhibition456&&exhibitionReady&&exhibitionBottom3.includes(1))||(premiumAccess&&enabled.exhibition6top2&&exhibitionReady&&exhibitionWorst===1)||(premiumAccess&&enabled.exhibition56top2&&exhibitionReady&&exhibitionBottom2.includes(1));if(exhibitionSelected){factorKeys.push("ex");factors.push("展示劣勢");}if(premiumAccess&&enabled.st&&stBottom2.includes(1)){factorKeys.push("st");factors.push("ST劣勢");}if(premiumAccess&&enabled.motor&&motorBottom2.includes(1)){factorKeys.push("motor");factors.push("モーター劣勢");}if(premiumAccess&&enabled.win&&winBottom2.includes(1)){factorKeys.push("win");factors.push("勝率劣勢");}let mask=0;if(factorKeys.includes("ex"))mask|=1;if(factorKeys.includes("st"))mask|=2;if(factorKeys.includes("motor"))mask|=4;if(factorKeys.includes("win"))mask|=8;const hist=LANE1_TEST[mask]||null;const score=factorKeys.length;const eliminate=mask===15;const state=eliminate?"消去":hist&&hist.win<40?"危険":hist&&hist.win<55?"注意":"保護";return{score,factors,mask,hist,eliminate,state};},[enabled,premiumAccess,exhibitionReady,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
 
-  const headCounts=useMemo(() => Object.fromEntries(BOATS.map((first) => [first,ALL_BETS.filter((bet) => bet[0]===first&&!evaluation.map[betKey(bet)]?.eliminated).length])),[evaluation]);
-  const toggleRule=(rule) => { if (!rule.available || (!premiumAccess&&!rule.free)) return; setEnabled((prev) => ({...prev,[rule.key]:!prev[rule.key]})); };
-  const applyPreset=(preset) => {
-    if (!premiumAccess) return; const keys=new Set(preset.rules); const next={ exhibition456:false,exhibition6top2:false,exhibition56top2:false,st:false,motor:false,win:false };
-    for (const rule of rules) if (keys.has(rule.key) && rule.available) next[rule.key]=true;
-    setEnabled(next); setA1Correction(false); setValueEnabled(false);
-  };
-  const resetRules=() => { setEnabled({exhibition456:false,exhibition6top2:false,exhibition56top2:false,st:false,motor:false,win:false}); setA1Correction(false); setValueEnabled(false); };
-  const refresh=() => startTransition(() => router.refresh()); const removed=120-evaluation.remain; const removalRate=Math.round((removed/120)*1000)/10; const activeBets=ALL_BETS.filter((bet) => bet[0]===activeFirst);
-  const guardStyle = lane1Danger.state==="消去" ? {fg:"#b42318",bg:"#fff0f0"} : lane1Danger.state==="危険" ? {fg:"#c2410c",bg:"#fff7ed"} : lane1Danger.state==="注意" ? {fg:"#9a6700",bg:"#fff8e6"} : {fg:"#17663a",bg:"#eefaf3"};
+  const evaluation=useMemo(()=>{const map={};let remain=0;for(const bet of ALL_BETS){const reasons=[];const firstReasons=[];let secondElimination=false;for(const rule of rules){if(!enabled[rule.key]||!rule.available||(!premiumAccess&&!rule.free))continue;const firstHit=rule.firstBoats.includes(bet[0]);const secondHit=rule.secondBoats.includes(bet[1]);if(firstHit){if(bet[0]===1)firstReasons.push(rule.label);else reasons.push(rule.label);}if(secondHit){secondElimination=true;reasons.push(`${rule.label}（2着条件）`);}}let lane1Protected=false;if(bet[0]===1&&firstReasons.length>0){if(lane1Danger.eliminate){reasons.push("1号艇4条件すべて劣勢");reasons.push(...lane1Danger.factors);}else{lane1Protected=true;reasons.push(`1号艇${lane1Danger.state} ${lane1Danger.score}/4`);}}const lane1HeadEliminated=bet[0]===1&&firstReasons.length>0&&lane1Danger.eliminate;const nonHeadReason=bet[0]!==1&&reasons.length>0;const rawEliminated=lane1HeadEliminated||secondElimination||nonHeadReason;const hasNonHeadElimination=secondElimination||nonHeadReason;const restored=rawEliminated&&premiumAccess&&a1Correction&&a1Boats.includes(bet[0])&&!hasNonHeadElimination;let eliminated=rawEliminated&&!restored;if(!eliminated&&premiumAccess&&valueEnabled&&valueAvailable){const metrics=valueMetrics(probabilities,marketProbabilities,odds,bet);if(metrics.corrected===null||metrics.corrected*100<.5||metrics.ratio===null||metrics.ratio<1.15||metrics.ev===null||metrics.ev<evThreshold){eliminated=true;lane1Protected=false;reasons.push(`VALUE ${evThreshold}%未満`);}}if(!eliminated)remain++;map[betKey(bet)]={eliminated,restored,lane1Protected:lane1Protected&&!eliminated,reasons};}return{map,remain};},[enabled,premiumAccess,a1Correction,a1Boats,valueEnabled,valueAvailable,evThreshold,probabilities,marketProbabilities,odds,lane1Danger,exhibitionBottom3,exhibitionBottom2,exhibitionWorst,stBottom2,motorBottom2,winBottom2]);
+
+  const finalCandidates=useMemo(()=>{const alive=ALL_BETS.filter((bet)=>!evaluation.map[betKey(bet)]?.eliminated).map((bet)=>{const m=valueMetrics(probabilities,marketProbabilities,odds,bet);return{bet,key:betKey(bet),odds:m.currentOdds,prob:m.corrected,ratio:m.ratio,ev:m.ev};});const main=[...alive].filter((x)=>x.prob!==null).sort((a,b)=>(b.prob??0)-(a.prob??0)).slice(0,5);const value=[...alive].filter((x)=>(x.prob??0)>=.005&&(x.ratio??0)>=1.15&&(x.ev??0)>=100).sort((a,b)=>(b.ev??0)-(a.ev??0)).slice(0,5);const holes=[...alive].filter((x)=>(x.odds??0)>=50&&(x.prob??0)>=.005).sort((a,b)=>(b.ev??0)-(a.ev??0)).slice(0,5);return{main,value,holes};},[evaluation,probabilities,marketProbabilities,odds]);
+
+  const headCounts=useMemo(()=>Object.fromEntries(BOATS.map((first)=>[first,ALL_BETS.filter((bet)=>bet[0]===first&&!evaluation.map[betKey(bet)]?.eliminated).length])),[evaluation]);
+  const toggleRule=(rule)=>{if(!rule.available||(!premiumAccess&&!rule.free))return;setEnabled((prev)=>({...prev,[rule.key]:!prev[rule.key]}));};
+  const applyPreset=(preset)=>{if(!premiumAccess)return;const keys=new Set(preset.rules);const next={exhibition456:false,exhibition6top2:false,exhibition56top2:false,st:false,motor:false,win:false};for(const rule of rules)if(keys.has(rule.key)&&rule.available)next[rule.key]=true;setEnabled(next);setA1Correction(false);setValueEnabled(false);};
+  const resetRules=()=>{setEnabled({exhibition456:false,exhibition6top2:false,exhibition56top2:false,st:false,motor:false,win:false});setA1Correction(false);setValueEnabled(false);};
+  const refresh=()=>startTransition(()=>router.refresh());const removed=120-evaluation.remain;const removalRate=Math.round((removed/120)*1000)/10;const activeBets=ALL_BETS.filter((bet)=>bet[0]===activeFirst);const guardStyle=lane1Danger.state==="消去"?{fg:"#b42318",bg:"#fff0f0"}:lane1Danger.state==="危険"?{fg:"#c2410c",bg:"#fff7ed"}:lane1Danger.state==="注意"?{fg:"#9a6700",bg:"#fff8e6"}:{fg:"#17663a",bg:"#eefaf3"};
 
   return <div className={styles.wrap}>
-    {!premiumAccess && <section className={styles.freeTrial}><strong>FREE TRIAL</strong><p>無料では「展示4〜6位を1着から消す」を体験できます。1号艇は4条件すべてが悪い場合だけ1着消去します。</p></section>}
+    {!premiumAccess&&<section className={styles.freeTrial}><strong>FREE TRIAL</strong><p>無料では「展示4〜6位を1着から消す」を体験できます。1号艇は4条件すべてが悪い場合だけ1着消去します。</p></section>}
     <section className={styles.summary}><div><span>START</span><strong>120通り</strong></div><div className={styles.arrow}>→</div><div><span>REMAIN</span><strong>{evaluation.remain}通り</strong></div><div><span>消去率</span><strong>{removalRate}%</strong></div></section>
-    <button className={styles.refresh} onClick={refresh} disabled={isPending}>{isPending?"再診断中…":"最新データで再診断"}</button>
-    <p className={styles.synced}>レースデータ同期: {syncedAt||"-"} / オッズ: {oddsFetchedAt||"-"}</p>
+    <button className={styles.refresh} onClick={refresh} disabled={isPending}>{isPending?"再診断中…":"最新データで再診断"}</button><p className={styles.synced}>レースデータ同期: {syncedAt||"-"} / オッズ: {oddsFetchedAt||"-"}</p>
 
-    <section className={styles.processPanel}>
-      <div className={styles.sectionTitle}><span>LANE 1 GUARD</span><h2>1号艇保護判定</h2></div>
-      <div style={{display:"grid",gap:8}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}><strong style={{fontSize:18,color:guardStyle.fg}}>危険スコア {lane1Danger.score}/4</strong><span style={{padding:"6px 10px",borderRadius:999,fontSize:11,fontWeight:1000,background:guardStyle.bg,color:guardStyle.fg}}>{lane1Danger.state}</span></div>
-        <small style={{color:"#6f7f90",lineHeight:1.7,fontWeight:700}}>未使用の2026年8月以降で再検証し、3条件該当では1号艇勝率が27〜42%残ったため、1着消去は4条件すべて劣勢の時だけに変更しました。</small>
-        {lane1Danger.factors.length>0 && <div style={{fontSize:12,fontWeight:800,color:"#526477"}}>該当：{lane1Danger.factors.join(" / ")}</div>}
-        {lane1Danger.hist && <div style={{fontSize:12,fontWeight:1000,color:guardStyle.fg}}>同条件の未使用期間：{lane1Danger.hist.races}R / 1号艇1着率 {lane1Danger.hist.win}%</div>}
-      </div>
-    </section>
+    <section className={styles.processPanel}><div className={styles.sectionTitle}><span>LANE 1 GUARD</span><h2>1号艇保護判定</h2></div><div style={{display:"grid",gap:8}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}><strong style={{fontSize:18,color:guardStyle.fg}}>危険スコア {lane1Danger.score}/4</strong><span style={{padding:"6px 10px",borderRadius:999,fontSize:11,fontWeight:1000,background:guardStyle.bg,color:guardStyle.fg}}>{lane1Danger.state}</span></div><small style={{color:"#6f7f90",lineHeight:1.7,fontWeight:700}}>未使用の2026年8月以降で再検証し、3条件該当では1号艇勝率が27〜42%残ったため、1着消去は4条件すべて劣勢の時だけです。</small>{lane1Danger.factors.length>0&&<div style={{fontSize:12,fontWeight:800,color:"#526477"}}>該当：{lane1Danger.factors.join(" / ")}</div>}{lane1Danger.hist&&<div style={{fontSize:12,fontWeight:1000,color:guardStyle.fg}}>同条件の未使用期間：{lane1Danger.hist.races}R / 1号艇1着率 {lane1Danger.hist.win}%</div>}</div></section>
 
-    <section className={styles.rulePanel}>
-      <div className={styles.sectionTitle}><span>PRESET</span><h2>組み合わせプリセット</h2></div>
-      <p style={{margin:"-4px 0 12px",color:"#718096",fontSize:11,lineHeight:1.7,fontWeight:700}}>現在ロジックを未使用期間5,969Rで再検証した数値です。</p>
-      <div style={{display:"grid",gap:8}}>{PRESET_BACKTESTS.map((preset) => <button key={preset.key} type="button" onClick={() => applyPreset(preset)} disabled={!premiumAccess} style={{width:"100%",textAlign:"left",padding:13,borderRadius:14,border:preset.warning?"1px solid #f1b8b5":preset.recommended?"1px solid #b8e3c7":"1px solid #dfe6ef",background:preset.warning?"#fff6f6":preset.recommended?"#f5fcf7":"#fff",opacity:premiumAccess?1:.62}}>
-        <span style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"center"}}><strong style={{color:"#243549",fontSize:14}}>{preset.label}{preset.recommended?"  おすすめ":""}</strong><span style={{color:preset.survival>=85?"#17663a":preset.survival>=75?"#9a6700":"#b42318",fontWeight:1000,fontSize:12}}>残存 {preset.survival}%</span></span>
-        <small style={{display:"block",marginTop:4,color:"#728196",fontWeight:800}}>{premiumAccess?preset.sub:"🔒 プレミアム会員限定"}</small><small style={{display:"block",marginTop:6,color:"#607084",fontWeight:900}}>平均消去率 {preset.elimination}%</small>{preset.warning&&<small style={{display:"block",marginTop:5,color:"#b42318",fontWeight:1000}}>⚠ {preset.warning}</small>}
-      </button>)}</div>
-      <button type="button" onClick={resetRules} style={{marginTop:9,width:"100%",padding:10,borderRadius:12,border:"1px solid #dfe6ef",background:"#f8fafc",color:"#526477",fontWeight:900}}>条件をすべてOFF</button>
-    </section>
+    <section className={styles.rulePanel}><div className={styles.sectionTitle}><span>PRESET</span><h2>組み合わせプリセット</h2></div><p style={{margin:"-4px 0 12px",color:"#718096",fontSize:11,lineHeight:1.7,fontWeight:700}}>未使用期間での的中残存率と、残った買い目を各100円ずつ均等購入した実回収率を表示します。</p><div style={{display:"grid",gap:8}}>{PRESET_BACKTESTS.map((preset)=><button key={preset.key} type="button" onClick={()=>applyPreset(preset)} disabled={!premiumAccess} style={{width:"100%",textAlign:"left",padding:13,borderRadius:14,border:preset.warning?"1px solid #f1b8b5":preset.recommended?"1px solid #b8e3c7":"1px solid #dfe6ef",background:preset.warning?"#fff6f6":preset.recommended?"#f5fcf7":"#fff",opacity:premiumAccess?1:.62}}><span style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"center"}}><strong style={{color:"#243549",fontSize:14}}>{preset.label}{preset.recommended?"  おすすめ":""}</strong><span style={{color:preset.survival>=85?"#17663a":preset.survival>=75?"#9a6700":"#b42318",fontWeight:1000,fontSize:12}}>残存 {preset.survival}%</span></span><small style={{display:"block",marginTop:4,color:"#728196",fontWeight:800}}>{premiumAccess?preset.sub:"🔒 プレミアム会員限定"}</small><small style={{display:"block",marginTop:6,color:"#607084",fontWeight:900}}>平均消去率 {preset.elimination}%{preset.roi?`｜均等買い回収率 ${preset.roi}%`:""}</small>{preset.warning&&<small style={{display:"block",marginTop:5,color:"#b42318",fontWeight:1000}}>⚠ {preset.warning}</small>}</button>)}</div><button type="button" onClick={resetRules} style={{marginTop:9,width:"100%",padding:10,borderRadius:12,border:"1px solid #dfe6ef",background:"#f8fafc",color:"#526477",fontWeight:900}}>条件をすべてOFF</button></section>
 
-    <section className={styles.rulePanel}>
-      <div className={styles.sectionTitle}><span>STEP 1</span><h2>消去条件を選ぶ</h2></div>
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",margin:"-2px 0 10px"}}>{Object.values(LEVELS).map((level)=><span key={level.label} style={{padding:"4px 9px",borderRadius:999,border:`1px solid ${level.border}`,background:level.bg,color:level.fg,fontSize:10,fontWeight:1000}}>{level.label}</span>)}</div>
-      <p style={{margin:"0 0 12px",color:"#718096",fontSize:11,lineHeight:1.7,fontWeight:700}}>安全＝的中残存90%以上 / 標準＝80〜89.99% / 攻め＝80%未満。単独成績は全期間、下の研究モードは未使用期間で検証しています。</p>
-      <div className={styles.rules}>{rules.map((rule)=>{ const locked=!premiumAccess&&!rule.free; const bt=rule.backtest; const level=LEVELS[rule.level]; return <button key={rule.key} className={`${styles.rule} ${enabled[rule.key]&&!locked?styles.active:""}`} onClick={()=>toggleRule(rule)} disabled={!rule.available} style={locked?{opacity:.62}:undefined}>
-        <span className={styles.switch}>{locked?"🔒":enabled[rule.key]?"ON":"OFF"}</span><span><span style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><strong>{rule.label}{rule.free?"  FREE":""}</strong><em style={{fontStyle:"normal",padding:"3px 7px",borderRadius:999,border:`1px solid ${level.border}`,background:level.bg,color:level.fg,fontSize:9,fontWeight:1000}}>{level.label}</em>{rule.recommended&&<em style={{fontStyle:"normal",padding:"3px 7px",borderRadius:999,background:"#edf3fb",color:"#2c5f97",fontSize:9,fontWeight:1000}}>おすすめ</em>}</span><small>{locked?"プレミアム会員限定":rule.desc}</small>{rule.warning&&<small style={{marginTop:5,color:"#b42318",fontWeight:1000}}>⚠ {rule.warning}</small>}<small style={{marginTop:7,color:level.fg,fontWeight:1000}}>過去{bt.races.toLocaleString()}R｜平均消去率 {bt.elimination}%｜的中残存率 {bt.survival}%</small><small style={{marginTop:2,color:"#8a97a6"}}>的中目を消した率 {bt.miss}%</small></span>
-      </button>})}</div>
-    </section>
+    <section className={styles.rulePanel}><div className={styles.sectionTitle}><span>STEP 1</span><h2>消去条件を選ぶ</h2></div><div style={{display:"flex",gap:6,flexWrap:"wrap",margin:"-2px 0 10px"}}>{Object.values(LEVELS).map((level)=><span key={level.label} style={{padding:"4px 9px",borderRadius:999,border:`1px solid ${level.border}`,background:level.bg,color:level.fg,fontSize:10,fontWeight:1000}}>{level.label}</span>)}</div><p style={{margin:"0 0 12px",color:"#718096",fontSize:11,lineHeight:1.7,fontWeight:700}}>安全＝的中残存90%以上 / 標準＝80〜89.99% / 攻め＝80%未満。単独成績は全期間、下の研究モードは未使用期間で検証しています。</p><div className={styles.rules}>{rules.map((rule)=>{const locked=!premiumAccess&&!rule.free;const bt=rule.backtest;const level=LEVELS[rule.level];return <button key={rule.key} className={`${styles.rule} ${enabled[rule.key]&&!locked?styles.active:""}`} onClick={()=>toggleRule(rule)} disabled={!rule.available} style={locked?{opacity:.62}:undefined}><span className={styles.switch}>{locked?"🔒":enabled[rule.key]?"ON":"OFF"}</span><span><span style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><strong>{rule.label}{rule.free?"  FREE":""}</strong><em style={{fontStyle:"normal",padding:"3px 7px",borderRadius:999,border:`1px solid ${level.border}`,background:level.bg,color:level.fg,fontSize:9,fontWeight:1000}}>{level.label}</em>{rule.recommended&&<em style={{fontStyle:"normal",padding:"3px 7px",borderRadius:999,background:"#edf3fb",color:"#2c5f97",fontSize:9,fontWeight:1000}}>おすすめ</em>}</span><small>{locked?"プレミアム会員限定":rule.desc}</small>{rule.warning&&<small style={{marginTop:5,color:"#b42318",fontWeight:1000}}>⚠ {rule.warning}</small>}<small style={{marginTop:7,color:level.fg,fontWeight:1000}}>過去{bt.races.toLocaleString()}R｜平均消去率 {bt.elimination}%｜的中残存率 {bt.survival}%</small><small style={{marginTop:2,color:"#8a97a6"}}>的中目を消した率 {bt.miss}%</small></span></button>;})}</div></section>
 
-    <section className={styles.processPanel}>
-      <div className={styles.sectionTitle}><span>RESEARCH MODE</span><h2>選択中の過去検証</h2></div>
-      {currentResearch ? <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
-        <div style={{padding:10,borderRadius:12,background:"#f8fafc"}}><small style={{display:"block",color:"#718096",fontWeight:800}}>未使用期間</small><strong style={{fontSize:18}}>{currentResearch.races.toLocaleString()}R</strong></div>
-        <div style={{padding:10,borderRadius:12,background:"#f8fafc"}}><small style={{display:"block",color:"#718096",fontWeight:800}}>平均残り</small><strong style={{fontSize:18}}>{currentResearch.remain}通り</strong></div>
-        <div style={{padding:10,borderRadius:12,background:"#fff8e6"}}><small style={{display:"block",color:"#9a6700",fontWeight:800}}>平均消去率</small><strong style={{fontSize:18,color:"#9a6700"}}>{currentResearch.elimination}%</strong></div>
-        <div style={{padding:10,borderRadius:12,background:currentResearch.survival>=80?"#eefaf3":"#fff0f0"}}><small style={{display:"block",color:currentResearch.survival>=80?"#17663a":"#b42318",fontWeight:800}}>的中残存率</small><strong style={{fontSize:18,color:currentResearch.survival>=80?"#17663a":"#b42318"}}>{currentResearch.survival}%</strong></div>
-      </div> : <p style={{margin:0,color:"#718096",fontSize:12,fontWeight:800}}>消去条件を1つ以上ONにすると、その組み合わせの未使用期間成績をここに表示します。</p>}
-      <small style={{display:"block",marginTop:9,color:"#8a97a6",lineHeight:1.6}}>2026年8月以降の、6艇分の勝率・ST・モーター・展示が揃ったレースで検証。A1補正とVALUEはこの過去検証には含みません。</small>
-    </section>
+    <section className={styles.processPanel}><div className={styles.sectionTitle}><span>RESEARCH MODE</span><h2>選択中の過去検証</h2></div>{currentResearch?<div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}><div style={{padding:10,borderRadius:12,background:"#f8fafc"}}><small style={{display:"block",color:"#718096",fontWeight:800}}>未使用期間</small><strong style={{fontSize:18}}>{currentResearch.races.toLocaleString()}R</strong></div><div style={{padding:10,borderRadius:12,background:"#f8fafc"}}><small style={{display:"block",color:"#718096",fontWeight:800}}>平均残り</small><strong style={{fontSize:18}}>{currentResearch.remain}通り</strong></div><div style={{padding:10,borderRadius:12,background:"#fff8e6"}}><small style={{display:"block",color:"#9a6700",fontWeight:800}}>平均消去率</small><strong style={{fontSize:18,color:"#9a6700"}}>{currentResearch.elimination}%</strong></div><div style={{padding:10,borderRadius:12,background:currentResearch.survival>=80?"#eefaf3":"#fff0f0"}}><small style={{display:"block",color:currentResearch.survival>=80?"#17663a":"#b42318",fontWeight:800}}>的中残存率</small><strong style={{fontSize:18,color:currentResearch.survival>=80?"#17663a":"#b42318"}}>{currentResearch.survival}%</strong></div>{currentRoi&&<div style={{gridColumn:"1 / -1",padding:11,borderRadius:12,background:"#edf3fb"}}><small style={{display:"block",color:"#526477",fontWeight:800}}>均等買い実回収率（各100円）</small><strong style={{fontSize:20,color:"#2c5f97"}}>{currentRoi.roi}%</strong><small style={{display:"block",marginTop:4,color:"#728196",fontWeight:800}}>消去なし 59.60% → +{(currentRoi.roi-59.60).toFixed(2)}pt</small></div>}</div>:<p style={{margin:0,color:"#718096",fontSize:12,fontWeight:800}}>消去条件を1つ以上ONにすると、その組み合わせの未使用期間成績をここに表示します。</p>}<small style={{display:"block",marginTop:9,color:"#8a97a6",lineHeight:1.6}}>回収率は現時点で安全重視・バランスのみ実測。A1補正とVALUEはこの比較には含めません。</small></section>
 
     <section className={styles.rulePanel}><div className={styles.sectionTitle}><span>CORRECTION</span><h2>補正条件</h2></div><button className={`${styles.rule} ${premiumAccess&&a1Correction?styles.active:""}`} onClick={()=>premiumAccess&&setA1Correction((v)=>!v)} style={!premiumAccess?{opacity:.62}:undefined}><span className={styles.switch}>{!premiumAccess?"🔒":a1Correction?"ON":"OFF"}</span><span><strong>A1補正</strong><small>{premiumAccess?`A1艇（${a1Boats.length?a1Boats.join("・"):"該当なし"}）の1着消去を救済`:"プレミアム会員限定"}</small></span></button></section>
     <section className={styles.rulePanel}><div className={styles.sectionTitle}><span>VALUE β2</span><h2>価値フィルター</h2></div><button className={`${styles.rule} ${premiumAccess&&valueEnabled?styles.active:""}`} onClick={()=>premiumAccess&&valueAvailable&&setValueEnabled((v)=>!v)} style={!premiumAccess?{opacity:.62}:undefined}><span className={styles.switch}>{!premiumAccess?"🔒":valueEnabled?"ON":"OFF"}</span><span><strong>市場補正VALUEでさらに消す</strong><small>{!premiumAccess?"プレミアム会員限定":valueAvailable?`EV ${evThreshold}%以上を残す（最低確率0.5%・市場比1.15倍も併用）`:"確率またはオッズデータ待ち"}</small></span></button>{premiumAccess&&<div className={styles.evButtons}>{[80,100,120].map((v)=><button key={v} onClick={()=>setEvThreshold(v)} className={evThreshold===v?styles.evActive:""}>{v}%</button>)}</div>}</section>
 
-    <section className={styles.betPanel}><div className={styles.sectionTitle}><span>STEP 2</span><h2>3連単オッズ表</h2></div>{oddsError&&<p className={styles.oddsError}>オッズ取得エラー：{oddsError}</p>}<p className={styles.legend}>白＝残す / グレー＝消去 / 黄＝補正で復活。1号艇は4条件すべて劣勢の時だけ1着消去します。買い目タップで詳細表示。</p>
-      <div className={styles.mobileOdds}><div className={styles.headTabs}>{BOATS.map((first)=><button key={first} type="button" className={activeFirst===first?styles.headTabActive:""} onClick={()=>{setActiveFirst(first);setExpandedBet(null);}}><strong>{first}頭</strong><small>{headCounts[first]}/20</small></button>)}</div><div className={styles.mobileOddsHeader}><strong>{activeFirst}号艇 1着</strong><span>残り {headCounts[activeFirst]}/20</span></div><div className={styles.mobileRows}>{activeBets.map((bet)=><OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={expandedBet===betKey(bet)} onToggle={()=>setExpandedBet((prev)=>prev===betKey(bet)?null:betKey(bet))}/>)}</div></div>
-      <div className={styles.desktopOdds}>{BOATS.map((first)=><div className={styles.oddsColumn} key={first}><div className={styles.oddsColumnHeader}><strong>{first}号艇 1着</strong><small>{headCounts[first]}/20</small></div>{ALL_BETS.filter((bet)=>bet[0]===first).map((bet)=><OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={false} onToggle={()=>{}}/>)}</div>)}</div>
-    </section>
-    <aside className={styles.note}>未使用期間の再検証では「安全重視」が的中残存87.52%、「バランス」が81.39%でした。研究モードでは選択した条件の組み合わせ成績を即表示します。過去成績やVALUEは将来の結果・回収率・利益を保証するものではありません。</aside>
+    <section className={styles.processPanel}><div className={styles.sectionTitle}><span>FINAL CANDIDATES</span><h2>最終候補</h2></div>{!premiumAccess?<div style={{padding:14,borderRadius:14,background:"#f8fafc",color:"#66788a",fontWeight:900}}>🔒 プレミアム会員限定。消去後の買い目を「本命・VALUE・穴」に自動整理します。</div>:Object.keys(probabilities).length!==120?<p style={{margin:0,color:"#718096",fontSize:12,fontWeight:800}}>確率データが揃うと最終候補を表示します。</p>:<div style={{display:"grid",gap:9}}><CandidateList title="本命候補｜補正推定確率 上位5" items={finalCandidates.main} empty="候補なし"/><CandidateList title="VALUE候補｜市場比1.15倍・EV100%以上" items={finalCandidates.value} empty="基準を満たす買い目なし"/><CandidateList title="穴候補｜50倍以上・推定0.5%以上" items={finalCandidates.holes} empty="条件を満たす高配当候補なし"/></div>}<small style={{display:"block",marginTop:9,color:"#8a97a6",lineHeight:1.6}}>最終候補は推定指標による整理で、購入推奨や利益を保証するものではありません。</small></section>
+
+    <section className={styles.betPanel}><div className={styles.sectionTitle}><span>STEP 2</span><h2>3連単オッズ表</h2></div>{oddsError&&<p className={styles.oddsError}>オッズ取得エラー：{oddsError}</p>}<p className={styles.legend}>白＝残す / グレー＝消去 / 黄＝補正で復活。1号艇は4条件すべて劣勢の時だけ1着消去します。買い目タップで詳細表示。</p><div className={styles.mobileOdds}><div className={styles.headTabs}>{BOATS.map((first)=><button key={first} type="button" className={activeFirst===first?styles.headTabActive:""} onClick={()=>{setActiveFirst(first);setExpandedBet(null);}}><strong>{first}頭</strong><small>{headCounts[first]}/20</small></button>)}</div><div className={styles.mobileOddsHeader}><strong>{activeFirst}号艇 1着</strong><span>残り {headCounts[activeFirst]}/20</span></div><div className={styles.mobileRows}>{activeBets.map((bet)=><OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={expandedBet===betKey(bet)} onToggle={()=>setExpandedBet((prev)=>prev===betKey(bet)?null:betKey(bet))}/>)}</div></div><div className={styles.desktopOdds}>{BOATS.map((first)=><div className={styles.oddsColumn} key={first}><div className={styles.oddsColumnHeader}><strong>{first}号艇 1着</strong><small>{headCounts[first]}/20</small></div>{ALL_BETS.filter((bet)=>bet[0]===first).map((bet)=><OddsRow key={betKey(bet)} bet={bet} odds={odds} evaluation={evaluation} probabilities={probabilities} marketProbabilities={marketProbabilities} expanded={false} onToggle={()=>{}}/>)}</div>)}</div></section>
+    <aside className={styles.note}>未使用期間の均等買い比較では、消去なし59.60%に対して「安全重視」64.98%、「バランス」63.19%でした。消去だけでは100%に届かないため、VALUEと最終候補は別レイヤーとして扱います。過去成績やVALUEは将来の結果・利益を保証するものではありません。</aside>
   </div>;
 }
