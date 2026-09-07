@@ -40,13 +40,14 @@ async function exactCount(query) {
 }
 
 async function snapshot(supabase, raceDate) {
-  const [events, entries, previousPredictions, previousRankings] = await Promise.all([
+  const [events, entries, previousPredictions, previousRankings, exhibitionRankings] = await Promise.all([
     exactCount(supabase.from("bs_race_events").select("race_no", { count: "exact", head: true }).eq("race_date", raceDate)),
     exactCount(supabase.from("bs_race_entries").select("boat_no", { count: "exact", head: true }).eq("race_date", raceDate)),
     exactCount(supabase.from("bs_ai_predictions").select("id", { count: "exact", head: true }).eq("race_date", raceDate).eq("timing", "previous_day")),
     exactCount(supabase.from("ai_v2_daily_rankings").select("id", { count: "exact", head: true }).eq("ranking_date", raceDate).eq("data_timing", "previous_day")),
+    exactCount(supabase.from("ai_v2_daily_rankings").select("id", { count: "exact", head: true }).eq("ranking_date", raceDate).eq("data_timing", "after_exhibition")),
   ]);
-  return { events, entries, previousPredictions, previousRankings };
+  return { events, entries, previousPredictions, previousRankings, exhibitionRankings };
 }
 
 async function runPredictionRecovery(request, raceDate) {
@@ -65,13 +66,14 @@ async function runPredictionRecovery(request, raceDate) {
 
 async function recordHealth(supabase, raceDate, status, message) {
   const now = new Date().toISOString();
+  // ai_jobs_job_type_v8_check で許可済みの種別を使い、healthであることはworker/messageで識別する。
   const { error } = await supabase.from("ai_jobs").insert({
-    job_type: "previous_day_health",
+    job_type: "run_product_daily",
     status,
     progress: status === "completed" ? 100 : 0,
-    requested_by: "supabase-cron",
-    worker_name: "vercel-ai-health",
-    message: `${raceDate} ${message}`.slice(0, 1000),
+    requested_by: "supabase-cron-health",
+    worker_name: "vercel-ai-previous-day-health",
+    message: `[health] ${raceDate} ${message}`.slice(0, 1000),
     started_at: now,
     completed_at: now,
     error_message: status === "failed" ? message.slice(0, 1800) : null,
@@ -94,18 +96,34 @@ export async function GET(request) {
     }
 
     const after = recovery.attempted ? await snapshot(supabase, raceDate) : before;
-    const healthy = after.previousPredictions > 0 && after.previousRankings > 0;
-    const message = `events=${after.events}, entries=${after.entries}, previous_predictions=${after.previousPredictions}, previous_rankings=${after.previousRankings}`;
+    const predictionsReady = after.entries === 0 || after.previousPredictions > 0;
+    const rankingsReady = after.previousRankings > 0;
+    const fallbackRankingsReady = after.exhibitionRankings > 0;
+    const healthy = predictionsReady;
+    const degraded = healthy && !rankingsReady;
+    const message = `events=${after.events}, entries=${after.entries}, previous_predictions=${after.previousPredictions}, previous_rankings=${after.previousRankings}, exhibition_rankings=${after.exhibitionRankings}`;
 
-    await recordHealth(supabase, raceDate, healthy ? "completed" : "failed", message);
+    await recordHealth(supabase, raceDate, healthy ? "completed" : "failed", `${degraded ? "WARNING rankings_missing; " : ""}${message}`);
 
     if (!healthy) {
       console.error("[ai-previous-day-health] unhealthy", { raceDate, before, after, recovery });
+    } else if (degraded) {
+      console.warn("[ai-previous-day-health] predictions ready but previous-day rankings missing", { raceDate, after, fallbackRankingsReady });
     } else {
       console.info("[ai-previous-day-health] healthy", { raceDate, after });
     }
 
-    return NextResponse.json({ ok: healthy, raceDate, before, recovery, after, checkedAt: new Date().toISOString() }, { status: healthy ? 200 : 503 });
+    return NextResponse.json({
+      ok: healthy,
+      degraded,
+      rankingsReady,
+      fallbackRankingsReady,
+      raceDate,
+      before,
+      recovery,
+      after,
+      checkedAt: new Date().toISOString(),
+    }, { status: healthy ? 200 : 503 });
   } catch (error) {
     const message = String(error?.message || error);
     await recordHealth(supabase, raceDate, "failed", message);
