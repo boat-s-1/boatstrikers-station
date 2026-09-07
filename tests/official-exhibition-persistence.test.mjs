@@ -21,7 +21,8 @@ test('only present official measurements are written, so blanks cannot erase sto
 });
 test('production collector uses roster-verified persistence and evaluates PC fallback',()=>{
   const code=readFileSync(new URL('../app/api/cron/exhibition-alerts/route.js',import.meta.url),'utf8');
-  assert.ok(code.includes('persistOfficialExhibition(supabase,race,source)'));
+  assert.ok(code.includes('persistOfficialExhibition(supabase,race,fetched)'));
+  assert.ok(code.includes('source.persistence'));
   assert.ok(code.includes('pcFallbackEvaluated:true'));
   assert.ok(code.includes('evaluate_boat4_double_top_alerts'));
   assert.equal(code.includes('.eq("boat_no",row.boatNo)'),false);

@@ -133,14 +133,25 @@ export async function GET(request){
     const results=[];
     for(const race of targets){
       try{
-      const source=await fetchTrackedOriginalTenji(supabase,"kiina",{raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no});
+      const source=await fetchTrackedOriginalTenji(
+        supabase,
+        "kiina",
+        {raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no},
+        {},
+        async fetched=>{
+          if(!fetched.ok)return fetched;
+          const persistence=await persistOfficialExhibition(supabase,race,fetched);
+          if(Number(persistence.saved)!==6)throw new Error("incomplete_persistence");
+          return {...fetched,persistence};
+        }
+      );
       if(!source.ok){
         // PC-KYOTEI may already have populated the shared entry rows. Evaluate those
         // values even while an official page is unpublished or temporarily failing.
         const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
         results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null,pcFallbackEvaluated:true,inserted:Number(inserted||0)});continue;
       }
-      const persisted=await persistOfficialExhibition(supabase,race,source);
+      const persisted=source.persistence;
       const syncedAt=persisted.syncedAt;
       const weatherUpdate=buildWeatherUpdate(source.weather,syncedAt);
       if(weatherUpdate){const {error:weatherError}=await supabase.from("bs_race_events").update(weatherUpdate).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no);if(weatherError)throw weatherError;}

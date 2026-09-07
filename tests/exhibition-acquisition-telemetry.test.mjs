@@ -18,11 +18,14 @@ function client(error=null,throws=false) {
  }};
 }
 test('records and returns exact original result, never runs other RPCs',async()=>{const c=client(),result={ok:true,rows:[{boatNo:1}],sourceKind:'official'};assert.equal(await trackExhibitionFetch(c,'ichika',race,async()=>result),result);assert.equal(c.calls[0].name,'bs_record_exhibition_acquisition');assert.equal(c.calls[0].args.p_record.reason_code,'ready');});
+test('records ready only after the persistence finalizer succeeds',async()=>{const c=client(),result={ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1})),sourceKind:'official'};const final=await trackExhibitionFetch(c,'kiina',race,async()=>result,{},console,async fetched=>({...fetched,persistence:{saved:6}}));assert.equal(final.persistence.saved,6);assert.equal(c.calls[0].args.p_record.reason_code,'ready');});
+test('records persistence failure instead of premature ready',async()=>{const c=client(),result={ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1})),sourceKind:'official'};await assert.rejects(trackExhibitionFetch(c,'kiina',race,async()=>result,{},console,async()=>{throw new Error('saved_roster_mismatch');}),/saved_roster_mismatch/);assert.equal(c.calls[0].args.p_record.reason_code,'identity_mismatch');});
 test('logging failure cannot stop collection, error logs are fixed safe strings',async()=>{for(const c of [client({message:'SECRET'}),client(null,true)]) {const logs=[],result={ok:false,error:'timeout'};assert.equal(await trackExhibitionFetch(c,'hatsune',race,async()=>result,{}, {warn:m=>logs.push(m)}),result);assert.deepEqual(logs,['exhibition_acquisition_record_failed']);}});
 test('fetch exceptions are recorded then rethrown unchanged',async()=>{const c=client(),error=new Error('fetch failed');await assert.rejects(trackExhibitionFetch(c,'kiina',race,async()=>{throw error;}),e=>e===error);assert.equal(c.calls[0].args.p_record.reason_code,'network');});
 test('one collector records acquisition; theory crons consume the shared database',()=>{
  const collector=fs.readFileSync(new URL('../app/api/cron/exhibition-alerts/route.js',import.meta.url),'utf8');
- assert.ok(collector.includes('fetchTrackedOriginalTenji(supabase,"kiina",'));
+ assert.ok(collector.includes('fetchTrackedOriginalTenji('));
+ assert.ok(collector.includes('Number(persistence.saved)!==6'));
  assert.equal(collector.includes('await fetchBestOriginalTenji('),false);
  for(const path of ['ichika-hidden-escape','hatsune-womens-inner-break']){
   const code=fs.readFileSync(new URL(`../app/api/cron/${path}/route.js`,import.meta.url),'utf8');
