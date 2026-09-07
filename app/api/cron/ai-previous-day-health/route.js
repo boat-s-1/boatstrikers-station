@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { generateAiDailyRankings } from "../../../lib/aiDailyRankingGenerator";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -66,7 +67,6 @@ async function runPredictionRecovery(request, raceDate) {
 
 async function recordHealth(supabase, raceDate, status, message) {
   const now = new Date().toISOString();
-  // ai_jobs_job_type_v8_check で許可済みの種別を使い、healthであることはworker/messageで識別する。
   const { error } = await supabase.from("ai_jobs").insert({
     job_type: "run_product_daily",
     status,
@@ -90,27 +90,38 @@ export async function GET(request) {
   try {
     const before = await snapshot(supabase, raceDate);
     let recovery = { attempted: false };
+    let rankingRecovery = { attempted: false };
 
     if (before.entries > 0 && before.previousPredictions === 0) {
       recovery = await runPredictionRecovery(request, raceDate);
     }
 
-    const after = recovery.attempted ? await snapshot(supabase, raceDate) : before;
+    let afterPredictions = recovery.attempted ? await snapshot(supabase, raceDate) : before;
+
+    if (afterPredictions.entries > 0 && afterPredictions.previousRankings === 0) {
+      try {
+        const result = await generateAiDailyRankings(supabase, raceDate, "previous_day");
+        rankingRecovery = { attempted: true, ok: Boolean(result?.ok), ...result };
+      } catch (error) {
+        rankingRecovery = { attempted: true, ok: false, error: String(error?.message || error) };
+        console.error("[ai-previous-day-health] ranking recovery failed", rankingRecovery);
+      }
+    }
+
+    const after = rankingRecovery.attempted ? await snapshot(supabase, raceDate) : afterPredictions;
     const predictionsReady = after.entries === 0 || after.previousPredictions > 0;
-    const rankingsReady = after.previousRankings > 0;
+    const rankingsReady = after.entries === 0 || after.previousRankings > 0;
     const fallbackRankingsReady = after.exhibitionRankings > 0;
-    const healthy = predictionsReady;
-    const degraded = healthy && !rankingsReady;
+    const healthy = predictionsReady && rankingsReady;
+    const degraded = predictionsReady && !rankingsReady;
     const message = `events=${after.events}, entries=${after.entries}, previous_predictions=${after.previousPredictions}, previous_rankings=${after.previousRankings}, exhibition_rankings=${after.exhibitionRankings}`;
 
     await recordHealth(supabase, raceDate, healthy ? "completed" : "failed", `${degraded ? "WARNING rankings_missing; " : ""}${message}`);
 
     if (!healthy) {
-      console.error("[ai-previous-day-health] unhealthy", { raceDate, before, after, recovery });
-    } else if (degraded) {
-      console.warn("[ai-previous-day-health] predictions ready but previous-day rankings missing", { raceDate, after, fallbackRankingsReady });
+      console.error("[ai-previous-day-health] unhealthy", { raceDate, before, after, recovery, rankingRecovery });
     } else {
-      console.info("[ai-previous-day-health] healthy", { raceDate, after });
+      console.info("[ai-previous-day-health] healthy", { raceDate, after, recovery, rankingRecovery });
     }
 
     return NextResponse.json({
@@ -121,6 +132,7 @@ export async function GET(request) {
       raceDate,
       before,
       recovery,
+      rankingRecovery,
       after,
       checkedAt: new Date().toISOString(),
     }, { status: healthy ? 200 : 503 });
