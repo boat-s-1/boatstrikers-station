@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { formatJstDateTime, getCourseName, getRaceDetail, normalizeCourseCode, normalizeDate, normalizeRaceNo } from "../../../../lib/boatstrikersPlatform";
 import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../../lib/memberEntitlement";
 import { getOfficialTrifectaOdds } from "../../../../../lib/boatraceOdds";
+import { saveEliminationOddsSnapshot } from "../../../../../lib/eliminationOddsSnapshot";
 import EliminationLabClient from "./EliminationLabClient";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +21,11 @@ async function getPremiumAccess() {
 }
 
 function hasExhibition(entries) {
-  if (!Array.isArray(entries) || entries.length < 4) return false;
+  if (!Array.isArray(entries) || entries.length < 6) return false;
   return entries.filter((entry) => {
     const value = Number(entry?.exhibition_time ?? entry?.official_exhibition_time ?? entry?.tenji_time ?? entry?.display_time);
     return Number.isFinite(value) && value > 0;
-  }).length >= 4;
+  }).length >= 6;
 }
 
 export default async function EliminationLabPage({ params, searchParams }) {
@@ -59,6 +60,18 @@ export default async function EliminationLabPage({ params, searchParams }) {
 
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   const courseName = getCourseName(courseCode);
+
+  if (oddsData?.count >= 120) {
+    await saveEliminationOddsSnapshot({
+      raceDate,
+      courseCode,
+      raceNo,
+      odds: oddsData.odds,
+      oddsCount: oddsData.count,
+      source: oddsData.source || "boatrace_official",
+      resultAvailable: Boolean(data?.event?.result_available),
+    });
+  }
 
   return (
     <main style={{ maxWidth: 760, margin: "0 auto", padding: "18px 14px 40px", background: "#f5f7fa", minHeight: "100vh" }}>
