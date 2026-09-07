@@ -1,93 +1,88 @@
-const BASE_URL = "https://www.boat-strike.online";
+import { STADIUMS } from '../lib/stadiums';
+import { GUIDE_ARTICLES } from './guide/guideData';
 
-const STADIUMS = [
-  "桐生",
-  "戸田",
-  "江戸川",
-  "平和島",
-  "多摩川",
-  "浜名湖",
-  "蒲郡",
-  "常滑",
-  "津",
-  "三国",
-  "びわこ",
-  "住之江",
-  "尼崎",
-  "鳴門",
-  "丸亀",
-  "児島",
-  "宮島",
-  "徳山",
-  "下関",
-  "若松",
-  "芦屋",
-  "福岡",
-  "唐津",
-  "大村",
+const BASE_URL = 'https://www.boat-strike.online';
+const CONTENT_UPDATED_AT = new Date('2026-09-07T00:00:00+09:00');
+
+const DEEP_DIVE_GUIDES = [
+  'course-entry',
+  'racer-class',
+  'tilt',
+  'flying-late-start',
+  'first-turn-mark',
+  'course-characteristics',
+  'start-exhibition',
+  'lap-exhibition',
+  'local-win-rate',
+  'series-performance',
+  'exhibition-time',
+  'straight-line-time',
+  'motor-change',
+  'stabilizer',
+  'tide-level',
+];
+
+const STATIC_PAGES = [
+  ['', 'daily', 1],
+  ['/races', 'daily', 1],
+  ['/news', 'daily', 0.9],
+  ['/results', 'daily', 0.8],
+  ['/schedule', 'weekly', 0.7],
+  ['/guide', 'weekly', 0.9],
+  ['/library', 'weekly', 0.8],
+  ['/library/free', 'weekly', 0.6],
+  ['/library/ichika-seminar', 'weekly', 0.7],
+  ['/library/hatsune-seminar', 'weekly', 0.7],
+  ['/library/kiina-seminar', 'weekly', 0.7],
+  ['/library/stadiums', 'weekly', 0.9],
+  ['/ichika', 'daily', 0.8],
+  ['/hatsune', 'daily', 0.8],
+  ['/kiina', 'daily', 0.8],
+  ['/bsc2', 'weekly', 0.6],
+  ['/comic', 'weekly', 0.6],
+  ['/ichika-sensei', 'weekly', 0.7],
+  ['/radio', 'weekly', 0.6],
+  ['/about', 'monthly', 0.4],
+  ['/contact', 'monthly', 0.3],
+  ['/privacy', 'yearly', 0.2],
+  ['/terms', 'yearly', 0.2],
+  ['/disclaimer', 'yearly', 0.2],
+  ['/sitemap', 'monthly', 0.3],
 ];
 
 export default function sitemap() {
-  const lastModified = new Date();
+  const staticEntries = STATIC_PAGES.map(([path, changeFrequency, priority]) => ({
+    url: `${BASE_URL}${path}`,
+    lastModified: CONTENT_UPDATED_AT,
+    changeFrequency,
+    priority,
+  }));
 
-  const staticPages = [
-    { path: "", changeFrequency: "daily", priority: 1 },
-    { path: "/races", changeFrequency: "daily", priority: 0.9 },
-    { path: "/news", changeFrequency: "daily", priority: 0.9 },
-    { path: "/schedule", changeFrequency: "daily", priority: 0.8 },
-    { path: "/results", changeFrequency: "daily", priority: 0.8 },
-    { path: "/comic", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/ichika-sensei", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/guide", changeFrequency: "monthly", priority: 0.9 },
-    { path: "/guide/basic-rules", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/tickets", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/race-card", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/exhibition", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/inside-course", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/odds-payout", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/motor-rate", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/average-st", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/winning-techniques", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/guide/wind-water", changeFrequency: "yearly", priority: 0.75 },
-    { path: "/radio", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/library", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/library/free", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/library/ichika-seminar", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/library/hatsune-seminar", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/library/kiina-seminar", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/library/stadiums", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/ichika", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/hatsune", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/kiina", changeFrequency: "weekly", priority: 0.7 },
-    { path: "/bsc", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/disclaimer", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/contact", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/about", changeFrequency: "yearly", priority: 0.5 },
-    { path: "/sitemap", changeFrequency: "monthly", priority: 0.4 },
-  ];
+  const beginnerGuideEntries = GUIDE_ARTICLES.map((article) => ({
+    url: `${BASE_URL}/guide/${article.slug}`,
+    lastModified: CONTENT_UPDATED_AT,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
 
-  const staticEntries = staticPages.map((page) => ({
-    url: `${BASE_URL}${page.path}`,
-    lastModified,
-    changeFrequency: page.changeFrequency,
-    priority: page.priority,
+  const deepDiveGuideEntries = DEEP_DIVE_GUIDES.map((slug) => ({
+    url: `${BASE_URL}/guide/${slug}`,
+    lastModified: CONTENT_UPDATED_AT,
+    changeFrequency: 'monthly',
+    priority: 0.7,
   }));
 
   const stadiumEntries = STADIUMS.map((stadium) => ({
-    url: `${BASE_URL}/library/stadium/${encodeURIComponent(stadium)}`,
-    lastModified,
-    changeFrequency: "monthly",
-    priority: 0.6,
+    url: `${BASE_URL}/library/stadium/${stadium.slug}`,
+    lastModified: CONTENT_UPDATED_AT,
+    changeFrequency: 'weekly',
+    priority: 0.8,
   }));
 
-  const raceInfoEntries = Array.from({ length: 24 }, (_, index) => ({
-    url: `${BASE_URL}/races/${String(index + 1).padStart(2, "0")}/info`,
-    lastModified,
-    changeFrequency: "monthly",
-    priority: 0.65,
-  }));
-
-  return [...staticEntries, ...stadiumEntries, ...raceInfoEntries];
+  return [
+    ...staticEntries,
+    ...beginnerGuideEntries,
+    ...deepDiveGuideEntries,
+    ...stadiumEntries,
+  ];
 }
