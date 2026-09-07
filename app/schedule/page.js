@@ -2,9 +2,22 @@ import Link from "next/link";
 import BottomNav from "../BottomNav";
 import { getPublicScheduleSupabase } from "../../lib/scheduleSupabase";
 import ScheduleClient from "./ScheduleClient";
+import ScheduleSeoIntro from "./ScheduleSeoIntro";
 import styles from "./schedule.module.css";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "ボートレース番組表・今週の配信予定｜BoatStrikers",
+  description: "BoatStrikersの週間番組表。今週のボートレース関連動画、ラジオ、記事などの公開予定を曜日別に確認できます。今日の出走表や初心者ガイドにもつながります。",
+  alternates: { canonical: "/schedule" },
+  openGraph: {
+    title: "ボートレース番組表・今週の配信予定｜BoatStrikers",
+    description: "今週のボートレース関連コンテンツの公開予定をまとめて確認できます。",
+    url: "/schedule",
+    type: "website",
+  },
+};
 
 function getJstToday() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -55,6 +68,7 @@ export default async function SchedulePage({ searchParams }) {
     : getJstToday();
   const weekStart = mondayOf(requested);
   const weekEnd = addDays(weekStart, 7);
+  const weekLast = addDays(weekStart, 6);
   const previousWeek = addDays(weekStart, -7);
   const nextWeek = addDays(weekStart, 7);
   const { items, error } = await getItems(weekStart, weekEnd);
@@ -75,7 +89,7 @@ export default async function SchedulePage({ searchParams }) {
 
       <nav className={styles.weekNav} aria-label="週の移動">
         <Link href={`/schedule?week=${previousWeek}`}>← 前の週</Link>
-        <strong>{weekStart}〜{addDays(weekStart, 6)}</strong>
+        <strong>{weekStart}〜{weekLast}</strong>
         <Link href={`/schedule?week=${nextWeek}`}>次の週 →</Link>
       </nav>
 
@@ -89,6 +103,12 @@ export default async function SchedulePage({ searchParams }) {
         items={items}
         weekStart={weekStart}
         today={getJstToday()}
+      />
+
+      <ScheduleSeoIntro
+        weekStart={weekStart}
+        weekEnd={weekLast}
+        itemCount={items.length}
       />
 
       <BottomNav />
