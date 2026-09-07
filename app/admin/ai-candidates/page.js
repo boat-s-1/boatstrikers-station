@@ -82,11 +82,13 @@ function buildSocialPicks(rows, rankingTypes) {
     })
     .map((row) => ({
       rankNo: Number(row.rank_no),
+      rankingType: row.ranking_type,
       courseCode: Number(row.course_code),
       courseName: STADIUMS[Number(row.course_code)] || `${row.course_code}場`,
       raceNo: Number(row.race_no),
       probability: row.probability == null ? null : Number(row.probability),
       closingTime: row.closing_time,
+      summary: row.summary || "",
     }));
 }
 
