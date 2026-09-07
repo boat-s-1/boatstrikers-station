@@ -4,6 +4,8 @@ import StadiumSeoGuide from './StadiumSeoGuide';
 import { resolveStadium } from '../../../../lib/stadiums';
 import './unifiedStadiumGuide.css';
 
+const BASE_URL = 'https://www.boat-strike.online';
+
 export async function generateMetadata({ params }) {
   const route = await params;
   const stadium = resolveStadium(route?.place);
@@ -35,9 +37,41 @@ export async function generateMetadata({ params }) {
 // Shared shell for all 24 BoatStrikers stadium strategy pages.
 export default async function StadiumGuideLayout({ children, params }) {
   const route = await params;
+  const stadium = resolveStadium(route?.place);
+
+  const breadcrumbJsonLd = stadium ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'BoatStrikers',
+        item: BASE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: '全国24場攻略',
+        item: `${BASE_URL}/library/stadiums`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${stadium.name}競艇場`,
+        item: `${BASE_URL}/library/stadium/${stadium.slug}`,
+      },
+    ],
+  } : null;
 
   return (
     <div className="stadiumUnified24">
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
+      )}
       <StadiumGuideQuickNav />
       {children}
       <StadiumSeoGuide place={route?.place} />
