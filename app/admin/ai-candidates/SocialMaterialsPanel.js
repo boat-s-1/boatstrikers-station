@@ -59,7 +59,53 @@ function probabilityText(value) {
   return Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : null;
 }
 
-function normalizeComment(text, fallback, rankingType) {
+function extractPercent(text) {
+  const value = String(text || "");
+  const match = value.match(/(\d{1,3}(?:\.\d+)?)\s*%/);
+  if (match) return `${match[1]}%`;
+
+  const loose = value.match(/(?:shadow|score|probability|prob|期待度|不安度)\s*[:=]?\s*(0(?:\.\d+)?|1(?:\.0+)?)\b/i);
+  if (!loose) return null;
+
+  const n = Number(loose[1]);
+  if (!Number.isFinite(n)) return null;
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+function looksInternalComment(text) {
+  const value = String(text || "").trim();
+  if (!value) return false;
+
+  if (/\b(?:ai\s*v?\s*2|shadow|model(?:_version)?|raw(?:_ranking)?|score|probability|tiebreak)\b/i.test(value)) {
+    return true;
+  }
+
+  if (/^[\s\d.％%:+\-_/()]+$/.test(value)) return true;
+  if (/^\d{1,3}(?:\.\d+)?\s*[%％]$/.test(value)) return true;
+
+  return false;
+}
+
+function friendlyInternalComment(character, rankingType, percent, fallback) {
+  if (character === "ichika") {
+    return percent ? `イン逃げ期待度 ${percent}` : "イン逃げ期待の注目戦！";
+  }
+
+  if (character === "hatsune") {
+    if (rankingType === "hatsune_risky_best3") {
+      return percent ? `イン不安度 ${percent}` : "イン崩れに注意！";
+    }
+    return percent ? `女子戦期待度 ${percent}` : "女子戦で注目！";
+  }
+
+  if (character === "kiina") {
+    return percent ? `穴期待度 ${percent}` : "高配当狙いで注目！";
+  }
+
+  return fallback;
+}
+
+function normalizeComment(text, fallback, rankingType, character) {
   const typeFallback = rankingType === "hatsune_risky_best3"
     ? "イン崩れに注意したい一戦！"
     : rankingType === "hatsune_dominant_best3"
@@ -67,11 +113,15 @@ function normalizeComment(text, fallback, rankingType) {
       : fallback;
 
   const cleaned = String(text || "")
+    .replace(/[\r\n]+/g, " ")
     .replace(/\s+/g, " ")
-    .replace(/[\r\n]/g, " ")
     .trim();
 
   if (!cleaned) return typeFallback;
+
+  if (looksInternalComment(cleaned)) {
+    return friendlyInternalComment(character, rankingType, extractPercent(cleaned), typeFallback);
+  }
 
   const firstSentence = cleaned.split(/[。！？!？]/)[0].trim();
   const base = firstSentence || cleaned;
@@ -79,11 +129,12 @@ function normalizeComment(text, fallback, rankingType) {
   return chars.length > 24 ? `${chars.slice(0, 24).join("")}…` : base;
 }
 
-function pickComment(pick, meta) {
+function pickComment(pick, meta, character) {
   return normalizeComment(
     String(pick.socialComment || "").trim() || pick.summary,
     meta.fallbackComment,
-    pick.rankingType
+    pick.rankingType,
+    character
   );
 }
 
@@ -98,16 +149,16 @@ function buildImagePrompt(picks) {
   return `添付テンプレート画像の「1位・2位・3位」の白枠内だけを編集してください。その他のデザイン、キャラクター、背景、タイトル、ボート、色、レイアウトは一切変更しないでください。\n\n${raceLines}\n\n【文字配置】\n・各順位の既存の「1位」「2位」「3位」はそのまま残す\n・順位番号の下に「場名＋R」を大きく太字で中央揃え\n・その下に「HH:MM〆切」を少し小さく中央揃え\n・文字は白枠内に収め、はみ出さない\n・日本語文字を崩さず、読みやすさを最優先する\n・上記以外の要素は変更しない`;
 }
 
-function buildVerticalImagePrompt(picks, meta) {
+function buildVerticalImagePrompt(picks, meta, character) {
   const raceLines = picks
     .map((pick, index) => {
       const closing = formatClosingTime(pick.closingTime);
-      const comment = pickComment(pick, meta);
+      const comment = pickComment(pick, meta, character);
       return `${index + 1}位の枠：\n${pick.courseName}${pick.raceNo}R\n${closing}〆切\n一言コメント：${comment}`;
     })
     .join("\n\n");
 
-  return `添付した縦長の「${meta.verticalTitle}」テンプレート画像をそのまま使用し、「1位・2位・3位」の白い順位枠の中だけを編集してください。\n\n【最重要】\n・画像全体の縦横比、キャラクター、ボート、背景、水しぶき、タイトル「${meta.verticalTitle}」、中央の見出し「${meta.verticalTheme}」、吹き出し、色、装飾、順位デザインは一切変更しない\n・白い3つの順位枠以外には文字や要素を追加しない\n・既存の「1位」「2位」「3位」は消さず、そのまま残す\n\n${raceLines}\n\n【各順位枠の文字配置】\n・順位表示の右側の空きスペースを使う\n・1段目：「場名＋R」を最も大きく、太字で見やすく配置\n・2段目：「HH:MM〆切」を1段目より少し小さく配置\n・3段目：「一言コメント」をさらに少し小さく配置し、1〜2行以内に収める\n・コメントは短く読みやすくし、枠から絶対にはみ出さない\n・3つの枠で文字サイズ、行間、位置を統一する\n・日本語文字を崩さず、読みやすさを最優先する\n・元画像の雰囲気を維持し、画像全体を描き直さない`;
+  return `添付した縦長の「${meta.verticalTitle}」テンプレート画像をそのまま使用し、「1位・2位・3位」の白い順位枠の中だけを編集してください。\n\n【最重要】\n・画像全体の縦横比、キャラクター、ボート、背景、水しぶき、タイトル「${meta.verticalTitle}」、中央の見出し「${meta.verticalTheme}」、吹き出し、色、装飾、順位デザインは一切変更しない\n・白い3つの順位枠以外には文字や要素を追加しない\n・既存の「1位」「2位」「3位」は消さず、そのまま残す\n・「AI v2」「shadow」「model」「raw」「score」などの内部用モデル名・内部指標名は画像内に表示しない\n・内部用の文字列しかない場合は、一般ユーザー向けの自然な日本語コメントに変換した文言だけを表示する\n\n${raceLines}\n\n【各順位枠の文字配置】\n・順位表示の右側の空きスペースを使う\n・1段目：「場名＋R」を最も大きく、太字で見やすく配置\n・2段目：「HH:MM〆切」を1段目より少し小さく配置\n・3段目：「一言コメント」をさらに少し小さく配置し、1〜2行以内に収める\n・コメントは短く読みやすくし、枠から絶対にはみ出さない\n・3つの枠で文字サイズ、行間、位置を統一する\n・日本語文字を崩さず、読みやすさを最優先する\n・元画像の雰囲気を維持し、画像全体を描き直さない`;
 }
 
 function countChars(text) {
@@ -160,7 +211,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
   const [postCopied, setPostCopied] = useState(false);
 
   const imagePrompt = useMemo(() => buildImagePrompt(selected), [selected]);
-  const verticalImagePrompt = useMemo(() => buildVerticalImagePrompt(selected, meta), [selected, meta]);
+  const verticalImagePrompt = useMemo(() => buildVerticalImagePrompt(selected, meta, character), [selected, meta, character]);
   const xPost = useMemo(() => buildXPost(selected, meta), [selected, meta]);
   const xLength = countChars(xPost);
 
@@ -188,7 +239,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
                 <b>{index + 1}位</b>
                 <strong>{pick.courseName}{pick.raceNo}R</strong>
                 <span>{formatClosingTime(pick.closingTime)}〆切</span>
-                <small>{pickComment(pick, meta)}</small>
+                <small>{pickComment(pick, meta, character)}</small>
                 {probabilityText(pick.probability) ? <small>AI {probabilityText(pick.probability)}</small> : null}
               </div>
             ))}
