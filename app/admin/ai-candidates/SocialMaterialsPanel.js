@@ -79,6 +79,14 @@ function normalizeComment(text, fallback, rankingType) {
   return chars.length > 24 ? `${chars.slice(0, 24).join("")}…` : base;
 }
 
+function pickComment(pick, meta) {
+  return normalizeComment(
+    String(pick.socialComment || "").trim() || pick.summary,
+    meta.fallbackComment,
+    pick.rankingType
+  );
+}
+
 function buildImagePrompt(picks) {
   const raceLines = picks
     .map((pick, index) => {
@@ -94,7 +102,7 @@ function buildVerticalImagePrompt(picks, meta) {
   const raceLines = picks
     .map((pick, index) => {
       const closing = formatClosingTime(pick.closingTime);
-      const comment = normalizeComment(pick.summary, meta.fallbackComment, pick.rankingType);
+      const comment = pickComment(pick, meta);
       return `${index + 1}位の枠：\n${pick.courseName}${pick.raceNo}R\n${closing}〆切\n一言コメント：${comment}`;
     })
     .join("\n\n");
@@ -180,7 +188,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
                 <b>{index + 1}位</b>
                 <strong>{pick.courseName}{pick.raceNo}R</strong>
                 <span>{formatClosingTime(pick.closingTime)}〆切</span>
-                <small>{normalizeComment(pick.summary, meta.fallbackComment, pick.rankingType)}</small>
+                <small>{pickComment(pick, meta)}</small>
                 {probabilityText(pick.probability) ? <small>AI {probabilityText(pick.probability)}</small> : null}
               </div>
             ))}
