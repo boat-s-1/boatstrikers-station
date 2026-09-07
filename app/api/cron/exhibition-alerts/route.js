@@ -147,7 +147,6 @@ export async function GET(request){
       const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
       results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,saved:persisted.saved,rosterVerified:persisted.rosterVerified,liveAi,inserted:Number(inserted||0)});
     }
-    const line=await sendPendingLineAlerts(supabase,raceDate);
-    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,line,ranAt:new Date().toISOString()});
+    return NextResponse.json({ok:true,raceDate,checked:targets.length,results,notification:"separate_cron",ranAt:new Date().toISOString()});
   }catch(error){return NextResponse.json({ok:false,error:error?.message||"cron failed"},{status:500});}
 }
