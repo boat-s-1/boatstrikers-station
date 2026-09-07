@@ -2,6 +2,10 @@ import { STADIUMS } from '../../../lib/stadiums';
 
 const BASE_URL = 'https://www.boat-strike.online';
 
+export const metadata = {
+  alternates: { canonical: '/library/stadiums' },
+};
+
 export default function StadiumsDirectoryLayout({ children }) {
   const itemListJsonLd = {
     '@context': 'https://schema.org',
