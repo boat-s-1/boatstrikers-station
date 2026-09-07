@@ -8,6 +8,7 @@ import { validSuminoeOmuraRace } from '../../../../lib/suminoeOmuraVerifiedOrigi
 import { validHamanakoAshiyaRace } from '../../../../lib/hamanakoAshiyaVerifiedOriginalTenji.js';
 import { validFukuokaRace } from '../../../../lib/fukuokaVerifiedOriginalTenji.js';
 import { validTodaRace } from '../../../../lib/todaVerifiedOriginalTenji.js';
+import { validKiryuRace } from '../../../../lib/kiryuVerifiedOriginalTenji.js';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export async function GET(request) {
   const race = { courseCode: Number(q.get('course')), raceDate: q.get('date'), raceNo: Number(q.get('race')) };
   const reply = (body, status=200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
   // Fixed verified venues only; no arbitrary URL, credentials, DB, or notifications.
-  if (!validMarugameRace(race) && !validVerifiedRace(race) && !validTamagawaRace(race) && !validTokuyamaRace(race) && !validShimonosekiWakamatsuRace(race) && !validSuminoeOmuraRace(race) && !validHamanakoAshiyaRace(race) && !validFukuokaRace(race) && !validTodaRace(race) && !validCurrentDayVenue(race)) return reply({ ok:false, error:'invalid_or_unverified_venue' },400);
+  if (!validKiryuRace(race) && !validMarugameRace(race) && !validVerifiedRace(race) && !validTamagawaRace(race) && !validTokuyamaRace(race) && !validShimonosekiWakamatsuRace(race) && !validSuminoeOmuraRace(race) && !validHamanakoAshiyaRace(race) && !validFukuokaRace(race) && !validTodaRace(race) && !validCurrentDayVenue(race)) return reply({ ok:false, error:'invalid_or_unverified_venue' },400);
   if (Date.now()-lastRequest < 1000) return reply({ok:false,error:'retry_later'},429);
   lastRequest=Date.now();
   return reply({ readOnly:true, requested:race, ...(await fetchBestOriginalTenji(race)) });

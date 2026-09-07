@@ -7,6 +7,7 @@ const source = { ok:true, source:'hamanako_official_verified', rows:Array.from({
 const roster = source.rows.map(row=>({boat_no:row.boatNo,racer_registration_no:row.racerNo}));
 
 test('six official rows match the saved boat and racer roster',()=>assert.deepEqual(validateOfficialRowsAgainstRoster(source,roster),{ok:true}));
+test('leading zero padding in a saved registration number is the same racer',()=>assert.deepEqual(validateOfficialRowsAgainstRoster(source,roster.map(row=>({...row,racer_registration_no:`0${row.racer_registration_no}`}))),{ok:true}));
 test('five boats, duplicate boats, incomplete saved roster, and racer mismatch fail closed',()=>{
   assert.equal(validateOfficialRowsAgainstRoster({...source,rows:source.rows.slice(0,5)},roster).error,'six_unique_boats_required');
   assert.equal(validateOfficialRowsAgainstRoster({...source,rows:[...source.rows.slice(0,5),source.rows[0]]},roster).error,'six_unique_boats_required');
