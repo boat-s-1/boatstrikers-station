@@ -28,10 +28,6 @@
     {
       "path": "/api/cron/news-editorials",
       "schedule": "20 3,6,9,14 * * *"
-    },
-    {
-      "path": "/api/cron/ai-previous-day-health",
-      "schedule": "30 15,16 * * *"
     }
   ]
 }
