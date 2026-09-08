@@ -164,6 +164,13 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           </section>
         )}
 
+        {item.image_url && (
+          <figure className={styles.articlePhoto}>
+            <img src={item.image_url} alt={`${item.title} 関連画像`} loading="eager" decoding="async" referrerPolicy="no-referrer" />
+            {item.source_name && <figcaption>画像：{item.source_name}</figcaption>}
+          </figure>
+        )}
+
         {articleBody && (
           <section className={styles.articleBody}>
             <span>BOATSTRIKERS EDIT</span>
@@ -184,12 +191,6 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           <strong>次にチェックしたい情報</strong>
           <p>{item.place ? `${item.place}の開催・出走表、続報、展示・直前情報もBoatStrikers内で続けて確認できます。` : "このニュースの続報や次走情報、展示・直前情報もBoatStrikers NEWSで続けて確認できます。"}</p>
         </section>
-
-        {item.image_url && (
-          <figure className={styles.articlePhoto}>
-            <img src={item.image_url} alt={`${item.title} 関連画像`} loading="lazy" decoding="async" />
-          </figure>
-        )}
 
         {item.source_url && (
           <section className={styles.sourceBox}>
