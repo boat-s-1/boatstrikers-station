@@ -24,6 +24,9 @@
 .summaryLead p { margin: 0; color: #44364c; font-size: 16px; line-height: 1.9; font-weight: 700; }
 .summaryPending { margin-top: 22px; padding: 16px 18px; border-radius: 14px; background: #faf8fb; border: 1px solid #eee7f2; }
 .summaryPending p { margin: 5px 0 0; color: #7d7182; font-size: 14px; line-height: 1.7; }
+.articlePhoto { margin: 18px 0 0; border: 1px solid #eee5f4; border-radius: 14px; overflow: hidden; background: #f6f1f8; }
+.articlePhoto img { display: block; width: 100%; max-height: 560px; object-fit: cover; }
+.articlePhoto figcaption { padding: 7px 10px 8px; color: #918794; background: #fcfafc; font-size: 10px; line-height: 1.4; text-align: right; }
 .articleBody { margin-top: 20px; padding: 22px 2px 4px; border-top: 1px solid #eee7f2; }
 .articleBody h2 { margin: 5px 0 14px; color: #45275e; font-size: 21px; }
 .bodyContent { color: #44364c; }
@@ -37,8 +40,6 @@
 .checkBox > span { color: #d9bdec; }
 .checkBox > strong { display: block; margin-top: 4px; font-size: 17px; }
 .checkBox p { margin: 7px 0 0; color: #f0e8f4; font-size: 13px; line-height: 1.7; }
-.articlePhoto { margin: 18px 0 0; border: 1px solid #eee5f4; border-radius: 14px; overflow: hidden; background: #f6f1f8; }
-.articlePhoto img { display: block; width: 100%; max-height: 620px; object-fit: cover; }
 .sourceBox { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-top: 1px solid #eee7f2; border-bottom: 1px solid #eee7f2; }
 .sourceBox h2 { margin: 4px 0 2px; color: #45275e; font-size: 16px; }
 .sourceBox p { margin: 0; color: #817586; font-size: 12px; line-height: 1.55; }
@@ -50,6 +51,7 @@
   .article h1 { font-size: 27px; }
   .summaryLead { padding: 18px 17px; }
   .summaryLead p { font-size: 16px; line-height: 1.85; }
+  .articlePhoto img { max-height: 420px; }
   .bodyContent p { font-size: 16px; line-height: 1.85; }
   .sourceBox { align-items: flex-start; flex-direction: column; padding-inline: 2px; }
   .sourceBox a { width: 100%; box-sizing: border-box; }
