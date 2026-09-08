@@ -18,30 +18,28 @@
 .meta { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; color: #918794; font-size: 12px; }
 .meta span { display: inline-flex; align-items: center; }
 .meta span + span:before { content: "・"; margin-right: 7px; color: #c4b9c9; }
-.heroImage { margin: 18px 0 0; overflow: hidden; border-radius: 14px; background: #f4eff7; }
-.heroImage img { display: block; width: 100%; max-height: 500px; object-fit: cover; }
-.quickSummary { margin-top: 18px; border-radius: 16px; padding: 18px 19px; background: #f6effb; border: 1px solid #eadcf3; }
-.quickSummary > span,.articleBody > span,.checkBox > span,.sourceBox span { font-size: 10px; font-weight: 900; letter-spacing: .15em; color: #8a55b7; }
-.quickSummary h2 { margin: 5px 0 11px; color: #45275e; font-size: 19px; }
-.quickSummary ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.quickSummary li { position: relative; padding-left: 23px; color: #43354a; font-size: 14px; line-height: 1.65; font-weight: 800; }
-.quickSummary li:before { content: "✓"; position: absolute; left: 0; color: #8a55b7; font-weight: 900; }
-.articleBody { margin-top: 18px; padding: 20px 2px 4px; border-top: 1px solid #eee7f2; }
+.summaryLead { margin-top: 22px; padding: 20px 20px 21px; border-radius: 16px; background: linear-gradient(180deg,#fbf8fd,#f6effb); border: 1px solid #eadcf3; }
+.summaryLead > span,.articleBody > span,.checkBox > span,.sourceBox span,.summaryPending > span { font-size: 10px; font-weight: 900; letter-spacing: .15em; color: #8a55b7; }
+.summaryLead h2 { margin: 5px 0 10px; color: #45275e; font-size: 20px; }
+.summaryLead p { margin: 0; color: #44364c; font-size: 16px; line-height: 1.9; font-weight: 700; }
+.summaryPending { margin-top: 22px; padding: 16px 18px; border-radius: 14px; background: #faf8fb; border: 1px solid #eee7f2; }
+.summaryPending p { margin: 5px 0 0; color: #7d7182; font-size: 14px; line-height: 1.7; }
+.articleBody { margin-top: 20px; padding: 22px 2px 4px; border-top: 1px solid #eee7f2; }
 .articleBody h2 { margin: 5px 0 14px; color: #45275e; font-size: 21px; }
 .bodyContent { color: #44364c; }
-.bodyContent p { margin: 0 0 16px; font-size: 16px; line-height: 1.85; }
+.bodyContent p { margin: 0 0 18px; font-size: 16px; line-height: 1.9; }
 .bodyContent h3 { margin: 25px 0 10px; padding-left: 10px; border-left: 3px solid #8a55b7; color: #3c2150; font-size: 18px; line-height: 1.5; }
 .bodyContent h3:first-child { margin-top: 10px; }
 .bodyContent h3.checkHeading { padding: 10px 12px; border-left: 0; border-radius: 10px; background: #f3e8fb; color: #6f319d; font-size: 16px; }
 .bodyContent ul { margin: 0 0 16px; padding-left: 20px; }
 .bodyContent li { margin: 6px 0; line-height: 1.8; font-size: 15px; }
-.checkBox { margin-top: 18px; padding: 16px 18px; border-radius: 14px; background: #32194e; color: #fff; }
+.checkBox { margin-top: 20px; padding: 16px 18px; border-radius: 14px; background: #32194e; color: #fff; }
 .checkBox > span { color: #d9bdec; }
 .checkBox > strong { display: block; margin-top: 4px; font-size: 17px; }
 .checkBox p { margin: 7px 0 0; color: #f0e8f4; font-size: 13px; line-height: 1.7; }
 .articlePhoto { margin: 18px 0 0; border: 1px solid #eee5f4; border-radius: 14px; overflow: hidden; background: #f6f1f8; }
 .articlePhoto img { display: block; width: 100%; max-height: 620px; object-fit: cover; }
-.sourceBox { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-top: 1px solid #eee7f2; border-bottom: 1px solid #eee7f2; }
+.sourceBox { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-top: 1px solid #eee7f2; border-bottom: 1px solid #eee7f2; }
 .sourceBox h2 { margin: 4px 0 2px; color: #45275e; font-size: 16px; }
 .sourceBox p { margin: 0; color: #817586; font-size: 12px; line-height: 1.55; }
 .sourceBox a { flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 9px 13px; border-radius: 999px; background: #6f3c99; color: #fff; text-decoration: none; font-size: 12px; font-weight: 900; }
@@ -50,8 +48,9 @@
 @media (max-width: 640px) {
   .page { padding-inline: 12px; }
   .article h1 { font-size: 27px; }
-  .bodyContent p { font-size: 16px; line-height: 1.8; }
+  .summaryLead { padding: 18px 17px; }
+  .summaryLead p { font-size: 16px; line-height: 1.85; }
+  .bodyContent p { font-size: 16px; line-height: 1.85; }
   .sourceBox { align-items: flex-start; flex-direction: column; padding-inline: 2px; }
   .sourceBox a { width: 100%; box-sizing: border-box; }
-  .quickSummary { padding: 16px; }
 }
