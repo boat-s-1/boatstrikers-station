@@ -5,7 +5,6 @@ import relatedStyles from "./related.module.css";
 import {
   getHatsuneNewsById,
   getHatsuneNews,
-  getHatsuneNewsImage,
   HATSUNE_NEWS_LABELS,
   formatHatsuneNewsDate,
 } from "../../hatsune/newsData";
@@ -52,14 +51,14 @@ function shortMediaTitle(title) {
   return clean.length > 34 ? `${clean.slice(0, 33)}…` : clean;
 }
 
-function summaryPoints(summary) {
-  const text = String(summary || "").replace(/\s+/g, " ").trim();
-  if (!text) return [];
-  const parts = text.split(/(?<=[。！？!?])/).map((v) => v.trim()).filter(Boolean);
-  return (parts.length > 1 ? parts : text.split(/[・\n]/))
-    .map((v) => v.replace(/[。！？!?]+$/, "").trim())
-    .filter(Boolean)
-    .slice(0, 3);
+function isGenericCopy(value) {
+  return /公開されたボートレース関連ニュースです|元記事を転載せず|記事をBoatStrikers NEWSが確認しました|詳細は出典元の記事をご確認ください/.test(String(value || ""));
+}
+
+function cleanSummary(item) {
+  const value = String(item?.summary || "").replace(/\s+/g, " ").trim();
+  if (!value || isGenericCopy(value)) return "";
+  return value;
 }
 
 function renderArticleBody(body) {
@@ -114,8 +113,8 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
   if (!item) notFound();
 
   const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
-  const heroImage = getHatsuneNewsImage(item);
-  const points = summaryPoints(item.summary);
+  const summary = cleanSummary(item);
+  const articleBody = !isGenericCopy(item.article_body) ? String(item.article_body || "").trim() : "";
   const checkLabel = getCheckLabel(item);
 
   const [allNews, media] = await Promise.all([
@@ -157,25 +156,26 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           {item.source_name && <span>{item.source_name}</span>}
         </div>
 
-        <div className={styles.heroImage}>
-          <img src={heroImage} alt={`${item.title} 見出し画像`} decoding="async" />
-        </div>
-
-        {points.length > 0 && (
-          <section className={styles.quickSummary}>
-            <span>30 SEC SUMMARY</span>
-            <h2>30秒でわかる</h2>
-            <ul>{points.map((point, index) => <li key={index}>{point}</li>)}</ul>
+        {summary && (
+          <section className={styles.summaryLead}>
+            <span>NEWS SUMMARY</span>
+            <h2>この記事の要約</h2>
+            <p>{summary}</p>
           </section>
         )}
 
-        {(item.article_body || item.summary) && (
+        {articleBody && (
           <section className={styles.articleBody}>
             <span>BOATSTRIKERS EDIT</span>
-            <h2>ニュースを整理</h2>
-            <div className={styles.bodyContent}>
-              {item.article_body ? renderArticleBody(item.article_body) : <p>{item.summary}</p>}
-            </div>
+            <h2>ニュースを詳しく</h2>
+            <div className={styles.bodyContent}>{renderArticleBody(articleBody)}</div>
+          </section>
+        )}
+
+        {!summary && !articleBody && (
+          <section className={styles.summaryPending}>
+            <span>NEWS SUMMARY</span>
+            <p>このニュースは現在、公開情報をもとに要約を整理しています。</p>
           </section>
         )}
 
