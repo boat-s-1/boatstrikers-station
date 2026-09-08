@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getHatsuneNews, formatHatsuneNewsDate } from "../hatsune/newsData";
-import styles from "./page.module.css";
+import styles from "./readability.module.css";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
