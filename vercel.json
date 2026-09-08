@@ -10,6 +10,10 @@
       "schedule": "10 3,6,9,13 * * *"
     },
     {
+      "path": "/api/cron/news-morning-collect",
+      "schedule": "55 20 * * *"
+    },
+    {
       "path": "/api/cron/news-verify",
       "schedule": "10 3,6,9,14,21 * * *"
     },
