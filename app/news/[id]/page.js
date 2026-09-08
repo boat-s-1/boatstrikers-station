@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import styles from "../../hatsune/news/[id]/page.module.css";
+import styles from "./detail.module.css";
 import relatedStyles from "./related.module.css";
 import {
   getHatsuneNewsById,
@@ -56,7 +56,10 @@ function summaryPoints(summary) {
   const text = String(summary || "").replace(/\s+/g, " ").trim();
   if (!text) return [];
   const parts = text.split(/(?<=[。！？!?])/).map((v) => v.trim()).filter(Boolean);
-  return (parts.length > 1 ? parts : text.split(/[・\n]/)).map((v) => v.replace(/[。！？!?]+$/, "").trim()).filter(Boolean).slice(0, 3);
+  return (parts.length > 1 ? parts : text.split(/[・\n]/))
+    .map((v) => v.replace(/[。！？!?]+$/, "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function renderArticleBody(body) {
@@ -136,7 +139,7 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
   return (
     <main className={styles.page}>
       <div className={styles.topLinks}>
-        <Link href="/news">← BoatStrikers NEWS</Link>
+        <Link href="/news">← NEWS一覧</Link>
         <Link href="/">BoatStrikers TOP</Link>
       </div>
 
@@ -151,6 +154,7 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
         <div className={styles.meta}>
           {item.place && <span>{item.place}</span>}
           <span>{formatHatsuneNewsDate(item.published_at)}</span>
+          {item.source_name && <span>{item.source_name}</span>}
         </div>
 
         <div className={styles.heroImage}>
@@ -159,40 +163,26 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
 
         {points.length > 0 && (
           <section className={styles.quickSummary}>
-            <span>3 POINTS</span>
-            <h2>この記事を3行で</h2>
+            <span>30 SEC SUMMARY</span>
+            <h2>30秒でわかる</h2>
             <ul>{points.map((point, index) => <li key={index}>{point}</li>)}</ul>
           </section>
         )}
 
-        <section className={styles.dataCard}>
-          <div className={styles.dataCardTitle}><span>NEWS DATA</span><strong>記事データ</strong></div>
-          <dl>
-            {item.place && <div><dt>開催場</dt><dd>{item.place}</dd></div>}
-            <div><dt>カテゴリ</dt><dd>{label.replace(/^\S+\s*/, "")}</dd></div>
-            <div><dt>公開</dt><dd>{formatHatsuneNewsDate(item.published_at)}</dd></div>
-            {item.source_name && <div><dt>情報元</dt><dd>{item.source_name}</dd></div>}
-          </dl>
-        </section>
-
-        <section className={styles.summary}>
-          <span>BOATSTRIKERS NEWS</span>
-          <h2>ニュース概要</h2>
-          <p>{item.summary || "このニュースの詳細情報を確認しています。"}</p>
-        </section>
-
-        {item.article_body && (
+        {(item.article_body || item.summary) && (
           <section className={styles.articleBody}>
             <span>BOATSTRIKERS EDIT</span>
-            <h2>詳しく見る</h2>
-            <div className={styles.bodyContent}>{renderArticleBody(item.article_body)}</div>
+            <h2>ニュースを整理</h2>
+            <div className={styles.bodyContent}>
+              {item.article_body ? renderArticleBody(item.article_body) : <p>{item.summary}</p>}
+            </div>
           </section>
         )}
 
         <section className={styles.checkBox}>
           <span>{checkLabel}</span>
-          <strong>ここをチェック</strong>
-          <p>このニュースの続報や次走情報、展示・直前情報が出た場合は、BoatStrikers NEWSであわせて確認できます。</p>
+          <strong>次にチェックしたい情報</strong>
+          <p>{item.place ? `${item.place}の開催・出走表、続報、展示・直前情報もBoatStrikers内で続けて確認できます。` : "このニュースの続報や次走情報、展示・直前情報もBoatStrikers NEWSで続けて確認できます。"}</p>
         </section>
 
         {item.image_url && (
@@ -204,13 +194,15 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
         {item.source_url && (
           <section className={styles.sourceBox}>
             <div>
-              <span>LINK / SOURCE</span>
-              <h2>{item.source_name || "関連情報を見る"}</h2>
-              <p>関連ページや公式情報をあわせて確認できます。</p>
+              <span>SOURCE</span>
+              <h2>{item.source_name || "出典・関連情報"}</h2>
+              <p>詳しい内容は出典元で確認できます。</p>
             </div>
-            <a href={item.source_url} target="_blank" rel="noopener noreferrer">{item.source_name || "関連情報"}を見る ↗</a>
+            <a href={item.source_url} target="_blank" rel="noopener noreferrer">元記事を見る ↗</a>
           </section>
         )}
+
+        <p className={styles.notice}>BoatStrikers NEWSは公開情報をもとに要点を整理しています。出典元の記事本文は転載していません。</p>
       </article>
 
       {relatedNews.length > 0 && (
@@ -257,7 +249,7 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
 
       <div className={styles.bottomLinks}>
         <Link href="/news">ニュース一覧へ戻る</Link>
-        <Link href="/hatsune">初音ページへ</Link>
+        <Link href="/races">今日の出走表へ</Link>
       </div>
     </main>
   );
