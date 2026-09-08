@@ -32,6 +32,10 @@
     {
       "path": "/api/cron/news-editorials",
       "schedule": "20 3,6,9,14 * * *"
+    },
+    {
+      "path": "/api/cron/daily-result-digest",
+      "schedule": "10 14 * * *"
     }
   ]
 }
