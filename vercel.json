@@ -10,6 +10,10 @@
       "schedule": "*/15 * * * *"
     },
     {
+      "path": "/api/cron/discord-community-poll",
+      "schedule": "0 0 * * *"
+    },
+    {
       "path": "/api/cron/elimination-odds-snapshots",
       "schedule": "*/10 * * * *"
     },
