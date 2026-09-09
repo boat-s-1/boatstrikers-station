@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { generateDataLabSocialOutputs } from "../../../lib/dataLabSocialGenerator";
 import ClientActions from "./ClientActions";
+import PromptBuilder from "./PromptBuilder";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -78,7 +79,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
           <div>
             <span>BOATSTRIKERS CONTENT STUDIO</span>
             <h1>DATA LAB SNS</h1>
-            <p>前日の結果データから、X・ショート台本・9:16画像をまとめて確認できます。</p>
+            <p>前日の結果データから、X・ショート台本・画像生成プロンプトをまとめて確認できます。</p>
           </div>
           <form className={styles.dateForm} method="get">
             <input type="date" name="date" defaultValue={selectedDate} />
@@ -99,7 +100,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
                 <h2>9:16 SNS画像</h2>
                 <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
                 <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
-                <p className={styles.note}>画像は1080×1920で自動描画されます。数値が変われば画像も自動で更新されます。</p>
+                <p className={styles.note}>従来の自動描画画像もそのまま利用できます。AI画像を作る場合は右側のプロンプトプリセットを使えます。</p>
               </section>
 
               <section className={styles.contentCard}>
@@ -114,6 +115,8 @@ export default async function DataLabSocialAdmin({ searchParams }) {
                     {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
                   </div>
                 </div>
+
+                <PromptBuilder payload={p} />
 
                 <div className={styles.section}>
                   <label>X投稿文</label>
