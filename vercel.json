@@ -18,6 +18,14 @@
       "schedule": "20 21 * * *"
     },
     {
+      "path": "/api/cron/race-cancellations",
+      "schedule": "5 3,6,9,12 * * *"
+    },
+    {
+      "path": "/api/cron/race-cancellations",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/cron/news-verify",
       "schedule": "10 3,6,9,14,21 * * *"
     },
