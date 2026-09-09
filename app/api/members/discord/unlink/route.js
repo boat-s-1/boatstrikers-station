@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminClient, removePremiumRole } from "@/app/lib/discordPremium";
+import { getAdminClient, removePremiumRole } from "../../../../lib/discordPremium";
 
 export const runtime="nodejs";
 
