@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminClient, sendDiscordMessage } from "@/app/lib/discordPremium";
+import { getAdminClient, sendDiscordMessage } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
