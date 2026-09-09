@@ -74,6 +74,7 @@ const GROUPS = [
       { label: "ボート・ナイト・ニッポン", href: "/radio" },
       { label: "24場攻略ノート", href: "/library/stadiums" },
       { label: "番組表", href: "/schedule" },
+      { label: "有料会員限定 Discord全通知", href: "/members/discord" },
     ],
   },
 ];
