@@ -1,5 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
+export const DISCORD_NOTIFICATION_ROLES={
+  configured:"BSC 通知設定済",
+  ichika:"BSC 一果通知",
+  hatsune:"BSC 初音通知",
+  kiina:"BSC キイナ通知",
+  all_alerts:"BSC 全アラート通知",
+};
+
 export function getAdminClient(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -51,14 +59,62 @@ export async function discordApi(path,{method="GET",body,token}={}){
   return response.json().catch(()=>null);
 }
 
+export async function ensureNotificationRoles(){
+  const {guildId}=discordConfig();
+  const existing=await discordApi(`/guilds/${guildId}/roles`);
+  const result={};
+  for(const [key,name] of Object.entries(DISCORD_NOTIFICATION_ROLES)){
+    let role=(existing||[]).find(item=>item?.name===name);
+    if(!role){
+      role=await discordApi(`/guilds/${guildId}/roles`,{
+        method:"POST",
+        body:{name,hoist:false,mentionable:key!=="configured"},
+      });
+    }else if(key!=="configured"&&!role.mentionable){
+      role=await discordApi(`/guilds/${guildId}/roles/${role.id}`,{
+        method:"PATCH",
+        body:{mentionable:true},
+      });
+    }
+    result[key]=role.id;
+  }
+  return result;
+}
+
+export async function getDiscordMember(discordUserId){
+  const {guildId}=discordConfig();
+  return discordApi(`/guilds/${guildId}/members/${discordUserId}`);
+}
+
+export async function addDiscordRole(discordUserId,roleId){
+  const {guildId}=discordConfig();
+  await discordApi(`/guilds/${guildId}/members/${discordUserId}/roles/${roleId}`,{method:"PUT"});
+}
+
+export async function removeDiscordRole(discordUserId,roleId){
+  const {guildId}=discordConfig();
+  await discordApi(`/guilds/${guildId}/members/${discordUserId}/roles/${roleId}`,{method:"DELETE"});
+}
+
+export async function ensureDefaultNotificationRoles(discordUserId){
+  const roles=await ensureNotificationRoles();
+  const member=await getDiscordMember(discordUserId);
+  const current=new Set(member?.roles||[]);
+  if(current.has(roles.configured))return roles;
+  for(const key of ["configured","ichika","hatsune","kiina","all_alerts"]){
+    await addDiscordRole(discordUserId,roles[key]);
+  }
+  return roles;
+}
+
 export async function addPremiumRole(discordUserId){
-  const {guildId,premiumRoleId}=discordConfig();
-  await discordApi(`/guilds/${guildId}/members/${discordUserId}/roles/${premiumRoleId}`,{method:"PUT"});
+  const {premiumRoleId}=discordConfig();
+  await addDiscordRole(discordUserId,premiumRoleId);
 }
 
 export async function removePremiumRole(discordUserId){
-  const {guildId,premiumRoleId}=discordConfig();
-  await discordApi(`/guilds/${guildId}/members/${discordUserId}/roles/${premiumRoleId}`,{method:"DELETE"});
+  const {premiumRoleId}=discordConfig();
+  await removeDiscordRole(discordUserId,premiumRoleId);
 }
 
 export async function joinGuild(discordUserId,userAccessToken){
@@ -69,10 +125,14 @@ export async function joinGuild(discordUserId,userAccessToken){
   });
 }
 
-export async function sendDiscordMessage(channelId,content){
+export async function sendDiscordMessage(channelId,content,{roleId}={}){
   if(!channelId)return null;
+  const bodyContent=roleId?`<@&${roleId}> ${content}`:content;
   return discordApi(`/channels/${channelId}/messages`,{
     method:"POST",
-    body:{content:String(content).slice(0,2000),allowed_mentions:{parse:[]}},
+    body:{
+      content:String(bodyContent).slice(0,2000),
+      allowed_mentions:roleId?{parse:[],roles:[roleId]}:{parse:[]},
+    },
   });
 }
