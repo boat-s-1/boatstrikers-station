@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
-import { discordConfig, getAdminClient, isDiscordEligible } from "@/app/lib/discordPremium";
+import { discordConfig, getAdminClient, isDiscordEligible } from "../../../../lib/discordPremium";
 
 export const runtime="nodejs";
 
