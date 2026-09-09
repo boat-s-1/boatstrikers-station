@@ -21,20 +21,20 @@ export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
   const admin=getAdminClient();
   const summary={sent:0,skipped:0,failed:0};
-  const message="✅ **BoatStrikers Discord通知テスト**\nBotからの通知配信テストです。\nこのメッセージが見えていれば、Discord通知経路は正常です。";
+  const message="✅ **BoatStrikers Discord通知テスト（再確認）**\nチャンネルID修正後の再テストです。\nこのメッセージが見えていれば、Discord通知経路は正常です。";
 
   for(const [channelKey,envKey,label] of TARGETS){
     const channelId=process.env[envKey];
     if(!channelId){summary.failed+=1;console.error(`discord test missing channel: ${envKey}`);continue;}
     const {data:existing,error:checkError}=await admin.from("bs_discord_notification_deliveries")
-      .select("id,sent_at").eq("alert_type","system_test").eq("alert_id",1).eq("channel_key",channelKey).maybeSingle();
+      .select("id,sent_at").eq("alert_type","system_test").eq("alert_id",2).eq("channel_key",channelKey).maybeSingle();
     if(checkError){summary.failed+=1;console.error("discord test check failed",checkError);continue;}
     if(existing?.sent_at){summary.skipped+=1;continue;}
     try{
       const result=await sendDiscordMessage(channelId,message);
       const now=new Date().toISOString();
       const {error}=await admin.from("bs_discord_notification_deliveries").upsert({
-        alert_type:"system_test",alert_id:1,channel_key:channelKey,
+        alert_type:"system_test",alert_id:2,channel_key:channelKey,
         discord_message_id:result?.id||null,sent_at:now,error:null,updated_at:now,
       },{onConflict:"alert_type,alert_id,channel_key"});
       if(error)throw error;
