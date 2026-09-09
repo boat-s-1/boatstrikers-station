@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addPremiumRole, getAdminClient, isDiscordEligible, removePremiumRole } from "@/app/lib/discordPremium";
+import { addPremiumRole, getAdminClient, isDiscordEligible, removePremiumRole } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
