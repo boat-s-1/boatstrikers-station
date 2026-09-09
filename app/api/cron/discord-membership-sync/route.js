@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addPremiumRole, getAdminClient, isDiscordEligible, removePremiumRole } from "../../../lib/discordPremium";
+import { addPremiumRole, ensureDefaultNotificationRoles, getAdminClient, isDiscordEligible, removePremiumRole } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -30,8 +30,12 @@ export async function GET(request){
       const eligible=isDiscordEligible(profileMap.get(link.user_id));
       const desired=eligible?"premium":"inactive";
       try{
-        if(eligible)await addPremiumRole(link.discord_user_id);
-        else await removePremiumRole(link.discord_user_id);
+        if(eligible){
+          await addPremiumRole(link.discord_user_id);
+          await ensureDefaultNotificationRoles(link.discord_user_id);
+        }else{
+          await removePremiumRole(link.discord_user_id);
+        }
         const now=new Date().toISOString();
         await admin.from("bs_member_discord_links").update({last_role_state:desired,last_role_synced_at:now,updated_at:now}).eq("user_id",link.user_id);
         if(desired!==link.last_role_state){if(eligible)granted+=1;else revoked+=1;}
