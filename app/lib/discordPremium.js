@@ -8,15 +8,24 @@ export function getAdminClient(){
 }
 
 export function discordConfig(){
-  const clientId=process.env.DISCORD_CLIENT_ID;
-  const clientSecret=process.env.DISCORD_CLIENT_SECRET;
-  const botToken=process.env.DISCORD_BOT_TOKEN;
-  const guildId=process.env.DISCORD_GUILD_ID;
-  const premiumRoleId=process.env.DISCORD_PREMIUM_ROLE_ID;
-  if(!clientId||!clientSecret||!botToken||!guildId||!premiumRoleId){
-    throw new Error("Discord環境変数が未設定です");
+  const required={
+    DISCORD_CLIENT_ID:process.env.DISCORD_CLIENT_ID,
+    DISCORD_CLIENT_SECRET:process.env.DISCORD_CLIENT_SECRET,
+    DISCORD_BOT_TOKEN:process.env.DISCORD_BOT_TOKEN,
+    DISCORD_GUILD_ID:process.env.DISCORD_GUILD_ID,
+    DISCORD_PREMIUM_ROLE_ID:process.env.DISCORD_PREMIUM_ROLE_ID,
+  };
+  const missing=Object.entries(required).filter(([,value])=>!value).map(([key])=>key);
+  if(missing.length){
+    throw new Error(`Discord環境変数が未設定です: ${missing.join(",")}`);
   }
-  return {clientId,clientSecret,botToken,guildId,premiumRoleId};
+  return {
+    clientId:required.DISCORD_CLIENT_ID,
+    clientSecret:required.DISCORD_CLIENT_SECRET,
+    botToken:required.DISCORD_BOT_TOKEN,
+    guildId:required.DISCORD_GUILD_ID,
+    premiumRoleId:required.DISCORD_PREMIUM_ROLE_ID,
+  };
 }
 
 export function isDiscordEligible(profile){
