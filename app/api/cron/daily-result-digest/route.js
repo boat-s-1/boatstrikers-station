@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateDailyResultDigest } from "../../../../lib/dailyResultDigest";
+import { syncOfficialRaceCancellations } from "../../../../lib/officialRaceCancellationSync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,8 +16,9 @@ export async function GET(request) {
   try {
     const url = new URL(request.url);
     const date = url.searchParams.get("date") || undefined;
+    const cancellations = await syncOfficialRaceCancellations({ date });
     const result = await generateDailyResultDigest({ date });
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, cancellations });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error?.message || String(error) }, { status: 500 });
   }
