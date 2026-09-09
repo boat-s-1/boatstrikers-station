@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminClient, isDiscordEligible } from "@/app/lib/discordPremium";
+import { getAdminClient, isDiscordEligible } from "../../../../lib/discordPremium";
 
 export const runtime="nodejs";
 
