@@ -40,6 +40,7 @@ const GROUPS = [
     title: "コンテンツ制作",
     description: "記事・動画・雑誌・配信素材を作成",
     items: [
+      { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS", text: "昨日の結果をX・ショート台本・9:16画像へ自動変換", badge: "NEW" },
       { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け", badge: "NEW" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "前日予想などから台本・投稿素材を作成", badge: "よく使う" },
       { href: "/admin/seminar-magazines", icon: "📚", title: "攻略マガジン管理", text: "月・水・金の週刊3誌を画像登録・予約公開", badge: "よく使う" },
@@ -66,6 +67,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS" },
   { href: "/admin/editorial", icon: "🗞️", title: "AI編集部" },
   { href: "/admin/alerts", icon: "🔔", title: "アラート管理" },
   { href: "/admin/members", icon: "👥", title: "会員管理" },
@@ -90,84 +92,18 @@ export default async function AdminHome() {
       <div className={styles.shell}>
         <header className={styles.hero}>
           <div>
-            <span className={styles.eyebrow}>BOATSTRIKERS CONTROL ROOM</span>
-            <h1>運営ダッシュボード</h1>
-            <p>今日の状況と通知を先に確認して、必要な作業へ移動できます。</p>
+            <span className={styles.eyebrow}>BOATSTRIKERS CONTROL ROOM</span><h1>運営ダッシュボード</h1><p>今日の状況と通知を先に確認して、必要な作業へ移動できます。</p>
           </div>
-          <div className={styles.heroActions}>
-            <Link href="/" className={styles.secondaryButton}>サイトを見る</Link>
-            <Link href="/ai-results" className={styles.primaryButton}>公開成績を見る</Link>
-          </div>
+          <div className={styles.heroActions}><Link href="/" className={styles.secondaryButton}>サイトを見る</Link><Link href="/ai-results" className={styles.primaryButton}>公開成績を見る</Link></div>
         </header>
-
-        <section className={styles.todayPanel} id="today">
-          <div className={styles.panelHeading}>
-            <div><span>TODAY STATUS</span><h2>今日の状況</h2></div>
-            <div className={`${styles.syncPill} ${styles[tone]}`}><span className={styles.statusDot} />AutoSync {statusText(status.runtime)}</div>
-          </div>
-          <div className={styles.statusGrid}>
-            <article className={styles.statusCard}><span>🚤 開催</span><strong>{status.events === null ? "—" : `${status.events}R`}</strong><small>{status.today}</small></article>
-            <article className={styles.statusCard}><span>🤖 AI予想</span><strong>{countText(status.predictions)}</strong><small>保存済み予想</small></article>
-            <article className={styles.statusCard}><span>📣 理論成立</span><strong>{totalAlertsToday}件</strong><small>本日の3理論合計</small></article>
-            <article className={styles.statusCard}><span>🏁 結果同期</span><strong>{status.results === null ? "—" : `${status.results}R`}</strong><small>{status.events ? `${status.results || 0} / ${status.events}R` : "本日分"}</small></article>
-          </div>
-          <div className={styles.syncMeta}>
-            <span>最終成功：<strong>{formatJst(status.runtime?.last_success_at)}</strong></span>
-            <span>Heartbeat：<strong>{formatJst(status.runtime?.heartbeat_at)}</strong></span>
-            <span>AI的中：<strong>{countText(status.hits)}</strong></span>
-            {status.runtime?.current_mode && <span>実行中：<strong>{status.runtime.current_mode}</strong></span>}
-          </div>
-        </section>
-
-        <section className={styles.alertSection} id="attention">
-          <div className={styles.panelHeading}><div><span>NEEDS ATTENTION</span><h2>要対応</h2></div></div>
-          <div className={styles.alertList}>
-            {alerts.map((alert, index) => {
-              const content = <><b>{alert.icon}</b><div><strong>{alert.title}</strong><span>{alert.text}</span></div>{alert.href && <i>›</i>}</>;
-              return alert.href ? <Link href={alert.href} key={`${alert.title}-${index}`} className={`${styles.alertItem} ${styles[alert.tone]}`}>{content}</Link> : <div key={`${alert.title}-${index}`} className={`${styles.alertItem} ${styles[alert.tone]}`}>{content}</div>;
-            })}
-          </div>
-        </section>
-
-        <section id="notifications" className={styles.notificationCenter}>
-          <div className={styles.panelHeading}><div><span>ALERT MANAGEMENT</span><h2>アラート管理</h2></div><Link href="/admin/alerts" className={styles.primaryButton}>アラート管理を開く →</Link></div>
-          <p>LINE通知センター・3理論の管理・24場の展示データ対応状況をまとめました。</p>
-        </section>
-
-        <section className={styles.favoriteSection} id="quick">
-          <div className={styles.panelHeading}><div><span>QUICK ACCESS</span><h2>よく使う</h2></div></div>
-          <div className={styles.favoriteGrid}>
-            {FAVORITES.map((item) => <Link href={item.href} className={styles.favoriteCard} key={item.href}><b>{item.icon}</b><span>{item.title}</span></Link>)}
-          </div>
-        </section>
-
-        <div className={styles.groups} id="all-tools">
-          {GROUPS.map((group) => (
-            <section className={styles.group} key={group.key}>
-              <div className={styles.groupTitle}><b>{group.icon}</b><div><h2>{group.title}</h2><p>{group.description}</p></div></div>
-              <div className={styles.menuGrid}>
-                {group.items.map((item) => (
-                  <Link href={item.href} key={item.href} className={styles.menuCard}>
-                    <b className={styles.menuIcon}>{item.icon}</b>
-                    <div className={styles.menuText}><div className={styles.menuName}><h3>{item.title}</h3>{item.badge && <span>{item.badge}</span>}</div><p>{item.text}</p></div>
-                    <i>›</i>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
+        <section className={styles.todayPanel} id="today"><div className={styles.panelHeading}><div><span>TODAY STATUS</span><h2>今日の状況</h2></div><div className={`${styles.syncPill} ${styles[tone]}`}><span className={styles.statusDot} />AutoSync {statusText(status.runtime)}</div></div><div className={styles.statusGrid}><article className={styles.statusCard}><span>🚤 開催</span><strong>{status.events === null ? "—" : `${status.events}R`}</strong><small>{status.today}</small></article><article className={styles.statusCard}><span>🤖 AI予想</span><strong>{countText(status.predictions)}</strong><small>保存済み予想</small></article><article className={styles.statusCard}><span>📣 理論成立</span><strong>{totalAlertsToday}件</strong><small>本日の3理論合計</small></article><article className={styles.statusCard}><span>🏁 結果同期</span><strong>{status.results === null ? "—" : `${status.results}R`}</strong><small>{status.events ? `${status.results || 0} / ${status.events}R` : "本日分"}</small></article></div><div className={styles.syncMeta}><span>最終成功：<strong>{formatJst(status.runtime?.last_success_at)}</strong></span><span>Heartbeat：<strong>{formatJst(status.runtime?.heartbeat_at)}</strong></span><span>AI的中：<strong>{countText(status.hits)}</strong></span>{status.runtime?.current_mode && <span>実行中：<strong>{status.runtime.current_mode}</strong></span>}</div></section>
+        <section className={styles.alertSection} id="attention"><div className={styles.panelHeading}><div><span>NEEDS ATTENTION</span><h2>要対応</h2></div></div><div className={styles.alertList}>{alerts.map((alert, index) => { const content = <><b>{alert.icon}</b><div><strong>{alert.title}</strong><span>{alert.text}</span></div>{alert.href && <i>›</i>}</>; return alert.href ? <Link href={alert.href} key={`${alert.title}-${index}`} className={`${styles.alertItem} ${styles[alert.tone]}`}>{content}</Link> : <div key={`${alert.title}-${index}`} className={`${styles.alertItem} ${styles[alert.tone]}`}>{content}</div>; })}</div></section>
+        <section id="notifications" className={styles.notificationCenter}><div className={styles.panelHeading}><div><span>ALERT MANAGEMENT</span><h2>アラート管理</h2></div><Link href="/admin/alerts" className={styles.primaryButton}>アラート管理を開く →</Link></div><p>LINE通知センター・3理論の管理・24場の展示データ対応状況をまとめました。</p></section>
+        <section className={styles.favoriteSection} id="quick"><div className={styles.panelHeading}><div><span>QUICK ACCESS</span><h2>よく使う</h2></div></div><div className={styles.favoriteGrid}>{FAVORITES.map((item) => <Link href={item.href} className={styles.favoriteCard} key={item.href}><b>{item.icon}</b><span>{item.title}</span></Link>)}</div></section>
+        <div className={styles.groups} id="all-tools">{GROUPS.map((group) => <section className={styles.group} key={group.key}><div className={styles.groupTitle}><b>{group.icon}</b><div><h2>{group.title}</h2><p>{group.description}</p></div></div><div className={styles.menuGrid}>{group.items.map((item) => <Link href={item.href} key={item.href} className={styles.menuCard}><b className={styles.menuIcon}>{item.icon}</b><div className={styles.menuText}><div className={styles.menuName}><h3>{item.title}</h3>{item.badge && <span>{item.badge}</span>}</div><p>{item.text}</p></div><i>›</i></Link>)}</div></section>)}</div>
         <footer className={styles.footer}><Link href="/">← BoatStrikersトップへ</Link><span>BOATSTRIKERS CONTROL ROOM</span></footer>
       </div>
-
-      <nav className={styles.adminDock} aria-label="管理画面クイックメニュー">
-        <Link href="/admin#today"><b>🏠</b><span>管理TOP</span></Link>
-        <Link href="/admin/alerts"><b>📣</b><span>通知</span></Link>
-        <Link href="/admin/editorial"><b>🗞️</b><span>編集部</span></Link>
-        <Link href="/admin/shorts"><b>🎬</b><span>制作</span></Link>
-        <Link href="/admin/sync"><b>⚙️</b><span>同期</span></Link>
-      </nav>
+      <nav className={styles.adminDock} aria-label="管理画面クイックメニュー"><Link href="/admin#today"><b>🏠</b><span>管理TOP</span></Link><Link href="/admin/alerts"><b>📣</b><span>通知</span></Link><Link href="/admin/editorial"><b>🗞️</b><span>編集部</span></Link><Link href="/admin/shorts"><b>🎬</b><span>制作</span></Link><Link href="/admin/sync"><b>⚙️</b><span>同期</span></Link></nav>
     </main>
   );
 }
