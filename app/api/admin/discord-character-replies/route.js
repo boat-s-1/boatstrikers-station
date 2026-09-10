@@ -7,9 +7,9 @@ export const dynamic="force-dynamic";
 export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
-  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune"},
-  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina"},
+  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v2"},
+  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
 };
 
 async function requireAdmin(request){
@@ -42,19 +42,22 @@ async function loadAvatarDataUri(avatarKey){
 
 async function getOrCreateWebhook(channel,spec){
   const hooks=await discordApi(`/channels/${channel.id}/webhooks`);
-  let hook=(hooks||[]).find(h=>h.name===`BSC ${spec.name}`&&h.token);
+  const wantedName=spec.webhookName||`BSC ${spec.name}`;
+  let hook=(hooks||[]).find(h=>h.name===wantedName&&h.token);
+  let needsAvatar=false;
   if(!hook){
-    hook=await discordApi(`/channels/${channel.id}/webhooks`,{method:"POST",body:{name:`BSC ${spec.name}`}});
+    hook=await discordApi(`/channels/${channel.id}/webhooks`,{method:"POST",body:{name:wantedName}});
+    needsAvatar=true;
   }
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // Webhook本体にキャラ画像を保存する。Discord側がavatar_url取得に失敗して
-  // デフォルトアイコンになるケースを避けるため、外部URL依存にしない。
-  if(!hook.avatar){
+  // 新規Webhook、またはavatar未設定時にキャラ画像をWebhook本体へ保存する。
+  // 初音は webhookName を v2 に変更して旧Webhookのキャッシュ/誤アイコンを完全に切り離す。
+  if(needsAvatar||!hook.avatar){
     const avatar=await loadAvatarDataUri(spec.avatarKey);
     const updated=await discordApi(`/webhooks/${hook.id}`,{
       method:"PATCH",
-      body:{name:`BSC ${spec.name}`,avatar},
+      body:{name:wantedName,avatar},
     });
     hook={...hook,...(updated||{}),token:hook.token};
   }
