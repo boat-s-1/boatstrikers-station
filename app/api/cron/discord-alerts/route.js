@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ensureNotificationRoles, getAdminClient, sendDiscordMessage } from "../../../lib/discordPremium";
+import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -12,11 +13,37 @@ function authorized(request){
 function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 function raceLink(alert){return `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;}
 function closeText(alert){return alert.closing_time?String(alert.closing_time).slice(0,5):"--:--";}
+function finite(value){const n=Number(value);return Number.isFinite(n)?n:null;}
+function normalizeEntry(row){
+  return {
+    ...row,
+    boat_no:Number(row.boat_no??row.teiban),
+    racer_name:String(row.racer_name??row.shimei??"").replace(/\u3000/g," ").replace(/\s+/g," ").trim(),
+    national_win_rate:finite(row.national_win_rate),
+    local_win_rate:finite(row.local_win_rate),
+    motor_2_rate:finite(row.motor_top2_rate??row.motor_2_rate),
+    boat_2_rate:finite(row.race_boat_top2_rate??row.boat_2_rate),
+    average_st:finite(row.average_st),
+  };
+}
+
+async function getIchikaSecondRecommendation(admin,alert){
+  const [eventResult,entriesResult]=await Promise.all([
+    admin.from("bs_race_events").select("*").eq("race_date",alert.race_date).eq("course_code",alert.course_code).eq("race_no",alert.race_no).maybeSingle(),
+    admin.from("bs_race_entries").select("*").eq("race_date",alert.race_date).eq("course_code",alert.course_code).eq("race_no",alert.race_no).order("boat_no",{ascending:true}),
+  ]);
+  if(eventResult.error||entriesResult.error)return null;
+  const entries=(entriesResult.data||[]).map(normalizeEntry);
+  if(entries.length!==6)return null;
+  const {livePrediction}=buildPhase2Predictions({event:eventResult.data||{},entries});
+  const second=livePrediction?.marks?.[1]?.boat_no;
+  return Number.isInteger(Number(second))?Number(second):null;
+}
 
 const SOURCES=[
   {type:"kiina_double_top",table:"bs_exhibition_alerts",channel:"DISCORD_KIINA_CHANNEL_ID",roleKey:"kiina",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_rank,straight_rank,detected_at",build:a=>`🚨 **キイナ｜カド攻め理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n展示${a.exhibition_rank??"-"}位 ＋ 直線${a.straight_rank??"-"}位\n${raceLink(a)}`},
   {type:"ichika_hidden_escape",table:"bs_ichika_hidden_escape_alerts",channel:"DISCORD_ICHIKA_CHANNEL_ID",roleKey:"ichika",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_rank,exhibition_gap,lap_rank,detected_at",build:a=>`🏁 **一果｜隠れイン理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n展示${a.exhibition_rank??"-"}位｜一周${a.lap_rank??"-"}位${a.exhibition_gap!=null?`｜展示差 ${a.exhibition_gap}`:""}\n${raceLink(a)}`},
-  {type:"ichika_escape_surge",table:"bs_ichika_escape_surge_alerts",channel:"DISCORD_ICHIKA_CHANNEL_ID",roleKey:"ichika",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,lap_time,uplift_points,detected_at",build:a=>`🔥 **一果｜イン逃げ急上昇**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}${a.uplift_points!=null?`\n上昇幅 +${a.uplift_points}pt`:""}\n${raceLink(a)}`},
+  {type:"ichika_escape_surge",table:"bs_ichika_escape_surge_alerts",channel:"DISCORD_ICHIKA_CHANNEL_ID",roleKey:"ichika",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_time,lap_time,uplift_points,detected_at",build:a=>`🔥 **一果｜イン逃げ急上昇**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}${a.second_recommendation?`\n2着おすすめ：${a.second_recommendation}号艇`:""}\n${raceLink(a)}`},
   {type:"hatsune_inner_break",table:"bs_hatsune_womens_inner_break_alerts",channel:"DISCORD_HATSUNE_CHANNEL_ID",roleKey:"hatsune",select:"id,race_date,course_code,course_name,race_no,closing_time,danger_level,exhibition_advantage,lap_advantage,detected_at",build:a=>`🌸 **初音｜女子イン崩れアラート**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}${a.danger_level?`\n危険度 ${a.danger_level}`:""}\n${raceLink(a)}`},
   {type:"hatsune_box",table:"bs_hatsune_box_alerts",channel:"DISCORD_HATSUNE_CHANNEL_ID",roleKey:"hatsune",select:"id,race_date,course_code,course_name,race_no,closing_time,box_234_rating,box_235_rating,box_345_rating,detected_at",build:a=>`🎀 **初音｜箱推し理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n234:${a.box_234_rating||"-"}｜235:${a.box_235_rating||"-"}｜345:${a.box_345_rating||"-"}\n${raceLink(a)}`},
 ];
@@ -38,7 +65,9 @@ export async function GET(request){
     const roles=await ensureNotificationRoles();
     for(const source of SOURCES){
       const {data:alerts,error}=await admin.from(source.table).select(source.select).eq("race_date",raceDate).order("detected_at",{ascending:true}).limit(100);if(error)throw error;
-      for(const alert of alerts||[]){
+      for(const rawAlert of alerts||[]){
+        const alert={...rawAlert};
+        if(source.type==="ichika_escape_surge")alert.second_recommendation=await getIchikaSecondRecommendation(admin,alert);
         const targets=[["all",allChannel,roles.all_alerts],[source.channel,process.env[source.channel],roles[source.roleKey]]];
         for(const [channelKey,channelId,roleId] of targets){if(!channelId)continue;const result=await deliver(admin,source,alert,channelKey,channelId,roleId);if(result.sent)summary.sent+=1;else if(result.error)summary.failed+=1;else summary.skipped+=1;}
       }
