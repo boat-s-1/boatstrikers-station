@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/discord-alerts",
-      "schedule": "*/2 * * * *"
+      "schedule": "*/2 22,0-13 * * *"
     },
     {
       "path": "/api/cron/discord-membership-sync",
@@ -15,7 +15,7 @@
     },
     {
       "path": "/api/cron/elimination-odds-snapshots",
-      "schedule": "*/10 * * * *"
+      "schedule": "*/10 22,0-13 * * *"
     },
     {
       "path": "/api/cron/media-editorials",
