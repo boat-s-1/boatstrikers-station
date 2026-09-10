@@ -8,7 +8,7 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v3",forceAvatar:true},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v4",strictAvatar:true},
   kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
 };
 
@@ -44,15 +44,21 @@ async function getOrCreateWebhook(channel,spec){
   const hooks=await discordApi(`/channels/${channel.id}/webhooks`);
   const wantedName=spec.webhookName||`BSC ${spec.name}`;
   let hook=(hooks||[]).find(h=>h.name===wantedName&&h.token);
-  let needsAvatar=false;
+
   if(!hook){
-    hook=await discordApi(`/channels/${channel.id}/webhooks`,{method:"POST",body:{name:wantedName}});
-    needsAvatar=true;
+    const avatar=await loadAvatarDataUri(spec.avatarKey);
+    // name と avatar を同一リクエストで作成する。初音だけ後付け更新が反映されない
+    // ケースがあったため、作成時点でDiscord側に画像を保存する。
+    hook=await discordApi(`/channels/${channel.id}/webhooks`,{
+      method:"POST",
+      body:{name:wantedName,avatar},
+    });
   }
+
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // 初音は旧Webhook/キャッシュを完全に避けるため、v3 Webhookへ毎回画像を再設定する。
-  if(needsAvatar||!hook.avatar||spec.forceAvatar){
+  // 既存の一果/キイナWebHookがavatar未設定なら従来通り補正する。
+  if(!hook.avatar&&!spec.strictAvatar){
     const avatar=await loadAvatarDataUri(spec.avatarKey);
     const updated=await discordApi(`/webhooks/${hook.id}`,{
       method:"PATCH",
@@ -61,10 +67,12 @@ async function getOrCreateWebhook(channel,spec){
     hook={...hook,...(updated||{}),token:hook.token};
   }
 
-  const avatarUrl=hook.avatar
-    ? `https://cdn.discordapp.com/avatars/${hook.id}/${hook.avatar}.png?size=256`
-    : null;
-  return {...hook,avatarUrl};
+  // 初音は「設定できたつもり」で送らず、Discord側のavatar hashを必須確認する。
+  if(spec.strictAvatar&&!hook.avatar){
+    throw new Error("初音アイコンをDiscord Webhookへ設定できませんでした。送信は中止しました。");
+  }
+
+  return hook;
 }
 
 export async function GET(request){
@@ -101,20 +109,24 @@ export async function POST(request){
     const {channel,spec}=await findQuestionChannel(character);
     const hook=await getOrCreateWebhook(channel,spec);
     const text=replyUserId?`<@${replyUserId}>\n${content}`:content;
-    const payload={
-      username:spec.name,
-      content:text,
-      allowed_mentions:replyUserId?{parse:[],users:[replyUserId]}:{parse:[]},
-    };
-    if(hook.avatarUrl)payload.avatar_url=hook.avatarUrl;
     const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(payload),
+      body:JSON.stringify({
+        username:spec.name,
+        content:text,
+        allowed_mentions:replyUserId?{parse:[],users:[replyUserId]}:{parse:[]},
+      }),
       cache:"no-store",
     });
     if(!response.ok){const t=await response.text().catch(()=>"");throw new Error(`Webhook送信に失敗しました: ${response.status} ${t}`.slice(0,1000));}
     const sent=await response.json();
+
+    // 初音だけは送信結果にもavatar hashがあることを確認。なければ問題を明示する。
+    if(spec.strictAvatar&&!sent?.author?.avatar){
+      throw new Error("初音メッセージは送信されましたが、Discord側でアイコンが反映されませんでした。Webhook状態を再確認してください。");
+    }
+
     return NextResponse.json({ok:true,message_id:sent?.id||null,character,channel_name:spec.channel});
   }catch(error){
     return NextResponse.json({ok:false,error:error?.message||"failed"},{status:error?.status||500});
