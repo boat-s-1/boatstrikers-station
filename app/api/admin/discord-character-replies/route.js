@@ -6,7 +6,7 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatar:"https://www.boat-strike.online/api/discord/avatar/ichika"},
-  hatsune:{name:"初音",channel:"初音に質問",avatar:"https://www.boat-strike.online/api/discord/avatar/hatsune"},
+  hatsune:{name:"初音",channel:"初音に質問",avatar:"https://www.boat-strike.online/api/discord/avatar/hatsune?v=2"},
   kiina:{name:"キイナ",channel:"キイナに質問",avatar:"https://www.boat-strike.online/api/discord/avatar/kiina"},
 };
 
