@@ -8,7 +8,9 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",avatarMime:"image/jpeg",webhookName:"BSC 一果 v2"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune-v3",avatarMime:"image/png",webhookName:"BSC 初音 v12",forceAvatar:true},
+  // 切り分けテスト: 初音チャンネルだけキイナ画像を使う。
+  // ここでアイコンが出れば、Webhook/チャンネルではなく初音画像データ側の問題と確定できる。
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"kiina",avatarMime:"image/jpeg",webhookName:"BSC 初音 avatar-test-kiina",forceAvatar:true},
   kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",avatarMime:"image/jpeg",webhookName:"BSC キイナ v2"},
 };
 
@@ -76,7 +78,7 @@ async function getOrCreateWebhook(channel,spec){
     hook=await patchWebhookAvatarWithToken(hook,spec);
   }
   if(spec.forceAvatar&&!hook.avatar){
-    throw new Error(`初音アイコンをDiscord側へ保存できませんでした。Webhook avatar hash が空です。mime=${spec.avatarMime}`);
+    throw new Error(`初音チャンネルのテストWebhookへ画像を保存できませんでした。Webhook avatar hash が空です。mime=${spec.avatarMime}`);
   }
   return hook;
 }
@@ -144,6 +146,7 @@ export async function POST(request){
       avatar_hash:sent?.author?.avatar||null,
       webhook_avatar_hash:hook?.avatar||null,
       avatar_mime:spec.avatarMime,
+      avatar_test:character==="hatsune"?"kiina-image":null,
       avatar_cdn_url:spec.forceAvatar&&hook?.avatar?`https://cdn.discordapp.com/avatars/${hook.id}/${hook.avatar}.png?size=128`:null,
     });
   }catch(error){
