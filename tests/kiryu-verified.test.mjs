@@ -4,7 +4,7 @@ import { fetchKiryuVerifiedOriginalTenji, parseKiryuOriginalTenji, validKiryuRac
 
 const race={courseCode:1,raceDate:'2026-09-07',raceNo:3};
 const page=`<p>本日開催中 09月07日(月)</p><select><option value="./?page=yosou-cyokuzen&race=3" selected>3R</option></select>`;
-const timingRows=Array.from({length:6},(_,i)=>`<tr><td class="col1 im_color${i+1}" rowspan="2">${i+1}</td><td class="col4" rowspan="2">${(6.70+i/100).toFixed(2)}</td><td class="col5_1">${(14.10+i/100).toFixed(2)}</td><td class="col5_2">${(5.10+i/100).toFixed(2)}</td><td class="col5_3">${(7.10+i/100).toFixed(2)}</td></tr>`).join('');
+const timingRows=Array.from({length:6},(_,i)=>`<tr><td class="col1 im_color${i+1}" rowspan="2">${i+1}</td><td class="col4" rowspan="2">${(6.70+i/100).toFixed(2)}</td><td class="col5">${(14.10+i/100).toFixed(2)}</td><td class="col6">${(5.10+i/100).toFixed(2)}</td><td class="col7">${(7.10+i/100).toFixed(2)}</td></tr>`).join('');
 const racerRows=Array.from({length:6},(_,i)=>`<tr><td class="im_color${i+1} bodyh_02 col1">${i+1}</td><td class="col2"><a href="https://www.boatrace.jp/owpc/pc/data/racersearch/season?toban=${4200+i}">選手</a></td></tr>`).join('');
 const ajax=`<div><table><thead><th>展示タイム</th><th>オリジナル展示データ</th><th>半周</th><th>まわり足</th><th>直線</th></thead><tbody>${timingRows}</tbody></table></div><!--sep--><table>${racerRows}</table>`;
 
