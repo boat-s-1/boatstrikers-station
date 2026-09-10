@@ -14,15 +14,16 @@ export async function GET(_request, { params }) {
   }
 
   try {
+    const assetName = character === "hatsune" ? "hatsune-v2" : character;
     const encoded = await readFile(
-      path.join(process.cwd(), "public", "discord", `${character}.b64`),
+      path.join(process.cwd(), "public", "discord", `${assetName}.b64`),
       "utf8"
     );
     const image = Buffer.from(encoded.trim(), "base64");
     return new Response(image, {
       headers: {
         "Content-Type": "image/jpeg",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
