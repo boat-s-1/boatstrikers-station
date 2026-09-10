@@ -8,7 +8,7 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v2"},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v3",forceAvatar:true},
   kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
 };
 
@@ -51,9 +51,8 @@ async function getOrCreateWebhook(channel,spec){
   }
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // 新規Webhook、またはavatar未設定時にキャラ画像をWebhook本体へ保存する。
-  // 初音は webhookName を v2 に変更して旧Webhookのキャッシュ/誤アイコンを完全に切り離す。
-  if(needsAvatar||!hook.avatar){
+  // 初音は旧Webhook/キャッシュを完全に避けるため、v3 Webhookへ毎回画像を再設定する。
+  if(needsAvatar||!hook.avatar||spec.forceAvatar){
     const avatar=await loadAvatarDataUri(spec.avatarKey);
     const updated=await discordApi(`/webhooks/${hook.id}`,{
       method:"PATCH",
@@ -61,7 +60,11 @@ async function getOrCreateWebhook(channel,spec){
     });
     hook={...hook,...(updated||{}),token:hook.token};
   }
-  return hook;
+
+  const avatarUrl=hook.avatar
+    ? `https://cdn.discordapp.com/avatars/${hook.id}/${hook.avatar}.png?size=256`
+    : null;
+  return {...hook,avatarUrl};
 }
 
 export async function GET(request){
@@ -98,10 +101,16 @@ export async function POST(request){
     const {channel,spec}=await findQuestionChannel(character);
     const hook=await getOrCreateWebhook(channel,spec);
     const text=replyUserId?`<@${replyUserId}>\n${content}`:content;
+    const payload={
+      username:spec.name,
+      content:text,
+      allowed_mentions:replyUserId?{parse:[],users:[replyUserId]}:{parse:[]},
+    };
+    if(hook.avatarUrl)payload.avatar_url=hook.avatarUrl;
     const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({username:spec.name,content:text,allowed_mentions:replyUserId?{parse:[],users:[replyUserId]}:{parse:[]}}),
+      body:JSON.stringify(payload),
       cache:"no-store",
     });
     if(!response.ok){const t=await response.text().catch(()=>"");throw new Error(`Webhook送信に失敗しました: ${response.status} ${t}`.slice(0,1000));}
