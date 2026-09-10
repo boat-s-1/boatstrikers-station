@@ -7,9 +7,9 @@ export const dynamic="force-dynamic";
 export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
-  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果 v2"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune-v2",webhookName:"BSC 初音 v11",forceAvatar:true},
-  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ v2"},
+  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",avatarMime:"image/jpeg",webhookName:"BSC 一果 v2"},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune-v3",avatarMime:"image/png",webhookName:"BSC 初音 v12",forceAvatar:true},
+  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",avatarMime:"image/jpeg",webhookName:"BSC キイナ v2"},
 };
 
 async function requireAdmin(request){
@@ -35,13 +35,13 @@ async function findQuestionChannel(character){
   return {channel,spec};
 }
 
-async function loadAvatarDataUri(avatarKey){
-  const encoded=await readFile(path.join(process.cwd(),"public","discord",`${avatarKey}.b64`),"utf8");
-  return `data:image/jpeg;base64,${encoded.trim()}`;
+async function loadAvatarDataUri(spec){
+  const encoded=await readFile(path.join(process.cwd(),"public","discord",`${spec.avatarKey}.b64`),"utf8");
+  return `data:${spec.avatarMime||"image/jpeg"};base64,${encoded.trim()}`;
 }
 
 async function patchWebhookAvatarWithToken(hook,spec){
-  const avatar=await loadAvatarDataUri(spec.avatarKey);
+  const avatar=await loadAvatarDataUri(spec);
   const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}`,{
     method:"PATCH",
     headers:{"Content-Type":"application/json"},
@@ -54,7 +54,7 @@ async function patchWebhookAvatarWithToken(hook,spec){
   }
   const updated=text?JSON.parse(text):{};
   const merged={...hook,...updated,token:hook.token};
-  console.info("[discord character avatar]",spec.name,"hook",hook.id,"avatar",merged?.avatar||null);
+  console.info("[discord character avatar]",spec.name,"hook",hook.id,"mime",spec.avatarMime,"avatar",merged?.avatar||null);
   return merged;
 }
 
@@ -64,7 +64,7 @@ async function getOrCreateWebhook(channel,spec){
   let hook=(hooks||[]).find(h=>h.name===wantedName&&h.token);
 
   if(!hook){
-    const avatar=await loadAvatarDataUri(spec.avatarKey);
+    const avatar=await loadAvatarDataUri(spec);
     hook=await discordApi(`/channels/${channel.id}/webhooks`,{
       method:"POST",
       body:{name:wantedName,avatar},
@@ -72,12 +72,11 @@ async function getOrCreateWebhook(channel,spec){
   }
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // 初音は毎回avatarを再設定して、Discordが返すavatar hashを必ず確認する。
   if(spec.forceAvatar||!hook.avatar){
     hook=await patchWebhookAvatarWithToken(hook,spec);
   }
   if(spec.forceAvatar&&!hook.avatar){
-    throw new Error("初音アイコンをDiscord側へ保存できませんでした。Webhook avatar hash が空です。");
+    throw new Error(`初音アイコンをDiscord側へ保存できませんでした。Webhook avatar hash が空です。mime=${spec.avatarMime}`);
   }
   return hook;
 }
@@ -122,7 +121,6 @@ export async function POST(request){
       allowed_mentions:replyUserId?{parse:[],users:[replyUserId]}:{parse:[]},
     };
 
-    // 初音は、Webhook本体に保存されたDiscord CDNアイコンも送信時に明示する。
     if(spec.forceAvatar&&hook.avatar){
       payload.avatar_url=`https://cdn.discordapp.com/avatars/${hook.id}/${hook.avatar}.png?size=128`;
     }
@@ -135,7 +133,7 @@ export async function POST(request){
     });
     if(!response.ok){const t=await response.text().catch(()=>"");throw new Error(`Webhook送信に失敗しました: ${response.status} ${t}`.slice(0,1000));}
     const sent=await response.json();
-    console.info("[discord character sent]",spec.name,"hookAvatar",hook?.avatar||null,"sentAvatar",sent?.author?.avatar||null);
+    console.info("[discord character sent]",spec.name,"mime",spec.avatarMime,"hookAvatar",hook?.avatar||null,"sentAvatar",sent?.author?.avatar||null);
 
     return NextResponse.json({
       ok:true,
@@ -145,6 +143,7 @@ export async function POST(request){
       avatar_applied:Boolean(sent?.author?.avatar),
       avatar_hash:sent?.author?.avatar||null,
       webhook_avatar_hash:hook?.avatar||null,
+      avatar_mime:spec.avatarMime,
       avatar_cdn_url:spec.forceAvatar&&hook?.avatar?`https://cdn.discordapp.com/avatars/${hook.id}/${hook.avatar}.png?size=128`:null,
     });
   }catch(error){
