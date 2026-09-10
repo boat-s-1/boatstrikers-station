@@ -7,9 +7,9 @@ export const dynamic="force-dynamic";
 export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
-  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune-v2",webhookName:"BSC 初音 v9",forceAvatar:true},
-  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
+  ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果 v2"},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune-v2",webhookName:"BSC 初音 v10"},
+  kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ v2"},
 };
 
 async function requireAdmin(request){
@@ -62,21 +62,19 @@ async function getOrCreateWebhook(channel,spec){
   let hook=(hooks||[]).find(h=>h.name===wantedName&&h.token);
 
   if(!hook){
+    // 3キャラ共通: Webhook作成時にavatarを直接渡す。
+    // 作成後に外部URLへ取りに行かせないため、Discord側へ画像データをその場で保存する。
+    const avatar=await loadAvatarDataUri(spec.avatarKey);
     hook=await discordApi(`/channels/${channel.id}/webhooks`,{
       method:"POST",
-      body:{name:wantedName},
+      body:{name:wantedName,avatar},
     });
   }
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // Webhookのavatar更新はWebhook token付きエンドポイントで行う。
-  // 初音は新しい128x128 JPEGを毎回確認・再設定して、旧Webhook状態を引き継がない。
-  if(spec.forceAvatar||!hook.avatar){
+  // 既存Webhookでavatarが欠けている場合だけ、token付きPATCHで補修する。
+  if(!hook.avatar){
     hook=await patchWebhookAvatarWithToken(hook,spec);
-  }
-
-  if(spec.forceAvatar&&!hook.avatar){
-    throw new Error("初音アイコンをDiscord Webhookへ設定できませんでした。送信を中止しました。");
   }
   return hook;
 }
@@ -137,6 +135,7 @@ export async function POST(request){
       channel_name:spec.channel,
       avatar_applied:Boolean(sent?.author?.avatar),
       avatar_hash:sent?.author?.avatar||null,
+      webhook_avatar_hash:hook?.avatar||null,
     });
   }catch(error){
     return NextResponse.json({ok:false,error:error?.message||"failed"},{status:error?.status||500});
