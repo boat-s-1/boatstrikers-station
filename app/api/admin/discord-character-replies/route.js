@@ -5,9 +5,9 @@ export const dynamic="force-dynamic";
 export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
-  ichika:{name:"一果",channel:"一果に質問",avatar:"https://www.boat-strike.online/7562660D-EB9C-4981-A1D1-789E6211DACA.png"},
-  hatsune:{name:"初音",channel:"初音に質問",avatar:"https://www.boat-strike.online/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png"},
-  kiina:{name:"キイナ",channel:"キイナに質問",avatar:"https://www.boat-strike.online/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png"},
+  ichika:{name:"一果",channel:"一果に質問",avatar:"https://www.boat-strike.online/api/discord/avatar/ichika"},
+  hatsune:{name:"初音",channel:"初音に質問",avatar:"https://www.boat-strike.online/api/discord/avatar/hatsune"},
+  kiina:{name:"キイナ",channel:"キイナに質問",avatar:"https://www.boat-strike.online/api/discord/avatar/kiina"},
 };
 
 async function requireAdmin(request){
