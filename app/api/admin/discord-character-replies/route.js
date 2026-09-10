@@ -8,7 +8,7 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v4",strictAvatar:true},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v5",strictAvatar:true},
   kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
 };
 
@@ -40,38 +40,44 @@ async function loadAvatarDataUri(avatarKey){
   return `data:image/jpeg;base64,${encoded.trim()}`;
 }
 
+async function patchWebhookWithToken(hook,spec){
+  const avatar=await loadAvatarDataUri(spec.avatarKey);
+  const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}`,{
+    method:"PATCH",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({name:spec.webhookName||`BSC ${spec.name}`,avatar}),
+    cache:"no-store",
+  });
+  const text=await response.text().catch(()=>"");
+  if(!response.ok){
+    throw new Error(`Webhookアイコン設定に失敗しました: ${response.status} ${text}`.slice(0,1200));
+  }
+  const updated=text?JSON.parse(text):{};
+  return {...hook,...updated,token:hook.token};
+}
+
 async function getOrCreateWebhook(channel,spec){
   const hooks=await discordApi(`/channels/${channel.id}/webhooks`);
   const wantedName=spec.webhookName||`BSC ${spec.name}`;
   let hook=(hooks||[]).find(h=>h.name===wantedName&&h.token);
 
   if(!hook){
-    const avatar=await loadAvatarDataUri(spec.avatarKey);
-    // name と avatar を同一リクエストで作成する。初音だけ後付け更新が反映されない
-    // ケースがあったため、作成時点でDiscord側に画像を保存する。
     hook=await discordApi(`/channels/${channel.id}/webhooks`,{
       method:"POST",
-      body:{name:wantedName,avatar},
+      body:{name:wantedName},
     });
   }
-
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // 既存の一果/キイナWebHookがavatar未設定なら従来通り補正する。
-  if(!hook.avatar&&!spec.strictAvatar){
-    const avatar=await loadAvatarDataUri(spec.avatarKey);
-    const updated=await discordApi(`/webhooks/${hook.id}`,{
-      method:"PATCH",
-      body:{name:wantedName,avatar},
-    });
-    hook={...hook,...(updated||{}),token:hook.token};
+  // Webhookのアバター変更は、Bot認証のPATCHではなくWebhook token付きエンドポイントを使う。
+  // 初音は過去Webhookの状態を引き継がないようv5を新規利用し、毎回確実に画像を再設定する。
+  if(spec.strictAvatar||!hook.avatar){
+    hook=await patchWebhookWithToken(hook,spec);
   }
 
-  // 初音は「設定できたつもり」で送らず、Discord側のavatar hashを必須確認する。
   if(spec.strictAvatar&&!hook.avatar){
     throw new Error("初音アイコンをDiscord Webhookへ設定できませんでした。送信は中止しました。");
   }
-
   return hook;
 }
 
@@ -121,12 +127,9 @@ export async function POST(request){
     });
     if(!response.ok){const t=await response.text().catch(()=>"");throw new Error(`Webhook送信に失敗しました: ${response.status} ${t}`.slice(0,1000));}
     const sent=await response.json();
-
-    // 初音だけは送信結果にもavatar hashがあることを確認。なければ問題を明示する。
     if(spec.strictAvatar&&!sent?.author?.avatar){
       throw new Error("初音メッセージは送信されましたが、Discord側でアイコンが反映されませんでした。Webhook状態を再確認してください。");
     }
-
     return NextResponse.json({ok:true,message_id:sent?.id||null,character,channel_name:spec.channel});
   }catch(error){
     return NextResponse.json({ok:false,error:error?.message||"failed"},{status:error?.status||500});
