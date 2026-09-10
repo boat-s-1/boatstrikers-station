@@ -41,7 +41,9 @@ export function isDiscordEligible(profile){
   return ["beta_premium","plus","premium"].includes(profile.plan);
 }
 
-export async function discordApi(path,{method="GET",body,token}={}){
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+export async function discordApi(path,{method="GET",body,token,_retry=0}={}){
   const response=await fetch(`https://discord.com/api/v10${path}`,{
     method,
     headers:{
@@ -51,6 +53,21 @@ export async function discordApi(path,{method="GET",body,token}={}){
     body:body?JSON.stringify(body):undefined,
     cache:"no-store",
   });
+
+  if(response.status===429){
+    const payload=await response.json().catch(()=>null);
+    const retryAfter=Math.max(0,Number(payload?.retry_after||0));
+    if(_retry<1&&retryAfter>0&&retryAfter<=20){
+      await sleep(Math.ceil(retryAfter*1000)+150);
+      return discordApi(path,{method,body,token,_retry:_retry+1});
+    }
+    const seconds=retryAfter>0?Math.ceil(retryAfter):null;
+    const error=new Error(seconds?`Discordのアクセス制限中です。約${seconds}秒後に再度お試しください。`:"Discordのアクセス制限中です。少し待ってから再度お試しください。");
+    error.status=429;
+    error.retryAfter=retryAfter;
+    throw error;
+  }
+
   if(!response.ok){
     const text=await response.text().catch(()=>"");
     throw new Error(`Discord API failed: ${response.status} ${text}`.slice(0,1200));
