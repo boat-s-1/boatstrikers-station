@@ -8,7 +8,7 @@ export const runtime="nodejs";
 
 const CHARACTER_CONFIG={
   ichika:{name:"一果",channel:"一果に質問",avatarKey:"ichika",webhookName:"BSC 一果"},
-  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v6",avatarUrl:"https://www.boat-strike.online/discord-assets/hatsune.jpg?v=6"},
+  hatsune:{name:"初音",channel:"初音に質問",avatarKey:"hatsune",webhookName:"BSC 初音 v7",avatarUrl:"https://www.boat-strike.online/api/discord/avatar/hatsune?v=7"},
   kiina:{name:"キイナ",channel:"キイナに質問",avatarKey:"kiina",webhookName:"BSC キイナ"},
 };
 
@@ -53,7 +53,6 @@ async function getOrCreateWebhook(channel,spec){
   }
   if(!hook?.id||!hook?.token)throw new Error("Webhookを作成できませんでした");
 
-  // 一果・キイナは既存のWebhook avatarを維持。
   if(!spec.avatarUrl&&!hook.avatar){
     const avatar=await loadAvatarDataUri(spec.avatarKey);
     const updated=await discordApi(`/webhooks/${hook.id}`,{
@@ -121,6 +120,7 @@ export async function POST(request){
       character,
       channel_name:spec.channel,
       avatar_applied:Boolean(sent?.author?.avatar),
+      avatar_url_used:spec.avatarUrl||null,
     });
   }catch(error){
     return NextResponse.json({ok:false,error:error?.message||"failed"},{status:error?.status||500});
