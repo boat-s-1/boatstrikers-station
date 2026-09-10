@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/discord-membership-sync",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/discord-community-poll",
