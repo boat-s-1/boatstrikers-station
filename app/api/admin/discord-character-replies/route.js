@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminClient, discordApi } from "../../../lib/discordPremium";
+import { getAdminClient, discordApi, discordConfig } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -17,14 +17,16 @@ async function requireAdmin(request){
   const {data,error}=await admin.auth.getUser(token);
   if(error||!data?.user)throw Object.assign(new Error("ログイン情報を確認できません"),{status:401});
   const allowIds=String(process.env.BSC_ADMIN_USER_IDS||"").split(",").map(v=>v.trim()).filter(Boolean);
-  if(!allowIds.includes(data.user.id))throw Object.assign(new Error("管理者権限がありません"),{status:403});
+  if(!allowIds.includes(data.user.id)){
+    throw Object.assign(new Error(`管理者権限がありません。Vercel の BSC_ADMIN_USER_IDS に ${data.user.id} を登録してください。`),{status:403});
+  }
   return {admin,user:data.user};
 }
 
 async function findQuestionChannel(character){
   const spec=CHARACTER_CONFIG[character];
   if(!spec)throw Object.assign(new Error("character が不正です"),{status:400});
-  const {guildId}=await import("../../../lib/discordPremium").then(m=>m.discordConfig());
+  const {guildId}=discordConfig();
   const channels=await discordApi(`/guilds/${guildId}/channels`);
   const channel=(channels||[]).find(c=>c.type===0&&c.name===spec.channel);
   if(!channel)throw new Error(`${spec.channel} が見つかりません`);
