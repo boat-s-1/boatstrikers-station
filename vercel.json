@@ -6,6 +6,10 @@
       "schedule": "*/2 22,0-13 * * *"
     },
     {
+      "path": "/api/cron/discord-race-threads",
+      "schedule": "*/5 22-23,0-13 * * *"
+    },
+    {
       "path": "/api/cron/discord-membership-sync",
       "schedule": "0 * * * *"
     },
