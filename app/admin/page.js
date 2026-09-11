@@ -59,6 +59,7 @@ const GROUPS = [
     description: "会員・同期・AI基盤・稼働状態を確認",
     items: [
       { href: "/admin/members", icon: "👥", title: "会員管理", text: "登録会員・β会員・メール確認・LINE連携を確認", badge: "よく使う" },
+      { href: "/admin/discord-replies", icon: "💬", title: "Discord運営", text: "キャラ質問への返信・実況スレッドへの一果／初音／キイナ名義投稿", badge: "NEW" },
       { href: "/admin/sync", icon: "🔄", title: "同期管理", text: "AutoSync・結果・展示データの状態を確認", badge: "重要" },
       { href: "/bsc2/admin", icon: "🤖", title: "AI Pipeline", text: "AI処理・生成・CSV登録" },
       { href: "/admin/engine-v3", icon: "🧠", title: "Engine v3", text: "AIエンジンの管理・実行" },
@@ -70,6 +71,7 @@ const FAVORITES = [
   { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS" },
   { href: "/admin/editorial", icon: "🗞️", title: "AI編集部" },
   { href: "/admin/alerts", icon: "🔔", title: "アラート管理" },
+  { href: "/admin/discord-replies", icon: "💬", title: "Discord運営" },
   { href: "/admin/members", icon: "👥", title: "会員管理" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート生成" },
   { href: "/admin/seminar-magazines", icon: "📚", title: "週刊3誌" },
