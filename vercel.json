@@ -10,6 +10,10 @@
       "schedule": "*/5 22-23,0-13 * * *"
     },
     {
+      "path": "/api/cron/discord-community-setup",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/discord-membership-sync",
       "schedule": "0 * * * *"
     },
