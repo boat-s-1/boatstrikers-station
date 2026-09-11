@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
-import { ensureNotificationRoles, getAdminClient, sendDiscordMessage } from "../../../lib/discordPremium";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { ensureNotificationRoles, getAdminClient, sendDiscordMessage, discordApi } from "../../../lib/discordPremium";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
 export const maxDuration=30;
+
+const ALERT_CHARACTERS={
+  ichika:{name:"一果",avatarKey:"ichika",avatarMime:"image/jpeg",webhookName:"BSC ALERT 一果"},
+  hatsune:{name:"初音",avatarKey:"hatsune-final",avatarMime:"image/jpeg",webhookName:"BSC ALERT 初音"},
+  kiina:{name:"キイナ",avatarKey:"kiina",avatarMime:"image/jpeg",webhookName:"BSC ALERT キイナ"},
+};
+const webhookCache=new Map();
 
 function authorized(request){
   const secret=process.env.CRON_SECRET;
@@ -93,6 +102,42 @@ function hatsuneBoxLine(alert){
   return "🎀 箱推しで注目！";
 }
 
+async function loadAvatarDataUri(spec){
+  const encoded=await readFile(path.join(process.cwd(),"public","discord",`${spec.avatarKey}.b64`),"utf8");
+  return `data:${spec.avatarMime};base64,${encoded.trim()}`;
+}
+async function getCharacterWebhook(channelId,roleKey){
+  const cacheKey=`${channelId}:${roleKey}`;
+  if(webhookCache.has(cacheKey))return webhookCache.get(cacheKey);
+  const spec=ALERT_CHARACTERS[roleKey];
+  if(!spec)throw new Error(`通知キャラクター設定がありません: ${roleKey}`);
+  const hooks=await discordApi(`/channels/${channelId}/webhooks`);
+  let hook=(hooks||[]).find(h=>h.name===spec.webhookName&&h.token);
+  if(!hook){
+    const avatar=await loadAvatarDataUri(spec);
+    hook=await discordApi(`/channels/${channelId}/webhooks`,{method:"POST",body:{name:spec.webhookName,avatar}});
+  }
+  if(!hook?.id||!hook?.token)throw new Error(`${spec.name}通知Webhookを作成できませんでした`);
+  webhookCache.set(cacheKey,{hook,spec});
+  return {hook,spec};
+}
+async function sendCharacterAlert(channelId,content,{roleId,roleKey}={}){
+  const {hook,spec}=await getCharacterWebhook(channelId,roleKey);
+  const bodyContent=roleId?`<@&${roleId}> ${content}`:content;
+  const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:spec.name,
+      content:String(bodyContent).slice(0,2000),
+      allowed_mentions:roleId?{parse:[],roles:[roleId]}:{parse:[]},
+    }),
+    cache:"no-store",
+  });
+  if(!response.ok){const text=await response.text().catch(()=>"");throw new Error(`Discord Webhook failed: ${response.status} ${text}`.slice(0,1200));}
+  return response.json().catch(()=>null);
+}
+
 const SOURCES=[
   {type:"kiina_double_top",table:"bs_exhibition_alerts",channel:"DISCORD_KIINA_CHANNEL_ID",roleKey:"kiina",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_rank,straight_rank,detected_at",build:a=>`🚨 **キイナ｜カド攻め理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n${kiinaLine(a)}\n${raceLink(a)}`},
   {type:"ichika_hidden_escape",table:"bs_ichika_hidden_escape_alerts",channel:"DISCORD_ICHIKA_CHANNEL_ID",roleKey:"ichika",select:"id,race_date,course_code,course_name,race_no,closing_time,exhibition_rank,exhibition_gap,lap_rank,detected_at",build:a=>`🏁 **一果｜隠れイン理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n展示${a.exhibition_rank??"-"}位｜一周${a.lap_rank??"-"}位${a.exhibition_gap!=null?`｜展示差 ${a.exhibition_gap}`:""}\n${raceLink(a)}`},
@@ -105,7 +150,10 @@ async function deliver(admin,source,alert,channelKey,channelId,roleId){
   if(!channelId)return {skipped:true};
   if(await alreadySent(admin,source.type,alert.id,channelKey))return {skipped:true};
   try{
-    const message=await sendDiscordMessage(channelId,source.build(alert),{roleId});
+    // キャラ別チャンネルはキャラ専用Webhook、全アラートはBoatStrikers Botアイコンのまま送信。
+    const message=channelKey==="all"
+      ?await sendDiscordMessage(channelId,source.build(alert),{roleId})
+      :await sendCharacterAlert(channelId,source.build(alert),{roleId,roleKey:source.roleKey});
     const now=new Date().toISOString();
     const {error}=await admin.from("bs_discord_notification_deliveries").upsert({alert_type:source.type,alert_id:alert.id,channel_key:channelKey,discord_message_id:message?.id||null,sent_at:now,error:null,updated_at:now},{onConflict:"alert_type,alert_id,channel_key"});
     if(error)throw error;return {sent:true};
