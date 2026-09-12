@@ -30,7 +30,20 @@ function MetricCard({ label, value, suffix = "" }) {
   );
 }
 
+function TicketChip({ ticket, isHit, stake }) {
+  return (
+    <div className={`${styles.ticketChip} ${isHit ? styles.ticketChipHit : ""}`}>
+      <span className={styles.ticketText}>{ticket}</span>
+      {stake ? <small className={styles.ticketStake}>{Number(stake).toLocaleString("ja-JP")}円</small> : null}
+      {isHit ? <span className={styles.ticketHitMark}>HIT</span> : null}
+    </div>
+  );
+}
+
 function BetCard({ item }) {
+  const tickets = Array.isArray(item.tickets) ? item.tickets : [];
+  const hitTicket = item.isHit ? String(item.resultCombination || "") : "";
+
   return (
     <article className={styles.betCard}>
       <div className={styles.betTop}>
@@ -39,11 +52,27 @@ function BetCard({ item }) {
           <span className={item.isHit ? styles.hitBadge : styles.missBadge}>{item.isHit ? "的中" : "不的中"}</span>
         )}
       </div>
-      <div className={styles.betFormation}>{item.formation || item.tickets?.join(" / ") || "—"}</div>
+
+      <div className={styles.betSectionHead}>
+        <strong>買い目</strong>
+        <span>（{tickets.length}点）</span>
+      </div>
+
+      <div className={styles.ticketGrid}>
+        {tickets.length ? tickets.map((ticket) => (
+          <TicketChip
+            key={ticket}
+            ticket={ticket}
+            isHit={ticket === hitTicket}
+            stake={item.stakes?.[ticket]}
+          />
+        )) : <span className={styles.emptyTickets}>—</span>}
+      </div>
+
       <div className={styles.betMeta}>
         <span>{item.characterLabel}</span>
         {item.investment ? <span>投資 {formatYen(item.investment)}</span> : null}
-        {item.isHit ? <span>払戻 {formatYen(item.payout)}</span> : null}
+        {item.isHit ? <span className={styles.payoutMeta}>払戻 {formatYen(item.payout)}</span> : null}
       </div>
     </article>
   );
