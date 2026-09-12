@@ -9,6 +9,7 @@ const COURSE_NAMES = {
 };
 
 const CHARACTER_LABELS = { ichika: "一果", hatsune: "初音", kiina: "キイナ" };
+const CHARACTER_CODES = new Set(Object.keys(CHARACTER_LABELS));
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -128,11 +129,13 @@ function toBetCard(row) {
   };
 }
 
-export async function GET() {
+export async function GET(request) {
   const supabase = getClient();
   if (!supabase) return NextResponse.json({ error: "supabase_not_configured" }, { status: 503 });
 
   try {
+    const requestedCharacter = request?.nextUrl?.searchParams?.get("character") || "";
+    const character = CHARACTER_CODES.has(requestedCharacter) ? requestedCharacter : "";
     const { start, next } = currentMonthRange();
     const [performanceRes, predictionsRes, oddsRes] = await Promise.all([
       supabase
@@ -147,7 +150,8 @@ export async function GET() {
     if (performanceRes.error) throw performanceRes.error;
     if (predictionsRes.error) throw predictionsRes.error;
 
-    const rows = Array.isArray(performanceRes.data) ? performanceRes.data : [];
+    const allRows = Array.isArray(performanceRes.data) ? performanceRes.data : [];
+    const rows = character ? allRows.filter((row) => row.character_code === character) : allRows;
     const predictionMap = new Map((predictionsRes.data || []).map((item) => [Number(item.id), item.snapshot || {}]));
 
     const earliestOddsByRace = new Map();
@@ -174,6 +178,7 @@ export async function GET() {
     const oddsStats = summarize(oddsRows);
 
     return NextResponse.json({
+      character: character || null,
       modes: {
         equal: {
           ready: true,
