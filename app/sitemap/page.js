@@ -3,7 +3,7 @@ import styles from "./sitemap.module.css";
 
 export const metadata = {
   title: "サイトマップ｜BoatStrikers",
-  description: "BoatStrikersの主要コンテンツを一覧でご案内します。出走表、キャラクター予想、図書館、全国24場攻略、漫画、ラジオなど、目的のページをこちらから探せます。",
+  description: "BoatStrikersの主要コンテンツを一覧でご案内します。出走表、初心者ガイド、DATA LAB、全国24場攻略、キャラクター予想、漫画、ラジオなど、目的のページをこちらから探せます。",
   alternates: { canonical: "/sitemap" },
   openGraph: {
     title: "サイトマップ｜BoatStrikers",
@@ -34,6 +34,8 @@ const sitemapGroups = [
     icon: "📚",
     color: "pink",
     links: [
+      { title: "ボートレース初心者ガイド", description: "基本ルール、舟券、出走表、展示、スタート、モーターなどを順番に学べます。", href: "/guide" },
+      { title: "BoatStrikers DATA LAB", description: "実レースデータを使い、買い方・イン逃げ・5号艇・女子戦などを独自検証します。", href: "/data-lab" },
       { title: "一果図書館", description: "攻略本、週刊誌、講座、バックナンバーをまとめています。", href: "/library" },
       { title: "全国24場攻略", description: "全国24ボートレース場の特徴や水面傾向を場ごとに紹介します。", href: "/library/stadiums" },
       { title: "一果のイン逃げ鉄板ゼミ", description: "イン逃げを見極めるための知識を学べます。", href: "/library/ichika-seminar" },
@@ -120,7 +122,7 @@ export default function SitemapPage() {
             </div>
             <div className="footerLinkGroup">
               <h2>学ぶ・楽しむ</h2>
-              <a href="/library">一果図書館</a><a href="/library/stadiums">全国24場攻略</a><a href="/ichika-sensei">教えて！一果センセー</a><a href="/comic">ふなけん研究部</a><a href="/radio">ボート・ナイト・ニッポン</a><a href="/schedule">番組表</a>
+              <a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library">一果図書館</a><a href="/library/stadiums">全国24場攻略</a><a href="/ichika-sensei">教えて！一果センセー</a><a href="/comic">ふなけん研究部</a><a href="/radio">ボート・ナイト・ニッポン</a><a href="/schedule">番組表</a>
             </div>
             <div className="footerLinkGroup">
               <h2>サイト案内</h2>
