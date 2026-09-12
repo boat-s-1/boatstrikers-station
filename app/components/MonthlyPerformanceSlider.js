@@ -4,18 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MonthlyPerformanceSlider.module.css";
 
 const MODES = [
-  { key: "equal", label: "均等買い", note: "各買い目を同額で購入した場合" },
-  { key: "confidence", label: "自信配分", note: "AIの自信度に合わせた資金配分" },
-  { key: "odds", label: "オッズ配分", note: "オッズを考慮した資金配分" },
+  { key: "equal", label: "均等買い", note: "全買い目を100円で購入" },
+  { key: "confidence", label: "自信配分", note: "自信上位300円・中間200円・下位100円" },
+  { key: "odds", label: "オッズ配分", note: "低オッズ側300円・中間200円・高オッズ側100円" },
 ];
 
 function formatNumber(value, digits = 1) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
-  return n.toLocaleString("ja-JP", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  });
+  return n.toLocaleString("ja-JP", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 function formatYen(value) {
@@ -28,10 +25,7 @@ function MetricCard({ label, value, suffix = "" }) {
   return (
     <div className={styles.metricCard}>
       <span>{label}</span>
-      <strong>
-        {value}
-        {value !== "—" && suffix ? <small>{suffix}</small> : null}
-      </strong>
+      <strong>{value}{value !== "—" && suffix ? <small>{suffix}</small> : null}</strong>
     </div>
   );
 }
@@ -42,9 +36,7 @@ function BetCard({ item }) {
       <div className={styles.betTop}>
         <strong>{item.courseName}{item.raceNo}R</strong>
         {item.isHit == null ? null : (
-          <span className={item.isHit ? styles.hitBadge : styles.missBadge}>
-            {item.isHit ? "的中" : "不的中"}
-          </span>
+          <span className={item.isHit ? styles.hitBadge : styles.missBadge}>{item.isHit ? "的中" : "不的中"}</span>
         )}
       </div>
       <div className={styles.betFormation}>{item.formation || item.tickets?.join(" / ") || "—"}</div>
@@ -66,21 +58,13 @@ export default function MonthlyPerformanceSlider({ initialEqualStats }) {
     let cancelled = false;
     fetch("/api/home-performance", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!cancelled && data) setDetail(data);
-      })
+      .then((data) => { if (!cancelled && data) setDetail(data); })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const modes = useMemo(() => {
-    const equal = detail?.modes?.equal || {
-      ready: true,
-      stats: initialEqualStats,
-      bets: [],
-    };
+    const equal = detail?.modes?.equal || { ready: true, stats: initialEqualStats, bets: [] };
     return {
       equal,
       confidence: detail?.modes?.confidence || { ready: false, stats: null, bets: [] },
@@ -126,12 +110,16 @@ export default function MonthlyPerformanceSlider({ initialEqualStats }) {
         {MODES.map((mode) => {
           const data = modes[mode.key];
           const stats = data?.stats || {};
+          const note = data?.rule || mode.note;
           return (
             <section className={styles.slide} key={mode.key} role="tabpanel">
               <div className={styles.modeHeader}>
                 <div>
                   <strong>{mode.label}</strong>
-                  <span>{mode.note}</span>
+                  <span>{note}</span>
+                  {mode.key === "odds" && data?.ready && data?.coverageRaceCount < data?.totalRaceCount ? (
+                    <span>※保存オッズがある {data.coverageRaceCount}R のみ集計</span>
+                  ) : null}
                 </div>
                 {!data?.ready ? <b className={styles.preparing}>準備中</b> : null}
               </div>
@@ -156,13 +144,13 @@ export default function MonthlyPerformanceSlider({ initialEqualStats }) {
                       ))}
                     </div>
                   ) : (
-                    <p className={styles.noBets}>買い目データを読み込み中です。</p>
+                    <p className={styles.noBets}>対象データがありません。</p>
                   )}
                 </div>
               ) : (
                 <div className={styles.pendingBox}>
-                  <strong>{mode.label}は資金配分ルール確定後に自動集計します</strong>
-                  <p>画面と集計枠は先に実装済みです。買い目数や配分方法を変更しても、このタブのまま対応できます。</p>
+                  <strong>{mode.label}は対象データを準備中です</strong>
+                  <p>保存済みデータが揃ったレースから自動で集計します。</p>
                 </div>
               )}
             </section>
@@ -171,9 +159,7 @@ export default function MonthlyPerformanceSlider({ initialEqualStats }) {
       </div>
 
       <div className={styles.dots} aria-hidden="true">
-        {MODES.map((mode, index) => (
-          <span key={mode.key} className={activeIndex === index ? styles.activeDot : ""} />
-        ))}
+        {MODES.map((mode, index) => <span key={mode.key} className={activeIndex === index ? styles.activeDot : ""} />)}
       </div>
     </div>
   );
