@@ -129,10 +129,8 @@ export default async function HatsunePage() {
         <Image src="/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png" alt="初音" width={1536} height={864} className="heroImage" priority />
       </section>
 
-      {/* AI予想はCharacterAiRoomPanelがヒーロー直下に表示。ここから女子戦情報・理論アラート。 */}
       <RealtimeUpdates target="hatsune" limit={5} />
 
-      {/* 新聞 */}
       <section className="sectionCard purpleCard">
         <img src="/top/IMG_7884.jpeg?v=20260901-0532" alt="初音新聞" className="homeTitleImage" />
         {newspaper ? (
@@ -147,7 +145,6 @@ export default async function HatsunePage() {
         ) : <p>今日の初音新聞はまだありません。</p>}
       </section>
 
-      {/* 成績 */}
       <section className="sectionCard purpleCard">
         <img src="/top/IMG_7883.jpeg?v=20260901-0532" alt="初音成績" className="homeTitleImage" />
         <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
@@ -158,10 +155,9 @@ export default async function HatsunePage() {
           <div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div>
           <div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div>
         </div>
-        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : <p className="recordLead">的中画像はまだ登録されていません。</p>}
+        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
       </section>
 
-      {/* 研究・記事 */}
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow"><img src="/top/IMG_7960.jpeg?v=20260904-0315" alt="初音ラボ" className="homeTitleImage" /></div>
         {articles.length > 0 ? (
@@ -176,7 +172,6 @@ export default async function HatsunePage() {
         ) : <p>初音ラボの記事はまだありません。</p>}
       </section>
 
-      {/* ラジオ */}
       <section className="sectionCard purpleCard">
         <div className="sectionTitleRow"><img src="/top/IMG_7954.jpeg?v=20260904-0315" alt="初音ラジオ" className="homeTitleImage" /></div>
         <p className="radioLead">初音が女子戦の流れやデータの見方をやさしく解説♪ 一果・キイナとの掛け合いも配信中！</p>
