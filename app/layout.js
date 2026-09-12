@@ -9,6 +9,7 @@ import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
 import CharacterShortsShelf from "./components/CharacterShortsShelf";
+import CharacterPerformancePortal from "./components/CharacterPerformancePortal";
 import IchikaBackgroundOnly from "./components/IchikaBackgroundOnly";
 import IchikaFixedWallpaperLayer from "./components/IchikaFixedWallpaperLayer";
 import IchikaNewspaperBannerOverride from "./components/IchikaNewspaperBannerOverride";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }) {
         <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
         <CharacterShortsShelf />
+        <CharacterPerformancePortal />
         <IchikaBackgroundOnly />
         <IchikaFixedWallpaperLayer />
         <IchikaNewspaperBannerOverride />
