@@ -23,6 +23,8 @@ create table if not exists public.bs_news_short_drafts (
 
 alter table public.bs_news_short_drafts enable row level security;
 
+revoke all privileges on table public.bs_news_short_drafts from anon, authenticated;
+revoke all privileges on sequence public.bs_news_short_drafts_id_seq from anon, authenticated;
 grant select, insert, update, delete on public.bs_news_short_drafts to service_role;
 grant usage, select on sequence public.bs_news_short_drafts_id_seq to service_role;
 
