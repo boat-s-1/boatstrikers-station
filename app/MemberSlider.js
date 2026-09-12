@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useRef, useState } from "react";
+import MonthlyPerformanceSlider from "./components/MonthlyPerformanceSlider";
 import styles from "./MemberSlider.module.css";
 
 const members = [
@@ -29,6 +31,28 @@ const members = [
 export default function MemberSlider() {
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [performanceTarget, setPerformanceTarget] = useState(null);
+
+  useEffect(() => {
+    const target = document.querySelector(".resultSummarySection");
+    if (!target) return;
+
+    const legacyBlocks = target.querySelectorAll(
+      ".resultStatsGrid, .resultMemberGrid, .resultEmptyState"
+    );
+    const previousDisplays = Array.from(legacyBlocks).map((node) => node.style.display);
+    legacyBlocks.forEach((node) => {
+      node.style.display = "none";
+    });
+
+    setPerformanceTarget(target);
+
+    return () => {
+      legacyBlocks.forEach((node, index) => {
+        node.style.display = previousDisplays[index] || "";
+      });
+    };
+  }, []);
 
   function updateActiveIndex() {
     const slider = sliderRef.current;
@@ -67,46 +91,52 @@ export default function MemberSlider() {
   }
 
   return (
-    <div className={styles.wrapper}>
-      <div
-        ref={sliderRef}
-        className={styles.slider}
-        onScroll={updateActiveIndex}
-        aria-label="メンバー紹介"
-      >
-        {members.map((member) => (
-          <Link
-            href={member.href}
-            className={styles.card}
-            key={member.name}
-            aria-label={`${member.name}の部屋へ`}
-          >
-            <Image
-              src={member.image}
-              alt={member.alt}
-              width={1536}
-              height={2048}
-              className={styles.image}
-              sizes="(max-width: 720px) 88vw, 600px"
+    <>
+      <div className={styles.wrapper}>
+        <div
+          ref={sliderRef}
+          className={styles.slider}
+          onScroll={updateActiveIndex}
+          aria-label="メンバー紹介"
+        >
+          {members.map((member) => (
+            <Link
+              href={member.href}
+              className={styles.card}
+              key={member.name}
+              aria-label={`${member.name}の部屋へ`}
+            >
+              <Image
+                src={member.image}
+                alt={member.alt}
+                width={1536}
+                height={2048}
+                className={styles.image}
+                sizes="(max-width: 720px) 88vw, 600px"
+              />
+            </Link>
+          ))}
+        </div>
+
+        <div className={styles.dots} aria-label="表示中のメンバー">
+          {members.map((member, index) => (
+            <button
+              key={member.name}
+              type="button"
+              className={`${styles.dot} ${
+                activeIndex === index ? styles.activeDot : ""
+              }`}
+              onClick={() => goTo(index)}
+              aria-label={`${member.name}を表示`}
+              aria-current={activeIndex === index ? "true" : undefined}
             />
-          </Link>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className={styles.dots} aria-label="表示中のメンバー">
-        {members.map((member, index) => (
-          <button
-            key={member.name}
-            type="button"
-            className={`${styles.dot} ${
-              activeIndex === index ? styles.activeDot : ""
-            }`}
-            onClick={() => goTo(index)}
-            aria-label={`${member.name}を表示`}
-            aria-current={activeIndex === index ? "true" : undefined}
-          />
-        ))}
-      </div>
-    </div>
+      {performanceTarget
+        ? createPortal(<MonthlyPerformanceSlider />, performanceTarget)
+        : null}
+    </>
   );
 }
