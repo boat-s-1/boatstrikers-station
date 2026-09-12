@@ -132,10 +132,8 @@ export default async function KiinaPage() {
         <Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority />
       </section>
 
-      {/* AI予想はCharacterAiRoomPanelがヒーロー直下に表示。ここからカド攻め理論アラート。 */}
       <RealtimeUpdates target="kiina" limit={5} />
 
-      {/* 新聞 */}
       <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_8019.jpeg?v=20260906-0649" alt="5アタマ攻略新聞" className="homeTitleImage" style={edgeBannerImageStyle} />
@@ -152,7 +150,6 @@ export default async function KiinaPage() {
         ) : <p>今日のキイナ新聞はまだありません。</p>}
       </section>
 
-      {/* 成績 */}
       <section className="sectionCard purpleCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_8020.jpeg?v=20260906-0649" alt="今月の成績" className="homeTitleImage" style={edgeBannerImageStyle} />
@@ -165,10 +162,9 @@ export default async function KiinaPage() {
           <div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div>
           <div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div>
         </div>
-        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : <p className="recordLead">的中画像はまだ登録されていません。</p>}
+        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
       </section>
 
-      {/* 研究・記事 */}
       <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_7992.jpeg?v=20260905-0810" alt="キイナラボ" className="homeTitleImage" style={edgeBannerImageStyle} />
@@ -185,7 +181,6 @@ export default async function KiinaPage() {
         ) : <p>穴党ラボの記事はまだありません。</p>}
       </section>
 
-      {/* ラジオ */}
       <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_7993.jpeg?v=20260905-0810" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} />
