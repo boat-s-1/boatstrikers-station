@@ -26,6 +26,20 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <strong>📢 速報</strong>
       <div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div>
     </div>
+
+    <nav className={styles.learnNav} aria-label="BoatStrikersの読み物コンテンツ">
+      <a href="/guide" className={styles.learnCard}>
+        <span aria-hidden="true">📖</span>
+        <div><small>FOR BEGINNERS</small><strong>初心者ガイド</strong><p>基本ルール・舟券・展示を学ぶ</p></div>
+        <b>›</b>
+      </a>
+      <a href="/data-lab" className={styles.learnCard}>
+        <span aria-hidden="true">📊</span>
+        <div><small>DATA &amp; RESEARCH</small><strong>BoatStrikers DATA LAB</strong><p>実レースデータの独自検証を読む</p></div>
+        <b>›</b>
+      </a>
+    </nav>
+
     <div className={styles.card}>
       <div className={styles.todayBannerWrap}>
         <img
@@ -58,8 +72,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
         }):<div className={styles.empty}>
           <strong>📅 本日の配信予定はありません</strong>
-          <span>初心者講座や全国24場攻略の最新記事をお楽しみください。</span>
-          <div><a href="/ichika-sensei">初心者講座</a><a href="/library/stadiums">24場攻略</a></div>
+          <span>初心者講座やDATA LAB、全国24場攻略の最新記事をお楽しみください。</span>
+          <div><a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library/stadiums">24場攻略</a></div>
         </div>}
       </div>
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
