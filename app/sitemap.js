@@ -27,7 +27,7 @@ const STATIC_PAGES = [
   ['', 'daily', 1],
   ['/races', 'daily', 1],
   ['/news', 'daily', 0.9],
-  ['/results', 'daily', 0.8],
+  ['/ai-results', 'daily', 0.8],
   ['/schedule', 'weekly', 0.7],
   ['/guide', 'weekly', 0.9],
   ['/data-lab', 'weekly', 0.9],
