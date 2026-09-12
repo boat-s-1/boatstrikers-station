@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { dataLabArticles, getDataLabArticle } from "../articles";
+import { dataLabArticles, getDataLabArticle } from "../allArticles";
 import styles from "./article.module.css";
 
 export function generateStaticParams() {

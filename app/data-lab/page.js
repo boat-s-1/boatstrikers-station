@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { dataLabArticles } from "./articles";
+import { dataLabArticles } from "./allArticles";
 import styles from "./data-lab.module.css";
 
 export const metadata = {
   title: "BoatStrikers DATA LAB｜実レースデータで検証するボートレース研究",
   description:
-    "BoatStrikers DATA LABは、実レースデータをもとに買い方、イン逃げ、5号艇、女子戦などを検証する研究コンテンツです。集計条件と結果を明示し、的中率だけでなく回収率まで確認します。",
+    "BoatStrikers DATA LABは、実レースデータをもとに買い方、イン逃げ、展示、モーター、出目、女子戦などを検証する研究コンテンツです。集計条件と結果を明示し、的中率だけでなくデータの意味まで確認します。",
   alternates: { canonical: "/data-lab" },
   openGraph: {
     title: "BoatStrikers DATA LAB",
