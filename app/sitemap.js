@@ -1,8 +1,9 @@
 import { STADIUMS } from '../lib/stadiums';
 import { GUIDE_ARTICLES } from './guide/guideData';
+import { dataLabArticles } from './data-lab/articles';
 
 const BASE_URL = 'https://www.boat-strike.online';
-const CONTENT_UPDATED_AT = new Date('2026-09-07T00:00:00+09:00');
+const CONTENT_UPDATED_AT = new Date('2026-09-12T00:00:00+09:00');
 
 const DEEP_DIVE_GUIDES = [
   'course-entry',
@@ -29,6 +30,7 @@ const STATIC_PAGES = [
   ['/results', 'daily', 0.8],
   ['/schedule', 'weekly', 0.7],
   ['/guide', 'weekly', 0.9],
+  ['/data-lab', 'weekly', 0.9],
   ['/library', 'weekly', 0.8],
   ['/library/free', 'weekly', 0.6],
   ['/library/ichika-seminar', 'weekly', 0.7],
@@ -72,6 +74,13 @@ export default function sitemap() {
     priority: 0.7,
   }));
 
+  const dataLabEntries = dataLabArticles.map((article) => ({
+    url: `${BASE_URL}/data-lab/${article.slug}`,
+    lastModified: new Date(`${article.updatedAt || article.publishedAt}T00:00:00+09:00`),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
   const stadiumEntries = STADIUMS.map((stadium) => ({
     url: `${BASE_URL}/library/stadium/${stadium.slug}`,
     lastModified: CONTENT_UPDATED_AT,
@@ -83,6 +92,7 @@ export default function sitemap() {
     ...staticEntries,
     ...beginnerGuideEntries,
     ...deepDiveGuideEntries,
+    ...dataLabEntries,
     ...stadiumEntries,
   ];
 }
