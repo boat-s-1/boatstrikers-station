@@ -63,6 +63,7 @@ export function predictionToDatabaseRow({
 
   const markedBoats = getMarkedBoats(prediction);
   const generatedAt = prediction.generated_at || new Date().toISOString();
+  const bets = Array.isArray(prediction.bet_json) ? prediction.bet_json : [];
 
   return {
     race_date: raceDate,
@@ -70,7 +71,7 @@ export function predictionToDatabaseRow({
     race_no: Number(raceNo),
     character_code: CHARACTER_CODE,
     timing: String(prediction.timing),
-    model_version: prediction.engine_version || "phase2-v13",
+    model_version: prediction.engine_version || "phase2-v14",
     score:
       prediction.score === null || prediction.score === undefined
         ? null
@@ -86,7 +87,7 @@ export function predictionToDatabaseRow({
       toIntegerOrNull(prediction.fourth_boat) ?? markedBoats[3] ?? null,
     danger_level: prediction.danger_level || null,
     comment_text: prediction.comment_text || null,
-    bet_json: Array.isArray(prediction.bet_json) ? prediction.bet_json : [],
+    bet_json: bets,
     predicted_at: generatedAt,
     published: true,
     detail_json: {
@@ -98,6 +99,8 @@ export function predictionToDatabaseRow({
       danger_score: prediction.danger_score ?? null,
       score_before: prediction.score_before ?? null,
       score_delta: prediction.score_delta ?? null,
+      bet_count: prediction.bet_count ?? bets.length,
+      bet_count_rule: prediction.bet_count_rule || null,
       source: prediction.source || "phase2_fallback",
       generated_at: generatedAt,
     },

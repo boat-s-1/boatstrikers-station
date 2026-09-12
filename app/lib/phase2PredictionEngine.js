@@ -94,25 +94,59 @@ function marksFromPower(entries, powerMap) {
     }));
 }
 
+function targetBetCount(score) {
+  const value = finite(score) ?? 60;
+  if (value >= 88) return 4;
+  if (value >= 80) return 5;
+  if (value >= 72) return 6;
+  if (value >= 64) return 7;
+  return 8;
+}
+
+function confidenceLabel(index) {
+  if (index === 0) return "本線";
+  if (index <= 2) return "対抗";
+  return "押さえ";
+}
+
 function buildBets(score, marks) {
-  const boats = marks.map((m) => m.boat_no);
-  const [first = 1, second = 2, third = 3] = boats;
-  const rest = [1, 2, 3, 4, 5, 6].filter((n) => !boats.includes(n));
-  const fourth = rest[0] ?? 4;
+  const marked = marks
+    .map((m) => Number(m?.boat_no))
+    .filter((boatNo, index, values) => boatNo >= 1 && boatNo <= 6 && values.indexOf(boatNo) === index);
+  const rankedBoats = [...marked, ...[1, 2, 3, 4, 5, 6].filter((boatNo) => !marked.includes(boatNo))];
+  const [first = 1, second = 2, third = 3, fourth = 4, fifth = 5] = rankedBoats;
+  const target = targetBetCount(score);
+  const candidates = [];
+  const seen = new Set();
 
-  if (first === 1 && score >= 64) {
-    return [
-      { bet: `1-${second}-${third}`, confidence: "本線" },
-      { bet: `1-${third}-${second}`, confidence: "対抗" },
-      { bet: `1-${second}-${fourth}`, confidence: "押さえ" },
-    ];
-  }
+  const add = (a, b, c) => {
+    if (![a, b, c].every((boatNo) => Number.isInteger(boatNo) && boatNo >= 1 && boatNo <= 6)) return;
+    if (a === b || a === c || b === c) return;
+    const bet = `${a}-${b}-${c}`;
+    if (seen.has(bet)) return;
+    seen.add(bet);
+    candidates.push(bet);
+  };
 
-  return [
-    { bet: `${first}-${second}-${third}`, confidence: "本線" },
-    { bet: `${first}-${third}-${second}`, confidence: "対抗" },
-    { bet: `${second}-${first}-${third}`, confidence: "押さえ" },
-  ];
+  // 最低4点は「本命頭 × 対抗2着」の3着流し。
+  // 例: 本命1・対抗2なら 1-2-3456 の4点になる。
+  rankedBoats
+    .filter((boatNo) => boatNo !== first && boatNo !== second)
+    .forEach((thirdBoat) => add(first, second, thirdBoat));
+
+  // 5〜8点目はAI評価順に相手替わりを追加する。
+  add(first, third, second);
+  add(first, third, fourth);
+  add(first, fourth, second);
+  add(second, first, third);
+  add(first, fourth, third);
+  add(first, fifth, second);
+  add(third, first, second);
+
+  return candidates.slice(0, target).map((bet, index) => ({
+    bet,
+    confidence: confidenceLabel(index),
+  }));
 }
 
 function buildComment({ score, marks, factors, isLive, delta }) {
@@ -161,6 +195,7 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     motor: Math.round(motor * 100),
     start: Math.round(start * 100),
   };
+  const previousBets = buildBets(previousScore, marks);
 
   const previousPrediction = {
     timing: "previous_day",
@@ -170,11 +205,13 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     danger_level: dangerLabel(previousScore),
     danger_score: 100 - previousScore,
     marks,
-    bet_json: buildBets(previousScore, marks),
+    bet_json: previousBets,
+    bet_count: previousBets.length,
+    bet_count_rule: "variable_4_to_8",
     factors: previousFactors,
     comment_text: buildComment({ score: previousScore, marks, factors: { motor }, isLive: false, delta: 0 }),
     generated_at: new Date().toISOString(),
-    engine_version: "phase2-v13",
+    engine_version: "phase2-v14",
     source: "phase2_fallback",
   };
 
@@ -193,6 +230,7 @@ export function buildPhase2Predictions({ event, entries = [] }) {
   const rivalExhibition = average(rivals.map((entry) => exhibitionPower(entry, entries))) ?? 0.5;
   const delta = Math.round(clamp((lane1Exhibition - rivalExhibition) * 22, -12, 12));
   const liveScore = Math.round(clamp(previousScore + delta, 30, 96));
+  const liveBets = buildBets(liveScore, liveMarks);
 
   const livePrediction = {
     timing: "after_exhibition",
@@ -204,14 +242,16 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     danger_level: dangerLabel(liveScore),
     danger_score: 100 - liveScore,
     marks: liveMarks,
-    bet_json: buildBets(liveScore, liveMarks),
+    bet_json: liveBets,
+    bet_count: liveBets.length,
+    bet_count_rule: "variable_4_to_8",
     factors: {
       ...previousFactors,
       exhibition: Math.round(lane1Exhibition * 100),
     },
     comment_text: buildComment({ score: liveScore, marks: liveMarks, factors: { motor }, isLive: true, delta }),
     generated_at: new Date().toISOString(),
-    engine_version: "phase2-v13",
+    engine_version: "phase2-v14",
     source: "phase2_fallback",
   };
 
