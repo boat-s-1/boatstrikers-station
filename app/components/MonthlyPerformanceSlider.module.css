@@ -207,13 +207,89 @@
   color: #77808f;
 }
 
-.betFormation {
-  margin: 8px 0 6px;
+.betSectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: 9px 0 7px;
+  color: #214b8f;
+}
+
+.betSectionHead strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.betSectionHead span {
+  color: #8a7652;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.ticketGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: stretch;
+  margin-bottom: 9px;
+}
+
+.ticketChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: #f8fbff;
+  border: 1px solid #cadcf3;
+  box-shadow: 0 1px 2px rgba(28,81,139,.06);
+}
+
+.ticketChipHit {
+  background: #fff0f5;
+  border-color: #ff9fbd;
+  box-shadow: 0 2px 7px rgba(225,49,82,.12);
+}
+
+.ticketText {
   color: #0d57a7;
-  font-size: 15px;
-  line-height: 1.35;
+  font-size: 12px;
+  line-height: 1;
   font-weight: 950;
-  word-break: break-word;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+.ticketChipHit .ticketText {
+  color: #d82f53;
+}
+
+.ticketStake {
+  color: #8a7652;
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.ticketHitMark {
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: #df3152;
+  color: #fff;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.emptyTickets {
+  color: #8a7652;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .betMeta {
@@ -223,6 +299,11 @@
   color: #8a7652;
   font-size: 8px;
   font-weight: 800;
+}
+
+.payoutMeta {
+  color: #c93655;
+  font-weight: 950;
 }
 
 .pendingBox {
@@ -282,5 +363,7 @@
 @media (max-width: 360px) {
   .tabs button { font-size: 11px; }
   .metricCard strong { font-size: 22px; }
-  .betFormation { font-size: 13px; }
+  .ticketChip { padding: 5px 6px; gap: 2px 4px; }
+  .ticketText { font-size: 11px; }
+  .ticketStake { font-size: 7px; }
 }
