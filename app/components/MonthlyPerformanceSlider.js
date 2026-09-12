@@ -49,19 +49,20 @@ function BetCard({ item }) {
   );
 }
 
-export default function MonthlyPerformanceSlider({ initialEqualStats }) {
+export default function MonthlyPerformanceSlider({ initialEqualStats, character }) {
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [detail, setDetail] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/home-performance", { cache: "no-store" })
+    const query = character ? `?character=${encodeURIComponent(character)}` : "";
+    fetch(`/api/home-performance${query}`, { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => { if (!cancelled && data) setDetail(data); })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [character]);
 
   const modes = useMemo(() => {
     const equal = detail?.modes?.equal || { ready: true, stats: initialEqualStats, bets: [] };
