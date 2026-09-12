@@ -62,6 +62,10 @@
       "schedule": "45 13 * * *"
     },
     {
+      "path": "/api/cron/news-short-draft",
+      "schedule": "50 13 * * *"
+    },
+    {
       "path": "/api/cron/news-editorials",
       "schedule": "20 3,6,9,14 * * *"
     },
