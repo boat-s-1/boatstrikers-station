@@ -162,10 +162,8 @@ export default async function IchikaPage() {
         <Image src="/7562660D-EB9C-4981-A1D1-789E6211DACA.png" alt="一果" width={1536} height={2048} className="heroImage" priority />
       </section>
 
-      {/* AI予想はCharacterAiRoomPanelがヒーロー直下に表示。ここから理論アラート。 */}
       <RealtimeUpdates target="ichika" limit={5} />
 
-      {/* 新聞 */}
       <section className="sectionCard pinkCard">
         <img src="/IMG_6130.jpeg" alt="一果新聞" className="homeTitleImage" />
         {newspaper ? (
@@ -180,7 +178,6 @@ export default async function IchikaPage() {
         ) : <p>今日の一果新聞はまだありません。</p>}
       </section>
 
-      {/* 成績 */}
       <section className="sectionCard pinkCard">
         <img src="/IMG_6131.jpeg" alt="一果成績" className="homeTitleImage" />
         <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
@@ -191,10 +188,9 @@ export default async function IchikaPage() {
           <div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div>
           <div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div>
         </div>
-        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : <p className="recordLead">的中画像はまだ登録されていません。</p>}
+        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
       </section>
 
-      {/* 研究・記事 */}
       <section className="sectionCard pinkCard">
         <div className="sectionTitleRow"><img src="/IMG_6135.jpeg" alt="一果ラボ" className="homeTitleImage" /></div>
         {articles.length > 0 ? (
@@ -209,7 +205,6 @@ export default async function IchikaPage() {
         ) : <p>一果ラボの記事はまだありません。</p>}
       </section>
 
-      {/* ラジオ */}
       <section className="sectionCard pinkCard">
         <div className="sectionTitleRow"><img src="/IMG_6133.jpeg" alt="一果ラジオ" className="homeTitleImage" /></div>
         <p className="radioLead">一果・初音・キイナがお届けする競艇ラジオ♪ イン飛び研究や女子戦考察、穴党反省会を配信中！</p>
