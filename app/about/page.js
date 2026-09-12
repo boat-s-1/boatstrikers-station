@@ -5,14 +5,14 @@ import styles from "./about.module.css";
 export const metadata = {
   title: "BoatStrikersについて｜BoatStrikers",
   description:
-    "BoatStrikersは、出走表、展示情報、キャラクター予想、初心者講座、漫画、ラジオ、全国24場攻略を楽しめるボートレース情報サイトです。",
+    "BoatStrikersは、出走表、展示情報、初心者講座、全国24場攻略、DATA LABによる独自データ検証などを発信するボートレース情報サイトです。",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
     title: "BoatStrikersについて",
     description:
-      "ボートレースを　もっと楽しくもっと分かりやすく。BoatStrikersのコンセプトやコンテンツをご紹介します。",
+      "ボートレースをもっと楽しく、もっと分かりやすく。BoatStrikersのコンセプト、DATA LABの検証方針、掲載情報の考え方をご紹介します。",
     url: "/about",
     type: "website",
   },
@@ -71,6 +71,12 @@ const contents = [
     href: "/library",
   },
   {
+    icon: "📊",
+    title: "BoatStrikers DATA LAB",
+    text: "実レースデータをもとに、展示・モーター・コース・買い方などを条件を明示して検証します。",
+    href: "/data-lab",
+  },
+  {
     icon: "🎬",
     title: "漫画・動画",
     text: "『ふなけん研究部』や『教えて！一果センセー』を気軽に楽しめます。",
@@ -123,7 +129,7 @@ export default function AboutPage() {
           </p>
 
           <p className={styles.heroDescription}>
-            予想だけではなく、学ぶ・見る・聴くまで。
+            予想だけではなく、学ぶ・見る・聴く・調べるまで。
             <br />
             3人のキャラクターと一緒にボートレースを楽しむ情報サイトです。
           </p>
@@ -157,7 +163,7 @@ export default function AboutPage() {
           <p>
             一果のイン逃げ予想、初音の女子戦攻略、
             キイナの5号艇・穴狙い情報を中心に、
-            出走表、展示情報、予想新聞、全国24場攻略、漫画、動画、ラジオなどを配信しています。
+            出走表、展示情報、予想新聞、初心者ガイド、全国24場攻略、DATA LAB、漫画、動画、ラジオなどを配信しています。
           </p>
 
           <div className={styles.messageBox}>
@@ -232,6 +238,64 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section className={styles.introSection}>
+        <div className={styles.sectionHeading}>
+          <span>DATA &amp; EDITORIAL POLICY</span>
+          <h2>DATA LABのデータ取得・検証方針</h2>
+          <p>数値の根拠と集計条件をできるだけ明確にし、結果だけを切り取らない検証を行います。</p>
+        </div>
+
+        <div className={styles.introCard}>
+          <p>
+            BoatStrikers DATA LABでは、レース日、場、レース番号、艇番、選手情報、モーター成績、
+            展示タイム、スタート情報、着順、3連単結果・払戻など、収集・保存したレースデータをもとに集計します。
+            データは項目ごとに取得状況が異なるため、記事では実際に値が確認できた対象だけを集計し、
+            対象期間や件数を明示します。
+          </p>
+
+          <p>
+            比較するときは、できる限り同じ期間・同じ条件で対象をそろえます。
+            たとえば「展示1位」「モーター2連対率40%以上」「4号艇1着」など、先に条件を定めてから対象全体を集計し、
+            都合のよいレースだけを後から抜き出すことはしません。
+          </p>
+
+          <p>
+            的中率・1着率・2連対率・3連対率・払戻などは、それぞれ意味が異なります。
+            「当たりやすい」ことと「利益が出る」ことを同一視せず、回収率を算出できるだけの購入条件やオッズ履歴がない場合は、
+            回収率を推測で掲載しません。確認できない数値は「未集計」「検証予定」として扱います。
+          </p>
+
+          <p>
+            記事の文章作成や整理にAIを利用する場合がありますが、公開する実数値は保存データや確認済み集計を根拠にします。
+            AIが生成した推測値を実測データとして掲載しないことを編集方針としています。
+          </p>
+
+          <div className={styles.messageBox}>
+            <strong>DATA LABで大切にしている4つのこと</strong>
+            <span>
+              ① 対象期間と件数を明示する　② 条件を先に決めて集計する　③ 的中率と回収率を分けて考える　④ 確認できない数値を作らない
+            </span>
+          </div>
+
+          <div className={styles.messageBox}>
+            <strong>データは「未来を保証する答え」ではありません</strong>
+            <span>
+              過去の傾向は、次のレース結果を保証するものではありません。BoatStrikersでは、データを断定材料ではなく、
+              レースを見る視点や仮説を検証するための参考情報として扱います。
+            </span>
+          </div>
+
+          <div className={styles.messageBox}>
+            <strong>現在公開中の独自検証を見る</strong>
+            <span>
+              展示、モーター、1号艇、4号艇、女子戦、買い方などの研究記事は
+              <Link href="/data-lab"> BoatStrikers DATA LAB </Link>
+              で公開しています。
+            </span>
+          </div>
+        </div>
+      </section>
+
       <section className={styles.policySection}>
         <div className={styles.policyCard}>
           <div className={styles.policyIcon} aria-hidden="true">
@@ -279,6 +343,8 @@ export default function AboutPage() {
       <div className="footerLinkGroup">
         <h2>学ぶ・楽しむ</h2>
 
+        <a href="/guide">ボートレース初心者ガイド</a>
+        <a href="/data-lab">BoatStrikers DATA LAB</a>
         <a href="/library">一果図書館</a>
         <a href="/library/stadiums">全国24場攻略</a>
         <a href="/ichika-sensei">教えて！一果センセー</a>
