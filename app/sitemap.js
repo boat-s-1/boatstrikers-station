@@ -1,6 +1,6 @@
 import { STADIUMS } from '../lib/stadiums';
 import { GUIDE_ARTICLES } from './guide/guideData';
-import { dataLabArticles } from './data-lab/articles';
+import { dataLabArticles } from './data-lab/allArticles';
 
 const BASE_URL = 'https://www.boat-strike.online';
 const CONTENT_UPDATED_AT = new Date('2026-09-12T00:00:00+09:00');
