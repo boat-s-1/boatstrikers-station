@@ -24,6 +24,7 @@ const GROUPS = [
     title: "コンテンツ制作",
     description: "SNS・記事・動画・雑誌・配信素材を作成",
     items: [
+      { href: "/admin/x-night-posts", icon: "🌙", title: "今夜のX投稿候補", text: "22:35生成の一果・初音・キイナ・公式・TOP5をコピーして投稿" },
       { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS", text: "昨日の結果をX・ショート台本・9:16画像へ自動変換" },
       { href: "/admin/data-lab-social#minamo-comic", icon: "🏫", title: "みなも学園4コマ", text: "前日の結果・ニュースから4コマ生成プロンプトを作成" },
       { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け" },
@@ -78,9 +79,9 @@ const FAVORITES = [
   { href: "/admin/realtime", icon: "⚡", title: "リアルタイム更新" },
   { href: "/admin/schedule", icon: "📅", title: "今日の予定" },
   { href: "/admin/alerts", icon: "🔔", title: "アラート管理" },
+  { href: "/admin/x-night-posts", icon: "🌙", title: "今夜のX投稿候補" },
   { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS" },
   { href: "/admin/data-lab-social#minamo-comic", icon: "🏫", title: "みなも学園4コマ" },
-  { href: "/admin/editorial", icon: "🗞️", title: "AI編集部" },
   { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成" },
 ];
 
