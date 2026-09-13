@@ -24,6 +24,11 @@ function jstYesterday() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }
 
+function hasCharacterDetails(item) {
+  const d = item?.image_payload?.character_details;
+  return Boolean(d?.ichika && d?.hatsune && d?.kiina);
+}
+
 async function loadOutput(date) {
   const client = getClient();
   if (!client) return { item: null, history: [], error: "Supabase環境変数がありません。" };
@@ -34,7 +39,7 @@ async function loadOutput(date) {
     .eq("race_date", date)
     .maybeSingle();
 
-  if (!error && !item) {
+  if (!error && (!item || !hasCharacterDetails(item))) {
     try {
       await generateDataLabSocialOutputs({ date });
       const retry = await client
@@ -79,7 +84,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
           <div>
             <span>BOATSTRIKERS CONTENT STUDIO</span>
             <h1>DATA LAB SNS</h1>
-            <p>前日の結果データから、9:16画像・X投稿・ショート台本・3人入り固定テンプレ用プロンプトをまとめて生成します。</p>
+            <p>前日の結果データから、9:16画像・X投稿・ショート台本・キャラ別2枚目用の専門集計までまとめて生成します。</p>
           </div>
           <form className={styles.dateForm} method="get">
             <input type="date" name="date" defaultValue={selectedDate} />
@@ -99,7 +104,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
               <h2>9:16 SNS画像</h2>
               <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
               <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
-              <p className={styles.note}>左の画像は数値確認用の自動描画版です。SNS投稿用の3人入りデザインは、右側の「3人入り固定テンプレ」で今日の数値入りプロンプトをコピーして作成できます。</p>
+              <p className={styles.note}>左の画像は数値確認用の自動描画版です。右側のDATA LAB画像生成プロンプトでは、共通表紙＋一果/初音/キイナの専門2枚目を作成できます。</p>
             </section>
 
             <section className={styles.contentCard}>
