@@ -10,6 +10,14 @@ const PRESETS = [
   { key: "anime", label: "キャラ強め版", tone: "3人を少し大きめにし、VTuber番組のような親しみやすさを強める。ただしデータ欄を隠さない。" },
 ];
 
+const OUTPUT_MODES = [
+  { key: "cover", label: "共通表紙 1枚", detail: null },
+  { key: "common", label: "共通 2枚", detail: "common" },
+  { key: "ichika", label: "一果 2枚", detail: "ichika" },
+  { key: "hatsune", label: "初音 2枚", detail: "hatsune" },
+  { key: "kiina", label: "キイナ 2枚", detail: "kiina" },
+];
+
 function statsMap(payload) {
   const map = {};
   const stats = Array.isArray(payload?.stats) ? payload.stats : [];
@@ -29,61 +37,108 @@ function topText(payload) {
   return `${top.venue || ""}${top.race_no || ""}R ${top.trifecta || ""} / ${Number(top.payout || 0).toLocaleString("ja-JP")}円`;
 }
 
-function buildPrompt(payload, preset) {
+function buildCoverPrompt(payload, preset) {
   const s = statsMap(payload);
   const title = payload?.title || "昨日のボートレースを数字で見る";
   const headline = payload?.headline || "";
   const date = payload?.date || "";
 
-  return `BoatStrikers DATA LABの9:16縦長SNS画像を作成してください。\n\n【最重要】\n・1080×1920、9:16\n・毎日同じ構成で使う固定テンプレート\n・参考レイアウトは「上部に3キャラ、中央〜下部にデータカード」\n・数値、場名、出目、配当は下記データから絶対に変更しない\n・文字化け、余計な英語、架空の数値を追加しない\n・数字を最優先で読みやすくする\n・キャラクターがデータ欄を隠さない\n・濃紺、ダークブルー、白、ゴールドを基本色にする\n\n【選択デザイン】\n${preset.label}\n${preset.tone}\n\n【BoatStrikersキャラクター】\n上部に3人を横並びで配置。既存デザインを崩さない。\n左：一果。深緑〜グリーン系。落ち着いたリーダー感。イン逃げ分析担当。\n中央：初音。紫髪、ピンクのうさ耳フード。不思議で可愛い雰囲気。女子戦分析担当。\n右：キイナ。黄色〜ゴールド系、明るく元気で少し攻めた雰囲気。穴狙い分析担当。\n一果の下に緑のタグ「一果｜イン逃げ分析」\n初音の下に紫のタグ「初音｜女子戦分析」\nキイナの下に黄色のタグ「キイナ｜穴狙い分析」\n3人の背景に薄いモニター、ボートレース映像、データグラフ、水しぶき、HUDを入れる。\n\n【固定レイアウト】\n1. 上部：BoatStrikers DATA LABロゴ＋3キャラクター\n2. 大見出し：${title}\n3. サマリー帯：${headline}\n4. 右上の日付：${date}\n5. 開催カード\n6. 2列のデータカード群\n7. 横長の逃げカード\n8. 白×ゴールドの最高配当カード\n9. 左下「万舟が多かった場 TOP5」\n10. 右下「事故・異常者」「優勝戦・DR」\n11. 最下部フッター「昨日の結果を、数字で振り返る。」「BoatStrikers」「boat-strike.online」\n\n【差し込む実データ】\n開催：${s["開催"] || s["開催数"] || ""}\n万舟：${s["万舟"] || ""}\n万舟率：${s["万舟率"] || ""}\n1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n逃げ：${s["逃げ"] || ""}\n\n最高配当：${topText(payload)}\n\n万舟が多かった場 TOP5\n${rankingLines(payload)}\n\n事故・異常者：${payload?.incident_races || 0}R\n優勝戦・DR：${payload?.featured_races || 0}R\n\n【デザインルール】\n・キャラクターは上部25〜30%以内に収める\n・データ部分は中央〜下部70%を使用\n・角丸カード、十分な余白、細いネオンブルー＋ゴールド縁取り\n・最高配当だけ白〜淡いゴールド背景で強く目立たせる\n・数字は大きく、項目名は小さくする\n・万舟TOP5は5行固定で、場名と本数を左右に分ける\n・背景装飾は薄くして文字の視認性を邪魔しない\n・SNSで縮小表示してもタイトル、最高配当、主要数値が読めること\n\n完成画像は、BoatStrikersの3人が毎日データを分析して発表している公式DATA LABとして統一感のあるデザインにしてください。`;
+  return `BoatStrikers DATA LABの9:16縦長SNS画像【1枚目・共通表紙】を作成してください。\n\n【最重要】\n・1080×1920、9:16\n・毎日同じ構成で使う固定テンプレート\n・上部に一果・初音・キイナ、中央〜下部にデータカード\n・数値、場名、出目、配当は下記データから絶対に変更しない\n・文字化け、余計な英語、架空の数値を追加しない\n・濃紺、ダークブルー、白、ゴールドを基本色にする\n・SNSの表紙として、タイトル、最高配当、万舟本数が一目で伝わること\n\n【選択デザイン】\n${preset.label}\n${preset.tone}\n\n【3キャラクター】\n左：一果。深緑系、落ち着いたリーダー感、イン逃げ分析担当。\n中央：初音。紫髪、ピンクのうさ耳フード、女子戦分析担当。\n右：キイナ。黄色〜ゴールド系、元気で攻めた雰囲気、穴狙い分析担当。\nタグは「一果｜イン逃げ分析」「初音｜女子戦分析」「キイナ｜穴狙い分析」。\n\n【表紙レイアウト】\n・BoatStrikers DATA LABロゴ\n・日付：${date}\n・タイトル：${title}\n・強調サマリー：${headline}\n・開催：${s["開催"] || s["開催数"] || ""}\n・万舟：${s["万舟"] || ""}\n・万舟率：${s["万舟率"] || ""}\n・1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n・5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n・逃げ：${s["逃げ"] || ""}\n・最高配当：${topText(payload)}\n・万舟が多かった場TOP5：\n${rankingLines(payload)}\n・事故・異常者：${payload?.incident_races || 0}R\n・優勝戦・DR：${payload?.featured_races || 0}R\n\n【表紙ルール】\n・3人は上部25〜30%以内\n・最高配当カードだけ白〜淡いゴールド背景で強く目立たせる\n・数字は大きく、項目名は小さく\n・最下部に「昨日の結果を、数字で振り返る。」「BoatStrikers」「boat-strike.online」\n・2枚構成で使う場合も1枚目単体で意味が通じる完成度にする。`;
+}
+
+function buildDetailPrompt(payload, mode) {
+  const s = statsMap(payload);
+  const date = payload?.date || "";
+  const common = `【使用する実データ】\n日付：${date}\n開催：${s["開催"] || s["開催数"] || ""}\n万舟：${s["万舟"] || ""}\n万舟率：${s["万舟率"] || ""}\n1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n逃げ：${s["逃げ"] || ""}\n最高配当：${topText(payload)}\n万舟TOP5：\n${rankingLines(payload)}\n事故・異常者：${payload?.incident_races || 0}R\n優勝戦・DR：${payload?.featured_races || 0}R`;
+
+  const base = `BoatStrikers DATA LABの9:16縦長SNS画像【2枚目・詳細】を作成してください。\n1080×1920、9:16。1枚目と同じ濃紺・ダークブルー・白・ゴールドの世界観を維持し、数字を最優先で読みやすくしてください。下記にない数値は絶対に追加しないでください。\n\n${common}\n\n`;
+
+  if (mode === "ichika") {
+    return `${base}【一果分岐】\n一果を上部または右上に小さく配置。緑アクセント。テーマは「イン逃げ分析」。\n大きく見せる項目は「1号艇1着」「逃げ」「逃げ率」。補助として万舟TOP5、最高配当、事故・異常者を整理。\n見出し例は「一果のイン逃げDATA」。堅実で分析的な雰囲気にする。\n実データから断定できないコメントや架空のイン有利場ランキングは作らない。`;
+  }
+  if (mode === "hatsune") {
+    return `${base}【初音分岐】\n初音を上部または右上に小さく配置。紫アクセント。テーマは「初音のDATA CHECK」。\n現時点の入力データは全体集計なので、女子戦専用の架空数値は絶対に作らない。\n開催、万舟率、1号艇1着、逃げ率、事故・異常者、優勝戦・DRを知的で見やすく整理し、「女子戦専用集計ではない」ことが誤解されない構成にする。`;
+  }
+  if (mode === "kiina") {
+    return `${base}【キイナ分岐】\nキイナを上部または右上に小さく配置。黄色・ゴールドアクセント。テーマは「穴・高配当分析」。\n大きく見せる項目は「万舟」「万舟率」「最高配当」「5号艇1着」。万舟TOP5を大きなランキングカードで表示。\n見出し例は「キイナの穴DATA」。勢いは出すが、数値を煽って改変しない。`;
+  }
+
+  return `${base}【共通詳細】\n3人は小さなワンポイントに留める。\n上段に主要数値の再整理、中段に「万舟が多かった場TOP5」と「最高配当」、下段に「事故・異常者」「優勝戦・DR」と短い総括スペース。\n1枚目より情報整理を優先し、保存して見返したくなるデータシート風にする。`;
 }
 
 export default function PromptBuilder({ payload }) {
   const [presetKey, setPresetKey] = useState("three");
-  const [copied, setCopied] = useState(false);
+  const [modeKey, setModeKey] = useState("common");
+  const [copiedKey, setCopiedKey] = useState("");
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("bs_data_lab_prompt_preset");
-      if (saved && PRESETS.some((p) => p.key === saved)) setPresetKey(saved);
+      const savedPreset = localStorage.getItem("bs_data_lab_prompt_preset");
+      const savedMode = localStorage.getItem("bs_data_lab_output_mode");
+      if (savedPreset && PRESETS.some((p) => p.key === savedPreset)) setPresetKey(savedPreset);
+      if (savedMode && OUTPUT_MODES.some((m) => m.key === savedMode)) setModeKey(savedMode);
     } catch {}
   }, []);
 
   const preset = PRESETS.find((p) => p.key === presetKey) || PRESETS[0];
-  const prompt = useMemo(() => buildPrompt(payload || {}, preset), [payload, preset]);
+  const mode = OUTPUT_MODES.find((m) => m.key === modeKey) || OUTPUT_MODES[1];
+  const coverPrompt = useMemo(() => buildCoverPrompt(payload || {}, preset), [payload, preset]);
+  const detailPrompt = useMemo(() => mode.detail ? buildDetailPrompt(payload || {}, mode.detail) : "", [payload, mode]);
 
   function changePreset(value) {
     setPresetKey(value);
     try { localStorage.setItem("bs_data_lab_prompt_preset", value); } catch {}
   }
 
-  async function copyPrompt() {
+  function changeMode(value) {
+    setModeKey(value);
+    try { localStorage.setItem("bs_data_lab_output_mode", value); } catch {}
+  }
+
+  async function copyPrompt(key, text) {
     try {
-      await navigator.clipboard.writeText(prompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      setCopied(false);
-    }
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(""), 1600);
+    } catch { setCopiedKey(""); }
   }
 
   return (
     <section className={styles.promptBuilder}>
       <div className={styles.promptHeader}>
         <div>
-          <span className={styles.promptEyebrow}>FIXED TEMPLATE PROMPT</span>
+          <span className={styles.promptEyebrow}>DATA LAB SERIES BUILDER</span>
           <h3>DATA LAB画像生成プロンプト</h3>
         </div>
-        <select value={presetKey} onChange={(e) => changePreset(e.target.value)}>
-          {PRESETS.map((p) => <option value={p.key} key={p.key}>{p.label}</option>)}
-        </select>
+        <div className={styles.promptSelectors}>
+          <select value={modeKey} onChange={(e) => changeMode(e.target.value)}>
+            {OUTPUT_MODES.map((m) => <option value={m.key} key={m.key}>{m.label}</option>)}
+          </select>
+          <select value={presetKey} onChange={(e) => changePreset(e.target.value)}>
+            {PRESETS.map((p) => <option value={p.key} key={p.key}>{p.label}</option>)}
+          </select>
+        </div>
       </div>
-      <p className={styles.promptDescription}>{preset.tone}</p>
-      <textarea className={styles.promptTextarea} readOnly value={prompt} />
-      <button className={styles.promptCopyButton} type="button" onClick={copyPrompt}>
-        {copied ? "コピーしました ✓" : "今日の数値入りプロンプトをコピー"}
+
+      <p className={styles.promptDescription}>出力形式：{mode.label}。1枚目は共通表紙、2枚構成では2枚目だけ共通／一果／初音／キイナに分岐します。</p>
+
+      <div className={styles.promptPageLabel}>1枚目｜共通表紙</div>
+      <textarea className={styles.promptTextarea} readOnly value={coverPrompt} />
+      <button className={styles.promptCopyButton} type="button" onClick={() => copyPrompt("cover", coverPrompt)}>
+        {copiedKey === "cover" ? "コピーしました ✓" : "1枚目のプロンプトをコピー"}
       </button>
-      <p className={styles.note}>日付を切り替えると、その日のDATA LAB集計値が固定テンプレート用プロンプトへ自動反映されます。</p>
+
+      {detailPrompt && (
+        <>
+          <div className={styles.promptPageLabel}>2枚目｜{mode.label.replace(" 2枚", "")}詳細</div>
+          <textarea className={styles.promptTextarea} readOnly value={detailPrompt} />
+          <button className={styles.promptCopyButton} type="button" onClick={() => copyPrompt("detail", detailPrompt)}>
+            {copiedKey === "detail" ? "コピーしました ✓" : "2枚目のプロンプトをコピー"}
+          </button>
+        </>
+      )}
+
+      <p className={styles.note}>日付を切り替えると、その日のDATA LAB集計値が1枚目・2枚目の両方へ自動反映されます。初音版は女子戦専用データがまだないため、架空の女子戦数値を生成しない安全設計です。</p>
     </section>
   );
 }
