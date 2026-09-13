@@ -15,7 +15,6 @@ const PREFS=[
   ["ichika","🏁","一果通知","隠れイン・イン逃げ急上昇"],
   ["hatsune","🌸","初音通知","女子イン崩れ・箱推し"],
   ["kiina","🚨","キイナ通知","カド攻め理論"],
-  ["all_alerts","⚡","全アラート通知","すべての成立通知をまとめて受信"],
 ];
 
 export default function DiscordMemberPage(){
@@ -106,7 +105,7 @@ export default function DiscordMemberPage(){
       <section style={{marginTop:22,padding:"28px 22px",borderRadius:24,background:"linear-gradient(135deg,#19245a,#5865F2)",boxShadow:"0 20px 50px rgba(0,0,0,.3)"}}>
         <div style={{fontSize:13,fontWeight:800,letterSpacing:".14em",opacity:.8}}>BOATSTRIKERS PREMIUM</div>
         <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord 通知設定</h1>
-        <p style={{lineHeight:1.8,margin:0}}>一果・初音・キイナ・全アラートから、受け取りたい通知だけを選べます。</p>
+        <p style={{lineHeight:1.8,margin:0}}>一果・初音・キイナから、受け取りたい通知だけを選べます。</p>
       </section>
 
       <section style={{marginTop:18,padding:22,border:"1px solid #233654",borderRadius:20,background:"#0d1a2b"}}>
@@ -129,7 +128,7 @@ export default function DiscordMemberPage(){
             })}
           </div>
 
-          <p style={{fontSize:13,color:"#93a6bd",lineHeight:1.7}}>初期設定は4種類すべてONです。設定はいつでも変更できます。</p>
+          <p style={{fontSize:13,color:"#93a6bd",lineHeight:1.7}}>初期設定は3種類すべてONです。設定はいつでも変更できます。</p>
           <button onClick={unlink} disabled={busy} style={{padding:"12px 16px",borderRadius:12,border:"1px solid #40516c",background:"transparent",color:"white",fontWeight:700}}>Discord連携を解除</button>
         </>:<>
           <h2>{status?.eligible?"Discordを連携する":"対象会員限定です"}</h2>
