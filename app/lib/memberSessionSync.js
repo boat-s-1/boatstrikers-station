@@ -57,6 +57,12 @@ export function syncMemberSession(session, { force = false } = {}) {
     return Promise.resolve({ skipped: true, reason: "fresh" });
   }
 
+  // Never let an older logout DELETE race a newly signed-in POST. Calls that
+  // arrive while clearing all resume through this same function afterwards.
+  if (clearInFlightPromise) {
+    return clearInFlightPromise.then(() => syncMemberSession(session, { force }));
+  }
+
   // All callers in the same tab share the same POST while it is in flight.
   if (inFlightPromise) return inFlightPromise;
 
