@@ -5,7 +5,6 @@ export const DISCORD_NOTIFICATION_ROLES={
   ichika:"BSC 一果通知",
   hatsune:"BSC 初音通知",
   kiina:"BSC キイナ通知",
-  all_alerts:"BSC 全アラート通知",
 };
 
 export function getAdminClient(){
@@ -118,7 +117,7 @@ export async function ensureDefaultNotificationRoles(discordUserId){
   const member=await getDiscordMember(discordUserId);
   const current=new Set(member?.roles||[]);
   if(current.has(roles.configured))return roles;
-  for(const key of ["configured","ichika","hatsune","kiina","all_alerts"]){
+  for(const key of ["configured","ichika","hatsune","kiina"]){
     await addDiscordRole(discordUserId,roles[key]);
   }
   return roles;
@@ -144,6 +143,7 @@ export async function joinGuild(discordUserId,userAccessToken){
 
 export async function sendDiscordMessage(channelId,content,{roleId}={}){
   if(!channelId)return null;
+  if(process.env.DISCORD_ALL_ALERTS_CHANNEL_ID&&String(channelId)===String(process.env.DISCORD_ALL_ALERTS_CHANNEL_ID))return null;
   const bodyContent=roleId?`<@&${roleId}> ${content}`:content;
   return discordApi(`/channels/${channelId}/messages`,{
     method:"POST",
