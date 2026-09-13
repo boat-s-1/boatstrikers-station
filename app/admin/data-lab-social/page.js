@@ -25,8 +25,14 @@ function jstYesterday() {
 }
 
 function hasCharacterDetails(item) {
-  const d = item?.image_payload?.character_details;
-  return Boolean(d?.ichika && d?.hatsune && d?.kiina);
+  const p = item?.image_payload || {};
+  const d = p.character_details;
+  return Boolean(
+    d?.ichika &&
+    d?.hatsune?.detection_method === "six_entries_gender_code_priority" &&
+    d?.kiina &&
+    p.template === "data_lab_yesterday_numbers_v3"
+  );
 }
 
 async function loadOutput(date) {
