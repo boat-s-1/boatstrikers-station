@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { generateDataLabSocialOutputs } from "../../../lib/dataLabSocialGenerator";
+import { getHatsuneNews } from "../../hatsune/newsData";
 import ClientActions from "./ClientActions";
 import PromptBuilder from "./PromptBuilder";
 import MinamoComicPromptBuilder from "./MinamoComicPromptBuilder";
@@ -23,6 +24,15 @@ function jstYesterday() {
   const d = new Date(`${obj.year}-${obj.month}-${obj.day}T12:00:00+09:00`);
   d.setUTCDate(d.getUTCDate() - 1);
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+function jstDate(value) {
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
+  } catch {
+    return "";
+  }
 }
 
 function hasCharacterDetails(item) {
@@ -70,10 +80,31 @@ async function loadOutput(date) {
   return { item: item || null, history: history || [], error: error?.message || null };
 }
 
+async function loadNewsForDate(date) {
+  try {
+    const items = await getHatsuneNews({ limit: 60, category: "all" });
+    const sameDay = items.filter((item) => jstDate(item?.published_at) === date);
+    if (sameDay.length) return sameDay.slice(0, 12);
+
+    const target = new Date(`${date}T12:00:00+09:00`).getTime();
+    return items
+      .filter((item) => {
+        const published = new Date(item?.published_at || 0).getTime();
+        return Number.isFinite(published) && Math.abs(published - target) <= 36 * 60 * 60 * 1000;
+      })
+      .slice(0, 12);
+  } catch {
+    return [];
+  }
+}
+
 export default async function DataLabSocialAdmin({ searchParams }) {
   const params = await searchParams;
   const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(params?.date || "")) ? String(params.date) : jstYesterday();
-  const { item, history, error } = await loadOutput(selectedDate);
+  const [{ item, history, error }, newsItems] = await Promise.all([
+    loadOutput(selectedDate),
+    loadNewsForDate(selectedDate),
+  ]);
   const p = item?.image_payload || {};
   const stats = Array.isArray(p.stats) ? p.stats : [];
   const ranking = Array.isArray(p.venue_manshu_ranking) ? p.venue_manshu_ranking : [];
@@ -142,7 +173,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
               </section>
             </div>
 
-            <MinamoComicPromptBuilder payload={p} />
+            <MinamoComicPromptBuilder payload={p} newsItems={newsItems} />
           </>
         )}
 
