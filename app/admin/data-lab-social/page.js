@@ -79,7 +79,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
           <div>
             <span>BOATSTRIKERS CONTENT STUDIO</span>
             <h1>DATA LAB SNS</h1>
-            <p>前日の結果データから、X・ショート台本・画像生成プロンプトをまとめて確認できます。</p>
+            <p>前日の結果データから、9:16画像・X投稿・ショート台本・3人入り固定テンプレ用プロンプトをまとめて生成します。</p>
           </div>
           <form className={styles.dateForm} method="get">
             <input type="date" name="date" defaultValue={selectedDate} />
@@ -94,42 +94,40 @@ export default async function DataLabSocialAdmin({ searchParams }) {
             <p className={styles.note}>結果が全レース確定してから再度開くと、自動生成を試みます。</p>
           </section>
         ) : (
-          <>
-            <div className={styles.grid}>
-              <section className={styles.previewCard}>
-                <h2>9:16 SNS画像</h2>
-                <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
-                <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
-                <p className={styles.note}>従来の自動描画画像もそのまま利用できます。AI画像を作る場合は右側のプロンプトプリセットを使えます。</p>
-              </section>
+          <div className={styles.grid}>
+            <section className={styles.previewCard}>
+              <h2>9:16 SNS画像</h2>
+              <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
+              <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
+              <p className={styles.note}>左の画像は数値確認用の自動描画版です。SNS投稿用の3人入りデザインは、右側の「3人入り固定テンプレ」で今日の数値入りプロンプトをコピーして作成できます。</p>
+            </section>
 
-              <section className={styles.contentCard}>
-                <h2>{p.title || "昨日のボートレースを数字で見る"}</h2>
-                <div className={styles.statsGrid}>
-                  {stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}
+            <section className={styles.contentCard}>
+              <h2>{p.title || "昨日のボートレースを数字で見る"}</h2>
+              <div className={styles.statsGrid}>
+                {stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}
+              </div>
+
+              <div className={styles.section}>
+                <label>万舟が多かった場 TOP5</label>
+                <div className={styles.ranking}>
+                  {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
                 </div>
+              </div>
 
-                <div className={styles.section}>
-                  <label>万舟が多かった場 TOP5</label>
-                  <div className={styles.ranking}>
-                    {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
-                  </div>
-                </div>
+              <PromptBuilder payload={p} />
 
-                <PromptBuilder payload={p} />
+              <div className={styles.section}>
+                <label>X投稿文</label>
+                <textarea readOnly value={item.x_post_text || ""} />
+              </div>
 
-                <div className={styles.section}>
-                  <label>X投稿文</label>
-                  <textarea readOnly value={item.x_post_text || ""} />
-                </div>
-
-                <div className={`${styles.section} ${styles.short}`}>
-                  <label>ショート動画 30秒台本</label>
-                  <textarea readOnly value={item.short_script || ""} />
-                </div>
-              </section>
-            </div>
-          </>
+              <div className={`${styles.section} ${styles.short}`}>
+                <label>ショート動画 30秒台本</label>
+                <textarea readOnly value={item.short_script || ""} />
+              </div>
+            </section>
+          </div>
         )}
 
         {history.length > 0 && (
