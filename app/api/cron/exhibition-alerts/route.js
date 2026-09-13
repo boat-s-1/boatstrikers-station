@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchTrackedOriginalTenji } from "../../../../lib/trackedOriginalTenjiSource";
 import { persistOfficialExhibition } from "../../../../lib/officialExhibitionPersistence";
+import { loadPersistedPcFallback } from "../../../../lib/persistedExhibitionFallback";
+import { recordExhibitionAcquisition } from "../../../../lib/exhibitionAcquisitionTelemetry";
+import { selectExhibitionCollectionTargets } from "../../../../lib/exhibitionCollectionTargets";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import {
   predictionToDatabaseRow,
@@ -128,15 +131,21 @@ export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
   try{
     const supabase=getSupabase();const raceDate=jstToday();
-    const {data:events,error:eventError}=await supabase.from("bs_race_events").select("race_date,course_code,course_name,race_no,closing_time").eq("race_date",raceDate).not("closing_time","is",null);if(eventError)throw eventError;
-    const targets=(events||[]).map(r=>({...r,remaining:minutesUntil(r.race_date,r.closing_time)})).filter(r=>r.remaining!==null&&r.remaining<=18&&r.remaining>=2).sort((a,b)=>a.remaining-b.remaining).slice(0,8);
+    const [eventResult,attemptResult]=await Promise.all([
+      supabase.from("bs_race_events").select("race_date,course_code,course_name,race_no,closing_time").eq("race_date",raceDate).not("closing_time","is",null),
+      supabase.from("bs_exhibition_acquisition_status").select("race_date,course_code,race_no,checked_at,reason_code").eq("race_date",raceDate).eq("consumer","kiina"),
+    ]);
+    if(eventResult.error)throw eventResult.error;
+    const targets=selectExhibitionCollectionTargets(eventResult.data||[],attemptResult.error?[]:attemptResult.data||[],minutesUntil,8);
     const results=[];
     for(const race of targets){
       try{
+      const trackedRace={raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no};
+      const isLive=race.collectionPhase==='live';
       const source=await fetchTrackedOriginalTenji(
         supabase,
         "kiina",
-        {raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no},
+        trackedRace,
         {},
         async fetched=>{
           if(!fetched.ok)return fetched;
@@ -146,18 +155,25 @@ export async function GET(request){
         }
       );
       if(!source.ok){
-        // PC-KYOTEI may already have populated the shared entry rows. Evaluate those
-        // values even while an official page is unpublished or temporarily failing.
-        const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-        results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:false,error:source.error||null,diagnostics:source.diagnostics||null,pcFallbackEvaluated:true,inserted:Number(inserted||0)});continue;
+        // PC-KYOTEI writes into the shared entry rows independently. Verify that
+        // all values required by this consumer are really present before marking
+        // the official failure as recovered in the acquisition status table.
+        const pcFallback=await loadPersistedPcFallback(supabase,race,"kiina");
+        if(pcFallback.ok){
+          await recordExhibitionAcquisition(supabase,"kiina",trackedRace,{ok:true,sourceKind:pcFallback.sourceKind,diagnostics:{pcKyotei:{ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1}))}}});
+        }
+        let inserted=0;
+        if(isLive){const evaluated=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evaluated.error)throw evaluated.error;inserted=Number(evaluated.data||0);}
+        results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,collectionPhase:race.collectionPhase,published:false,error:source.error||null,diagnostics:source.diagnostics||null,pcFallbackEvaluated:true,pcFallbackReady:pcFallback.ok,pcFallbackSource:pcFallback.ok?pcFallback.sourceKind:null,inserted});continue;
       }
       const persisted=source.persistence;
       const syncedAt=persisted.syncedAt;
       const weatherUpdate=buildWeatherUpdate(source.weather,syncedAt);
       if(weatherUpdate){const {error:weatherError}=await supabase.from("bs_race_events").update(weatherUpdate).eq("race_date",race.race_date).eq("course_code",race.course_code).eq("race_no",race.race_no);if(weatherError)throw weatherError;}
-      const liveAi=await generateLivePredictionForRace(supabase,race);
-      const {data:inserted,error:evalError}=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evalError)throw evalError;
-      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,saved:persisted.saved,rosterVerified:persisted.rosterVerified,liveAi,inserted:Number(inserted||0)});
+      const liveAi=isLive?await generateLivePredictionForRace(supabase,race):{generated:false,reason:"post_close_recovery"};
+      let inserted=0;
+      if(isLive){const evaluated=await supabase.rpc("evaluate_boat4_double_top_alerts");if(evaluated.error)throw evaluated.error;inserted=Number(evaluated.data||0);}
+      results.push({courseCode:race.course_code,raceNo:race.race_no,remaining:race.remaining,collectionPhase:race.collectionPhase,published:true,source:source.source,fallbackUsed:Boolean(source.fallbackUsed),startPublished:Boolean(source.startPublished),weatherPublished:Boolean(source.weatherPublished),rows:source.rows.length,saved:persisted.saved,rosterVerified:persisted.rosterVerified,liveAi,inserted});
       }catch(error){
         const message=String(error?.message||error).slice(0,500);
         console.error(JSON.stringify({level:"error",message:"exhibition race collection failed",raceDate:race.race_date,courseCode:race.course_code,raceNo:race.race_no,error:message}));

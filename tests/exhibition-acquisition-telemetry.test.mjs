@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { acquisitionReason, acquisitionRecord, trackExhibitionFetch } from '../lib/exhibitionAcquisitionTelemetry.js';
+import { acquisitionReason, acquisitionRecord, recordExhibitionAcquisition, trackExhibitionFetch } from '../lib/exhibitionAcquisitionTelemetry.js';
 const race={raceDate:'2026-08-28',courseCode:'05',raceNo:1};
 for(const [error,code] of Object.entries({upstream_timeout:'timeout','fetch failed':'network',http_503:'http',reference_date_mismatch:'date_mismatch',source_identity_mismatch:'identity_mismatch',source_identity_missing:'identity_missing',six_unique_boats_required:'incomplete_boats',measurements_incomplete_or_invalid:'incomplete_values',timing_layout_changed:'layout',official_adapter_not_verified:'unsupported',not_published:'not_published',official_original_tenji_not_available:'unavailable',unrecognised:'unknown'})) test(`classifies ${error}`,()=>assert.equal(acquisitionReason({ok:false,error}),code));
 test('empty results are never presumed unpublished',()=>assert.equal(acquisitionReason({ok:false,rows:[]}), 'unknown'));
@@ -18,6 +18,7 @@ function client(error=null,throws=false) {
  }};
 }
 test('records and returns exact original result, never runs other RPCs',async()=>{const c=client(),result={ok:true,rows:[{boatNo:1}],sourceKind:'official'};assert.equal(await trackExhibitionFetch(c,'ichika',race,async()=>result),result);assert.equal(c.calls[0].name,'bs_record_exhibition_acquisition');assert.equal(c.calls[0].args.p_record.reason_code,'ready');});
+test('records a verified persisted PC fallback as ready without exposing values',async()=>{const c=client();assert.equal(await recordExhibitionAcquisition(c,'kiina',race,{ok:true,sourceKind:'pc_kyotei',diagnostics:{pcKyotei:{ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1}))}}}),true);assert.equal(c.calls[0].args.p_record.source_kind,'pc_kyotei');assert.deepEqual(c.calls[0].args.p_record.source_results,[{key:'pcKyotei',code:'ready',boats:6,http:null}]);});
 test('records ready only after the persistence finalizer succeeds',async()=>{const c=client(),result={ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1})),sourceKind:'official'};const final=await trackExhibitionFetch(c,'kiina',race,async()=>result,{},console,async fetched=>({...fetched,persistence:{saved:6}}));assert.equal(final.persistence.saved,6);assert.equal(c.calls[0].args.p_record.reason_code,'ready');});
 test('records persistence failure instead of premature ready',async()=>{const c=client(),result={ok:true,rows:Array.from({length:6},(_,i)=>({boatNo:i+1})),sourceKind:'official'};await assert.rejects(trackExhibitionFetch(c,'kiina',race,async()=>result,{},console,async()=>{throw new Error('saved_roster_mismatch');}),/saved_roster_mismatch/);assert.equal(c.calls[0].args.p_record.reason_code,'identity_mismatch');});
 test('logging failure cannot stop collection, error logs are fixed safe strings',async()=>{for(const c of [client({message:'SECRET'}),client(null,true)]) {const logs=[],result={ok:false,error:'timeout'};assert.equal(await trackExhibitionFetch(c,'hatsune',race,async()=>result,{}, {warn:m=>logs.push(m)}),result);assert.deepEqual(logs,['exhibition_acquisition_record_failed']);}});

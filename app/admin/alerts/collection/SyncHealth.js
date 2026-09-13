@@ -28,7 +28,7 @@ export default function SyncHealth({ runtime, error, date }) {
   </section>;
 }
 
-const SOURCE_LABELS = { boaters: 'BOATERS', tsu: '津公式', amagasaki: '尼崎公式', official: '公式', verifiedOfficial: '公式（照合付き）' };
+const SOURCE_LABELS = { boaters: 'BOATERS', tsu: '津公式', amagasaki: '尼崎公式', official: '公式', verifiedOfficial: '公式（照合付き）', pcKyotei: 'PC-KYOTEI補完' };
 const CONSUMERS = { kiina: 'キイナ', ichika: '一果', hatsune: '初音' };
 export function AcquisitionStatus({ summary, readError }) {
   if (readError) return <small>取得記録の読込失敗（未取得とは別）</small>;
