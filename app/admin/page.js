@@ -39,6 +39,7 @@ const GROUPS = [
     title: "コンテンツ制作",
     description: "記事・動画・雑誌・配信素材を作成",
     items: [
+      { href: "/admin/data-lab-social#minamo-comic", icon: "🏫", title: "みなも学園4コマ", text: "前日の結果・ニュースから候補3本を出し、4コマ生成プロンプトへ反映", badge: "NEW" },
       { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS", text: "昨日の結果をX・ショート台本・9:16画像へ自動変換", badge: "NEW" },
       { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け", badge: "NEW" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "前日予想などから台本・投稿素材を作成", badge: "よく使う" },
@@ -67,6 +68,7 @@ const GROUPS = [
 ];
 
 const FAVORITES = [
+  { href: "/admin/data-lab-social#minamo-comic", icon: "🏫", title: "みなも学園4コマ" },
   { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS" },
   { href: "/admin/editorial", icon: "🗞️", title: "AI編集部" },
   { href: "/admin/alerts", icon: "🔔", title: "アラート管理" },

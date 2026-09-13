@@ -73,7 +73,7 @@ export default function MinamoComicPromptBuilder({ payload, newsItems = [] }) {
   }
 
   return (
-    <section style={{ marginTop: 28, padding: 20, borderRadius: 18, border: "1px solid rgba(255,255,255,.12)", background: "rgba(7,18,38,.72)" }}>
+    <section id="minamo-comic" style={{ scrollMarginTop: 80, marginTop: 28, padding: 20, borderRadius: 18, border: "1px solid rgba(255,255,255,.12)", background: "rgba(7,18,38,.72)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <div>
           <div style={{ fontSize: 12, letterSpacing: ".12em", opacity: .68 }}>MINAMO ACADEMY COMIC STUDIO</div>
