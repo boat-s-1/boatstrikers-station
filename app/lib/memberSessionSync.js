@@ -2,6 +2,7 @@ const SYNC_TTL_MS = 40 * 60 * 1000;
 const STORAGE_KEY = "boatstrikers:member-session-sync:v1";
 
 let inFlightPromise = null;
+let clearInFlightPromise = null;
 let generation = 0;
 
 function readSyncState() {
@@ -40,11 +41,8 @@ function clearSyncState() {
 
 function isFresh(userId) {
   const state = readSyncState();
-  return Boolean(
-    state?.userId === userId &&
-      Date.now() - state.syncedAt >= 0 &&
-      Date.now() - state.syncedAt < SYNC_TTL_MS,
-  );
+  const age = state ? Date.now() - state.syncedAt : Number.POSITIVE_INFINITY;
+  return Boolean(state?.userId === userId && age >= 0 && age < SYNC_TTL_MS);
 }
 
 export function syncMemberSession(session, { force = false } = {}) {
@@ -59,6 +57,7 @@ export function syncMemberSession(session, { force = false } = {}) {
     return Promise.resolve({ skipped: true, reason: "fresh" });
   }
 
+  // All callers in the same tab share the same POST while it is in flight.
   if (inFlightPromise) return inFlightPromise;
 
   const requestGeneration = generation;
@@ -83,22 +82,32 @@ export function syncMemberSession(session, { force = false } = {}) {
   return inFlightPromise;
 }
 
-export async function clearMemberSession() {
+export function clearMemberSession() {
   generation += 1;
   clearSyncState();
+
+  // getSession() and INITIAL_SESSION/SIGNED_OUT can arrive together. Share a
+  // single clear operation so an unauthenticated mount does not double-call it.
+  if (clearInFlightPromise) return clearInFlightPromise;
 
   const pendingSync = inFlightPromise;
   const deleteCookie = () =>
     fetch("/api/members/session", { method: "DELETE", cache: "no-store" });
 
-  const firstDelete = deleteCookie();
+  clearInFlightPromise = (async () => {
+    const firstDelete = deleteCookie();
 
-  if (!pendingSync) return firstDelete;
+    if (!pendingSync) return firstDelete;
 
-  // If a POST was already in flight when logout occurred, it can finish after
-  // the first DELETE and recreate the cookie. Delete once more after it settles.
-  await Promise.allSettled([firstDelete, pendingSync]);
-  return deleteCookie();
+    // If a POST was already in flight when logout occurred, it can finish after
+    // the first DELETE and recreate the cookie. Delete once more after it settles.
+    await Promise.allSettled([firstDelete, pendingSync]);
+    return deleteCookie();
+  })().finally(() => {
+    clearInFlightPromise = null;
+  });
+
+  return clearInFlightPromise;
 }
 
 export const MEMBER_SESSION_SYNC_TTL_MS = SYNC_TTL_MS;
