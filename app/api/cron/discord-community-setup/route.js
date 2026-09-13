@@ -72,7 +72,20 @@ export async function GET(request){
   try{
     const config=discordConfig();
     const channels=await discordApi(`/guilds/${config.guildId}/channels`);
-    const summary={categories:[],created:[],moved:[]};
+    const summary={categories:[],created:[],moved:[],removed:[]};
+
+    // 旧「全アラート」は通知重複を避けるため廃止。
+    const allAlertsChannel=channels.find(c=>c.type===0&&c.name==="全アラート");
+    if(allAlertsChannel){
+      await discordApi(`/channels/${allAlertsChannel.id}`,{method:"DELETE"});
+      summary.removed.push("全アラート");
+    }
+    const roles=await discordApi(`/guilds/${config.guildId}/roles`);
+    const allAlertsRole=(roles||[]).find(r=>r.name==="BSC 全アラート通知");
+    if(allAlertsRole){
+      await discordApi(`/guilds/${config.guildId}/roles/${allAlertsRole.id}`,{method:"DELETE"});
+      summary.removed.push("BSC 全アラート通知");
+    }
 
     const start=await ensureCategory(channels,"00｜START",[],"free",config,0);
     const free=await ensureCategory(channels,"10｜FREE",["20｜COMMUNITY"],"free",config,1);
@@ -94,7 +107,6 @@ export async function GET(request){
       ["一果-イン逃げ速報","一果のイン逃げ系プレミアムアラート。"],
       ["初音-女子戦速報","初音の女子戦プレミアムアラート。"],
       ["キイナ-穴狙い速報","キイナの穴狙いプレミアムアラート。"],
-      ["全アラート","BoatStrikersの全プレミアムアラートをまとめて配信します。"],
       ["12r生実況","ラジオと連動した12R生実況。展示後から結果までリアルタイムで追います。"],
       ["有料会員雑談","BSC PREMIUM会員限定の雑談・情報交換。"],
       ["展示後の最終判断","展示後の評価変更や締切前の最終コメントを共有します。"],
