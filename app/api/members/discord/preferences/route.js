@@ -3,7 +3,7 @@ import { addDiscordRole, ensureDefaultNotificationRoles, ensureNotificationRoles
 
 export const runtime="nodejs";
 
-const KEYS=["ichika","hatsune","kiina","all_alerts"];
+const KEYS=["ichika","hatsune","kiina"];
 
 async function context(request){
   const auth=request.headers.get("authorization")||"";
