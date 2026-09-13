@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { generateDataLabSocialOutputs } from "../../../lib/dataLabSocialGenerator";
 import ClientActions from "./ClientActions";
 import PromptBuilder from "./PromptBuilder";
+import MinamoComicPromptBuilder from "./MinamoComicPromptBuilder";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -105,40 +106,44 @@ export default async function DataLabSocialAdmin({ searchParams }) {
             <p className={styles.note}>結果が全レース確定してから再度開くと、自動生成を試みます。</p>
           </section>
         ) : (
-          <div className={styles.grid}>
-            <section className={styles.previewCard}>
-              <h2>9:16 SNS画像</h2>
-              <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
-              <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
-              <p className={styles.note}>左の画像は数値確認用の自動描画版です。右側のDATA LAB画像生成プロンプトでは、共通表紙＋一果/初音/キイナの専門2枚目を作成できます。</p>
-            </section>
+          <>
+            <div className={styles.grid}>
+              <section className={styles.previewCard}>
+                <h2>9:16 SNS画像</h2>
+                <div className={styles.previewFrame}><img src={imageUrl} alt={`${selectedDate} DATA LAB SNS画像`} /></div>
+                <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
+                <p className={styles.note}>左の画像は数値確認用の自動描画版です。右側のDATA LAB画像生成プロンプトでは、共通表紙＋一果/初音/キイナの専門2枚目を作成できます。</p>
+              </section>
 
-            <section className={styles.contentCard}>
-              <h2>{p.title || "昨日のボートレースを数字で見る"}</h2>
-              <div className={styles.statsGrid}>
-                {stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}
-              </div>
-
-              <div className={styles.section}>
-                <label>万舟が多かった場 TOP5</label>
-                <div className={styles.ranking}>
-                  {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
+              <section className={styles.contentCard}>
+                <h2>{p.title || "昨日のボートレースを数字で見る"}</h2>
+                <div className={styles.statsGrid}>
+                  {stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}
                 </div>
-              </div>
 
-              <PromptBuilder payload={p} />
+                <div className={styles.section}>
+                  <label>万舟が多かった場 TOP5</label>
+                  <div className={styles.ranking}>
+                    {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
+                  </div>
+                </div>
 
-              <div className={styles.section}>
-                <label>X投稿文</label>
-                <textarea readOnly value={item.x_post_text || ""} />
-              </div>
+                <PromptBuilder payload={p} />
 
-              <div className={`${styles.section} ${styles.short}`}>
-                <label>ショート動画 30秒台本</label>
-                <textarea readOnly value={item.short_script || ""} />
-              </div>
-            </section>
-          </div>
+                <div className={styles.section}>
+                  <label>X投稿文</label>
+                  <textarea readOnly value={item.x_post_text || ""} />
+                </div>
+
+                <div className={`${styles.section} ${styles.short}`}>
+                  <label>ショート動画 30秒台本</label>
+                  <textarea readOnly value={item.short_script || ""} />
+                </div>
+              </section>
+            </div>
+
+            <MinamoComicPromptBuilder payload={p} />
+          </>
         )}
 
         {history.length > 0 && (
