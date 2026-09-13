@@ -28,6 +28,12 @@ const TYPE_ORDER = [
   "kiina_boat5_best5",
 ];
 
+const ACTION_ERROR_MESSAGES = {
+  missing_service_key: "保存用のSupabase設定が見つかりません。環境変数を確認してください。",
+  read_failed: "保存前の候補データ取得に失敗しました。再読み込みしてもう一度お試しください。",
+  save_failed: "選択内容の保存に失敗しました。DB処理または公開買い目生成処理を確認してください。",
+};
+
 function jstToday() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -171,6 +177,14 @@ async function saveSelections(formData) {
       .eq("rank_no", row.rank_no);
 
     if (error) {
+      console.error("[admin/ai-candidates] save failed", {
+        date,
+        timing,
+        rankingType: row.ranking_type,
+        rankNo: row.rank_no,
+        message: error.message,
+        code: error.code,
+      });
       redirect(`/admin/ai-candidates?date=${date}&timing=${timing}&error=save_failed`);
     }
   }
@@ -186,6 +200,9 @@ export default async function AiCandidatesPage({ searchParams }) {
   const { rows, error } = await loadRows(date, timing);
   const saved = params?.saved === "1";
   const actionError = params?.error;
+  const actionErrorMessage = actionError
+    ? ACTION_ERROR_MESSAGES[actionError] || `不明なエラーが発生しました（${actionError}）。`
+    : "";
 
   const groups = TYPE_ORDER.map((type) => ({
     type,
@@ -235,7 +252,9 @@ export default async function AiCandidatesPage({ searchParams }) {
 
         {saved && <div className={styles.success}>✓ 選択内容と一言コメントを保存しました。SNS素材も更新されています。</div>}
         {(error || actionError) && (
-          <div className={styles.error}>保存・取得時にエラーが発生しました。{error ? ` ${error}` : ""}</div>
+          <div className={styles.error}>
+            {error ? `候補データの取得に失敗しました。${error}` : actionErrorMessage}
+          </div>
         )}
 
         <SocialMaterialsPanel character="ichika" picks={ichikaSocialPicks} date={date} timing={timing} />
