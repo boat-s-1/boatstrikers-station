@@ -37,33 +37,49 @@ function topText(payload) {
   return `${top.venue || ""}${top.race_no || ""}R ${top.trifecta || ""} / ${Number(top.payout || 0).toLocaleString("ja-JP")}円`;
 }
 
+function characterDetail(payload, code) {
+  const details = payload?.character_details || {};
+  return details?.[code] && typeof details[code] === "object" ? details[code] : {};
+}
+
+function valueOrBlank(value) {
+  return value === null || value === undefined || value === "" ? "（集計データがある場合のみ表示）" : String(value);
+}
+
 function buildCoverPrompt(payload, preset) {
   const s = statsMap(payload);
   const title = payload?.title || "昨日のボートレースを数字で見る";
   const headline = payload?.headline || "";
   const date = payload?.date || "";
 
-  return `BoatStrikers DATA LABの9:16縦長SNS画像【1枚目・共通表紙】を作成してください。\n\n【最重要】\n・1080×1920、9:16\n・毎日同じ構成で使う固定テンプレート\n・上部に一果・初音・キイナ、中央〜下部にデータカード\n・数値、場名、出目、配当は下記データから絶対に変更しない\n・文字化け、余計な英語、架空の数値を追加しない\n・濃紺、ダークブルー、白、ゴールドを基本色にする\n・SNSの表紙として、タイトル、最高配当、万舟本数が一目で伝わること\n\n【選択デザイン】\n${preset.label}\n${preset.tone}\n\n【3キャラクター】\n左：一果。深緑系、落ち着いたリーダー感、イン逃げ分析担当。\n中央：初音。紫髪、ピンクのうさ耳フード、女子戦分析担当。\n右：キイナ。黄色〜ゴールド系、元気で攻めた雰囲気、穴狙い分析担当。\nタグは「一果｜イン逃げ分析」「初音｜女子戦分析」「キイナ｜穴狙い分析」。\n\n【表紙レイアウト】\n・BoatStrikers DATA LABロゴ\n・日付：${date}\n・タイトル：${title}\n・強調サマリー：${headline}\n・開催：${s["開催"] || s["開催数"] || ""}\n・万舟：${s["万舟"] || ""}\n・万舟率：${s["万舟率"] || ""}\n・1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n・5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n・逃げ：${s["逃げ"] || ""}\n・最高配当：${topText(payload)}\n・万舟が多かった場TOP5：\n${rankingLines(payload)}\n・事故・異常者：${payload?.incident_races || 0}R\n・優勝戦・DR：${payload?.featured_races || 0}R\n\n【表紙ルール】\n・3人は上部25〜30%以内\n・最高配当カードだけ白〜淡いゴールド背景で強く目立たせる\n・数字は大きく、項目名は小さく\n・最下部に「昨日の結果を、数字で振り返る。」「BoatStrikers」「boat-strike.online」\n・2枚構成で使う場合も1枚目単体で意味が通じる完成度にする。`;
+  return `BoatStrikers DATA LABの9:16縦長SNS画像【1枚目・共通表紙】を作成してください。\n\n【最重要】\n・1080×1920、9:16\n・毎日同じ構成で使う固定テンプレート\n・上部に一果・初音・キイナ、中央〜下部にデータカード\n・数値、場名、出目、配当は下記データから絶対に変更しない\n・文字化け、余計な英語、架空の数値を追加しない\n・濃紺、ダークブルー、白、ゴールドを基本色にする\n・SNSの表紙として、タイトル、最高配当、万舟本数が一目で伝わること\n\n【選択デザイン】\n${preset.label}\n${preset.tone}\n\n【3キャラクター】\n左：一果。深緑系、落ち着いたリーダー感、イン逃げ分析担当。\n中央：初音。紫髪、ピンクのうさ耳フード、女子戦分析担当。\n右：キイナ。黄色〜ゴールド系、元気で攻めた雰囲気、穴・高配当分析担当。\nタグは「一果｜イン逃げ分析」「初音｜女子戦分析」「キイナ｜穴・高配当分析」。\n\n【表紙レイアウト】\n・BoatStrikers DATA LABロゴ\n・日付：${date}\n・タイトル：${title}\n・強調サマリー：${headline}\n・開催：${s["開催"] || s["開催数"] || ""}\n・万舟：${s["万舟"] || ""}\n・万舟率：${s["万舟率"] || ""}\n・1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n・5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n・逃げ：${s["逃げ"] || ""}\n・最高配当：${topText(payload)}\n・万舟が多かった場TOP5：\n${rankingLines(payload)}\n・事故・異常者：${payload?.incident_races || 0}R\n・優勝戦・DR：${payload?.featured_races || 0}R\n\n【表紙ルール】\n・3人は上部25〜30%以内\n・最高配当カードだけ白〜淡いゴールド背景で強く目立たせる\n・数字は大きく、項目名は小さく\n・最下部に「昨日の結果を、数字で振り返る。」「BoatStrikers」「boat-strike.online」\n・2枚構成で使う場合も1枚目単体で意味が通じる完成度にする。`;
 }
 
 function buildDetailPrompt(payload, mode) {
   const s = statsMap(payload);
   const date = payload?.date || "";
-  const common = `【使用する実データ】\n日付：${date}\n開催：${s["開催"] || s["開催数"] || ""}\n万舟：${s["万舟"] || ""}\n万舟率：${s["万舟率"] || ""}\n1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n逃げ：${s["逃げ"] || ""}\n最高配当：${topText(payload)}\n万舟TOP5：\n${rankingLines(payload)}\n事故・異常者：${payload?.incident_races || 0}R\n優勝戦・DR：${payload?.featured_races || 0}R`;
+  const escapeText = s["逃げ"] || "";
+  const escapeRateMatch = escapeText.match(/\(([^)]+)\)/);
+  const escapeRate = escapeRateMatch ? escapeRateMatch[1] : "";
+  const ichika = characterDetail(payload, "ichika");
+  const hatsune = characterDetail(payload, "hatsune");
+  const kiina = characterDetail(payload, "kiina");
 
-  const base = `BoatStrikers DATA LABの9:16縦長SNS画像【2枚目・詳細】を作成してください。\n1080×1920、9:16。1枚目と同じ濃紺・ダークブルー・白・ゴールドの世界観を維持し、数字を最優先で読みやすくしてください。下記にない数値は絶対に追加しないでください。\n\n${common}\n\n`;
+  const base = `BoatStrikers DATA LABの9:16縦長SNS画像【2枚目・キャラ別詳細】を作成してください。\n1080×1920、9:16。1枚目と同じ濃紺・ダークブルー・白・ゴールドの世界観を維持し、キャラごとの専門分野に特化してください。\n下記に存在しない数値・ランキング・レース情報は絶対に推測・生成しないでください。データが無い項目は空欄のままにしてください。\n\n日付：${date}\n\n`;
 
   if (mode === "ichika") {
-    return `${base}【一果分岐】\n一果を上部または右上に小さく配置。緑アクセント。テーマは「イン逃げ分析」。\n大きく見せる項目は「1号艇1着」「逃げ」「逃げ率」。補助として万舟TOP5、最高配当、事故・異常者を整理。\n見出し例は「一果のイン逃げDATA」。堅実で分析的な雰囲気にする。\n実データから断定できないコメントや架空のイン有利場ランキングは作らない。`;
-  }
-  if (mode === "hatsune") {
-    return `${base}【初音分岐】\n初音を上部または右上に小さく配置。紫アクセント。テーマは「初音のDATA CHECK」。\n現時点の入力データは全体集計なので、女子戦専用の架空数値は絶対に作らない。\n開催、万舟率、1号艇1着、逃げ率、事故・異常者、優勝戦・DRを知的で見やすく整理し、「女子戦専用集計ではない」ことが誤解されない構成にする。`;
-  }
-  if (mode === "kiina") {
-    return `${base}【キイナ分岐】\nキイナを上部または右上に小さく配置。黄色・ゴールドアクセント。テーマは「穴・高配当分析」。\n大きく見せる項目は「万舟」「万舟率」「最高配当」「5号艇1着」。万舟TOP5を大きなランキングカードで表示。\n見出し例は「キイナの穴DATA」。勢いは出すが、数値を煽って改変しない。`;
+    return `${base}【一果｜イン逃げ特化】\nテーマは「イン逃げで昨日を読む」。一果を上部に配置し、緑アクセントで統一。\n万舟や最高配当は主役にせず、1号艇と逃げの結果だけを中心に見せる。\n\n【表示する項目】\n1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n逃げ：${escapeText}\n逃げ率：${escapeRate}\nイン逃げ成功数：${valueOrBlank(ichika.escape_success_count)}\nイン崩れ数：${valueOrBlank(ichika.escape_failure_count)}\nイン逃げが強かった場 TOP3：${valueOrBlank(ichika.strong_venues)}\nイン崩れ注目レース TOP3：${valueOrBlank(ichika.upset_races)}\n一果メモ：${valueOrBlank(ichika.comment)}\n\n【固定レイアウト】\n・上段「一果 DATA LAB｜イン逃げ分析」\n・大きなカード：1号艇1着 / 逃げ / 逃げ率 / イン崩れ数\n・左ランキング「イン逃げが強かった場 TOP3」\n・右ランキング「イン崩れ注目レース TOP3」\n・下部に「一果メモ」\n\n見た瞬間に“インが勝ったのか、崩れたのか”が分かる構成にする。存在しない場別ランキングや注目レースは作らない。`;
   }
 
-  return `${base}【共通詳細】\n3人は小さなワンポイントに留める。\n上段に主要数値の再整理、中段に「万舟が多かった場TOP5」と「最高配当」、下段に「事故・異常者」「優勝戦・DR」と短い総括スペース。\n1枚目より情報整理を優先し、保存して見返したくなるデータシート風にする。`;
+  if (mode === "hatsune") {
+    return `${base}【初音｜女子戦特化】\nテーマは「昨日の女子戦だけを見る」。初音を上部に配置し、紫・ピンクアクセントで統一。\n全体集計を女子戦の数字として流用しない。女子戦専用データだけを使う。\n\n【表示する項目】\n女子戦数：${valueOrBlank(hatsune.race_count)}\n女子戦1号艇1着：${valueOrBlank(hatsune.boat1_wins)}\n女子戦逃げ数：${valueOrBlank(hatsune.escape_wins)}\n女子戦逃げ率：${valueOrBlank(hatsune.escape_rate)}\n女子戦万舟数：${valueOrBlank(hatsune.manshu_count)}\n女子戦最高配当：${valueOrBlank(hatsune.max_payout)}\n荒れた女子戦 TOP3：${valueOrBlank(hatsune.upset_races)}\n注目女子戦 TOP3：${valueOrBlank(hatsune.featured_races)}\n初音メモ：${valueOrBlank(hatsune.comment)}\n\n【固定レイアウト】\n・上段「初音 DATA LAB｜女子戦分析」\n・大きなカード：女子戦数 / 女子戦1号艇1着 / 女子戦逃げ率 / 女子戦万舟数 / 女子戦最高配当\n・左ランキング「荒れた女子戦 TOP3」\n・右ランキング「注目女子戦 TOP3」\n・下部に「初音メモ」\n\n女子戦データが無い項目は空欄。全体の万舟率や全体の1号艇1着を女子戦値として代用しない。`;
+  }
+
+  if (mode === "kiina") {
+    return `${base}【キイナ｜穴・高配当特化】\nテーマは「昨日の穴と高配当だけを見る」。キイナを上部に配置し、黄色・ゴールドアクセントで統一。\n逃げや堅い決着は主役にせず、万舟・高配当・外枠頭を中心に見せる。\n\n【表示する項目】\n万舟本数：${s["万舟"] || ""}\n万舟率：${s["万舟率"] || ""}\n最高配当：${topText(payload)}\n5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n4〜6号艇頭の高配当件数：${valueOrBlank(kiina.outer_head_high_payout_count)}\n荒れた場 TOP3：${valueOrBlank(kiina.upset_venues)}\n高配当レース TOP5：${valueOrBlank(kiina.high_payout_races)}\nキイナメモ：${valueOrBlank(kiina.comment)}\n\n【固定レイアウト】\n・上段「キイナ DATA LAB｜穴・高配当分析」\n・大きなカード：万舟 / 万舟率 / 最高配当 / 5号艇1着 / 4〜6号艇頭高配当件数\n・左ランキング「荒れた場 TOP3」\n・右ランキング「高配当レース TOP5」\n・下部に「キイナメモ」\n\n万舟が多かった場TOP5は補助データとして使用可能：\n${rankingLines(payload)}\n\n煽り文句で数値を盛らず、実際の穴・高配当データだけで構成する。`;
+  }
+
+  return `${base}【共通詳細】\n上段に主要数値、中段に万舟が多かった場TOP5と最高配当、下段に事故・異常者、優勝戦・DRを整理する。\n開催：${s["開催"] || s["開催数"] || ""}\n万舟：${s["万舟"] || ""}\n万舟率：${s["万舟率"] || ""}\n1号艇1着：${s["1号艇1着"] || s["1号艇1着数"] || ""}\n5号艇1着：${s["5号艇1着"] || s["5号艇1着数"] || ""}\n逃げ：${escapeText}\n最高配当：${topText(payload)}\n万舟TOP5：\n${rankingLines(payload)}\n事故・異常者：${payload?.incident_races || 0}R\n優勝戦・DR：${payload?.featured_races || 0}R`;
 }
 
 export default function PromptBuilder({ payload }) {
@@ -120,7 +136,7 @@ export default function PromptBuilder({ payload }) {
         </div>
       </div>
 
-      <p className={styles.promptDescription}>出力形式：{mode.label}。1枚目は共通表紙、2枚構成では2枚目だけ共通／一果／初音／キイナに分岐します。</p>
+      <p className={styles.promptDescription}>出力形式：{mode.label}。2枚目は一果＝イン逃げ、初音＝女子戦、キイナ＝穴・高配当に完全特化します。</p>
 
       <div className={styles.promptPageLabel}>1枚目｜共通表紙</div>
       <textarea className={styles.promptTextarea} readOnly value={coverPrompt} />
@@ -138,7 +154,7 @@ export default function PromptBuilder({ payload }) {
         </>
       )}
 
-      <p className={styles.note}>日付を切り替えると、その日のDATA LAB集計値が1枚目・2枚目の両方へ自動反映されます。初音版は女子戦専用データがまだないため、架空の女子戦数値を生成しない安全設計です。</p>
+      <p className={styles.note}>各キャラの専門外データは使わず、未集計項目は空欄にします。一果はイン逃げ、初音は女子戦専用データ、キイナは穴・高配当だけを扱います。</p>
     </section>
   );
 }
