@@ -11,7 +11,7 @@
     },
     {
       "path": "/api/cron/discord-community-setup",
-      "schedule": "*/5 * * * *"
+      "schedule": "17 * * * *"
     },
     {
       "path": "/api/cron/discord-membership-sync",
