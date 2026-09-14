@@ -10,14 +10,7 @@ import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
 import CharacterShortsShelf from "./components/CharacterShortsShelf";
 import CharacterPerformancePortal from "./components/CharacterPerformancePortal";
-import IchikaBackgroundOnly from "./components/IchikaBackgroundOnly";
-import IchikaFixedWallpaperLayer from "./components/IchikaFixedWallpaperLayer";
-import IchikaNewspaperBannerOverride from "./components/IchikaNewspaperBannerOverride";
-import HatsuneWallpaper from "./components/HatsuneWallpaper";
-import KiinaFixedWallpaper from "./components/KiinaFixedWallpaper";
-import HomeFixedWallpaper from "./components/HomeFixedWallpaper";
-import HomeCompactRealtime from "./components/HomeCompactRealtime";
-import HomeTopCleanup from "./components/HomeTopCleanup";
+import RouteScopedVisuals from "./components/RouteScopedVisuals";
 import RaceHitFlashDeduper from "./components/RaceHitFlashDeduper";
 import BetaMemberPlacementBanner from "./components/BetaMemberPlacementBanner";
 import MemberSessionBridge from "./components/MemberSessionBridge";
@@ -59,14 +52,7 @@ export default function RootLayout({ children }) {
         <CharacterAiRoomPanel />
         <CharacterShortsShelf />
         <CharacterPerformancePortal />
-        <IchikaBackgroundOnly />
-        <IchikaFixedWallpaperLayer />
-        <IchikaNewspaperBannerOverride />
-        <HatsuneWallpaper />
-        <KiinaFixedWallpaper />
-        <HomeFixedWallpaper />
-        <HomeCompactRealtime />
-        <HomeTopCleanup />
+        <RouteScopedVisuals />
         <RaceHitFlashDeduper />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
