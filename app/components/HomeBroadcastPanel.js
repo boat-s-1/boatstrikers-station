@@ -16,7 +16,35 @@ function mins(value){ const [h,m]=String(value||"00:00").slice(0,5).split(":").m
 
 export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [] }) {
   const [now,setNow] = useState(new Date());
-  useEffect(()=>{ const id=setInterval(()=>setNow(new Date()),30000); return()=>clearInterval(id); },[]);
+
+  useEffect(()=>{
+    const id=setInterval(()=>setNow(new Date()),30000);
+    return()=>clearInterval(id);
+  },[]);
+
+  useEffect(()=>{
+    const headerLink=document.querySelector(".lineMini");
+    if(headerLink){
+      headerLink.setAttribute("href","/members");
+      headerLink.setAttribute("aria-label","会員登録・LINE・Discord通知設定");
+      headerLink.textContent="会員・通知";
+      headerLink.style.background="linear-gradient(135deg,#1769e0,#6b5cff)";
+      headerLink.style.boxShadow="0 5px 14px rgba(23,105,224,.24)";
+    }
+
+    const lineSection=[...document.querySelectorAll("section")].find(section=>section.textContent?.includes("LINE限定情報"));
+    if(lineSection){
+      const title=lineSection.querySelector("h2");
+      const lead=lineSection.querySelector("p");
+      const lineLink=lineSection.querySelector('a[href*="lin.ee"]');
+      const banner=lineSection.querySelector("img");
+      if(title)title.textContent="💚 公式LINE";
+      if(lead)lead.textContent="無料情報・重要なお知らせをお届けします。リアルタイムのPREMIUM通知はDiscordをご利用ください。";
+      if(lineLink)lineLink.setAttribute("aria-label","BoatStrikers公式LINEを開く（無料情報・重要なお知らせ）");
+      if(banner)banner.setAttribute("alt","BoatStrikers公式LINE 無料情報・重要なお知らせ");
+    }
+  },[]);
+
   const current=jstParts(now);
   const today=useMemo(()=>scheduleItems.filter(i=>i.event_date===current.date && i.status==="published").sort((a,b)=>String(a.start_time).localeCompare(String(b.start_time))).slice(0,3),[scheduleItems,current.date]);
   const ticker=tickerItems.filter(i=>i.is_active && !/サイト(?:製作|制作)中/.test(String(i.message || "").replace(/[！!、,\s]/g, ""))).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
@@ -56,7 +84,7 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           <div>
             <small>FREE MEMBERS</small>
             <strong>無料会員になる</strong>
-            <p>無料登録して会員機能を使う</p>
+            <p>会員登録・LINE連携・Discord通知設定へ</p>
           </div>
           <b aria-hidden="true">›</b>
         </a>
