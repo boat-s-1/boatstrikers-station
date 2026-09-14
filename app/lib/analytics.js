@@ -1,24 +1,27 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
+
 export function trackBoatEvent(name, params = {}) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return false;
   try {
-    if (typeof window.gtag === "function") {
-      window.gtag("event", name, params);
-    }
+    sendGAEvent("event", name, params);
+    return true;
   } catch (error) {
     console.warn("GA4 event failed", name, error);
+    return false;
   }
 }
 
 export function trackBoatEventOnce(storageKey, name, params = {}) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return false;
   try {
-    if (window.localStorage.getItem(storageKey) === "1") return;
-    trackBoatEvent(name, params);
-    window.localStorage.setItem(storageKey, "1");
+    if (window.localStorage.getItem(storageKey) === "1") return false;
+    const sent = trackBoatEvent(name, params);
+    if (sent) window.localStorage.setItem(storageKey, "1");
+    return sent;
   } catch {
-    trackBoatEvent(name, params);
+    return trackBoatEvent(name, params);
   }
 }
 
