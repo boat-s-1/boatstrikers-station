@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeBroadcastPanel.module.css";
+import entryStyles from "./HomeEntryCta.module.css";
 import { getProgramPresetByTitle } from "../../lib/programPresets";
 
 const TYPE_LABELS = { radio:"ラジオ", short:"ショート動画", note:"note", live:"生放送", comic:"コミック", other:"お知らせ" };
@@ -22,16 +23,16 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
   const text=ticker.map(i=>i.message).join("　　◆　　") || "BoatStrikersからのお知らせをこちらに表示します";
 
   return <section className={styles.wrap}>
-    <section className={styles.entrySection} aria-labelledby="home-entry-title">
-      <div className={styles.entryHeading}>
+    <section className={entryStyles.section} aria-labelledby="home-entry-title">
+      <div className={entryStyles.heading}>
         <span>START HERE</span>
         <h2 id="home-entry-title">まずはここから</h2>
         <p>目的に合わせて、3つの入口からすぐに始められます。</p>
       </div>
 
-      <nav className={styles.entryNav} aria-label="BoatStrikersを始める">
-        <a href={`/races?date=${current.date}`} className={`${styles.entryCard} ${styles.entryCardPrimary}`}>
-          <span className={styles.entryIcon} aria-hidden="true">🚤</span>
+      <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
+        <a href={`/races?date=${current.date}`} className={`${entryStyles.card} ${entryStyles.primary}`}>
+          <span className={entryStyles.icon} aria-hidden="true">🚤</span>
           <div>
             <small>RACE TODAY</small>
             <strong>今日のレースを見る</strong>
@@ -40,8 +41,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           <b aria-hidden="true">›</b>
         </a>
 
-        <a href="/guide" className={styles.entryCard}>
-          <span className={styles.entryIcon} aria-hidden="true">📖</span>
+        <a href="/guide" className={entryStyles.card}>
+          <span className={entryStyles.icon} aria-hidden="true">📖</span>
           <div>
             <small>FIRST GUIDE</small>
             <strong>初めての方</strong>
@@ -50,8 +51,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           <b aria-hidden="true">›</b>
         </a>
 
-        <a href="/members" className={`${styles.entryCard} ${styles.entryCardMember}`}>
-          <span className={styles.entryIcon} aria-hidden="true">✨</span>
+        <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}>
+          <span className={entryStyles.icon} aria-hidden="true">✨</span>
           <div>
             <small>FREE MEMBERS</small>
             <strong>無料会員になる</strong>
