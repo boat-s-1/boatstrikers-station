@@ -82,6 +82,8 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
       const button = event.target?.closest?.("button[data-bs-quota-feature]");
       if (!button) return;
 
+      if (button.dataset.bsQuotaGranted === "true") return;
+
       if (button.dataset.bsQuotaBypass === "true") {
         delete button.dataset.bsQuotaBypass;
         return;
@@ -127,6 +129,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         }
 
         setStatuses((previous) => ({ ...previous, [featureKey]: payload.usage }));
+        button.dataset.bsQuotaGranted = "true";
         button.dataset.bsQuotaBypass = "true";
         button.click();
       } catch (error) {
@@ -155,6 +158,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         delete button.dataset.bsQuotaFeature;
         delete button.dataset.bsQuotaLabel;
         delete button.dataset.bsQuotaBypass;
+        delete button.dataset.bsQuotaGranted;
       });
     };
   }, [premiumAccess]);
