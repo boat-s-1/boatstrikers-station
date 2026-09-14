@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { DISCORD_GUIDE, DISCORD_NOTIFICATION_PREFS, LINE_GUIDE } from "./notificationGuide";
+import { CURRENT_BETA_MESSAGE, MEMBERSHIP_GUIDE, MEMBERSHIP_GUIDE_ORDER } from "./planGuide";
 
 function notificationCardsHtml(){
   const prefs=DISCORD_NOTIFICATION_PREFS.map(item=>`<div>${item.icon} ${item.title}｜${item.description}</div>`).join("");
@@ -29,20 +30,32 @@ function notificationCardsHtml(){
   `;
 }
 
-function benefitHtml(){
+function membershipGuideHtml(){
+  const cards=MEMBERSHIP_GUIDE_ORDER.map(key=>{
+    const item=MEMBERSHIP_GUIDE[key];
+    const isCurrent=Boolean(item.current);
+    const benefits=item.benefits.map(benefit=>`<li style="display:flex;gap:7px;align-items:flex-start"><span style="color:${isCurrent?"#6b5cff":"#159cd5"};font-weight:900">✓</span><span>${benefit}</span></li>`).join("");
+    return `
+      <div style="position:relative;padding:16px;border:${isCurrent?"2px solid #6b5cff":"1px solid #d9e8f2"};border-radius:18px;background:${isCurrent?"linear-gradient(180deg,#f2f0ff,#fff)":"#fff"};box-shadow:${isCurrent?"0 10px 24px rgba(107,92,255,.14)":"none"}">
+        ${isCurrent?'<span style="position:absolute;top:-11px;right:12px;padding:5px 9px;border-radius:999px;background:#6b5cff;color:#fff;font-size:10px;font-weight:900">現在</span>':""}
+        <small style="display:block;color:${isCurrent?"#6b5cff":"#159cd5"};font-weight:900;letter-spacing:.08em">${item.label}</small>
+        <h3 style="margin:5px 0 5px;color:#10233d;font-size:19px">${item.title}</h3>
+        <strong style="display:block;margin-bottom:8px;color:${isCurrent?"#5847e8":"#526176"};font-size:12px">${item.status}</strong>
+        <p style="margin:0;color:#617287;font-size:12px;line-height:1.65">${item.description}</p>
+        <ul style="margin:12px 0 0;padding:0;list-style:none;display:grid;gap:6px;color:#34475f;font-size:12px;line-height:1.5">${benefits}</ul>
+      </div>`;
+  }).join("");
+
   return `
-    <section data-member-benefits="1" style="margin:16px auto;padding:18px;max-width:760px;border:1px solid #d9e8f2;border-radius:22px;background:linear-gradient(180deg,#ffffff,#f7fbff);box-sizing:border-box">
-      <div style="text-align:center;margin-bottom:13px">
-        <div style="font-size:10px;font-weight:900;letter-spacing:.14em;color:#159cd5">FREE MEMBERS</div>
-        <h2 style="margin:5px 0 6px;color:#10233d;font-size:22px">無料会員になると、ここまで使えます</h2>
-        <p style="margin:0;color:#617287;font-size:13px;line-height:1.6">登録後は、レース情報を見るだけでなく通知サービスも自分に合わせて使えます。</p>
+    <section data-membership-guide="1" style="margin:16px auto;padding:18px;max-width:760px;border:1px solid #d9e8f2;border-radius:22px;background:linear-gradient(180deg,#ffffff,#f7fbff);box-sizing:border-box">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:900;letter-spacing:.14em;color:#159cd5">MEMBERSHIP</div>
+        <h2 style="margin:5px 0 6px;color:#10233d;font-size:22px">会員プランと使える機能</h2>
+        <p style="margin:0;color:#617287;font-size:13px;line-height:1.7">${CURRENT_BETA_MESSAGE}</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px" class="member-benefit-grid">
-        <div style="padding:13px;border-radius:15px;background:#f2f9ff"><b style="display:block;color:#0e4f86">🚤 今日のレース</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">開催場・出走表・会員機能へ</span></div>
-        <div style="padding:13px;border-radius:15px;background:#effff4"><b style="display:block;color:#087a38">💬 LINE連携</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">無料情報・重要なお知らせ</span></div>
-        <div style="padding:13px;border-radius:15px;background:#f1f2ff"><b style="display:block;color:#4350d8">⚡ Discord</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">PREMIUM対象はリアルタイム通知</span></div>
-      </div>
-      <style>@media(max-width:520px){.member-benefit-grid{grid-template-columns:1fr!important}}</style>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px" class="member-plan-grid">${cards}</div>
+      <p style="margin:12px 0 0;padding:10px 12px;border-radius:12px;background:#fff8e8;color:#765b19;font-size:11px;font-weight:800;line-height:1.6">※ PREMIUMの料金・正式開始時期は未定です。決定後に公式LINE・サイトで案内します。</p>
+      <style>@media(max-width:640px){.member-plan-grid{grid-template-columns:1fr!important}}</style>
     </section>
   `;
 }
@@ -56,14 +69,17 @@ export default function MemberChannelBridge(){
       const sections=[...document.querySelectorAll("section")];
       const hero=sections[0];
 
-      if(main&&hero&&!document.querySelector('[data-member-benefits="1"]')){
-        hero.insertAdjacentHTML("afterend",benefitHtml());
+      const oldBenefits=document.querySelector('[data-member-benefits="1"]');
+      if(oldBenefits)oldBenefits.remove();
+      if(main&&hero&&!document.querySelector('[data-membership-guide="1"]')){
+        hero.insertAdjacentHTML("afterend",membershipGuideHtml());
       }
 
       const notificationSection=sections.find(section=>
         section.textContent?.includes("LINE通知設定")||
         section.textContent?.includes("リアルタイム通知はDiscordへ")||
-        section.textContent?.includes("REAL-TIME ALERTS")
+        section.textContent?.includes("REAL-TIME ALERTS")||
+        section.id==="notifications"
       );
       if(notificationSection&&!notificationSection.dataset.channelBridge){
         notificationSection.dataset.channelBridge="1";
@@ -72,7 +88,7 @@ export default function MemberChannelBridge(){
           <div style="margin-bottom:12px">
             <div style="font-size:10px;font-weight:900;letter-spacing:.14em;color:#159cd5">NOTIFICATION GUIDE</div>
             <h2 style="margin:5px 0 6px;color:#10233d;font-size:22px">LINEとDiscordの使い分け</h2>
-            <p style="margin:0;color:#617287;line-height:1.7">LINEは公式案内、PREMIUMのリアルタイム通知はDiscord。役割を分けて迷わず使えるようにしています。</p>
+            <p style="margin:0;color:#617287;line-height:1.7">LINEは公式案内、β PREMIUM / PREMIUMのリアルタイム通知はDiscord。役割を分けて迷わず使えるようにしています。</p>
           </div>
           ${notificationCardsHtml()}
         `;
@@ -83,7 +99,7 @@ export default function MemberChannelBridge(){
         const paragraphs=[...section.querySelectorAll("p")];
         for(const p of paragraphs){
           if(p.textContent?.includes("BoatStrikers会員ID")||p.textContent?.includes("LINEは重要なお知らせ")){
-            p.textContent=`BoatStrikers会員IDと公式LINEを連携できます。LINEでは無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordをご利用ください。`;
+            p.textContent=`BoatStrikers会員IDと公式LINEを連携できます。LINEでは無料情報・重要なお知らせをお届けします。β PREMIUM / PREMIUMのリアルタイム通知はDiscordをご利用ください。`;
           }
         }
       }
