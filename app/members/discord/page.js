@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { DISCORD_GUIDE, DISCORD_NOTIFICATION_PREFS, LINE_GUIDE } from "../notificationGuide";
 
 function makeSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,12 +11,6 @@ function makeSupabase(){
   if(!url||!key)return null;
   return createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 }
-
-const PREFS=[
-  ["ichika","🏁","一果通知","隠れイン・イン逃げ急上昇"],
-  ["hatsune","🌸","初音通知","女子イン崩れ・箱推し"],
-  ["kiina","🚨","キイナ通知","カド攻め理論"],
-];
 
 export default function DiscordMemberPage(){
   const supabase=useMemo(()=>makeSupabase(),[]);
@@ -102,27 +97,45 @@ export default function DiscordMemberPage(){
   return <main style={{minHeight:"100vh",background:"#07111f",color:"white",padding:"40px 18px 80px"}}>
     <div style={{maxWidth:760,margin:"0 auto"}}>
       <Link href="/members" style={{color:"#9cc6ff",textDecoration:"none"}}>← メンバーズへ戻る</Link>
+
       <section style={{marginTop:22,padding:"28px 22px",borderRadius:24,background:"linear-gradient(135deg,#19245a,#5865F2)",boxShadow:"0 20px 50px rgba(0,0,0,.3)"}}>
         <div style={{fontSize:13,fontWeight:800,letterSpacing:".14em",opacity:.8}}>BOATSTRIKERS PREMIUM</div>
-        <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord 通知設定</h1>
-        <p style={{lineHeight:1.8,margin:0}}>一果・初音・キイナから、受け取りたい通知だけを選べます。</p>
+        <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord リアルタイム通知</h1>
+        <p style={{lineHeight:1.8,margin:0}}>{DISCORD_GUIDE.description}</p>
+      </section>
+
+      <section style={{marginTop:18,padding:18,border:"1px solid #273c59",borderRadius:20,background:"#0d1a2b"}}>
+        <div style={{fontSize:11,fontWeight:900,letterSpacing:".12em",color:"#8bbcff"}}>NOTIFICATION GUIDE</div>
+        <h2 style={{margin:"7px 0 12px",fontSize:22}}>LINEとDiscordの役割</h2>
+        <div style={{display:"grid",gap:10}}>
+          <div style={{padding:14,borderRadius:14,background:"#102c24",border:"1px solid #1b5d43"}}>
+            <strong style={{display:"block",color:"#62e6a7"}}>LINE｜{LINE_GUIDE.role}</strong>
+            <span style={{display:"block",marginTop:5,color:"#b8c7da",fontSize:13,lineHeight:1.6}}>対象：{LINE_GUIDE.audience}</span>
+            <span style={{display:"block",marginTop:5,color:"#93a6bd",fontSize:12,lineHeight:1.6}}>{LINE_GUIDE.note}</span>
+          </div>
+          <div style={{padding:14,borderRadius:14,background:"#162454",border:"1px solid #5865F2"}}>
+            <strong style={{display:"block",color:"#b8c1ff"}}>Discord｜{DISCORD_GUIDE.role}</strong>
+            <span style={{display:"block",marginTop:5,color:"#d4dcff",fontSize:13,lineHeight:1.6}}>対象：{DISCORD_GUIDE.audience}</span>
+            <span style={{display:"block",marginTop:5,color:"#aeb8df",fontSize:12,lineHeight:1.6}}>{DISCORD_GUIDE.note}</span>
+          </div>
+        </div>
       </section>
 
       <section style={{marginTop:18,padding:22,border:"1px solid #233654",borderRadius:20,background:"#0d1a2b"}}>
         {loading?<p>連携状況を確認中...</p>:!session?<>
-          <h2>ログインが必要です</h2><p>BoatStrikers会員としてログインしてからDiscordを連携してください。</p><Link href="/members" style={{display:"inline-block",padding:"13px 18px",borderRadius:12,background:"white",color:"#07111f",fontWeight:800,textDecoration:"none"}}>ログインする</Link>
+          <h2>ログインが必要です</h2><p>PREMIUMのリアルタイム通知を利用するには、BoatStrikers会員としてログインしてからDiscordを連携してください。</p><Link href="/members" style={{display:"inline-block",padding:"13px 18px",borderRadius:12,background:"white",color:"#07111f",fontWeight:800,textDecoration:"none"}}>ログイン・無料会員登録</Link>
         </>:status?.linked?<>
           <div style={{fontSize:13,color:"#62e6a7",fontWeight:900}}>● CONNECTED</div>
           <h2>{status.link?.discord_global_name||status.link?.discord_username||"Discord"} と連携済み</h2>
-          <p style={{color:"#b8c7da",lineHeight:1.7}}>通知をONにした項目だけ、Discordでメンション通知を受け取ります。チャンネル自体はPREMIUM会員なら閲覧できます。</p>
+          <p style={{color:"#b8c7da",lineHeight:1.7}}>通知をONにした項目だけ、Discordでメンション通知を受け取ります。PREMIUM対象会員は通知設定をいつでも変更できます。</p>
 
           <div style={{display:"grid",gap:10,margin:"18px 0 22px"}}>
-            {PREFS.map(([key,icon,title,desc])=>{
+            {DISCORD_NOTIFICATION_PREFS.map(({key,icon,title,description})=>{
               const on=Boolean(preferences?.[key]);
               const waiting=prefBusy===key;
               return <button key={key} onClick={()=>togglePreference(key)} disabled={Boolean(prefBusy)} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"14px 15px",borderRadius:14,border:`1px solid ${on?"#5865F2":"#2a3d59"}`,background:on?"#162454":"#0a1626",color:"white",textAlign:"left",cursor:"pointer"}}>
                 <span style={{fontSize:24}}>{icon}</span>
-                <span style={{flex:1}}><strong style={{display:"block",fontSize:16}}>{title}</strong><span style={{fontSize:13,color:"#9fb0c5"}}>{desc}</span></span>
+                <span style={{flex:1}}><strong style={{display:"block",fontSize:16}}>{title}</strong><span style={{fontSize:13,color:"#9fb0c5"}}>{description}</span></span>
                 <span style={{minWidth:58,textAlign:"center",padding:"7px 9px",borderRadius:999,background:on?"#5865F2":"#26384f",fontSize:12,fontWeight:900}}>{waiting?"更新中":on?"ON":"OFF"}</span>
               </button>;
             })}
@@ -131,8 +144,8 @@ export default function DiscordMemberPage(){
           <p style={{fontSize:13,color:"#93a6bd",lineHeight:1.7}}>初期設定は3種類すべてONです。設定はいつでも変更できます。</p>
           <button onClick={unlink} disabled={busy} style={{padding:"12px 16px",borderRadius:12,border:"1px solid #40516c",background:"transparent",color:"white",fontWeight:700}}>Discord連携を解除</button>
         </>:<>
-          <h2>{status?.eligible?"Discordを連携する":"対象会員限定です"}</h2>
-          <p>{status?.eligible?"Discordで認証するとBoatStrikersサーバーへ参加し、PREMIUMロールと通知設定が自動で用意されます。":"Discord通知はPREMIUM対象プランで利用できます。"}</p>
+          <h2>{status?.eligible?"Discordを連携する":"PREMIUM対象会員限定です"}</h2>
+          <p>{status?.eligible?"Discordで認証するとBoatStrikersサーバーへ参加し、PREMIUMロールと通知設定が自動で用意されます。":"リアルタイムのDiscord通知はPREMIUM対象プランで利用できます。LINEでは無料情報・重要なお知らせを受け取れます。"}</p>
           {status?.eligible&&<button onClick={connect} disabled={busy} style={{width:"100%",padding:"15px 18px",border:0,borderRadius:14,background:"#5865F2",color:"white",fontSize:17,fontWeight:900,cursor:"pointer"}}>{busy?"Discordへ移動中...":"Discordを連携する"}</button>}
         </>}
         {error&&<div style={{marginTop:14,padding:12,borderRadius:10,background:"#411c28",color:"#ffd6df"}}>{error}</div>}
