@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import styles from "./membersAdmin.module.css";
+import MemberAnalyticsPanel from "./MemberAnalyticsPanel";
 import {
   clearMembersAdminCookie,
   isMembersAdminAuthenticated,
@@ -183,7 +184,7 @@ export default async function MembersAdminPage({ searchParams }) {
           <div>
             <span className={styles.eyebrow}>BOATSTRIKERS MEMBER ADMIN</span>
             <h1>会員管理</h1>
-            <p>登録・LINE連携・通知設定・最終ログインを確認できます。</p>
+            <p>登録・LINE連携・通知設定・最終ログイン・AI利用状況を確認できます。</p>
           </div>
           <div className={styles.heroActions}>
             <Link className={styles.back} href="/admin">← 管理画面一覧</Link>
@@ -198,6 +199,8 @@ export default async function MembersAdminPage({ searchParams }) {
           <article className={styles.stat}><span>LINE連携済み</span><strong>{stats.line}</strong></article>
           <article className={styles.stat}><span>通知ON会員</span><strong>{stats.notifications}</strong></article>
         </section>
+
+        <MemberAnalyticsPanel />
 
         <form className={styles.toolbar} method="get">
           <div className={styles.search}>
