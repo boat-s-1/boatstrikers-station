@@ -78,7 +78,7 @@ export default function MembersPage(){
         const emailRedirectTo=typeof window!=="undefined"?`${window.location.origin}/members`:undefined;
         const {data,error:signError}=await supabase.auth.signUp({email:email.trim(),password,options:{emailRedirectTo,data:{display_name:displayName.trim()||null,terms_accepted:true,privacy_accepted:true}}});
         if(signError)throw signError;
-        setMessage(data.session?"β会員登録が完了しました。次に公式LINEを連携してください。":"確認メールを送信しました。メール内のリンクを開くと登録完了です。");
+        setMessage(data.session?"β会員登録が完了しました。公式LINEでは無料情報・重要なお知らせを受け取れます。PREMIUMのリアルタイム通知はDiscordをご利用ください。":"確認メールを送信しました。メール内のリンクを開くと登録完了です。");
       }else{
         const {error:loginError}=await supabase.auth.signInWithPassword({email:email.trim(),password});
         if(loginError)throw loginError;
@@ -188,7 +188,7 @@ export default function MembersPage(){
       <section className={`${styles.lineCard} ${lineLinked?styles.lineLinked:""}`}>
         <div className={styles.lineHead}><div><span className={styles.kicker}>OFFICIAL LINE</span><h2>{lineLinked?"✅ 公式LINE連携済み":"公式LINEを会員アカウントに連携"}</h2></div><strong>{lineLinked?"CONNECTED":"3 STEPS"}</strong></div>
         {lineLinked?<>
-          <p>BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEは重要なお知らせや更新案内に使用します。</p>
+          <p>BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEでは無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordをご利用ください。</p>
           {profile?.line_linked_at&&<small>連携日時：{new Date(profile.line_linked_at).toLocaleString("ja-JP")}</small>}
         </>:<>
           <p>サイトから登録した方は、次の3ステップでLINEを連携してください。LINEから登録した方も同じ手順で会員IDとの紐づけができます。</p>

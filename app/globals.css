@@ -45,14 +45,15 @@ body {
   color: #00317f;
 }
 
-.lineMini {
-  background: #06c755;
+.memberMini {
+  background: linear-gradient(135deg,#1769e0,#6b5cff);
   color: #fff;
   text-decoration: none;
   padding: 10px 14px;
   border-radius: 999px;
   font-weight: 800;
   font-size: 14px;
+  box-shadow: 0 5px 14px rgba(23,105,224,.24);
 }
 
 .hero {
