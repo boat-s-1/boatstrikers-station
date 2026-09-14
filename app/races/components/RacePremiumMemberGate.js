@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const LOCKED_LABELS = new Set(["BS展示", "直前版", "直前買い目"]);
+const LOCKED_LABELS = new Set(["直前版", "直前買い目"]);
 const BANNER = "/beta-membership-banner.webp";
 
 export default function RacePremiumMemberGate({ premiumAccess = false }) {
