@@ -283,7 +283,7 @@ export default async function Home() {
     <main className="page">
       <header className="header">
         <div className="logo">BOAT<br /><span>STRIKERS</span></div>
-        <a className="lineMini" href="https://lin.ee/Pf3FEEQ">LINE登録</a>
+        <a className="memberMini" href="/members" aria-label="会員登録・LINE・Discord通知設定">会員・通知</a>
       </header>
 
       <section className="hero">
@@ -488,13 +488,13 @@ export default async function Home() {
     
 
       <section className="homeSectionCard green">
-  <h2 className="homeSectionTitle">💚 LINE限定情報</h2>
-  <p className="homeSectionLead">前日版・直前版を最速配信中！</p>
+  <h2 className="homeSectionTitle">💚 公式LINE</h2>
+  <p className="homeSectionLead">無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordへ。</p>
 
   <a href="https://lin.ee/Pf3FEEQ" className="bannerLink">
     <img
       src="/EED67E49-6856-4A73-BFF4-60583A6B2835.png"
-      alt="公式LINE登録"
+      alt="BoatStrikers公式LINE 無料情報・重要なお知らせ"
       className="bannerImage"
     />
   </a>
@@ -653,6 +653,7 @@ export default async function Home() {
       <div className="footerLinkGroup">
         <h2>サイト案内</h2>
 
+        <a href="/members">会員・通知設定</a>
         <a href="/about">BoatStrikersについて</a>
         <a href="/sitemap">サイトマップ</a>
         <a href="/contact">お問い合わせ</a>
