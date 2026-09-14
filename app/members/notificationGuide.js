@@ -4,17 +4,17 @@ export const LINE_GUIDE = {
   role: "無料情報・重要なお知らせ・会員ID連携",
   description:
     "今日の注目情報、無料記事、YouTube更新、キャンペーンなどの公式案内を受け取る窓口です。会員はLINEと会員IDを連携できます。",
-  note: "PREMIUMのリアルタイム通知はLINEではなくDiscordで配信します。",
+  note: "β PREMIUM / PREMIUMのリアルタイム通知はLINEではなくDiscordで配信します。",
   href: "https://lin.ee/Pf3FEEQ",
 };
 
 export const DISCORD_GUIDE = {
   label: "Discord",
-  audience: "コミュニティ参加 / PREMIUM対象会員はリアルタイム通知を利用可能",
+  audience: "コミュニティ参加 / β PREMIUM・PREMIUM対象会員はリアルタイム通知を利用可能",
   role: "コミュニティ・PREMIUMリアルタイム通知",
   description:
-    "BoatStrikersコミュニティの参加先です。PREMIUM対象会員は、一果・初音・キイナのリアルタイム通知を個別にON/OFFできます。",
-  note: "リアルタイム通知を使う場合はBoatStrikers会員としてログイン後、Discord連携が必要です。",
+    "BoatStrikersコミュニティの参加先です。β PREMIUM / PREMIUM対象会員は、一果・初音・キイナのリアルタイム通知を個別にON/OFFできます。",
+  note: "リアルタイム通知を使う場合はBoatStrikers会員としてログイン後、Discord連携が必要です。現在のβ期間中は有効な会員にPREMIUM相当機能を無料開放しています。",
   href: "/members/discord",
 };
 
