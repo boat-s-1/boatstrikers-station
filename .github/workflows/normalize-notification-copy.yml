@@ -1,0 +1,80 @@
+name: Normalize notification copy
+
+on:
+  push:
+    branches:
+      - fix/notification-copy-source
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/notification-copy-source
+          fetch-depth: 0
+
+      - name: Normalize LINE and Discord copy
+        shell: python
+        run: |
+          from pathlib import Path
+
+          replacements = {
+              "app/page.js": [
+                  ('<a className="lineMini" href="https://lin.ee/Pf3FEEQ">LINE登録</a>', '<a className="memberMini" href="/members" aria-label="会員登録・LINE・Discord通知設定">会員・通知</a>'),
+                  ('<h2 className="homeSectionTitle">💚 LINE限定情報</h2>', '<h2 className="homeSectionTitle">💚 公式LINE</h2>'),
+                  ('<p className="homeSectionLead">前日版・直前版を最速配信中！</p>', '<p className="homeSectionLead">無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordへ。</p>'),
+                  ('alt="公式LINE登録"', 'alt="BoatStrikers公式LINE 無料情報・重要なお知らせ"'),
+                  ('<h2>サイト案内</h2>\n\n        <a href="/about">BoatStrikersについて</a>', '<h2>サイト案内</h2>\n\n        <a href="/members">会員・通知設定</a>\n        <a href="/about">BoatStrikersについて</a>'),
+              ],
+              "app/globals.css": [
+                  ('.lineMini {\n  background: #06c755;', '.memberMini {\n  background: linear-gradient(135deg,#1769e0,#6b5cff);'),
+                  ('  font-size: 14px;\n}\n\n.hero {', '  font-size: 14px;\n  box-shadow: 0 5px 14px rgba(23,105,224,.24);\n}\n\n.hero {'),
+              ],
+              "app/members/page.js": [
+                  ('β会員登録が完了しました。次に公式LINEを連携してください。', 'β会員登録が完了しました。公式LINEでは無料情報・重要なお知らせを受け取れます。PREMIUMのリアルタイム通知はDiscordをご利用ください。'),
+                  ('BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEは重要なお知らせや更新案内に使用します。', 'BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEでは無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordをご利用ください。'),
+              ],
+              "app/components/HomeBroadcastPanel.js": [
+                  ('\n  useEffect(()=>{\n    const headerLink=document.querySelector(".lineMini");\n    if(headerLink){\n      headerLink.setAttribute("href","/members");\n      headerLink.setAttribute("aria-label","会員登録・LINE・Discord通知設定");\n      headerLink.textContent="会員・通知";\n      headerLink.style.background="linear-gradient(135deg,#1769e0,#6b5cff)";\n      headerLink.style.boxShadow="0 5px 14px rgba(23,105,224,.24)";\n    }\n\n    const lineSection=[...document.querySelectorAll("section")].find(section=>section.textContent?.includes("LINE限定情報"));\n    if(lineSection){\n      const title=lineSection.querySelector("h2");\n      const lead=lineSection.querySelector("p");\n      const lineLink=lineSection.querySelector(\'a[href*="lin.ee"]\');\n      const banner=lineSection.querySelector("img");\n      if(title)title.textContent="💚 公式LINE";\n      if(lead)lead.textContent="無料情報・重要なお知らせをお届けします。リアルタイムのPREMIUM通知はDiscordをご利用ください。";\n      if(lineLink)lineLink.setAttribute("aria-label","BoatStrikers公式LINEを開く（無料情報・重要なお知らせ）");\n      if(banner)banner.setAttribute("alt","BoatStrikers公式LINE 無料情報・重要なお知らせ");\n    }\n  },[]);\n', '\n'),
+              ],
+          }
+
+          changed = []
+          for filename, pairs in replacements.items():
+              path = Path(filename)
+              text = path.read_text(encoding="utf-8")
+              original = text
+              for old, new in pairs:
+                  if old not in text:
+                      raise SystemExit(f"Expected source text not found in {filename}: {old[:80]!r}")
+                  text = text.replace(old, new, 1)
+              if text != original:
+                  path.write_text(text, encoding="utf-8")
+                  changed.append(filename)
+
+          print("Updated:", ", ".join(changed))
+
+      - name: Verify obsolete public wording is gone
+        shell: bash
+        run: |
+          ! grep -R --line-number --exclude-dir=node_modules --exclude-dir=.git -E 'LINE登録|LINE限定情報|前日版・直前版を最速配信中' app
+          grep -q '会員・通知' app/page.js
+          grep -q 'PREMIUMのリアルタイム通知はDiscord' app/members/page.js
+
+      - name: Commit normalized source
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.js app/globals.css app/members/page.js app/components/HomeBroadcastPanel.js
+          git commit -m "fix: make notification copy canonical in source"
+          git push origin HEAD:fix/notification-copy-source
