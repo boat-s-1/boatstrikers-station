@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const FEATURES = {
   "BS展示": {
@@ -28,6 +28,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
   const [statuses, setStatuses] = useState({});
   const [dialog, setDialog] = useState(null);
   const [busyKey, setBusyKey] = useState("");
+  const busyRef = useRef(false);
 
   const definitions = useMemo(() => Object.values(FEATURES), []);
 
@@ -88,12 +89,19 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
 
       const featureKey = button.dataset.bsQuotaFeature;
       const definition = Object.values(FEATURES).find((item) => item.key === featureKey);
-      if (!definition || busyKey) return;
+      if (!definition) return;
+
+      if (busyRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
       if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
 
+      busyRef.current = true;
       setBusyKey(featureKey);
       try {
         const response = await fetch("/api/members/feature-usage", {
@@ -130,6 +138,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
           exhausted: false,
         });
       } finally {
+        busyRef.current = false;
         setBusyKey("");
       }
     };
@@ -148,7 +157,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         delete button.dataset.bsQuotaBypass;
       });
     };
-  }, [premiumAccess, busyKey]);
+  }, [premiumAccess]);
 
   return (
     <>
