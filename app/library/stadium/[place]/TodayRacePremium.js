@@ -1,4 +1,5 @@
 'use client';
+import { startVisiblePolling } from "../../../lib/visiblePolling";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from './stadiumAiV2.module.css';
@@ -31,14 +32,12 @@ export default function TodayRacePremium({ place, stadiumName }) {
     } catch (e) {
       setError(e.message || '取得に失敗しました。');
     } finally {
-      if (!quiet) setLoading(false);
+      setLoading(false);
     }
   }, [place]);
 
   useEffect(() => {
-    load();
-    const timer = window.setInterval(() => load({ quiet: true }), 60_000);
-    return () => window.clearInterval(timer);
+    return startVisiblePolling(() => load({ quiet: true }), 60_000);
   }, [load]);
 
   const race = useMemo(() => data?.races?.find(item => item.raceNo === selectedRace), [data, selectedRace]);

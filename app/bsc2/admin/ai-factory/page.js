@@ -1,4 +1,5 @@
 "use client";
+import { startVisiblePolling } from "../../../lib/visiblePolling";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -48,7 +49,7 @@ export default function AiFactoryPage(){
     }catch(e){setMessage(e.message);}finally{setLoading(false);}
   },[adminKey,filterCharacter,filterTiming]);
 
-  useEffect(()=>{ if(!adminKey)return; load(); const id=setInterval(load,5000); return()=>clearInterval(id); },[adminKey,load]);
+  useEffect(()=>{ if(!adminKey)return; return startVisiblePolling(load,5000); },[adminKey,load]);
 
   async function createTraining(){
     setMessage("学習ジョブを登録中…");
