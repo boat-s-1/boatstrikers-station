@@ -1,0 +1,77 @@
+name: Temporary notification source normalizer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/temp-normalize-notification-source.yml
+
+permissions:
+  contents: write
+
+jobs:
+  normalize-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/notification-copy-source
+          fetch-depth: 0
+
+      - name: Normalize canonical source copy
+        shell: python
+        run: |
+          from pathlib import Path
+
+          changes = {
+            "app/page.js": [
+              ('<a className="lineMini" href="https://lin.ee/Pf3FEEQ">LINE登録</a>', '<a className="memberMini" href="/members" aria-label="会員登録・LINE・Discord通知設定">会員・通知</a>'),
+              ('<h2 className="homeSectionTitle">💚 LINE限定情報</h2>', '<h2 className="homeSectionTitle">💚 公式LINE</h2>'),
+              ('<p className="homeSectionLead">前日版・直前版を最速配信中！</p>', '<p className="homeSectionLead">無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordへ。</p>'),
+              ('alt="公式LINE登録"', 'alt="BoatStrikers公式LINE 無料情報・重要なお知らせ"'),
+              ('<h2>サイト案内</h2>\n\n        <a href="/about">BoatStrikersについて</a>', '<h2>サイト案内</h2>\n\n        <a href="/members">会員・通知設定</a>\n        <a href="/about">BoatStrikersについて</a>'),
+            ],
+            "app/globals.css": [
+              ('.lineMini {\n  background: #06c755;\n  color: #fff;\n  text-decoration: none;\n  padding: 10px 14px;\n  border-radius: 999px;\n  font-weight: 800;\n  font-size: 14px;\n}', '.memberMini {\n  background: linear-gradient(135deg,#1769e0,#6b5cff);\n  color: #fff;\n  text-decoration: none;\n  padding: 10px 14px;\n  border-radius: 999px;\n  font-weight: 800;\n  font-size: 14px;\n  box-shadow: 0 5px 14px rgba(23,105,224,.24);\n}'),
+            ],
+            "app/members/page.js": [
+              ('β会員登録が完了しました。次に公式LINEを連携してください。', 'β会員登録が完了しました。公式LINEでは無料情報・重要なお知らせを受け取れます。PREMIUMのリアルタイム通知はDiscordをご利用ください。'),
+              ('BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEは重要なお知らせや更新案内に使用します。', 'BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEでは無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordをご利用ください。'),
+            ],
+            "app/components/HomeBroadcastPanel.js": [
+              ('\n  useEffect(()=>{\n    const headerLink=document.querySelector(".lineMini");\n    if(headerLink){\n      headerLink.setAttribute("href","/members");\n      headerLink.setAttribute("aria-label","会員登録・LINE・Discord通知設定");\n      headerLink.textContent="会員・通知";\n      headerLink.style.background="linear-gradient(135deg,#1769e0,#6b5cff)";\n      headerLink.style.boxShadow="0 5px 14px rgba(23,105,224,.24)";\n    }\n\n    const lineSection=[...document.querySelectorAll("section")].find(section=>section.textContent?.includes("LINE限定情報"));\n    if(lineSection){\n      const title=lineSection.querySelector("h2");\n      const lead=lineSection.querySelector("p");\n      const lineLink=lineSection.querySelector(\'a[href*="lin.ee"]\');\n      const banner=lineSection.querySelector("img");\n      if(title)title.textContent="💚 公式LINE";\n      if(lead)lead.textContent="無料情報・重要なお知らせをお届けします。リアルタイムのPREMIUM通知はDiscordをご利用ください。";\n      if(lineLink)lineLink.setAttribute("aria-label","BoatStrikers公式LINEを開く（無料情報・重要なお知らせ）");\n      if(banner)banner.setAttribute("alt","BoatStrikers公式LINE 無料情報・重要なお知らせ");\n    }\n  },[]);\n', '\n'),
+            ],
+          }
+
+          changed=[]
+          for filename,pairs in changes.items():
+            p=Path(filename)
+            text=p.read_text(encoding='utf-8')
+            original=text
+            for old,new in pairs:
+              if old not in text:
+                raise SystemExit(f'Expected text missing in {filename}: {old[:100]}')
+              text=text.replace(old,new,1)
+            if text != original:
+              p.write_text(text,encoding='utf-8')
+              changed.append(filename)
+          print('Changed:', ', '.join(changed))
+
+      - name: Audit notification wording
+        shell: bash
+        run: |
+          if grep -RIn --exclude-dir=node_modules --exclude-dir=.git -E 'LINE登録|LINE限定情報|前日版・直前版を最速配信中' app; then
+            echo 'Obsolete wording remains'
+            exit 1
+          fi
+          grep -RIn --exclude-dir=node_modules --exclude-dir=.git -E '公式LINE|Discord|リアルタイム通知' app > /tmp/notification-audit.txt
+          cat /tmp/notification-audit.txt
+
+      - name: Commit to feature branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.js app/globals.css app/members/page.js app/components/HomeBroadcastPanel.js
+          git commit -m "fix: make LINE and Discord copy canonical in source"
+          git push origin HEAD:fix/notification-copy-source
