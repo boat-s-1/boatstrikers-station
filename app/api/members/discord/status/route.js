@@ -12,7 +12,7 @@ export async function GET(request){
     const {data:{user},error:userError}=await admin.auth.getUser(token);
     if(userError||!user)return NextResponse.json({error:"ログイン情報が無効です。"},{status:401});
     const [{data:profile,error:profileError},{data:link,error:linkError}]=await Promise.all([
-      admin.from("bs_member_profiles").select("plan,membership_status").eq("user_id",user.id).maybeSingle(),
+      admin.from("bs_member_profiles").select("plan,membership_status,premium_until").eq("user_id",user.id).maybeSingle(),
       admin.from("bs_member_discord_links").select("discord_user_id,discord_username,discord_global_name,linked_at,last_role_synced_at,last_role_state").eq("user_id",user.id).maybeSingle(),
     ]);
     if(profileError)throw profileError;

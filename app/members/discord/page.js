@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { DISCORD_GUIDE, DISCORD_NOTIFICATION_PREFS, LINE_GUIDE } from "../notificationGuide";
+import { CURRENT_BETA_MESSAGE } from "../planGuide";
 
 function makeSupabase(){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -99,9 +100,10 @@ export default function DiscordMemberPage(){
       <Link href="/members" style={{color:"#9cc6ff",textDecoration:"none"}}>← メンバーズへ戻る</Link>
 
       <section style={{marginTop:22,padding:"28px 22px",borderRadius:24,background:"linear-gradient(135deg,#19245a,#5865F2)",boxShadow:"0 20px 50px rgba(0,0,0,.3)"}}>
-        <div style={{fontSize:13,fontWeight:800,letterSpacing:".14em",opacity:.8}}>BOATSTRIKERS PREMIUM</div>
+        <div style={{fontSize:13,fontWeight:800,letterSpacing:".14em",opacity:.8}}>BOATSTRIKERS β PREMIUM / PREMIUM</div>
         <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord リアルタイム通知</h1>
         <p style={{lineHeight:1.8,margin:0}}>{DISCORD_GUIDE.description}</p>
+        <div style={{marginTop:14,padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,.12)",fontSize:12,fontWeight:800,lineHeight:1.7}}>{CURRENT_BETA_MESSAGE}</div>
       </section>
 
       <section style={{marginTop:18,padding:18,border:"1px solid #273c59",borderRadius:20,background:"#0d1a2b"}}>
@@ -123,11 +125,11 @@ export default function DiscordMemberPage(){
 
       <section style={{marginTop:18,padding:22,border:"1px solid #233654",borderRadius:20,background:"#0d1a2b"}}>
         {loading?<p>連携状況を確認中...</p>:!session?<>
-          <h2>ログインが必要です</h2><p>PREMIUMのリアルタイム通知を利用するには、BoatStrikers会員としてログインしてからDiscordを連携してください。</p><Link href="/members" style={{display:"inline-block",padding:"13px 18px",borderRadius:12,background:"white",color:"#07111f",fontWeight:800,textDecoration:"none"}}>ログイン・無料会員登録</Link>
+          <h2>ログインが必要です</h2><p>現在のβ期間中は、有効なBoatStrikers会員ならPREMIUM相当のDiscordリアルタイム通知を利用できます。ログイン後にDiscordを連携してください。</p><Link href="/members" style={{display:"inline-block",padding:"13px 18px",borderRadius:12,background:"white",color:"#07111f",fontWeight:800,textDecoration:"none"}}>ログイン・無料会員登録</Link>
         </>:status?.linked?<>
           <div style={{fontSize:13,color:"#62e6a7",fontWeight:900}}>● CONNECTED</div>
           <h2>{status.link?.discord_global_name||status.link?.discord_username||"Discord"} と連携済み</h2>
-          <p style={{color:"#b8c7da",lineHeight:1.7}}>通知をONにした項目だけ、Discordでメンション通知を受け取ります。PREMIUM対象会員は通知設定をいつでも変更できます。</p>
+          <p style={{color:"#b8c7da",lineHeight:1.7}}>通知をONにした項目だけ、Discordでメンション通知を受け取ります。β PREMIUM / PREMIUM対象会員は通知設定をいつでも変更できます。</p>
 
           <div style={{display:"grid",gap:10,margin:"18px 0 22px"}}>
             {DISCORD_NOTIFICATION_PREFS.map(({key,icon,title,description})=>{
@@ -144,8 +146,8 @@ export default function DiscordMemberPage(){
           <p style={{fontSize:13,color:"#93a6bd",lineHeight:1.7}}>初期設定は3種類すべてONです。設定はいつでも変更できます。</p>
           <button onClick={unlink} disabled={busy} style={{padding:"12px 16px",borderRadius:12,border:"1px solid #40516c",background:"transparent",color:"white",fontWeight:700}}>Discord連携を解除</button>
         </>:<>
-          <h2>{status?.eligible?"Discordを連携する":"PREMIUM対象会員限定です"}</h2>
-          <p>{status?.eligible?"Discordで認証するとBoatStrikersサーバーへ参加し、PREMIUMロールと通知設定が自動で用意されます。":"リアルタイムのDiscord通知はPREMIUM対象プランで利用できます。LINEでは無料情報・重要なお知らせを受け取れます。"}</p>
+          <h2>{status?.eligible?"Discordを連携する":"β PREMIUM / PREMIUM対象会員限定です"}</h2>
+          <p>{status?.eligible?"Discordで認証するとBoatStrikersサーバーへ参加し、PREMIUMロールと通知設定が自動で用意されます。":"リアルタイムのDiscord通知はβ PREMIUM / PREMIUM対象会員向けです。FREEではLINEの無料情報・重要なお知らせを利用できます。"}</p>
           {status?.eligible&&<button onClick={connect} disabled={busy} style={{width:"100%",padding:"15px 18px",border:0,borderRadius:14,background:"#5865F2",color:"white",fontSize:17,fontWeight:900,cursor:"pointer"}}>{busy?"Discordへ移動中...":"Discordを連携する"}</button>}
         </>}
         {error&&<div style={{marginTop:14,padding:12,borderRadius:10,background:"#411c28",color:"#ffd6df"}}>{error}</div>}
