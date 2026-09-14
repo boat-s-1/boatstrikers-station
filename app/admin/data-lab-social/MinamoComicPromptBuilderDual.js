@@ -1,0 +1,322 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { buildMinamoComicCandidates } from "../../../lib/minamoComicCandidates";
+
+function statsMap(payload) {
+  const map = {};
+  const stats = Array.isArray(payload?.stats) ? payload.stats : [];
+  stats.forEach((s) => {
+    map[String(s.label || "")] = String(s.value || "");
+  });
+  return map;
+}
+
+function rankingLines(payload) {
+  const ranking = Array.isArray(payload?.venue_manshu_ranking) ? payload.venue_manshu_ranking : [];
+  if (!ranking.length) return "該当データなし";
+  return ranking.slice(0, 5).map((r, i) => `${i + 1}. ${r.venue || ""} ${r.count || 0}本`).join("\n");
+}
+
+function topText(payload) {
+  const top = payload?.max_payout;
+  if (!top) return "該当データなし";
+  return `${top.venue || ""}${top.race_no || ""}R ${top.trifecta || ""} / ${Number(top.payout || 0).toLocaleString("ja-JP")}円`;
+}
+
+function clean(value) {
+  return value === null || value === undefined || value === "" ? "該当データなし" : String(value);
+}
+
+const CHARACTER_LABELS = {
+  ichika: "一果",
+  hatsune: "初音",
+  kiina: "キイナ",
+};
+
+const selectStyle = { width: "100%", padding: 12, borderRadius: 10 };
+const labelStyle = { display: "grid", gap: 7 };
+const labelTextStyle = { fontSize: 13, opacity: 0.75 };
+
+function layoutInstruction(layout, usage, textVolume) {
+  const usageText = {
+    sns: "SNS向け。スマホ閲覧を最優先し、最初の1秒で内容が伝わるフック、読みやすさ、スワイプしたくなる流れを重視する。",
+    archive: "サイト・保存向け。作品としての完成感、4コマ全体のまとまり、情報の整理を重視する。",
+    balanced: "SNSの読みやすさと、作品としてのまとまりを両立する。",
+  }[usage];
+
+  const volumeText = {
+    low: "文字量は少なめ。1吹き出しを短くし、ひと目で理解できる量にする。",
+    normal: "文字量は標準。必要な説明を残しつつ、スマホで読みやすい量にする。",
+    high: "文字量はやや多めでもよいが、長文を1か所に詰め込まず分散し、可読性を最優先する。",
+  }[textVolume];
+
+  if (layout === "comic_single") {
+    return `【出力レイアウト】\n1枚4コマ版のみを作る。\n・1枚の縦長画像の中に4コマを縦に配置する\n・4つのコマを明確に区切る\n・各コマは1つの役割に絞り、情報を詰め込みすぎない\n・4コマ目でオチまたは研究部らしいまとめを作る\n・1枚の作品として統一感を出す\n${usageText}\n${volumeText}`;
+  }
+
+  if (layout === "slides_vertical") {
+    return `【出力レイアウト】\n縦長4枚版のみを作る。\n・9:16の縦長画像を4枚作る前提で構成する\n・1枚につき1メッセージを基本にする\n・1枚目：強いフック、状況提示\n・2枚目：事実・状況・展開\n・3枚目：リアクション、気づき、比較、ひねり\n・4枚目：オチ、まとめ、共感、次につながる締め\n・各画像単体でも意味が通じ、4枚通すと物語になるようにする\n・文字を大きくし、スマホで一瞬で読めることを優先する\n${usageText}\n${volumeText}`;
+  }
+
+  return `【出力レイアウト】\n同じテーマ・同じ事実・同じキャラクター設定から、次の2種類を両方作る。\n\nA. 1枚4コマ版\n・1枚の縦長画像の中に4コマを縦に配置する\n・4つのコマを明確に区切る\n・1枚の作品としての完成感を重視する\n・4コマ目でオチまたは研究部らしいまとめを作る\n\nB. 縦長4枚版\n・9:16の縦長画像を4枚作る前提で構成する\n・1枚目は強いフック\n・2枚目は事実・状況・展開\n・3枚目はリアクション、気づき、比較、ひねり\n・4枚目はオチ、まとめ、共感、次につながる締め\n・1枚につき1メッセージを基本にし、文字を大きくする\n\n重要：同じ内容をそのままコピペするのではなく、それぞれの見せ方に最適化して台本と画像生成プロンプトを作り分ける。\n${usageText}\n${volumeText}`;
+}
+
+export default function MinamoComicPromptBuilderDual({ payload, newsItems = [] }) {
+  const candidates = useMemo(() => buildMinamoComicCandidates({ payload, newsItems }), [payload, newsItems]);
+  const [mode, setMode] = useState("balanced");
+  const [layout, setLayout] = useState("both");
+  const [usage, setUsage] = useState("sns");
+  const [textVolume, setTextVolume] = useState("normal");
+  const [comicType, setComicType] = useState("daily");
+  const [topic, setTopic] = useState("auto");
+  const [protagonist, setProtagonist] = useState("all");
+  const [punchline, setPunchline] = useState("character");
+  const [audience, setAudience] = useState("general");
+  const [dailyIdea, setDailyIdea] = useState("");
+  const [news, setNews] = useState("");
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  function useCandidate(candidate) {
+    setSelectedCandidate(candidate);
+    setMode("fact");
+    setComicType(candidate.topicType === "news" ? "news" : "result");
+    setTopic(candidate.topicType || "auto");
+    setNews(candidate.newsSummary || "");
+  }
+
+  const prompt = useMemo(() => {
+    const s = statsMap(payload);
+    const date = payload?.date || "";
+
+    const selectedMode = {
+      fact: "ファクト重視。実データ・入力済みの確認済み事実を中心に構成し、事実関係を最優先する。",
+      joke: "ネタ重視。実在データがなくても、ボートレースあるある・舟券あるある・学園の日常・キャラの掛け合いを自由に創作する。",
+      balanced: "バランス型。入力された事実は厳密に守りつつ、日常ネタ・あるある・キャラの掛け合いを強める。",
+    }[mode];
+
+    const selectedComicType = {
+      news: "ニュース・時事4コマ",
+      result: "レース結果・データ4コマ",
+      research: "研究・検証4コマ",
+      daily: "ボートレース×学園日常4コマ",
+      aruaru: "ボートレース・舟券あるある4コマ",
+      beginner: "初心者向け4コマ",
+      character: "キャラクター掛け合い4コマ",
+    }[comicType];
+
+    const selectedTopic = {
+      auto: "AIが今回の入力から最も4コマ向きの話題を1つ選ぶ",
+      payout: "高配当・万舟を主役にする",
+      escape: "イン逃げ・1号艇を主役にする",
+      boat5: "5号艇・穴狙いを主役にする",
+      women: "女子戦・初音らしい視点を主役にする",
+      ticket: "舟券を買う時の心理・迷い・あるあるを主役にする",
+      deadline: "締切前のバタバタ・迷いを主役にする",
+      exhibition: "展示を見た後に気持ちが変わるあるあるを主役にする",
+      school: "学園・部室の日常にボートレース要素を掛け合わせる",
+      news: "入力された時事ネタ・ニュースを主役にする",
+      research: "研究部らしいデータ検証を主役にする",
+    }[topic] || "AIが今回の入力から最も4コマ向きの話題を1つ選ぶ";
+
+    const selectedProtagonist = {
+      all: "一果・初音・キイナの3人をバランスよく使う",
+      ichika: "一果を主役にする",
+      hatsune: "初音を主役にする",
+      kiina: "キイナを主役にする",
+    }[protagonist];
+
+    const selectedPunchline = {
+      character: "キャラ性が出るオチ",
+      relatable: "読者が『あるある』と思える共感オチ",
+      tsukkomi: "テンポのよいツッコミオチ",
+      mismatch: "3人の考えが微妙に噛み合わないすれ違いオチ",
+      warm: "かわいく、ほっこりするオチ",
+      research: "最後に研究部らしい一言で締めるオチ",
+    }[punchline];
+
+    const selectedAudience = {
+      beginner: "初心者にも意味が通じるよう専門用語をかみ砕く",
+      general: "ボートレースを少し知っているSNSユーザー向け",
+      core: "ボートレースファン向け。あるある感を強める",
+    }[audience];
+
+    const candidateText = selectedCandidate
+      ? `\n【選択した4コマ候補】\nタイトル：${selectedCandidate.title}\n要約：${selectedCandidate.lead}\n主役候補：${selectedCandidate.recommendedCharacters.map((c) => CHARACTER_LABELS[c] || c).join(" → ")}\n演出方針：${selectedCandidate.comicAngle}\n使用事実：\n${selectedCandidate.facts.map((f) => `・${f.label}：${f.value}`).join("\n")}\n`
+      : "";
+
+    const factData = `日付：${date}\n開催：${clean(s["開催"] || s["開催数"])}\n万舟：${clean(s["万舟"])}\n万舟率：${clean(s["万舟率"])}\n1号艇1着：${clean(s["1号艇1着"] || s["1号艇1着数"])}\n5号艇1着：${clean(s["5号艇1着"] || s["5号艇1着数"])}\n逃げ：${clean(s["逃げ"])}\n最高配当：${topText(payload)}\n万舟が多かった場TOP5：\n${rankingLines(payload)}\n事故・異常者：${clean(payload?.incident_races)}R\n優勝戦・DR：${clean(payload?.featured_races)}R`;
+
+    const outputFormat = layout === "comic_single"
+      ? `【出力形式】\n1. タイトル\n2. 採用テーマと理由\n3. 使用した事実データ一覧（使っていない場合は「実データ使用なし」）\n4. 【1枚4コマ版】\n   ■1コマ目〜■4コマ目：役割 / 場面 / 登場キャラ / セリフ / 表示文字・事実 / 表情・ポーズ・演出\n5. 【1枚4コマ版の画像生成プロンプト】\n6. X投稿文\n7. ファクトチェック`
+      : layout === "slides_vertical"
+        ? `【出力形式】\n1. タイトル\n2. 採用テーマと理由\n3. 使用した事実データ一覧（使っていない場合は「実データ使用なし」）\n4. 【縦長4枚版】\n   ■1枚目〜■4枚目：役割 / 場面 / 登場キャラ / セリフ / 大見出し / 表示文字・事実 / 表情・ポーズ・演出\n5. 【縦長4枚版の画像生成プロンプト】\n   4枚それぞれについて9:16用の独立プロンプトを出す\n6. X投稿文\n7. ファクトチェック`
+        : `【出力形式】\n1. タイトル\n2. 採用テーマと理由\n3. 使用した事実データ一覧（使っていない場合は「実データ使用なし」）\n4. 【1枚4コマ版】\n   ■1コマ目〜■4コマ目：役割 / 場面 / 登場キャラ / セリフ / 表示文字・事実 / 表情・ポーズ・演出\n5. 【1枚4コマ版の画像生成プロンプト】\n6. 【縦長4枚版】\n   ■1枚目〜■4枚目：役割 / 場面 / 登場キャラ / セリフ / 大見出し / 表示文字・事実 / 表情・ポーズ・演出\n7. 【縦長4枚版の画像生成プロンプト】\n   4枚それぞれについて9:16用の独立プロンプトを出す\n8. X投稿文\n9. ファクトチェック`;
+
+    return `あなたはBoatStrikersの学園4コマシリーズ「私立みなも学園〜ふなけん研究部〜」の専属脚本家・編集者・画像生成プロンプト担当です。\n\nこの作品は、ボートレースのニュースや実データだけでなく、ボートレースあるある、舟券あるある、学園の日常、初心者の疑問、キャラクター同士の掛け合いを、楽しく読みやすい漫画・SNSコンテンツにするシリーズです。\n\n【今回の生成モード】\n${selectedMode}\n\n【漫画タイプ】\n${selectedComicType}\n\n【今回のテーマ方針】\n${selectedTopic}\n\n【主役】\n${selectedProtagonist}\n\n【オチ】\n${selectedPunchline}\n\n【読者レベル】\n${selectedAudience}\n\n${layoutInstruction(layout, usage, textVolume)}\n${candidateText}\n【最重要ルール】\n・実在の開催場、日付、レース番号、艇番、選手名、着順、出目、配当、ST、展示タイム、事故内容、勝率、記録などを使う場合は、下記の実データまたは入力された確認済み情報だけを使用する\n・入力されていない実在情報を、知識・推測・類似例から補完しない\n・入力された数字は桁、単位、小数点、順位、艇番を変更せず完全一致させる\n・ネタ重視では、実データを使わない日常会話、リアクション、学園演出、ボケ、ツッコミ、あるある、オチは自由に創作してよい\n・ネタのために架空の具体的な選手名、開催場、レース番号、配当、事故情報を作らない\n・予想を事実のように断定しない\n・セリフはスマホで読みやすい短さにし、1つの吹き出しへ説明を詰め込みすぎない\n\n【シリーズ名】\n私立みなも学園〜ふなけん研究部〜\n\n【舞台設定】\nみなも学園の「ふなけん研究部」。ボートレースをデータや日々のあるあるから研究する学園部活もの。\n部室、教室、廊下、掲示板前、放課後、購買、テスト勉強など普通の学園生活に、ボートレース的な考え方や言葉を自然に掛け合わせてよい。\nホワイトボード、モニター、競艇場資料、艇番カラーの小物なども必要に応じて使う。\n\n【キャラクター】\n一果：緑系。研究部リーダー。イン逃げを絞るタイプ。落ち着いたまとめ役だが、インへの自信が強い時は少し断言しがち。\n初音：紫系。女子戦オタクの不思議キャラ。普段はふわっとしているが、女子戦や気になるポイントでは急に詳しくなる。独特な視点で核心を突く。\nキイナ：黄色・ゴールド系。5アタマ狙いの穴党。ギャルっぽく元気で少し天然。高配当や穴の気配にテンションが上がり、リアクションは大きめ。\n\n【日常ネタ・あるある入力】\n${dailyIdea.trim() || "指定なし。漫画タイプ・テーマ・キャラ設定から自然なネタを考える。"}\n\n【確認済みの時事ネタ・ニュース補足】\n${news.trim() || "なし"}\n\n【DATA LAB 実データ】\n${factData}\n\n【実データの扱い】\n${mode === "joke" ? "今回はネタ重視。実データは無理に漫画へ入れなくてよい。使う場合だけ正確に引用する。" : mode === "fact" ? "今回はファクト重視。実データまたは確認済みニュースを中心に構成する。" : "実データは使える時だけ自然に使い、日常ネタを邪魔する場合は無理に詰め込まない。"}\n\n【4コマ・4枚の物語ルール】\n1：日常の状況、疑問、あるあるのフリ、ニュース提示など、ひと目で状況が分かる導入。\n2：キャラクターらしい考え方や行動で話を展開する。\n3：別キャラのツッコミ、ズレた視点、感情の膨らみ、データの意味などで一段ひねる。\n4：${selectedPunchline}で短く締める。説明だけで終わらず、『あるある』『それな』『かわいい』『なるほど』のどれかが残るようにする。\n\n【日常ネタで意識すること】\n・単なるボートレース解説ではなく、学校生活や日常行動とボートレースの感覚を掛け合わせる\n・例：テストの選択肢を舟券のように絞る、席替えで1枠を気にする、購買の行列を進入争いに見立てる、締切前に宿題を出す姿を舟券締切に重ねる、体育祭のスタートに反応する等\n・毎回同じ『予想が外れた』オチにしない\n・キャラクターの性格そのものがオチになる回も作る\n\n${outputFormat}\n\n【画像生成プロンプト共通条件】\n・日本語\n・明るくポップなアニメ調\n・一果＝緑、初音＝紫、キイナ＝黄色・ゴールドのキャラカラーと役割を維持\n・セリフは短く読みやすくする\n・数字、場名、出目、配当を使う場合は特に読みやすく正確にする\n・入力されていない具体的な数字や固有名詞を背景へ勝手に生成しない\n・下部に小さく「私立みなも学園〜ふなけん研究部〜」「BoatStrikers」\n・ニュース解説だけにせず、3人の掛け合いと学園コメディを作品の中心にする\n・縦長4枚版では、各画像にシリーズ名を大きく繰り返しすぎず、内容を読むスペースを優先する\n\n【ファクトチェック】\n・入力外の実在情報追加：なし / あり\n・数字変更：なし / あり\n・未確認情報の断定：なし / あり\n・キャラぶれ：なし / あり\n・指定レイアウトどおり：はい / いいえ`;
+  }, [payload, mode, layout, usage, textVolume, comicType, topic, protagonist, punchline, audience, dailyIdea, news, selectedCandidate]);
+
+  async function copyPrompt() {
+    await navigator.clipboard.writeText(prompt);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  return (
+    <section id="minamo-comic" style={{ scrollMarginTop: 80, marginTop: 28, padding: 20, borderRadius: 18, border: "1px solid rgba(255,255,255,.12)", background: "rgba(7,18,38,.72)" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: 12, letterSpacing: ".12em", opacity: 0.68 }}>MINAMO ACADEMY COMIC STUDIO</div>
+          <h2 style={{ margin: "6px 0 8px" }}>私立みなも学園〜ふなけん研究部〜</h2>
+          <p style={{ margin: 0, opacity: 0.78, lineHeight: 1.7 }}>実データ・日常ネタに加えて、「1枚4コマ」「縦長4枚」「両方出力」を同じ画面から選べます。</p>
+        </div>
+        <button type="button" onClick={copyPrompt} style={{ border: 0, borderRadius: 12, padding: "12px 18px", fontWeight: 700, cursor: "pointer" }}>{copied ? "コピーしました" : "プロンプトをコピー"}</button>
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 9 }}>今日の4コマ候補 3本（実データ・NEWS）</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+          {candidates.map((candidate) => {
+            const active = selectedCandidate?.id === candidate.id;
+            return (
+              <article key={candidate.id} style={{ border: active ? "2px solid #f2c75c" : "1px solid rgba(255,255,255,.12)", borderRadius: 14, padding: 14, background: active ? "rgba(242,199,92,.08)" : "rgba(255,255,255,.035)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                  <span style={{ fontSize: 12, fontWeight: 800 }}>{candidate.badge}</span>
+                  <span style={{ fontSize: 11, opacity: 0.58 }}>優先度 {candidate.priority}</span>
+                </div>
+                <h3 style={{ fontSize: 17, margin: "10px 0 8px" }}>{candidate.title}</h3>
+                <p style={{ fontSize: 13, lineHeight: 1.65, opacity: 0.78, minHeight: 64 }}>{candidate.lead}</p>
+                <div style={{ display: "grid", gap: 4, marginTop: 10 }}>
+                  {candidate.facts.slice(0, 4).map((f) => <div key={`${candidate.id}-${f.label}`} style={{ fontSize: 12, opacity: 0.72 }}>・{f.label}：{f.value}</div>)}
+                </div>
+                <div style={{ fontSize: 12, marginTop: 10, opacity: 0.72 }}>主役：{candidate.recommendedCharacters.map((c) => CHARACTER_LABELS[c] || c).join(" → ")}</div>
+                <button type="button" onClick={() => useCandidate(candidate)} style={{ marginTop: 12, width: "100%", border: 0, borderRadius: 10, padding: "10px 12px", fontWeight: 800, cursor: "pointer" }}>{active ? "この候補を使用中" : "この候補を使う"}</button>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginTop: 20 }}>
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>生成モード</span>
+          <select value={mode} onChange={(e) => { setMode(e.target.value); setSelectedCandidate(null); }} style={selectStyle}>
+            <option value="fact">ファクト重視</option>
+            <option value="balanced">バランス型</option>
+            <option value="joke">ネタ重視</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>見せ方</span>
+          <select value={layout} onChange={(e) => setLayout(e.target.value)} style={selectStyle}>
+            <option value="comic_single">1枚4コマ</option>
+            <option value="slides_vertical">縦長4枚</option>
+            <option value="both">両方出力</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>用途</span>
+          <select value={usage} onChange={(e) => setUsage(e.target.value)} style={selectStyle}>
+            <option value="sns">SNS向け</option>
+            <option value="archive">サイト・保存向け</option>
+            <option value="balanced">バランス</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>文字量</span>
+          <select value={textVolume} onChange={(e) => setTextVolume(e.target.value)} style={selectStyle}>
+            <option value="low">少なめ</option>
+            <option value="normal">標準</option>
+            <option value="high">多め</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>漫画タイプ</span>
+          <select value={comicType} onChange={(e) => { setComicType(e.target.value); setSelectedCandidate(null); }} style={selectStyle}>
+            <option value="daily">学園日常</option>
+            <option value="aruaru">ボート・舟券あるある</option>
+            <option value="character">キャラ掛け合い</option>
+            <option value="beginner">初心者向け</option>
+            <option value="news">ニュース・時事</option>
+            <option value="result">レース結果・データ</option>
+            <option value="research">研究・検証</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>テーマ</span>
+          <select value={topic} onChange={(e) => { setTopic(e.target.value); setSelectedCandidate(null); }} style={selectStyle}>
+            <option value="auto">自動選択</option>
+            <option value="school">学園×ボートの日常</option>
+            <option value="ticket">舟券あるある</option>
+            <option value="deadline">締切前あるある</option>
+            <option value="exhibition">展示で気持ちが揺れる</option>
+            <option value="escape">イン逃げ・1号艇</option>
+            <option value="boat5">5号艇・穴</option>
+            <option value="women">女子戦</option>
+            <option value="payout">高配当・万舟</option>
+            <option value="news">時事ネタ・ニュース</option>
+            <option value="research">研究・検証</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>主役</span>
+          <select value={protagonist} onChange={(e) => setProtagonist(e.target.value)} style={selectStyle}>
+            <option value="all">3人均等</option>
+            <option value="ichika">一果</option>
+            <option value="hatsune">初音</option>
+            <option value="kiina">キイナ</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>オチ</span>
+          <select value={punchline} onChange={(e) => setPunchline(e.target.value)} style={selectStyle}>
+            <option value="character">キャラ性</option>
+            <option value="relatable">あるある・共感</option>
+            <option value="tsukkomi">ツッコミ</option>
+            <option value="mismatch">すれ違い</option>
+            <option value="warm">ほっこり</option>
+            <option value="research">研究部らしく締める</option>
+          </select>
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>読者</span>
+          <select value={audience} onChange={(e) => setAudience(e.target.value)} style={selectStyle}>
+            <option value="beginner">初心者</option>
+            <option value="general">一般SNS向け</option>
+            <option value="core">ボートファン向け</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginTop: 14 }}>
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>日常ネタ・あるある（任意）</span>
+          <textarea value={dailyIdea} onChange={(e) => { setDailyIdea(e.target.value); setSelectedCandidate(null); }} placeholder="例：テストで答えを1つに絞れないキイナを、舟券の買い目にたとえて一果がツッコむ" style={{ width: "100%", minHeight: 105, padding: 12, borderRadius: 10, resize: "vertical" }} />
+        </label>
+
+        <label style={labelStyle}>
+          <span style={labelTextStyle}>確認済みの時事ネタ・ニュース（任意）</span>
+          <textarea value={news} onChange={(e) => { setNews(e.target.value); setSelectedCandidate(null); }} placeholder="実在情報を使う場合だけ入力。確認済みの事実のみ。" style={{ width: "100%", minHeight: 105, padding: 12, borderRadius: 10, resize: "vertical" }} />
+        </label>
+      </div>
+
+      <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: "rgba(255,255,255,.05)", fontSize: 13, lineHeight: 1.7, opacity: 0.82 }}>
+        <strong>おすすめ：</strong> SNSは「縦長4枚 × SNS向け × 文字少なめ」、サイト保存は「1枚4コマ × サイト・保存向け × 標準」。迷ったら「両方出力」で同じテーマから2パターン作れます。
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 7 }}>生成プロンプト</div>
+        <textarea readOnly value={prompt} style={{ width: "100%", minHeight: 760, padding: 14, borderRadius: 12, resize: "vertical", lineHeight: 1.65, fontFamily: "inherit" }} />
+      </div>
+    </section>
+  );
+}
