@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { trackBoatEvent, trackBoatEventOnce } from "../../lib/analytics";
 
 const FEATURES = {
   "BS展示": {
@@ -22,6 +23,11 @@ function statusText(status, definition) {
     return `${definition.label}：残り ${status.remaining}/${status.limit ?? definition.limit}回`;
   }
   return `${definition.label}：FREE ${definition.limit}回/日`;
+}
+
+function trackAiUse(definition, access) {
+  trackBoatEvent("ai_feature_use", { feature_key: definition.key, feature_label: definition.label, access });
+  trackBoatEventOnce("bs_ga_first_ai_use", "first_ai_use", { feature_key: definition.key, feature_label: definition.label, access });
 }
 
 export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
@@ -63,8 +69,6 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
   }, [premiumAccess, definitions]);
 
   useEffect(() => {
-    if (premiumAccess) return undefined;
-
     const annotate = () => {
       document.querySelectorAll("button").forEach((button) => {
         const strong = button.querySelector("strong");
@@ -74,7 +78,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
 
         button.dataset.bsQuotaFeature = definition.key;
         button.dataset.bsQuotaLabel = definition.label;
-        button.setAttribute("aria-label", `${label}（FREEは1日${definition.limit}回）`);
+        button.setAttribute("aria-label", premiumAccess ? `${label}（PREMIUM無制限）` : `${label}（FREEは1日${definition.limit}回）`);
       });
     };
 
@@ -82,16 +86,21 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
       const button = event.target?.closest?.("button[data-bs-quota-feature]");
       if (!button) return;
 
+      const featureKey = button.dataset.bsQuotaFeature;
+      const definition = Object.values(FEATURES).find((item) => item.key === featureKey);
+      if (!definition) return;
+
+      if (premiumAccess) {
+        trackAiUse(definition, "premium");
+        return;
+      }
+
       if (button.dataset.bsQuotaGranted === "true") return;
 
       if (button.dataset.bsQuotaBypass === "true") {
         delete button.dataset.bsQuotaBypass;
         return;
       }
-
-      const featureKey = button.dataset.bsQuotaFeature;
-      const definition = Object.values(FEATURES).find((item) => item.key === featureKey);
-      if (!definition) return;
 
       if (busyRef.current) {
         event.preventDefault();
@@ -116,6 +125,9 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         const payload = await response.json().catch(() => ({}));
 
         if (!response.ok || !payload?.ok) {
+          if (response.status === 429) {
+            trackBoatEvent("free_limit_reached", { feature_key: definition.key, feature_label: definition.label });
+          }
           setDialog({
             feature: definition.label,
             error: payload?.error || "利用回数を確認できませんでした。",
@@ -129,6 +141,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         }
 
         setStatuses((previous) => ({ ...previous, [featureKey]: payload.usage }));
+        trackAiUse(definition, payload?.usage?.unlimited ? "premium" : "free");
         button.dataset.bsQuotaGranted = "true";
         button.dataset.bsQuotaBypass = "true";
         button.click();
