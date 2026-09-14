@@ -1,22 +1,36 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { formatJstDateTime, getCourseName, getRaceDetail, normalizeCourseCode, normalizeDate, normalizeRaceNo } from "../../../../lib/boatstrikersPlatform";
-import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../../lib/memberEntitlement";
+import { getMemberAdminClient, getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../../lib/memberEntitlement";
+import { getMemberFeatureUsageStatus } from "../../../../../lib/memberFeatureUsage";
 import { getOfficialTrifectaOdds } from "../../../../../lib/boatraceOdds";
 import { saveEliminationOddsSnapshot } from "../../../../../lib/eliminationOddsSnapshot";
 import EliminationLabClient from "./EliminationLabClient";
+import EliminationQuotaGate from "./EliminationQuotaGate";
 
 export const dynamic = "force-dynamic";
 
-async function getPremiumAccess() {
+async function getMemberContext() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(MEMBER_ACCESS_COOKIE)?.value || "";
     const entitlement = await getMemberEntitlementFromToken(token);
-    return Boolean(entitlement.premium);
+    let usage = null;
+    if (entitlement.authenticated && entitlement.active) {
+      usage = await getMemberFeatureUsageStatus({
+        admin: getMemberAdminClient(),
+        userId: entitlement.user.id,
+        featureKey: "elimination_ai",
+        entitlement,
+      });
+    }
+    return { entitlement, usage };
   } catch (error) {
-    console.error("elimination lab member entitlement error", error);
-    return false;
+    console.error("elimination lab member context error", error);
+    return {
+      entitlement: { authenticated: false, active: false, premium: false, plan: "free", betaOpen: false },
+      usage: null,
+    };
   }
 }
 
@@ -34,7 +48,8 @@ export default async function EliminationLabPage({ params, searchParams }) {
   const courseCode = normalizeCourseCode(route.courseCode);
   const raceNo = normalizeRaceNo(route.raceNo);
   const raceDate = normalizeDate(query?.date);
-  const premiumAccess = await getPremiumAccess();
+  const { entitlement, usage } = await getMemberContext();
+  const premiumAccess = Boolean(entitlement.premium);
 
   if (!courseCode || !raceNo) {
     return <main style={{ maxWidth: 760, margin: "0 auto", padding: 20 }}>URLが正しくありません。</main>;
@@ -91,17 +106,24 @@ export default async function EliminationLabPage({ params, searchParams }) {
       ) : entries.length === 0 ? (
         <div style={{ padding: 18, borderRadius: 16, background: "#fff", color: "#66788a", fontWeight: 800 }}>このレースの出走データがありません。</div>
       ) : (
-        <EliminationLabClient
-          entries={entries}
+        <EliminationQuotaGate
+          initialUsage={usage}
+          authenticated={Boolean(entitlement.authenticated)}
+          active={Boolean(entitlement.active)}
           premiumAccess={premiumAccess}
-          syncedAt={data?.event?.synced_at ? formatJstDateTime(data.event.synced_at) : null}
-          exhibitionReady={hasExhibition(entries)}
-          odds={oddsData?.odds || {}}
-          oddsCount={oddsData?.count || 0}
-          oddsFetchedAt={oddsData?.fetchedAt ? formatJstDateTime(oddsData.fetchedAt) : null}
-          oddsSource={oddsData?.source || null}
-          oddsError={oddsError}
-        />
+        >
+          <EliminationLabClient
+            entries={entries}
+            premiumAccess={premiumAccess}
+            syncedAt={data?.event?.synced_at ? formatJstDateTime(data.event.synced_at) : null}
+            exhibitionReady={hasExhibition(entries)}
+            odds={oddsData?.odds || {}}
+            oddsCount={oddsData?.count || 0}
+            oddsFetchedAt={oddsData?.fetchedAt ? formatJstDateTime(oddsData.fetchedAt) : null}
+            oddsSource={oddsData?.source || null}
+            oddsError={oddsError}
+          />
+        </EliminationQuotaGate>
       )}
     </main>
   );
