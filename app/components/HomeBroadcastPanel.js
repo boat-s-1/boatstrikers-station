@@ -22,6 +22,46 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
   const text=ticker.map(i=>i.message).join("　　◆　　") || "BoatStrikersからのお知らせをこちらに表示します";
 
   return <section className={styles.wrap}>
+    <section className={styles.entrySection} aria-labelledby="home-entry-title">
+      <div className={styles.entryHeading}>
+        <span>START HERE</span>
+        <h2 id="home-entry-title">まずはここから</h2>
+        <p>目的に合わせて、3つの入口からすぐに始められます。</p>
+      </div>
+
+      <nav className={styles.entryNav} aria-label="BoatStrikersを始める">
+        <a href={`/races?date=${current.date}`} className={`${styles.entryCard} ${styles.entryCardPrimary}`}>
+          <span className={styles.entryIcon} aria-hidden="true">🚤</span>
+          <div>
+            <small>RACE TODAY</small>
+            <strong>今日のレースを見る</strong>
+            <p>本日の開催場・出走表・展示情報へ</p>
+          </div>
+          <b aria-hidden="true">›</b>
+        </a>
+
+        <a href="/guide" className={styles.entryCard}>
+          <span className={styles.entryIcon} aria-hidden="true">📖</span>
+          <div>
+            <small>FIRST GUIDE</small>
+            <strong>初めての方</strong>
+            <p>BoatStrikersの使い方とレースの基本</p>
+          </div>
+          <b aria-hidden="true">›</b>
+        </a>
+
+        <a href="/members" className={`${styles.entryCard} ${styles.entryCardMember}`}>
+          <span className={styles.entryIcon} aria-hidden="true">✨</span>
+          <div>
+            <small>FREE MEMBERS</small>
+            <strong>無料会員になる</strong>
+            <p>無料登録して会員機能を使う</p>
+          </div>
+          <b aria-hidden="true">›</b>
+        </a>
+      </nav>
+    </section>
+
     <div className={styles.ticker}>
       <strong>📢 速報</strong>
       <div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div>
