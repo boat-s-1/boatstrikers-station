@@ -1,40 +1,80 @@
 "use client";
 
 import { useEffect } from "react";
+import { DISCORD_GUIDE, DISCORD_NOTIFICATION_PREFS, LINE_GUIDE } from "./notificationGuide";
+
+function notificationCardsHtml(){
+  const prefs=DISCORD_NOTIFICATION_PREFS.map(item=>`<div>${item.icon} ${item.title}｜${item.description}</div>`).join("");
+  return `
+    <div style="display:grid;gap:14px">
+      <div style="padding:18px;border:1px solid #d8eee0;border-radius:18px;background:linear-gradient(135deg,#f4fff7,#ffffff)">
+        <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#08a64a">OFFICIAL LINE</div>
+        <h2 style="margin:7px 0 8px;font-size:22px;color:#10233d">${LINE_GUIDE.label}｜${LINE_GUIDE.role}</h2>
+        <p style="margin:0 0 8px;line-height:1.7;color:#526176">${LINE_GUIDE.description}</p>
+        <p style="margin:0 0 14px;line-height:1.6;color:#087a38;font-size:13px;font-weight:800">対象：${LINE_GUIDE.audience}</p>
+        <div style="margin:0 0 14px;padding:10px 12px;border-radius:12px;background:#e9fff1;color:#315443;font-size:12px;font-weight:800;line-height:1.6">${LINE_GUIDE.note}</div>
+        <a href="${LINE_GUIDE.href}" target="_blank" rel="noreferrer" style="display:block;text-align:center;padding:13px 16px;border-radius:12px;background:#06c755;color:white;font-weight:900;text-decoration:none">公式LINEを開く</a>
+      </div>
+
+      <div style="padding:18px;border:1px solid #cfd5ff;border-radius:18px;background:linear-gradient(135deg,#f4f5ff,#ffffff)">
+        <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#5865f2">BOATSTRIKERS DISCORD</div>
+        <h2 style="margin:7px 0 8px;font-size:22px;color:#10233d">${DISCORD_GUIDE.label}｜${DISCORD_GUIDE.role}</h2>
+        <p style="margin:0 0 8px;line-height:1.7;color:#526176">${DISCORD_GUIDE.description}</p>
+        <p style="margin:0 0 12px;line-height:1.6;color:#4350d8;font-size:13px;font-weight:800">対象：${DISCORD_GUIDE.audience}</p>
+        <div style="display:grid;gap:7px;margin:13px 0 15px;color:#24344f;font-weight:800;font-size:14px">${prefs}</div>
+        <div style="margin:0 0 14px;padding:10px 12px;border-radius:12px;background:#eef0ff;color:#3d4779;font-size:12px;font-weight:800;line-height:1.6">${DISCORD_GUIDE.note}</div>
+        <a href="${DISCORD_GUIDE.href}" style="display:block;text-align:center;padding:13px 16px;border-radius:12px;background:#5865f2;color:white;font-weight:900;text-decoration:none">Discordに参加・通知設定</a>
+      </div>
+    </div>
+  `;
+}
+
+function benefitHtml(){
+  return `
+    <section data-member-benefits="1" style="margin:16px auto;padding:18px;max-width:760px;border:1px solid #d9e8f2;border-radius:22px;background:linear-gradient(180deg,#ffffff,#f7fbff);box-sizing:border-box">
+      <div style="text-align:center;margin-bottom:13px">
+        <div style="font-size:10px;font-weight:900;letter-spacing:.14em;color:#159cd5">FREE MEMBERS</div>
+        <h2 style="margin:5px 0 6px;color:#10233d;font-size:22px">無料会員になると、ここまで使えます</h2>
+        <p style="margin:0;color:#617287;font-size:13px;line-height:1.6">登録後は、レース情報を見るだけでなく通知サービスも自分に合わせて使えます。</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px" class="member-benefit-grid">
+        <div style="padding:13px;border-radius:15px;background:#f2f9ff"><b style="display:block;color:#0e4f86">🚤 今日のレース</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">開催場・出走表・会員機能へ</span></div>
+        <div style="padding:13px;border-radius:15px;background:#effff4"><b style="display:block;color:#087a38">💬 LINE連携</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">無料情報・重要なお知らせ</span></div>
+        <div style="padding:13px;border-radius:15px;background:#f1f2ff"><b style="display:block;color:#4350d8">⚡ Discord</b><span style="display:block;margin-top:5px;color:#64788b;font-size:11px;line-height:1.5">PREMIUM対象はリアルタイム通知</span></div>
+      </div>
+      <style>@media(max-width:520px){.member-benefit-grid{grid-template-columns:1fr!important}}</style>
+    </section>
+  `;
+}
 
 export default function MemberChannelBridge(){
   useEffect(()=>{
     if(window.location.pathname!=="/members")return;
 
     const apply=()=>{
+      const main=document.querySelector("main");
       const sections=[...document.querySelectorAll("section")];
-      const notificationSection=sections.find(section=>section.textContent?.includes("LINE通知設定"));
+      const hero=sections[0];
+
+      if(main&&hero&&!document.querySelector('[data-member-benefits="1"]')){
+        hero.insertAdjacentHTML("afterend",benefitHtml());
+      }
+
+      const notificationSection=sections.find(section=>
+        section.textContent?.includes("LINE通知設定")||
+        section.textContent?.includes("リアルタイム通知はDiscordへ")||
+        section.textContent?.includes("REAL-TIME ALERTS")
+      );
       if(notificationSection&&!notificationSection.dataset.channelBridge){
         notificationSection.dataset.channelBridge="1";
+        notificationSection.id="notifications";
         notificationSection.innerHTML=`
-          <div style="display:grid;gap:14px">
-            <div style="padding:18px;border:1px solid #d8eee0;border-radius:18px;background:linear-gradient(135deg,#f4fff7,#ffffff)">
-              <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#08a64a">OFFICIAL LINE</div>
-              <h2 style="margin:7px 0 8px;font-size:22px;color:#10233d">無料情報を受け取る</h2>
-              <p style="margin:0 0 14px;line-height:1.7;color:#526176">今日の注目情報、無料記事、YouTube更新、キャンペーンなどBoatStrikersの無料情報をLINEでお届けします。</p>
-              <a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noreferrer" style="display:block;text-align:center;padding:13px 16px;border-radius:12px;background:#06c755;color:white;font-weight:900;text-decoration:none">公式LINEを開く</a>
-            </div>
-
-            <div style="padding:18px;border:1px solid #cfd5ff;border-radius:18px;background:linear-gradient(135deg,#f4f5ff,#ffffff)">
-              <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#5865f2">BOATSTRIKERS DISCORD</div>
-              <h2 style="margin:7px 0 8px;font-size:22px;color:#10233d">コミュニティに参加＋PREMIUM限定通知</h2>
-              <p style="margin:0 0 10px;line-height:1.7;color:#526176">DiscordはBoatStrikersのコミュニティです。無料参加エリアに加えて、有料会員は一果・初音・キイナ・全アラートの限定通知を利用できます。</p>
-              <div style="display:grid;gap:7px;margin:13px 0 15px;color:#24344f;font-weight:800;font-size:14px">
-                <div>💬 コミュニティ参加</div>
-                <div>🏁 一果｜PREMIUM通知</div>
-                <div>🌸 初音｜PREMIUM通知</div>
-                <div>🚨 キイナ｜PREMIUM通知</div>
-                <div>⚡ 全アラート｜PREMIUM限定</div>
-              </div>
-              <a href="/members/discord" style="display:block;text-align:center;padding:13px 16px;border-radius:12px;background:#5865f2;color:white;font-weight:900;text-decoration:none">Discordに参加・通知設定</a>
-              <a href="/members/ichika-consult" style="display:block;text-align:center;margin-top:9px;padding:12px 16px;border-radius:12px;border:1px solid #5865f2;color:#4350d8;font-weight:900;text-decoration:none;background:white">一果に相談！ PREMIUM</a>
-            </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:900;letter-spacing:.14em;color:#159cd5">NOTIFICATION GUIDE</div>
+            <h2 style="margin:5px 0 6px;color:#10233d;font-size:22px">LINEとDiscordの使い分け</h2>
+            <p style="margin:0;color:#617287;line-height:1.7">LINEは公式案内、PREMIUMのリアルタイム通知はDiscord。役割を分けて迷わず使えるようにしています。</p>
           </div>
+          ${notificationCardsHtml()}
         `;
       }
 
@@ -42,8 +82,8 @@ export default function MemberChannelBridge(){
         if(!section.textContent?.includes("公式LINE"))continue;
         const paragraphs=[...section.querySelectorAll("p")];
         for(const p of paragraphs){
-          if(p.textContent?.includes("下の「LINE通知設定」")){
-            p.textContent="BoatStrikers会員IDと公式LINEの紐づけが完了しています。LINEでは無料情報・重要なお知らせをお届けします。リアルタイムのPREMIUM通知はDiscordをご利用ください。";
+          if(p.textContent?.includes("BoatStrikers会員ID")||p.textContent?.includes("LINEは重要なお知らせ")){
+            p.textContent=`BoatStrikers会員IDと公式LINEを連携できます。LINEでは無料情報・重要なお知らせをお届けします。PREMIUMのリアルタイム通知はDiscordをご利用ください。`;
           }
         }
       }
