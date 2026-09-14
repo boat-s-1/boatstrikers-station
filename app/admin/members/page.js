@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import styles from "./membersAdmin.module.css";
 import MemberAnalyticsPanel from "./MemberAnalyticsPanel";
+import DiscordAudiencePanel from "./DiscordAudiencePanel";
 import {
   clearMembersAdminCookie,
   isMembersAdminAuthenticated,
@@ -30,9 +31,7 @@ function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
 async function loginAction(formData) {
@@ -211,6 +210,7 @@ export default async function MembersAdminPage({ searchParams }) {
         </section>
 
         <MemberAnalyticsPanel />
+        <DiscordAudiencePanel />
 
         <form className={styles.toolbar} method="get">
           <div className={styles.search}>
