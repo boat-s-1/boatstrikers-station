@@ -3,8 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackBoatEvent, trackBoatEventOnce } from "../../../../lib/analytics";
 
 const FEATURE_KEY = "elimination_ai";
+const FEATURE_LABEL = "消去法AI";
+
+function trackUse(access) {
+  trackBoatEvent("ai_feature_use", { feature_key: FEATURE_KEY, feature_label: FEATURE_LABEL, access });
+  trackBoatEventOnce("bs_ga_first_ai_use", "first_ai_use", { feature_key: FEATURE_KEY, feature_label: FEATURE_LABEL, access });
+}
 
 export default function EliminationQuotaGate({ children, initialUsage = null, authenticated = false, active = false, premiumAccess = false }) {
   const router = useRouter();
@@ -29,11 +36,15 @@ export default function EliminationQuotaGate({ children, initialUsage = null, au
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 429) {
+          trackBoatEvent("free_limit_reached", { feature_key: FEATURE_KEY, feature_label: FEATURE_LABEL });
+        }
         if (payload?.usage) setUsage(payload.usage);
         setMessage(payload?.error || "再診断の利用回数を確認できませんでした。");
         return;
       }
       if (payload?.usage) setUsage(payload.usage);
+      trackUse(payload?.usage?.unlimited ? "premium" : "free");
       router.refresh();
     } catch (error) {
       console.error("elimination quota consume error", error);
@@ -49,7 +60,10 @@ export default function EliminationQuotaGate({ children, initialUsage = null, au
     const text = String(button.textContent || "");
     if (!text.includes("最新データで再診断") && !text.includes("再診断中")) return;
 
-    if (unlimited) return;
+    if (unlimited) {
+      trackUse("premium");
+      return;
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -63,6 +77,7 @@ export default function EliminationQuotaGate({ children, initialUsage = null, au
       return;
     }
     if (remaining <= 0) {
+      trackBoatEvent("free_limit_reached", { feature_key: FEATURE_KEY, feature_label: FEATURE_LABEL });
       setMessage("本日の無料再診断3回を使い切りました。PREMIUMなら無制限で利用できます。");
       return;
     }

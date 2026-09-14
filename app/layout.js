@@ -23,6 +23,7 @@ import BetaMemberPlacementBanner from "./components/BetaMemberPlacementBanner";
 import MemberSessionBridge from "./components/MemberSessionBridge";
 import MemberEmailConfirmationHelper from "./components/MemberEmailConfirmationHelper";
 import MemberModeQueryBridge from "./components/MemberModeQueryBridge";
+import BoatAnalyticsTracker from "./components/BoatAnalyticsTracker";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
       <body>
         <MemberSessionBridge />
         <MemberModeQueryBridge />
+        <BoatAnalyticsTracker />
         <PublicSiteHeader />
         <MemberEmailConfirmationHelper />
         {children}
