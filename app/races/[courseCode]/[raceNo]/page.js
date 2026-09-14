@@ -12,6 +12,7 @@ import {
 } from "../../../lib/boatstrikersPlatform";
 import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../../lib/memberEntitlement";
 import RaceDetailTabs from "../../components/RaceDetailTabs";
+import RaceFeatureQuotaGate from "../../components/RaceFeatureQuotaGate";
 import RacePremiumMemberGate from "../../components/RacePremiumMemberGate";
 import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
@@ -108,6 +109,7 @@ export default async function RaceDetailPage({
         ) : (
           <>
             <ExhibitionAutoRefresh raceDate={raceDate} closingTime={data.event.closing_time} />
+            <RaceFeatureQuotaGate premiumAccess={premiumAccess} />
             <RaceDetailTabs
               event={data.event}
               entries={displayEntries}
