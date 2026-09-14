@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeBroadcastPanel.module.css";
 import entryStyles from "./HomeEntryCta.module.css";
 import { getProgramPresetByTitle } from "../../lib/programPresets";
+import { BETA_ACCESS_END_LABEL } from "../members/planGuide";
 
 const TYPE_LABELS = { radio:"ラジオ", short:"ショート動画", note:"note", live:"生放送", comic:"コミック", other:"お知らせ" };
 
@@ -21,7 +22,6 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
     const id=setInterval(()=>setNow(new Date()),30000);
     return()=>clearInterval(id);
   },[]);
-
 
   const current=jstParts(now);
   const today=useMemo(()=>scheduleItems.filter(i=>i.event_date===current.date && i.status==="published").sort((a,b)=>String(a.start_time).localeCompare(String(b.start_time))).slice(0,3),[scheduleItems,current.date]);
@@ -60,9 +60,9 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
         <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}>
           <span className={entryStyles.icon} aria-hidden="true">✨</span>
           <div>
-            <small>FREE MEMBERS</small>
+            <small>β PREMIUM FREE</small>
             <strong>無料会員になる</strong>
-            <p>会員登録・LINE連携・Discord通知設定へ</p>
+            <p>{BETA_ACCESS_END_LABEL}までPREMIUM相当機能を無料開放</p>
           </div>
           <b aria-hidden="true">›</b>
         </a>
