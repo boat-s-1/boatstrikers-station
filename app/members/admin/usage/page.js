@@ -51,11 +51,16 @@ export default function AdminUsagePage(){
 
   const summary=payload?.periods?.[period]||{};
   const byFeature=summary.byFeature||{};
+  const funnel=payload?.funnel||{};
+  const conversion=funnel.conversion||{};
+  const activation=funnel.activation||{};
+  const planCounts=funnel.planCounts||{};
+  const conversionByFeature=funnel.conversionByFeature||{};
 
   return <main style={pageStyle}>
     <section style={panelStyle}>
       <div style={headerStyle}>
-        <div><span style={kickerStyle}>BOATSTRIKERS ADMIN</span><h1 style={{margin:"6px 0 4px"}}>AI利用状況</h1><p style={mutedStyle}>FREE機能の利用状況を管理者専用で確認できます。</p></div>
+        <div><span style={kickerStyle}>BOATSTRIKERS ADMIN</span><h1 style={{margin:"6px 0 4px"}}>AI利用状況</h1><p style={mutedStyle}>利用・上限到達・会員転換をまとめて確認できます。</p></div>
         <Link href="/members" style={backStyle}>会員ページへ</Link>
       </div>
 
@@ -77,9 +82,38 @@ export default function AdminUsagePage(){
         })}
       </div>
 
+      <section style={sectionStyle}>
+        <div style={sectionHeadStyle}><div><span style={kickerStyle}>CONVERSION</span><h2 style={sectionTitleStyle}>FREE → PREMIUM 転換</h2></div><span style={statusPillStyle}>{conversion.available?"計測中":"β期間中"}</span></div>
+        <div style={summaryGridStyle}>
+          <Metric label="FREE" value={`${planCounts.free||0}人`} />
+          <Metric label="β PREMIUM" value={`${planCounts.betaPremium||0}人`} />
+          <Metric label="PREMIUM" value={`${planCounts.premium||0}人`} />
+        </div>
+        <div style={{...featureCardStyle,marginTop:12}}>
+          <strong style={{fontSize:28,color:"#173f75"}}>{conversion.available?`${conversion.rate||0}%`:"計測開始前"}</strong>
+          <p style={{...mutedStyle,marginTop:6}}>{conversion.note}</p>
+        </div>
+        <div style={{...featureGridStyle,marginTop:12}}>
+          {FEATURE_ORDER.map(key=>{
+            const item=conversionByFeature[key]||{};
+            return <article key={key} style={featureCardStyle}><strong>{item.label||key}</strong><div style={{marginTop:8,fontSize:24,fontWeight:1000,color:"#243d59"}}>{item.conversions||0}人</div><small style={mutedStyle}>この機能で上限到達後にPREMIUMへ転換</small></article>;
+          })}
+        </div>
+      </section>
+
+      <section style={sectionStyle}>
+        <span style={kickerStyle}>ACTIVATION</span><h2 style={sectionTitleStyle}>会員登録後の利用</h2>
+        <div style={summaryGridStyle}>
+          <Metric label="登録当日にAI利用" value={`${activation.sameDayUsers||0}人 / ${activation.sameDayRate||0}%`} />
+          <Metric label="登録7日以内にAI利用" value={`${activation.within7DaysUsers||0}人 / ${activation.within7DaysRate||0}%`} />
+          <Metric label="一度でもAI利用" value={`${activation.everUsedUsers||0}人 / ${activation.everUsedRate||0}%`} />
+        </div>
+        <p style={{...mutedStyle,marginTop:10}}>{activation.note}</p>
+      </section>
+
       <section style={{marginTop:22}}><h2 style={{fontSize:17}}>直近30日の推移</h2><div style={trendStyle}>{(payload.daily||[]).slice(-14).map(day=><div key={day.date} style={trendRowStyle}><span>{day.date.slice(5)}</span><div style={barTrackStyle}><div style={{...barStyle,width:`${Math.min(100,(Number(day.uses||0)/Math.max(1,...(payload.daily||[]).map(d=>Number(d.uses||0))))*100)}%`}} /></div><strong>{day.uses||0}回</strong></div>)}</div></section>
 
-      <p style={{...mutedStyle,marginTop:18}}>集計対象：消去法AI・展示比較AI・AI詳細診断。日付は日本時間基準です。</p>
+      <p style={{...mutedStyle,marginTop:18}}>集計対象：消去法AI・展示比較AI・AI詳細診断。1マークシミュレーターは対象外。日付は日本時間基準です。</p>
     </section>
   </main>;
 }
@@ -95,13 +129,17 @@ const backStyle={textDecoration:"none",background:"#183d70",color:"#fff",padding
 const tabsStyle={display:"flex",gap:8,marginTop:20};
 const tabStyle={border:"1px solid #d6dfeb",background:"#f7f9fc",padding:"9px 16px",borderRadius:999,fontWeight:900,cursor:"pointer"};
 const activeTabStyle={background:"#173f75",color:"#fff",borderColor:"#173f75"};
-const summaryGridStyle={display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,marginTop:16};
+const summaryGridStyle={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10,marginTop:16};
 const metricStyle={padding:16,border:"1px solid #e1e7ef",borderRadius:16,background:"#f9fbfd",display:"flex",flexDirection:"column",gap:4};
-const featureGridStyle={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(270px,1fr))",gap:12,marginTop:18};
-const featureCardStyle={padding:16,border:"1px solid #dfe6ee",borderRadius:18};
+const featureGridStyle={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:12,marginTop:18};
+const featureCardStyle={padding:16,border:"1px solid #dfe6ee",borderRadius:18,background:"#fff"};
 const limitStyle={fontSize:11,fontWeight:900,color:"#45688e",background:"#edf4fb",padding:"5px 8px",borderRadius:999};
 const featureStatsStyle={display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:15};
 const trendStyle={display:"grid",gap:8};
 const trendRowStyle={display:"grid",gridTemplateColumns:"44px 1fr 58px",gap:10,alignItems:"center",fontSize:12,color:"#66788a"};
 const barTrackStyle={height:8,borderRadius:999,background:"#e9eef4",overflow:"hidden"};
 const barStyle={height:"100%",background:"linear-gradient(90deg,#2b72b7,#6b57c9)",borderRadius:999};
+const sectionStyle={marginTop:24,paddingTop:22,borderTop:"1px solid #e2e8ef"};
+const sectionHeadStyle={display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"};
+const sectionTitleStyle={margin:"5px 0 0",fontSize:19};
+const statusPillStyle={fontSize:11,fontWeight:1000,padding:"7px 10px",borderRadius:999,background:"#eef1ff",color:"#5f51a9"};
