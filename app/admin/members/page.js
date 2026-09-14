@@ -38,9 +38,7 @@ function getAdminClient() {
 async function loginAction(formData) {
   "use server";
   const password = String(formData.get("password") || "");
-  if (!verifyMembersAdminPassword(password)) {
-    redirect("/admin/members?error=1");
-  }
+  if (!verifyMembersAdminPassword(password)) redirect("/admin/members?error=1");
   await setMembersAdminCookie();
   redirect("/admin/members");
 }
@@ -53,14 +51,15 @@ async function logoutAction() {
 
 async function loadMembers() {
   const client = getAdminClient();
-  if (!client) {
-    return { rows: [], configError: "SUPABASE_SERVICE_ROLE_KEY が未設定です。" };
-  }
+  if (!client) return { rows: [], configError: "SUPABASE_SERVICE_ROLE_KEY が未設定です。" };
 
-  const [profilesResult, preferencesResult, authResult] = await Promise.all([
+  const [profilesResult, preferencesResult, discordResult, authResult] = await Promise.all([
     client.from("bs_member_profiles").select("*").order("created_at", { ascending: false }).limit(1000),
     client.from("bs_member_notification_preferences")
       .select("user_id,boat4_double_top,ichika_escape,hatsune_venus,kiina_boat5,triple_match,updated_at")
+      .limit(1000),
+    client.from("bs_member_discord_links")
+      .select("user_id,discord_user_id,discord_username,discord_global_name,linked_at,last_role_synced_at,last_role_state")
       .limit(1000),
     client.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
@@ -70,15 +69,18 @@ async function loadMembers() {
   const authUsers = authResult?.data?.users || [];
   const profiles = profilesResult.data || [];
   const preferences = preferencesResult.error ? [] : (preferencesResult.data || []);
+  const discordLinks = discordResult.error ? [] : (discordResult.data || []);
   const authMap = new Map(authUsers.map((user) => [user.id, user]));
   const profileMap = new Map(profiles.map((profile) => [profile.user_id, profile]));
   const prefMap = new Map(preferences.map((pref) => [pref.user_id, pref]));
-  const ids = new Set([...authMap.keys(), ...profileMap.keys(), ...prefMap.keys()]);
+  const discordMap = new Map(discordLinks.map((link) => [link.user_id, link]));
+  const ids = new Set([...authMap.keys(), ...profileMap.keys(), ...prefMap.keys(), ...discordMap.keys()]);
 
   const rows = [...ids].map((userId) => {
     const profile = profileMap.get(userId) || null;
     const auth = authMap.get(userId) || null;
     const pref = prefMap.get(userId) || null;
+    const discord = discordMap.get(userId) || null;
     const notificationPrefs = {
       kiina45: Boolean(pref?.boat4_double_top),
       ichikaHidden: Boolean(pref?.ichika_escape),
@@ -98,10 +100,16 @@ async function loadMembers() {
       premiumUntil: profile?.premium_until || null,
       lineLinked: Boolean(profile?.line_user_id || profile?.line_linked_at),
       lineLinkedAt: profile?.line_linked_at || null,
+      discordLinked: Boolean(discord),
+      discordName: discord?.discord_global_name || discord?.discord_username || "",
+      discordUsername: discord?.discord_username || "",
+      discordUserId: discord?.discord_user_id || "",
+      discordLinkedAt: discord?.linked_at || null,
+      discordRoleSyncedAt: discord?.last_role_synced_at || null,
+      discordRoleState: discord?.last_role_state || null,
       createdAt: auth?.created_at || profile?.created_at || null,
       emailConfirmedAt: auth?.email_confirmed_at || auth?.confirmed_at || null,
       lastSignInAt: auth?.last_sign_in_at || null,
-      termsAccepted: Boolean(profile?.terms_accepted_at && profile?.privacy_accepted_at),
       withdrawnAt: profile?.withdrawn_at || null,
       hasProfile: Boolean(profile),
       notificationPrefs,
@@ -114,6 +122,7 @@ async function loadMembers() {
   const errors = [];
   if (authResult?.error) errors.push(`Auth取得エラー: ${authResult.error.message}`);
   if (preferencesResult.error) errors.push(`通知設定取得エラー: ${preferencesResult.error.message}`);
+  if (discordResult.error) errors.push(`Discord連携取得エラー: ${discordResult.error.message}`);
   return { rows, configError: errors.length ? errors.join(" / ") : null };
 }
 
@@ -139,9 +148,7 @@ export default async function MembersAdminPage({ searchParams }) {
           <span className={styles.eyebrow}>MEMBER ADMIN</span>
           <h1>会員管理</h1>
           <p>会員情報を扱うため、管理パスワードが必要です。</p>
-          {String(params.error || "") === "1" && (
-            <div className={styles.error}>管理パスワードが違います。</div>
-          )}
+          {String(params.error || "") === "1" && <div className={styles.error}>管理パスワードが違います。</div>}
           <input name="password" type="password" autoComplete="current-password" required placeholder="管理パスワード" />
           <button type="submit">ログイン</button>
         </form>
@@ -154,10 +161,11 @@ export default async function MembersAdminPage({ searchParams }) {
   const filter = String(params.filter || "all");
 
   const filtered = rows.filter((row) => {
-    const matchesQuery = !q || row.email.toLowerCase().includes(q) || row.displayName.toLowerCase().includes(q);
+    const matchesQuery = !q || row.email.toLowerCase().includes(q) || row.displayName.toLowerCase().includes(q) || row.discordName.toLowerCase().includes(q) || row.discordUsername.toLowerCase().includes(q);
     if (!matchesQuery) return false;
     if (filter === "beta") return row.betaMember && !row.withdrawnAt;
     if (filter === "line") return row.lineLinked && !row.withdrawnAt;
+    if (filter === "discord") return row.discordLinked && !row.withdrawnAt;
     if (filter === "notifications") return row.activeNotificationCount > 0 && !row.withdrawnAt;
     if (filter === "kiina45") return row.notificationPrefs.kiina45 && !row.withdrawnAt;
     if (filter === "ichika") return row.notificationPrefs.ichikaHidden && !row.withdrawnAt;
@@ -174,6 +182,7 @@ export default async function MembersAdminPage({ searchParams }) {
     beta: activeRows.filter((row) => row.betaMember).length,
     confirmed: activeRows.filter((row) => row.emailConfirmedAt).length,
     line: activeRows.filter((row) => row.lineLinked).length,
+    discord: activeRows.filter((row) => row.discordLinked).length,
     notifications: activeRows.filter((row) => row.activeNotificationCount > 0).length,
   };
 
@@ -184,7 +193,7 @@ export default async function MembersAdminPage({ searchParams }) {
           <div>
             <span className={styles.eyebrow}>BOATSTRIKERS MEMBER ADMIN</span>
             <h1>会員管理</h1>
-            <p>登録・LINE連携・通知設定・最終ログイン・AI利用状況を確認できます。</p>
+            <p>登録・LINE/Discord連携・通知設定・最終ログイン・AI利用状況を確認できます。</p>
           </div>
           <div className={styles.heroActions}>
             <Link className={styles.back} href="/admin">← 管理画面一覧</Link>
@@ -197,6 +206,7 @@ export default async function MembersAdminPage({ searchParams }) {
           <article className={styles.stat}><span>β会員</span><strong>{stats.beta}</strong></article>
           <article className={styles.stat}><span>メール確認済み</span><strong>{stats.confirmed}</strong></article>
           <article className={styles.stat}><span>LINE連携済み</span><strong>{stats.line}</strong></article>
+          <article className={styles.stat}><span>Discord連携済み</span><strong>{stats.discord}</strong></article>
           <article className={styles.stat}><span>通知ON会員</span><strong>{stats.notifications}</strong></article>
         </section>
 
@@ -204,11 +214,12 @@ export default async function MembersAdminPage({ searchParams }) {
 
         <form className={styles.toolbar} method="get">
           <div className={styles.search}>
-            <input name="q" defaultValue={String(params.q || "")} placeholder="メール・表示名で検索" />
+            <input name="q" defaultValue={String(params.q || "")} placeholder="メール・表示名・Discord名で検索" />
             <select name="filter" defaultValue={filter}>
               <option value="all">すべて</option>
               <option value="beta">β会員</option>
               <option value="line">LINE連携済み</option>
+              <option value="discord">Discord連携済み</option>
               <option value="notifications">通知を1つ以上ON</option>
               <option value="kiina45">キイナ・4→5 ON</option>
               <option value="ichika">一果・隠れイン ON</option>
@@ -229,37 +240,16 @@ export default async function MembersAdminPage({ searchParams }) {
           ) : (
             <div className={styles.tableWrap}>
               <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>会員</th><th>状態</th><th>メール確認</th><th>LINE</th><th>通知設定</th><th>登録日</th><th>最終ログイン</th><th>PREMIUM期限</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>会員</th><th>状態</th><th>メール確認</th><th>LINE</th><th>Discord</th><th>通知設定</th><th>登録日</th><th>最終ログイン</th><th>PREMIUM期限</th></tr></thead>
                 <tbody>
                   {filtered.map((row) => (
                     <tr key={row.userId}>
-                      <td>
-                        <div className={styles.email}>{row.email}</div>
-                        {row.displayName && <div className={styles.name}>{row.displayName}</div>}
-                        {!row.hasProfile && <div className={styles.name}>⚠️ プロフィール未作成</div>}
-                      </td>
-                      <td>
-                        {row.withdrawnAt
-                          ? badge("退会済み", "danger")
-                          : row.betaMember
-                            ? badge("β会員", "blue")
-                            : badge(row.membershipStatus || "一般", "muted")}
-                        <div className={styles.name}>{row.plan}</div>
-                      </td>
+                      <td><div className={styles.email}>{row.email}</div>{row.displayName && <div className={styles.name}>{row.displayName}</div>}{!row.hasProfile && <div className={styles.name}>⚠️ プロフィール未作成</div>}</td>
+                      <td>{row.withdrawnAt ? badge("退会済み", "danger") : row.betaMember ? badge("β会員", "blue") : badge(row.membershipStatus || "一般", "muted")}<div className={styles.name}>{row.plan}</div></td>
                       <td>{row.emailConfirmedAt ? badge("確認済み", "good") : badge("未確認", "warn")}</td>
-                      <td>{row.lineLinked ? badge("連携済み", "good") : badge("未連携", "muted")}</td>
-                      <td>
-                        <div className={styles.notificationPrefs}>
-                          {notificationBadge("キイナ・4→5", row.notificationPrefs.kiina45)}
-                          {notificationBadge("一果・隠れイン", row.notificationPrefs.ichikaHidden)}
-                          {notificationBadge("初音・女子イン崩れ", row.notificationPrefs.hatsuneBreak)}
-                        </div>
-                        {row.notificationUpdatedAt && <div className={styles.notificationUpdated}>更新 {formatJst(row.notificationUpdatedAt)}</div>}
-                      </td>
+                      <td>{row.lineLinked ? <>{badge("連携済み", "good")}<div className={styles.name}>{formatJst(row.lineLinkedAt)}</div></> : badge("未連携", "muted")}</td>
+                      <td>{row.discordLinked ? <>{badge("連携済み", "blue")}<div className={styles.email}>{row.discordName || "Discord"}</div>{row.discordUsername && row.discordUsername !== row.discordName && <div className={styles.name}>@{row.discordUsername}</div>}<div className={styles.name}>連携 {formatJst(row.discordLinkedAt)}</div>{row.discordRoleSyncedAt && <div className={styles.name}>ロール同期 {formatJst(row.discordRoleSyncedAt)}</div>}</> : badge("未連携", "muted")}</td>
+                      <td><div className={styles.notificationPrefs}>{notificationBadge("キイナ・4→5", row.notificationPrefs.kiina45)}{notificationBadge("一果・隠れイン", row.notificationPrefs.ichikaHidden)}{notificationBadge("初音・女子イン崩れ", row.notificationPrefs.hatsuneBreak)}</div>{row.notificationUpdatedAt && <div className={styles.notificationUpdated}>更新 {formatJst(row.notificationUpdatedAt)}</div>}</td>
                       <td className={styles.date}>{formatJst(row.createdAt)}</td>
                       <td className={styles.date}>{formatJst(row.lastSignInAt)}</td>
                       <td className={styles.date}>{formatJst(row.premiumUntil)}</td>
@@ -271,7 +261,7 @@ export default async function MembersAdminPage({ searchParams }) {
           )}
         </section>
 
-        <p className={styles.note}>※ メールアドレスなどの個人情報を含むため、このページは管理パスワードで保護されています。通知設定は会員ページで保存された現在値を表示しています。</p>
+        <p className={styles.note}>※ メールアドレスやDiscord連携情報などの個人情報を含むため、このページは管理パスワードで保護されています。</p>
       </div>
     </main>
   );
