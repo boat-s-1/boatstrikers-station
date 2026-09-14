@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { evaluateMemberEntitlement } from "../../lib/memberEntitlement";
 
 export const DISCORD_NOTIFICATION_ROLES={
   configured:"BSC 通知設定済",
@@ -36,8 +37,9 @@ export function discordConfig(){
 }
 
 export function isDiscordEligible(profile){
-  if(!profile||profile.membership_status!=="active")return false;
-  return ["beta_premium","plus","premium"].includes(profile.plan);
+  if(!profile)return false;
+  const entitlement=evaluateMemberEntitlement(profile);
+  return entitlement.plus;
 }
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
