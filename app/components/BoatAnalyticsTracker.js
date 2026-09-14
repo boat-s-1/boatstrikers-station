@@ -113,7 +113,12 @@ export default function BoatAnalyticsTracker() {
     }
 
     supabase.auth.getSession().then(({ data }) => checkJourney(data.session || null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => checkJourney(session || null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextSession = session || null;
+      window.setTimeout(() => {
+        if (alive) void checkJourney(nextSession);
+      }, 0);
+    });
 
     const interval = pathname === "/members" && hasRecentMarker(LINE_MARKER)
       ? window.setInterval(() => supabase.auth.getSession().then(({ data }) => checkJourney(data.session || null)), 5000)
