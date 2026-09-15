@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const client = getPublicScheduleSupabase();
-  if (!client) return NextResponse.json({ item: null });
+  if (!client) return NextResponse.json({ item: null }, { headers: { "Cache-Control": "no-store" } });
 
   try {
     const { data, error } = await client
@@ -31,9 +31,9 @@ export async function GET() {
             published_at: row.published_at || row.created_at || null,
           }
         : null,
-    });
+    }, { headers: { "Cache-Control": "public, max-age=0, s-maxage=30" } });
   } catch (error) {
     console.error("トップ・コンパクトリアルタイム取得エラー:", error);
-    return NextResponse.json({ item: null });
+    return NextResponse.json({ item: null }, { headers: { "Cache-Control": "no-store" } });
   }
 }

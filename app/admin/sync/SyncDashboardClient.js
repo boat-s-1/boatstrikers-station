@@ -1,4 +1,5 @@
 "use client";
+import { startVisiblePolling } from "../../lib/visiblePolling";
 import { useCallback, useEffect, useState } from "react";
 import styles from "./sync.module.css";
 
@@ -14,7 +15,7 @@ function StatusPill({ value }) { return <span className={`${styles.pill} ${style
 export default function SyncDashboardClient() {
   const [data, setData] = useState(null); const [busy, setBusy] = useState(false); const [message, setMessage] = useState("");
   const load = useCallback(async()=>{ const r=await fetch("/api/admin/sync/status",{cache:"no-store"}); if(r.status===401){location.href="/admin/sync/login";return;} setData(await r.json()); },[]);
-  useEffect(()=>{ load(); const id=setInterval(load,15000); return()=>clearInterval(id); },[load]);
+  useEffect(()=>startVisiblePolling(load,15000),[load]);
   async function command(type){ setBusy(true); setMessage(""); const r=await fetch("/api/admin/sync/command",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({commandType:type,targetDate:data?.today})}); const j=await r.json(); setMessage(r.ok?`指示を登録しました（#${j.id}）。Windows側が次回巡回時に実行します。`:j.error||"登録失敗"); setBusy(false); load(); }
   if(!data) return <main className={styles.page}><div className={styles.loading}>読み込み中...</div></main>;
   const r=data.runtime||{};

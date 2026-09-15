@@ -28,7 +28,7 @@ export default function HomeCompactRealtime() {
     target.insertAdjacentElement("afterend", node);
     setMount(node);
 
-    fetch("/api/home/realtime", { cache: "no-store" })
+    fetch("/api/home/realtime")
       .then((response) => response.json())
       .then((data) => setItem(data.item || null))
       .catch(() => setItem(null));

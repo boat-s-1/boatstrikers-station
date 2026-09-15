@@ -1,8 +1,8 @@
 import Parser from "rss-parser";
 import styles from "./ichikaSensei.module.css";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Public video catalog: refresh on demand every five minutes.
+export const revalidate = 300;
 
 const PLAYLIST_ID =
   process.env.ICHIKA_SENSEI_YOUTUBE_PLAYLIST_ID ||
@@ -32,7 +32,7 @@ function getVideoId(item) {
 }
 
 async function getLatestLessons() {
-  const parser = new Parser();
+  const parser = new Parser({ timeout: 10000 });
   const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`;
 
   try {
