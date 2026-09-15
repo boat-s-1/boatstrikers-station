@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { DISCORD_GUIDE, DISCORD_NOTIFICATION_PREFS, LINE_GUIDE } from "./notificationGuide";
 import { CURRENT_BETA_MESSAGE, MEMBERSHIP_GUIDE, MEMBERSHIP_GUIDE_ORDER } from "./planGuide";
 
@@ -61,17 +62,19 @@ function membershipGuideHtml(){
 }
 
 export default function MemberChannelBridge(){
+  const pathname=usePathname();
   useEffect(()=>{
-    if(window.location.pathname!=="/members")return;
+    if(pathname!=="/members")return;
 
     const apply=()=>{
       const main=document.querySelector("main");
-      const sections=[...document.querySelectorAll("section")];
-      const hero=sections[0];
+      if(!main)return;
+      const sections=[...main.querySelectorAll("section")];
+      const hero=main.querySelector(":scope > section");
 
-      const oldBenefits=document.querySelector('[data-member-benefits="1"]');
+      const oldBenefits=main.querySelector('[data-member-benefits="1"]');
       if(oldBenefits)oldBenefits.remove();
-      if(main&&hero&&!document.querySelector('[data-membership-guide="1"]')){
+      if(main&&hero&&!main.querySelector('[data-membership-guide="1"]')){
         hero.insertAdjacentHTML("afterend",membershipGuideHtml());
       }
 
@@ -99,16 +102,24 @@ export default function MemberChannelBridge(){
         const paragraphs=[...section.querySelectorAll("p")];
         for(const p of paragraphs){
           if(p.textContent?.includes("BoatStrikers会員ID")||p.textContent?.includes("LINEは重要なお知らせ")){
-            p.textContent=`BoatStrikers会員IDと公式LINEを連携できます。LINEでは無料情報・重要なお知らせをお届けします。β PREMIUM / PREMIUMのリアルタイム通知はDiscordをご利用ください。`;
+            const nextText="BoatStrikers会員IDと公式LINEを連携できます。LINEでは無料情報・重要なお知らせをお届けします。β PREMIUM / PREMIUMのリアルタイム通知はDiscordをご利用ください。";
+            // Assigning even identical textContent creates childList mutations.
+            if(p.textContent!==nextText)p.textContent=nextText;
           }
         }
       }
     };
 
     apply();
-    const observer=new MutationObserver(apply);
+    // Do not observe our own DOM writes; other React updates remain observed.
+    const observer=new MutationObserver(()=>{
+      observer.disconnect();
+      try{apply();}finally{
+        observer.observe(document.body,{childList:true,subtree:true});
+      }
+    });
     observer.observe(document.body,{childList:true,subtree:true});
     return()=>observer.disconnect();
-  },[]);
+  },[pathname]);
   return null;
 }
