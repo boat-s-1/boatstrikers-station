@@ -48,19 +48,36 @@ export default function MembersPage(){
   useEffect(()=>{
     if(!supabase){setLoading(false);setError("会員機能の設定を確認しています。しばらくしてからお試しください。");return;}
     let alive=true;
-    supabase.auth.getSession().then(async({data})=>{
-      if(!alive)return;
-      setSession(data.session||null);
-      if(data.session)await loadProfile(data.session.user.id);
-      setLoading(false);
-    });
-    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event,nextSession)=>{
+    let initialized=false;
+
+    const initialize=async()=>{
+      try{
+        const {data}=await supabase.auth.getSession();
+        if(!alive)return;
+        const nextSession=data.session||null;
+        setSession(nextSession);
+        if(nextSession)await loadProfile(nextSession.user.id);
+      }catch{
+        if(alive)setError("会員情報を読み込めませんでした。ページを再読み込みしてください。");
+      }finally{
+        if(alive){initialized=true;setLoading(false);}
+      }
+    };
+    initialize();
+
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((event,nextSession)=>{
       if(!alive)return;
       if(event==="PASSWORD_RECOVERY"){setRecoveryMode(true);setMode("login");setError("");setMessage("新しいパスワードを設定してください。");}
       setSession(nextSession||null);
-      if(nextSession)await loadProfile(nextSession.user.id);else setProfile(null);
+      if(!nextSession){setProfile(null);if(!initialized)setLoading(false);return;}
+      // Supabase auth callback内で別のSupabase処理をawaitするとauth lockと競合するため、callback完了後に実行する。
+      setTimeout(()=>{
+        if(!alive)return;
+        loadProfile(nextSession.user.id).finally(()=>{if(alive)setLoading(false);});
+      },0);
     });
-    return()=>{alive=false;subscription.unsubscribe();};
+    const safetyTimer=setTimeout(()=>{if(alive)setLoading(false);},8000);
+    return()=>{alive=false;clearTimeout(safetyTimer);subscription.unsubscribe();};
   },[supabase]);
 
   useEffect(()=>{
@@ -201,15 +218,9 @@ export default function MembersPage(){
       <section className={styles.notificationCard}>
         <div className={styles.notificationHead}><div><span className={styles.kicker}>REAL-TIME ALERTS</span><h2>リアルタイム通知はDiscordへ</h2><p>一果・初音・キイナのアラートはDiscordに集約しました。</p></div><strong>DISCORD</strong></div>
         <div className={styles.notificationList}>
-          <div className={styles.notificationItem}>
-            <div className={styles.notificationText}><b>🏁</b><span><strong>一果通知</strong><small>隠れイン・イン逃げ急上昇</small></span></div>
-          </div>
-          <div className={styles.notificationItem}>
-            <div className={styles.notificationText}><b>🌸</b><span><strong>初音通知</strong><small>女子イン崩れ・箱推し</small></span></div>
-          </div>
-          <div className={styles.notificationItem}>
-            <div className={styles.notificationText}><b>🚨</b><span><strong>キイナ通知</strong><small>カド攻め理論</small></span></div>
-          </div>
+          <div className={styles.notificationItem}><div className={styles.notificationText}><b>🏁</b><span><strong>一果通知</strong><small>隠れイン・イン逃げ急上昇</small></span></div></div>
+          <div className={styles.notificationItem}><div className={styles.notificationText}><b>🌸</b><span><strong>初音通知</strong><small>女子イン崩れ・箱推し</small></span></div></div>
+          <div className={styles.notificationItem}><div className={styles.notificationText}><b>🚨</b><span><strong>キイナ通知</strong><small>カド攻め理論</small></span></div></div>
         </div>
         <p className={styles.notificationHelp}>通知のON/OFFはDiscord連携ページからキャラクターごとに設定できます。LINEでは重要なお知らせや更新情報を配信します。</p>
         <div className={styles.actions}><Link className={styles.primaryButton} href="/members/discord">Discordを連携・通知設定</Link></div>
