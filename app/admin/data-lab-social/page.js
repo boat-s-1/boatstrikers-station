@@ -4,6 +4,7 @@ import { generateDataLabSocialOutputs } from "../../../lib/dataLabSocialGenerato
 import { getHatsuneNews } from "../../hatsune/newsData";
 import ClientActions from "./ClientActions";
 import PromptBuilder from "./PromptBuilder";
+import XPostImagePromptBuilder from "./XPostImagePromptBuilder";
 import MinamoComicPromptBuilder from "./MinamoComicPromptBuilder";
 import styles from "./page.module.css";
 
@@ -38,45 +39,22 @@ function jstDate(value) {
 function hasCharacterDetails(item) {
   const p = item?.image_payload || {};
   const d = p.character_details;
-  return Boolean(
-    d?.ichika &&
-    d?.hatsune?.detection_method === "six_entries_gender_code_priority" &&
-    d?.kiina &&
-    p.template === "data_lab_yesterday_numbers_v3"
-  );
+  return Boolean(d?.ichika && d?.hatsune?.detection_method === "six_entries_gender_code_priority" && d?.kiina && p.template === "data_lab_yesterday_numbers_v3");
 }
 
 async function loadOutput(date) {
   const client = getClient();
   if (!client) return { item: null, history: [], error: "Supabase環境変数がありません。" };
-
-  let { data: item, error } = await client
-    .from("bs_data_lab_social_outputs")
-    .select("id,race_date,status,x_post_text,short_script,image_payload,hashtags,generated_at")
-    .eq("race_date", date)
-    .maybeSingle();
-
+  let { data: item, error } = await client.from("bs_data_lab_social_outputs").select("id,race_date,status,x_post_text,short_script,image_payload,hashtags,generated_at").eq("race_date", date).maybeSingle();
   if (!error && (!item || !hasCharacterDetails(item))) {
     try {
       await generateDataLabSocialOutputs({ date });
-      const retry = await client
-        .from("bs_data_lab_social_outputs")
-        .select("id,race_date,status,x_post_text,short_script,image_payload,hashtags,generated_at")
-        .eq("race_date", date)
-        .maybeSingle();
+      const retry = await client.from("bs_data_lab_social_outputs").select("id,race_date,status,x_post_text,short_script,image_payload,hashtags,generated_at").eq("race_date", date).maybeSingle();
       item = retry.data;
       error = retry.error;
-    } catch (e) {
-      error = { message: e?.message || String(e) };
-    }
+    } catch (e) { error = { message: e?.message || String(e) }; }
   }
-
-  const { data: history } = await client
-    .from("bs_data_lab_social_outputs")
-    .select("race_date")
-    .order("race_date", { ascending: false })
-    .limit(14);
-
+  const { data: history } = await client.from("bs_data_lab_social_outputs").select("race_date").order("race_date", { ascending: false }).limit(14);
   return { item: item || null, history: history || [], error: error?.message || null };
 }
 
@@ -85,26 +63,18 @@ async function loadNewsForDate(date) {
     const items = await getHatsuneNews({ limit: 60, category: "all" });
     const sameDay = items.filter((item) => jstDate(item?.published_at) === date);
     if (sameDay.length) return sameDay.slice(0, 12);
-
     const target = new Date(`${date}T12:00:00+09:00`).getTime();
-    return items
-      .filter((item) => {
-        const published = new Date(item?.published_at || 0).getTime();
-        return Number.isFinite(published) && Math.abs(published - target) <= 36 * 60 * 60 * 1000;
-      })
-      .slice(0, 12);
-  } catch {
-    return [];
-  }
+    return items.filter((item) => {
+      const published = new Date(item?.published_at || 0).getTime();
+      return Number.isFinite(published) && Math.abs(published - target) <= 36 * 60 * 60 * 1000;
+    }).slice(0, 12);
+  } catch { return []; }
 }
 
 export default async function DataLabSocialAdmin({ searchParams }) {
   const params = await searchParams;
   const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(params?.date || "")) ? String(params.date) : jstYesterday();
-  const [{ item, history, error }, newsItems] = await Promise.all([
-    loadOutput(selectedDate),
-    loadNewsForDate(selectedDate),
-  ]);
+  const [{ item, history, error }, newsItems] = await Promise.all([loadOutput(selectedDate), loadNewsForDate(selectedDate)]);
   const p = item?.image_payload || {};
   const stats = Array.isArray(p.stats) ? p.stats : [];
   const ranking = Array.isArray(p.venue_manshu_ranking) ? p.venue_manshu_ranking : [];
@@ -117,25 +87,13 @@ export default async function DataLabSocialAdmin({ searchParams }) {
           <Link href="/admin" className={styles.back}>← 管理TOPへ</Link>
           <Link href="/news?category=result" className={styles.back}>今日の結果を見る →</Link>
         </div>
-
         <section className={styles.hero}>
-          <div>
-            <span>BOATSTRIKERS CONTENT STUDIO</span>
-            <h1>DATA LAB SNS</h1>
-            <p>前日の結果データから、9:16画像・X投稿・ショート台本・キャラ別2枚目用の専門集計までまとめて生成します。</p>
-          </div>
-          <form className={styles.dateForm} method="get">
-            <input type="date" name="date" defaultValue={selectedDate} />
-            <button type="submit">表示</button>
-          </form>
+          <div><span>BOATSTRIKERS CONTENT STUDIO</span><h1>DATA LAB SNS</h1><p>前日の結果データから、9:16画像・X投稿・ショート台本・キャラ別2枚目用の専門集計までまとめて生成します。</p></div>
+          <form className={styles.dateForm} method="get"><input type="date" name="date" defaultValue={selectedDate} /><button type="submit">表示</button></form>
         </section>
 
         {!item ? (
-          <section className={styles.empty}>
-            <h2>{selectedDate} のSNS素材を生成できませんでした</h2>
-            <p>{error || "日次結果集計がまだ完了していない可能性があります。"}</p>
-            <p className={styles.note}>結果が全レース確定してから再度開くと、自動生成を試みます。</p>
-          </section>
+          <section className={styles.empty}><h2>{selectedDate} のSNS素材を生成できませんでした</h2><p>{error || "日次結果集計がまだ完了していない可能性があります。"}</p><p className={styles.note}>結果が全レース確定してから再度開くと、自動生成を試みます。</p></section>
         ) : (
           <>
             <div className={styles.grid}>
@@ -145,44 +103,24 @@ export default async function DataLabSocialAdmin({ searchParams }) {
                 <ClientActions xText={item.x_post_text || ""} shortScript={item.short_script || ""} imageUrl={imageUrl} filename={`boatstrikers-data-lab-${selectedDate}.png`} />
                 <p className={styles.note}>左の画像は数値確認用の自動描画版です。右側のDATA LAB画像生成プロンプトでは、共通表紙＋一果/初音/キイナの専門2枚目を作成できます。</p>
               </section>
-
               <section className={styles.contentCard}>
                 <h2>{p.title || "昨日のボートレースを数字で見る"}</h2>
-                <div className={styles.statsGrid}>
-                  {stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}
-                </div>
-
+                <div className={styles.statsGrid}>{stats.map((s, i) => <div className={styles.stat} key={`${s.label}-${i}`}><span>{s.label}</span><strong>{s.value}</strong></div>)}</div>
                 <div className={styles.section}>
                   <label>万舟が多かった場 TOP5</label>
-                  <div className={styles.ranking}>
-                    {ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}
-                  </div>
+                  <div className={styles.ranking}>{ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}</div>
                 </div>
-
                 <PromptBuilder payload={p} />
-
-                <div className={styles.section}>
-                  <label>X投稿文</label>
-                  <textarea readOnly value={item.x_post_text || ""} />
-                </div>
-
-                <div className={`${styles.section} ${styles.short}`}>
-                  <label>ショート動画 30秒台本</label>
-                  <textarea readOnly value={item.short_script || ""} />
-                </div>
+                <XPostImagePromptBuilder payload={p} />
+                <div className={styles.section}><label>X投稿文</label><textarea readOnly value={item.x_post_text || ""} /></div>
+                <div className={`${styles.section} ${styles.short}`}><label>ショート動画 30秒台本</label><textarea readOnly value={item.short_script || ""} /></div>
               </section>
             </div>
-
             <MinamoComicPromptBuilder payload={p} newsItems={newsItems} />
           </>
         )}
 
-        {history.length > 0 && (
-          <section className={styles.history}>
-            <h2>最近のDATA LAB</h2>
-            <div className={styles.historyList}>{history.map((row) => <Link href={`/admin/data-lab-social?date=${row.race_date}`} key={row.race_date}>{row.race_date}</Link>)}</div>
-          </section>
-        )}
+        {history.length > 0 && <section className={styles.history}><h2>最近のDATA LAB</h2><div className={styles.historyList}>{history.map((row) => <Link href={`/admin/data-lab-social?date=${row.race_date}`} key={row.race_date}>{row.race_date}</Link>)}</div></section>}
       </div>
     </main>
   );
