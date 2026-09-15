@@ -1,5 +1,3 @@
-import KiinaTheoryLabelBridge from "./KiinaTheoryLabelBridge";
-import MemberChannelBridge from "./MemberChannelBridge";
 import MemberUsageDashboard from "./MemberUsageDashboard";
 
 export const metadata = {
@@ -7,5 +5,5 @@ export const metadata = {
 };
 
 export default function MembersLayout({children}){
-  return <>{children}<MemberUsageDashboard /><KiinaTheoryLabelBridge /><MemberChannelBridge /></>;
+  return <>{children}<MemberUsageDashboard /></>;
 }
