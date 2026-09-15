@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { trackBoatEvent, trackBoatEventOnce } from "../../lib/analytics";
 
 const FEATURES = {
@@ -16,6 +17,54 @@ const FEATURES = {
     limit: 5,
   },
 };
+
+function makeSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+}
+
+async function fetchMemberFeatureUsage(supabase, init = {}) {
+  const request = async (accessToken = "") => {
+    const headers = new Headers(init.headers || {});
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+
+    return fetch("/api/members/feature-usage", {
+      ...init,
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    });
+  };
+
+  let accessToken = "";
+  try {
+    const { data } = await supabase?.auth.getSession();
+    accessToken = data?.session?.access_token || "";
+  } catch {}
+
+  let response = await request(accessToken);
+
+  // The server-side member cookie can briefly lag behind a valid Supabase login.
+  // If that happens, refresh once and retry with an explicit bearer token instead
+  // of incorrectly showing the user a login-required dialog.
+  if (response.status === 401 && supabase) {
+    try {
+      const { data } = await supabase.auth.refreshSession();
+      const refreshedToken = data?.session?.access_token || "";
+      if (refreshedToken) response = await request(refreshedToken);
+    } catch {}
+  }
+
+  return response;
+}
 
 function statusText(status, definition) {
   if (status?.unlimited) return `${definition.label}：無制限`;
@@ -35,6 +84,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
   const [dialog, setDialog] = useState(null);
   const [busyKey, setBusyKey] = useState("");
   const busyRef = useRef(false);
+  const supabase = useMemo(() => makeSupabase(), []);
 
   const definitions = useMemo(() => Object.values(FEATURES), []);
 
@@ -49,11 +99,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
       return undefined;
     }
 
-    fetch("/api/members/feature-usage", {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-    })
+    fetchMemberFeatureUsage(supabase, { method: "GET" })
       .then(async (response) => {
         if (!response.ok) return null;
         return response.json();
@@ -66,7 +112,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
     return () => {
       cancelled = true;
     };
-  }, [premiumAccess, definitions]);
+  }, [premiumAccess, definitions, supabase]);
 
   useEffect(() => {
     const annotate = () => {
@@ -115,10 +161,8 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
       busyRef.current = true;
       setBusyKey(featureKey);
       try {
-        const response = await fetch("/api/members/feature-usage", {
+        const response = await fetchMemberFeatureUsage(supabase, {
           method: "POST",
-          credentials: "include",
-          cache: "no-store",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ feature: featureKey }),
         });
@@ -174,7 +218,7 @@ export default function RaceFeatureQuotaGate({ premiumAccess = false }) {
         delete button.dataset.bsQuotaGranted;
       });
     };
-  }, [premiumAccess]);
+  }, [premiumAccess, supabase]);
 
   return (
     <>
