@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import styles from "./membersAdmin.module.css";
 import MemberAnalyticsPanel from "./MemberAnalyticsPanel";
+import Ga4FunnelPanel from "./Ga4FunnelPanel";
 import DiscordAudiencePanel from "./DiscordAudiencePanel";
 import {
   clearMembersAdminCookie,
@@ -209,6 +210,7 @@ export default async function MembersAdminPage({ searchParams }) {
           <article className={styles.stat}><span>通知ON会員</span><strong>{stats.notifications}</strong></article>
         </section>
 
+        <Ga4FunnelPanel />
         <MemberAnalyticsPanel />
         <DiscordAudiencePanel />
 
