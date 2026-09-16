@@ -38,92 +38,38 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
 
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
         <a href={`/races?date=${current.date}`} className={`${entryStyles.card} ${entryStyles.primary}`}>
-          <span className={entryStyles.icon} aria-hidden="true">🚤</span>
-          <div>
-            <small>RACE TODAY</small>
-            <strong>今日のレースを見る</strong>
-            <p>本日の開催場・出走表・展示情報へ</p>
-          </div>
-          <b aria-hidden="true">›</b>
+          <span className={entryStyles.icon} aria-hidden="true">🚤</span><div><small>RACE TODAY</small><strong>今日のレースを見る</strong><p>本日の開催場・出走表・展示情報へ</p></div><b aria-hidden="true">›</b>
         </a>
-
-        <a href="/guide" className={entryStyles.card}>
-          <span className={entryStyles.icon} aria-hidden="true">📖</span>
-          <div>
-            <small>FIRST GUIDE</small>
-            <strong>初めての方</strong>
-            <p>BoatStrikersの使い方とレースの基本</p>
-          </div>
-          <b aria-hidden="true">›</b>
-        </a>
-
-        <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}>
-          <span className={entryStyles.icon} aria-hidden="true">✨</span>
-          <div>
-            <small>β PREMIUM FREE</small>
-            <strong>無料会員になる</strong>
-            <p>{BETA_ACCESS_END_LABEL}までPREMIUM相当機能を無料開放</p>
-          </div>
-          <b aria-hidden="true">›</b>
-        </a>
+        <a href="/guide" className={entryStyles.card}><span className={entryStyles.icon} aria-hidden="true">📖</span><div><small>FIRST GUIDE</small><strong>初めての方</strong><p>BoatStrikersの使い方とレースの基本</p></div><b aria-hidden="true">›</b></a>
+        <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}><span className={entryStyles.icon} aria-hidden="true">✨</span><div><small>β PREMIUM FREE</small><strong>無料会員になる</strong><p>{BETA_ACCESS_END_LABEL}までPREMIUM相当機能を無料開放</p></div><b aria-hidden="true">›</b></a>
       </nav>
     </section>
 
-    <div className={styles.ticker}>
-      <strong>📢 速報</strong>
-      <div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div>
-    </div>
+    <div className={styles.ticker}><strong>📢 速報</strong><div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div></div>
 
     <nav className={styles.learnNav} aria-label="BoatStrikersの読み物コンテンツ">
-      <a href="/guide" className={styles.learnCard}>
-        <span aria-hidden="true">📖</span>
-        <div><small>FOR BEGINNERS</small><strong>初心者ガイド</strong><p>基本ルール・舟券・展示を学ぶ</p></div>
-        <b>›</b>
-      </a>
-      <a href="/data-lab" className={styles.learnCard}>
-        <span aria-hidden="true">📊</span>
-        <div><small>DATA &amp; RESEARCH</small><strong>BoatStrikers DATA LAB</strong><p>実レースデータの独自検証を読む</p></div>
-        <b>›</b>
-      </a>
+      <a href="/guide" className={styles.learnCard}><span aria-hidden="true">📖</span><div><small>FOR BEGINNERS</small><strong>初心者ガイド</strong><p>基本ルール・舟券・展示を学ぶ</p></div><b>›</b></a>
+      <a href="/data-lab" className={styles.learnCard}><span aria-hidden="true">📊</span><div><small>DATA &amp; RESEARCH</small><strong>BoatStrikers DATA LAB</strong><p>実レースデータの独自検証を読む</p></div><b>›</b></a>
     </nav>
 
     <div className={styles.card}>
-      <div className={styles.todayBannerWrap}>
-        <img
-          className={styles.todayBanner}
-          src="/top/Untitled design.png"
-          alt="今日の予定 本日の配信をチェック"
-        />
-      </div>
+      <div className={styles.todayBannerWrap}><img className={styles.todayBanner} src="/top/Untitled design.png" alt="今日の予定 本日の配信をチェック" /></div>
       <div className={styles.list}>
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
           const preset=getProgramPresetByTitle(item.title);
-          const body=<>
-            <div className={styles.time}>
-              <strong>{String(item.start_time).slice(0,5)}</strong>
-              <em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em>
-            </div>
-            {preset&&<div className={styles.programIcon} style={{"--program-accent":preset.accent}}>{preset.iconUrl?<img src={preset.iconUrl} alt=""/>:<span>{preset.iconText}</span>}</div>}
-            <div className={styles.body}>
-              <div className={styles.metaRow}>
-                <span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span>
-                {item.host&&<small>担当：{item.host}</small>}
-              </div>
-              <h3>{item.title}</h3>
-              {item.episode&&<p>{item.episode}</p>}
-              {item.link_url&&<b className={styles.miniAction}>詳しく見る <i>›</i></b>}
-            </div>
-          </>;
+          const body=<><div className={styles.time}><strong>{String(item.start_time).slice(0,5)}</strong><em className={ended?styles.ended:styles.upcoming}>{ended?"終了":"予定"}</em></div>{preset&&<div className={styles.programIcon} style={{"--program-accent":preset.accent}}>{preset.iconUrl?<img src={preset.iconUrl} alt=""/>:<span>{preset.iconText}</span>}</div>}<div className={styles.body}><div className={styles.metaRow}><span>{TYPE_LABELS[item.content_type]||"お知らせ"}</span>{item.host&&<small>担当：{item.host}</small>}</div><h3>{item.title}</h3>{item.episode&&<p>{item.episode}</p>}{item.link_url&&<b className={styles.miniAction}>詳しく見る <i>›</i></b>}</div></>;
           const rowClass=`${preset?styles.hasIcon:""} ${ended?styles.past:""}`.trim();
           return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
-        }):<div className={styles.empty}>
-          <strong>📅 本日の配信予定はありません</strong>
-          <span>初心者講座やDATA LAB、全国24場攻略の最新記事をお楽しみください。</span>
-          <div><a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library/stadiums">24場攻略</a></div>
-        </div>}
+        }):<div className={styles.empty}><strong>📅 本日の配信予定はありません</strong><span>初心者講座やDATA LAB、全国24場攻略の最新記事をお楽しみください。</span><div><a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library/stadiums">24場攻略</a></div></div>}
       </div>
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
     </div>
+
+    <a className={styles.todayEntry} href="/today" aria-label="BoatStrikers TODAY 今日のレースを見る">
+      <span className={styles.todayEntryIcon} aria-hidden="true">⚡</span>
+      <span className={styles.todayEntryBody}><small>BOATSTRIKERS TODAY</small><strong>今日のレースを見る</strong><em>開催場・注目レース・グレード戦をまとめてチェック</em></span>
+      <b aria-hidden="true">›</b>
+    </a>
   </section>;
 }
