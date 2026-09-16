@@ -10,8 +10,8 @@ export default function RacesSeoIntro({ raceDate, courseCount = null, courseName
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'ボートレース出走表・開催日程・レース情報',
-    description: 'ボートレース開催場、出走表、締切時刻、展示・モーター情報、AI注目レースを確認できます。',
+    name: '本日のボートレース出走表・開催日程・レース情報',
+    description: '本日のボートレース開催場、出走表、締切時刻、展示・モーター情報、AI注目レースを確認できます。',
     url: 'https://www.boat-strike.online/races',
     isPartOf: {
       '@type': 'WebSite',
@@ -23,8 +23,8 @@ export default function RacesSeoIntro({ raceDate, courseCount = null, courseName
   return (
     <section className={styles.wrap} aria-labelledby="races-seo-title">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div className={styles.eyebrow}>BOAT RACE INFO</div>
-      <h1 id="races-seo-title">ボートレース出走表・開催日程</h1>
+      <div className={styles.eyebrow}>TODAY&apos;S BOAT RACE</div>
+      <h1 id="races-seo-title">本日のボートレース出走表・開催日程</h1>
       <p className={styles.lead}>
         <RacesSeoResolvedDate fallbackDate={raceDate} />のボートレース開催情報をまとめています。{courseCountText}
         各場の出走表、締切時刻、選手・モーター・展示情報を確認し、BoatStrikersのAI注目レースや理論アラートまで続けてチェックできます。
