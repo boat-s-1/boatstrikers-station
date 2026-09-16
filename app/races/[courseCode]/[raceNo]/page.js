@@ -14,10 +14,28 @@ import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../../..
 import RaceDetailTabs from "../../components/RaceDetailTabs";
 import RaceFeatureQuotaGate from "../../components/RaceFeatureQuotaGate";
 import RacePremiumMemberGate from "../../components/RacePremiumMemberGate";
+import RaceQuickView from "../../components/RaceQuickView";
 import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
 
 export const dynamic = "force-dynamic";
+
+const RACE_STATUS_LABELS = {
+  open: "発売中",
+  on_sale: "発売中",
+  onsale: "発売中",
+  closed: "締切",
+  cutoff: "締切",
+  finished: "結果確定",
+  result: "結果確定",
+  confirmed: "結果確定",
+};
+
+function getRaceStatusLabel(event) {
+  const rawStatus = event?.race_status ?? event?.status ?? null;
+  if (!rawStatus) return null;
+  return RACE_STATUS_LABELS[String(rawStatus).trim().toLowerCase()] ?? null;
+}
 
 async function getPremiumAccess(){
   try{
@@ -72,6 +90,11 @@ export default async function RaceDetailPage({
     ? data.entries
     : [];
   const exhibitionReady = isExhibitionReady(displayEntries);
+  const resultEntries = Array.isArray(data?.resultEntries) ? data.resultEntries : [];
+  const resultConfirmed = Boolean(data?.event?.result_available || data?.result || resultEntries.length > 0);
+  const visibleLivePrediction = premiumAccess && exhibitionReady
+    ? data?.livePrediction
+    : null;
 
   const courseName = getCourseName(courseCode);
   const paddedCourseCode = String(courseCode).padStart(
@@ -109,6 +132,16 @@ export default async function RaceDetailPage({
         ) : (
           <>
             <ExhibitionAutoRefresh raceDate={raceDate} closingTime={data.event.closing_time} />
+            <RaceQuickView
+              courseName={courseName}
+              raceNo={raceNo}
+              closingTime={data.event.closing_time || null}
+              raceStatus={resultConfirmed ? "結果確定" : getRaceStatusLabel(data.event)}
+              exhibitionReady={exhibitionReady}
+              hasPreviousAi={Boolean(data.previousPrediction)}
+              hasLiveAi={Boolean(visibleLivePrediction)}
+              resultConfirmed={resultConfirmed}
+            />
             <RaceFeatureQuotaGate premiumAccess={premiumAccess} />
             <RaceDetailTabs
               event={data.event}
@@ -118,11 +151,7 @@ export default async function RaceDetailPage({
                 data.previousPrediction
               }
               noteFeature={data.noteFeature}
-              livePrediction={
-                premiumAccess && exhibitionReady
-                  ? data.livePrediction
-                  : null
-              }
+              livePrediction={visibleLivePrediction}
               syncedAt={
                 data?.event?.synced_at
                   ? formatJstDateTime(
@@ -131,9 +160,7 @@ export default async function RaceDetailPage({
                   : null
               }
               result={data.result}
-              resultEntries={
-                data.resultEntries ?? []
-              }
+              resultEntries={resultEntries}
               courseCode={courseCode}
               raceNo={raceNo}
               raceDate={raceDate}
