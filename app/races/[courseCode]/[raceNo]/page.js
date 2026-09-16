@@ -34,15 +34,23 @@ function getRaceStatusLabel(event) {
   return RACE_STATUS_LABELS[String(rawStatus).trim().toLowerCase()] ?? null;
 }
 
-async function getPremiumAccess(){
+async function getRaceMemberAccess(){
   try{
     const cookieStore=await cookies();
     const token=cookieStore.get(MEMBER_ACCESS_COOKIE)?.value||"";
     const entitlement=await getMemberEntitlementFromToken(token);
-    return Boolean(entitlement.premium);
+    return {
+      premiumAccess:Boolean(entitlement.premium),
+      authenticated:Boolean(entitlement.authenticated),
+      entitlementResolved:true,
+    };
   }catch(error){
     console.error("race member entitlement error",error);
-    return false;
+    return {
+      premiumAccess:false,
+      authenticated:null,
+      entitlementResolved:false,
+    };
   }
 }
 
@@ -67,7 +75,9 @@ export default async function RaceDetailPage({
 
   let data = null;
   let loadError = null;
-  const premiumAccess = await getPremiumAccess();
+  const memberAccess = await getRaceMemberAccess();
+  const premiumAccess = memberAccess.premiumAccess;
+  const showFreeMemberCta = memberAccess.entitlementResolved && memberAccess.authenticated === false;
 
   try {
     data = await getRaceDetail(
@@ -162,6 +172,50 @@ export default async function RaceDetailPage({
               raceNo={raceNo}
               raceDate={raceDate}
             />
+
+            {showFreeMemberCta ? (
+              <aside
+                aria-label="無料会員のご案内"
+                style={{
+                  margin: "16px 12px 18px",
+                  padding: "16px",
+                  border: "1px solid #d7e7f3",
+                  borderRadius: "16px",
+                  background: "#f8fcff",
+                  boxShadow: "0 6px 18px rgba(21,89,149,.07)",
+                }}
+              >
+                <strong style={{ display: "block", color: "#155995", fontSize: "16px", lineHeight: 1.4 }}>
+                  BoatStrikersをもっと活用する
+                </strong>
+                <p style={{ margin: "7px 0 13px", color: "#536b7d", fontSize: "13px", lineHeight: 1.7 }}>
+                  無料会員になると、TODAYを中心にBoatStrikersを毎日のレースチェックに使えます。
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px 14px" }}>
+                  <Link
+                    href="/members"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "42px",
+                      padding: "0 18px",
+                      borderRadius: "12px",
+                      background: "#1679d6",
+                      color: "#fff",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      fontWeight: 900,
+                    }}
+                  >
+                    無料会員になる
+                  </Link>
+                  <Link href="/today" style={{ color: "#155995", fontSize: "13px", fontWeight: 800, textDecoration: "none" }}>
+                    BoatStrikers TODAYを見る →
+                  </Link>
+                </div>
+              </aside>
+            ) : null}
 
             <div style={{ margin: "18px 0" }}>
               <Link
