@@ -20,33 +20,36 @@ const CHARACTERS=[
   {key:"hatsune",name:"初音",emoji:"💜",role:"女子戦中心",types:["hatsune_dominant_best3","hatsune_risky_best3"],tone:"hatsune",href:"/hatsune"},
   {key:"kiina",name:"キイナ",emoji:"💛",role:"5アタマ・穴狙い中心",types:["kiina_boat5_best5"],tone:"kiina",href:"/kiina"},
 ];
+const PICK_LABELS={ichika_escape_best10:"イン逃げ期待",hatsune_dominant_best3:"イン優勢",hatsune_risky_best3:"イン注意",kiina_boat5_best5:"5アタマ期待"};
 
 function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 function formatDate(date){const [y,m,d]=date.split("-");return `${y}年${Number(m)}月${Number(d)}日`;}
 function db(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)return null;return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
 function raceHref(code,race,date){return `/races/${Number(code)}/${Number(race)}?date=${date}`;}
+function latestCourseSync(courses){const values=(courses||[]).flatMap(c=>[c.syncedAt,c.apiSyncedAt,c.exhibitionSyncedAt]).filter(Boolean).map(v=>new Date(v).getTime()).filter(Number.isFinite);return values.length?new Date(Math.max(...values)).toISOString():null;}
 
 async function loadTodayData(date){
   const client=db();
   const coursesPromise=getCoursesByDate(date).catch(()=>[]);
-  if(!client) return {courses:await coursesPromise,rankings:[],grades:[],updatedAt:null};
-  const [courses,rank,grade,events]=await Promise.all([
+  if(!client){const courses=await coursesPromise;return {courses,rankings:[],grades:[],updatedAt:latestCourseSync(courses)};}
+  const [courses,rank,grade]=await Promise.all([
     coursesPromise,
-    client.from("ai_v2_daily_rankings").select("ranking_type,rank_no,course_code,race_no,selected_for_home,data_timing").eq("ranking_date",date).in("ranking_type",CHARACTERS.flatMap(x=>x.types)).order("rank_no"),
+    client.from("ai_v2_daily_rankings").select("ranking_type,rank_no,course_code,race_no,selected_for_home,data_timing").eq("ranking_date",date).in("ranking_type",CHARACTERS.flatMap(x=>x.types)).in("data_timing",["previous_day","after_exhibition"]).order("rank_no"),
     client.from("bs_grade_race_events").select("start_date,end_date,course_code,grade,title").lte("start_date",date).gte("end_date",date).order("course_code"),
-    client.from("bs_race_events").select("api_synced_at,synced_at,updated_at").eq("race_date",date).order("updated_at",{ascending:false}).limit(1),
   ]);
-  const rankingRows=rank.data||[];
-  const preferred=rankingRows.filter(x=>x.data_timing==="previous_day");
-  const rankings=preferred.length?preferred:rankingRows.filter(x=>x.data_timing==="after_exhibition");
-  const stamp=events.data?.[0];
-  return {courses:Array.isArray(courses)?courses:[],rankings,grades:grade.data||[],updatedAt:stamp?.api_synced_at||stamp?.synced_at||stamp?.updated_at||null};
+  const safeCourses=Array.isArray(courses)?courses:[];
+  return {courses:safeCourses,rankings:rank.data||[],grades:grade.data||[],updatedAt:latestCourseSync(safeCourses)};
 }
 
 function characterPicks(rows,character){
-  const group=rows.filter(x=>character.types.includes(x.ranking_type));
-  const selected=group.filter(x=>x.selected_for_home===true);
-  return (selected.length?selected:group).slice(0,3);
+  const selected=rows.filter(x=>character.types.includes(x.ranking_type)&&x.selected_for_home===true);
+  const byRace=new Map();
+  for(const row of selected){
+    const key=`${Number(row.course_code)}:${Number(row.race_no)}`;
+    const current=byRace.get(key);
+    if(!current||row.data_timing==="after_exhibition")byRace.set(key,row);
+  }
+  return [...byRace.values()].sort((a,b)=>Number(a.rank_no)-Number(b.rank_no)).slice(0,3);
 }
 
 async function memberState(){
@@ -54,27 +57,26 @@ async function memberState(){
 }
 
 export default async function TodayPage(){
-  // Single Source of Truth: all TODAY sections receive this one date value.
   const displayDate=jstToday();
   const [data,member]=await Promise.all([loadTodayData(displayDate),memberState()]);
   const gradeLabels=new Set(["SG","PG1","G1","G2","G3"]);
   const grades=data.grades.filter(x=>gradeLabels.has(String(x.grade||"").toUpperCase()));
-  const updateText=data.updatedAt?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"}).format(new Date(data.updatedAt)):"取得済み";
+  const updateText=data.updatedAt?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"}).format(new Date(data.updatedAt)):null;
 
   return <main className={styles.page}>
     <section className={styles.hero}>
       <div><span className={styles.kicker}>DAILY COMMAND CENTER</span><h1>BOATSTRIKERS TODAY</h1><p>{formatDate(displayDate)}</p></div>
-      <div className={styles.metrics}><span><b>{data.courses.length}</b>開催場</span><span><b>{grades.length}</b>グレード戦</span><span><b>{updateText}</b>データ更新</span></div>
+      {(data.courses.length||grades.length||updateText)?<div className={styles.metrics}>{data.courses.length?<span><b>{data.courses.length}</b>開催場</span>:null}{grades.length?<span><b>{grades.length}</b>グレード戦</span>:null}{updateText?<span><b>{updateText}</b>データ更新</span>:null}</div>:null}
     </section>
 
     <section className={styles.section}>
       <div className={styles.heading}><div><small>TODAY'S STADIUMS</small><h2>今日の開催場</h2></div><Link href={`/races?date=${displayDate}`}>全場を見る ›</Link></div>
-      {data.courses.length?<div className={styles.courseGrid}>{data.courses.map(c=><Link className={styles.course} key={c.courseCode} href={`/races/${Number(c.courseCode)}?date=${displayDate}`}><span>#{String(c.courseCode).padStart(2,"0")}</span><strong>{c.courseName||COURSE_NAMES[Number(c.courseCode)]}</strong><small>{Number(c.resultCount||0)}/{Number(c.raceCount||12)}R 結果取得</small></Link>)}</div>:<p className={styles.empty}>本日の開催場データはまだありません。</p>}
+      {data.courses.length?<div className={styles.courseGrid}>{data.courses.map(c=><Link className={styles.course} key={c.courseCode} href={`/races/${Number(c.courseCode)}?date=${displayDate}`}><span>#{String(c.courseCode).padStart(2,"0")}</span><strong>{c.courseName||COURSE_NAMES[Number(c.courseCode)]}</strong>{Number(c.resultCount||0)>0?<small>{Number(c.resultCount)}/{Number(c.raceCount||12)}R 結果取得</small>:null}</Link>)}</div>:<p className={styles.empty}>本日の開催場データはまだありません。</p>}
     </section>
 
     <section className={styles.section}>
       <div className={styles.heading}><div><small>CHARACTER PICKS</small><h2>今日の注目レース</h2></div></div>
-      <div className={styles.characterGrid}>{CHARACTERS.map(ch=>{const picks=characterPicks(data.rankings,ch);return <article className={`${styles.character} ${styles[ch.tone]}`} key={ch.key}><div className={styles.characterHead}><span>{ch.emoji}</span><div><h3>{ch.name}</h3><p>{ch.role}</p></div></div>{picks.length?<div className={styles.pickList}>{picks.map((p,i)=><Link key={`${p.course_code}-${p.race_no}-${i}`} href={raceHref(p.course_code,p.race_no,displayDate)}><span>{COURSE_NAMES[Number(p.course_code)]} {Number(p.race_no)}R</span><b>レースを見る →</b></Link>)}</div>:<div className={styles.noPick}>本日の公開候補はまだありません。</div>}<Link className={styles.characterLink} href={ch.href}>{ch.name}のページへ ›</Link></article>})}</div>
+      <div className={styles.characterGrid}>{CHARACTERS.map(ch=>{const picks=characterPicks(data.rankings,ch);return <article className={`${styles.character} ${styles[ch.tone]}`} key={ch.key}><div className={styles.characterHead}><span>{ch.emoji}</span><div><h3>{ch.name}</h3><p>{ch.role}</p></div></div>{picks.length?<div className={styles.pickList}>{picks.map((p,i)=><Link key={`${p.course_code}-${p.race_no}-${i}`} href={raceHref(p.course_code,p.race_no,displayDate)}><span>{COURSE_NAMES[Number(p.course_code)]} {Number(p.race_no)}R <small>{PICK_LABELS[p.ranking_type]}</small></span><b>レースを見る →</b></Link>)}</div>:<div className={styles.noPick}>本日の公開候補はまだありません。</div>}<Link className={styles.characterLink} href={ch.href}>{ch.name}のページへ ›</Link></article>})}</div>
     </section>
 
     {grades.length?<section className={styles.section}><div className={styles.heading}><div><small>GRADE RACES</small><h2>今日のグレード戦</h2></div></div><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>›</b></Link>)}</div></section>:null}
