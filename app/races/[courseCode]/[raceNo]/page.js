@@ -26,9 +26,6 @@ const RACE_STATUS_LABELS = {
   onsale: "発売中",
   closed: "締切",
   cutoff: "締切",
-  finished: "結果確定",
-  result: "結果確定",
-  confirmed: "結果確定",
 };
 
 function getRaceStatusLabel(event) {
@@ -136,7 +133,7 @@ export default async function RaceDetailPage({
               courseName={courseName}
               raceNo={raceNo}
               closingTime={data.event.closing_time || null}
-              raceStatus={resultConfirmed ? "結果確定" : getRaceStatusLabel(data.event)}
+              raceStatus={resultConfirmed ? null : getRaceStatusLabel(data.event)}
               exhibitionReady={exhibitionReady}
               hasPreviousAi={Boolean(data.previousPrediction)}
               hasLiveAi={Boolean(visibleLivePrediction)}
