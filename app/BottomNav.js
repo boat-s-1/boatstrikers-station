@@ -6,10 +6,10 @@ import styles from "./BottomNav.module.css";
 
 const navItems = [
   { href: "/", label: "ホーム", icon: "home", tone: "home" },
-  { href: "/radio", label: "ラジオ", icon: "radio", tone: "radio", onAir: true },
-  { href: "/library", label: "図書館", icon: "book", tone: "library" },
+  { href: "/today", label: "TODAY", icon: "today", tone: "today" },
   { href: "/races", label: "出走表", icon: "boat", tone: "races" },
-  { href: "/schedule", label: "番組表", icon: "calendar", tone: "schedule" },
+  { href: "/library", label: "図書館", icon: "book", tone: "library" },
+  { href: "/radio", label: "ラジオ", icon: "radio", tone: "radio", onAir: true },
 ];
 
 function NavIcon({ type }) {
@@ -18,6 +18,14 @@ function NavIcon({ type }) {
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path d="M7 23.5 24 8l17 15.5" />
         <path d="M11 21.5V40h10V29h6v11h10V21.5" />
+      </svg>
+    );
+  }
+
+  if (type === "today") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M28 5 13 27h11l-4 16 15-23H24Z" />
       </svg>
     );
   }
@@ -42,23 +50,11 @@ function NavIcon({ type }) {
     );
   }
 
-  if (type === "boat") {
-    return (
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <path d="m8 29 29-4 5 7c-6 7-15 10-25 8-5-1-9-4-11-8Z" />
-        <path d="m20 25 5-11h8l5 11" />
-        <path d="M8 43c5-2 9-2 14 0 5 2 10 2 17-1" />
-      </svg>
-    );
-  }
-
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
-      <rect x="7" y="10" width="34" height="31" rx="5" />
-      <path d="M15 6v9M33 6v9M7 20h34" />
-      <path d="M14 27h6M27 27h6M14 34h6" />
-      <circle cx="34" cy="35" r="7" />
-      <path d="M34 31v4l3 2" />
+      <path d="m8 29 29-4 5 7c-6 7-15 10-25 8-5-1-9-4-11-8Z" />
+      <path d="m20 25 5-11h8l5 11" />
+      <path d="M8 43c5-2 9-2 14 0 5 2 10 2 17-1" />
     </svg>
   );
 }
