@@ -31,6 +31,7 @@ export default function MembersPage() {
   const [lineCode, setLineCode] = useState("");
   const [lineExpiresAt, setLineExpiresAt] = useState("");
   const appliedUserRef = useRef(null);
+  const mountedRef = useRef(false);
 
   async function loadProfile(userId) {
     if (!supabase || !userId) return null;
@@ -40,11 +41,12 @@ export default function MembersPage() {
       .eq("user_id", userId)
       .maybeSingle();
     if (profileError) throw profileError;
-    setProfile(data || null);
+    if (mountedRef.current) setProfile(data || null);
     return data || null;
   }
 
-  async function applySession(nextSession, { force = false } = {}) {
+  async function applySession(nextSession) {
+    if (!mountedRef.current) return;
     const user = nextSession?.user || null;
     setSession(nextSession || null);
     if (!user) {
@@ -53,7 +55,7 @@ export default function MembersPage() {
       setAuthLoading(false);
       return;
     }
-    if (!force && appliedUserRef.current === user.id) {
+    if (appliedUserRef.current === user.id) {
       setAuthLoading(false);
       return;
     }
@@ -61,18 +63,20 @@ export default function MembersPage() {
     try {
       await loadProfile(user.id);
     } catch {
+      if (!mountedRef.current) return;
       appliedUserRef.current = null;
       setError("ログインは確認できましたが、会員プロフィールの取得に時間がかかっています。");
     } finally {
-      setAuthLoading(false);
+      if (mountedRef.current) setAuthLoading(false);
     }
   }
 
   useEffect(() => {
+    mountedRef.current = true;
     if (!supabase) {
       setError("Supabaseの公開環境変数が設定されていません。");
       setAuthLoading(false);
-      return undefined;
+      return () => { mountedRef.current = false; };
     }
     let alive = true;
     const hash = typeof window !== "undefined" ? window.location.hash : "";
@@ -90,22 +94,33 @@ export default function MembersPage() {
     supabase.auth.getSession()
       .then(({ data, error: sessionError }) => {
         if (!alive) return;
+        window.clearTimeout(safetyTimer);
         if (sessionError) throw sessionError;
         return applySession(data?.session || null);
       })
       .catch(() => {
         if (!alive) return;
+        window.clearTimeout(safetyTimer);
         setError("ログイン状態を確認できませんでした。登録・ログインはそのままお試しいただけます。");
         setAuthLoading(false);
       });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (!alive || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+      if (!alive || event === "INITIAL_SESSION") return;
+      if (event === "TOKEN_REFRESHED") {
+        setSession(nextSession || null);
+        return;
+      }
+      if (event === "PASSWORD_RECOVERY") {
+        setRecoveryMode(true);
+        setAuthLoading(false);
+      }
       void applySession(nextSession || null);
     });
 
     return () => {
       alive = false;
+      mountedRef.current = false;
       window.clearTimeout(safetyTimer);
       listener?.subscription?.unsubscribe();
     };
@@ -126,7 +141,7 @@ export default function MembersPage() {
         if (signUpError) throw signUpError;
         setRegistrationComplete(true);
         if (data?.session) {
-          await applySession(data.session, { force: true });
+          await applySession(data.session);
           setMessage("無料会員登録が完了しました。TODAYから今日のレースを確認できます。");
         } else {
           setMessage("確認メールを送信しました。メール確認後にログインすると公式LINE連携も利用できます。");
@@ -134,7 +149,7 @@ export default function MembersPage() {
       } else {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (loginError) throw loginError;
-        await applySession(data?.session || null, { force: true });
+        await applySession(data?.session || null);
         setMessage("ログインしました。TODAYから今日の情報を確認できます。");
       }
     } catch (err) {
