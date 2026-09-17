@@ -177,8 +177,8 @@ export default function BoatAnalyticsTracker() {
     let sent = false;
     const detectLinkedState = () => {
       if (sent || !hasRecentMarker(LINE_MARKER)) return;
-      const linked = Array.from(document.querySelectorAll("strong,h2")).some((node) =>
-        String(node.textContent || "").includes("公式LINEは連携済み") || String(node.textContent || "").trim() === "連携済み"
+      const linked = Array.from(document.querySelectorAll("h2")).some((node) =>
+        String(node.textContent || "").includes("公式LINEは連携済み")
       );
       if (!linked) return;
       sent = true;
