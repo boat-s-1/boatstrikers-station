@@ -109,7 +109,8 @@ export default function BoatAnalyticsTracker() {
         }
       }
 
-      if (/^\/races\/\d+\/\d+$/.test(pathname) && href === "/members" && text.includes("無料会員")) {
+      const raceMemberCta = target.closest?.('aside[aria-label="無料会員のご案内"]');
+      if (/^\/races\/\d+\/\d+$/.test(pathname) && href === "/members" && text === "無料会員になる" && raceMemberCta) {
         const match = pathname.match(/^\/races\/(\d+)\/(\d+)$/);
         trackBoatEvent("race_member_cta_click", {
           source: "race_detail",
@@ -119,9 +120,11 @@ export default function BoatAnalyticsTracker() {
       }
 
       if (pathname === "/members" && href === "/today") {
-        trackBoatEvent("member_today_click", {
-          source: text.includes("BoatStrikers TODAY") ? "registration_complete" : "member_page",
-        });
+        if (text === "今日のBoatStrikers TODAYを見る →") {
+          trackBoatEvent("member_today_click", { source: "registration_complete" });
+        } else if (text === "今日のTODAYを見る →") {
+          trackBoatEvent("member_today_click", { source: "member_page" });
+        }
       }
     };
 
@@ -174,19 +177,27 @@ export default function BoatAnalyticsTracker() {
 
   useEffect(() => {
     if (pathname !== "/members" || !hasRecentMarker(LINE_MARKER)) return;
+    const lineHeading = Array.from(document.querySelectorAll("h2")).find((node) =>
+      String(node.textContent || "").includes("公式LINE")
+    );
+    const lineCard = lineHeading?.closest?.("section");
+    if (!lineCard) return;
+
     let sent = false;
     const detectLinkedState = () => {
       if (sent || !hasRecentMarker(LINE_MARKER)) return;
-      const linked = Array.from(document.querySelectorAll("h2")).some((node) =>
-        String(node.textContent || "").includes("公式LINEは連携済み")
-      );
+      const heading = lineCard.querySelector("h2");
+      const badge = Array.from(lineCard.querySelectorAll("strong")).find((node) => String(node.textContent || "").trim() === "CONNECTED");
+      const linked = String(heading?.textContent || "").trim() === "公式LINEは連携済みです" && Boolean(badge);
       if (!linked) return;
       sent = true;
+      observer.disconnect();
       if (trackBoatEvent("line_link_complete", { member_status: "linked" })) clearMarker(LINE_MARKER);
     };
-    detectLinkedState();
+
     const observer = new MutationObserver(detectLinkedState);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    detectLinkedState();
+    if (!sent) observer.observe(lineCard, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
   }, [pathname]);
 
