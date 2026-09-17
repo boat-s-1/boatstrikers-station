@@ -9,6 +9,7 @@ const SIGNUP_MARKER = "bs_ga_signup_started_at";
 const LINE_MARKER = "bs_ga_line_link_started_at";
 const DISCORD_MARKER = "bs_ga_discord_link_started_at";
 const FUNNEL_VIEW_MARKER = "bs_ga_funnel_last_path";
+const LINE_START_EVENT = "bs:analytics-line-link-start";
 
 function makeSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -84,6 +85,7 @@ export default function BoatAnalyticsTracker() {
 
       if (text.includes("LINE連携コードを発行") || text.includes("新しいコードを発行")) {
         mark(LINE_MARKER);
+        window.dispatchEvent(new Event(LINE_START_EVENT));
         trackBoatEvent("line_link_start", { source_page: pathname });
       }
 
@@ -176,29 +178,43 @@ export default function BoatAnalyticsTracker() {
   }, [pathname, supabase]);
 
   useEffect(() => {
-    if (pathname !== "/members" || !hasRecentMarker(LINE_MARKER)) return;
-    const lineHeading = Array.from(document.querySelectorAll("h2")).find((node) =>
-      String(node.textContent || "").includes("公式LINE")
-    );
-    const lineCard = lineHeading?.closest?.("section");
-    if (!lineCard) return;
-
+    if (pathname !== "/members") return;
+    let observer = null;
     let sent = false;
-    const detectLinkedState = () => {
+
+    const stopObserver = () => {
+      observer?.disconnect();
+      observer = null;
+    };
+
+    const detectLinkedState = (lineCard) => {
       if (sent || !hasRecentMarker(LINE_MARKER)) return;
       const heading = lineCard.querySelector("h2");
       const badge = Array.from(lineCard.querySelectorAll("strong")).find((node) => String(node.textContent || "").trim() === "CONNECTED");
       const linked = String(heading?.textContent || "").trim() === "公式LINEは連携済みです" && Boolean(badge);
       if (!linked) return;
       sent = true;
-      observer.disconnect();
+      stopObserver();
       if (trackBoatEvent("line_link_complete", { member_status: "linked" })) clearMarker(LINE_MARKER);
     };
 
-    const observer = new MutationObserver(detectLinkedState);
-    detectLinkedState();
-    if (!sent) observer.observe(lineCard, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
+    const startObserver = () => {
+      if (sent || observer || !hasRecentMarker(LINE_MARKER)) return;
+      const lineHeading = Array.from(document.querySelectorAll("h2")).find((node) => String(node.textContent || "").includes("公式LINE"));
+      const lineCard = lineHeading?.closest?.("section");
+      if (!lineCard) return;
+      detectLinkedState(lineCard);
+      if (sent) return;
+      observer = new MutationObserver(() => detectLinkedState(lineCard));
+      observer.observe(lineCard, { childList: true, subtree: true, characterData: true });
+    };
+
+    window.addEventListener(LINE_START_EVENT, startObserver);
+    startObserver();
+    return () => {
+      window.removeEventListener(LINE_START_EVENT, startObserver);
+      stopObserver();
+    };
   }, [pathname]);
 
   return null;
