@@ -182,8 +182,7 @@ export default function BoatAnalyticsTracker() {
       );
       if (!linked) return;
       sent = true;
-      trackBoatEventOnce("bs_ga_line_complete_browser", "line_link_complete", { member_status: "linked" });
-      clearMarker(LINE_MARKER);
+      if (trackBoatEvent("line_link_complete", { member_status: "linked" })) clearMarker(LINE_MARKER);
     };
     detectLinkedState();
     const observer = new MutationObserver(detectLinkedState);
