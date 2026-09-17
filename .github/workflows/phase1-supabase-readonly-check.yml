@@ -1,0 +1,41 @@
+name: Phase 1 Supabase Read-only Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fixed Production main SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 1ab230750090a02a6e5dfae376f1545978a752c6
+          fetch-depth: 1
+
+      - name: Assert checkout SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "1ab230750090a02a6e5dfae376f1545978a752c6"
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Show CLI version
+        run: supabase --version
+
+      - name: Link Production project (read-only credential test)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase link --project-ref rzosrbkyniyedolhkgxo
+
+      - name: List migration status only
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase migration list --linked
