@@ -96,6 +96,14 @@ function buildSocialPicks(rows, rankingTypes) {
       closingTime: row.closing_time,
       summary: row.summary || "",
       socialComment: row.social_comment || "",
+      tickets: Array.isArray(row.official_prediction?.tickets) ? row.official_prediction.tickets : [],
+      unitStake: Number(row.official_prediction?.unit_stake || 0),
+      investment: Number(row.official_prediction?.investment || 0),
+      predictionLabel: row.official_prediction?.prediction_label || "",
+      resultAvailable: Boolean(row.result?.result_available),
+      trifecta: row.result?.trifecta || "",
+      trifectaPayout: Number(row.result?.trifecta_payout || 0),
+      raceStatus: row.result?.race_status || "",
     }));
 }
 
@@ -103,7 +111,7 @@ async function loadRows(date, timing) {
   const client = getClient();
   if (!client) return { rows: [], error: "Supabase環境変数がありません。" };
 
-  const [rankingResult, eventResult] = await Promise.all([
+  const [rankingResult, eventResult, predictionResult] = await Promise.all([
     client
       .from("ai_v2_daily_rankings")
       .select("ranking_date,character_code,ranking_type,rank_no,course_code,race_no,probability,model_version,summary,social_comment,metrics,data_timing,selected_for_social,selected_for_home")
@@ -114,23 +122,45 @@ async function loadRows(date, timing) {
       .order("rank_no", { ascending: true }),
     client
       .from("bs_race_events")
-      .select("course_code,race_no,closing_time")
+      .select("course_code,race_no,closing_time,result_available,trifecta,trifecta_payout,race_status")
       .eq("race_date", date),
+    client
+      .from("bsc_official_predictions")
+      .select("character_code,ranking_type,rank_no,course_code,race_no,tickets,unit_stake,investment,prediction_label,published_at")
+      .eq("race_date", date)
+      .eq("timing", timing)
+      .eq("source_table", "ai_v2_daily_rankings")
+      .in("ranking_type", TYPE_ORDER)
+      .order("published_at", { ascending: false }),
   ]);
 
   if (rankingResult.error) return { rows: [], error: rankingResult.error.message };
 
-  const closingByRace = new Map();
+  const eventByRace = new Map();
   if (!eventResult.error) {
     for (const event of eventResult.data || []) {
-      closingByRace.set(raceKey(event.course_code, event.race_no), event.closing_time || null);
+      eventByRace.set(raceKey(event.course_code, event.race_no), event);
     }
   }
 
-  const rows = (rankingResult.data || []).map((row) => ({
-    ...row,
-    closing_time: closingByRace.get(raceKey(row.course_code, row.race_no)) || null,
-  }));
+  const predictionByRanking = new Map();
+  if (!predictionResult.error) {
+    for (const prediction of predictionResult.data || []) {
+      const key = `${prediction.character_code}:${prediction.ranking_type}:${Number(prediction.rank_no)}:${Number(prediction.course_code)}:${Number(prediction.race_no)}`;
+      if (!predictionByRanking.has(key)) predictionByRanking.set(key, prediction);
+    }
+  }
+
+  const rows = (rankingResult.data || []).map((row) => {
+    const predictionKey = `${row.character_code}:${row.ranking_type}:${Number(row.rank_no)}:${Number(row.course_code)}:${Number(row.race_no)}`;
+    const event = eventByRace.get(raceKey(row.course_code, row.race_no)) || null;
+    return {
+      ...row,
+      closing_time: event?.closing_time || null,
+      result: event,
+      official_prediction: predictionByRanking.get(predictionKey) || null,
+    };
+  });
 
   return { rows, error: null };
 }
