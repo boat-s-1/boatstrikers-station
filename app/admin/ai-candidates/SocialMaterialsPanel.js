@@ -190,6 +190,131 @@ function buildXPost(picks, meta) {
   return variants.find((text) => countChars(text) <= 140) || Array.from(variants[2]).slice(0, 140).join("");
 }
 
+function normalizeTrifecta(value) {
+  const digits = String(value || "").match(/[1-6]/g) || [];
+  return digits.slice(0, 3).join("-");
+}
+
+function resultSummary(pick) {
+  const result = normalizeTrifecta(pick.trifecta);
+  const tickets = Array.isArray(pick.tickets)
+    ? pick.tickets.map(normalizeTrifecta).filter(Boolean)
+    : [];
+  if (!result || tickets.length === 0) return null;
+
+  const hit = tickets.includes(result);
+  const unitStake = Number(pick.unitStake || 0);
+  const payout = Number(pick.trifectaPayout || 0);
+  const returnAmount = hit && unitStake > 0 && payout > 0
+    ? Math.round(payout * (unitStake / 100))
+    : 0;
+
+  return {
+    result,
+    tickets,
+    hit,
+    unitStake,
+    investment: Number(pick.investment || tickets.length * unitStake || 0),
+    payout,
+    returnAmount,
+  };
+}
+
+function resultCharacterLabel(character) {
+  if (character === "hatsune") return "初音";
+  if (character === "kiina") return "キイナ";
+  return "一果";
+}
+
+function buildResultXPost(pick, character) {
+  const summary = resultSummary(pick);
+  if (!summary) return "";
+
+  const label = resultCharacterLabel(character);
+  const ticketText = summary.tickets.join(" / ");
+  const lines = summary.hit
+    ? [
+        `🎯 BoatStrikers AI RESULT｜${label}`,
+        `【${pick.courseName}${pick.raceNo}R】的中！`,
+        `買い目：${ticketText}`,
+        `結果：${summary.result}　払戻：${summary.payout.toLocaleString("ja-JP")}円`,
+        `回収：${summary.returnAmount.toLocaleString("ja-JP")}円 / 投資${summary.investment.toLocaleString("ja-JP")}円`,
+        "#BoatStrikers #ボートレース",
+      ]
+    : [
+        `📊 BoatStrikers AI RESULT｜${label}`,
+        `【${pick.courseName}${pick.raceNo}R】不的中`,
+        `買い目：${ticketText}`,
+        `結果：${summary.result}`,
+        "事前に選んだAI候補の結果をそのまま公開。",
+        "#BoatStrikers #ボートレース",
+      ];
+
+  const full = lines.join("\n");
+  if (countChars(full) <= 140) return full;
+
+  const compact = summary.hit
+    ? `🎯${label} AI RESULT｜${pick.courseName}${pick.raceNo}R 的中！\n結果 ${summary.result}｜払戻 ${summary.payout.toLocaleString("ja-JP")}円｜回収 ${summary.returnAmount.toLocaleString("ja-JP")}円\n#BoatStrikers #ボートレース`
+    : `📊${label} AI RESULT｜${pick.courseName}${pick.raceNo}R 不的中\n結果 ${summary.result}\n事前選択したAI候補の結果です。\n#BoatStrikers #ボートレース`;
+
+  return countChars(compact) <= 140 ? compact : Array.from(compact).slice(0, 140).join("");
+}
+
+function buildResultImagePrompt(pick, character) {
+  const summary = resultSummary(pick);
+  if (!summary) return "";
+
+  const label = resultCharacterLabel(character);
+  const accent = character === "hatsune"
+    ? "紫・ピンク"
+    : character === "kiina"
+      ? "黄色・ゴールド"
+      : "緑・ゴールド";
+  const verdict = summary.hit ? "🎯 的中！" : "RESULT 不的中";
+  const hitDetail = summary.hit
+    ? `・払戻：${summary.payout.toLocaleString("ja-JP")}円\n・投資：${summary.investment.toLocaleString("ja-JP")}円\n・回収：${summary.returnAmount.toLocaleString("ja-JP")}円`
+    : "・不的中を過度にネガティブに演出せず、結果報告として見せる";
+
+  return `BoatStrikersのX投稿用「AI RESULT」画像を作成してください。
+
+【画像】
+・横長16:9、1200×675px
+・Xのスマホタイムラインで一瞬で結果が分かる構成
+・濃紺・ダークブルー・白・ゴールドを基調
+・${label}のキャラクター世界観を維持し、${accent}をアクセントにする
+・スポーツ速報／データ速報のように、結果を大きく読みやすく表示
+・文字を詰め込みすぎない
+
+【確定データ】
+担当：${label}
+レース：${pick.courseName}${pick.raceNo}R
+事前保存済み買い目：${summary.tickets.join(" / ")}
+結果：${summary.result}
+判定：${verdict}
+${hitDetail}
+
+【最重要ルール】
+・レース前に固定保存された買い目だけを表示する
+・結果確定後に予想内容を書き換えない
+・結果、出目、払戻は入力された確定データだけを使用する
+・入力されていない数字、場名、買い目、配当を推測しない
+・「AI v2」「shadow」「model」「raw」「score」など内部モデル名・内部指標は表示しない
+・[object Object]を絶対に表示しない
+・的中／不的中の判定を変更しない
+
+【表示優先順位】
+1. ${verdict}
+2. ${pick.courseName}${pick.raceNo}R
+3. 結果 ${summary.result}
+4. 事前保存済み買い目
+${summary.hit ? "5. 払戻・投資・回収" : ""}
+
+【フッター】
+BoatStrikers
+AI RESULT
+boat-strike.com`;
+}
+
 async function copyText(text, setter) {
   try {
     await navigator.clipboard.writeText(text);
@@ -209,10 +334,15 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
   const [promptCopied, setPromptCopied] = useState(false);
   const [verticalPromptCopied, setVerticalPromptCopied] = useState(false);
   const [postCopied, setPostCopied] = useState(false);
+  const [resultCopied, setResultCopied] = useState("");
 
   const imagePrompt = useMemo(() => buildImagePrompt(selected), [selected]);
   const verticalImagePrompt = useMemo(() => buildVerticalImagePrompt(selected, meta, character), [selected, meta, character]);
   const xPost = useMemo(() => buildXPost(selected, meta), [selected, meta]);
+  const resolvedResults = useMemo(
+    () => selected.map((pick) => ({ pick, summary: resultSummary(pick) })).filter((item) => item.summary),
+    [selected]
+  );
   const xLength = countChars(xPost);
 
   return (
@@ -292,6 +422,78 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
               </div>
             </article>
           </div>
+
+          <section className={styles.resultSection}>
+            <div className={styles.resultHeading}>
+              <div>
+                <span>AI RESULT MATERIALS</span>
+                <h3>結果確定後のX投稿素材</h3>
+                <p>事前に固定された公開買い目と確定3連単結果だけで判定します。</p>
+              </div>
+              <strong>{resolvedResults.length}/{selected.length}レース確定</strong>
+            </div>
+
+            {resolvedResults.length === 0 ? (
+              <div className={styles.resultWaiting}>結果が確定すると、的中／不的中のX投稿文と結果画像プロンプトがここに表示されます。</div>
+            ) : (
+              <div className={styles.resultGrid}>
+                {resolvedResults.map(({ pick, summary }) => {
+                  const key = `${pick.rankingType}-${pick.rankNo}-${pick.courseCode}-${pick.raceNo}`;
+                  const resultPost = buildResultXPost(pick, character);
+                  const resultPrompt = buildResultImagePrompt(pick, character);
+                  return (
+                    <article className={styles.resultCard} key={key}>
+                      <div className={styles.resultTop}>
+                        <div>
+                          <span className={summary.hit ? styles.hitBadge : styles.missBadge}>
+                            {summary.hit ? "🎯 的中" : "不的中"}
+                          </span>
+                          <strong>{pick.courseName}{pick.raceNo}R</strong>
+                        </div>
+                        <b>結果 {summary.result}</b>
+                      </div>
+
+                      <div className={styles.resultFacts}>
+                        <span>買い目 {summary.tickets.join(" / ")}</span>
+                        <span>投資 {summary.investment.toLocaleString("ja-JP")}円</span>
+                        {summary.hit ? <span>払戻 {summary.payout.toLocaleString("ja-JP")}円</span> : null}
+                        {summary.hit ? <span>回収 {summary.returnAmount.toLocaleString("ja-JP")}円</span> : null}
+                      </div>
+
+                      <div className={styles.resultMaterials}>
+                        <div>
+                          <div className={styles.resultMaterialHeader}>
+                            <b>X投稿文</b>
+                            <button
+                              type="button"
+                              onClick={() => copyText(resultPost, (done) => setResultCopied(done ? `${key}:post` : ""))}
+                            >
+                              {resultCopied === `${key}:post` ? "コピーしました" : "コピー"}
+                            </button>
+                          </div>
+                          <textarea readOnly value={resultPost} rows={7} />
+                          <small>{countChars(resultPost)} / 140文字</small>
+                        </div>
+
+                        <div>
+                          <div className={styles.resultMaterialHeader}>
+                            <b>結果画像プロンプト</b>
+                            <button
+                              type="button"
+                              onClick={() => copyText(resultPrompt, (done) => setResultCopied(done ? `${key}:prompt` : ""))}
+                            >
+                              {resultCopied === `${key}:prompt` ? "コピーしました" : "コピー"}
+                            </button>
+                          </div>
+                          <textarea readOnly value={resultPrompt} rows={13} />
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         </>
       )}
     </section>
