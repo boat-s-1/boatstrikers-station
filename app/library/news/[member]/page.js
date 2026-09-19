@@ -1,4 +1,6 @@
 import Parser from "rss-parser";
+import Link from "next/link";
+import { getPublishedNewspapers } from "../../../../lib/newspapers";
 
 const members = {
   ichika: {
@@ -25,27 +27,21 @@ const members = {
 };
 
 export default async function NewsBackNumberPage({ params }) {
-  const memberKey = params.member;
+  const { member: memberParam } = await params;
+  const memberKey = memberParam;
   const member = members[memberKey] || members.ichika;
-
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
-
-  const articles = feed.items
-    .filter((item) => item.title.includes(member.keyword))
-    .slice(0, 30)
-    .map((item) => {
-      const image =
-        item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
-        member.fallbackImage;
-
-      return {
-        title: item.title,
-        link: item.link,
-        date: item.pubDate,
-        image,
-      };
-    });
+  const siteItems = await getPublishedNewspapers({ character: memberKey, limit: 60 });
+  let legacyItems = [];
+  try {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
+    legacyItems = feed.items.filter((item) => item.title.includes(member.keyword)).slice(0, 30).map((item) => ({
+      title: item.title, link: item.link, date: item.pubDate,
+      image: item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || member.fallbackImage,
+      external: true,
+    }));
+  } catch (error) { console.error("旧新聞RSS取得エラー:", error); }
+  const articles = siteItems.length ? siteItems.map((item) => ({ title: item.title, link: `/newspapers/${item.slug}`, date: item.race_date, image: item.image_url || member.fallbackImage, external: false })) : legacyItems;
 
   const latest = articles[0];
   const backNumbers = articles.slice(1);
@@ -77,21 +73,16 @@ export default async function NewsBackNumberPage({ params }) {
         <section className="librarySection">
           <h2>🆕 最新号</h2>
 
-          <a
-            href={latest.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="latestIssueCard"
-          >
+          <Link href={latest.link} className="latestIssueCard">
             <img src={latest.image} alt={latest.title} />
 
             <div>
               <span>NEW</span>
               <h3>{latest.title}</h3>
               <p>{new Date(latest.date).toLocaleDateString("ja-JP")}</p>
-              <b>最新号を読む ›</b>
+              <b>{latest.external ? "noteで最新号を読む ›" : "サイト内で最新号を読む ›"}</b>
             </div>
-          </a>
+          </Link>
         </section>
       )}
 
@@ -104,18 +95,12 @@ export default async function NewsBackNumberPage({ params }) {
         <div className="newsBackGrid">
           {backNumbers.length > 0 ? (
             backNumbers.map((article) => (
-              <a
-                href={article.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="newsBackCard"
-                key={article.link}
-              >
+              <Link href={article.link} className="newsBackCard" key={article.link}>
                 <img src={article.image} alt={article.title} />
                 <h3>{article.title}</h3>
                 <p>{new Date(article.date).toLocaleDateString("ja-JP")}</p>
                 <b>読む ›</b>
-              </a>
+              </Link>
             ))
           ) : (
             <p className="stadiumLead">まだバックナンバーはありません。</p>
