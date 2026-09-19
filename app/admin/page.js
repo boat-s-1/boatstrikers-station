@@ -26,6 +26,7 @@ const GROUPS = [
     items: [
       { href: "/admin/x-night-posts", icon: "🌙", title: "今夜のX投稿候補", text: "22:35生成の一果・初音・キイナ・公式・TOP5をコピーして投稿" },
       { href: "/admin/data-lab-social", icon: "📊", title: "DATA LAB SNS", text: "昨日の結果をX・ショート台本・9:16画像へ自動変換" },
+      { href: "/admin/ichika-news", icon: "🟢", title: "一果新聞プロンプト", text: "前日版・直前版と一果ちゃんの表情・ポーズを選んで新聞プロンプトを作成" },
       { href: "/admin/data-lab-social#minamo-comic", icon: "🏫", title: "みなも学園4コマ", text: "前日の結果・ニュースから4コマ生成プロンプトを作成" },
       { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "前日予想などから台本・投稿素材を作成" },
