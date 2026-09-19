@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { buildNewspaperChannels, newspaperSlug } from "../../../lib/newspaperContent";
 import styles from "./newspaperPublishingPanel.module.css";
 
@@ -20,8 +21,36 @@ export default function NewspaperPublishingPanel({ character, value }) {
   const [status, setStatus] = useState("draft");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
   const [copied, setCopied] = useState("");
   const slug = newspaperSlug(source);
+
+  async function uploadImage(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || uploading || busy) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setUploadMessage("JPG・PNG・WebPの画像を選んでください。"); return;
+    }
+    if (!file.size || file.size > 4 * 1024 * 1024) {
+      setUploadMessage("画像は4MB以下にしてください。"); return;
+    }
+    setUploading(true); setUploadMessage("アップロード中…");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const response = await fetch("/api/admin/newspapers/upload", { method: "POST", body: form, signal: AbortSignal.timeout(60000) });
+      if (response.status === 401) throw new Error("ログインの有効期限が切れました。管理画面に再ログインしてください。");
+      if (response.status === 413) throw new Error("画像が大きすぎます。4MB以下にしてください。");
+      const json = await response.json();
+      if (!response.ok || !json.url) throw new Error(json.error || "アップロードに失敗しました。");
+      setImageUrl(json.url);
+      setUploadMessage("画像URLを入力しました。最後に「保存する」または「サイトに公開」を押してください。");
+    } catch (error) {
+      setUploadMessage(error.name === "TimeoutError" ? "時間がかかっています。通信状態を確認して再度お試しください。" : error.message || "アップロードに失敗しました。");
+    } finally { setUploading(false); }
+  }
 
   async function copy(text, key) {
     await navigator.clipboard.writeText(text);
@@ -30,6 +59,7 @@ export default function NewspaperPublishingPanel({ character, value }) {
   }
 
   async function save() {
+    if (uploading || busy) return;
     setBusy(true); setMessage("");
     try {
       const response = await fetch("/api/admin/newspapers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...source, ...generated, imageUrl, noteUrl, status, sourcePayload: value }) });
@@ -44,10 +74,17 @@ export default function NewspaperPublishingPanel({ character, value }) {
   return <section className={styles.panel}>
     <div className={styles.head}><div><span>SITE / NOTE / SOCIAL</span><h2>記事・投稿原稿</h2><p>新聞と同じ入力から各媒体向けの原稿を生成します。</p></div><Link href={`/newspapers/${slug}`} target="_blank">詳細ページ確認</Link></div>
     <div className={styles.publishGrid}>
-      <label>新聞画像URL<input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." /></label>
+      <div className={styles.imageUpload}>
+        <label>スマホ・PCから新聞画像を選択<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadImage} disabled={uploading || busy} /></label>
+        <p>推奨：1080×1920px（縦長9:16）。JPG・PNG・WebP、4MB以下。異なる縦横比もそのまま掲載できます。</p>
+        <p>選択するとアップロードされ、画像URLが自動入力されます。</p>
+        <p role="status" aria-live="polite">{uploadMessage}</p>
+        {/^https?:\/\//i.test(imageUrl) && <Image className={styles.imagePreview} src={imageUrl} alt="新聞画像のプレビュー" width={1080} height={1920} unoptimized />}
+      </div>
+      <label>新聞画像URL<input value={imageUrl} disabled={uploading || busy} onChange={(e) => setImageUrl(e.target.value)} placeholder="画像を選択すると自動入力されます" /></label>
       <label>公開したnote URL<input value={noteUrl} onChange={(e) => setNoteUrl(e.target.value)} placeholder="https://note.com/..." /></label>
       <label>サイト状態<select value={status} onChange={(e) => setStatus(e.target.value)}><option value="draft">下書き</option><option value="published">公開</option><option value="archived">アーカイブ</option></select></label>
-      <button type="button" onClick={save} disabled={busy}>{busy ? "保存中…" : status === "published" ? "サイトに公開" : "保存する"}</button>
+      <button type="button" onClick={save} disabled={busy || uploading}>{uploading ? "画像アップロード中…" : busy ? "保存中…" : status === "published" ? "サイトに公開" : "保存する"}</button>
     </div>
     {message && <p className={styles.message}>{message}</p>}
     <div className={styles.outputs}>
