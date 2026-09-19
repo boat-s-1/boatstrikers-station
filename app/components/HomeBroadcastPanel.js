@@ -38,7 +38,7 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
 
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
         <a
-          href="/today"
+          href={`/races?date=${current.date}`}
           className={entryStyles.featuredBanner}
           aria-label="BoatStrikers TODAY 今日のレースを見る"
         >
