@@ -37,14 +37,15 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       </div>
 
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
-        <a href={`/races?date=${current.date}`} className={`${entryStyles.card} ${entryStyles.primary}`}>
-          <span className={entryStyles.icon} aria-hidden="true">🚤</span>
-          <div>
-            <small>RACE TODAY</small>
-            <strong>今日のレースを見る</strong>
-            <p>本日の開催場・出走表・展示情報へ</p>
-          </div>
-          <b aria-hidden="true">›</b>
+        <a
+          href="/today"
+          className={entryStyles.featuredBanner}
+          aria-label="BoatStrikers TODAY 今日のレースを見る"
+        >
+          <img
+            src="/todayrace.png"
+            alt="BoatStrikers TODAY 今日のレースを見る"
+          />
         </a>
 
         <a href="/guide" className={entryStyles.card}>
@@ -74,18 +75,6 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <div className={styles.viewport}><div className={styles.track}><span>{text}</span><span aria-hidden="true">{text}</span></div></div>
     </div>
 
-    <nav className={styles.learnNav} aria-label="BoatStrikersの読み物コンテンツ">
-      <a href="/guide" className={styles.learnCard}>
-        <span aria-hidden="true">📖</span>
-        <div><small>FOR BEGINNERS</small><strong>初心者ガイド</strong><p>基本ルール・舟券・展示を学ぶ</p></div>
-        <b>›</b>
-      </a>
-      <a href="/data-lab" className={styles.learnCard}>
-        <span aria-hidden="true">📊</span>
-        <div><small>DATA &amp; RESEARCH</small><strong>BoatStrikers DATA LAB</strong><p>実レースデータの独自検証を読む</p></div>
-        <b>›</b>
-      </a>
-    </nav>
 
     <div className={styles.card}>
       <div className={styles.todayBannerWrap}>
@@ -126,16 +115,5 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
     </div>
 
-    <a
-      className={styles.todayEntryImageLink}
-      href="/today"
-      aria-label="BoatStrikers TODAY 今日のレースを見る"
-    >
-      <img
-        className={styles.todayEntryImage}
-        src="/todayrace.png"
-        alt="BoatStrikers TODAY 今日のレースを見る"
-      />
-    </a>
   </section>;
 }

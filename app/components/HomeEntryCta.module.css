@@ -37,8 +37,36 @@
 
 .nav {
   display: grid;
-  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.featuredBanner {
+  grid-column: 1 / -1;
+  display: block;
+  overflow: hidden;
+  border-radius: 17px;
+  line-height: 0;
+  text-decoration: none;
+  box-shadow: 0 7px 18px rgba(20, 96, 155, .11);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.featuredBanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 91, 140, .14);
+}
+
+.featuredBanner:focus-visible {
+  outline: 3px solid #ffd43b;
+  outline-offset: 2px;
+}
+
+.featuredBanner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .card {
@@ -143,11 +171,6 @@
   .nav {
     grid-template-columns: 1fr 1fr;
   }
-
-  .primary {
-    grid-column: 1 / -1;
-    min-height: 96px;
-  }
 }
 
 @media (max-width: 430px) {
@@ -170,23 +193,40 @@
   }
 
   .nav {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 9px;
   }
 
-  .primary {
-    grid-column: auto;
+  .card {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 86px;
+    padding: 10px;
   }
 
-  .card,
-  .primary {
-    min-height: 80px;
-    padding: 11px 12px;
+  .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 19px;
+  }
+
+  .card strong {
+    font-size: 12px;
+  }
+
+  .card p {
+    font-size: 9px;
+  }
+
+  .card > b {
+    font-size: 22px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .featuredBanner {
     transition: none;
   }
 }
