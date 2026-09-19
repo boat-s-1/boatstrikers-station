@@ -10,6 +10,7 @@ export async function GET(request){
   const date = searchParams.get("date");
   const course = searchParams.get("course");
   const raceNo = Number(searchParams.get("raceNo"));
+  const timing = searchParams.get("timing") === "after_exhibition" ? "after_exhibition" : "previous_day";
   const courseCode = STADIUMS.indexOf(course) + 1;
 
   if(!validDate(date) || courseCode < 1 || !Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12){
@@ -28,7 +29,7 @@ export async function GET(request){
     .eq("ranking_date",date)
     .eq("character_code","ichika")
     .eq("ranking_type","ichika_escape_best10")
-    .eq("data_timing","previous_day")
+    .eq("data_timing",timing)
     .eq("course_code",courseCode)
     .eq("race_no",raceNo)
     .maybeSingle();
@@ -43,7 +44,7 @@ export async function GET(request){
     .eq("course_code",courseCode)
     .eq("race_no",raceNo)
     .eq("character_code","ichika")
-    .eq("timing","previous_day")
+    .eq("timing",timing)
     .eq("source_table","ai_v2_daily_rankings")
     .eq("ranking_type","ichika_escape_best10")
     .eq("rank_no",ranking.rank_no)
@@ -70,7 +71,8 @@ export async function GET(request){
       unitStake:Number(prediction?.unit_stake || 0),
       investment:Number(prediction?.investment || 0),
       predictionLabel:prediction?.prediction_label || "",
-      publishedAt:prediction?.published_at || null
+      publishedAt:prediction?.published_at || null,
+      timing
     }
   });
 }
