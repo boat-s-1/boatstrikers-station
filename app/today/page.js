@@ -65,7 +65,16 @@ export default async function TodayPage(){
 
   return <main className={styles.page}>
     <section className={styles.hero}>
-      <div><span className={styles.kicker}>DAILY COMMAND CENTER</span><h1>BOATSTRIKERS TODAY</h1><p>{formatDate(displayDate)}</p></div>
+      <div className={styles.heroLead}>
+        <span className={styles.kicker}>DAILY COMMAND CENTER</span>
+        <h1 className={styles.srOnly}>BoatStrikers TODAY</h1>
+        <img
+          src="/todayrace.png"
+          alt="今日のレースを見る"
+          className={styles.heroBanner}
+        />
+        <p>{formatDate(displayDate)}</p>
+      </div>
       {(data.courses.length||grades.length||updateText)?<div className={styles.metrics}>{data.courses.length?<span><b>{data.courses.length}</b>開催場</span>:null}{grades.length?<span><b>{grades.length}</b>グレード戦</span>:null}{updateText?<span><b>{updateText}</b>データ更新</span>:null}</div>:null}
     </section>
 
