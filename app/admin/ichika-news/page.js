@@ -159,6 +159,10 @@ const DEFAULTS = {
   exhibition3: "伸びが良く、外からの一撃候補。",
   topExpression: "wink",
   topPose: "pointing",
+  aiTickets: [],
+  aiUnitStake: 0,
+  aiInvestment: 0,
+  aiRankNo: null,
   topNotes: "読者に向かって明るくアピール",
   mainExpression: "smile",
   mainPose: "hands_clasped",
@@ -168,6 +172,7 @@ const DEFAULTS = {
 export default function IchikaNewsAdmin() {
   const [v, setV] = useState(DEFAULTS);
   const [copied, setCopied] = useState("");
+  const [importState, setImportState] = useState({ status: "idle", message: "", source: "manual" });
 
   const prompt = useMemo(() => buildPrompt(v), [v]);
   const xPost = useMemo(() => buildXPost(v), [v]);
@@ -212,6 +217,42 @@ export default function IchikaNewsAdmin() {
     }
   }
 
+  async function loadAiPrediction() {
+    setImportState({ status: "loading", message: "一果の前日AI予想を確認しています…", source: "manual" });
+    try {
+      const qs = new URLSearchParams({ date: v.date, course: v.course, raceNo: v.raceNo });
+      const res = await fetch("/api/admin/ichika-news/prediction?" + qs.toString(), { cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || "load_failed");
+      if (!json.found) {
+        setImportState({ status: "empty", message: "このレースの一果・前日AI予想は見つかりませんでした。手動入力をそのまま使えます。", source: "manual" });
+        return;
+      }
+      const d = json.data;
+      const ticketText = (d.tickets || []).join(" / ");
+      setV((prev) => ({
+        ...prev,
+        edition: "previous_day",
+        escapeRate: d.escapeRate || prev.escapeRate,
+        honmeiBoat: "1",
+        honmeiTitle: "イン逃げで信頼度◎",
+        honmeiComment: ticketText ? "前日AI公式買い目は " + ticketText + "。1号艇の逃げを軸に狙う構成。" : prev.honmeiComment,
+        ichikaComment: d.socialComment || (d.escapeRate ? "前日AIではイン逃げ期待度" + d.escapeRate + "%。1号艇を中心に相手関係を見ていこう！" : prev.ichikaComment),
+        aiTickets: d.tickets || [],
+        aiUnitStake: d.unitStake || 0,
+        aiInvestment: d.investment || 0,
+        aiRankNo: d.rankNo || null,
+      }));
+      setImportState({ status: "loaded", message: (json.frozen ? "freeze済み前日AI予想" : "前日AI候補") + "を取得しました（BEST10 #" + d.rankNo + "）。取得後も手動修正できます。", source: json.frozen ? "ai_frozen" : "ai_candidate" });
+    } catch {
+      setImportState({ status: "error", message: "AI予想の取得に失敗しました。手動入力はそのまま利用できます。", source: "manual" });
+    }
+  }
+
+  function switchToManual() {
+    setImportState({ status: "idle", message: "手動入力モードです。", source: "manual" });
+  }
+
   async function copy(text, key) {
     try {
       await navigator.clipboard.writeText(text);
@@ -248,6 +289,13 @@ export default function IchikaNewsAdmin() {
               <label><span>日付</span><input type="date" value={v.date} onChange={(e) => set("date",e.target.value)} /></label>
               <label><span>場名</span><select value={v.course} onChange={(e) => set("course",e.target.value)}>{STADIUMS.map((s) => <option key={s}>{s}</option>)}</select></label>
               <label><span>レース</span><select value={v.raceNo} onChange={(e) => set("raceNo",e.target.value)}>{Array.from({length:12},(_,i) => <option key={i+1} value={String(i+1)}>{i+1}R</option>)}</select></label>
+            </div>
+
+            <div className={styles.importBox}>
+              <div><span>DATA SOURCE</span><strong>{importState.source === "ai_frozen" ? "🟢 AI前日公式予想" : importState.source === "ai_candidate" ? "🟡 AI前日候補" : "✏️ 手動入力"}</strong><p>日付・場・Rに一致する一果の前日AI予想を読み込み、取得後も手動で修正できます。</p></div>
+              <div className={styles.importActions}><button type="button" onClick={loadAiPrediction} disabled={importState.status === "loading"}>{importState.status === "loading" ? "確認中…" : "AI前日予想を読み込む"}</button><button type="button" className={styles.manualButton} onClick={switchToManual}>手動で編集</button></div>
+              {importState.message && <div className={styles.importMessage}>{importState.message}</div>}
+              {v.aiTickets?.length > 0 && <div className={styles.aiSnapshot}><b>取得した公式買い目</b><span>{v.aiTickets.join(" / ")}</span><small>1点 {v.aiUnitStake}円 ／ 投資 {v.aiInvestment}円</small></div>}
             </div>
 
             <label className={styles.full}><span>メインコピー</span><input value={v.mainCopy} onChange={(e) => set("mainCopy",e.target.value)} /></label>
