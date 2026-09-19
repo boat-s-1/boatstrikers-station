@@ -58,3 +58,62 @@ alter table public.bs_racers enable row level security;
 -- Internal master: direct browser access is intentionally disabled.
 revoke all on table public.bs_racers from public, anon, authenticated;
 grant all on table public.bs_racers to service_role;
+
+-- Return recent racers that do not yet have a canonical profile.
+-- SECURITY INVOKER keeps the caller's permissions; only service_role may execute.
+create or replace function public.bs_racer_sync_candidates(
+  p_recent_days integer default 90,
+  p_limit integer default 100
+)
+returns table (
+  racer_registration_no text,
+  racer_name text,
+  racer_name_kana text,
+  racer_branch text,
+  racer_class text,
+  gender text
+)
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  select
+    src.racer_registration_no,
+    src.racer_name,
+    src.racer_name_kana,
+    src.racer_branch,
+    src.racer_class,
+    src.gender
+  from (
+    select distinct on (e.racer_registration_no)
+      e.racer_registration_no,
+      e.racer_name,
+      e.racer_name_kana,
+      e.racer_branch,
+      e.racer_class,
+      e.gender,
+      e.race_date,
+      e.updated_at
+    from public.bs_race_entries e
+    where e.racer_registration_no is not null
+      and btrim(e.racer_registration_no) <> ''
+      and e.race_date >= current_date - greatest(p_recent_days, 1)
+    order by
+      e.racer_registration_no,
+      e.race_date desc,
+      e.updated_at desc nulls last
+  ) src
+  where not exists (
+    select 1
+    from public.bs_racers r
+    where r.registration_no = src.racer_registration_no
+  )
+  order by src.race_date desc, src.racer_registration_no
+  limit least(greatest(p_limit, 1), 500);
+$$;
+
+revoke all on function public.bs_racer_sync_candidates(integer, integer)
+  from public, anon, authenticated;
+grant execute on function public.bs_racer_sync_candidates(integer, integer)
+  to service_role;
