@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "./page.module.css";
 import NewsCandidatePicker from "../news-candidate-picker/NewsCandidatePicker";
+import NewspaperPublishingPanel from "../components/NewspaperPublishingPanel";
 
 const STADIUMS = [
   "桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江",
@@ -386,6 +387,7 @@ export default function IchikaNewsAdmin() {
           </aside>
         </div>
       </div>
+      <NewspaperPublishingPanel character="ichika" value={v} />
     </main>
   );
 }

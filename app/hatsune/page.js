@@ -3,6 +3,7 @@ import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
+import { getPublishedNewspapers } from "../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -90,6 +91,8 @@ function getRssImage(item, fallbackImage) {
 
 async function getHatsuneNewspaper() {
   try {
+    const [siteItem] = await getPublishedNewspapers({ character: "hatsune", limit: 1 });
+    if (siteItem) return { title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/hatsune-banner.jpg" };
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
     const item = feed.items.find((feedItem) => feedItem.title?.includes("【初音前日版】"));
@@ -134,7 +137,7 @@ export default async function HatsunePage() {
       <section className="sectionCard purpleCard">
         <img src="/top/IMG_7884.jpeg?v=20260901-0532" alt="初音新聞" className="homeTitleImage" />
         {newspaper ? (
-          <a href={newspaper.link} target="_blank" rel="noopener noreferrer" className="newsFeature">
+          <a href={newspaper.link} className="newsFeature">
             <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
             <div>
               <h3>{newspaper.title}</h3>
