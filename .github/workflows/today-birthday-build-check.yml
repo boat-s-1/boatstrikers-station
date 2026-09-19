@@ -1,0 +1,25 @@
+name: TODAY Birthday Build Check
+
+on:
+  pull_request:
+    paths:
+      - "app/today/**"
+      - "app/admin/sync/**"
+      - "app/api/admin/sync/racers/**"
+      - "supabase/migrations/20260919214500_add_today_birthday_racers_rpc.sql"
+      - ".github/workflows/today-birthday-build-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm install --ignore-scripts
+      - run: npm run build
