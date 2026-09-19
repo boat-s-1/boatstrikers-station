@@ -1,0 +1,53 @@
+name: Racer Profile Dry Run
+
+on:
+  pull_request:
+    paths:
+      - "scripts/sync-racer-profiles.mjs"
+      - "package.json"
+      - ".github/workflows/racer-profile-dry-run.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-profile-dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        registration_no:
+          - "4296"
+          - "3546"
+          - "5322"
+          - "3544"
+          - "3950"
+          - "3889"
+          - "5444"
+          - "3660"
+          - "3543"
+          - "4120"
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Parse BOAT RACE official profile without DB writes
+        run: npm run racers:sync -- --registration-no=${{ matrix.registration_no }}
+
+      - name: Confirm dry-run safety
+        run: |
+          echo "Profile ${{ matrix.registration_no }} parsed in dry-run mode."
+          echo "No --write flag was used."
+          echo "No Supabase credentials were supplied."
