@@ -27,14 +27,20 @@ if (!Number.isInteger(recentDays) || recentDays < 1 || recentDays > 3650) {
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const needsSupabase = write || !requestedRegistrationNo;
 
-if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+if (needsSupabase && (!supabaseUrl || !serviceRoleKey)) {
+  throw new Error(
+    'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for batch mode or --write',
+  );
 }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const supabase =
+  supabaseUrl && serviceRoleKey
+    ? createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
 
 function decodeHtml(value) {
   return value
@@ -108,18 +114,20 @@ function parseProfile(html, fallback = {}) {
   }
 
   const officialRegistrationNo = normalizeOfficialRegistrationNo(registration);
-  const header = lines.find((line) => line.includes('（出場予定）'));
-  const headerName = header?.replace(/（出場予定）.*$/, '').trim() ?? null;
+  const header = lines.find((line) => /（[^）]*出場予定[^）]*）/.test(line));
+  const headerName = header?.replace(/（[^）]*出場予定[^）]*）.*$/, '').trim() ?? null;
 
-  const name =
-    compactName(fallback.racer_name) ||
-    compactName(headerName);
+  const name = compactName(fallback.racer_name) || compactName(headerName);
 
   if (!name) {
     throw new Error(`Could not determine racer name for ${officialRegistrationNo}`);
   }
 
   const birthday = parseBirthday(valueAfterLabel(lines, '生年月日'));
+  if (!birthday) {
+    throw new Error(`Official profile did not contain a valid 生年月日 for ${officialRegistrationNo}`);
+  }
+
   const heightCm = parseInteger(valueAfterLabel(lines, '身長'));
   const weightKg = parseNumber(valueAfterLabel(lines, '体重'));
   const bloodType = valueAfterLabel(lines, '血液型')?.replace(/型$/, '') ?? null;
@@ -170,70 +178,60 @@ async function fetchOfficialProfile(registrationNo, fallback) {
   return parseProfile(await response.text(), fallback);
 }
 
-async function loadCandidates() {
-  if (requestedRegistrationNo) {
-    const registrationNo = toBoatStrikersRegistrationNo(requestedRegistrationNo);
-    const { data, error } = await supabase
-      .from('bs_race_entries')
-      .select('racer_registration_no,racer_name,racer_name_kana,racer_branch,racer_class,gender')
-      .eq('racer_registration_no', registrationNo)
-      .order('race_date', { ascending: false })
-      .limit(1);
+async function loadManualCandidate(registrationNo) {
+  const normalized = toBoatStrikersRegistrationNo(registrationNo);
 
-    if (error) throw error;
-
-    return [
-      data?.[0] ?? {
-        racer_registration_no: registrationNo,
-        racer_name: null,
-        racer_name_kana: null,
-        racer_branch: null,
-        racer_class: null,
-        gender: null,
-      },
-    ];
+  if (!supabase) {
+    return {
+      racer_registration_no: normalized,
+      racer_name: null,
+      racer_name_kana: null,
+      racer_branch: null,
+      racer_class: null,
+      gender: null,
+    };
   }
-
-  const cutoff = new Date();
-  cutoff.setUTCDate(cutoff.getUTCDate() - recentDays);
-  const cutoffDate = cutoff.toISOString().slice(0, 10);
 
   const { data, error } = await supabase
     .from('bs_race_entries')
-    .select('racer_registration_no,racer_name,racer_name_kana,racer_branch,racer_class,gender,race_date')
-    .gte('race_date', cutoffDate)
-    .not('racer_registration_no', 'is', null)
+    .select(
+      'racer_registration_no,racer_name,racer_name_kana,racer_branch,racer_class,gender',
+    )
+    .eq('racer_registration_no', normalized)
     .order('race_date', { ascending: false })
-    .limit(10000);
+    .limit(1);
 
   if (error) throw error;
 
-  const latestByRegistration = new Map();
-  for (const row of data ?? []) {
-    if (!row.racer_registration_no) continue;
-    if (!latestByRegistration.has(row.racer_registration_no)) {
-      latestByRegistration.set(row.racer_registration_no, row);
+  return (
+    data?.[0] ?? {
+      racer_registration_no: normalized,
+      racer_name: null,
+      racer_name_kana: null,
+      racer_branch: null,
+      racer_class: null,
+      gender: null,
     }
+  );
+}
+
+async function loadCandidates() {
+  if (requestedRegistrationNo) {
+    return [await loadManualCandidate(requestedRegistrationNo)];
   }
 
-  const registrations = [...latestByRegistration.keys()];
-  const { data: existing, error: existingError } = await supabase
-    .from('bs_racers')
-    .select('registration_no')
-    .in('registration_no', registrations);
+  const { data, error } = await supabase.rpc('bs_racer_sync_candidates', {
+    p_recent_days: recentDays,
+    p_limit: limit,
+  });
 
-  // Before the migration is applied, dry-run can still be used with
-  // --registration-no. For batch mode, the master table must exist.
-  if (existingError) {
+  if (error) {
     throw new Error(
-      `Could not read bs_racers. Apply the migration in a non-production test environment first, or use --registration-no for parser dry-run. ${existingError.message}`,
+      `Could not load sync candidates. Apply the bs_racers migration in a non-production test environment first. ${error.message}`,
     );
   }
 
-  const existingSet = new Set((existing ?? []).map((row) => row.registration_no));
-  return [...latestByRegistration.values()]
-    .filter((row) => !existingSet.has(row.racer_registration_no))
-    .slice(0, limit);
+  return data ?? [];
 }
 
 async function main() {
@@ -269,6 +267,7 @@ async function main() {
           JSON.stringify(
             {
               registration_no: profile.registration_no,
+              official_registration_no: profile.official_registration_no,
               name: profile.name,
               birthday: profile.birthday,
               branch: profile.branch,
