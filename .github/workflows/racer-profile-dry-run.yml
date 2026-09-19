@@ -1,6 +1,13 @@
 name: Racer Profile Dry Run
 
 on:
+  push:
+    branches:
+      - "feat/racer-birthday-master"
+    paths:
+      - "scripts/sync-racer-profiles.mjs"
+      - "package.json"
+      - ".github/workflows/racer-profile-dry-run.yml"
   pull_request:
     paths:
       - "scripts/sync-racer-profiles.mjs"
