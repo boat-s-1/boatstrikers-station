@@ -59,6 +59,7 @@ const GROUPS = [
     items: [
       { href: "/admin/members", icon: "👥", title: "会員管理", text: "登録会員・β会員・メール確認・LINE連携を確認" },
       { href: "/admin/discord-replies", icon: "💬", title: "Discord運営", text: "キャラ質問への返信・実況スレッドへの投稿を管理" },
+      { href: "/admin/sync", icon: "🎂", title: "選手マスタ・誕生日管理", text: "選手プロフィール・生年月日を公式情報から同期してTODAYの誕生日表示を更新" },
       { href: "/admin/sync", icon: "🔄", title: "同期管理", text: "AutoSync・結果・展示データの状態を確認" },
     ],
   },
