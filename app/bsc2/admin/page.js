@@ -1,4 +1,5 @@
 "use client";
+import { startVisiblePolling } from "../../lib/visiblePolling";
 
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
@@ -146,12 +147,12 @@ export default function AiControlCenterV14() {
         readJson(await fetch("/api/bsc2/ai-control/status", { headers: { "x-bsc-ai-key": adminKey }, cache: "no-store" }), "状態取得に失敗しました"),
       ]);
       setJobs(jobsBody.jobs || []); setEvents(jobsBody.events || []); setSummary(jobsBody.summary || null); setSystemStatus(statusBody);
-      if (!selectedJobId && jobsBody.jobs?.length) setSelectedJobId(jobsBody.jobs[0].id);
+      if (jobsBody.jobs?.length) setSelectedJobId(current => current || jobsBody.jobs[0].id);
     } catch (e) { setError(e.message || "取得に失敗しました"); }
     finally { setLoading(false); }
-  }, [adminKey, selectedJobId]);
+  }, [adminKey]);
 
-  useEffect(() => { if (!adminKey) return; loadData(); const timer = setInterval(loadData, 5000); return () => clearInterval(timer); }, [adminKey, loadData]);
+  useEffect(() => { if (!adminKey) return; return startVisiblePolling(loadData, 5000); }, [adminKey, loadData]);
 
   async function action(jobId, name) {
     try {
