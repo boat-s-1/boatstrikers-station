@@ -62,7 +62,7 @@ function parseProfile(html,fallback){
   };
 }
 
-async function fetchProfile(candidate){
+async function fetchProfileOnce(candidate){
   const official=digits(candidate.racer_registration_no);
   const url=`${PROFILE_BASE}?toban=${official}`;
   const controller=new AbortController();
@@ -76,6 +76,21 @@ async function fetchProfile(candidate){
     if(!res.ok)throw new Error(`official_http_${res.status}`);
     return parseProfile(await res.text(),candidate);
   }finally{clearTimeout(timer);}
+}
+
+async function fetchProfile(candidate){
+  try{
+    return await fetchProfileOnce(candidate);
+  }catch(firstError){
+    await sleep(800);
+    try{
+      return await fetchProfileOnce(candidate);
+    }catch(secondError){
+      const first=firstError instanceof Error?firstError.message:String(firstError);
+      const second=secondError instanceof Error?secondError.message:String(secondError);
+      throw new Error(`retry_failed: ${first} -> ${second}`);
+    }
+  }
 }
 
 export async function POST(request){
@@ -94,20 +109,35 @@ export async function POST(request){
 
   const synced=[];
   const failed=[];
-  for(const candidate of candidates||[]){
-    try{
-      const profile=await fetchProfile(candidate);
-      const {error}=await db.from("bs_racers").upsert(profile,{onConflict:"registration_no"});
-      if(error)throw error;
-      synced.push({registration_no:profile.registration_no,name:profile.name,birthday:profile.birthday});
-    }catch(error){
-      failed.push({
-        registration_no:candidate.racer_registration_no,
-        name:candidate.racer_name,
-        error:error instanceof Error?error.message:String(error),
-      });
+  const queue=candidates||[];
+  for(let i=0;i<queue.length;i+=2){
+    const chunk=queue.slice(i,i+2);
+    const results=await Promise.all(chunk.map(async(candidate)=>{
+      try{
+        const profile=await fetchProfile(candidate);
+        const {error}=await db.from("bs_racers").upsert(profile,{onConflict:"registration_no"});
+        if(error)throw error;
+        return {ok:true,profile};
+      }catch(error){
+        return {
+          ok:false,
+          candidate,
+          error:error instanceof Error?error.message:String(error),
+        };
+      }
+    }));
+    for(const result of results){
+      if(result.ok){
+        synced.push({registration_no:result.profile.registration_no,name:result.profile.name,birthday:result.profile.birthday});
+      }else{
+        failed.push({
+          registration_no:result.candidate.racer_registration_no,
+          name:compact(result.candidate.racer_name)||result.candidate.racer_registration_no,
+          error:result.error,
+        });
+      }
     }
-    await sleep(180);
+    if(i+2<queue.length)await sleep(250);
   }
 
   const {count}=await db.from("bs_racers").select("registration_no",{count:"exact",head:true});
