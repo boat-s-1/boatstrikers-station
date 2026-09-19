@@ -31,14 +31,15 @@ function latestCourseSync(courses){const values=(courses||[]).flatMap(c=>[c.sync
 async function loadTodayData(date){
   const client=db();
   const coursesPromise=getCoursesByDate(date).catch(()=>[]);
-  if(!client){const courses=await coursesPromise;return {courses,rankings:[],grades:[],updatedAt:latestCourseSync(courses)};}
-  const [courses,rank,grade]=await Promise.all([
+  if(!client){const courses=await coursesPromise;return {courses,rankings:[],grades:[],birthdays:[],updatedAt:latestCourseSync(courses)};}
+  const [courses,rank,grade,birthday]=await Promise.all([
     coursesPromise,
     client.from("ai_v2_daily_rankings").select("ranking_type,rank_no,course_code,race_no,selected_for_home,data_timing").eq("ranking_date",date).in("ranking_type",CHARACTERS.flatMap(x=>x.types)).in("data_timing",["previous_day","after_exhibition"]).order("rank_no"),
     client.from("bs_grade_race_events").select("start_date,end_date,course_code,grade,title").lte("start_date",date).gte("end_date",date).order("course_code"),
+    client.rpc("bs_today_birthday_racers",{p_date:date}),
   ]);
   const safeCourses=Array.isArray(courses)?courses:[];
-  return {courses:safeCourses,rankings:rank.data||[],grades:grade.data||[],updatedAt:latestCourseSync(safeCourses)};
+  return {courses:safeCourses,rankings:rank.data||[],grades:grade.data||[],birthdays:birthday.data||[],updatedAt:latestCourseSync(safeCourses)};
 }
 
 function characterPicks(rows,character){
@@ -62,6 +63,13 @@ export default async function TodayPage(){
   const gradeLabels=new Set(["SG","PG1","G1","G2","G3"]);
   const grades=data.grades.filter(x=>gradeLabels.has(String(x.grade||"").toUpperCase()));
   const updateText=data.updatedAt?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"}).format(new Date(data.updatedAt)):null;
+  const birthdayMap=new Map();
+  for(const row of data.birthdays||[]){
+    const key=row.registration_no;
+    if(!birthdayMap.has(key))birthdayMap.set(key,{...row,races:[]});
+    birthdayMap.get(key).races.push({course_code:row.course_code,race_no:row.race_no,boat_no:row.boat_no});
+  }
+  const birthdayRacers=[...birthdayMap.values()];
 
   return <main className={styles.page}>
     <section className={styles.hero}>
@@ -82,6 +90,16 @@ export default async function TodayPage(){
       <div className={styles.heading}><div><small>TODAY'S STADIUMS</small><h2>今日の開催場</h2></div><Link href={`/races?date=${displayDate}`}>全場を見る ›</Link></div>
       {data.courses.length?<div className={styles.courseGrid}>{data.courses.map(c=><Link className={styles.course} key={c.courseCode} href={`/races/${Number(c.courseCode)}?date=${displayDate}`}><span>#{String(c.courseCode).padStart(2,"0")}</span><strong>{c.courseName||COURSE_NAMES[Number(c.courseCode)]}</strong>{Number(c.resultCount||0)>0?<small>{Number(c.resultCount)}/{Number(c.raceCount||12)}R 結果取得</small>:null}</Link>)}</div>:<p className={styles.empty}>本日の開催場データはまだありません。</p>}
     </section>
+
+    {birthdayRacers.length?<section className={styles.section}>
+      <div className={styles.heading}><div><small>TODAY'S BIRTHDAYS</small><h2>🎂 今日の誕生日レーサー</h2></div></div>
+      <div className={styles.birthdayGrid}>{birthdayRacers.map(r=><article className={styles.birthdayCard} key={r.registration_no}>
+        <div className={styles.birthdayHead}><div><strong>{r.name}</strong><small>登録 {Number(r.registration_no)} / {r.branch||"支部未登録"} / {r.racer_class||"-"}</small></div><span>{Number(r.birthday?.slice(5,7))}/{Number(r.birthday?.slice(8,10))}</span></div>
+        <div className={styles.birthdayRaces}>{r.races.map((race,i)=><Link key={`${race.course_code}-${race.race_no}-${i}`} href={raceHref(race.course_code,race.race_no,displayDate)}>
+          <span>{COURSE_NAMES[Number(race.course_code)]} {Number(race.race_no)}R</span><small>{Number(race.boat_no)}号艇</small><b>見る →</b>
+        </Link>)}</div>
+      </article>)}</div>
+    </section>:null}
 
     <section className={styles.section}>
       <div className={styles.heading}><div><small>CHARACTER PICKS</small><h2>今日の注目レース</h2></div></div>
