@@ -145,6 +145,14 @@ const SOURCES=[
   {type:"hatsune_inner_break",table:"bs_hatsune_womens_inner_break_alerts",channel:"DISCORD_HATSUNE_CHANNEL_ID",roleKey:"hatsune",select:"id,race_date,course_code,course_name,race_no,closing_time,danger_level,exhibition_advantage,lap_advantage,detected_at",build:a=>`🌸 **初音｜女子イン崩れアラート**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n${hatsuneInnerLine(a)}\n${raceLink(a)}`},
   {type:"hatsune_box",table:"bs_hatsune_box_alerts",channel:"DISCORD_HATSUNE_CHANNEL_ID",roleKey:"hatsune",select:"id,race_date,course_code,course_name,race_no,closing_time,box_234_rating,box_235_rating,box_345_rating,detected_at",build:a=>`🎀 **初音｜箱推し理論成立**\n${a.course_name} ${a.race_no}R｜〆切 ${closeText(a)}\n${hatsuneBoxLine(a)}\n${raceLink(a)}`},
 ];
+
+const QUALITY_SOURCE={
+  type:"race_data_quality",
+  build:a=>{
+    const missing=Array.isArray(a.missing_fields)&&a.missing_fields.length?a.missing_fields.join(", "):"unknown";
+    return `🚨 **管理者向け｜レースデータ欠損**\n${a.course_name||a.course_code} ${a.race_no}R（${a.race_date}）\n欠損: ${missing}\nhttps://www.boat-strike.online/admin/alerts`;
+  },
+};
 async function alreadySent(admin,type,alertId,channelKey){const {data,error}=await admin.from("bs_discord_notification_deliveries").select("id,sent_at").eq("alert_type",type).eq("alert_id",alertId).eq("channel_key",channelKey).maybeSingle();if(error)throw error;return Boolean(data?.sent_at);}
 async function deliver(admin,source,alert,channelKey,channelId,roleId){
   if(!channelId)return {skipped:true};
@@ -164,6 +172,22 @@ export async function GET(request){
   const admin=getAdminClient();const raceDate=jstToday();const allChannel=process.env.DISCORD_ALL_ALERTS_CHANNEL_ID;const summary={raceDate,sent:0,failed:0,skipped:0};
   try{
     const roles=await ensureNotificationRoles();
+    const adminChannel=process.env.DISCORD_ADMIN_ALERTS_CHANNEL_ID||allChannel;
+    if(adminChannel){
+      const {data:qualityAlerts,error:qualityError}=await admin
+        .from("bs_race_data_quality_alerts")
+        .select("id,race_date,course_code,course_name,race_no,missing_fields,last_detected_at")
+        .eq("race_date",raceDate)
+        .eq("severity","critical")
+        .eq("status","active")
+        .order("last_detected_at",{ascending:true})
+        .limit(100);
+      if(qualityError)throw qualityError;
+      for(const alert of qualityAlerts||[]){
+        const result=await deliver(admin,QUALITY_SOURCE,alert,"admin",adminChannel,null);
+        if(result.sent)summary.sent+=1;else if(result.error)summary.failed+=1;else summary.skipped+=1;
+      }
+    }
     for(const source of SOURCES){
       const {data:alerts,error}=await admin.from(source.table).select(source.select).eq("race_date",raceDate).order("detected_at",{ascending:true}).limit(100);if(error)throw error;
       for(const rawAlert of alerts||[]){
