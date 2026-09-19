@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "./page.module.css";
+import NewsCandidatePicker from "../news-candidate-picker/NewsCandidatePicker";
 
 const STADIUMS = ["桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江","尼崎","鳴門","丸亀","児島","宮島","徳山","下関","若松","芦屋","福岡","唐津","大村"];
 
@@ -167,11 +168,13 @@ export default function KiinaNewsAdmin() {
     setV((prev) => ({...prev,scores:{...prev.scores,[boat]:clampScore(value)}}));
   }
 
-  async function loadAiPrediction() {
+  async function loadAiPrediction(target = null) {
     setImportState({status:"loading",message:"キイナのAI予想を確認しています…",source:"manual"});
     try {
       const timing = v.edition === "just_before" ? "after_exhibition" : "previous_day";
-      const qs = new URLSearchParams({date:v.date,course:v.course,raceNo:v.raceNo,timing});
+      const course = target?.courseName || v.course;
+      const raceNo = String(target?.raceNo || v.raceNo);
+      const qs = new URLSearchParams({date:v.date,course,raceNo,timing});
       const res = await fetch("/api/admin/kiina-news/prediction?" + qs.toString(), {cache:"no-store"});
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "load_failed");
@@ -182,6 +185,8 @@ export default function KiinaNewsAdmin() {
       const d = json.data;
       setV((prev) => ({
         ...prev,
+        course,
+        raceNo,
         holeBoat: d.holeBoat || prev.holeBoat,
         holeChance: d.chance || prev.holeChance,
         kiinaComment: d.socialComment || (d.chance ? "AIでは" + d.holeBoat + "号艇の穴期待度が" + d.chance + "%。展開がハマれば一発に期待！" : prev.kiinaComment),
@@ -232,6 +237,8 @@ export default function KiinaNewsAdmin() {
               <label><span>場名</span><select value={v.course} onChange={(e)=>set("course",e.target.value)}>{STADIUMS.map((s)=><option key={s}>{s}</option>)}</select></label>
               <label><span>レース</span><select value={v.raceNo} onChange={(e)=>set("raceNo",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}R</option>)}</select></label>
             </div>
+
+            <NewsCandidatePicker character="kiina" date={v.date} edition={v.edition} onSelect={loadAiPrediction} />
 
             <div className={styles.importBox}>
               <div><span>DATA SOURCE</span><strong>{importState.source==="ai_frozen"?"🟢 AI公式予想":importState.source==="ai_candidate"?"🟡 AI候補":"✏️ 手動入力"}</strong><p>選択中の版に合わせて、前日版は前日AI、直前版は展示後AIを読み込みます。</p></div>

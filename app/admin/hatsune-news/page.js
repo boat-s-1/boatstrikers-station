@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "./page.module.css";
+import NewsCandidatePicker from "../news-candidate-picker/NewsCandidatePicker";
 
 const STADIUMS = ["桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江","尼崎","鳴門","丸亀","児島","宮島","徳山","下関","若松","芦屋","福岡","唐津","大村"];
 
@@ -167,11 +168,13 @@ export default function HatsuneNewsAdmin(){
   function setScore(boat,value){ setV((prev)=>({...prev,scores:{...prev.scores,[boat]:clampScore(value)}})); }
   function setCheckpoint(index,value){ setV((prev)=>({...prev,checkpoints:prev.checkpoints.map((x,i)=>i===index?value:x)})); }
 
-  async function loadAiPrediction(){
+  async function loadAiPrediction(target = null){
     setImportState({status:"loading",message:"初音のAI予想を確認しています…",source:"manual"});
     try{
       const timing = v.edition === "just_before" ? "after_exhibition" : "previous_day";
-      const qs = new URLSearchParams({date:v.date,course:v.course,raceNo:v.raceNo,timing});
+      const course = target?.courseName || v.course;
+      const raceNo = String(target?.raceNo || v.raceNo);
+      const qs = new URLSearchParams({date:v.date,course,raceNo,timing});
       const res = await fetch("/api/admin/hatsune-news/prediction?"+qs.toString(),{cache:"no-store"});
       const json = await res.json();
       if(!res.ok || !json.ok) throw new Error(json.error||"load_failed");
@@ -182,6 +185,8 @@ export default function HatsuneNewsAdmin(){
       const d = json.data;
       setV((prev)=>({
         ...prev,
+        course,
+        raceNo,
         expectation:d.expectation||prev.expectation,
         aiCategory:d.category||"",
         comment:d.socialComment || (d.category === "インが不安"
@@ -232,6 +237,8 @@ export default function HatsuneNewsAdmin(){
               <label><span>場名</span><select value={v.course} onChange={(e)=>set("course",e.target.value)}>{STADIUMS.map((s)=><option key={s}>{s}</option>)}</select></label>
               <label><span>レース</span><select value={v.raceNo} onChange={(e)=>set("raceNo",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}R</option>)}</select></label>
             </div>
+
+            <NewsCandidatePicker character="hatsune" date={v.date} edition={v.edition} onSelect={loadAiPrediction} />
 
             <div className={styles.importBox}>
               <div><span>DATA SOURCE</span><strong>{importState.source==="ai_frozen"?"🟣 AI公式予想":importState.source==="ai_candidate"?"🟪 AI候補":"✏️ 手動入力"}</strong><p>前日版は前日AI、直前版は展示後AIを読み込みます。「イン逃げが圧倒的 / インが不安」も自動判定します。</p></div>

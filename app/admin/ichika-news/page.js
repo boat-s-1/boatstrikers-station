@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "./page.module.css";
+import NewsCandidatePicker from "../news-candidate-picker/NewsCandidatePicker";
 
 const STADIUMS = [
   "桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江",
@@ -217,10 +218,13 @@ export default function IchikaNewsAdmin() {
     }
   }
 
-  async function loadAiPrediction() {
+  async function loadAiPrediction(target = null) {
     setImportState({ status: "loading", message: "一果の前日AI予想を確認しています…", source: "manual" });
     try {
-      const qs = new URLSearchParams({ date: v.date, course: v.course, raceNo: v.raceNo });
+      const course = target?.courseName || v.course;
+      const raceNo = String(target?.raceNo || v.raceNo);
+      const timing = v.edition === "just_before" ? "after_exhibition" : "previous_day";
+      const qs = new URLSearchParams({ date: v.date, course, raceNo, timing });
       const res = await fetch("/api/admin/ichika-news/prediction?" + qs.toString(), { cache: "no-store" });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "load_failed");
@@ -232,7 +236,8 @@ export default function IchikaNewsAdmin() {
       const ticketText = (d.tickets || []).join(" / ");
       setV((prev) => ({
         ...prev,
-        edition: "previous_day",
+        course,
+        raceNo,
         escapeRate: d.escapeRate || prev.escapeRate,
         honmeiBoat: "1",
         honmeiTitle: "イン逃げで信頼度◎",
@@ -243,7 +248,7 @@ export default function IchikaNewsAdmin() {
         aiInvestment: d.investment || 0,
         aiRankNo: d.rankNo || null,
       }));
-      setImportState({ status: "loaded", message: (json.frozen ? "freeze済み前日AI予想" : "前日AI候補") + "を取得しました（BEST10 #" + d.rankNo + "）。取得後も手動修正できます。", source: json.frozen ? "ai_frozen" : "ai_candidate" });
+      setImportState({ status: "loaded", message: (json.frozen ? "freeze済み公式予想" : "AI候補") + "を取得しました（BEST10 #" + d.rankNo + "）。取得後も手動修正できます。", source: json.frozen ? "ai_frozen" : "ai_candidate" });
     } catch {
       setImportState({ status: "error", message: "AI予想の取得に失敗しました。手動入力はそのまま利用できます。", source: "manual" });
     }
@@ -291,9 +296,11 @@ export default function IchikaNewsAdmin() {
               <label><span>レース</span><select value={v.raceNo} onChange={(e) => set("raceNo",e.target.value)}>{Array.from({length:12},(_,i) => <option key={i+1} value={String(i+1)}>{i+1}R</option>)}</select></label>
             </div>
 
+            <NewsCandidatePicker character="ichika" date={v.date} edition={v.edition} onSelect={loadAiPrediction} />
+
             <div className={styles.importBox}>
-              <div><span>DATA SOURCE</span><strong>{importState.source === "ai_frozen" ? "🟢 AI前日公式予想" : importState.source === "ai_candidate" ? "🟡 AI前日候補" : "✏️ 手動入力"}</strong><p>日付・場・Rに一致する一果の前日AI予想を読み込み、取得後も手動で修正できます。</p></div>
-              <div className={styles.importActions}><button type="button" onClick={loadAiPrediction} disabled={importState.status === "loading"}>{importState.status === "loading" ? "確認中…" : "AI前日予想を読み込む"}</button><button type="button" className={styles.manualButton} onClick={switchToManual}>手動で編集</button></div>
+              <div><span>DATA SOURCE</span><strong>{importState.source === "ai_frozen" ? "🟢 AI公式予想" : importState.source === "ai_candidate" ? "🟡 AI候補" : "✏️ 手動入力"}</strong><p>前日版は前日AI、直前版は展示後AIを読み込み、取得後も手動で修正できます。</p></div>
+              <div className={styles.importActions}><button type="button" onClick={loadAiPrediction} disabled={importState.status === "loading"}>{importState.status === "loading" ? "確認中…" : "AI予想を読み込む"}</button><button type="button" className={styles.manualButton} onClick={switchToManual}>手動で編集</button></div>
               {importState.message && <div className={styles.importMessage}>{importState.message}</div>}
               {v.aiTickets?.length > 0 && <div className={styles.aiSnapshot}><b>取得した公式買い目</b><span>{v.aiTickets.join(" / ")}</span><small>1点 {v.aiUnitStake}円 ／ 投資 {v.aiInvestment}円</small></div>}
             </div>
