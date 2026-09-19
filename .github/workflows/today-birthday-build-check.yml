@@ -1,6 +1,9 @@
 name: TODAY Birthday Build Check
 
 on:
+  push:
+    branches:
+      - "feat/today-racer-birthdays"
   pull_request:
     paths:
       - "app/today/**"
