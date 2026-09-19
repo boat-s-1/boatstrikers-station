@@ -126,14 +126,16 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
     </div>
 
-    <a className={styles.todayEntry} href="/today" aria-label="BoatStrikers TODAY 今日のレースを見る">
-      <span className={styles.todayEntryIcon} aria-hidden="true">⚡</span>
-      <span className={styles.todayEntryBody}>
-        <small>BOATSTRIKERS TODAY</small>
-        <strong>今日のレースを見る</strong>
-        <em>開催場・注目レース・グレード戦をまとめてチェック</em>
-      </span>
-      <b aria-hidden="true">›</b>
+    <a
+      className={styles.todayEntryImageLink}
+      href="/today"
+      aria-label="BoatStrikers TODAY 今日のレースを見る"
+    >
+      <img
+        className={styles.todayEntryImage}
+        src="/todayrace.png"
+        alt="BoatStrikers TODAY 今日のレースを見る"
+      />
     </a>
   </section>;
 }
