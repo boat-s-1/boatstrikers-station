@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "../../../../../admin/sync/_lib/adminAuth";
-import { getAdminSupabase } from "../../../../../admin/sync/_lib/supabaseAdmin";
+import { isAdminAuthenticated } from "../../../../admin/sync/_lib/adminAuth";
+import { getAdminSupabase } from "../../../../admin/sync/_lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
