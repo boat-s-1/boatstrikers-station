@@ -100,16 +100,18 @@ export async function POST(request){
   const requested=Number(body?.limit??5);
   const limit=Number.isInteger(requested)?Math.min(Math.max(requested,1),10):5;
   const recentDays=14;
+  const excluded=new Set(Array.isArray(body?.exclude)?body.exclude.map(v=>String(v||"").trim()).filter(v=>/^\d{5}$/.test(v)).slice(0,100):[]);
   const db=getAdminSupabase();
 
+  const candidateLimit=Math.min(limit+excluded.size,100);
   const {data:candidates,error:candidateError}=await db.rpc("bs_racer_sync_candidates",{
-    p_recent_days:recentDays,p_limit:limit,
+    p_recent_days:recentDays,p_limit:candidateLimit,
   });
   if(candidateError)return NextResponse.json({error:candidateError.message},{status:500});
 
   const synced=[];
   const failed=[];
-  const queue=candidates||[];
+  const queue=(candidates||[]).filter(x=>!excluded.has(x.racer_registration_no)).slice(0,limit);
   for(let i=0;i<queue.length;i+=2){
     const chunk=queue.slice(i,i+2);
     const results=await Promise.all(chunk.map(async(candidate)=>{
@@ -144,7 +146,7 @@ export async function POST(request){
   return NextResponse.json({
     ok:failed.length===0,
     requested:limit,
-    candidates:(candidates||[]).length,
+    candidates:queue.length,
     synced:synced.length,
     failed,
     total_profiles:count||0,
