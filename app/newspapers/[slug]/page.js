@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getPublishedNewspaper } from "../../../lib/newspapers";
 import { NEWSPAPER_CHARACTERS } from "../../../lib/newspaperContent";
 import NewspaperAnalytics from "../NewspaperAnalytics";
 import styles from "../newspapers.module.css";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const getNewspaperCached = cache(getPublishedNewspaper);
 
 function renderBody(body) {
   const blocks = String(body || "").split(/\n\n+/).filter(Boolean);
@@ -13,13 +17,13 @@ function renderBody(body) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params; const item = await getPublishedNewspaper(slug);
+  const { slug } = await params; const item = await getNewspaperCached(decodeURIComponent(slug));
   if (!item) return { title: "新聞が見つかりません｜BoatStrikers" };
   return { title: `${item.title}｜BoatStrikers`, description: item.summary || `${item.course_name}${item.race_no}Rの予想新聞` };
 }
 
 export default async function NewspaperDetailPage({ params }) {
-  const { slug } = await params; const item = await getPublishedNewspaper(slug); if (!item) notFound();
+  const { slug } = await params; const item = await getNewspaperCached(decodeURIComponent(slug)); if (!item) notFound();
   const character = NEWSPAPER_CHARACTERS[item.character_key] || NEWSPAPER_CHARACTERS.ichika;
   return <main className={styles.page}><article className={styles.article}>
     <NewspaperAnalytics slug={item.slug} character={item.character_key} edition={item.edition} />
