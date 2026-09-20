@@ -300,3 +300,89 @@
   .related{padding:15px}
   .relatedHead{align-items:flex-start;flex-direction:column}
 }
+
+
+/* =========================================================
+   Newspaper ↔ race / edition bridge
+========================================================= */
+.raceBridge,
+.editionBridge{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:16px 0;
+  padding:16px;
+  border:1px solid var(--paper-border);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(30,48,68,.06);
+}
+.raceBridgeMain span,
+.editionBridge span{
+  display:block;
+  margin-bottom:4px;
+  color:var(--paper-accent);
+  font-size:8px;
+  font-weight:1000;
+  letter-spacing:.14em;
+}
+.raceBridgeMain strong,
+.editionBridge strong{
+  display:block;
+  color:var(--paper-ink);
+  font-size:15px;
+}
+.raceBridgeMain p,
+.editionBridge p{
+  margin:5px 0 0;
+  color:#71808f;
+  font-size:11px;
+  line-height:1.6;
+}
+.raceBridgeButton,
+.editionBridge a{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:0 13px;
+  border-radius:12px;
+  background:var(--paper-accent-strong);
+  color:#fff;
+  text-decoration:none;
+  font-size:11px;
+  font-weight:1000;
+}
+.theme_kiina .raceBridgeButton,
+.theme_kiina .editionBridge a{
+  background:#171717;
+  color:#fff;
+}
+.editionBridgeUpdate{
+  border-width:2px;
+  background:
+    radial-gradient(circle at 100% 0,var(--paper-chip),transparent 140px),
+    #fff;
+}
+.editionBridgeUpdate strong{
+  color:var(--paper-accent-strong);
+}
+.raceAction{
+  grid-column:1 / -1;
+  background:var(--paper-soft);
+  color:var(--paper-accent-strong);
+  border:1px solid var(--paper-border);
+}
+@media(max-width:620px){
+  .raceBridge,
+  .editionBridge{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .raceBridgeButton,
+  .editionBridge a{
+    width:100%;
+  }
+}
