@@ -11,6 +11,8 @@ on:
       - "app/api/admin/sync/racers/**"
       - "app/api/cron/racer-master-sync/**"
       - "vercel.json"
+      - "lib/racer-profile-sync.js"
+      - "tests/racer-master-sync.test.mjs"
       - "supabase/migrations/20260921021500_add_racer_sync_queue.sql"
       - "supabase/migrations/20260919214500_add_today_birthday_racers_rpc.sql"
       - ".github/workflows/today-birthday-build-check.yml"
@@ -28,6 +30,8 @@ jobs:
         with:
           node-version: "24"
       - run: npm install --ignore-scripts
+      - name: Racer sync regression tests
+        run: node --experimental-vm-modules --test tests/racer-master-sync.test.mjs
       - name: Build
         run: npm run build
         env:
