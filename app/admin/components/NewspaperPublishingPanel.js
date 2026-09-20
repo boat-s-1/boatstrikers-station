@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { buildNewspaperChannels, newspaperSlug } from "../../../lib/newspaperContent";
@@ -16,6 +16,16 @@ function inputFor(character, value) {
 export default function NewspaperPublishingPanel({ character, value }) {
   const source = useMemo(() => inputFor(character, value), [character, value]);
   const generated = useMemo(() => buildNewspaperChannels(source), [source]);
+  const [aiResult, setAiResult] = useState(null);
+  const [aiLength, setAiLength] = useState("standard");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
+  const effective = aiResult ? { ...generated, ...aiResult } : generated;
+
+  useEffect(() => {
+    setAiResult(null);
+    setAiMessage("");
+  }, [source]);
   const [imageUrl, setImageUrl] = useState("");
   const [noteUrl, setNoteUrl] = useState("");
   const [status, setStatus] = useState("draft");
@@ -52,6 +62,38 @@ export default function NewspaperPublishingPanel({ character, value }) {
     } finally { setUploading(false); }
   }
 
+  async function generateAiArticle() {
+    if (character !== "ichika" || aiBusy || busy || uploading) return;
+    setAiBusy(true);
+    setAiMessage("一果の記事をAI編集部が作成しています…");
+    try {
+      const response = await fetch("/api/admin/newspapers/ai-write", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          character,
+          source,
+          sourcePayload: value,
+          draft: generated,
+          length: aiLength,
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (response.status === 401) {
+        location.href = "/admin/sync/login";
+        return;
+      }
+      const json = await response.json();
+      if (!response.ok || !json.ok) throw new Error(json.error || "AI記事生成に失敗しました。");
+      setAiResult(json.result);
+      setAiMessage("AI記事を生成しました。内容を確認・編集してから保存または公開してください。");
+    } catch (error) {
+      setAiMessage(error.name === "TimeoutError" ? "AI生成に時間がかかっています。もう一度お試しください。" : error.message || "AI記事生成に失敗しました。");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   async function copy(text, key) {
     await navigator.clipboard.writeText(text);
     setCopied(key);
@@ -62,7 +104,7 @@ export default function NewspaperPublishingPanel({ character, value }) {
     if (uploading || busy) return;
     setBusy(true); setMessage("");
     try {
-      const response = await fetch("/api/admin/newspapers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...source, ...generated, imageUrl, noteUrl, status, sourcePayload: value }) });
+      const response = await fetch("/api/admin/newspapers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...source, ...effective, imageUrl, noteUrl, status, sourcePayload: value }) });
       if (response.status === 401) { location.href = "/admin/sync/login"; return; }
       const json = await response.json();
       if (!response.ok) throw new Error(json.error || "保存に失敗しました");
@@ -87,8 +129,33 @@ export default function NewspaperPublishingPanel({ character, value }) {
       <button type="button" onClick={save} disabled={busy || uploading}>{uploading ? "画像アップロード中…" : busy ? "保存中…" : status === "published" ? "サイトに公開" : "保存する"}</button>
     </div>
     {message && <p className={styles.message}>{message}</p>}
+    {character === "ichika" && <section className={styles.aiWriter}>
+      <div className={styles.aiWriterCopy}>
+        <span>ICHIKA AI EDITOR</span>
+        <h3>AIで一果の記事を詳しくする</h3>
+        <p>入力済みの数値・コメントだけを根拠に、サイト記事とnote記事を読み物として詳しく編集します。入力にない事実は追加しません。</p>
+      </div>
+      <div className={styles.aiWriterControls}>
+        <label>記事の長さ
+          <select value={aiLength} onChange={(e) => setAiLength(e.target.value)} disabled={aiBusy}>
+            <option value="short">短め</option>
+            <option value="standard">標準</option>
+            <option value="detailed">詳細</option>
+          </select>
+        </label>
+        <button type="button" onClick={generateAiArticle} disabled={aiBusy || busy || uploading}>
+          {aiBusy ? "AI生成中…" : aiResult ? "AIで再生成" : "AIで記事を詳しくする"}
+        </button>
+        {aiResult && <button type="button" className={styles.aiReset} onClick={() => { setAiResult(null); setAiMessage("テンプレート原稿に戻しました。"); }}>テンプレートに戻す</button>}
+      </div>
+      {aiMessage && <p className={styles.aiMessage}>{aiMessage}</p>}
+      {aiResult && <div className={styles.aiSummary}>
+        <b>サイト用要約</b>
+        <textarea rows={4} value={effective.summary || ""} onChange={(e) => setAiResult((prev) => ({ ...prev, summary: e.target.value }))} />
+      </div>}
+    </section>}
     <div className={styles.outputs}>
-      <article><header><b>サイト記事</b><button onClick={() => copy(generated.articleBody, "site")}>{copied === "site" ? "コピー済み" : "コピー"}</button></header><strong>{generated.title}</strong><textarea readOnly value={generated.articleBody} rows={10} /></article>
+      <article><header><b>サイト記事</b><button onClick={() => copy(effective.articleBody, "site")}>{copied === "site" ? "コピー済み" : "コピー"}</button></header><strong>{generated.title}</strong><textarea readOnly={!aiResult} value={effective.articleBody} onChange={(e) => aiResult && setAiResult((prev) => ({ ...prev, articleBody: e.target.value }))} rows={16} /></article>
       <article><header><b>note記事</b><button onClick={() => copy(`${generated.noteTitle}\n\n${generated.noteBody}`, "note")}>{copied === "note" ? "コピー済み" : "コピー"}</button></header><strong>{generated.noteTitle}</strong><textarea readOnly value={generated.noteBody} rows={12} /></article>
       <article><header><b>X投稿</b><button onClick={() => copy(generated.xPost, "x")}>{copied === "x" ? "コピー済み" : "コピー"}</button></header><textarea readOnly value={generated.xPost} rows={7} /><small>{Array.from(generated.xPost).length}文字</small></article>
       <article><header><b>Shorts台本</b><button onClick={() => copy(generated.shortsScript, "shorts")}>{copied === "shorts" ? "コピー済み" : "コピー"}</button></header><textarea readOnly value={generated.shortsScript} rows={8} /></article>
