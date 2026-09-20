@@ -109,12 +109,22 @@ export default async function RaceDetailPage({
     2,
     "0"
   );
-  const racePapers = await getPublishedNewspapers({
+  const racePapers = (await getPublishedNewspapers({
     date: raceDate,
     course: courseName,
     raceNo,
     limit: 10,
+  })).sort((a, b) => {
+    const editionRank = (paper) => paper.edition === "just_before" ? 0 : 1;
+    const byEdition = editionRank(a) - editionRank(b);
+    if (byEdition !== 0) return byEdition;
+    return String(b.published_at || "").localeCompare(String(a.published_at || ""));
   });
+  const directEditionPairs = new Set(
+    racePapers
+      .filter((paper) => paper.edition === "just_before")
+      .map((paper) => paper.character_key)
+  );
 
   return (
     <main className={styles.page}>
@@ -169,8 +179,9 @@ export default async function RaceDetailPage({
                       <span style={{fontWeight:900}}>
                         📰 {paper.character_key === "ichika" ? "一果" : paper.character_key === "hatsune" ? "初音" : "キイナ"}新聞
                         ・{paper.edition === "just_before" ? "直前版" : "前日版"}
+                        {paper.edition === "previous_day" && directEditionPairs.has(paper.character_key) ? "・直前版あり" : ""}
                       </span>
-                      <b style={{color:"#8d3fa3"}}>読む ›</b>
+                      <b style={{color:"#8d3fa3"}}>{paper.edition === "just_before" ? "最新を見る" : "読む"} ›</b>
                     </Link>
                   ))}
                 </div>
