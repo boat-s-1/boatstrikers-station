@@ -386,3 +386,57 @@
     width:100%;
   }
 }
+
+
+/* =========================================================
+   Long-form newspaper article readability
+========================================================= */
+.body{
+  color:#415468;
+}
+.body p{
+  margin:0 0 1.45em;
+  color:#415468;
+  font-size:16px;
+  line-height:2.05;
+  letter-spacing:.015em;
+}
+.body h2{
+  margin:34px 0 14px;
+  color:var(--paper-ink,#21384d);
+  font-size:21px;
+  line-height:1.45;
+  letter-spacing:.01em;
+}
+.body h2:first-child{margin-top:0}
+.body ul{
+  margin:14px 0 24px;
+  padding:15px 18px 15px 38px;
+  border:1px solid var(--paper-border,#dfe7ef);
+  border-radius:14px;
+  background:var(--paper-soft-2,#f8fbfd);
+}
+.body li{
+  margin:6px 0;
+  color:#3d5165;
+  font-size:15px;
+  line-height:1.9;
+}
+.body p:last-of-type{margin-bottom:0}
+@media(max-width:520px){
+  .body p{
+    font-size:15px;
+    line-height:2;
+  }
+  .body h2{
+    margin-top:28px;
+    font-size:19px;
+  }
+  .body ul{
+    padding:13px 14px 13px 32px;
+  }
+  .body li{
+    font-size:14px;
+    line-height:1.85;
+  }
+}
