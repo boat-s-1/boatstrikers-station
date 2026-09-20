@@ -8,6 +8,7 @@ import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
 import HomeRaceInfo from "./components/HomeRaceInfo";
 import { getPublicScheduleSupabase } from "../lib/scheduleSupabase";
 import { getCoursesByDate } from "../lib/boatstrikersPlatform";
+import { getPublishedNewspapers } from "../lib/newspapers";
 
 
 
@@ -270,14 +271,30 @@ export default async function Home() {
     results,
     cms,
     raceData,
+    siteNewspapers,
   ] = await Promise.all([
     getHomeNoteData(),
     getMonthlyForecastStats(),
     getHomeCmsData(),
     getHomeRaceData(),
+    getPublishedNewspapers({ limit: 3 }),
   ]);
 
-  const { news, latestInfo } = noteData;
+  const { news: noteNews, latestInfo } = noteData;
+  const newspaperMeta = {
+    ichika: { tag: "イン逃げ", fallback: "/ichika-banner.jpg" },
+    hatsune: { tag: "女子戦", fallback: "/hatsune-banner.jpg" },
+    kiina: { tag: "穴狙い", fallback: "/kiina-banner.jpg" },
+  };
+  const news = siteNewspapers.length
+    ? siteNewspapers.map((item) => ({
+        title: item.title,
+        date: item.race_date,
+        link: `/newspapers/${item.slug}`,
+        tag: newspaperMeta[item.character_key]?.tag || "予想新聞",
+        image: item.image_url || newspaperMeta[item.character_key]?.fallback || "/library-banner.jpg",
+      }))
+    : noteNews;
 
   return (
     <main className="page">
