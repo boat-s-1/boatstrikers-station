@@ -12,6 +12,7 @@ import { getCoursesForRacesIndex } from "../lib/racesIndexLight";
 import styles from "./phase2.module.css";
 import CoursePortalCard from "./components/CoursePortalCard";
 import AlertFlash from "./components/AlertFlash";
+import { getPublishedNewspapers } from "../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 
@@ -164,16 +165,18 @@ export default async function RacesPage({ searchParams }) {
 
   let courses = [];
   let dates = [];
+  let noteFeatures = [];
   let newspapers = [];
   let hitFlash = [];
   let aiPickups = [];
   let loadError = null;
 
   try {
-    [courses, dates, newspapers, hitFlash, aiPickups] = await Promise.all([
+    [courses, dates, noteFeatures, newspapers, hitFlash, aiPickups] = await Promise.all([
       getCoursesForRacesIndex(raceDate),
       getAvailableDates(),
       getPublishedNoteFeaturesByDate(raceDate, false),
+      getPublishedNewspapers({ date: raceDate, limit: 30 }),
       getAiBetHitFlashByDate(raceDate, 6),
       getAiPredictionPickupsByDate(raceDate),
     ]);
@@ -182,7 +185,7 @@ export default async function RacesPage({ searchParams }) {
     loadError = error instanceof Error ? error.message : "データの取得に失敗しました。";
   }
 
-  const noteCountByCourse = newspapers.reduce((map, item) => {
+  const noteCountByCourse = noteFeatures.reduce((map, item) => {
     const code = Number(item.course_code);
     map.set(code, (map.get(code) ?? 0) + 1);
     return map;
@@ -362,9 +365,12 @@ export default async function RacesPage({ searchParams }) {
           ) : (
             <div className={styles.hitFlashList}>
               {newspapers.slice(0, 6).map((item) => (
-                <Link key={item.id ?? `${item.course_code}-${item.race_no}-${item.title}`} href={item.url ?? `/races/${String(item.course_code).padStart(2, "0")}/${item.race_no}?date=${raceDate}`} className={styles.hitFlashCard}>
+                <Link key={item.id} href={`/newspapers/${item.slug}`} className={styles.hitFlashCard}>
                   <div className={styles.hitFlashIcon}>新聞</div>
-                  <div className={styles.hitFlashMain}><span>公開中</span><strong>{item.title ?? `${getCourseName(item.course_code)} ${item.race_no}R`}</strong></div>
+                  <div className={styles.hitFlashMain}>
+                    <span>{item.character_key === "ichika" ? "一果" : item.character_key === "hatsune" ? "初音" : "キイナ"}・{item.edition === "just_before" ? "直前版" : "前日版"}</span>
+                    <strong>{item.course_name} {item.race_no}R｜{item.title}</strong>
+                  </div>
                 </Link>
               ))}
             </div>
