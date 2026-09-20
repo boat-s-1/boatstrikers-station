@@ -110,21 +110,21 @@ function getRssImage(item, fallbackImage) {
 
 async function getIchikaNewspaper() {
   try {
-    const [siteItem] = await getPublishedNewspapers({ character: "ichika", limit: 1 });
-    if (siteItem) return { title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/ichika-banner.jpg" };
+    const siteItems = await getPublishedNewspapers({ character: "ichika", limit: 3 });
+    if (siteItems.length) return siteItems.map((siteItem) => ({ title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/ichika-banner.jpg", edition: siteItem.edition, course: siteItem.course_name, raceNo: siteItem.race_no }));
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
     const item = feed.items.find((feedItem) => feedItem.title?.includes("【一果前日版】"));
-    if (!item) return null;
-    return {
+    if (!item) return [];
+    return [{
       title: item.title || "一果前日版",
       link: item.link || "",
       date: item.pubDate || "",
       image: getRssImage(item, "/ichika-banner.jpg"),
-    };
+    }];
   } catch (error) {
     console.error("一果新聞取得エラー:", error);
-    return null;
+    return [];
   }
 }
 
@@ -148,7 +148,7 @@ async function getIchikaArticles() {
 }
 
 export default async function IchikaPage() {
-  const [articles, newspaper, result] = await Promise.all([
+  const [articles, newspapers, result] = await Promise.all([
     getIchikaArticles(),
     getIchikaNewspaper(),
     getIchikaResults(),
@@ -169,15 +169,20 @@ export default async function IchikaPage() {
 
       <section className="sectionCard pinkCard">
         <img src="/IMG_6130.jpeg" alt="一果新聞" className="homeTitleImage" />
-        {newspaper ? (
-          <a href={newspaper.link} className="newsFeature">
-            <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
-            <div>
-              <h3>{newspaper.title}</h3>
-              <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
-              <span className="pinkBtn">📖 新聞を読む</span>
-            </div>
-          </a>
+        {newspapers?.length ? (
+          <div className="labList">
+            {newspapers.map((newspaper) => (
+              <a href={newspaper.link} className="newsFeature" key={newspaper.link}>
+                <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
+                <div>
+                  <small>{newspaper.edition === "just_before" ? "直前版" : "前日版"}{newspaper.course ? `・${newspaper.course}${newspaper.raceNo}R` : ""}</small>
+                  <h3>{newspaper.title}</h3>
+                  <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
+                  <span className="pinkBtn">📖 新聞を読む</span>
+                </div>
+              </a>
+            ))}
+          </div>
         ) : <p>今日の一果新聞はまだありません。</p>}
       </section>
 
