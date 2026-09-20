@@ -9,6 +9,9 @@ on:
       - "app/today/**"
       - "app/admin/sync/**"
       - "app/api/admin/sync/racers/**"
+      - "app/api/cron/racer-master-sync/**"
+      - "vercel.json"
+      - "supabase/migrations/20260921021500_add_racer_sync_queue.sql"
       - "supabase/migrations/20260919214500_add_today_birthday_racers_rpc.sql"
       - ".github/workflows/today-birthday-build-check.yml"
 
