@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { getPublishedNewspaper } from "../../../lib/newspapers";
+import { getPublishedNewspaper, getPublishedNewspapers } from "../../../lib/newspapers";
 import { NEWSPAPER_CHARACTERS } from "../../../lib/newspaperContent";
 import NewspaperAnalytics from "../NewspaperAnalytics";
 import styles from "../newspapers.module.css";
@@ -10,6 +10,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const getNewspaperCached = cache(getPublishedNewspaper);
+
+const THEME_META = {
+  ichika: { key:"ichika", room:"/ichika", role:"イン逃げ", kicker:"ICHIKA NEWSPAPER", label:"一果のイン逃げ予想", roomLabel:"一果の部屋へ", emoji:"🌿" },
+  hatsune: { key:"hatsune", room:"/hatsune", role:"女子戦", kicker:"HATSUNE NEWSPAPER", label:"初音の女子戦予想", roomLabel:"初音の部屋へ", emoji:"💜" },
+  kiina: { key:"kiina", room:"/kiina", role:"穴狙い", kicker:"KIINA NEWSPAPER", label:"キイナの穴狙い予想", roomLabel:"キイナの部屋へ", emoji:"💛" },
+};
 
 function renderBody(body) {
   const blocks = String(body || "").split(/\n\n+/).filter(Boolean);
@@ -25,11 +31,69 @@ export async function generateMetadata({ params }) {
 export default async function NewspaperDetailPage({ params }) {
   const { slug } = await params; const item = await getNewspaperCached(decodeURIComponent(slug)); if (!item) notFound();
   const character = NEWSPAPER_CHARACTERS[item.character_key] || NEWSPAPER_CHARACTERS.ichika;
-  return <main className={styles.page}><article className={styles.article}>
-    <NewspaperAnalytics slug={item.slug} character={item.character_key} edition={item.edition} />
-    <Link className={styles.back} href="/newspapers">← 予想新聞一覧</Link>
-    <header className={styles.articleHead}><div className={styles.meta}>{character.emoji} {character.name}新聞・{item.race_date}・{item.course_name}{item.race_no}R・{item.edition === "just_before" ? "直前版" : "前日版"}</div><h1>{item.title}</h1>{item.summary && <p>{item.summary}</p>}</header>
-    {item.image_url && <img className={styles.cover} src={item.image_url} alt={item.title} />}
-    <section className={styles.body}>{renderBody(item.article_body)}<div className={styles.actions}><Link data-newspaper-member="1" className={styles.primary} href="/members">無料会員になる</Link>{item.note_url && <a data-newspaper-note="1" className={styles.note} href={item.note_url} target="_blank" rel="noopener noreferrer">詳しい解説をnoteで読む</a>}</div><p className={styles.disclaimer}>舟券の購入は20歳になってから。予想・データは的中や利益を保証するものではありません。</p></section>
-  </article></main>;
+  const theme = THEME_META[item.character_key] || THEME_META.ichika;
+  const related = (await getPublishedNewspapers({ character: item.character_key, limit: 4 }))
+    .filter((paper) => paper.slug !== item.slug)
+    .slice(0, 3);
+  const editionLabel = item.edition === "just_before" ? "直前版" : "前日版";
+
+  return <main className={`${styles.page} ${styles[`theme_${theme.key}`]}`}>
+    <article className={styles.article}>
+      <NewspaperAnalytics slug={item.slug} character={item.character_key} edition={item.edition} />
+
+      <div className={styles.topNav}>
+        <Link className={styles.back} href="/newspapers">← 予想新聞一覧</Link>
+        <Link className={styles.roomLink} href={theme.room}>{theme.roomLabel} →</Link>
+      </div>
+
+      <header className={styles.characterHero}>
+        <div className={styles.heroTop}>
+          <div>
+            <span className={styles.kicker}>{theme.kicker}</span>
+            <div className={styles.heroTags}>
+              <b>{theme.emoji} {theme.role}</b>
+              <b>{editionLabel}</b>
+              <b>{item.course_name}{item.race_no}R</b>
+            </div>
+          </div>
+          <div className={styles.characterSeal}>{character.name}</div>
+        </div>
+        <p className={styles.characterLabel}>{theme.label}</p>
+        <h1>{item.title}</h1>
+        {item.summary && <p className={styles.summary}>{item.summary}</p>}
+      </header>
+
+      {item.image_url && <figure className={styles.coverWrap}>
+        <img className={styles.cover} src={item.image_url} alt={item.title} />
+        <figcaption>{item.race_date}・{item.course_name}{item.race_no}R・{editionLabel}</figcaption>
+      </figure>}
+
+      <section className={styles.body}>
+        {renderBody(item.article_body)}
+        <div className={styles.actions}>
+          <Link className={styles.characterButton} href={theme.room}>{theme.roomLabel}</Link>
+          {item.note_url && <a data-newspaper-note="1" className={styles.note} href={item.note_url} target="_blank" rel="noopener noreferrer">詳しい解説をnoteで読む</a>}
+          <Link data-newspaper-member="1" className={styles.primary} href="/members">無料会員になる</Link>
+        </div>
+        <p className={styles.disclaimer}>舟券の購入は20歳になってから。予想・データは的中や利益を保証するものではありません。</p>
+      </section>
+
+      {related.length > 0 && <section className={styles.related}>
+        <div className={styles.relatedHead}>
+          <div><span>MORE NEWSPAPERS</span><h2>最新の{character.name}新聞</h2></div>
+          <Link href={`/newspapers?character=${item.character_key}`}>一覧を見る →</Link>
+        </div>
+        <div className={styles.relatedGrid}>
+          {related.map((paper) => <Link className={styles.relatedCard} href={`/newspapers/${paper.slug}`} key={paper.id}>
+            {paper.image_url ? <img src={paper.image_url} alt={paper.title} /> : <div className={styles.relatedPlaceholder}>📰</div>}
+            <div>
+              <small>{paper.edition === "just_before" ? "直前版" : "前日版"}・{paper.course_name}{paper.race_no}R</small>
+              <strong>{paper.title}</strong>
+              <span>読む ›</span>
+            </div>
+          </Link>)}
+        </div>
+      </section>}
+    </article>
+  </main>;
 }
