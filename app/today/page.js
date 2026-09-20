@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../lib/memberEntitlement";
 import styles from "./today.module.css";
+import { getPublishedNewspapers } from "../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -41,7 +42,7 @@ async function memberState(){
 
 export default async function TodayPage(){
   const displayDate=jstToday();
-  const [data,member]=await Promise.all([loadTodayData(displayDate),memberState()]);
+  const [data,member,todayPapers]=await Promise.all([loadTodayData(displayDate),memberState(),getPublishedNewspapers({date:displayDate,limit:30})]);
   const gradeLabels=new Set(["SG","PG1","G1","G2","G3"]);
   const grades=data.grades.filter(x=>gradeLabels.has(String(x.grade||"").toUpperCase()));
   const birthdayMap=new Map();
@@ -84,7 +85,7 @@ export default async function TodayPage(){
 
     <section className={styles.section}>
       <div className={styles.heading}><div><small>TODAY'S BOATSTRIKERS</small><h2>今日のBoatStrikers</h2></div><Link href="/library">過去の記事を見る ›</Link></div>
-      <div className={styles.paperGrid}>{CHARACTERS.map(ch=><Link href={ch.href} className={`${styles.paper} ${styles[ch.tone]}`} key={ch.key}><span>{ch.emoji}</span><div><small>{ch.role}</small><strong>{ch.name}の新聞</strong><p>今日の公開内容をチェック</p></div><b>読む ›</b></Link>)}</div>
+      <div className={styles.paperGrid}>{todayPapers.length ? todayPapers.map((item)=>{const ch=CHARACTERS.find(x=>x.key===item.character_key)||CHARACTERS[0];return <Link href={`/newspapers/${item.slug}`} className={`${styles.paper} ${styles[ch.tone]}`} key={item.id}><span>{ch.emoji}</span><div><small>{ch.name}・{item.edition==="just_before"?"直前版":"前日版"}</small><strong>{item.course_name}{item.race_no}R</strong><p>{item.title}</p></div><b>読む ›</b></Link>}) : CHARACTERS.map(ch=><Link href={ch.href} className={`${styles.paper} ${styles[ch.tone]}`} key={ch.key}><span>{ch.emoji}</span><div><small>{ch.role}</small><strong>{ch.name}の新聞</strong><p>本日の新聞は準備中です</p></div><b>見る ›</b></Link>)}</div>
       <div className={styles.mediaGrid}>
         <Link href="/data-lab"><span>📊</span><div><small>DATA LAB</small><strong>昨日を数字で振り返る</strong></div><b>›</b></Link>
         <Link href="/news"><span>📰</span><div><small>NEWS</small><strong>今日のニュースを読む</strong></div><b>›</b></Link>
