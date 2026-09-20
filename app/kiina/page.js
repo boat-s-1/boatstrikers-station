@@ -91,16 +91,16 @@ function getRssImage(item, fallbackImage) {
 
 async function getKiinaNewspaper() {
   try {
-    const [siteItem] = await getPublishedNewspapers({ character: "kiina", limit: 1 });
-    if (siteItem) return { title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/kiina-banner.jpg" };
+    const siteItems = await getPublishedNewspapers({ character: "kiina", limit: 3 });
+    if (siteItems.length) return siteItems.map((siteItem) => ({ title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/kiina-banner.jpg", edition: siteItem.edition, course: siteItem.course_name, raceNo: siteItem.race_no }));
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
     const item = feed.items.find((feedItem) => feedItem.title?.includes("【キイナ前日版】"));
-    if (!item) return null;
-    return { title: item.title || "キイナ前日版", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/kiina-banner.jpg") };
+    if (!item) return [];
+    return [{ title: item.title || "キイナ前日版", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/kiina-banner.jpg") }];
   } catch (error) {
     console.error("キイナ新聞取得エラー:", error);
-    return null;
+    return [];
   }
 }
 
@@ -119,7 +119,7 @@ async function getKiinaArticles() {
 }
 
 export default async function KiinaPage() {
-  const [articles, newspaper, result] = await Promise.all([getKiinaArticles(), getKiinaNewspaper(), getKiinaResults()]);
+  const [articles, newspapers, result] = await Promise.all([getKiinaArticles(), getKiinaNewspaper(), getKiinaResults()]);
 
   const edgeBannerRowStyle = { margin: "-18px -18px 16px", width: "calc(100% + 36px)" };
   const edgeBannerImageStyle = { display: "block", width: "100%", maxWidth: "none", height: "auto", margin: 0, borderRadius: "22px 22px 0 0" };
@@ -141,15 +141,20 @@ export default async function KiinaPage() {
         <div className="sectionTitleRow" style={edgeBannerRowStyle}>
           <img src="/top/IMG_8019.jpeg?v=20260906-0649" alt="5アタマ攻略新聞" className="homeTitleImage" style={edgeBannerImageStyle} />
         </div>
-        {newspaper ? (
-          <a href={newspaper.link} className="newsFeature">
-            <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
-            <div>
-              <h3>{newspaper.title}</h3>
-              <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
-              <span className="yellowBtn">📖 新聞を読む</span>
-            </div>
-          </a>
+        {newspapers?.length ? (
+          <div className="labList">
+            {newspapers.map((newspaper) => (
+              <a href={newspaper.link} className="newsFeature" key={newspaper.link}>
+                <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
+                <div>
+                  <small>{newspaper.edition === "just_before" ? "直前版" : "前日版"}{newspaper.course ? `・${newspaper.course}${newspaper.raceNo}R` : ""}</small>
+                  <h3>{newspaper.title}</h3>
+                  <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
+                  <span className="yellowBtn">📖 新聞を読む</span>
+                </div>
+              </a>
+            ))}
+          </div>
         ) : <p>今日のキイナ新聞はまだありません。</p>}
       </section>
 

@@ -11,6 +11,7 @@ import {
 import styles from "../phase2.module.css";
 import CourseQuickNav from "../components/CourseQuickNav";
 import StadiumHeroBanner from "../components/StadiumHeroBanner";
+import { getPublishedNewspapers } from "../../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,13 @@ export default async function CoursePage({ params, searchParams }) {
   
 
   const courseName = getCourseName(courseCode);
+  const coursePapers = await getPublishedNewspapers({ date: raceDate, course: courseName, limit: 30 });
+  const papersByRace = new Map();
+  for (const paper of coursePapers) {
+    const key = Number(paper.race_no);
+    if (!papersByRace.has(key)) papersByRace.set(key, []);
+    papersByRace.get(key).push(paper);
+  }
 
   return (
     <main className={styles.page}>
@@ -98,6 +106,26 @@ export default async function CoursePage({ params, searchParams }) {
                       : "出走表公開"}
                   </b>
                 </div>
+                {papersByRace.get(Number(race.race_no))?.length ? (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:8, padding:"0 0 12px" }}>
+                    {papersByRace.get(Number(race.race_no)).map((paper) => (
+                      <Link
+                        key={paper.id}
+                        href={`/newspapers/${paper.slug}`}
+                        style={{
+                          display:"inline-flex", alignItems:"center", gap:6,
+                          padding:"7px 10px", borderRadius:999,
+                          background:"#fff4fb", border:"1px solid #efc9e1",
+                          color:"#a22a78", fontSize:12, fontWeight:900,
+                          textDecoration:"none"
+                        }}
+                      >
+                        📰 {paper.character_key === "ichika" ? "一果" : paper.character_key === "hatsune" ? "初音" : "キイナ"}
+                        ・{paper.edition === "just_before" ? "直前版" : "前日版"}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
           
 
   

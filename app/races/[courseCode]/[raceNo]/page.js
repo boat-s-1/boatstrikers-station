@@ -17,6 +17,7 @@ import RacePremiumMemberGate from "../../components/RacePremiumMemberGate";
 import RaceQuickView from "../../components/RaceQuickView";
 import StadiumHeroBanner from "../../components/StadiumHeroBanner";
 import styles from "../../phase2.module.css";
+import { getPublishedNewspapers } from "../../../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 
@@ -108,6 +109,12 @@ export default async function RaceDetailPage({
     2,
     "0"
   );
+  const racePapers = await getPublishedNewspapers({
+    date: raceDate,
+    course: courseName,
+    raceNo,
+    limit: 10,
+  });
 
   return (
     <main className={styles.page}>
@@ -139,6 +146,36 @@ export default async function RaceDetailPage({
         ) : (
           <>
             <ExhibitionAutoRefresh raceDate={raceDate} closingTime={data.event.closing_time} />
+            {racePapers.length ? (
+              <section style={{
+                margin:"0 0 14px", padding:"14px",
+                border:"1px solid #ead8ec", borderRadius:16,
+                background:"#fff"
+              }}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
+                  <div>
+                    <small style={{display:"block",color:"#9b4bb0",fontWeight:900,letterSpacing:".08em"}}>PUBLISHED NEWSPAPER</small>
+                    <strong style={{fontSize:16}}>このレースの公開新聞</strong>
+                  </div>
+                  <span style={{fontSize:12,fontWeight:900,color:"#765082"}}>{racePapers.length}件</span>
+                </div>
+                <div style={{display:"grid",gap:8}}>
+                  {racePapers.map((paper)=>(
+                    <Link key={paper.id} href={`/newspapers/${paper.slug}`} style={{
+                      display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+                      padding:"11px 12px",borderRadius:12,background:"#fff8ff",
+                      border:"1px solid #ecd8ef",textDecoration:"none",color:"#4d3058"
+                    }}>
+                      <span style={{fontWeight:900}}>
+                        📰 {paper.character_key === "ichika" ? "一果" : paper.character_key === "hatsune" ? "初音" : "キイナ"}新聞
+                        ・{paper.edition === "just_before" ? "直前版" : "前日版"}
+                      </span>
+                      <b style={{color:"#8d3fa3"}}>読む ›</b>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             <RaceQuickView
               courseName={courseName}
               raceNo={raceNo}
