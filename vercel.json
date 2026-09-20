@@ -83,7 +83,7 @@
     },
     {
       "path": "/api/cron/racer-master-sync",
-      "schedule": "15 21 * * *"
+      "schedule": "15 3,21 * * *"
     }
   ]
 }
