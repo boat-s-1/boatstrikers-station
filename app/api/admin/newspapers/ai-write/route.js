@@ -23,11 +23,14 @@ function numeric(value) {
 function safeFacts(body) {
   const source = body?.source || {};
   const raw = body?.sourcePayload || {};
+  const edition = plain(source.edition || raw.edition);
+  const isJustBefore = edition === "just_before";
+
   return {
     date: plain(source.date || raw.date),
     course: plain(source.course || raw.course),
     raceNo: numeric(source.raceNo || raw.raceNo),
-    edition: plain(source.edition || raw.edition),
+    edition,
     headline: plain(source.headline || raw.mainCopy),
     escapeRate: numeric(raw.escapeRate),
     nationalAverage: numeric(raw.nationalAverage),
@@ -36,9 +39,12 @@ function safeFacts(body) {
     honmeiComment: plain(raw.honmeiComment),
     ichikaComment: plain(raw.ichikaComment),
     speech: plain(raw.speech),
-    exhibition1: plain(raw.exhibition1),
-    exhibition2: plain(raw.exhibition2),
-    exhibition3: plain(raw.exhibition3),
+    // 展示情報は直前版だけAIへ渡す。前日版では値が管理画面に残っていても物理的に除外する。
+    ...(isJustBefore ? {
+      exhibition1: plain(raw.exhibition1),
+      exhibition2: plain(raw.exhibition2),
+      exhibition3: plain(raw.exhibition3),
+    } : {}),
     aiTickets: Array.isArray(raw.aiTickets) ? raw.aiTickets.filter((v) => typeof v === "string").slice(0, 20) : [],
     aiUnitStake: Number.isFinite(Number(raw.aiUnitStake)) ? Number(raw.aiUnitStake) : null,
     aiInvestment: Number.isFinite(Number(raw.aiInvestment)) ? Number(raw.aiInvestment) : null,
@@ -90,11 +96,16 @@ export async function POST(request) {
     "- 入力にない数値・選手情報・モーター情報・展示情報・気象・進入・オッズ・結果を推測して追加しない",
     "- 数値、場名、レース番号、買い目は変更しない",
     "- 根拠のない断定をしない",
+    "- ユーザー入力のコメントや見立てを、一般的・客観的に確立した事実のように格上げして言い換えない",
+    "- 入力コメントを使うときは『一果の見立て』『今回の見方』『入力された評価』など、出所が分かる表現にする",
+    "- 前日版では展示気配・展示タイム・スタート展示・進入の確定情報を本文に書かない。直前版で確認したい項目として未来形で触れるのは可",
     "- AI v2 / shadow / model / raw / score など内部用語を本文に出さない",
     "- [object Object] を絶対に出さない",
     "- 舟券購入や利益を保証する表現を使わない",
     "- 一果は落ち着いて論理的、親しみやすい語り口にする",
     "- 同じ内容の言い換えを繰り返さない",
+    "- 同じ数値や結論を複数セクションで何度も反復しない。数値の詳説は主に『データから見るこのレース』へ集約する",
+    "- 『一果のまとめ』は本文の再説明ではなく、2〜3文程度で簡潔に締める",
     "- Markdown見出しは ##、箇条書きは - を使用する",
     "",
     "【サイト記事の構成】",
