@@ -17,7 +17,7 @@ function plain(value) {
 
 function numeric(value) {
   const raw = plain(value);
-  return raw && /^-?\\d+(?:\\.\\d+)?$/.test(raw) ? raw : "";
+  return raw && /^-?\d+(?:\.\d+)?$/.test(raw) ? raw : "";
 }
 
 function safeFacts(body) {
@@ -53,11 +53,11 @@ function outputText(json) {
       if (part?.type === "output_text" && typeof part.text === "string") parts.push(part.text);
     }
   }
-  return parts.join("\\n").trim();
+  return parts.join("\n").trim();
 }
 
 function parseObject(value) {
-  const cleaned = String(value || "").trim().replace(/^\\x60\\x60\\x60(?:json)?\\s*/i, "").replace(/\\s*\\x60\\x60\\x60$/i, "");
+  const cleaned = String(value || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
   return JSON.parse(cleaned);
 }
 
@@ -133,7 +133,7 @@ export async function POST(request) {
       noteTitle: "note記事タイトル",
       noteBody: "note記事本文",
     }, null, 2),
-  ].join("\\n");
+  ].join("\n");
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
