@@ -91,16 +91,16 @@ function getRssImage(item, fallbackImage) {
 
 async function getHatsuneNewspaper() {
   try {
-    const [siteItem] = await getPublishedNewspapers({ character: "hatsune", limit: 1 });
-    if (siteItem) return { title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/hatsune-banner.jpg" };
+    const siteItems = await getPublishedNewspapers({ character: "hatsune", limit: 3 });
+    if (siteItems.length) return siteItems.map((siteItem) => ({ title: siteItem.title, link: `/newspapers/${siteItem.slug}`, date: siteItem.race_date, image: siteItem.image_url || "/hatsune-banner.jpg", edition: siteItem.edition, course: siteItem.course_name, raceNo: siteItem.race_no }));
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
     const item = feed.items.find((feedItem) => feedItem.title?.includes("【初音前日版】"));
-    if (!item) return null;
-    return { title: item.title || "初音前日版", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/hatsune-banner.jpg") };
+    if (!item) return [];
+    return [{ title: item.title || "初音前日版", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/hatsune-banner.jpg") }];
   } catch (error) {
     console.error("初音新聞取得エラー:", error);
-    return null;
+    return [];
   }
 }
 
@@ -119,7 +119,7 @@ async function getHatsuneArticles() {
 }
 
 export default async function HatsunePage() {
-  const [articles, newspaper, result] = await Promise.all([getHatsuneArticles(), getHatsuneNewspaper(), getHatsuneResults()]);
+  const [articles, newspapers, result] = await Promise.all([getHatsuneArticles(), getHatsuneNewspaper(), getHatsuneResults()]);
 
   return (
     <main className="page hatsunePage">
@@ -136,15 +136,20 @@ export default async function HatsunePage() {
 
       <section className="sectionCard purpleCard">
         <img src="/top/IMG_7884.jpeg?v=20260901-0532" alt="初音新聞" className="homeTitleImage" />
-        {newspaper ? (
-          <a href={newspaper.link} className="newsFeature">
-            <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
-            <div>
-              <h3>{newspaper.title}</h3>
-              <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
-              <span className="purpleBtn">📖 新聞を読む</span>
-            </div>
-          </a>
+        {newspapers?.length ? (
+          <div className="labList">
+            {newspapers.map((newspaper) => (
+              <a href={newspaper.link} className="newsFeature" key={newspaper.link}>
+                <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
+                <div>
+                  <small>{newspaper.edition === "just_before" ? "直前版" : "前日版"}{newspaper.course ? `・${newspaper.course}${newspaper.raceNo}R` : ""}</small>
+                  <h3>{newspaper.title}</h3>
+                  <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
+                  <span className="purpleBtn">📖 新聞を読む</span>
+                </div>
+              </a>
+            ))}
+          </div>
         ) : <p>今日の初音新聞はまだありません。</p>}
       </section>
 
