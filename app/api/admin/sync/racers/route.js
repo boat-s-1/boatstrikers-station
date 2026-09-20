@@ -97,8 +97,8 @@ export async function POST(request){
   if(!(await isAdminAuthenticated()))return NextResponse.json({error:"unauthorized"},{status:401});
   let body={};
   try{body=await request.json();}catch{}
-  const requested=Number(body?.limit??5);
-  const limit=Number.isInteger(requested)?Math.min(Math.max(requested,1),10):5;
+  const requested=Number(body?.limit??4);
+  const limit=Number.isInteger(requested)?Math.min(Math.max(requested,1),8):4;
   const recentDays=7;
   const excluded=new Set(Array.isArray(body?.exclude)?body.exclude.map(v=>String(v||"").trim()).filter(v=>/^\d{5}$/.test(v)).slice(0,100):[]);
   const db=getAdminSupabase();
