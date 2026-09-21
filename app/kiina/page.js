@@ -8,6 +8,18 @@ import { getPublishedNewspapers } from "../../lib/newspapers";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export const metadata = {
+  title: "キイナ｜5号艇・穴狙い・高配当レース分析",
+  description: "BoatStrikersキイナの専門ページ。5号艇や人気薄をオッズだけで選ばず、スタート、センターの攻め、展示、モーター、展開から穴の入口を探す見方を解説します。",
+  alternates: { canonical: "/kiina" },
+  openGraph: {
+    title: "キイナ｜5号艇・穴狙い分析｜BoatStrikers",
+    description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。",
+    url: "/kiina",
+    type: "website",
+  },
+};
+
 const emptyKiinaResult = {
   raceCount: 0,
   hitCount: 0,
@@ -133,6 +145,25 @@ export default async function KiinaPage() {
 
       <section className="hero">
         <Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority />
+      </section>
+
+      <section className="sectionCard yellowCard">
+        <h1>キイナの5アタマ・穴狙い研究室</h1>
+        <p>キイナは「高配当だから」「5号艇だから」という理由だけでは狙いません。内側に崩れる材料があり、センター勢の攻めによって外へ展開が向きそうなときに、5号艇を含む人気薄を比較します。</p>
+        <h2>穴艇を見る5つのチェック</h2>
+        <ol>
+          <li><strong>インの弱点：</strong>1号艇の進入・ST・展示に不安材料があるか。</li>
+          <li><strong>攻めの起点：</strong>3・4コースにスタートから仕掛けられそうな艇がいるか。</li>
+          <li><strong>展開：</strong>攻め艇のさらに外、特に5号艇へ差し場やまくり差しの余地があるか。</li>
+          <li><strong>展示：</strong>人気薄でも直線・ターン出口・展示タイムに上向き材料があるか。</li>
+          <li><strong>価格：</strong>根拠を確認してからオッズを見る。高オッズそのものは買う理由にしない。</li>
+        </ol>
+        <p>穴狙いは当たりやすさよりも振れ幅が大きくなります。点数と購入額を先に決め、条件が噛み合わないレースは無理に狙いません。</p>
+        <div className="sectionTitleRow">
+          <a className="yellowBtn" href="/guide/average-st">平均STの見方</a>
+          <a className="yellowBtn" href="/guide/exhibition">展示航走の見方</a>
+          <a className="yellowBtn" href="/guide/odds-payout">オッズと払戻の基本</a>
+        </div>
       </section>
 
       <RealtimeUpdates target="kiina" limit={5} />
