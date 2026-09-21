@@ -68,3 +68,22 @@
     border-radius: 22px 22px 0 0;
   }
 }
+
+
+/* Flush section banners to the panel's top edge */
+.bannerPanel {
+  padding-top: 0 !important;
+  overflow: hidden;
+}
+
+.bannerPanel .bannerHeading {
+  margin: 0 -18px 16px;
+  border-radius: 0;
+}
+
+@media (max-width: 719px) {
+  .bannerPanel .bannerHeading {
+    margin: 0 -14px 14px;
+    border-radius: 0;
+  }
+}
