@@ -10,6 +10,48 @@ const LENGTHS = {
   detailed: { site: "1,200〜1,900字", note: "2,150〜3,500字", tokens: 6200 },
 };
 
+const PROFILES = {
+  ichika: {
+    name: "一果",
+    role: "イン逃げ担当。落ち着いて論理的で、親しみやすい先生・解説役",
+    focus: "1号艇のイン逃げを軸に、数字と直前情報を整理する",
+    firstPrevious: "## 前日版｜一果の注目ポイント",
+    firstBefore: "## 直前版｜展示後の一果チェック",
+    dataPrevious: "## 前日データから見るこのレース",
+    dataBefore: "## 展示データから見るこのレース",
+    thirdPrevious: "## 直前版で確認したいこと",
+    thirdBefore: "## 相手関係の最終チェック",
+    summaryPrevious: "## 一果の前日まとめ",
+    summaryBefore: "## 一果の直前まとめ",
+  },
+  hatsune: {
+    name: "初音",
+    role: "女子戦担当。やわらかく親しみやすく、女子戦の流れや注目艇を丁寧に整理する",
+    focus: "女子戦期待度・注目艇・各艇評価・チェックポイントを使って、女子戦の見どころを分かりやすく伝える",
+    firstPrevious: "## 前日版｜初音の女子戦チェック",
+    firstBefore: "## 直前版｜初音の女子戦チェック",
+    dataPrevious: "## 前日データから見る女子戦",
+    dataBefore: "## 直前データから見る女子戦",
+    thirdPrevious: "## 直前版で確認したいこと",
+    thirdBefore: "## 相手関係の最終チェック",
+    summaryPrevious: "## 初音の前日まとめ",
+    summaryBefore: "## 初音の直前まとめ",
+  },
+  kiina: {
+    name: "キイナ",
+    role: "穴狙い担当。元気で少し攻めた語り口だが、根拠のない煽りはせず、穴条件を絞って説明する",
+    focus: "注目穴・穴狙い期待度・各艇評価・買い目を使って、どこに穴の余地を見るかを分かりやすく伝える",
+    firstPrevious: "## 前日版｜キイナの穴チェック",
+    firstBefore: "## 直前版｜キイナの穴チェック",
+    dataPrevious: "## 前日データから見る穴ポイント",
+    dataBefore: "## 直前データから見る穴ポイント",
+    thirdPrevious: "## 直前版で確認したいこと",
+    thirdBefore: "## 穴候補の最終チェック",
+    summaryPrevious: "## キイナの前日まとめ",
+    summaryBefore: "## キイナの直前まとめ",
+  },
+};
+
 function plain(value) {
   if (value === null || value === undefined || typeof value === "object") return "";
   return String(value).trim();
@@ -18,6 +60,20 @@ function plain(value) {
 function numeric(value) {
   const raw = plain(value);
   return raw && /^-?\d+(?:\.\d+)?$/.test(raw) ? raw : "";
+}
+
+function safeStringArray(value, max = 20) {
+  return Array.isArray(value) ? value.filter((v) => typeof v === "string" && v.trim()).slice(0, max) : [];
+}
+
+function safeScores(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result = {};
+  for (const boat of ["1","2","3","4","5","6"]) {
+    const score = numeric(value[boat]);
+    if (score) result[boat] = score;
+  }
+  return result;
 }
 
 function safeFacts(body) {
@@ -31,21 +87,30 @@ function safeFacts(body) {
     course: plain(source.course || raw.course),
     raceNo: numeric(source.raceNo || raw.raceNo),
     edition,
-    headline: plain(source.headline || raw.mainCopy),
+    headline: plain(source.headline || raw.mainCopy || raw.headline),
+    speech: plain(raw.speech),
     escapeRate: numeric(raw.escapeRate),
     nationalAverage: numeric(raw.nationalAverage),
     honmeiBoat: numeric(raw.honmeiBoat),
     honmeiTitle: plain(raw.honmeiTitle),
     honmeiComment: plain(raw.honmeiComment),
     ichikaComment: plain(raw.ichikaComment),
-    speech: plain(raw.speech),
-    // 展示情報は直前版だけAIへ渡す。前日版では値が管理画面に残っていても物理的に除外する。
+    expectation: numeric(raw.expectation),
+    featuredBoat: numeric(raw.featuredBoat),
+    hatsuneComment: plain(raw.comment),
+    checkpoints: safeStringArray(raw.checkpoints, 6),
+    aiCategory: plain(raw.aiCategory),
+    holeBoat: numeric(raw.holeBoat),
+    holeChance: numeric(raw.holeChance),
+    callout: plain(raw.callout),
+    kiinaComment: plain(raw.kiinaComment),
+    scores: safeScores(raw.scores),
     ...(isJustBefore ? {
       exhibition1: plain(raw.exhibition1),
       exhibition2: plain(raw.exhibition2),
       exhibition3: plain(raw.exhibition3),
     } : {}),
-    aiTickets: Array.isArray(raw.aiTickets) ? raw.aiTickets.filter((v) => typeof v === "string").slice(0, 20) : [],
+    aiTickets: safeStringArray(raw.aiTickets, 20),
     aiUnitStake: Number.isFinite(Number(raw.aiUnitStake)) ? Number(raw.aiUnitStake) : null,
     aiInvestment: Number.isFinite(Number(raw.aiInvestment)) ? Number(raw.aiInvestment) : null,
   };
@@ -63,8 +128,41 @@ function outputText(json) {
 }
 
 function parseObject(value) {
-  const cleaned = String(value || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const cleaned = String(value || "").trim().replace(/^\`\`\`(?:json)?\s*/i, "").replace(/\s*\`\`\`$/i, "");
   return JSON.parse(cleaned);
+}
+
+function characterRules(character, edition) {
+  const isJustBefore = edition === "just_before";
+  if (character === "ichika") {
+    return [
+      "- 一果はイン逃げ担当。1号艇中心の見立てを、数字と入力済み情報から論理的に説明する",
+      "- 『私がまず見たいのは』『私はここを確認したいです』など一人称を自然に使うが、各セクション1〜2回程度に抑える",
+      isJustBefore
+        ? "- 直前版で展示評価が入力されている場合は確認済み材料として扱う。展示前に時間を戻す表現は禁止"
+        : "- 前日版では展示気配・展示タイム・スタート展示・進入を確定情報として書かない",
+    ];
+  }
+  if (character === "hatsune") {
+    return [
+      "- 初音は女子戦担当。やわらかく親しみやすいが、幼すぎる言い回しや過度なハート表現は本文では控える",
+      "- 女子戦期待度、注目艇、各艇評価、チェックポイント、分類が入力されていれば、それぞれの役割を整理して説明する",
+      "- 女子選手の性格・実力・近況など、入力にない個人情報や評価を推測しない",
+      "- 『流れ』『気配』という言葉だけで曖昧に済ませず、入力済みのチェックポイントや数値に結びつける",
+      isJustBefore
+        ? "- 直前版でも具体的な展示情報が入力されていない場合、展示内容を作らない。『直前データで評価が更新された』程度にとどめる"
+        : "- 前日版では展示・進入・当日気配を確定情報として書かず、直前に確認する項目として扱う",
+    ];
+  }
+  return [
+    "- キイナは穴狙い担当。元気で少し攻めた口調にするが、煽りすぎず、穴を狙う理由を入力済みデータに結びつける",
+    "- 注目穴、穴狙い期待度、各艇評価、買い目が入力されていれば、どこに穴の余地を見るのかを簡潔に説明する",
+    "- 『絶対穴』『激アツ』『儲かる』など、根拠のない煽り・利益を期待させる断定は使わない",
+    "- 5号艇が入力されていないのに5アタマ前提で書かない。注目穴と買い目は入力どおり扱う",
+    isJustBefore
+      ? "- 直前版でも具体的な展示情報が入力されていない場合、展示内容を作らない。直前データから穴候補を整理する"
+      : "- 前日版では展示・進入・当日気配を確定情報として書かず、直前に確認する項目として扱う",
+  ];
 }
 
 export async function POST(request) {
@@ -74,9 +172,9 @@ export async function POST(request) {
   if (!apiKey) return NextResponse.json({ error: "OPENAI_API_KEY がVercelに設定されていません。" }, { status: 503 });
 
   const body = await request.json();
-  if (body?.character !== "ichika") {
-    return NextResponse.json({ error: "現在は一果新聞のみAI記事生成に対応しています。" }, { status: 400 });
-  }
+  const character = plain(body?.character);
+  const profile = PROFILES[character];
+  if (!profile) return NextResponse.json({ error: "対応していない新聞キャラクターです。" }, { status: 400 });
 
   const facts = safeFacts(body);
   if (!facts.date || !facts.course || !facts.raceNo) {
@@ -85,78 +183,54 @@ export async function POST(request) {
 
   const lengthKey = LENGTHS[body?.length] ? body.length : "standard";
   const target = LENGTHS[lengthKey];
-  const editionLabel = facts.edition === "just_before" ? "直前版" : "前日版";
+  const isJustBefore = facts.edition === "just_before";
+  const editionLabel = isJustBefore ? "直前版" : "前日版";
   const draft = body?.draft || {};
 
   const prompt = [
-    "あなたはBoatStrikersの一果本人として、読者に語りかける一人称の記事を書きます。",
-    "以下の確認済み入力データだけを根拠に、一果が自分の目線でレースを解説する読みやすい記事へ編集してください。",
+    `あなたはBoatStrikersの${profile.name}本人として、読者に語りかける一人称の記事を書きます。`,
+    `役割：${profile.role}。`,
+    `記事の中心：${profile.focus}。`,
+    "以下の確認済み入力データだけを根拠に、サイト記事とnote記事を読みやすく編集してください。",
     "",
-    "【絶対ルール】",
+    "【全キャラ共通の絶対ルール】",
     "- 入力にない数値・選手情報・モーター情報・展示情報・気象・進入・オッズ・結果を推測して追加しない",
     "- 数値、場名、レース番号、買い目は変更しない",
-    "- 根拠のない断定をしない",
-    "- ユーザー入力のコメントや見立てを、一般的・客観的に確立した事実のように格上げして言い換えない",
-    "- 入力コメントを使うときは『私はこう見ています』『私が注目したいのは』『今回はこう考えています』など、一果本人の一人称で自然に表現する",
-    "- 前日版では展示気配・展示タイム・スタート展示・進入の確定情報を本文に書かない。展示・進入は『直前版で確認したいこと』として未来形でのみ触れる",
-    "- 直前版では展示情報をすでに確認済みの前提で書く。『これから展示を見る』『スタート展示で見極める』『展示後も変わらないか確認する』など、展示前に戻る表現は禁止",
-    "- 直前版では、入力された展示評価を現在完了の材料として使い、『展示を見て〜と評価しています』『展示では〜がポイントでした』のように表現する",
-    "- 直前版で進入情報が入力されていない場合は、進入を確定情報として書かず、『進入に変化がないか確認する』程度にとどめる",
-    "- AI v2 / shadow / model / raw / score など内部用語を本文に出さない",
+    "- ユーザー入力のコメントを客観的事実へ格上げしない",
+    "- AI v2 / shadow / model / raw / score / headline / input / source / sourcePayload / prompt など内部用語を本文に出さない",
     "- [object Object] を絶対に出さない",
     "- 舟券購入や利益を保証する表現を使わない",
-    "- 一果は落ち着いて論理的、親しみやすい『先生・解説役』の語り口にする",
-    "- 記事本文は一果本人の一人称を中心にする。『私がまず見たいのは』『私はここを確認したいです』『私はこう考えています』を自然に使う",
-    "- 一人称は各セクションで1〜2回程度を目安にし、毎段落『私』から始めない",
-    "- 『私が』『私は』を連続する段落で繰り返さず、必要なところだけに使う",
-    "- 『今回の見立ては』『入力された評価』『内容になります』『〜とされています』『〜とされており』のような編集部・AI・第三者目線の言い回しは避ける",
-    "- headline / input / source / sourcePayload / prompt / model など、実装・内部データを連想させる語を本文に絶対に出さない",
-    "- 『現時点』『前日段階』『前日版では』『直前情報では』など、時点を示す言葉を必要以上に繰り返さない",
-    "- 注意書きや保留表現を各セクションで何度も入れず、必要な場所に一度だけ置く",
-    "- 一果は慎重だが迷いすぎない。判断を保留し続ける文章ではなく、今の評価を明確に示してから直前確認へつなげる",
-    "- 同じ内容の言い換えを繰り返さない",
-    "- 文章は現在の生成品質を保ちながら、重複表現を削って全体を10〜15%程度引き締める",
-    "- 1つの主張は原則1回だけ明確に書き、別セクションで同じ結論を言い換えて再掲しない",
-    "- 『数字だけで決まらない』『最終判断は直前で』など同種の注意表現は記事全体で1回程度にまとめる",
-    "- 同じ数値や結論を複数セクションで何度も反復しない。数値の詳説は主に『データから見るこのレース』へ集約する",
-    "- 『一果の注目ポイント』では結論と着眼点を2〜3段落で簡潔に示し、『データから見るこのレース』で数字を詳しく説明する。両方で同じ説明を繰り返さない",
-    "- 『データから見るこのレース』で数値を説明したら、その数値の意味を別の段落でもう一度説明しない",
-    "- 前日版で相手を決められない場合は『展示や進入などの直前情報を確認して整理したい』程度にとどめ、『直前の出走表』とは書かない",
-    "- 進入については『進入に変化がないか確認する』など簡潔に書き、『1号艇がどの位置からレースを始めるか』のような回りくどい表現を避ける",
-    "- 『一果のまとめ』は本文の再説明ではなく、一果が読者へ最後に伝える2〜3文程度の短いコメントとして締める",
-    "- 前日版と直前版は、最初の見出しと導入文だけで版の違いが分かるようにする",
-    "- 前日版の導入は『前日版の一果チェックです』など、予想の土台を整理する記事だと自然に伝える",
-    "- 直前版の導入は『展示後の直前版です』など、展示確認後の最終チェック記事だと自然に伝える",
-    "- 導入の版説明は1回だけにし、以降は『前日版』『直前版』を必要以上に繰り返さない",
+    "- 同じ数値・結論・注意書きを別セクションで何度も繰り返さない",
+    "- 文章は重複を削り、読み物としてテンポよく進める",
+    "- 一人称は自然に使うが、毎段落『私』から始めない",
+    "- 前日版と直前版は最初の見出しと導入文で違いが分かるようにする",
+    "- 前日版では未確認の当日情報を未来形で扱う",
+    "- 直前版は入力済みの直前データを材料にする。ただし入力されていない展示・進入・気象は作らない",
+    "- まとめは本文の再説明ではなく、2〜3文程度の短い締めにする",
     "- Markdown見出しは ##、箇条書きは - を使用する",
+    ...characterRules(character, facts.edition),
     "",
     "【サイト記事の構成】",
-    facts.edition === "just_before" ? "## 直前版｜展示後の一果チェック" : "## 前日版｜一果の注目ポイント",
-    facts.edition === "just_before" ? "## 展示データから見るこのレース" : "## 前日データから見るこのレース",
-    facts.edition === "just_before" ? "## 相手関係の最終チェック" : "## 直前版で確認したいこと",
-    facts.edition === "just_before" ? "## 一果の直前まとめ" : "## 一果の前日まとめ",
-    "目安：" + target.site + "。短い段落を中心にし、一果が読者へ話しかける自然な文章にする。安全性のための説明を長くしすぎず、読み物としてテンポよく進める。" +
-      (facts.edition === "just_before"
-        ? " 直前版では、展示前→展示後へ時間を巻き戻さず、確認済みの展示評価から最終チェックへ進む。"
-        : " 前日版では、未確認の展示・進入を未来形で扱い、直前版で何を確認するかへつなげる。"),
+    isJustBefore ? profile.firstBefore : profile.firstPrevious,
+    isJustBefore ? profile.dataBefore : profile.dataPrevious,
+    isJustBefore ? profile.thirdBefore : profile.thirdPrevious,
+    isJustBefore ? profile.summaryBefore : profile.summaryPrevious,
+    `目安：${target.site}。短い段落を中心にし、${profile.name}本人の自然な記事として仕上げる。`,
     "",
     "【note記事の構成】",
-    facts.edition === "just_before"
-      ? "導入文：『展示後の直前版です』という意味が自然に伝わる1〜2文で始める"
-      : "導入文：『前日版の一果チェックです』という意味が自然に伝わる1〜2文で始める",
-    facts.edition === "just_before" ? "## 今日の一果新聞｜直前版" : "## 今日の一果新聞｜前日版",
-    facts.edition === "just_before" ? "## 展示後に一果が見たポイント" : "## 前日版で一果が見たポイント",
-    facts.edition === "just_before" ? "## 展示データから読み解くレース" : "## 前日データから読み解くレース",
-    facts.edition === "just_before" ? "## 最後に確認したいこと" : "## 直前までに確認したいこと",
-    facts.edition === "just_before" ? "## 一果の直前まとめ" : "## 一果の前日まとめ",
+    isJustBefore
+      ? `導入文：『${profile.name}の直前版』であることが自然に伝わる1〜2文で始める`
+      : `導入文：『${profile.name}の前日版』であることが自然に伝わる1〜2文で始める`,
+    isJustBefore ? `## 今日の${profile.name}新聞｜直前版` : `## 今日の${profile.name}新聞｜前日版`,
+    isJustBefore ? profile.firstBefore : profile.firstPrevious,
+    isJustBefore ? profile.dataBefore : profile.dataPrevious,
+    isJustBefore ? profile.thirdBefore : profile.thirdPrevious,
+    isJustBefore ? profile.summaryBefore : profile.summaryPrevious,
     "最後にBoatStrikersサイトで出走表・直前版・過去新聞を確認できる旨を自然に案内する。",
-    "目安：" + target.note + "。サイト記事より読み物として丁寧にし、一果本人の解説記事として仕上げる。同じ数値や注意点の再説明は避ける。" +
-      (facts.edition === "just_before"
-        ? " 直前版は展示確認済みの記事として時系列を統一する。"
-        : " 前日版は展示前の記事として時系列を統一する。"),
+    `目安：${target.note}。サイト記事より丁寧にしつつ、同じ数値や注意点の再説明は避ける。`,
     "",
     "【確認済み入力データ】",
-    JSON.stringify({ ...facts, editionLabel }, null, 2),
+    JSON.stringify({ ...facts, editionLabel, character: profile.name }, null, 2),
     "",
     "【現在のテンプレート原稿】",
     JSON.stringify({
