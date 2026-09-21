@@ -2,17 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import {
+  getMemberAuthSnapshot,
+  getServerMemberAuthSnapshot,
+  subscribeMemberAuth,
+} from "../lib/memberAuthState";
 
 const BANNER = "/beta-membership-banner.webp";
 
 export default function BetaMemberPlacementBanner() {
   const pathname = usePathname();
   const [mountNode, setMountNode] = useState(null);
+  const memberAuth = useSyncExternalStore(
+    subscribeMemberAuth,
+    getMemberAuthSnapshot,
+    getServerMemberAuthSnapshot,
+  );
 
   useEffect(() => {
-    if (pathname !== "/" && pathname !== "/races") {
+    if (memberAuth.status !== "signed_out" || (pathname !== "/" && pathname !== "/races")) {
       setMountNode(null);
       return;
     }
@@ -61,9 +71,9 @@ export default function BetaMemberPlacementBanner() {
       if (mount?.parentNode) mount.parentNode.removeChild(mount);
       setMountNode(null);
     };
-  }, [pathname]);
+  }, [memberAuth.status, pathname]);
 
-  if (!mountNode) return null;
+  if (memberAuth.status !== "signed_out" || !mountNode) return null;
   const isRaces = pathname === "/races";
 
   return createPortal(
