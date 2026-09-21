@@ -8,6 +8,18 @@ import { getPublishedNewspapers } from "../../lib/newspapers";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export const metadata = {
+  title: "一果｜イン逃げ・1号艇分析・ボートレース攻略",
+  description: "BoatStrikers一果の専門ページ。イン逃げ、1号艇、進入、スタート、展示、相手関係の見方を解説し、新聞・研究記事・成績とあわせて確認できます。",
+  alternates: { canonical: "/ichika" },
+  openGraph: {
+    title: "一果｜イン逃げ・1号艇分析｜BoatStrikers",
+    description: "イン逃げを艇番だけで決めず、進入・スタート・展示・相手関係まで重ねて見るBoatStrikers一果の専門ページです。",
+    url: "/ichika",
+    type: "website",
+  },
+};
+
 const emptyIchikaResult = {
   raceCount: 0,
   hitCount: 0,
@@ -163,6 +175,25 @@ export default async function IchikaPage() {
 
       <section className="hero">
         <Image src="/7562660D-EB9C-4981-A1D1-789E6211DACA.png" alt="一果" width={1536} height={2048} className="heroImage" priority />
+      </section>
+
+      <section className="sectionCard pinkCard">
+        <h1>一果のイン逃げ研究室</h1>
+        <p>一果は「1号艇だから買う」ではなく、1コースに入れるか、スタートで外に先行されないか、展示で足落ちがないか、2〜4コースに強い攻め艇がいないかを順番に確認します。イン逃げは1号艇単体ではなく、相手との比較で見ます。</p>
+        <h2>イン逃げを見る5つのポイント</h2>
+        <ol>
+          <li><strong>進入：</strong>1号艇が1コースを確保できるか、前付けで深くならないか。</li>
+          <li><strong>スタート：</strong>平均ST・今節ST・スタート展示を隣接艇と比較する。</li>
+          <li><strong>展示：</strong>展示タイムだけでなく、ターン出口や直線の気配も確認する。</li>
+          <li><strong>攻め艇：</strong>2〜4コースに先に仕掛けそうな艇がいないかを見る。</li>
+          <li><strong>水面：</strong>風・波・場ごとの傾向で、通常のイン信頼度を上書きする。</li>
+        </ol>
+        <p>判断材料が揃わないレースは見送ることも含めて考えます。過去データは将来の結果を保証するものではなく、当日の公式情報と直前展示を優先します。</p>
+        <div className="sectionTitleRow">
+          <a className="pinkBtn" href="/guide/inside-course">1号艇とイン逃げの基本</a>
+          <a className="pinkBtn" href="/guide/course-entry">進入・前付けを学ぶ</a>
+          <a className="pinkBtn" href="/data-lab">DATA LABで検証を見る</a>
+        </div>
       </section>
 
       <RealtimeUpdates target="ichika" limit={5} />
