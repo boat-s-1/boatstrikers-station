@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getMemberEntitlementFromToken, MEMBER_ACCESS_COOKIE } from "../../lib/memberEntitlement";
 import styles from "./today.module.css";
+import visualStyles from "./todayVisual.module.css";
 import { getPublishedNewspapers } from "../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
@@ -53,8 +54,8 @@ export default async function TodayPage(){
   }
   const birthdayRacers=[...birthdayMap.values()];
 
-  return <main className={styles.page}>
-    <section className={styles.hero}>
+  return <main className={`${styles.page} ${visualStyles.page}`} data-page="today">
+    <section className={`${styles.hero} ${visualStyles.hero}`}>
       <div>
         <span className={styles.kicker}>BOATSTRIKERS DAILY</span>
         <h1>今日のBoatStrikers</h1>
@@ -66,7 +67,7 @@ export default async function TodayPage(){
       </div>
     </section>
 
-    <section className={styles.topicSection}>
+    <section className={`${styles.topicSection} ${visualStyles.panel}`}>
       <div className={styles.heading}><div><small>TODAY'S TOPICS</small><h2>今日のトピックス</h2></div></div>
       <div className={styles.topicGrid}>
         {birthdayRacers.length?<a href="#birthdays" className={`${styles.topicCard} ${styles.birthdayTopic}`}><span>🎂</span><div><small>HAPPY BIRTHDAY</small><strong>本日出走する誕生日選手</strong><p>{birthdayRacers.map(x=>x.name).join("・")}</p></div><b>↓</b></a>:null}
@@ -75,7 +76,7 @@ export default async function TodayPage(){
       </div>
     </section>
 
-    {birthdayRacers.length?<section className={styles.section} id="birthdays">
+    {birthdayRacers.length?<section className={`${styles.section} ${visualStyles.panel}`} id="birthdays">
       <div className={styles.heading}><div><small>TODAY'S BIRTHDAYS</small><h2>今日の誕生日レーサー</h2></div></div>
       <div className={styles.birthdayGrid}>{birthdayRacers.map(r=><article className={styles.birthdayCard} key={r.registration_no}>
         <div className={styles.birthdayHead}><span aria-hidden="true">🎂</span><div><strong>{r.name}</strong><small>登録 {Number(r.registration_no)} / {r.branch||"支部未登録"} / {r.racer_class||"-"}</small></div><b>{Number(r.birthday?.slice(5,7))}/{Number(r.birthday?.slice(8,10))}</b></div>
@@ -83,7 +84,7 @@ export default async function TodayPage(){
       </article>)}</div>
     </section>:null}
 
-    <section className={styles.section}>
+    <section className={`${styles.section} ${visualStyles.panel}`}>
       <div className={styles.heading}><div><small>TODAY'S BOATSTRIKERS</small><h2>今日のBoatStrikers</h2></div><Link href="/library">過去の記事を見る ›</Link></div>
       <div className={styles.paperGrid}>{todayPapers.length ? todayPapers.map((item)=>{const ch=CHARACTERS.find(x=>x.key===item.character_key)||CHARACTERS[0];return <Link href={`/newspapers/${item.slug}`} className={`${styles.paper} ${styles[ch.tone]}`} key={item.id}><span>{ch.emoji}</span><div><small>{ch.name}・{item.edition==="just_before"?"直前版":"前日版"}</small><strong>{item.course_name}{item.race_no}R</strong><p>{item.title}</p></div><b>読む ›</b></Link>}) : CHARACTERS.map(ch=><Link href={ch.href} className={`${styles.paper} ${styles[ch.tone]}`} key={ch.key}><span>{ch.emoji}</span><div><small>{ch.role}</small><strong>{ch.name}の新聞</strong><p>本日の新聞は準備中です</p></div><b>見る ›</b></Link>)}</div>
       <div className={styles.mediaGrid}>
@@ -93,7 +94,7 @@ export default async function TodayPage(){
       </div>
     </section>
 
-    {grades.length?<section className={styles.section}><div className={styles.heading}><div><small>EVENTS</small><h2>今日のグレード戦</h2></div></div><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
+    {grades.length?<section className={`${styles.section} ${visualStyles.panel}`}><div className={styles.heading}><div><small>EVENTS</small><h2>今日のグレード戦</h2></div></div><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
 
     <section className={styles.raceCta}><div><small>RACE CENTER</small><h2>レースを探す・見る</h2><p>全開催場の出走表、展示、AI注目、理論アラート、的中速報はレースページにまとめています。</p></div><Link href={`/races?date=${displayDate}`}>今日のレースを見る →</Link></section>
 

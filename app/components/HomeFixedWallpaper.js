@@ -6,7 +6,7 @@ const WALLPAPER = "data:image/webp;base64,UklGRgIpAABXRUJQVlA4IPYoAACQ/wCdASpAAb
 
 export default function HomeFixedWallpaper() {
   const pathname = usePathname();
-  if (pathname !== "/") return null;
+  if (pathname !== "/" && pathname !== "/today") return null;
 
   return (
     <>
@@ -30,6 +30,12 @@ export default function HomeFixedWallpaper() {
         }
 
         body > main.page {
+          position: relative !important;
+          z-index: 1;
+          background: transparent !important;
+        }
+
+        body > main[data-page="today"] {
           position: relative !important;
           z-index: 1;
           background: transparent !important;
