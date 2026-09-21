@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
-import { supabase } from "./bsc2/lib/supabaseClient";
+import { getMonthlyPublicPredictionResults } from "../lib/publicPredictionResults";
 import MemberSlider from "./MemberSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
@@ -16,122 +16,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 
-
-/* =========================
-   日本時間基準の今月範囲
-========================= */
-
-function getCurrentMonthRange() {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "numeric",
-  });
-
-  const parts = formatter.formatToParts(new Date());
-
-  const year = Number(
-    parts.find((part) => part.type === "year")?.value
-  );
-
-  const month = Number(
-    parts.find((part) => part.type === "month")?.value
-  );
-
-  const monthStart =
-    `${year}-${String(month).padStart(2, "0")}-01`;
-
-  let nextYear = year;
-  let nextMonth = month + 1;
-
-  if (nextMonth === 13) {
-    nextYear += 1;
-    nextMonth = 1;
-  }
-
-  const nextMonthStart =
-    `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
-
-  return {
-    monthStart,
-    nextMonthStart,
-  };
-}
-
-/* =========================
-   3人の今月の予想数を取得
-========================= */
-
-async function getMonthlyForecastStats() {
-  const emptyMembers = [
-    { name: "ichika", label: "一果", href: "/ichika", role: "イン逃げ担当", icon: "/results/icons/ichika.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
-    { name: "hatsune", label: "初音", href: "/hatsune", role: "女子戦担当", icon: "/results/icons/hatsune.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
-    { name: "kiina", label: "キイナ", href: "/kiina", role: "5アタマ担当", icon: "/results/icons/kiina.jpg", raceCount: 0, hitCount: 0, recoveryRate: 0 },
-  ];
-
-  const empty = {
-    totalRace: 0,
-    hitRace: 0,
-    hitRate: 0,
-    invest: 0,
-    payout: 0,
-    recoveryRate: 0,
-    maxPayout: 0,
-    members: emptyMembers,
-  };
-
-  if (!supabase) {
-    console.error("Supabase未接続です");
-    return empty;
-  }
-
-  try {
-    const { monthStart, nextMonthStart } = getCurrentMonthRange();
-    const { data, error } = await supabase
-      .from("bsc_results")
-      .select("category, invest, payout, hit")
-      .gte("race_date", monthStart)
-      .lt("race_date", nextMonthStart)
-      .in("category", ["一果", "初音", "キイナ"]);
-
-    if (error) throw error;
-
-    const rows = Array.isArray(data) ? data : [];
-    const totalRace = rows.length;
-    const hitRace = rows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
-    const invest = rows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
-    const payout = rows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
-    const maxPayout = rows.reduce((max, row) => Math.max(max, Number(row.payout || 0)), 0);
-
-    const members = emptyMembers.map((member) => {
-      const memberRows = rows.filter((row) => row.category === member.label);
-      const memberHits = memberRows.filter((row) => Boolean(row.hit) || Number(row.payout || 0) > 0).length;
-      const memberInvest = memberRows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
-      const memberPayout = memberRows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
-
-      return {
-        ...member,
-        raceCount: memberRows.length,
-        hitCount: memberHits,
-        recoveryRate: memberInvest > 0 ? (memberPayout / memberInvest) * 100 : 0,
-      };
-    });
-
-    return {
-      totalRace,
-      hitRace,
-      hitRate: totalRace > 0 ? (hitRace / totalRace) * 100 : 0,
-      invest,
-      payout,
-      recoveryRate: invest > 0 ? (payout / invest) * 100 : 0,
-      maxPayout,
-      members,
-    };
-  } catch (error) {
-    console.error("トップページ成績取得エラー:", error);
-    return empty;
-  }
-}
 
 const getHomeNoteData = unstable_cache(
   async () => {
@@ -274,7 +158,7 @@ export default async function Home() {
     siteNewspapers,
   ] = await Promise.all([
     getHomeNoteData(),
-    getMonthlyForecastStats(),
+    getMonthlyPublicPredictionResults(),
     getHomeCmsData(),
     getHomeRaceData(),
     getPublishedNewspapers({ limit: 3 }),
@@ -426,6 +310,21 @@ export default async function Home() {
     alt="今月の予想実績"
     className="homeTitleImage"
   />
+
+  <dl className="homeResultScope" aria-label="予想実績の集計条件">
+    <div>
+      <dt>集計期間</dt>
+      <dd>{results.periodLabel}</dd>
+    </div>
+    <div>
+      <dt>対象予想</dt>
+      <dd>{results.targetLabel}</dd>
+    </div>
+    <div>
+      <dt>最終更新</dt>
+      <dd>{results.lastUpdatedLabel} JST</dd>
+    </div>
+  </dl>
 
   {results.totalRace === 0 ? (
     <div className="resultEmptyState">
