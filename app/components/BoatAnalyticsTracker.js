@@ -8,6 +8,7 @@ import { trackBoatEvent, trackBoatEventOnce } from "../lib/analytics";
 const SIGNUP_MARKER = "bs_ga_signup_started_at";
 const LINE_MARKER = "bs_ga_line_link_started_at";
 const DISCORD_MARKER = "bs_ga_discord_link_started_at";
+const DISCORD_SIGNUP_SOURCE_KEY = "bs_ga_discord_signup_source";
 const FUNNEL_VIEW_MARKER = "bs_ga_funnel_last_path";
 const LINE_START_EVENT = "bs:analytics-line-link-start";
 
@@ -32,6 +33,10 @@ function hasRecentMarker(key, maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
 
 function clearMarker(key) {
   try { window.localStorage.removeItem(key); } catch {}
+}
+
+function readMarker(key) {
+  try { return window.localStorage.getItem(key) || ""; } catch { return ""; }
 }
 
 function trackFunnelPageView(pathname) {
@@ -74,7 +79,15 @@ export default function BoatAnalyticsTracker() {
       const text = String(submitter?.textContent || "").trim();
       if (!text.includes("登録") || text.includes("ログイン")) return;
       mark(SIGNUP_MARKER);
-      trackBoatEvent("sign_up_start", { method: "email", source_page: pathname });
+      const memberParams = new URLSearchParams(window.location.search);
+      const discordSource = memberParams.get("next") === "discord"
+        ? (memberParams.get("source") || readMarker(DISCORD_SIGNUP_SOURCE_KEY) || "discord_cta")
+        : "";
+      if (discordSource) {
+        try { window.localStorage.setItem(DISCORD_SIGNUP_SOURCE_KEY, discordSource); } catch {}
+        trackBoatEvent("discord_signup_start", { method: "email", source_page: pathname, placement: discordSource });
+      }
+      trackBoatEvent("sign_up_start", { method: "email", source_page: pathname, funnel_source: discordSource ? "discord" : "general" });
     };
 
     const onClick = (event) => {
@@ -147,7 +160,18 @@ export default function BoatAnalyticsTracker() {
       const userId = session.user.id;
 
       if (hasRecentMarker(SIGNUP_MARKER)) {
-        trackBoatEventOnce(`bs_ga_signup_complete_${userId}`, "sign_up", { method: "email" });
+        const discordSource = readMarker(DISCORD_SIGNUP_SOURCE_KEY);
+        trackBoatEventOnce(`bs_ga_signup_complete_${userId}`, "sign_up", {
+          method: "email",
+          funnel_source: discordSource ? "discord" : "general",
+        });
+        if (discordSource) {
+          trackBoatEventOnce(`bs_ga_discord_signup_complete_${userId}`, "discord_signup_complete", {
+            method: "email",
+            placement: discordSource,
+          });
+          clearMarker(DISCORD_SIGNUP_SOURCE_KEY);
+        }
         clearMarker(SIGNUP_MARKER);
       }
 
