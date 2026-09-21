@@ -12,6 +12,7 @@ import { getCoursesForRacesIndex } from "../lib/racesIndexLight";
 import styles from "./phase2.module.css";
 import CoursePortalCard from "./components/CoursePortalCard";
 import AlertFlash from "./components/AlertFlash";
+import DiscordNotificationCta from "./components/DiscordNotificationCta";
 import { getPublishedNewspapers } from "../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
@@ -329,6 +330,7 @@ export default async function RacesPage({ searchParams }) {
               );
             })}
           </div>
+          <DiscordNotificationCta source="ai_picks" tone="ai" />
         </section>
 
         <AlertFlash aiRaceKeys={aiRaceKeys} />
