@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./PublicSiteHeader.module.css";
+import {
+  getMemberAuthSnapshot,
+  getServerMemberAuthSnapshot,
+  requestMemberSignOut,
+  subscribeMemberAuth,
+} from "./lib/memberAuthState";
 
 const SOCIALS = [
   { key: "line", label: "LINE", icon: "LINE", href: "https://lin.ee/Pf3FEEQ", className: "line" },
@@ -65,6 +71,13 @@ export default function PublicSiteHeader() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [signOutBusy, setSignOutBusy] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
+  const memberAuth = useSyncExternalStore(
+    subscribeMemberAuth,
+    getMemberAuthSnapshot,
+    getServerMemberAuthSnapshot,
+  );
 
   const hidden = useMemo(() => {
     const isMagazineViewer = /^\/library\/(ichika|hatsune|kiina)-seminar\/[^/]+\/?$/.test(pathname);
@@ -74,6 +87,19 @@ export default function PublicSiteHeader() {
   const compact = pathname.startsWith("/races");
 
   useEffect(() => { setOpen(false); }, [pathname]);
+
+  async function handleSignOut() {
+    if (signOutBusy) return;
+    setSignOutBusy(true);
+    setSignOutError("");
+    try {
+      await requestMemberSignOut();
+    } catch (error) {
+      setSignOutError(error?.message || "ログアウトに失敗しました。");
+    } finally {
+      setSignOutBusy(false);
+    }
+  }
 
   useEffect(() => {
     const updateScrolled = () => setScrolled(window.scrollY > 56);
@@ -102,9 +128,22 @@ export default function PublicSiteHeader() {
         <Link href="/" prefetch={false} className={`${styles.logo} PublicSiteHeader_logo__glass`} aria-label="BoatStrikers ホーム">
           <span>BOAT</span><strong>STRIKERS</strong>
         </Link>
-        <button type="button" className={`${styles.menuButton} PublicSiteHeader_menuButton__glass ${open ? `${styles.menuButtonOpen} PublicSiteHeader_menuButtonOpen__glass` : ""}`} aria-label={open ? "メニューを閉じる" : "メニューを開く"} aria-expanded={open} aria-controls="boatstrikers-global-menu" onClick={() => setOpen((value) => !value)}>
-          <span /><span /><span />
-        </button>
+        <div className={styles.headerActions}>
+          {memberAuth.status === "signed_in" ? (
+            <Link href="/members" prefetch={false} className={`${styles.authPill} ${styles.authPillSignedIn}`} aria-label="ログイン中。会員メニューを開く">
+              <i aria-hidden="true" />ログイン中
+            </Link>
+          ) : memberAuth.status === "signed_out" ? (
+            <Link href="/members?mode=login" prefetch={false} className={styles.authPill}>
+              <span aria-hidden="true">♙</span>ログイン
+            </Link>
+          ) : (
+            <span className={`${styles.authPill} ${styles.authPillLoading}`} aria-label="ログイン状態を確認中">確認中</span>
+          )}
+          <button type="button" className={`${styles.menuButton} PublicSiteHeader_menuButton__glass ${open ? `${styles.menuButtonOpen} PublicSiteHeader_menuButtonOpen__glass` : ""}`} aria-label={open ? "メニューを閉じる" : "メニューを開く"} aria-expanded={open} aria-controls="boatstrikers-global-menu" onClick={() => setOpen((value) => !value)}>
+            <span /><span /><span />
+          </button>
+        </div>
       </header>
       <div className={`${styles.headerSpacer} ${compact ? styles.headerSpacerCompact : ""}`} aria-hidden="true" />
       <div className={`${styles.overlay} ${open ? styles.overlayOpen : ""}`} onClick={() => setOpen(false)} aria-hidden={!open} />
@@ -113,6 +152,36 @@ export default function PublicSiteHeader() {
           <div><p>BOATSTRIKERS MENU</p><h2>メニュー</h2></div>
           <button type="button" className={styles.closeButton} onClick={() => setOpen(false)} aria-label="メニューを閉じる">×</button>
         </div>
+        <section className={`${styles.memberSection} ${memberAuth.status === "signed_in" ? styles.memberSectionSignedIn : ""}`} aria-live="polite">
+          {memberAuth.status === "signed_in" ? (
+            <>
+              <div className={styles.memberHeading}>
+                <span className={styles.memberStatus}><i aria-hidden="true" />ログイン中</span>
+                <strong>{memberAuth.user?.displayName || "BoatStrikers メンバー"}</strong>
+                {memberAuth.user?.email ? <small>{memberAuth.user.email}</small> : null}
+              </div>
+              <div className={styles.memberActions}>
+                <Link href="/members" prefetch={false} className={styles.memberPrimaryAction}>マイページ</Link>
+                <button type="button" onClick={handleSignOut} disabled={signOutBusy}>{signOutBusy ? "ログアウト中…" : "ログアウト"}</button>
+              </div>
+              {signOutError ? <p className={styles.memberError} role="alert">{signOutError}</p> : null}
+            </>
+          ) : memberAuth.status === "signed_out" ? (
+            <>
+              <div className={styles.memberHeading}>
+                <span className={styles.memberGuest}>MEMBERS</span>
+                <strong>ゲスト</strong>
+                <small>無料会員になると、会員向け機能や通知を利用できます。</small>
+              </div>
+              <div className={styles.memberActions}>
+                <Link href="/members?mode=login" prefetch={false} className={styles.memberPrimaryAction}>ログイン</Link>
+                <Link href="/members?mode=signup" prefetch={false}>無料会員登録</Link>
+              </div>
+            </>
+          ) : (
+            <div className={styles.memberLoading}>ログイン状態を確認しています…</div>
+          )}
+        </section>
         <section className={styles.socialSection}>
           <div className={styles.socialHeading}><span>FOLLOW US</span><strong>最新情報をフォロー</strong></div>
           <div className={styles.socialGrid}>{SOCIALS.map((item) => <SocialButton item={item} key={item.key} />)}</div>

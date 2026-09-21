@@ -73,6 +73,8 @@ export default function MembersPage() {
 
   useEffect(() => {
     mountedRef.current = true;
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    if (requestedMode === "login" || requestedMode === "signup") setMode(requestedMode);
     if (!supabase) {
       setError("Supabaseの公開環境変数が設定されていません。");
       setAuthLoading(false);
