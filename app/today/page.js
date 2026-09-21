@@ -53,6 +53,8 @@ export default async function TodayPage(){
     birthdayMap.get(key).races.push({course_code:row.course_code,race_no:row.race_no,boat_no:row.boat_no});
   }
   const birthdayRacers=[...birthdayMap.values()];
+  const gradeNames = grades.slice(0, 3).map((g) => `${String(g.grade || "").toUpperCase()} ${COURSE_NAMES[Number(g.course_code)]}`).join("、");
+  const birthdayNames = birthdayRacers.slice(0, 4).map((r) => r.name).join("・");
 
   return <main className={`${styles.page} ${visualStyles.page}`} data-page="today">
     <section className={styles.hero} aria-label={`${formatDate(displayDate)}の今日のBoatStrikers`}>
@@ -65,6 +67,25 @@ export default async function TodayPage(){
       <div className={styles.heroBadges}>
         {birthdayRacers.length?<span>🎂 誕生日選手 <b>{birthdayRacers.length}人</b></span>:null}
         {grades.length?<span>🏆 グレード戦 <b>{grades.length}件</b></span>:null}
+      </div>
+    </section>
+
+    <section className={`${styles.editorialNote} ${visualStyles.panel}`} aria-labelledby="today-editorial-title">
+      <span>DAILY EDITORIAL</span>
+      <h1 id="today-editorial-title">{formatDate(displayDate)}のボートレースをチェック</h1>
+      <p>
+        BoatStrikers TODAYは、今日の開催情報をただ並べるだけでなく、レースを見る前に確認したい入口をまとめています。
+        {grades.length ? ` 本日は${gradeNames}${grades.length > 3 ? "など" : ""}のグレード戦を開催中です。` : " 本日のグレード戦情報は開催データに合わせて更新します。"}
+        {birthdayRacers.length ? ` また、本日出走する誕生日レーサーは${birthdayNames}${birthdayRacers.length > 4 ? "ほか" : ""}です。` : ""}
+      </p>
+      <p>
+        出走表では選手・モーター・展示を確認し、初めての方はガイド、過去傾向を見たい方はDATA LABや全国24場攻略もあわせてご覧ください。
+        直前情報や当日の水面条件によって見方は変わるため、固定的な傾向だけで判断しないのがBoatStrikersの基本です。
+      </p>
+      <div className={styles.editorialLinks}>
+        <Link href="/guide">初心者ガイド</Link>
+        <Link href="/data-lab">DATA LAB</Link>
+        <Link href="/library/stadiums">全国24場攻略</Link>
       </div>
     </section>
 
