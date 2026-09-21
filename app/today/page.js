@@ -57,7 +57,7 @@ export default async function TodayPage(){
   return <main className={`${styles.page} ${visualStyles.page}`} data-page="today">
     <section className={styles.hero} aria-label={`${formatDate(displayDate)}の今日のBoatStrikers`}>
       <img
-        src="/today/FC3BEB6E-E4B1-447B-B3F5-C04E3B6B2E55.png"
+        src="/today/8EB455BA-4012-4C9A-9E1C-793E5F59B7FF.png"
         alt="今日のBoatStrikers"
         className={styles.heroBanner}
         fetchPriority="high"
@@ -97,8 +97,15 @@ export default async function TodayPage(){
       </article>)}</div>
     </section>:null}
 
-    <section className={`${styles.section} ${visualStyles.panel}`}>
-      <div className={styles.heading}><div><small>TODAY'S BOATSTRIKERS</small><h2>今日のBoatStrikers</h2></div><Link href="/library">過去の記事を見る ›</Link></div>
+    <section className={`${styles.section} ${styles.bannerPanel} ${visualStyles.panel}`}>
+      <h2 className={styles.bannerHeading}>
+        <img
+          src="/today/FC3BEB6E-E4B1-447B-B3F5-C04E3B6B2E55.png"
+          alt="今日のBoatStrikers"
+          className={styles.sectionBanner}
+        />
+      </h2>
+      <div className={styles.sectionSubnav}><Link href="/library">過去の記事を見る ›</Link></div>
       <div className={styles.paperGrid}>{todayPapers.length ? todayPapers.map((item)=>{const ch=CHARACTERS.find(x=>x.key===item.character_key)||CHARACTERS[0];return <Link href={`/newspapers/${item.slug}`} className={`${styles.paper} ${styles[ch.tone]}`} key={item.id}><span>{ch.emoji}</span><div><small>{ch.name}・{item.edition==="just_before"?"直前版":"前日版"}</small><strong>{item.course_name}{item.race_no}R</strong><p>{item.title}</p></div><b>読む ›</b></Link>}) : CHARACTERS.map(ch=><Link href={ch.href} className={`${styles.paper} ${styles[ch.tone]}`} key={ch.key}><span>{ch.emoji}</span><div><small>{ch.role}</small><strong>{ch.name}の新聞</strong><p>本日の新聞は準備中です</p></div><b>見る ›</b></Link>)}</div>
       <div className={styles.mediaGrid}>
         <Link href="/data-lab"><span>📊</span><div><small>DATA LAB</small><strong>昨日を数字で振り返る</strong></div><b>›</b></Link>
@@ -117,6 +124,8 @@ export default async function TodayPage(){
       />
     </Link>
 
-    {!member.authenticated?<section className={styles.cta}><div><small>FREE MEMBER</small><h2>無料会員で、もっと便利に</h2><p>会員向け機能や通知を活用できます。</p></div><Link href="/members">無料会員になる →</Link></section>:<section className={styles.memberMini}><span>✓ 会員ログイン中</span><Link href="/members">会員メニュー ›</Link></section>}
+    {!member.authenticated?<Link className={styles.memberSignupBannerLink} href="/members" aria-label="無料会員登録">
+      <img src="/beta-membership-banner.webp" alt="BoatStrikers 無料会員登録" className={styles.memberSignupBanner} />
+    </Link>:null}
   </main>;
 }
