@@ -62,10 +62,16 @@ export default function NewspaperPublishingPanel({ character, value }) {
     } finally { setUploading(false); }
   }
 
+  const characterMeta = {
+    ichika: { name: "一果", editor: "ICHIKA AI EDITOR" },
+    hatsune: { name: "初音", editor: "HATSUNE AI EDITOR" },
+    kiina: { name: "キイナ", editor: "KIINA AI EDITOR" },
+  }[character] || { name: "新聞", editor: "AI EDITOR" };
+
   async function generateAiArticle() {
-    if (character !== "ichika" || aiBusy || busy || uploading) return;
+    if (aiBusy || busy || uploading) return;
     setAiBusy(true);
-    setAiMessage("一果の記事をAI編集部が作成しています…");
+    setAiMessage(characterMeta.name + "の記事をAI編集部が作成しています…");
     try {
       const response = await fetch("/api/admin/newspapers/ai-write", {
         method: "POST",
@@ -129,11 +135,11 @@ export default function NewspaperPublishingPanel({ character, value }) {
       <button type="button" onClick={save} disabled={busy || uploading}>{uploading ? "画像アップロード中…" : busy ? "保存中…" : status === "published" ? "サイトに公開" : "保存する"}</button>
     </div>
     {message && <p className={styles.message}>{message}</p>}
-    {character === "ichika" && <section className={styles.aiWriter}>
+    <section className={styles.aiWriter}>
       <div className={styles.aiWriterCopy}>
-        <span>ICHIKA AI EDITOR</span>
-        <h3>AIで一果の記事を詳しくする</h3>
-        <p>入力済みの数値・コメントだけを根拠に、サイト記事とnote記事を読み物として詳しく編集します。入力にない事実は追加しません。</p>
+        <span>{characterMeta.editor}</span>
+        <h3>AIで{characterMeta.name}の記事を詳しくする</h3>
+        <p>入力済みの数値・コメントだけを根拠に、{characterMeta.name}本人の文体でサイト記事とnote記事を編集します。入力にない事実は追加しません。</p>
       </div>
       <div className={styles.aiWriterControls}>
         <label>記事の長さ
@@ -153,10 +159,10 @@ export default function NewspaperPublishingPanel({ character, value }) {
         <b>サイト用要約</b>
         <textarea rows={4} value={effective.summary || ""} onChange={(e) => setAiResult((prev) => ({ ...prev, summary: e.target.value }))} />
       </div>}
-    </section>}
+    </section>
     <div className={styles.outputs}>
       <article><header><b>サイト記事</b><button onClick={() => copy(effective.articleBody, "site")}>{copied === "site" ? "コピー済み" : "コピー"}</button></header><strong>{generated.title}</strong><textarea readOnly={!aiResult} value={effective.articleBody} onChange={(e) => aiResult && setAiResult((prev) => ({ ...prev, articleBody: e.target.value }))} rows={16} /></article>
-      <article><header><b>note記事</b><button onClick={() => copy(`${generated.noteTitle}\n\n${generated.noteBody}`, "note")}>{copied === "note" ? "コピー済み" : "コピー"}</button></header><strong>{generated.noteTitle}</strong><textarea readOnly value={generated.noteBody} rows={12} /></article>
+      <article><header><b>note記事</b><button onClick={() => copy(`${effective.noteTitle}\n\n${effective.noteBody}`, "note")}>{copied === "note" ? "コピー済み" : "コピー"}</button></header><strong>{effective.noteTitle}</strong><textarea readOnly={!aiResult} value={effective.noteBody} onChange={(e) => aiResult && setAiResult((prev) => ({ ...prev, noteBody: e.target.value }))} rows={12} /></article>
       <article><header><b>X投稿</b><button onClick={() => copy(generated.xPost, "x")}>{copied === "x" ? "コピー済み" : "コピー"}</button></header><textarea readOnly value={generated.xPost} rows={7} /><small>{Array.from(generated.xPost).length}文字</small></article>
       <article><header><b>Shorts台本</b><button onClick={() => copy(generated.shortsScript, "shorts")}>{copied === "shorts" ? "コピー済み" : "コピー"}</button></header><textarea readOnly value={generated.shortsScript} rows={8} /></article>
     </div>
