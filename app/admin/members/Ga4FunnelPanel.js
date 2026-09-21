@@ -16,6 +16,14 @@ const TODAY_STAGES=[
   {key:"line",label:"LINE連携完了",event:"line_link_complete"},
 ];
 
+const DISCORD_STAGES=[
+  {key:"discordCta",label:"Discord CTA",event:"discord_cta_click"},
+  {key:"discordSignupStart",label:"Discord経由登録開始",event:"discord_signup_start"},
+  {key:"discordSignup",label:"Discord経由登録完了",event:"discord_signup_complete"},
+  {key:"discordStart",label:"Discord連携開始",event:"discord_link_start"},
+  {key:"discordComplete",label:"Discord連携完了",event:"discord_link_complete"},
+];
+
 const LEGACY_STAGES=[
   {key:"visitors",label:"訪問者",event:null},
   {key:"race",label:"レース閲覧",event:"race_entry_click"},
@@ -26,7 +34,7 @@ const LEGACY_STAGES=[
   {key:"premium",label:"PREMIUM導線",event:"premium_cta_click"},
 ];
 
-const EVENT_NAMES=[...new Set([...TODAY_STAGES,...LEGACY_STAGES].map(stage=>stage.event).filter(Boolean))];
+const EVENT_NAMES=[...new Set([...TODAY_STAGES,...DISCORD_STAGES,...LEGACY_STAGES].map(stage=>stage.event).filter(Boolean))];
 
 function enc(value){return Buffer.from(value).toString("base64url");}
 
@@ -71,6 +79,7 @@ async function loadPeriod(token,startDate){
   return {
     visitors,sessions,
     todayStages:buildStages(TODAY_STAGES,map),
+    discordStages:buildStages(DISCORD_STAGES,map),
     legacyStages:buildStages(LEGACY_STAGES,map,visitors,sessions),
   };
 }
@@ -106,6 +115,9 @@ function Period({title,data}){
     <div className={styles.periodTitle}><strong>{title}・TODAY → 会員登録</strong><span>GA4 event count</span></div>
     <Funnel stages={data.todayStages} mode="events" />
     <p className={styles.note}>※ 前段階比はイベント件数の単純比率による参考CVRです。同一ユーザーが順番に進んだことを保証するコホートファネルではありません。</p>
+    <div className={styles.periodTitle}><strong>{title}・Discord通知ファネル</strong><span>GA4 event count</span></div>
+    <Funnel stages={data.discordStages} mode="events" />
+    <p className={styles.note}>※ CTAから無料会員登録、Discord連携完了までのイベント件数です。</p>
     <div className={styles.periodTitle}><strong>{title}・従来ファネル</strong><span>GA4 unique users</span></div>
     <Funnel stages={data.legacyStages} mode="users" sessions={data.sessions} />
   </>;
@@ -114,7 +126,7 @@ function Period({title,data}){
 export default async function Ga4FunnelPanel(){
   const data=await loadGa4();
   return <section className={styles.section}>
-    <div className={styles.heading}><div><span>GA4 FUNNEL</span><h2>TODAY → 会員化ファネル</h2><p>TODAY閲覧からレース、無料会員CTA、登録、TODAY再訪、LINE連携までを匿名イベントで確認します。従来ファネルも下段に維持します。</p></div><div className={styles.measurement}>G-DXF6FFZ574</div></div>
+    <div className={styles.heading}><div><span>GA4 FUNNEL</span><h2>TODAY・Discord会員化ファネル</h2><p>TODAY閲覧から会員登録に加え、Discord CTA、Discord経由登録、連携完了までを匿名イベントで確認します。</p></div><div className={styles.measurement}>G-DXF6FFZ574</div></div>
     {!data.configured&&<div className={styles.notice}><strong>GA4読み取り設定待ち</strong><p>画面は実装済みです。Vercelに <code>GA4_CLIENT_EMAIL</code> と <code>GA4_PRIVATE_KEY</code> を設定すると自動で実データ表示に切り替わります。Property ID は {PROPERTY_ID} を使用します。</p></div>}
     {data.error&&<div className={styles.error}>GA4取得エラー: {data.error}</div>}
     {data.week&&<><Period title="直近7日" data={data.week}/><Period title="直近30日" data={data.month}/><p className={styles.note}>※ GA4へメールアドレス、LINE user ID、Supabase user ID、token、氏名、LINE連携コードは送信しません。既存イベント名は維持しています。</p></>}
