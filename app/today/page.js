@@ -107,7 +107,7 @@ export default async function TodayPage(){
       </div>
     </section>
 
-    {grades.length?<section className={`${styles.section} ${styles.bannerPanel} ${visualStyles.panel}`}><h2 className={styles.bannerHeading}><img src="/today/B36F7AF4-D8EC-477D-B925-E58308AC100D.png" alt="今日のグレード戦" className={styles.sectionBanner} /></h2><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
+    {grades.length?<section className={`${styles.section} ${styles.bannerPanel} ${visualStyles.panel}`}><h2 className={styles.bannerHeading}><img src="/today/B36F7AF4-D8EC-477D-B925-E58308AC100D.png" alt="今日のグレード戦" className={`${styles.sectionBanner} ${styles.gradeBanner}`} /></h2><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
 
     <section className={styles.raceCta}><div><small>RACE CENTER</small><h2>レースを探す・見る</h2><p>全開催場の出走表、展示、AI注目、理論アラート、的中速報はレースページにまとめています。</p></div><Link href={`/races?date=${displayDate}`}>今日のレースを見る →</Link></section>
 

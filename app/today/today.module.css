@@ -89,6 +89,10 @@
   object-position: center;
 }
 
+.bannerPanel .gradeBanner {
+  object-position: center 67%;
+}
+
 @media (max-width: 719px) {
   .bannerPanel .bannerHeading {
     margin: 0 -14px 14px;
