@@ -150,3 +150,49 @@
     border-radius: 0;
   }
 }
+
+
+.editorialNote {
+  margin: 14px 12px;
+  padding: 20px;
+  border-radius: 18px;
+  line-height: 1.8;
+}
+
+.editorialNote > span {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  opacity: 0.72;
+}
+
+.editorialNote h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  line-height: 1.35;
+}
+
+.editorialNote p {
+  margin: 8px 0;
+}
+
+.editorialLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.editorialLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(20, 50, 90, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+  text-decoration: none;
+}
