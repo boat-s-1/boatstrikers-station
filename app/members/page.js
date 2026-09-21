@@ -27,6 +27,7 @@ export default function MembersPage() {
   const [message, setMessage] = useState("");
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [recoveryMode, setRecoveryMode] = useState(false);
+  const [nextStep, setNextStep] = useState("");
   const [lineBusy, setLineBusy] = useState(false);
   const [lineCode, setLineCode] = useState("");
   const [lineExpiresAt, setLineExpiresAt] = useState("");
@@ -73,8 +74,11 @@ export default function MembersPage() {
 
   useEffect(() => {
     mountedRef.current = true;
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    const memberParams = new URLSearchParams(window.location.search);
+    const requestedMode = memberParams.get("mode");
+    const requestedNextStep = memberParams.get("next");
     if (requestedMode === "login" || requestedMode === "signup") setMode(requestedMode);
+    if (requestedNextStep === "discord") setNextStep("discord");
     if (!supabase) {
       setError("Supabaseの公開環境変数が設定されていません。");
       setAuthLoading(false);
@@ -138,20 +142,35 @@ export default function MembersPage() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { display_name: displayName.trim(), terms_accepted: true, privacy_accepted: true } },
+          options: {
+            data: { display_name: displayName.trim(), terms_accepted: true, privacy_accepted: true },
+            ...(nextStep === "discord" && typeof window !== "undefined"
+              ? { emailRedirectTo: `${window.location.origin}/members?mode=login&next=discord&source=email_confirmation` }
+              : {}),
+          },
         });
         if (signUpError) throw signUpError;
         setRegistrationComplete(true);
         if (data?.session) {
           await applySession(data.session);
+          if (nextStep === "discord") {
+            window.location.assign("/members/discord?from=signup");
+            return;
+          }
           setMessage("無料会員登録が完了しました。TODAYから今日のレースを確認できます。");
         } else {
-          setMessage("確認メールを送信しました。メール確認後にログインすると公式LINE連携も利用できます。");
+          setMessage(nextStep === "discord"
+            ? "確認メールを送信しました。メール確認後にログインすると、そのままDiscord連携へ進みます。"
+            : "確認メールを送信しました。メール確認後にログインすると公式LINE連携も利用できます。");
         }
       } else {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (loginError) throw loginError;
         await applySession(data?.session || null);
+        if (nextStep === "discord") {
+          window.location.assign("/members/discord?from=login");
+          return;
+        }
         setMessage("ログインしました。TODAYから今日の情報を確認できます。");
       }
     } catch (err) {
@@ -263,10 +282,10 @@ export default function MembersPage() {
       <div className={styles.introHead}><span>FREE MEMBER</span><h2>無料会員でできること</h2><p>現在提供している会員機能だけを案内しています。</p></div>
       <div className={styles.benefitGrid}>
         <article><b>01</b><strong>会員メニュー</strong><span>ログイン後、AI成績や会員向け導線をまとめて利用できます。</span></article>
-        <article><b>02</b><strong>公式LINE連携</strong><span>会員IDとBoatStrikers公式LINEを連携できます。</span></article>
-        <article><b>03</b><strong>通知設定</strong><span>リアルタイム通知は既存のDiscord連携ページから設定できます。</span></article>
+        <article><b>02</b><strong>Discordリアルタイム通知</strong><span>AI注目・理論成立・新聞公開をキャラクター別に受け取れます。</span></article>
+        <article><b>03</b><strong>公式LINE連携</strong><span>無料情報や重要なお知らせを受け取るために、あとから連携できます。</span></article>
       </div>
-      <div className={styles.startFlow}><strong>登録後の使い方</strong><span>① TODAYを見る　→　② 気になるレースを見る　→　③ 必要ならLINE連携・通知設定</span></div>
+      <div className={styles.startFlow}><strong>登録後の使い方</strong><span>{nextStep === "discord" ? "① 無料会員登録　→　② Discord連携　→　③ 通知を選ぶ" : "① TODAYを見る　→　② 気になるレースを見る　→　③ Discord通知を設定"}</span></div>
     </section>}
 
     {authLoading && <section className={styles.authStatus} aria-live="polite"><span className={styles.spinner} aria-hidden="true" /><div><strong>ログイン状態を確認しています</strong><small>ページ全体を待たせず、認証部分だけ確認しています。</small></div></section>}
@@ -298,7 +317,7 @@ export default function MembersPage() {
 
       <section className={styles.note}><strong>アカウント管理</strong><p><Link href="/terms">利用規約</Link> ・ <Link href="/privacy">プライバシーポリシー</Link></p><p>退会するとログイン情報とBoatStrikers会員プロフィールが削除されます。この操作は取り消せません。</p><div className={styles.actions}><button type="button" onClick={withdraw} disabled={busy}>{busy ? "処理中..." : "退会する"}</button></div></section>
     </>
-    : registrationComplete ? <section className={styles.completeCard}><span className={styles.completeIcon}>✓</span><p className={styles.kicker}>REGISTRATION COMPLETE</p><h2>無料会員登録ありがとうございます</h2><p>まずはTODAYを見て、気になるレースを開いてみてください。</p><div className={styles.completeActions}><Link href="/today" className={styles.todayButton}>今日のBoatStrikers TODAYを見る →</Link><button type="button" onClick={() => { setMode("login"); setRegistrationComplete(false); }}>ログインして公式LINEを連携する</button></div><div className={styles.startFlow}><strong>ここからの3ステップ</strong><span>① TODAYを見る　→　② 気になるレースを見る　→　③ 必要ならLINE連携・通知設定</span></div></section>
+    : registrationComplete ? <section className={styles.completeCard}><span className={styles.completeIcon}>✓</span><p className={styles.kicker}>REGISTRATION COMPLETE</p><h2>無料会員登録ありがとうございます</h2><p>{nextStep === "discord" ? "メール確認後にログインして、Discord通知を設定してください。" : "まずはTODAYを見て、気になるレースを開いてみてください。"}</p><div className={styles.completeActions}>{nextStep === "discord" ? <button type="button" onClick={() => { setMode("login"); setRegistrationComplete(false); }}>ログインしてDiscord連携へ →</button> : <Link href="/today" className={styles.todayButton}>今日のBoatStrikers TODAYを見る →</Link>}<Link href="/members/discord" className={styles.secondaryButton}>Discord通知について見る</Link></div><div className={styles.startFlow}><strong>ここからの3ステップ</strong><span>① ログイン　→　② Discord連携　→　③ 受け取る通知を選ぶ</span></div></section>
     : !authLoading ? <section className={styles.authWrap}>
       <div className={styles.tabs}><button type="button" className={mode === "signup" ? styles.activeTab : ""} onClick={() => changeMode("signup")}>無料会員登録</button><button type="button" className={mode === "login" ? styles.activeTab : ""} onClick={() => changeMode("login")}>ログイン</button></div>
       {mode === "forgot" ? <form onSubmit={requestPasswordReset} className={styles.form}><div className={styles.formHead}><span>PASSWORD RESET</span><h2>パスワードを忘れた方</h2><p>登録したメールアドレスへ再設定リンクを送ります。</p></div><label>メールアドレス<input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></label><button className={styles.submit} disabled={busy}>{busy ? "送信中..." : "再設定メールを送る"}</button><button type="button" className={styles.textButton} onClick={() => changeMode("login")}>ログイン画面へ戻る</button></form>
