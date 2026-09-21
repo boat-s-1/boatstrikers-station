@@ -8,6 +8,18 @@ import { getPublishedNewspapers } from "../../lib/newspapers";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export const metadata = {
+  title: "初音｜女子戦・女子レーサー分析・ボートレース攻略",
+  description: "BoatStrikers初音の専門ページ。女子戦を級別だけで決めず、コース、今節成績、スタート、モーター、展示の順に確認する見方を解説します。",
+  alternates: { canonical: "/hatsune" },
+  openGraph: {
+    title: "初音｜女子戦・女子レーサー分析｜BoatStrikers",
+    description: "女子戦をコース・今節成績・スタート・モーター・展示から整理するBoatStrikers初音の専門ページです。",
+    url: "/hatsune",
+    type: "website",
+  },
+};
+
 const emptyHatsuneResult = {
   raceCount: 0,
   hitCount: 0,
@@ -130,6 +142,25 @@ export default async function HatsunePage() {
 
       <section className="hero">
         <Image src="/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png" alt="初音" width={1536} height={864} className="heroImage" priority />
+      </section>
+
+      <section className="sectionCard purpleCard">
+        <h1>初音の女子戦研究室</h1>
+        <p>初音は女子戦を「女子レーサーだから」という一括りでは見ません。まず艇番と実進入、選手の級別・当地やコース成績、今節のスタート、モーターと展示を分けて確認し、その日のレース条件に合わせて整理します。</p>
+        <h2>女子戦で確認したい5つのポイント</h2>
+        <ol>
+          <li><strong>コース：</strong>艇番と実際の進入が同じか、前付けや深い進入がないか。</li>
+          <li><strong>今節の状態：</strong>着順だけでなくSTや展示の変化も並べて見る。</li>
+          <li><strong>スタート：</strong>平均値と今回の展示STが大きく違っていないか確認する。</li>
+          <li><strong>モーター：</strong>2連率だけで決めず、当日の直線・ターン気配と一致しているかを見る。</li>
+          <li><strong>比較：</strong>人気や級別だけでなく、同じレースの6艇を相対的に比べる。</li>
+        </ol>
+        <p>ニュースや選手情報は背景を知る材料として使い、実際の予想では公式の出走表・展示・気象情報を優先します。</p>
+        <div className="sectionTitleRow">
+          <a className="purpleBtn" href="/guide/race-card">出走表の見方</a>
+          <a className="purpleBtn" href="/guide/series-performance">今節成績の見方</a>
+          <a className="purpleBtn" href="/news?category=women">女子戦ニュースを見る</a>
+        </div>
       </section>
 
       <RealtimeUpdates target="hatsune" limit={5} />
