@@ -16,10 +16,20 @@ export const revalidate = 0;
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const item = await getHatsuneNewsById(id);
-  if (!item) return { title: "BoatStrikers NEWS" };
+  if (!item) return { title: "BoatStrikers NEWS", robots: { index: false, follow: true } };
+
+  const summary = cleanSummary(item);
+  const body = !isGenericCopy(item.article_body) ? String(item.article_body || "").replace(/\s+/g, " ").trim() : "";
+  const hasEditorialValue =
+    (String(item.source_type || "").toLowerCase() === "bs_data" && (summary.length >= 40 || body.length >= 80)) ||
+    summary.length >= 80 ||
+    body.length >= 180;
+
   return {
     title: `${item.title} | BoatStrikers NEWS`,
-    description: item.summary || "BoatStrikersがボートレースの最新ニュースをわかりやすくまとめます。",
+    description: summary || "BoatStrikersがボートレースの最新ニュースをわかりやすくまとめます。",
+    alternates: { canonical: `/news/${item.id}` },
+    robots: hasEditorialValue ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
