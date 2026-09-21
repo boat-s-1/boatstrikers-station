@@ -98,7 +98,7 @@ export default async function TodayPage(){
     </section>:null}
 
     <section className={`${styles.section} ${styles.bannerPanel} ${visualStyles.panel}`}>
-      <h2 className={styles.bannerHeading}>
+      <h2 className={`${styles.bannerHeading} ${styles.todayContentHeading}`}>
         <img
           src="/today/FC3BEB6E-E4B1-447B-B3F5-C04E3B6B2E55.png"
           alt="今日のBoatStrikers"
