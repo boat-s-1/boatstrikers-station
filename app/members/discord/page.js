@@ -22,6 +22,7 @@ export default function DiscordMemberPage(){
   const [busy,setBusy]=useState(false);
   const [prefBusy,setPrefBusy]=useState("");
   const [error,setError]=useState("");
+  const [linkedReturn,setLinkedReturn]=useState(false);
 
   async function loadPreferences(nextSession){
     if(!nextSession)return;
@@ -43,6 +44,7 @@ export default function DiscordMemberPage(){
   }
 
   useEffect(()=>{
+    setLinkedReturn(new URLSearchParams(window.location.search).get("discord")==="linked");
     if(!supabase){setLoading(false);setError("会員機能の設定を確認できませんでした。");return;}
     let alive=true;
     supabase.auth.getSession().then(({data})=>{
@@ -101,10 +103,12 @@ export default function DiscordMemberPage(){
 
       <section style={{marginTop:22,padding:"28px 22px",borderRadius:24,background:"linear-gradient(135deg,#19245a,#5865F2)",boxShadow:"0 20px 50px rgba(0,0,0,.3)"}}>
         <div style={{fontSize:13,fontWeight:800,letterSpacing:".14em",opacity:.8}}>BOATSTRIKERS β PREMIUM / PREMIUM</div>
-        <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord リアルタイム通知</h1>
+        <h1 style={{fontSize:"clamp(28px,7vw,44px)",margin:"8px 0"}}>Discord通知を連携・設定</h1>
         <p style={{lineHeight:1.8,margin:0}}>{DISCORD_GUIDE.description}</p>
         <div style={{marginTop:14,padding:"10px 12px",borderRadius:12,background:"rgba(255,255,255,.12)",fontSize:12,fontWeight:800,lineHeight:1.7}}>{CURRENT_BETA_MESSAGE}</div>
       </section>
+
+      {linkedReturn&&<section role="status" style={{marginTop:18,padding:"16px 18px",border:"1px solid #2d8b62",borderRadius:18,background:"#102c24",color:"#b9f6d8"}}><strong style={{display:"block",fontSize:17}}>✓ Discord連携が完了しました</strong><span style={{display:"block",marginTop:5,fontSize:13,lineHeight:1.6}}>続けて、下から受け取りたい通知を選んでください。</span></section>}
 
       <section style={{marginTop:18,padding:18,border:"1px solid #273c59",borderRadius:20,background:"#0d1a2b"}}>
         <div style={{fontSize:11,fontWeight:900,letterSpacing:".12em",color:"#8bbcff"}}>NOTIFICATION GUIDE</div>
@@ -144,6 +148,7 @@ export default function DiscordMemberPage(){
           </div>
 
           <p style={{fontSize:13,color:"#93a6bd",lineHeight:1.7}}>初期設定は3種類すべてONです。設定はいつでも変更できます。</p>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:14}}><Link href="/races" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 16px",borderRadius:12,background:"#5865F2",color:"white",fontWeight:900,textDecoration:"none"}}>今日のレースを見る →</Link><Link href="/today" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 16px",borderRadius:12,background:"#26384f",color:"white",fontWeight:800,textDecoration:"none"}}>TODAYへ戻る</Link></div>
           <button onClick={unlink} disabled={busy} style={{padding:"12px 16px",borderRadius:12,border:"1px solid #40516c",background:"transparent",color:"white",fontWeight:700}}>Discord連携を解除</button>
         </>:<>
           <h2>{status?.eligible?"Discordを連携する":"β PREMIUM / PREMIUM対象会員限定です"}</h2>
