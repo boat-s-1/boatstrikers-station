@@ -19,6 +19,29 @@ const SOCIALS = [
   { key: "tiktok", label: "TikTok", icon: "♪", href: process.env.NEXT_PUBLIC_TIKTOK_URL || "", className: "tiktok" },
 ];
 
+const HEADER_LOGOS = [
+  { match: (path) => path.startsWith("/members") || path.startsWith("/membership"), key: "members", label: "メンバー" },
+  { match: (path) => path.startsWith("/today"), key: "today", label: "TODAY" },
+  { match: (path) => path.startsWith("/races"), key: "races", label: "出走表" },
+  { match: (path) => path.startsWith("/results") || path.startsWith("/ai-results"), key: "results", label: "成績" },
+  { match: (path) => path.startsWith("/ichika"), key: "ichika", label: "一果" },
+  { match: (path) => path.startsWith("/hatsune"), key: "hatsune", label: "初音" },
+  { match: (path) => path.startsWith("/kiina"), key: "kiina", label: "キイナ" },
+  { match: (path) => path.startsWith("/library"), key: "library", label: "図書館" },
+  { match: (path) => path.startsWith("/radio"), key: "radio", label: "ラジオ" },
+  { match: (path) => path.startsWith("/schedule"), key: "schedule", label: "番組表" },
+  { match: (path) => path.startsWith("/comic"), key: "comic", label: "漫画" },
+];
+
+function getHeaderLogo(pathname) {
+  const logo = HEADER_LOGOS.find(({ match }) => match(pathname));
+  const key = logo?.key || "home";
+  return {
+    src: `/header-logos/${key}.webp`,
+    label: logo?.label || "ホーム",
+  };
+}
+
 const GROUPS = [
   {
     eyebrow: "TODAY",
@@ -78,6 +101,7 @@ export default function PublicSiteHeader() {
     getMemberAuthSnapshot,
     getServerMemberAuthSnapshot,
   );
+  const headerLogo = getHeaderLogo(pathname);
 
   const hidden = useMemo(() => {
     const isMagazineViewer = /^\/library\/(ichika|hatsune|kiina)-seminar\/[^/]+\/?$/.test(pathname);
@@ -125,7 +149,13 @@ export default function PublicSiteHeader() {
   return (
     <>
       <header className={`${styles.header} PublicSiteHeader_header__glass ${compact ? `${styles.compact} PublicSiteHeader_compact__glass` : ""} ${scrolled && !open ? "PublicSiteHeader_scrolled__glass" : ""}`}>
-        <Link href="/" prefetch={false} className={`${styles.logo} PublicSiteHeader_logo__glass`} aria-label="BoatStrikers ホーム">
+        <Link
+          href="/"
+          prefetch={false}
+          className={`${styles.logo} PublicSiteHeader_logo__glass`}
+          aria-label={`BoatStrikers ${headerLogo.label}ロゴ。ホームへ戻る`}
+          style={{ "--header-logo-image": `url("${headerLogo.src}")` }}
+        >
           <span>BOAT</span><strong>STRIKERS</strong>
         </Link>
         <div className={styles.headerActions}>
