@@ -55,12 +55,13 @@ export default async function TodayPage(){
   const birthdayRacers=[...birthdayMap.values()];
 
   return <main className={`${styles.page} ${visualStyles.page}`} data-page="today">
-    <section className={`${styles.hero} ${visualStyles.hero}`}>
-      <div>
-        <span className={styles.kicker}>BOATSTRIKERS DAILY</span>
-        <h1>今日のBoatStrikers</h1>
-        <p>{formatDate(displayDate)}の出来事と新着コンテンツ</p>
-      </div>
+    <section className={styles.hero} aria-label={`${formatDate(displayDate)}の今日のBoatStrikers`}>
+      <img
+        src="/today/8EB455BA-4012-4C9A-9E1C-793E5F59B7FF.png"
+        alt="今日のBoatStrikers"
+        className={styles.heroBanner}
+        fetchPriority="high"
+      />
       <div className={styles.heroBadges}>
         {birthdayRacers.length?<span>🎂 誕生日選手 <b>{birthdayRacers.length}人</b></span>:null}
         {grades.length?<span>🏆 グレード戦 <b>{grades.length}件</b></span>:null}
@@ -68,7 +69,13 @@ export default async function TodayPage(){
     </section>
 
     <section className={`${styles.topicSection} ${visualStyles.panel}`}>
-      <div className={styles.heading}><div><small>TODAY'S TOPICS</small><h2>今日のトピックス</h2></div></div>
+      <h2 className={styles.bannerHeading}>
+        <img
+          src="/today/D83A0221-B4E5-4F4E-876B-7512587225B9.png"
+          alt="今日のトピックス"
+          className={styles.sectionBanner}
+        />
+      </h2>
       <div className={styles.topicGrid}>
         {birthdayRacers.length?<a href="#birthdays" className={`${styles.topicCard} ${styles.birthdayTopic}`}><span>🎂</span><div><small>HAPPY BIRTHDAY</small><strong>本日出走する誕生日選手</strong><p>{birthdayRacers.map(x=>x.name).join("・")}</p></div><b>↓</b></a>:null}
         {grades.slice(0,2).map((g,i)=><Link className={styles.topicCard} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>🏆</span><div><small>{String(g.grade).toUpperCase()} / {COURSE_NAMES[Number(g.course_code)]}</small><strong>{g.title||"グレードレース開催中"}</strong><p>本日の開催情報を見る</p></div><b>›</b></Link>)}
@@ -77,7 +84,13 @@ export default async function TodayPage(){
     </section>
 
     {birthdayRacers.length?<section className={`${styles.section} ${visualStyles.panel}`} id="birthdays">
-      <div className={styles.heading}><div><small>TODAY'S BIRTHDAYS</small><h2>今日の誕生日レーサー</h2></div></div>
+      <h2 className={styles.bannerHeading}>
+        <img
+          src="/today/07588D39-D6E8-45A9-8DAE-08D1CF90BF2D.png"
+          alt="今日の誕生日レーサー"
+          className={styles.sectionBanner}
+        />
+      </h2>
       <div className={styles.birthdayGrid}>{birthdayRacers.map(r=><article className={styles.birthdayCard} key={r.registration_no}>
         <div className={styles.birthdayHead}><span aria-hidden="true">🎂</span><div><strong>{r.name}</strong><small>登録 {Number(r.registration_no)} / {r.branch||"支部未登録"} / {r.racer_class||"-"}</small></div><b>{Number(r.birthday?.slice(5,7))}/{Number(r.birthday?.slice(8,10))}</b></div>
         <div className={styles.birthdayRaces}>{r.races.map((race,i)=><Link key={`${race.course_code}-${race.race_no}-${i}`} href={raceHref(race.course_code,race.race_no,displayDate)}><span>{COURSE_NAMES[Number(race.course_code)]} {Number(race.race_no)}R</span><small>{Number(race.boat_no)}号艇</small><b>出走表 →</b></Link>)}</div>
@@ -94,7 +107,7 @@ export default async function TodayPage(){
       </div>
     </section>
 
-    {grades.length?<section className={`${styles.section} ${visualStyles.panel}`}><div className={styles.heading}><div><small>EVENTS</small><h2>今日のグレード戦</h2></div></div><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
+    {grades.length?<section className={`${styles.section} ${visualStyles.panel}`}><h2 className={styles.bannerHeading}><img src="/today/B36F7AF4-D8EC-477D-B925-E58308AC100D.png" alt="今日のグレード戦" className={styles.sectionBanner} /></h2><div className={styles.gradeGrid}>{grades.map((g,i)=><Link className={styles.grade} key={`${g.course_code}-${g.title}-${i}`} href={`/races/${Number(g.course_code)}?date=${displayDate}`}><span>{String(g.grade).toUpperCase()}</span><div><strong>{g.title||"グレードレース"}</strong><small>{COURSE_NAMES[Number(g.course_code)]}</small></div><b>開催情報 ›</b></Link>)}</div></section>:null}
 
     <section className={styles.raceCta}><div><small>RACE CENTER</small><h2>レースを探す・見る</h2><p>全開催場の出走表、展示、AI注目、理論アラート、的中速報はレースページにまとめています。</p></div><Link href={`/races?date=${displayDate}`}>今日のレースを見る →</Link></section>
 
