@@ -1,5 +1,12 @@
 import Parser from "rss-parser";
 
+export const metadata = {
+  title: "無料新聞｜BoatStrikers",
+  description: "一果・初音・キイナの前日版への案内ページです。",
+  alternates: { canonical: "/library/free" },
+  robots: { index: false, follow: true },
+};
+
 async function getFreeNewspapers() {
   const parser = new Parser();
   const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
