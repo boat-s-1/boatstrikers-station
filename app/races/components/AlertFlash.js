@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import styles from "../phase2.module.css";
+import DiscordNotificationCta from "./DiscordNotificationCta";
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -149,6 +150,7 @@ export default async function AlertFlash({ aiRaceKeys = [] }) {
             <p>一果・初音・キイナの理論条件が成立すると、ここに自動で表示されます。</p>
           </div>
         )}
+        <DiscordNotificationCta source="theory_alerts" tone="theory" />
       </section>
 
       <section id="ai-theory-match" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
