@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [header, bridge, authStore, memberPage] = await Promise.all([
+const [header, bridge, authStore, memberPage, placementBanner] = await Promise.all([
   readFile(new URL("../app/PublicSiteHeader.js", import.meta.url), "utf8"),
   readFile(new URL("../app/components/MemberSessionBridge.js", import.meta.url), "utf8"),
   readFile(new URL("../app/lib/memberAuthState.js", import.meta.url), "utf8"),
   readFile(new URL("../app/members/page.js", import.meta.url), "utf8"),
+  readFile(new URL("../app/components/BetaMemberPlacementBanner.js", import.meta.url), "utf8"),
 ]);
 
 test("header consumes the shared auth state without adding session requests", () => {
@@ -33,4 +34,11 @@ test("drawer login and signup links select the requested members mode", () => {
   assert.match(header, /\/members\?mode=login/);
   assert.match(header, /\/members\?mode=signup/);
   assert.match(memberPage, /requestedMode === "login" \|\| requestedMode === "signup"/);
+});
+
+test("registration placement banner is shown only after shared auth resolves signed out", () => {
+  assert.match(placementBanner, /useSyncExternalStore/);
+  assert.match(placementBanner, /memberAuth\.status !== "signed_out"/);
+  assert.doesNotMatch(placementBanner, /createClient\(/);
+  assert.doesNotMatch(placementBanner, /\/api\/members\/session/);
 });
