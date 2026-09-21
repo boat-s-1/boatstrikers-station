@@ -20,6 +20,15 @@ function textOf(item) {
 }
 function headlineOf(item) { return String(item?.list_headline || item?.title || "ニュース").trim(); }
 
+function isMeaningfulEditorialNews(item) {
+  const summary = String(item?.summary || "").replace(/\s+/g, " ").trim();
+  const body = String(item?.article_body || "").replace(/\s+/g, " ").trim();
+  const generic = /公開されたボートレース関連ニュースです|元記事を転載せず|記事をBoatStrikers NEWSが確認しました|詳細は出典元の記事をご確認ください/;
+  if (generic.test(summary) || generic.test(body)) return false;
+  if (String(item?.source_type || "").toLowerCase() === "bs_data" && (summary.length >= 40 || body.length >= 80)) return true;
+  return summary.length >= 80 || body.length >= 180;
+}
+
 const GRADE_RE = /(?:^|[\s・／/【\[(（])(?:SG|G\s*[123]|GⅠ|GⅡ|GⅢ|GI|GII|GIII)(?:$|[\s・／/】\])）])|グランプリ|チャレンジカップ|ボートレース(?:クラシック|オールスター|メモリアル|ダービー)|グランドチャンピオン|オーシャンカップ|ヤングダービー|周年記念|周年競走|地区選手権|グレードレース/i;
 const RESULT_RE = /結果を更新|レース結果|払戻|着順|確定|優勝(?:した|を飾|決定|達成)|優出決定|V達成|初優勝|レース後|決着|万舟|高配当/;
 const RACER_RE = /水神祭|昇級|A1昇格|A2昇格|級別|インタビュー|トークショー|結婚|引退|復帰|欠場|追加斡旋|斡旋|登録|記録達成|選手特集|レーサー特集|デビュー|連勝|予選\d*位通過|予選トップ|前走地|近況|当地初|通算\d+勝|節目|フライング休み|復帰戦|選手が|レーサーが/;
@@ -71,7 +80,8 @@ export default async function NewsTopPage({ searchParams }) {
   const params = await searchParams;
   const category = TABS.some((x) => !x.href && x.key === params?.category) ? params.category : "all";
   const q = String(params?.q || "");
-  const allNews = await getHatsuneNews({ limit: 100, category: "all" });
+  const fetchedNews = await getHatsuneNews({ limit: 100, category: "all" });
+  const allNews = fetchedNews.filter(isMeaningfulEditorialNews);
   const news = allNews.filter((i) => matches(i, category, q));
   const featured = selectFeatured(news);
   const latest = news.filter((i) => i.id !== featured?.id).slice(0, 14);
