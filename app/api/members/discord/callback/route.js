@@ -6,7 +6,7 @@ export const runtime="nodejs";
 export async function GET(request){
   const requestUrl=new URL(request.url);
   const origin=requestUrl.origin;
-  const membersUrl=new URL("/members",origin);
+  const membersUrl=new URL("/members/discord",origin);
   try{
     const code=requestUrl.searchParams.get("code")||"";
     const state=requestUrl.searchParams.get("state")||"";
