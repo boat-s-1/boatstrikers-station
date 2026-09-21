@@ -9762,3 +9762,57 @@ color:white;
     height: 40px;
   }
 }
+
+
+/* =========================================================
+   PUBLIC PREDICTION RESULTS / SHARED SCOPE
+========================================================= */
+.homeResultScope {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.homeResultScope div {
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid rgba(20, 119, 169, .15);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .78);
+}
+
+.homeResultScope dt {
+  color: #6b8191;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.homeResultScope dd {
+  overflow: hidden;
+  margin: 3px 0 0;
+  color: #173f68;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 620px) {
+  .homeResultScope {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .homeResultScope div {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .homeResultScope dd {
+    margin-top: 0;
+  }
+}
