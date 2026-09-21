@@ -32,7 +32,6 @@ const STATIC_PAGES = [
   ['/guide', 'weekly', 0.9],
   ['/data-lab', 'weekly', 0.9],
   ['/library', 'weekly', 0.8],
-  ['/library/free', 'weekly', 0.6],
   ['/library/ichika-seminar', 'weekly', 0.7],
   ['/library/hatsune-seminar', 'weekly', 0.7],
   ['/library/kiina-seminar', 'weekly', 0.7],
