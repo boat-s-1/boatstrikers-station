@@ -17,9 +17,6 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 5 / 1;
-  object-fit: cover;
-  object-position: center;
   border-radius: 24px;
   box-shadow: 0 14px 34px rgba(9, 54, 94, .18);
 }
@@ -40,6 +37,35 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transform: scale(1.06);
+}
+
+.sectionSubnav {
+  display: flex;
+  justify-content: flex-end;
+  margin: -2px 0 12px;
+}
+
+.sectionSubnav a {
+  color: #3979b9;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.memberSignupBannerLink {
+  display: block;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 20px;
+  line-height: 0;
+  box-shadow: 0 10px 28px rgba(20, 92, 137, .14);
+}
+
+.memberSignupBanner {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .heroBadges {
