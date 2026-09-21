@@ -24,7 +24,10 @@
   width: 205px !important;
   height: 54px !important;
   flex: 0 0 205px !important;
-  background: url('/boatstrikers-header-logo.svg') left center / contain no-repeat !important;
+  background-image: var(--header-logo-image, url('/header-logos/home.webp')) !important;
+  background-position: left center !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
   text-decoration: none !important;
   transition: width .2s ease, height .2s ease, flex-basis .2s ease !important;
 }

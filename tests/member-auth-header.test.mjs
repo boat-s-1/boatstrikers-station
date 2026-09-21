@@ -36,6 +36,26 @@ test("drawer login and signup links select the requested members mode", () => {
   assert.match(memberPage, /requestedMode === "login" \|\| requestedMode === "signup"/);
 });
 
+test("public header selects a compact logo for each major page group", () => {
+  for (const key of [
+    "members",
+    "today",
+    "races",
+    "results",
+    "ichika",
+    "hatsune",
+    "kiina",
+    "library",
+    "radio",
+    "schedule",
+    "comic",
+  ]) {
+    assert.match(header, new RegExp(`key: "${key}"`));
+  }
+  assert.match(header, /\/header-logos\/\$\{key\}\.webp/);
+  assert.match(header, /--header-logo-image/);
+});
+
 test("registration placement banner is shown only after shared auth resolves signed out", () => {
   assert.match(placementBanner, /useSyncExternalStore/);
   assert.match(placementBanner, /memberAuth\.status !== "signed_out"/);
