@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { syncMemberSession } from "../../lib/memberSessionSync";
 import styles from "./MagazineSwipeViewer.module.css";
 
 function makeSupabase(){
@@ -47,7 +48,7 @@ export default function MagazineSwipeViewer({ magazine, issue }) {
         const token=data.session?.access_token;
         if(token){
           headers={Authorization:`Bearer ${token}`};
-          await fetch("/api/members/session",{method:"POST",headers,cache:"no-store"});
+          await syncMemberSession(data.session, { source: "magazine" });
         }
       }
       const response=await fetch("/api/members/entitlement",{headers,cache:"no-store"});
