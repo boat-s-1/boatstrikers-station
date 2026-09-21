@@ -1,4 +1,4 @@
-const SERVER_SNAPSHOT = Object.freeze({ status: "loading", user: null });
+const SERVER_SNAPSHOT = Object.freeze({ status: "loading", user: null, accessToken: "" });
 
 let snapshot = SERVER_SNAPSHOT;
 let signOutHandler = null;
@@ -23,7 +23,7 @@ export function subscribeMemberAuth(listener) {
 }
 
 export function publishMemberAuthLoading() {
-  emit({ status: "loading", user: null });
+  emit({ status: "loading", user: null, accessToken: "" });
 }
 
 export function publishMemberAuthSession(session) {
@@ -40,6 +40,7 @@ export function publishMemberAuthSession(session) {
   );
   emit({
     status: "signed_in",
+    accessToken: typeof session?.access_token === "string" ? session.access_token : "",
     user: {
       id: user.id,
       email: typeof user.email === "string" ? user.email : "",
@@ -49,7 +50,7 @@ export function publishMemberAuthSession(session) {
 }
 
 export function publishMemberAuthSignedOut() {
-  emit({ status: "signed_out", user: null });
+  emit({ status: "signed_out", user: null, accessToken: "" });
 }
 
 export function registerMemberSignOut(handler) {
