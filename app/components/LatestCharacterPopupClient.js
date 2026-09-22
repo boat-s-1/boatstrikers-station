@@ -38,8 +38,9 @@ export default function LatestCharacterPopupClient({
   useEffect(() => {
     if (HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) return;
 
+    const isPreview = window.location.hostname.endsWith(".vercel.app");
     const key = `bs-character-popup:${todayKey()}:${id}`;
-    if (window.localStorage.getItem(key) === "closed") return;
+    if (!isPreview && window.localStorage.getItem(key) === "closed") return;
 
     const timer = window.setTimeout(() => setVisible(true), 900);
     return () => window.clearTimeout(timer);
@@ -48,8 +49,9 @@ export default function LatestCharacterPopupClient({
   if (!visible || HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) return null;
 
   const close = () => {
+    const isPreview = window.location.hostname.endsWith(".vercel.app");
     const key = `bs-character-popup:${todayKey()}:${id}`;
-    window.localStorage.setItem(key, "closed");
+    if (!isPreview) window.localStorage.setItem(key, "closed");
     setVisible(false);
   };
 
