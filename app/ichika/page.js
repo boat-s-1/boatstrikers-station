@@ -4,6 +4,7 @@ import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
 import { getPublishedNewspapers } from "../../lib/newspapers";
+import IchikaBookshelf from "./IchikaBookshelf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -216,6 +217,8 @@ export default async function IchikaPage() {
           </div>
         ) : <p>今日の一果新聞はまだありません。</p>}
       </section>
+
+      <IchikaBookshelf />
 
       <section className="sectionCard pinkCard">
         <img src="/IMG_6131.jpeg" alt="一果成績" className="homeTitleImage" />
