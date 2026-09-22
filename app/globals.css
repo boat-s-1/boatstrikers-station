@@ -3314,6 +3314,14 @@ body {
   margin: 0 auto 18px;
 }
 
+.sectionBannerFlush {
+  display: block;
+  width: calc(100% + 36px);
+  height: auto;
+  margin: -18px -18px 14px;
+  border-radius: 22px 22px 0 0;
+}
+
 .homeLatestInfo {
   margin: 18px 14px;
   padding: 16px;
