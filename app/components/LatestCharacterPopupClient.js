@@ -69,14 +69,10 @@ export default function LatestCharacterPopupClient({
         <span className={styles.sparkleTwo} aria-hidden="true">♡</span>
         <span className={styles.name}>{name}</span>
         <strong>{message}</strong>
-        {tags.length ? (
-          <div className={styles.tags}>
-            {tags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}
-          </div>
-        ) : <small>{meta}</small>}
+        <small>{meta}</small>
         <p>{title}</p>
         <Link href={href} onClick={() => setVisible(false)} className={styles.link} {...linkProps}>
-          {cta} <span aria-hidden="true">→</span>
+          {cta}
         </Link>
       </div>
     </aside>
