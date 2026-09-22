@@ -223,7 +223,7 @@ export default async function IchikaPage() {
       <section className="sectionCard pinkCard bannerTopCard">
         <div className="sectionBannerCrop">
           <img
-          src="/371DFD2D-9544-4786-91EF-D2B5B304CE2A.png"
+          src="/1668A81B-6AEE-429E-B9D1-9B051344B77B.png"
           alt="一果の新着読み物"
           className="sectionBannerFlush"
         />

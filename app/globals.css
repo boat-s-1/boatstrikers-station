@@ -3328,10 +3328,10 @@ body {
 
 .sectionBannerFlush {
   display: block;
-  width: 106%;
+  width: 100%;
   max-width: none;
   height: auto;
-  margin: -2.2% -3% -1.5%;
+  margin: 0;
   border-radius: 0;
 }
 
