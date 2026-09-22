@@ -3332,11 +3332,10 @@ body {
   display: block;
   width: 100%;
   max-width: none;
-  height: calc(100% + 12px);
+  height: 100%;
   margin: 0;
   object-fit: cover;
-  object-position: center top;
-  transform: translateY(-6px);
+  object-position: center;
   border-radius: 0;
 }
 
