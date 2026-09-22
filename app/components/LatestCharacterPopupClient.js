@@ -28,6 +28,7 @@ export default function LatestCharacterPopupClient({
   pose,
   message,
   meta,
+  tags = [],
   title,
   href,
 }) {
@@ -55,6 +56,8 @@ export default function LatestCharacterPopupClient({
   const external = /^https?:\/\//.test(href || "");
   const linkProps = external ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
+  const cta = characterKey === "hatsune" ? "チェックする♡" : characterKey === "kiina" ? "見にいく☆" : "見てみる♪";
+
   return (
     <aside className={`${styles.popup} ${styles[characterKey] || ""}`} aria-label="最新更新のお知らせ">
       <button className={styles.close} type="button" onClick={close} aria-label="閉じる">×</button>
@@ -62,12 +65,18 @@ export default function LatestCharacterPopupClient({
         <img src={image} alt={`${name} ${pose}`} className={styles.character} />
       </div>
       <div className={styles.bubble}>
+        <span className={styles.sparkleOne} aria-hidden="true">✦</span>
+        <span className={styles.sparkleTwo} aria-hidden="true">♡</span>
         <span className={styles.name}>{name}</span>
         <strong>{message}</strong>
-        <small>{meta}</small>
+        {tags.length ? (
+          <div className={styles.tags}>
+            {tags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}
+          </div>
+        ) : <small>{meta}</small>}
         <p>{title}</p>
         <Link href={href} onClick={() => setVisible(false)} className={styles.link} {...linkProps}>
-          見にいく →
+          {cta} <span aria-hidden="true">→</span>
         </Link>
       </div>
     </aside>
