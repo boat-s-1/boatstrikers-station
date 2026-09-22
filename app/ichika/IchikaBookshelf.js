@@ -35,11 +35,13 @@ const BOOKS = [
 export default function IchikaBookshelf() {
   return (
     <section className={styles.section} aria-labelledby="ichika-bookshelf-title">
-      <img
-        src="/6B9E42AC-E569-449B-BDCA-1ABBAC275C38.png"
-        alt="一果の研究書棚"
-        className={styles.banner}
-      />
+      <div className={styles.bannerCrop}>
+        <img
+          src="/6B9E42AC-E569-449B-BDCA-1ABBAC275C38.png"
+          alt="一果の研究書棚"
+          className={styles.banner}
+        />
+      </div>
       <div className={styles.heading}>
         <div>
           <span>ICHIKA RESEARCH SHELF</span>
