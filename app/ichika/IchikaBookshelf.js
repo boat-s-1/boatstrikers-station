@@ -37,7 +37,7 @@ export default function IchikaBookshelf() {
     <section className={styles.section} aria-labelledby="ichika-bookshelf-title">
       <div className={styles.bannerCrop}>
         <img
-          src="/6B9E42AC-E569-449B-BDCA-1ABBAC275C38.png"
+          src="/D38AD8E9-7516-494E-AD62-0F830BBCC4EE.png"
           alt="一果の研究書棚"
           className={styles.banner}
         />
