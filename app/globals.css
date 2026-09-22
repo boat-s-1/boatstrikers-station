@@ -3315,23 +3315,27 @@ body {
 }
 
 .bannerTopCard {
-  padding-top: 0;
+  padding-top: 0 !important;
   overflow: hidden;
 }
 
 .sectionBannerCrop {
   width: calc(100% + 36px);
+  height: 74px;
   margin: 0 -18px 14px;
   overflow: hidden;
   border-radius: 22px 22px 0 0;
+  line-height: 0;
 }
 
 .sectionBannerFlush {
   display: block;
   width: 100%;
   max-width: none;
-  height: auto;
+  height: 100%;
   margin: 0;
+  object-fit: cover;
+  object-position: center;
   border-radius: 0;
 }
 
