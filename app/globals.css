@@ -3314,12 +3314,25 @@ body {
   margin: 0 auto 18px;
 }
 
+.bannerTopCard {
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.sectionBannerCrop {
+  width: calc(100% + 36px);
+  margin: 0 -18px 14px;
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+}
+
 .sectionBannerFlush {
   display: block;
-  width: calc(100% + 36px);
+  width: 106%;
+  max-width: none;
   height: auto;
-  margin: -18px -18px 14px;
-  border-radius: 22px 22px 0 0;
+  margin: -2.2% -3% -1.5%;
+  border-radius: 0;
 }
 
 .homeLatestInfo {
