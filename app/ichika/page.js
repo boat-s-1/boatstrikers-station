@@ -220,12 +220,14 @@ export default async function IchikaPage() {
 
       <RealtimeUpdates target="ichika" limit={5} />
 
-      <section className="sectionCard pinkCard">
-        <img
+      <section className="sectionCard pinkCard bannerTopCard">
+        <div className="sectionBannerCrop">
+          <img
           src="/371DFD2D-9544-4786-91EF-D2B5B304CE2A.png"
           alt="一果の新着読み物"
           className="sectionBannerFlush"
         />
+        </div>
         <p style={{ margin: "0 0 14px", color: "#6e7c75", fontSize: 12, lineHeight: 1.7 }}>
           新聞・ゼミ・研究記事から、新しいものを3件まとめて表示します。
         </p>
