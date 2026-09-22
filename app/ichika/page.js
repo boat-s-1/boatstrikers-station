@@ -167,6 +167,27 @@ export default async function IchikaPage() {
     getIchikaResults(),
   ]);
 
+  const latestReadings = [
+    ...newspapers.map((item) => ({
+      ...item,
+      kind: "新聞",
+      external: false,
+      meta: `${item.edition === "just_before" ? "直前版" : "前日版"}${item.course ? `・${item.course}${item.raceNo}R` : ""}`,
+    })),
+    ...articles.map((item) => ({
+      ...item,
+      kind: "研究",
+      external: true,
+      meta: "一果ゼミ・研究記事",
+    })),
+  ]
+    .sort((a, b) => {
+      const aTime = a.date ? new Date(a.date).getTime() : 0;
+      const bTime = b.date ? new Date(b.date).getTime() : 0;
+      return bTime - aTime;
+    })
+    .slice(0, 3);
+
   return (
     <main className="page ichikaPage">
       <header className="header">
@@ -200,22 +221,36 @@ export default async function IchikaPage() {
       <RealtimeUpdates target="ichika" limit={5} />
 
       <section className="sectionCard pinkCard">
-        <img src="/IMG_6130.jpeg" alt="一果新聞" className="homeTitleImage" />
-        {newspapers?.length ? (
+        <div className="sectionTitleRow">
+          <div>
+            <small style={{ color: "#2b8462", fontWeight: 900, letterSpacing: ".12em" }}>LATEST READINGS</small>
+            <h2 style={{ margin: "4px 0 0" }}>一果の新着読み物</h2>
+          </div>
+          <span style={{ fontSize: 12, fontWeight: 900, color: "#7b8a82" }}>最新3件</span>
+        </div>
+        <p style={{ margin: "8px 0 14px", color: "#6e7c75", fontSize: 12, lineHeight: 1.7 }}>
+          新聞・ゼミ・研究記事から、新しいものを3件まとめて表示します。
+        </p>
+        {latestReadings.length ? (
           <div className="labList">
-            {newspapers.map((newspaper) => (
-              <a href={newspaper.link} className="newsFeature" key={newspaper.link}>
-                <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
+            {latestReadings.map((item) => (
+              <a
+                href={item.link}
+                className="newsFeature"
+                key={`${item.kind}-${item.link}`}
+                {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
+                <img src={item.image || "/ichika-banner.jpg"} alt={item.title} className="featureImg" />
                 <div>
-                  <small>{newspaper.edition === "just_before" ? "直前版" : "前日版"}{newspaper.course ? `・${newspaper.course}${newspaper.raceNo}R` : ""}</small>
-                  <h3>{newspaper.title}</h3>
-                  <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
-                  <span className="pinkBtn">📖 新聞を読む</span>
+                  <small>{item.kind}・{item.meta}</small>
+                  <h3>{item.title}</h3>
+                  <p>{item.date ? new Date(item.date).toLocaleDateString("ja-JP") : ""}</p>
+                  <span className="pinkBtn">📖 読む</span>
                 </div>
               </a>
             ))}
           </div>
-        ) : <p>今日の一果新聞はまだありません。</p>}
+        ) : <p>新着の読み物はまだありません。</p>}
       </section>
 
       <IchikaBookshelf />
@@ -231,20 +266,6 @@ export default async function IchikaPage() {
           <div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div>
         </div>
         {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
-      </section>
-
-      <section className="sectionCard pinkCard">
-        <div className="sectionTitleRow"><img src="/IMG_6135.jpeg" alt="一果ラボ" className="homeTitleImage" /></div>
-        {articles.length > 0 ? (
-          <div className="labList">
-            {articles.map((article) => (
-              <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="labItem">
-                <img src={article.image || "/ichika-banner.jpg"} alt={article.title} />
-                <div><h3>{article.title}</h3><small>{article.date ? new Date(article.date).toLocaleDateString("ja-JP") : ""}</small></div>
-              </a>
-            ))}
-          </div>
-        ) : <p>一果ラボの記事はまだありません。</p>}
       </section>
 
       <section className="sectionCard pinkCard">
