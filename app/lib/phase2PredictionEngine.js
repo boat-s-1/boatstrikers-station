@@ -113,13 +113,17 @@ function buildBets(score, marks) {
   const marked = marks
     .map((m) => Number(m?.boat_no))
     .filter((boatNo, index, values) => boatNo >= 1 && boatNo <= 6 && values.indexOf(boatNo) === index);
-  const rankedBoats = [...marked, ...[1, 2, 3, 4, 5, 6].filter((boatNo) => !marked.includes(boatNo))];
-  const [first = 1, second = 2, third = 3, fourth = 4, fifth = 5] = rankedBoats;
+  const opponents = [
+    ...marked.filter((boatNo) => boatNo !== 1),
+    ...[2, 3, 4, 5, 6].filter((boatNo) => !marked.includes(boatNo)),
+  ];
+  const [second = 2, third = 3, fourth = 4, fifth = 5] = opponents;
   const target = targetBetCount(score);
   const candidates = [];
   const seen = new Set();
 
-  const add = (a, b, c) => {
+  const add = (b, c) => {
+    const a = 1;
     if (![a, b, c].every((boatNo) => Number.isInteger(boatNo) && boatNo >= 1 && boatNo <= 6)) return;
     if (a === b || a === c || b === c) return;
     const bet = `${a}-${b}-${c}`;
@@ -128,20 +132,17 @@ function buildBets(score, marks) {
     candidates.push(bet);
   };
 
-  // 最低4点は「本命頭 × 対抗2着」の3着流し。
-  // 例: 本命1・対抗2なら 1-2-3456 の4点になる。
-  rankedBoats
-    .filter((boatNo) => boatNo !== first && boatNo !== second)
-    .forEach((thirdBoat) => add(first, second, thirdBoat));
+  // 一果はイン逃げ担当。公開買い目は必ず1号艇1着固定にする。
+  opponents
+    .filter((boatNo) => boatNo !== second)
+    .forEach((thirdBoat) => add(second, thirdBoat));
 
-  // 5〜8点目はAI評価順に相手替わりを追加する。
-  add(first, third, second);
-  add(first, third, fourth);
-  add(first, fourth, second);
-  add(second, first, third);
-  add(first, fourth, third);
-  add(first, fifth, second);
-  add(third, first, second);
+  // 5〜8点目も1号艇1着を崩さず、AI評価順に相手替わりを追加する。
+  add(third, second);
+  add(third, fourth);
+  add(fourth, second);
+  add(fourth, third);
+  add(fifth, second);
 
   return candidates.slice(0, target).map((bet, index) => ({
     bet,
@@ -195,13 +196,14 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     motor: Math.round(motor * 100),
     start: Math.round(start * 100),
   };
-  const previousBets = buildBets(previousScore, marks);
+  const previousEligible = Number(marks[0]?.boat_no) === 1;
+  const previousBets = previousEligible ? buildBets(previousScore, marks) : [];
 
-  const previousPrediction = {
+  const previousPrediction = previousEligible ? {
     timing: "previous_day",
     score: previousScore,
     rank: grade(previousScore),
-    main_boat: marks[0]?.boat_no ?? 1,
+    main_boat: 1,
     danger_level: dangerLabel(previousScore),
     danger_score: 100 - previousScore,
     marks,
@@ -213,7 +215,7 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     generated_at: new Date().toISOString(),
     engine_version: "phase2-v14",
     source: "phase2_fallback",
-  };
+  } : null;
 
   const hasExhibition = entries.some((entry) => [entry.exhibition_time, entry.exhibition_st, entry.official_lap, entry.lap_time].some((v) => finite(v) !== null));
   if (!hasExhibition) return { previousPrediction, livePrediction: null };
@@ -230,15 +232,16 @@ export function buildPhase2Predictions({ event, entries = [] }) {
   const rivalExhibition = average(rivals.map((entry) => exhibitionPower(entry, entries))) ?? 0.5;
   const delta = Math.round(clamp((lane1Exhibition - rivalExhibition) * 22, -12, 12));
   const liveScore = Math.round(clamp(previousScore + delta, 30, 96));
-  const liveBets = buildBets(liveScore, liveMarks);
+  const liveEligible = Number(liveMarks[0]?.boat_no) === 1;
+  const liveBets = liveEligible ? buildBets(liveScore, liveMarks) : [];
 
-  const livePrediction = {
+  const livePrediction = liveEligible ? {
     timing: "after_exhibition",
     score: liveScore,
     score_before: previousScore,
     score_delta: liveScore - previousScore,
     rank: grade(liveScore),
-    main_boat: liveMarks[0]?.boat_no ?? 1,
+    main_boat: 1,
     danger_level: dangerLabel(liveScore),
     danger_score: 100 - liveScore,
     marks: liveMarks,
@@ -253,7 +256,7 @@ export function buildPhase2Predictions({ event, entries = [] }) {
     generated_at: new Date().toISOString(),
     engine_version: "phase2-v14",
     source: "phase2_fallback",
-  };
+  } : null;
 
   return { previousPrediction, livePrediction };
 }
