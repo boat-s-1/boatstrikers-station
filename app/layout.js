@@ -17,6 +17,7 @@ import MemberSessionBridge from "./components/MemberSessionBridge";
 import MemberEmailConfirmationHelper from "./components/MemberEmailConfirmationHelper";
 import MemberModeQueryBridge from "./components/MemberModeQueryBridge";
 import BoatAnalyticsTracker from "./components/BoatAnalyticsTracker";
+import LatestCharacterPopup from "./components/LatestCharacterPopup";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
         <CharacterPerformancePortal />
         <RouteScopedVisuals />
         <RaceHitFlashDeduper />
+        <LatestCharacterPopup />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
