@@ -9,11 +9,27 @@ const CHARACTER = {
 };
 
 const POSE_MESSAGE = {
-  normal: "新しいお知らせがあるよ！",
-  point: "ここ、注目してね！",
-  happy: "うれしいお知らせだよ！",
-  explain: "新しい読み物を更新したよ！",
-  extra: "特別なお知らせだよ！",
+  ichika: {
+    normal: "新しいお知らせがあるよ♪",
+    point: "ここ、注目してねっ♪",
+    happy: "うれしいお知らせだよ！",
+    explain: "新しい読み物、更新したよ♪",
+    extra: "特別なお知らせだよ☆",
+  },
+  hatsune: {
+    normal: "新しいお知らせだよ♡",
+    point: "ここ、見てみてね♡",
+    happy: "うれしいニュースだよ♡",
+    explain: "新しい読み物、できたよ♪",
+    extra: "特別なお知らせだよ♡",
+  },
+  kiina: {
+    normal: "新しいお知らせだよっ☆",
+    point: "ここ、狙い目かもっ☆",
+    happy: "やったー！うれしいお知らせ！",
+    explain: "新しい読み物、チェックしてね☆",
+    extra: "スペシャルなお知らせだよ☆",
+  },
 };
 
 function pickPose({ kind, title = "", body = "", source }) {
@@ -62,6 +78,11 @@ function newspaperToItem(item) {
     kind: "update",
     href: item.slug ? `/newspapers/${item.slug}` : `/${item.character_key}`,
     meta: `${edition}${item.course_name ? `・${item.course_name}${item.race_no || ""}R` : ""}`,
+    tags: [
+      edition,
+      item.course_name ? `${item.course_name}${item.race_no || ""}R` : null,
+      `${CHARACTER[item.character_key].name}新聞`,
+    ].filter(Boolean),
     publishedAt: item.published_at || item.race_date || "",
   };
 }
@@ -77,6 +98,10 @@ function realtimeToItem(item) {
     kind: item.kind || "notice",
     href: item.link_url || `/${item.character}`,
     meta: item.kind === "hit" ? "的中速報" : item.kind === "prediction" ? "予想更新" : item.kind === "radio" ? "ラジオ" : item.kind === "video" ? "動画" : "最新更新",
+    tags: [
+      item.kind === "hit" ? "的中" : item.kind === "prediction" ? "予想" : item.kind === "radio" ? "ラジオ" : item.kind === "video" ? "動画" : "新着",
+      CHARACTER[item.character].name,
+    ],
     publishedAt: item.published_at || item.created_at || "",
   };
 }
@@ -111,8 +136,9 @@ export default async function LatestCharacterPopup() {
       name={character.name}
       image={imageFor(item.characterKey, pose)}
       pose={pose}
-      message={POSE_MESSAGE[pose]}
+      message={POSE_MESSAGE[item.characterKey]?.[pose] || "新しいお知らせだよ♪"}
       meta={item.meta}
+      tags={item.tags || []}
       title={item.title}
       href={item.href}
     />
