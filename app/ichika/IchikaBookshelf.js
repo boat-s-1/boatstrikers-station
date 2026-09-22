@@ -3,13 +3,6 @@ import styles from "./IchikaBookshelf.module.css";
 
 const BOOKS = [
   {
-    title: "一果予想新聞",
-    subtitle: "前日版・直前版",
-    href: "/library/news/ichika",
-    cover: "/C53B3EAC-3CBA-411D-BCFF-4C67354CC424.png",
-    tag: "NEWSPAPER",
-  },
-  {
     title: "一果ゼミ",
     subtitle: "イン逃げ研究",
     href: "/library/ichika-seminar",
@@ -30,6 +23,13 @@ const BOOKS = [
     cover: "/A0021C32-58D9-488E-B0E2-F99E8718DB03.png",
     tag: "RESEARCH",
   },
+  {
+    title: "教えて！一果センセー",
+    subtitle: "初心者向け講座",
+    href: "/ichika-sensei",
+    cover: "/59F96330-6F99-4736-8083-6D6508FCD861.png",
+    tag: "BEGINNER",
+  },
 ];
 
 export default function IchikaBookshelf() {
@@ -39,7 +39,7 @@ export default function IchikaBookshelf() {
         <div>
           <span>ICHIKA RESEARCH SHELF</span>
           <h2 id="ichika-bookshelf-title">一果の研究書棚</h2>
-          <p>新聞・ゼミ・攻略・検証を、本棚から選ぶように読めます。</p>
+          <p>ゼミ・攻略・検証・初心者講座を、本棚から選ぶように読めます。</p>
         </div>
         <small>横にスワイプ →</small>
       </div>
@@ -67,7 +67,7 @@ export default function IchikaBookshelf() {
 
       <div className={styles.note}>
         <strong>デザイン確認用</strong>
-        <p>現在は既存ページへリンクしています。見た目が良ければ、今後は一果専用の新聞・研究・検証記事をこの棚にまとめる想定です。</p>
+        <p>現在は既存ページへリンクしています。新着は上の「一果の新着読み物」、テーマ別の読み物はこの書棚から探す構成です。</p>
       </div>
     </section>
   );
