@@ -88,6 +88,10 @@
     {
       "path": "/api/cron/ichika-ai-analysis",
       "schedule": "35 21 * * *"
+    },
+    {
+      "path": "/api/cron/hatsune-kiina-ai-analysis",
+      "schedule": "45 21 * * *"
     }
   ]
 }

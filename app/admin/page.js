@@ -48,6 +48,8 @@ const GROUPS = [
     items: [
       { href: "/admin/ai-bet-stats", icon: "📈", title: "AI買い目成績", text: "AI予想の的中率・回収率・収支を確認" },
       { href: "/admin/ichika-ai-lab", icon: "🟢", title: "一果AI 改善パネル", text: "1アタマ実績を条件別に比較し、買い・注意・見送り候補を確認" },
+      { href: "/admin/hatsune-ai-lab", icon: "🟣", title: "初音AI 改善パネル", text: "女子戦AIの公開成績を条件別に比較し、得意・苦手条件を確認" },
+      { href: "/admin/kiina-ai-lab", icon: "🟡", title: "キイナAI 改善パネル", text: "5アタマAIの公開成績を条件別に比較し、狙い・見送り条件を確認" },
       { href: "/admin/condition-research", icon: "🧪", title: "回収率100%条件リサーチ", text: "理論成立履歴を条件別に比較してプラス条件を探す" },
       { href: "/admin/stadium-ai", icon: "🧭", title: "Stadium AI集計", text: "競艇場データの再集計・確認" },
     ],
