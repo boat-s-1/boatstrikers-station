@@ -221,14 +221,12 @@ export default async function IchikaPage() {
       <RealtimeUpdates target="ichika" limit={5} />
 
       <section className="sectionCard pinkCard">
-        <div className="sectionTitleRow">
-          <div>
-            <small style={{ color: "#2b8462", fontWeight: 900, letterSpacing: ".12em" }}>LATEST READINGS</small>
-            <h2 style={{ margin: "4px 0 0" }}>一果の新着読み物</h2>
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 900, color: "#7b8a82" }}>最新3件</span>
-        </div>
-        <p style={{ margin: "8px 0 14px", color: "#6e7c75", fontSize: 12, lineHeight: 1.7 }}>
+        <img
+          src="/371DFD2D-9544-4786-91EF-D2B5B304CE2A.png"
+          alt="一果の新着読み物"
+          className="sectionBannerFlush"
+        />
+        <p style={{ margin: "0 0 14px", color: "#6e7c75", fontSize: 12, lineHeight: 1.7 }}>
           新聞・ゼミ・研究記事から、新しいものを3件まとめて表示します。
         </p>
         {latestReadings.length ? (
