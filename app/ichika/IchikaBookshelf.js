@@ -34,7 +34,7 @@ const BOOKS = [
 
 export default function IchikaBookshelf() {
   return (
-    <section className={styles.section} aria-labelledby="ichika-bookshelf-title">
+    <section className={styles.section} aria-label="一果の研究書棚">
       <div className={styles.bannerCrop}>
         <img
           src="/D38AD8E9-7516-494E-AD62-0F830BBCC4EE.png"
@@ -43,11 +43,7 @@ export default function IchikaBookshelf() {
         />
       </div>
       <div className={styles.heading}>
-        <div>
-          <span>ICHIKA RESEARCH SHELF</span>
-          <h2 id="ichika-bookshelf-title">一果の研究書棚</h2>
-          <p>ゼミ・攻略・検証・初心者講座を、本棚から選ぶように読めます。</p>
-        </div>
+        <p>ゼミ・攻略・検証・初心者講座を、本棚から選ぶように読めます。</p>
         <small>横にスワイプ →</small>
       </div>
 
