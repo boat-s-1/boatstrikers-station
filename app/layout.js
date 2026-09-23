@@ -18,6 +18,7 @@ import MemberEmailConfirmationHelper from "./components/MemberEmailConfirmationH
 import MemberModeQueryBridge from "./components/MemberModeQueryBridge";
 import BoatAnalyticsTracker from "./components/BoatAnalyticsTracker";
 import LatestCharacterPopup from "./components/LatestCharacterPopup";
+import IchikaPagePolish from "./components/IchikaPagePolish";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({ children }) {
         {children}
         <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
+        <IchikaPagePolish />
         <CharacterShortsShelf />
         <CharacterPerformancePortal />
         <RouteScopedVisuals />
