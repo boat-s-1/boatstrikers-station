@@ -52,7 +52,6 @@ export default function RootLayout({ children }) {
         <PublicSiteHeader />
         <MemberEmailConfirmationHelper />
         {children}
-        <RacerWaterAffinityPanel />
         <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
         <HideCharacterResearchTool />
@@ -62,6 +61,7 @@ export default function RootLayout({ children }) {
         <RouteScopedVisuals />
         <RaceHitFlashDeduper />
         <LatestCharacterPopup />
+        <RacerWaterAffinityPanel />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
