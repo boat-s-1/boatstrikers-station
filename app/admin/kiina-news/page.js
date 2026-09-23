@@ -46,17 +46,52 @@ function clampScore(value) {
   if (!Number.isFinite(n)) return "";
   return String(Math.max(0, Math.min(100, Math.round(n))));
 }
+function pickCopyIndex(key, length) {
+  if (typeof window === "undefined" || length <= 1) return Math.floor(Math.random() * Math.max(1, length));
+  const storageKey = "boatstrikers:newspaper-copy:" + key;
+  const previous = Number(window.localStorage.getItem(storageKey));
+  const candidates = Array.from({length}, (_, i) => i).filter((i) => i !== previous);
+  const next = candidates[Math.floor(Math.random() * candidates.length)] ?? 0;
+  window.localStorage.setItem(storageKey, String(next));
+  return next;
+}
+function buildKiinaCopy({course, raceNo, holeBoat, chance}) {
+  const rate = chance ? String(chance) : "";
+  const headlines = [
+    course + raceNo + "R 穴候補をチェック！",
+    holeBoat ? holeBoat + "号艇から穴狙い！" : "キイナの穴狙いチェック！",
+    rate ? "穴狙い期待度" + rate + "%！" : "波乱のポイントをチェック！",
+    "キイナの穴狙いメモ！",
+  ];
+  const callouts = [
+    holeBoat ? holeBoat + "号艇に注目！" : "ここが狙い目！",
+    rate ? "穴期待" + rate + "%をチェック！" : "穴候補をチェック！",
+    course + raceNo + "Rの穴候補！",
+    "本命以外も見逃さない！",
+  ];
+  const speeches = [
+    holeBoat ? holeBoat + "号艇、展開がハマるか注目！" : "穴候補の展開を見よう！",
+    rate ? "穴期待" + rate + "%！攻め筋を見たい！" : "スタートと攻め筋を見たい！",
+    course + raceNo + "R、穴候補からチェック！",
+    "相手関係までしっかり見ていこう！",
+  ];
+  return {
+    headline: headlines[pickCopyIndex("kiina:headline", headlines.length)],
+    callout: callouts[pickCopyIndex("kiina:callout", callouts.length)],
+    speech: speeches[pickCopyIndex("kiina:speech", speeches.length)],
+  };
+}
 
 const DEFAULTS = {
   date: todayJst(),
   course: "宮島",
   raceNo: "1",
   edition: "previous_day",
-  headline: "キイナの穴狙い予想",
+  headline: "キイナの穴狙いメモ！",
   holeBoat: "5",
   holeChance: "16",
-  callout: "ここが狙い目！",
-  speech: "穴で一発狙っちゃおう！",
+  callout: "穴候補をチェック！",
+  speech: "スタートと攻め筋を見たい！",
   kiinaComment: "本命だけじゃもったいない！穴候補の気配と展開を見て狙っていこう！",
   scores: {1:"60",2:"55",3:"58",4:"62",5:"78",6:"57"},
   topExpression: "wink",
@@ -184,18 +219,24 @@ export default function KiinaNewsAdmin() {
         return;
       }
       const d = json.data;
+      const holeBoat = d.holeBoat || v.holeBoat;
+      const holeChance = d.chance || v.holeChance;
+      const dynamicCopy = buildKiinaCopy({course,raceNo,holeBoat,chance:holeChance});
       setV((prev) => ({
         ...prev,
         course,
         raceNo,
-        holeBoat: d.holeBoat || prev.holeBoat,
-        holeChance: d.chance || prev.holeChance,
-        kiinaComment: d.socialComment || (d.chance ? "AIでは" + d.holeBoat + "号艇の穴期待度が" + d.chance + "%。展開がハマれば一発に期待！" : prev.kiinaComment),
+        headline: dynamicCopy.headline,
+        callout: dynamicCopy.callout,
+        speech: dynamicCopy.speech,
+        holeBoat,
+        holeChance,
+        kiinaComment: d.socialComment || (d.chance ? "AIでは" + holeBoat + "号艇の穴期待度が" + d.chance + "%。展開がハマれば一発に期待！" : prev.kiinaComment),
         aiTickets: d.tickets || [],
         aiUnitStake: d.unitStake || 0,
         aiInvestment: d.investment || 0,
         aiRankNo: d.rankNo || null,
-        scores: {...prev.scores,[d.holeBoat || "5"]: d.chance ? String(Math.max(Number(prev.scores[d.holeBoat || "5"] || 0), Math.min(100, Math.round(Number(d.chance) * 5)))) : prev.scores[d.holeBoat || "5"]}
+        scores: {...prev.scores,[holeBoat || "5"]: d.chance ? String(Math.max(Number(prev.scores[holeBoat || "5"] || 0), Math.min(100, Math.round(Number(d.chance) * 5)))) : prev.scores[holeBoat || "5"]}
       }));
       setImportState({
         status:"loaded",
