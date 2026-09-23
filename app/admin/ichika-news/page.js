@@ -52,6 +52,45 @@ function shortDate(value) {
   return `${Number(m)}/${Number(d)}`;
 }
 
+function pickNonRepeatingCopy(kind, options) {
+  if (!options.length) return "";
+  if (typeof window === "undefined") return options[0];
+  const storageKey = `boatstrikers:ichika-news:${kind}`;
+  const previous = Number.parseInt(window.localStorage.getItem(storageKey) || "-1", 10);
+  const candidates = options.map((_, index) => index).filter((index) => index !== previous);
+  const pool = candidates.length ? candidates : options.map((_, index) => index);
+  const nextIndex = pool[Math.floor(Math.random() * pool.length)];
+  window.localStorage.setItem(storageKey, String(nextIndex));
+  return options[nextIndex];
+}
+
+function buildIchikaAiCopy({ course, raceNo, escapeRate, nationalAverage }) {
+  const rate = escapeRate ? String(escapeRate) : "";
+  const average = nationalAverage ? String(nationalAverage) : "";
+  const raceLabel = `${course}${raceNo}R`;
+
+  const mainOptions = [
+    rate ? `${raceLabel}、イン逃げ期待${rate}%！` : `${raceLabel}、1号艇の先マイに注目！`,
+    rate && average ? `イン逃げ${rate}%、全国平均${average}%と比較！` : `1号艇を軸に、展開をチェック！`,
+    `${raceLabel}、1号艇中心に相手比較！`,
+    "インから先マイ、相手候補まで見極める！",
+    "1号艇を軸に、2・3着争いをチェック！",
+  ];
+
+  const speechOptions = [
+    rate ? `${raceLabel}はイン逃げ期待${rate}%！相手関係も見よう！` : `${raceLabel}、インの条件と相手関係を見よう！`,
+    rate && average ? `全国平均${average}%との差も見ながら、1号艇の条件を確認しよう！` : "1号艇の先マイ条件と相手候補を丁寧に確認しよう！",
+    `${raceLabel}、1号艇だけでなく差し・まくり差しも確認！`,
+    "インの先マイ条件と、相手候補の気配を丁寧に見よう！",
+    "数字だけで決めず、2・3着候補までチェックしていこう！",
+  ];
+
+  return {
+    mainCopy: pickNonRepeatingCopy("main", mainOptions),
+    speech: pickNonRepeatingCopy("speech", speechOptions),
+  };
+}
+
 function buildPrompt(v) {
   const edition = v.edition === "just_before" ? "直前版" : "前日版";
   const topExpression = labelOf(EXPRESSIONS, v.topExpression);
@@ -89,14 +128,14 @@ function buildPrompt(v) {
 ${shortDate(v.date)} ${v.course}${v.raceNo}R　${edition}
 
 【メインコピー】
-${v.mainCopy || "インの力を信じて、堅く、着実に！"}
+${v.mainCopy || "1号艇を軸に、展開をチェック！"}
 
 【イン逃げデータ】
 ・このレースのイン逃げ率：${v.escapeRate || "—"}%
 ・全国平均：${v.nationalAverage || "—"}%
 
 【吹き出し】
-${v.speech || "インの力に注目！"}
+${v.speech || "インの条件と相手関係を丁寧に見ていこう！"}
 
 【本命】
 ・本命艇：${v.honmeiBoat || "1"}号艇
@@ -148,14 +187,14 @@ const DEFAULTS = {
   course: "宮島",
   raceNo: "1",
   edition: "previous_day",
-  mainCopy: "インの力を信じて、堅く、着実に！",
+  mainCopy: "1号艇を軸に、展開をチェック！",
   escapeRate: "84",
   nationalAverage: "73",
-  speech: "宮島はインが強い水面！まずは1号艇から狙おう！",
+  speech: "インの条件と相手関係を丁寧に見ていこう！",
   honmeiBoat: "1",
   honmeiTitle: "イン逃げで信頼度◎",
   honmeiComment: "スタートを決めて押し切りに期待！",
-  ichikaComment: "宮島はインが素直に決まりやすい水面です。まずは1号艇の逃げから。相手は2・3号艇を中心に！",
+  ichikaComment: "インの気配を中心に、相手候補までしっかり見ていこう！",
   exhibition1: "行き足が軽く、スタート気配も上々。",
   exhibition2: "差し足に注意したい気配。",
   exhibition3: "伸びが良く、外からの一撃候補。",
@@ -235,10 +274,18 @@ export default function IchikaNewsAdmin() {
       }
       const d = json.data;
       const ticketText = (d.tickets || []).join(" / ");
+      const copy = buildIchikaAiCopy({
+        course,
+        raceNo,
+        escapeRate: d.escapeRate || v.escapeRate,
+        nationalAverage: v.nationalAverage,
+      });
       setV((prev) => ({
         ...prev,
         course,
         raceNo,
+        mainCopy: copy.mainCopy,
+        speech: copy.speech,
         escapeRate: d.escapeRate || prev.escapeRate,
         honmeiBoat: "1",
         honmeiTitle: "イン逃げで信頼度◎",
