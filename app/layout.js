@@ -20,6 +20,7 @@ import BoatAnalyticsTracker from "./components/BoatAnalyticsTracker";
 import LatestCharacterPopup from "./components/LatestCharacterPopup";
 import IchikaPagePolish from "./components/IchikaPagePolish";
 import HideCharacterResearchTool from "./components/HideCharacterResearchTool";
+import RacerWaterAffinityPanel from "./components/RacerWaterAffinityPanel";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({ children }) {
         <PublicSiteHeader />
         <MemberEmailConfirmationHelper />
         {children}
+        <RacerWaterAffinityPanel />
         <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
         <HideCharacterResearchTool />
