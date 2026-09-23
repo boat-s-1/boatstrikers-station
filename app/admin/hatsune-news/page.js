@@ -55,19 +55,20 @@ function pickCopyIndex(key, length) {
   window.localStorage.setItem(storageKey, String(next));
   return next;
 }
-function buildHatsuneCopy({course, raceNo, expectation, category}) {
+function buildHatsuneCopy({course, raceNo, expectation, category, featuredBoat}) {
   const rate = expectation ? String(expectation) : "";
+  const boat = featuredBoat ? String(featuredBoat) : "";
   const headlines = [
     course + raceNo + "R 女子戦をチェック♪",
     rate ? "女子戦期待度" + rate + "%に注目♪" : "初音の女子戦ポイント♪",
     category ? category + "の女子戦をチェック♪" : "女子戦の流れをチェック♪",
-    course + raceNo + "R 注目ポイント♪",
+    boat ? boat + "号艇を中心にチェック♪" : course + raceNo + "R 注目ポイント♪",
   ];
   const speeches = [
-    course + raceNo + "R、まずは気配を見よう♪",
+    boat ? "注目は" + boat + "号艇♪ 艇別データも見てみよう！" : course + raceNo + "R、まずは気配を見よう♪",
     rate ? "女子戦期待度" + rate + "%！展開も見たいな♪" : "スタートと展開を見たいな♪",
-    category ? category + "。スタート隊形もチェック♪" : "相手候補の気配もチェック♪",
-    "注目艇と相手の気配を比べてみよう♪",
+    category ? category + "。スタート比較もチェック♪" : "相手候補の気配もチェック♪",
+    boat ? boat + "号艇と相手の数字を比べてみよう♪" : "注目艇と相手の気配を比べてみよう♪",
   ];
   return {
     headline: headlines[pickCopyIndex("hatsune:headline", headlines.length)],
@@ -213,21 +214,23 @@ export default function HatsuneNewsAdmin(){
       }
       const d = json.data;
       const expectation = d.expectation || v.expectation;
-      const dynamicCopy = buildHatsuneCopy({course,raceNo,expectation,category:d.category||""});
+      const featuredBoat = d.featuredBoat || v.featuredBoat;
+      const dynamicCopy = buildHatsuneCopy({course,raceNo,expectation,category:d.category||"",featuredBoat});
       setV((prev)=>({
         ...prev,
         course,
         raceNo,
         headline:dynamicCopy.headline,
         speech:dynamicCopy.speech,
+        featuredBoat,
         expectation,
         aiCategory:d.category||"",
         comment:d.socialComment || (d.category === "インが不安"
-          ? "インが不安な女子戦。流れが変わる展開に注目だよ♪"
-          : "イン優勢の女子戦。軸を決めて相手の気配を見ていこう♪"),
-        checkpoints:d.category === "インが不安"
-          ? ["1号艇のスタート気配","2〜4号艇の攻め足","まくり差しの展開"]
-          : ["1号艇の行き足","相手候補の差し足","スタート隊形"],
+          ? "インが不安な女子戦。艇別データを比べて流れが変わる展開に注目だよ♪"
+          : "イン優勢の女子戦。1号艇を中心に艇別データも確認しよう♪"),
+        checkpoints:Array.isArray(d.checkpoints) && d.checkpoints.length === 3
+          ? d.checkpoints
+          : prev.checkpoints,
         aiTickets:d.tickets||[],
         aiUnitStake:d.unitStake||0,
         aiInvestment:d.investment||0,
@@ -235,7 +238,7 @@ export default function HatsuneNewsAdmin(){
       }));
       setImportState({
         status:"loaded",
-        message:(json.frozen?"freeze済み公式予想":"AI候補")+"を取得しました（"+d.category+" / BEST3 #"+d.rankNo+"）。取得後も手動修正できます。",
+        message:(json.frozen?"freeze済み公式予想":"AI候補")+"を取得しました（"+d.category+" / BEST3 #"+d.rankNo+"）。注目艇・チェックポイントも艇別データから更新しました。",
         source:json.frozen?"ai_frozen":"ai_candidate"
       });
     }catch{
