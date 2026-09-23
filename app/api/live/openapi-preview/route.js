@@ -5,6 +5,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const OPEN_API_BASE = "https://boatraceopenapi.github.io/api/v1";
+const COURSE_NAMES = [
+  null,
+  "桐生", "戸田", "江戸川", "平和島", "多摩川", "浜名湖", "蒲郡", "常滑",
+  "津", "三国", "びわこ", "住之江", "尼崎", "鳴門", "丸亀", "児島",
+  "宮島", "徳山", "下関", "若松", "芦屋", "福岡", "唐津", "大村",
+];
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -43,10 +49,21 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function toTime(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  const match = text.match(/(?:T|\s)(\d{2}:\d{2}(?::\d{2})?)/);
+  if (match) return match[1].length === 5 ? `${match[1]}:00` : match[1];
+  if (/^\d{2}:\d{2}(?::\d{2})?$/.test(text)) return text.length === 5 ? `${text}:00` : text;
+  return null;
+}
+
 function buildPayload(apiJson, fallbackDate) {
   const stadiums = apiJson?.programs?.stadiums || {};
-  const entryRows = [];
-  const eventRows = [];
+  const bootstrapEntryRows = [];
+  const bootstrapEventRows = [];
+  const previewEntryRows = [];
+  const previewEventRows = [];
 
   for (const [stadiumKey, stadium] of Object.entries(stadiums)) {
     const courseCode = Number(stadium?.stadium_number ?? stadiumKey);
@@ -57,12 +74,54 @@ function buildPayload(apiJson, fallbackDate) {
       const raceNo = Number(race?.race_number ?? raceKey);
       if (!Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12) continue;
 
+      const raceDate = String(race?.date || race?.preview?.date || fallbackDate).slice(0, 10);
+      const courseName = COURSE_NAMES[courseCode] || null;
+      const raceName = String(race?.subtitle || race?.title || "").trim() || null;
+
+      bootstrapEventRows.push({
+        race_date: raceDate,
+        course_code: courseCode,
+        race_no: raceNo,
+        course_name: courseName,
+        race_name: raceName,
+        closing_time: toTime(race?.closed_at),
+        distance: toNumber(race?.distance),
+        race_day_no: toNumber(race?.day_number),
+      });
+
+      const programRacers = race?.racers || {};
+      for (const [boatKey, racer] of Object.entries(programRacers)) {
+        const boatNo = Number(racer?.entry_number ?? boatKey);
+        if (!Number.isInteger(boatNo) || boatNo < 1 || boatNo > 6) continue;
+
+        bootstrapEntryRows.push({
+          race_date: raceDate,
+          course_code: courseCode,
+          race_no: raceNo,
+          boat_no: boatNo,
+          racer_registration_no:
+            racer?.number === null || racer?.number === undefined ? null : String(racer.number),
+          racer_name: racer?.name || null,
+          racer_class: racer?.rank_number_source || null,
+          national_win_rate: toNumber(racer?.national_win_rate),
+          local_win_rate: toNumber(racer?.local_win_rate),
+          national_2_rate: toNumber(racer?.national_top_2_percent),
+          local_2_rate: toNumber(racer?.local_top_2_percent),
+          average_st: toNumber(racer?.average_start_timing),
+          flying_count: toNumber(racer?.flying_count),
+          late_count: toNumber(racer?.late_count),
+          motor_no: toNumber(racer?.motor_number),
+          motor_2_rate: toNumber(racer?.motor_top_2_percent),
+          boat_machine_no: toNumber(racer?.boat_number),
+          boat_2_rate: toNumber(racer?.boat_top_2_percent),
+          racer_weight: toNumber(racer?.weight),
+        });
+      }
+
       const preview = race?.preview;
       if (!preview || typeof preview !== "object") continue;
 
-      const raceDate = String(race?.date || preview?.date || fallbackDate).slice(0, 10);
-
-      eventRows.push({
+      previewEventRows.push({
         race_date: raceDate,
         course_code: courseCode,
         race_no: raceNo,
@@ -80,8 +139,8 @@ function buildPayload(apiJson, fallbackDate) {
         water_temperature: toNumber(preview.water_temperature),
       });
 
-      const racers = preview?.racers || {};
-      for (const [boatKey, racer] of Object.entries(racers)) {
+      const previewRacers = preview?.racers || {};
+      for (const [boatKey, racer] of Object.entries(previewRacers)) {
         const boatNo = Number(racer?.entry_number ?? boatKey);
         if (!Number.isInteger(boatNo) || boatNo < 1 || boatNo > 6) continue;
 
@@ -99,7 +158,7 @@ function buildPayload(apiJson, fallbackDate) {
           continue;
         }
 
-        entryRows.push({
+        previewEntryRows.push({
           race_date: raceDate,
           course_code: courseCode,
           race_no: raceNo,
@@ -113,7 +172,12 @@ function buildPayload(apiJson, fallbackDate) {
     }
   }
 
-  return { entryRows, eventRows };
+  return {
+    bootstrapEntryRows,
+    bootstrapEventRows,
+    previewEntryRows,
+    previewEventRows,
+  };
 }
 
 async function syncPreview(date) {
@@ -128,18 +192,36 @@ async function syncPreview(date) {
   }
 
   const apiJson = await response.json();
-  const { entryRows, eventRows } = buildPayload(apiJson, date);
+  const {
+    bootstrapEntryRows,
+    bootstrapEventRows,
+    previewEntryRows,
+    previewEventRows,
+  } = buildPayload(apiJson, date);
   const syncedAt = new Date().toISOString();
   const supabase = getSupabase();
+
+  // Emergency bootstrap is current-day only. The RPC inserts missing rows only,
+  // so existing BRDB/PC-KYOTEI rows are never overwritten.
+  let bootstrapResult = null;
+  if (date === jstDate() && bootstrapEventRows.length && bootstrapEntryRows.length) {
+    const { data, error } = await supabase.rpc("bs_apply_openapi_bootstrap", {
+      p_events: bootstrapEventRows,
+      p_entries: bootstrapEntryRows,
+      p_synced_at: syncedAt,
+    });
+    if (error) throw error;
+    bootstrapResult = data;
+  }
 
   const [{ data: entryResult, error: entryError }, { data: eventResult, error: eventError }] =
     await Promise.all([
       supabase.rpc("bs_apply_openapi_preview", {
-        p_rows: entryRows,
+        p_rows: previewEntryRows,
         p_synced_at: syncedAt,
       }),
       supabase.rpc("bs_apply_openapi_preview_events", {
-        p_rows: eventRows,
+        p_rows: previewEventRows,
         p_synced_at: syncedAt,
       }),
     ]);
@@ -150,13 +232,17 @@ async function syncPreview(date) {
   return {
     date,
     endpoint,
-    fetched_entry_rows: entryRows.length,
-    fetched_event_rows: eventRows.length,
+    bootstrap: bootstrapResult,
+    fetched_program_entry_rows: bootstrapEntryRows.length,
+    fetched_program_event_rows: bootstrapEventRows.length,
+    fetched_entry_rows: previewEntryRows.length,
+    fetched_event_rows: previewEventRows.length,
     entries: entryResult,
     events: eventResult,
     priority: {
+      program: "BRDB existing rows > OpenAPI bootstrap for missing rows only",
       preview: "PC-KYOTEI existing values > OpenAPI fallback",
-      detailed_exhibition: "PC-KYOTEI only (lap/turn/straight)",
+      detailed_exhibition: "verified official / PC-KYOTEI detailed exhibition",
     },
   };
 }
