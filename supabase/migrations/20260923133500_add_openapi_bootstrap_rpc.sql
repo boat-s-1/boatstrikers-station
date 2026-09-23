@@ -183,3 +183,8 @@ begin
   );
 end;
 $$;
+
+revoke all on function public.bs_apply_openapi_bootstrap(jsonb, jsonb, timestamptz) from public;
+revoke all on function public.bs_apply_openapi_bootstrap(jsonb, jsonb, timestamptz) from anon;
+revoke all on function public.bs_apply_openapi_bootstrap(jsonb, jsonb, timestamptz) from authenticated;
+grant execute on function public.bs_apply_openapi_bootstrap(jsonb, jsonb, timestamptz) to service_role;
