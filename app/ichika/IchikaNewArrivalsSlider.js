@@ -5,6 +5,9 @@ export default function IchikaNewArrivalsSlider({ items = [] }) {
 
   return (
     <div className={styles.wrap}>
+      {items.length > 1 ? (
+        <div className={styles.hint}>横にスワイプ →</div>
+      ) : null}
       <div className={styles.slider} aria-label="一果の新着読み物">
         {items.map((item) => (
           <a
@@ -27,9 +30,6 @@ export default function IchikaNewArrivalsSlider({ items = [] }) {
           </a>
         ))}
       </div>
-      {items.length > 1 ? (
-        <p className={styles.hint}>← 横にスワイプできます →</p>
-      ) : null}
     </div>
   );
 }
