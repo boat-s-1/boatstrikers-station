@@ -115,6 +115,29 @@ function buildInsights(stats) {
   return { strengths: strengths.slice(0, 4), cautions: cautions.slice(0, 4) };
 }
 
+function latestTimestamp(values) {
+  const times = values
+    .filter(Boolean)
+    .map((value) => new Date(value).getTime())
+    .filter(Number.isFinite);
+  return times.length ? new Date(Math.max(...times)).toISOString() : null;
+}
+
+function formatUpdatedAt(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 async function loadRacer(registrationNo) {
   const supabase = getSupabase();
   const today = getJstDateString();
@@ -122,7 +145,7 @@ async function loadRacer(registrationNo) {
   const [{ data: racer, error: racerError }, { data: rows, error: rowsError }, { data: todayRows, error: todayError }] = await Promise.all([
     supabase.from("bs_racers").select("registration_no,official_registration_no,name,name_kana,birthday,branch,birthplace,gender,racer_class,registration_term,height_cm,weight_kg,blood_type,is_active").eq("registration_no", registrationNo).maybeSingle(),
     supabase.from("bs_race_entries").select("race_date,course_code,race_no,boat_no,actual_course,arrival_order,finish_place,average_st,national_win_rate,local_win_rate").eq("racer_registration_no", registrationNo).order("race_date", { ascending: false }).limit(1000),
-    supabase.from("bs_race_entries").select("race_date,course_code,race_no,boat_no,racer_name,average_st,national_win_rate,local_win_rate").eq("racer_registration_no", registrationNo).eq("race_date", today).order("race_no", { ascending: true }),
+    supabase.from("bs_race_entries").select("race_date,course_code,race_no,boat_no,racer_name,average_st,national_win_rate,local_win_rate,updated_at,synced_at").eq("racer_registration_no", registrationNo).eq("race_date", today).order("race_no", { ascending: true }),
   ]);
 
   if (racerError) throw racerError;
@@ -132,14 +155,16 @@ async function loadRacer(registrationNo) {
 
   const eventKeys = (todayRows ?? []).map((row) => `and(course_code.eq.${row.course_code},race_no.eq.${row.race_no})`);
   let eventMap = new Map();
+  let events = [];
   if (eventKeys.length) {
-    const { data: events, error: eventsError } = await supabase
+    const { data: eventRows, error: eventsError } = await supabase
       .from("bs_race_events")
-      .select("course_code,race_no,course_name,race_name,closing_time,deadline_time,race_status,result_available")
+      .select("course_code,race_no,course_name,race_name,closing_time,deadline_time,race_status,result_available,updated_at,synced_at")
       .eq("race_date", today)
       .or(eventKeys.join(","));
     if (eventsError) throw eventsError;
-    eventMap = new Map((events ?? []).map((event) => [`${event.course_code}:${event.race_no}`, event]));
+    events = eventRows ?? [];
+    eventMap = new Map(events.map((event) => [`${event.course_code}:${event.race_no}`, event]));
   }
 
   const stats = buildStats(rows ?? []);
@@ -156,7 +181,21 @@ async function loadRacer(registrationNo) {
     };
   });
 
-  return { racer, stats, latest, races, tags: buildTags(stats, latest), insights: buildInsights(stats), today };
+  const dataUpdatedAt = latestTimestamp([
+    ...(todayRows ?? []).flatMap((row) => [row.updated_at, row.synced_at]),
+    ...events.flatMap((event) => [event.updated_at, event.synced_at]),
+  ]);
+
+  return {
+    racer,
+    stats,
+    latest,
+    races,
+    tags: buildTags(stats, latest),
+    insights: buildInsights(stats),
+    today,
+    dataUpdatedAt,
+  };
 }
 
 function boatClass(boatNo) {
@@ -200,12 +239,13 @@ export default async function RacerGuidePage({ params }) {
 
   const data = await loadRacer(registrationNo);
   if (!data) notFound();
-  const { racer, stats, latest, races, tags, insights, today } = data;
+  const { racer, stats, latest, races, tags, insights, today, dataUpdatedAt } = data;
   const c1 = stats.courses[0];
   const displayRegistration = String(racer.registration_no || registrationNo).replace(/^0+/, "") || registrationNo;
   const latestAverageSt = n(latest?.average_st);
   const latestNational = n(latest?.national_win_rate);
   const latestLocal = n(latest?.local_win_rate);
+  const updatedLabel = formatUpdatedAt(dataUpdatedAt);
 
   return (
     <main className={styles.page}>
@@ -236,27 +276,66 @@ export default async function RacerGuidePage({ params }) {
         <section className={styles.todaySection}>
           <div className={styles.sectionHeading}>
             <div><span>TODAY'S RACE</span><h2>本日の出走</h2></div>
-            <time dateTime={today}>{today.replaceAll("-", ".")}</time>
-          </div>
-          {races.length ? (
-            <div className={styles.raceGrid}>
-              {races.map((race) => (
-                <article className={styles.raceCard} key={`${race.course_code}-${race.race_no}`}>
-                  <div className={styles.raceTop}>
-                    <div><strong>{race.courseName} {race.race_no}R</strong>{race.raceName ? <small>{race.raceName}</small> : null}</div>
-                    <span className={`${styles.boatBadge} ${boatClass(race.boat_no)}`}>{race.boat_no}</span>
-                  </div>
-                  <div className={styles.raceMeta}>
-                    <span>{race.boat_no}号艇</span>
-                    {shortTime(race.closingTime) ? <span>締切 {shortTime(race.closingTime)}</span> : <span>{race.resultAvailable ? "結果確定" : "出走予定"}</span>}
-                  </div>
-                  <Link href={`/races/${Number(race.course_code)}/${Number(race.race_no)}?date=${today}`} prefetch={false} className={styles.raceLink}>レースを見る <span>›</span></Link>
-                </article>
-              ))}
-              {races.some((race) => Number(race.boat_no) === 1) ? (
-                <aside className={styles.ichikaNote}><b>一果の注目</b><strong>今日は1号艇の出走あり</strong><p>この選手のイン成績と合わせてチェック。</p></aside>
+            <div style={{ textAlign: "right" }}>
+              <time dateTime={today}>{today.replaceAll("-", ".")}</time>
+              {updatedLabel ? (
+                <div style={{ marginTop: 5, fontSize: 10, color: "#76d8ff", fontWeight: 800 }}>
+                  データ更新 {updatedLabel}
+                </div>
               ) : null}
             </div>
+          </div>
+          {races.length ? (
+            <>
+              <div style={{ padding: "10px 16px 0", fontSize: 11, color: "#8fc5dd", fontWeight: 800 }}>
+                ← 横にスワイプして出走を確認 →
+              </div>
+              <div
+                className={styles.raceGrid}
+                style={{
+                  display: "flex",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  WebkitOverflowScrolling: "touch",
+                  scrollbarWidth: "thin",
+                  paddingBottom: 18,
+                }}
+              >
+                {races.map((race) => (
+                  <article
+                    className={styles.raceCard}
+                    key={`${race.course_code}-${race.race_no}`}
+                    style={{
+                      flex: "0 0 min(82vw, 320px)",
+                      minWidth: 0,
+                      scrollSnapAlign: "start",
+                    }}
+                  >
+                    <div className={styles.raceTop}>
+                      <div><strong>{race.courseName} {race.race_no}R</strong>{race.raceName ? <small>{race.raceName}</small> : null}</div>
+                      <span className={`${styles.boatBadge} ${boatClass(race.boat_no)}`}>{race.boat_no}</span>
+                    </div>
+                    <div className={styles.raceMeta}>
+                      <span>{race.boat_no}号艇</span>
+                      {shortTime(race.closingTime) ? <span>締切 {shortTime(race.closingTime)}</span> : <span>{race.resultAvailable ? "結果確定" : "出走予定"}</span>}
+                    </div>
+                    <Link href={`/races/${Number(race.course_code)}/${Number(race.race_no)}?date=${today}`} prefetch={false} className={styles.raceLink}>レースを見る <span>›</span></Link>
+                  </article>
+                ))}
+                {races.some((race) => Number(race.boat_no) === 1) ? (
+                  <aside
+                    className={styles.ichikaNote}
+                    style={{
+                      flex: "0 0 min(76vw, 300px)",
+                      minWidth: 0,
+                      scrollSnapAlign: "start",
+                    }}
+                  >
+                    <b>一果の注目</b><strong>今日は1号艇の出走あり</strong><p>この選手のイン成績と合わせてチェック。</p>
+                  </aside>
+                ) : null}
+              </div>
+            </>
           ) : <div className={styles.emptyRace}>本日の出走はありません。</div>}
         </section>
 
@@ -303,7 +382,7 @@ export default async function RacerGuidePage({ params }) {
 
         <section className={styles.profileGrid}>
           <article className={styles.detailCard}><h2>基本プロフィール</h2><dl><div><dt>登録番号</dt><dd>{displayRegistration}</dd></div><div><dt>級別</dt><dd>{racer.racer_class || "--"}</dd></div><div><dt>支部</dt><dd>{racer.branch || "--"}</dd></div><div><dt>出身地</dt><dd>{racer.birthplace || "--"}</dd></div><div><dt>生年月日</dt><dd>{racer.birthday || "--"}</dd></div><div><dt>登録期</dt><dd>{racer.registration_term ? `${racer.registration_term}期` : "--"}</dd></div><div><dt>身長</dt><dd>{racer.height_cm ? `${racer.height_cm}cm` : "--"}</dd></div><div><dt>体重</dt><dd>{racer.weight_kg ? `${racer.weight_kg}kg` : "--"}</dd></div></dl></article>
-          <article className={styles.detailCard}><h2>最新データ</h2><dl><div><dt>全国勝率</dt><dd>{latestNational == null ? "--" : latestNational.toFixed(2)}</dd></div><div><dt>当地勝率</dt><dd>{latestLocal == null ? "--" : latestLocal.toFixed(2)}</dd></div><div><dt>平均ST</dt><dd>{latestAverageSt == null ? "--" : latestAverageSt.toFixed(2)}</dd></div><div><dt>集計完走数</dt><dd>{stats.completed}走</dd></div><div><dt>1着</dt><dd>{stats.wins}回</dd></div><div><dt>1着率</dt><dd>{pct(stats.winRate)}</dd></div></dl></article>
+          <article className={styles.detailCard}><h2>最新データ</h2><dl><div><dt>全国勝率</dt><dd>{latestNational == null ? "--" : latestNational.toFixed(2)}</dd></div><div><dt>当地勝率</dt><dd>{latestLocal == null ? "--" : latestLocal.toFixed(2)}</dd></div><div><dt>平均ST</dt><dd>{latestAverageSt == null ? "--" : latestAverageSt.toFixed(2)}</dd></div><div><dt>集計完走数</dt><dd>{stats.completed}走</dd></div><div><dt>1着</dt><dd>{stats.wins}回</dd></div><div><dt>1着率</dt><dd>{pct(stats.winRate)}</dd></div>{updatedLabel ? <div><dt>データ更新</dt><dd>{updatedLabel}</dd></div> : null}</dl></article>
         </section>
 
         <section className={styles.relatedSection}>
