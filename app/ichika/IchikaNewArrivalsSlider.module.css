@@ -2,6 +2,14 @@
   margin-top: 6px;
 }
 
+.hint {
+  margin: 0 2px 7px;
+  text-align: right;
+  color: #2b8462;
+  font-size: 9px;
+  font-weight: 900;
+}
+
 .slider {
   display: flex;
   gap: 12px;
@@ -76,14 +84,6 @@
   color: #fff;
   font-size: 13px;
   font-weight: 900;
-}
-
-.hint {
-  margin: 6px 0 0;
-  text-align: center;
-  color: #6e7c75;
-  font-size: 11px;
-  font-weight: 800;
 }
 
 @media (min-width: 768px) {
