@@ -63,21 +63,62 @@ function buildSyncHealth(runtimeRow) {
   };
 }
 
+async function getDataHealth(db, raceDate) {
+  if (!raceDate) return null;
+
+  try {
+    const [bootstrapEntries, bootstrapEvents, unknownResults, unknownPayouts] = await Promise.all([
+      db.from("bs_race_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("race_date", raceDate)
+        .eq("data_source", "BOATRACE_OPEN_API_BOOTSTRAP"),
+      db.from("bs_race_events")
+        .select("id", { count: "exact", head: true })
+        .eq("race_date", raceDate)
+        .eq("data_source", "BOATRACE_OPEN_API_BOOTSTRAP"),
+      db.from("bs_race_events")
+        .select("id", { count: "exact", head: true })
+        .eq("race_date", raceDate)
+        .eq("result_available", true)
+        .is("result_source", null),
+      db.from("bs_race_events")
+        .select("id", { count: "exact", head: true })
+        .eq("race_date", raceDate)
+        .not("trifecta_payout", "is", null)
+        .is("payout_source", null),
+    ]);
+
+    const errors = [bootstrapEntries.error, bootstrapEvents.error, unknownResults.error, unknownPayouts.error].filter(Boolean);
+    if (errors.length) return { status: "unknown" };
+
+    return {
+      status: "ok",
+      bootstrapEntryRows: bootstrapEntries.count || 0,
+      bootstrapEventRows: bootstrapEvents.count || 0,
+      unknownResultSourceRows: unknownResults.count || 0,
+      unknownPayoutSourceRows: unknownPayouts.count || 0,
+    };
+  } catch {
+    return { status: "unknown" };
+  }
+}
+
 export async function GET() {
   try {
+    const db = getAdminSupabase();
     const [dates, runtimeResult] = await Promise.all([
       getAvailableDates(3),
-      getAdminSupabase()
-        .from("bs_sync_runtime")
+      db.from("bs_sync_runtime")
         .select("state,worker_name,heartbeat_at,last_success_at,last_status,last_summary")
         .eq("id", 1)
         .maybeSingle(),
     ]);
 
     const latestDate = dates[0] ?? null;
-    const courses = latestDate
-      ? await getCoursesByDate(latestDate)
-      : [];
+    const [courses, dataHealth] = await Promise.all([
+      latestDate ? getCoursesByDate(latestDate) : Promise.resolve([]),
+      getDataHealth(db, latestDate),
+    ]);
 
     const syncHealth = runtimeResult.error
       ? {
@@ -94,18 +135,15 @@ export async function GET() {
       latestDate,
       availableDates: dates,
       courseCount: courses.length,
-      raceCount: courses.reduce(
-        (sum, course) => sum + course.races.length,
-        0
-      ),
+      raceCount: courses.reduce((sum, course) => sum + course.races.length, 0),
       syncHealth,
+      dataHealth,
     });
   } catch (error) {
     return NextResponse.json(
       {
         status: "error",
-        message:
-          error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
