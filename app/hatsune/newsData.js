@@ -37,10 +37,20 @@ const HATSUNE_NEWS_IMAGES = {
   tomorrow: "/images/hatsune-news/hatsune-tomorrow-v1.webp",
 };
 
+const WOMEN_NEWS_PATTERN = /(女子|女子戦|女子ボート|オールレディース|レディース|ヴィーナス|プリンセス|クイーンズ|女子王座|レディースチャンピオン)/;
+
 export function normalizeHatsuneNewsCategory(value) {
   const key = String(value || "all");
   if (HATSUNE_NEWS_CATEGORIES.some((item) => item.key === key)) return key;
   return LEGACY_CATEGORY_TO_TAB[key] || "all";
+}
+
+export function isHatsuneWomenNews(item) {
+  const category = String(item?.category || "").toLowerCase();
+  if (category === "women" || category === "tomorrow") return true;
+
+  const text = `${item?.title || ""} ${item?.summary || ""}`;
+  return WOMEN_NEWS_PATTERN.test(text);
 }
 
 export function getHatsuneNewsImage(item) {
@@ -97,11 +107,15 @@ const HATSUNE_NEWS_SELECT = `
   priority
 `;
 
-export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
+export async function getHatsuneNews({ limit = 20, category = "all", womenOnly = false } = {}) {
   if (!supabase) return [];
 
   try {
     const normalizedCategory = normalizeHatsuneNewsCategory(category);
+    const fetchLimit = womenOnly
+      ? Math.min(Math.max(Number(limit || 20) * 10, 100), 500)
+      : limit;
+
     let query = supabase
       .from("hatsune_news")
       .select(HATSUNE_NEWS_SELECT)
@@ -109,7 +123,7 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("is_featured", { ascending: false })
       .order("priority", { ascending: false })
-      .limit(limit);
+      .limit(fetchLimit);
 
     if (normalizedCategory === "race") {
       query = query.in("category", ["result", "women", "win"]);
@@ -128,7 +142,9 @@ export async function getHatsuneNews({ limit = 20, category = "all" } = {}) {
       return [];
     }
 
-    return Array.isArray(data) ? data : [];
+    const rows = Array.isArray(data) ? data : [];
+    const visibleRows = womenOnly ? rows.filter(isHatsuneWomenNews) : rows;
+    return visibleRows.slice(0, limit);
   } catch (error) {
     console.warn("初音NEWS取得:", error?.message || error);
     return [];
