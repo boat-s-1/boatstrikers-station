@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "../../../../admin/sync/_lib/adminAuth";
+import { getAiAdminSupabase } from "../../../../../lib/aiAdminSupabase";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -62,6 +63,14 @@ function numeric(value) {
   return raw && /^-?\d+(?:\.\d+)?$/.test(raw) ? raw : "";
 }
 
+function nullableNumeric(...values) {
+  for (const value of values) {
+    const parsed = numeric(value);
+    if (parsed) return parsed;
+  }
+  return null;
+}
+
 function safeStringArray(value, max = 20) {
   return Array.isArray(value) ? value.filter((v) => typeof v === "string" && v.trim()).slice(0, max) : [];
 }
@@ -116,6 +125,66 @@ function safeFacts(body) {
   };
 }
 
+async function loadOfficialExhibitionFacts(facts) {
+  try {
+    const supabase = getAiAdminSupabase();
+    const raceNo = Number(facts.raceNo);
+    const { data: events, error: eventError } = await supabase
+      .from("bs_race_events")
+      .select("course_code,course_name")
+      .eq("race_date", facts.date)
+      .eq("race_no", raceNo);
+
+    if (eventError) throw eventError;
+
+    const wantedCourse = plain(facts.course);
+    const event = (events || []).find((row) =>
+      plain(row.course_name) === wantedCourse || plain(row.course_code) === wantedCourse
+    );
+    if (!event?.course_code) return [];
+
+    const { data: entries, error: entryError } = await supabase
+      .from("bs_race_entries")
+      .select([
+        "boat_no",
+        "official_exhibition_time","exhibition_time","api_exhibition_time",
+        "official_exhibition_st","exhibition_st","api_exhibition_st",
+        "official_exhibition_course","exhibition_course","api_exhibition_course",
+        "official_half_lap","half_lap_time",
+        "official_lap","lap_time",
+        "official_turn","turn_time",
+        "official_straight","straight_time",
+        "official_exhibition_source","exhibition_source",
+      ].join(","))
+      .eq("race_date", facts.date)
+      .eq("course_code", event.course_code)
+      .eq("race_no", raceNo)
+      .gte("boat_no", 1)
+      .lte("boat_no", 6)
+      .order("boat_no", { ascending: true });
+
+    if (entryError) throw entryError;
+
+    return (entries || []).map((row) => ({
+      boatNo: Number(row.boat_no),
+      exhibitionCourse: nullableNumeric(row.official_exhibition_course, row.exhibition_course, row.api_exhibition_course),
+      exhibitionTime: nullableNumeric(row.official_exhibition_time, row.exhibition_time, row.api_exhibition_time),
+      exhibitionSt: nullableNumeric(row.official_exhibition_st, row.exhibition_st, row.api_exhibition_st),
+      halfLap: nullableNumeric(row.official_half_lap, row.half_lap_time),
+      lap: nullableNumeric(row.official_lap, row.lap_time),
+      turn: nullableNumeric(row.official_turn, row.turn_time),
+      straight: nullableNumeric(row.official_straight, row.straight_time),
+      source: plain(row.official_exhibition_source || row.exhibition_source) || null,
+    })).filter((row) =>
+      row.exhibitionCourse !== null || row.exhibitionTime !== null || row.exhibitionSt !== null ||
+      row.halfLap !== null || row.lap !== null || row.turn !== null || row.straight !== null
+    );
+  } catch (error) {
+    console.error("新聞AI公式展示データ取得エラー:", error?.message || error);
+    return [];
+  }
+}
+
 function outputText(json) {
   if (typeof json?.output_text === "string" && json.output_text.trim()) return json.output_text.trim();
   const parts = [];
@@ -139,7 +208,7 @@ function characterRules(character, edition) {
       "- 一果はイン逃げ担当。1号艇中心の見立てを、数字と入力済み情報から論理的に説明する",
       "- 『私がまず見たいのは』『私はここを確認したいです』など一人称を自然に使うが、各セクション1〜2回程度に抑える",
       isJustBefore
-        ? "- 直前版で展示評価が入力されている場合は確認済み材料として扱う。展示前に時間を戻す表現は禁止"
+        ? "- 直前版では確認済みの公式展示データと手入力の展示評価を材料として扱う。展示前に時間を戻す表現は禁止"
         : "- 前日版では展示気配・展示タイム・スタート展示・進入を確定情報として書かない",
     ];
   }
@@ -150,7 +219,7 @@ function characterRules(character, edition) {
       "- 女子選手の性格・実力・近況など、入力にない個人情報や評価を推測しない",
       "- 『流れ』『気配』という言葉だけで曖昧に済ませず、入力済みのチェックポイントや数値に結びつける",
       isJustBefore
-        ? "- 直前版でも具体的な展示情報が入力されていない場合、展示内容を作らない。『直前データで評価が更新された』程度にとどめる"
+        ? "- 直前版では確認済みの公式展示データがあれば具体的に使う。データがない項目は作らない"
         : "- 前日版では展示・進入・当日気配を確定情報として書かず、直前に確認する項目として扱う",
     ];
   }
@@ -160,7 +229,7 @@ function characterRules(character, edition) {
     "- 『絶対穴』『激アツ』『儲かる』など、根拠のない煽り・利益を期待させる断定は使わない",
     "- 5号艇が入力されていないのに5アタマ前提で書かない。注目穴と買い目は入力どおり扱う",
     isJustBefore
-      ? "- 直前版でも具体的な展示情報が入力されていない場合、展示内容を作らない。直前データから穴候補を整理する"
+      ? "- 直前版では確認済みの公式展示データがあれば穴候補の根拠として使う。データがない項目は作らない"
       : "- 前日版では展示・進入・当日気配を確定情報として書かず、直前に確認する項目として扱う",
   ];
 }
@@ -186,6 +255,7 @@ export async function POST(request) {
   const isJustBefore = facts.edition === "just_before";
   const editionLabel = isJustBefore ? "直前版" : "前日版";
   const draft = body?.draft || {};
+  const officialExhibition = isJustBefore ? await loadOfficialExhibitionFacts(facts) : [];
 
   const prompt = [
     `あなたはBoatStrikersの${profile.name}本人として、読者に語りかける一人称の記事を書きます。`,
@@ -205,7 +275,8 @@ export async function POST(request) {
     "- 一人称は自然に使うが、毎段落『私』から始めない",
     "- 前日版と直前版は最初の見出しと導入文で違いが分かるようにする",
     "- 前日版では未確認の当日情報を未来形で扱う",
-    "- 直前版は入力済みの直前データを材料にする。ただし入力されていない展示・進入・気象は作らない",
+    "- 直前版は入力済みの直前データと確認済み公式展示データを材料にする。ただし値がない項目は作らない",
+    "- 公式展示データでは official 系の値を優先済み。数値はそのまま使用し、勝手に補正・順位化しない",
     "- まとめは本文の再説明ではなく、2〜3文程度の短い締めにする",
     "- Markdown見出しは ##、箇条書きは - を使用する",
     ...characterRules(character, facts.edition),
@@ -230,7 +301,12 @@ export async function POST(request) {
     `目安：${target.note}。サイト記事より丁寧にしつつ、同じ数値や注意点の再説明は避ける。`,
     "",
     "【確認済み入力データ】",
-    JSON.stringify({ ...facts, editionLabel, character: profile.name }, null, 2),
+    JSON.stringify({
+      ...facts,
+      ...(officialExhibition.length ? { officialExhibition } : {}),
+      editionLabel,
+      character: profile.name,
+    }, null, 2),
     "",
     "【現在のテンプレート原稿】",
     JSON.stringify({
