@@ -34,6 +34,10 @@ function mapEntry(row) {
     motor_2_rate: finite(row.motor_top2_rate ?? row.motor_2_rate),
     boat_2_rate: finite(row.race_boat_top2_rate ?? row.boat_2_rate),
     average_st: finite(row.average_st),
+    // 直前ランキングは、確認済み公式展示を最優先でPhase2へ渡す。
+    exhibition_time: finite(row.official_exhibition_time ?? row.exhibition_time ?? row.api_exhibition_time),
+    exhibition_st: finite(row.official_exhibition_st ?? row.exhibition_st ?? row.api_exhibition_st),
+    exhibition_course: finite(row.official_exhibition_course ?? row.exhibition_course ?? row.api_exhibition_course),
   };
 }
 
@@ -70,8 +74,11 @@ function pick(rows, limit) {
 
 function makeRows(races, rankingDate, dataTiming) {
   const all = races.map((race) => {
-    const { previousPrediction } = buildPhase2Predictions({ event: race.event, entries: race.entries });
-    const escapeProbability = clamp(Number(previousPrediction?.score || 0) / 100, 0, 1);
+    const { previousPrediction, livePrediction } = buildPhase2Predictions({ event: race.event, entries: race.entries });
+    const prediction = dataTiming === "after_exhibition"
+      ? (livePrediction ?? previousPrediction)
+      : previousPrediction;
+    const escapeProbability = clamp(Number(prediction?.score || 0) / 100, 0, 1);
     const boat5Probability = boatWinProbability(race.entries, 5);
     return {
       ...race,
