@@ -80,7 +80,7 @@ export default async function RealtimeUpdates({ target = "home", limit = 5, comp
   }
 
   if (target === "hatsune") {
-    const hatsuneNews = await getHatsuneNews({ limit: 3 });
+    const hatsuneNews = await getHatsuneNews({ limit: 3, womenOnly: true });
     return (
       <>
         <HatsuneSchedulePreview />
