@@ -52,10 +52,54 @@ function entryPower(entry) {
   return national * 0.28 + local * 0.18 + motor * 0.18 + boat * 0.08 + start * 0.18 + lane * 0.10;
 }
 
-function boatWinProbability(entries, boatNo) {
+function lowerIsBetter(value, values, fallback = 0.5) {
+  const n = finite(value);
+  if (n === null || !values.length) return fallback;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (max === min) return 0.5;
+  return clamp((max - n) / (max - min), 0, 1);
+}
+
+function exhibitionPower(entry, entries) {
+  const times = entries.map((e) => finite(e.exhibition_time)).filter((v) => v !== null);
+  const starts = entries.map((e) => finite(e.exhibition_st)).filter((v) => v !== null);
+  const laps = entries.map((e) => finite(e.official_lap ?? e.lap_time)).filter((v) => v !== null);
+  const turns = entries.map((e) => finite(e.official_turn ?? e.turn_time)).filter((v) => v !== null);
+  const straights = entries.map((e) => finite(e.official_straight ?? e.straight_time)).filter((v) => v !== null);
+  const mark = String(entry.exhibition_fl || "").toUpperCase();
+  const flyingPenalty = mark.includes("F") ? 0.08 : 0;
+
+  return clamp(
+    lowerIsBetter(entry.exhibition_time, times) * 0.30 +
+      lowerIsBetter(Math.abs(finite(entry.exhibition_st) ?? 0.20), starts.map(Math.abs)) * 0.24 +
+      lowerIsBetter(entry.official_lap ?? entry.lap_time, laps) * 0.18 +
+      lowerIsBetter(entry.official_turn ?? entry.turn_time, turns) * 0.18 +
+      lowerIsBetter(entry.official_straight ?? entry.straight_time, straights) * 0.10 -
+      flyingPenalty,
+    0,
+    1
+  );
+}
+
+function hasExhibitionData(entries) {
+  return entries.some((entry) => [
+    entry.exhibition_time,
+    entry.exhibition_st,
+    entry.official_lap,
+    entry.lap_time,
+    entry.official_turn,
+    entry.turn_time,
+    entry.official_straight,
+    entry.straight_time,
+  ].some((value) => finite(value) !== null));
+}
+
+function boatWinProbability(entries, boatNo, useExhibition = false) {
   const temperature = 4.4;
   const weights = entries.map((entry) => {
-    const power = entryPower(entry);
+    const base = entryPower(entry);
+    const power = useExhibition ? base * 0.64 + exhibitionPower(entry, entries) * 0.36 : base;
     const laneExtra = Number(entry.boat_no) === 1 ? 0.14 : 0;
     return { boatNo: Number(entry.boat_no), weight: Math.exp((power + laneExtra) * temperature) };
   });
@@ -79,7 +123,8 @@ function makeRows(races, rankingDate, dataTiming) {
       ? (livePrediction ?? previousPrediction)
       : previousPrediction;
     const escapeProbability = clamp(Number(prediction?.score || 0) / 100, 0, 1);
-    const boat5Probability = boatWinProbability(race.entries, 5);
+    const useExhibition = dataTiming === "after_exhibition" && hasExhibitionData(race.entries);
+    const boat5Probability = boatWinProbability(race.entries, 5, useExhibition);
     return {
       ...race,
       escapeProbability,
@@ -116,6 +161,7 @@ function makeRows(races, rankingDate, dataTiming) {
           boat5_first_probability: race.boat5Probability,
           women_race: race.isWomenRace,
           generator: MODEL_VERSION,
+          exhibition_applied: dataTiming === "after_exhibition" && hasExhibitionData(race.entries),
         },
         data_timing: dataTiming,
       });
