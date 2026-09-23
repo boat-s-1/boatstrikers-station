@@ -2,6 +2,7 @@ import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
+import CharacterReadingSlider from "../components/CharacterReadingSlider";
 import { supabase } from "../bsc2/lib/supabaseClient";
 import { getPublishedNewspapers } from "../../lib/newspapers";
 
@@ -12,25 +13,10 @@ export const metadata = {
   title: "キイナ｜5号艇・穴狙い・高配当レース分析",
   description: "BoatStrikersキイナの専門ページ。5号艇や人気薄をオッズだけで選ばず、スタート、センターの攻め、展示、モーター、展開から穴の入口を探す見方を解説します。",
   alternates: { canonical: "/kiina" },
-  openGraph: {
-    title: "キイナ｜5号艇・穴狙い分析｜BoatStrikers",
-    description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。",
-    url: "/kiina",
-    type: "website",
-  },
+  openGraph: { title: "キイナ｜5号艇・穴狙い分析｜BoatStrikers", description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。", url: "/kiina", type: "website" },
 };
 
-const emptyKiinaResult = {
-  raceCount: 0,
-  hitCount: 0,
-  hitRate: 0,
-  returnRate: 0,
-  profit: 0,
-  bestHit: 0,
-  updated: "",
-  hits: [],
-  errorMessage: "",
-};
+const emptyKiinaResult = { raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0, profit: 0, bestHit: 0, updated: "", hits: [], errorMessage: "" };
 
 function getCurrentMonthRange() {
   const formatter = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Tokyo", year: "numeric", month: "numeric" });
@@ -44,62 +30,33 @@ function getCurrentMonthRange() {
   return { monthStart, nextMonthStart: `${nextYear}-${String(nextMonth).padStart(2, "0")}-01` };
 }
 
-function formatRaceDate(dateString) {
-  return dateString ? dateString.replaceAll("-", "/") : "";
-}
+function formatRaceDate(dateString) { return dateString ? dateString.replaceAll("-", "/") : ""; }
 
 async function getKiinaResults() {
   if (!supabase) return { ...emptyKiinaResult, errorMessage: "Supabase未接続です" };
   try {
     const { monthStart, nextMonthStart } = getCurrentMonthRange();
-    const { data, error } = await supabase
-      .from("bsc_results")
+    const { data, error } = await supabase.from("bsc_results")
       .select("id,race_date,place,race_no,category,bet_text,invest,payout,hit,memo,hit_image_url,hit_title,hit_note,created_at")
-      .eq("category", "キイナ")
-      .gte("race_date", monthStart)
-      .lt("race_date", nextMonthStart)
-      .order("race_date", { ascending: false })
-      .order("race_no", { ascending: false })
-      .order("created_at", { ascending: false });
-
+      .eq("category", "キイナ").gte("race_date", monthStart).lt("race_date", nextMonthStart)
+      .order("race_date", { ascending: false }).order("race_no", { ascending: false }).order("created_at", { ascending: false });
     if (error) return { ...emptyKiinaResult, errorMessage: `${error.message} / ${error.code || "コードなし"}` };
     const rows = Array.isArray(data) ? data : [];
     const hitRows = rows.filter((row) => row.hit === true || Number(row.payout || 0) > 0);
     const totalInvest = rows.reduce((sum, row) => sum + Number(row.invest || 0), 0);
     const totalPayout = rows.reduce((sum, row) => sum + Number(row.payout || 0), 0);
     const bestHit = rows.reduce((max, row) => Math.max(max, Number(row.payout || 0)), 0);
-    const hits = rows
-      .filter((row) => Boolean(row.hit_image_url))
-      .slice(0, 6)
-      .map((row) => {
-        const payout = Number(row.payout || 0);
-        return {
-          image: row.hit_image_url,
-          title: row.hit_title || `${row.place}${row.race_no}R`,
-          race: `${formatRaceDate(row.race_date)} ${row.place}${row.race_no}R`,
-          note: row.hit_note || row.memo || `払戻 ${payout.toLocaleString()}円`,
-        };
-      });
-
-    return {
-      raceCount: rows.length,
-      hitCount: hitRows.length,
-      hitRate: rows.length ? Math.round((hitRows.length / rows.length) * 100) : 0,
-      returnRate: totalInvest > 0 ? Math.round((totalPayout / totalInvest) * 100) : 0,
-      profit: totalPayout - totalInvest,
-      bestHit,
-      updated: rows[0]?.race_date ? formatRaceDate(rows[0].race_date) : "",
-      hits,
-      errorMessage: "",
-    };
-  } catch (error) {
-    return { ...emptyKiinaResult, errorMessage: error?.message || "不明な取得エラー" };
-  }
+    const hits = rows.filter((row) => Boolean(row.hit_image_url)).slice(0, 6).map((row) => ({
+      image: row.hit_image_url,
+      title: row.hit_title || `${row.place}${row.race_no}R`,
+      race: `${formatRaceDate(row.race_date)} ${row.place}${row.race_no}R`,
+      note: row.hit_note || row.memo || `払戻 ${Number(row.payout || 0).toLocaleString()}円`,
+    }));
+    return { raceCount: rows.length, hitCount: hitRows.length, hitRate: rows.length ? Math.round((hitRows.length / rows.length) * 100) : 0, returnRate: totalInvest > 0 ? Math.round((totalPayout / totalInvest) * 100) : 0, profit: totalPayout - totalInvest, bestHit, updated: rows[0]?.race_date ? formatRaceDate(rows[0].race_date) : "", hits, errorMessage: "" };
+  } catch (error) { return { ...emptyKiinaResult, errorMessage: error?.message || "不明な取得エラー" }; }
 }
 
-function getRssImage(item, fallbackImage) {
-  return item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || fallbackImage;
-}
+function getRssImage(item, fallbackImage) { return item?.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] || fallbackImage; }
 
 async function getKiinaNewspaper() {
   try {
@@ -110,128 +67,65 @@ async function getKiinaNewspaper() {
     const item = feed.items.find((feedItem) => feedItem.title?.includes("【キイナ前日版】"));
     if (!item) return [];
     return [{ title: item.title || "キイナ前日版", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/kiina-banner.jpg") }];
-  } catch (error) {
-    console.error("キイナ新聞取得エラー:", error);
-    return [];
-  }
+  } catch (error) { console.error("キイナ新聞取得エラー:", error); return []; }
 }
 
 async function getKiinaArticles() {
   try {
     const parser = new Parser();
     const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
-    return feed.items
-      .filter((item) => item.title?.includes("【キイナゼミ"))
-      .slice(0, 6)
-      .map((item) => ({ title: item.title || "キイナゼミ", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/kiina-banner.jpg") }));
-  } catch (error) {
-    console.error("キイナゼミ取得エラー:", error);
-    return [];
-  }
+    return feed.items.filter((item) => item.title?.includes("【キイナゼミ")).slice(0, 6).map((item) => ({ title: item.title || "キイナゼミ", link: item.link || "", date: item.pubDate || "", image: getRssImage(item, "/kiina-banner.jpg") }));
+  } catch (error) { console.error("キイナゼミ取得エラー:", error); return []; }
 }
 
 export default async function KiinaPage() {
   const [articles, newspapers, result] = await Promise.all([getKiinaArticles(), getKiinaNewspaper(), getKiinaResults()]);
+  const latestReadings = [
+    ...newspapers.map((item) => ({ ...item, kind: "新聞", external: false, meta: `${item.edition === "just_before" ? "直前版" : "前日版"}${item.course ? `・${item.course}${item.raceNo}R` : ""}` })),
+    ...articles.map((item) => ({ ...item, kind: "研究", external: true, meta: "5アタマ・穴狙い研究" })),
+  ].sort((a, b) => (b.date ? new Date(b.date).getTime() : 0) - (a.date ? new Date(a.date).getTime() : 0)).slice(0, 3);
 
   const edgeBannerRowStyle = { margin: "-18px -18px 16px", width: "calc(100% + 36px)" };
   const edgeBannerImageStyle = { display: "block", width: "100%", maxWidth: "none", height: "auto", margin: 0, borderRadius: "22px 22px 0 0" };
+  const guideStyle = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "13px 14px", border: "2px solid #e1aa20", borderRadius: 14, background: "#fffdf6", color: "#9a6c00", textDecoration: "none", fontWeight: 900 };
 
   return (
     <main className="page kiinaPage">
-      <header className="header">
-        <div className="logo">BOAT<br /><span>STRIKERS</span></div>
-        <a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a>
-      </header>
+      <header className="header"><div className="logo">BOAT<br /><span>STRIKERS</span></div><a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a></header>
+      <section className="hero"><Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority /></section>
 
-      <section className="hero">
-        <Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority />
+      <RealtimeUpdates target="kiina" limit={5} />
+
+      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_8019.jpeg?v=20260906-0649" alt="キイナの新着読み物" className="homeTitleImage" style={edgeBannerImageStyle} /></div>
+        <p style={{ margin: "0 0 12px", color: "#7d7358", fontSize: 12, lineHeight: 1.7 }}>新聞・ゼミ・穴狙い研究から、新しいものを3件まとめて表示します。</p>
+        <CharacterReadingSlider items={latestReadings} character="kiina" emptyText="新着の読み物はまだありません。" />
       </section>
+
+      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_7992.jpeg?v=20260905-0810" alt="キイナの研究書棚" className="homeTitleImage" style={edgeBannerImageStyle} /></div>
+        <p style={{ margin: "0 0 12px", color: "#7d7358", fontSize: 12, lineHeight: 1.7 }}>5アタマ・穴狙いの研究記事を、横にスワイプして選べます。</p>
+        <CharacterReadingSlider items={articles.map((item) => ({ ...item, kind: "研究", external: true, meta: "穴党ラボ" })).slice(0, 6)} character="kiina" emptyText="穴党ラボの記事はまだありません。" />
+      </section>
+
+      <section className="sectionCard purpleCard" style={{ overflow: "hidden" }}>
+        <div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_8020.jpeg?v=20260906-0649" alt="今月の成績" className="homeTitleImage" style={edgeBannerImageStyle} /></div>
+        <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
+        {result.errorMessage && <p className="recordLead" style={{ color: "#d93025", wordBreak: "break-word" }}>成績取得エラー：{result.errorMessage}</p>}
+        <div className="recordGrid"><div className="recordCard"><span>予想レース数</span><strong>{result.raceCount}R</strong><p>今月の予想数</p></div><div className="recordCard"><span>的中率</span><strong>{result.hitRate}%</strong><p>{result.hitCount}R的中</p></div><div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div><div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div></div>
+        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
+      </section>
+
+      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}><div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_7993.jpeg?v=20260905-0810" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} /></div><p className="radioLead">キイナが高配当狙い・5アタマの考え方・穴党反省会を配信中！</p><a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="yellowBtn fullBtn">🎙 ラジオ一覧を見る</a></section>
+      <section className="sectionCard lineBannerCard"><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink"><img src="/C5AD4F38-3CAF-4C4D-9A4A-8313644E05BB.png" alt="公式LINE登録" className="lineBannerImage" /></a></section>
 
       <section className="sectionCard yellowCard">
         <h1>キイナの5アタマ・穴狙い研究室</h1>
         <p>キイナは「高配当だから」「5号艇だから」という理由だけでは狙いません。内側に崩れる材料があり、センター勢の攻めによって外へ展開が向きそうなときに、5号艇を含む人気薄を比較します。</p>
         <h2>穴艇を見る5つのチェック</h2>
-        <ol>
-          <li><strong>インの弱点：</strong>1号艇の進入・ST・展示に不安材料があるか。</li>
-          <li><strong>攻めの起点：</strong>3・4コースにスタートから仕掛けられそうな艇がいるか。</li>
-          <li><strong>展開：</strong>攻め艇のさらに外、特に5号艇へ差し場やまくり差しの余地があるか。</li>
-          <li><strong>展示：</strong>人気薄でも直線・ターン出口・展示タイムに上向き材料があるか。</li>
-          <li><strong>価格：</strong>根拠を確認してからオッズを見る。高オッズそのものは買う理由にしない。</li>
-        </ol>
+        <ol><li><strong>インの弱点：</strong>1号艇の進入・ST・展示に不安材料があるか。</li><li><strong>攻めの起点：</strong>3・4コースにスタートから仕掛けられそうな艇がいるか。</li><li><strong>展開：</strong>攻め艇のさらに外、特に5号艇へ差し場やまくり差しの余地があるか。</li><li><strong>展示：</strong>人気薄でも直線・ターン出口・展示タイムに上向き材料があるか。</li><li><strong>価格：</strong>根拠を確認してからオッズを見る。高オッズそのものは買う理由にしない。</li></ol>
         <p>穴狙いは当たりやすさよりも振れ幅が大きくなります。点数と購入額を先に決め、条件が噛み合わないレースは無理に狙いません。</p>
-        <div className="sectionTitleRow">
-          <a className="yellowBtn" href="/guide/average-st">平均STの見方</a>
-          <a className="yellowBtn" href="/guide/exhibition">展示航走の見方</a>
-          <a className="yellowBtn" href="/guide/odds-payout">オッズと払戻の基本</a>
-        </div>
-      </section>
-
-      <RealtimeUpdates target="kiina" limit={5} />
-
-      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
-        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
-          <img src="/top/IMG_8019.jpeg?v=20260906-0649" alt="5アタマ攻略新聞" className="homeTitleImage" style={edgeBannerImageStyle} />
-        </div>
-        {newspapers?.length ? (
-          <div className="labList">
-            {newspapers.map((newspaper) => (
-              <a href={newspaper.link} className="newsFeature" key={newspaper.link}>
-                <img src={newspaper.image} alt={newspaper.title} className="featureImg" />
-                <div>
-                  <small>{newspaper.edition === "just_before" ? "直前版" : "前日版"}{newspaper.course ? `・${newspaper.course}${newspaper.raceNo}R` : ""}</small>
-                  <h3>{newspaper.title}</h3>
-                  <p>{newspaper.date ? new Date(newspaper.date).toLocaleDateString("ja-JP") : ""}</p>
-                  <span className="yellowBtn">📖 新聞を読む</span>
-                </div>
-              </a>
-            ))}
-          </div>
-        ) : <p>今日のキイナ新聞はまだありません。</p>}
-      </section>
-
-      <section className="sectionCard purpleCard" style={{ overflow: "hidden" }}>
-        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
-          <img src="/top/IMG_8020.jpeg?v=20260906-0649" alt="今月の成績" className="homeTitleImage" style={edgeBannerImageStyle} />
-        </div>
-        <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
-        {result.errorMessage && <p className="recordLead" style={{ color: "#d93025", wordBreak: "break-word" }}>成績取得エラー：{result.errorMessage}</p>}
-        <div className="recordGrid">
-          <div className="recordCard"><span>予想レース数</span><strong>{result.raceCount}R</strong><p>今月の予想数</p></div>
-          <div className="recordCard"><span>的中率</span><strong>{result.hitRate}%</strong><p>{result.hitCount}R的中</p></div>
-          <div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div>
-          <div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div>
-        </div>
-        {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
-      </section>
-
-      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
-        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
-          <img src="/top/IMG_7992.jpeg?v=20260905-0810" alt="キイナラボ" className="homeTitleImage" style={edgeBannerImageStyle} />
-        </div>
-        {articles.length > 0 ? (
-          <div className="labList">
-            {articles.map((article) => (
-              <a key={article.link} href={article.link} target="_blank" rel="noopener noreferrer" className="labItem">
-                <img src={article.image || "/kiina-banner.jpg"} alt={article.title} />
-                <div><h3>{article.title}</h3><small>{article.date ? new Date(article.date).toLocaleDateString("ja-JP") : ""}</small></div>
-              </a>
-            ))}
-          </div>
-        ) : <p>穴党ラボの記事はまだありません。</p>}
-      </section>
-
-      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
-        <div className="sectionTitleRow" style={edgeBannerRowStyle}>
-          <img src="/top/IMG_7993.jpeg?v=20260905-0810" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} />
-        </div>
-        <p className="radioLead">キイナが高配当狙い・5アタマの考え方・穴党反省会を配信中！</p>
-        <a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="yellowBtn fullBtn">🎙 ラジオ一覧を見る</a>
-      </section>
-
-      <section className="sectionCard lineBannerCard">
-        <a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink">
-          <img src="/C5AD4F38-3CAF-4C4D-9A4A-8313644E05BB.png" alt="公式LINE登録" className="lineBannerImage" />
-        </a>
+        <div style={{ display: "grid", gap: 9 }}><a style={guideStyle} href="/guide/average-st"><span>平均STの見方</span><b>→</b></a><a style={guideStyle} href="/guide/exhibition"><span>展示航走の見方</span><b>→</b></a><a style={guideStyle} href="/guide/odds-payout"><span>オッズと払戻の基本</span><b>→</b></a></div>
       </section>
     </main>
   );
