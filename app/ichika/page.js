@@ -5,6 +5,7 @@ import HitGallery from "../components/HitGallery";
 import { supabase } from "../bsc2/lib/supabaseClient";
 import { getPublishedNewspapers } from "../../lib/newspapers";
 import IchikaBookshelf from "./IchikaBookshelf";
+import IchikaNewArrivalsSlider from "./IchikaNewArrivalsSlider";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -223,34 +224,15 @@ export default async function IchikaPage() {
       <section className="sectionCard pinkCard bannerTopCard">
         <div className="sectionBannerCrop">
           <img
-          src="/1668A81B-6AEE-429E-B9D1-9B051344B77B.png"
-          alt="一果の新着読み物"
-          className="sectionBannerFlush"
-        />
+            src="/1668A81B-6AEE-429E-B9D1-9B051344B77B.png"
+            alt="一果の新着読み物"
+            className="sectionBannerFlush"
+          />
         </div>
         <p style={{ margin: "0 0 14px", color: "#6e7c75", fontSize: 12, lineHeight: 1.7 }}>
           新聞・ゼミ・研究記事から、新しいものを3件まとめて表示します。
         </p>
-        {latestReadings.length ? (
-          <div className="labList">
-            {latestReadings.map((item) => (
-              <a
-                href={item.link}
-                className="newsFeature"
-                key={`${item.kind}-${item.link}`}
-                {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              >
-                <img src={item.image || "/ichika-banner.jpg"} alt={item.title} className="featureImg" />
-                <div>
-                  <small>{item.kind}・{item.meta}</small>
-                  <h3>{item.title}</h3>
-                  <p>{item.date ? new Date(item.date).toLocaleDateString("ja-JP") : ""}</p>
-                  <span className="pinkBtn">📖 読む</span>
-                </div>
-              </a>
-            ))}
-          </div>
-        ) : <p>新着の読み物はまだありません。</p>}
+        <IchikaNewArrivalsSlider items={latestReadings} />
       </section>
 
       <IchikaBookshelf />
