@@ -46,7 +46,7 @@ function NewsRow({ item }) {
 export default async function HatsuneNewsPage({ searchParams }) {
   const params = await searchParams;
   const category = normalizeHatsuneNewsCategory(params?.category || "all");
-  const news = await getHatsuneNews({ limit: 50, category });
+  const news = await getHatsuneNews({ limit: 50, category, womenOnly: true });
 
   return (
     <main className={styles.page}>
@@ -84,7 +84,7 @@ export default async function HatsuneNewsPage({ searchParams }) {
         <section className={styles.empty}>
           <div>📰</div>
           <h2>このジャンルのニュースはまだありません</h2>
-          <p>水神祭・優勝・級別・女子戦結果・高モーター・翌日情報を収集し、該当ジャンルへ自動で整理していきます。</p>
+          <p>女子戦・女子レーサー・高モーター・翌日情報を収集し、該当ジャンルへ自動で整理していきます。</p>
         </section>
       )}
 
