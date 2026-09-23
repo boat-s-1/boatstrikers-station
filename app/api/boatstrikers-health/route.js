@@ -3,7 +3,7 @@ import {
   getAvailableDates,
   getCoursesByDate,
 } from "../../lib/boatstrikersPlatform";
-import { getAdminSupabase } from "../admin/sync/_lib/supabaseAdmin";
+import { getAdminSupabase } from "../../admin/sync/_lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
