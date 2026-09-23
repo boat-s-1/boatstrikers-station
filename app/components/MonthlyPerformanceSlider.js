@@ -82,6 +82,7 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [detail, setDetail] = useState(null);
+  const [expandedModes, setExpandedModes] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -141,6 +142,12 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
           const data = modes[mode.key];
           const stats = data?.stats || {};
           const note = data?.rule || mode.note;
+          const bets = Array.isArray(data?.bets) ? data.bets : [];
+          const isIchikaCollapsed = character === "ichika";
+          const isExpanded = Boolean(expandedModes[mode.key]);
+          const visibleBets = isIchikaCollapsed && !isExpanded ? bets.slice(0, 4) : bets.slice(0, 8);
+          const canToggle = isIchikaCollapsed && bets.length > 4;
+
           return (
             <section className={styles.slide} key={mode.key} role="tabpanel">
               <div className={styles.modeHeader}>
@@ -167,12 +174,24 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
                     <strong>今月の買い目</strong>
                     <span>最新順</span>
                   </div>
-                  {Array.isArray(data.bets) && data.bets.length ? (
-                    <div className={styles.betGrid}>
-                      {data.bets.slice(0, 8).map((item) => (
-                        <BetCard key={`${item.raceDate}-${item.courseCode}-${item.raceNo}-${item.characterCode}`} item={item} />
-                      ))}
-                    </div>
+                  {bets.length ? (
+                    <>
+                      <div className={styles.betGrid}>
+                        {visibleBets.map((item) => (
+                          <BetCard key={`${item.raceDate}-${item.courseCode}-${item.raceNo}-${item.characterCode}`} item={item} />
+                        ))}
+                      </div>
+                      {canToggle ? (
+                        <button
+                          type="button"
+                          className={styles.moreBetsButton}
+                          onClick={() => setExpandedModes((current) => ({ ...current, [mode.key]: !isExpanded }))}
+                          aria-expanded={isExpanded}
+                        >
+                          {isExpanded ? "閉じる ↑" : `もっと見る（あと${Math.min(4, Math.max(0, bets.length - 4))}件） ↓`}
+                        </button>
+                      ) : null}
+                    </>
                   ) : (
                     <p className={styles.noBets}>対象データがありません。</p>
                   )}
