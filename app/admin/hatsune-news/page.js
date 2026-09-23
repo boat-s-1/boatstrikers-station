@@ -46,17 +46,45 @@ function clampScore(value){
   if (!Number.isFinite(n)) return "";
   return String(Math.max(0,Math.min(100,Math.round(n))));
 }
+function pickCopyIndex(key, length) {
+  if (typeof window === "undefined" || length <= 1) return Math.floor(Math.random() * Math.max(1, length));
+  const storageKey = "boatstrikers:newspaper-copy:" + key;
+  const previous = Number(window.localStorage.getItem(storageKey));
+  const candidates = Array.from({length}, (_, i) => i).filter((i) => i !== previous);
+  const next = candidates[Math.floor(Math.random() * candidates.length)] ?? 0;
+  window.localStorage.setItem(storageKey, String(next));
+  return next;
+}
+function buildHatsuneCopy({course, raceNo, expectation, category}) {
+  const rate = expectation ? String(expectation) : "";
+  const headlines = [
+    course + raceNo + "R 女子戦をチェック♪",
+    rate ? "女子戦期待度" + rate + "%に注目♪" : "初音の女子戦ポイント♪",
+    category ? category + "の女子戦をチェック♪" : "女子戦の流れをチェック♪",
+    course + raceNo + "R 注目ポイント♪",
+  ];
+  const speeches = [
+    course + raceNo + "R、まずは気配を見よう♪",
+    rate ? "女子戦期待度" + rate + "%！展開も見たいな♪" : "スタートと展開を見たいな♪",
+    category ? category + "。スタート隊形もチェック♪" : "相手候補の気配もチェック♪",
+    "注目艇と相手の気配を比べてみよう♪",
+  ];
+  return {
+    headline: headlines[pickCopyIndex("hatsune:headline", headlines.length)],
+    speech: speeches[pickCopyIndex("hatsune:speech", speeches.length)],
+  };
+}
 
 const DEFAULTS = {
   date: todayJst(),
   course: "宮島",
   raceNo: "1",
   edition: "previous_day",
-  headline: "初音の女子戦予想",
+  headline: "初音の女子戦ポイント♪",
   featuredBoat: "1",
   expectation: "70",
   comment: "女子戦は流れと気配に注目だよ♪",
-  speech: "ボートでみんなを笑顔に…♡",
+  speech: "スタートと展開を見たいな♪",
   checkpoints: ["スタート気配をチェック","ターン後の伸びをチェック","女子戦ならではの流れをチェック"],
   scores: {1:"72",2:"66",3:"64",4:"61",5:"58",6:"56"},
   topExpression: "wink",
@@ -184,11 +212,15 @@ export default function HatsuneNewsAdmin(){
         return;
       }
       const d = json.data;
+      const expectation = d.expectation || v.expectation;
+      const dynamicCopy = buildHatsuneCopy({course,raceNo,expectation,category:d.category||""});
       setV((prev)=>({
         ...prev,
         course,
         raceNo,
-        expectation:d.expectation||prev.expectation,
+        headline:dynamicCopy.headline,
+        speech:dynamicCopy.speech,
+        expectation,
         aiCategory:d.category||"",
         comment:d.socialComment || (d.category === "インが不安"
           ? "インが不安な女子戦。流れが変わる展開に注目だよ♪"
