@@ -1,38 +1,54 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import styles from "./IchikaBookshelf.module.css";
 
 const BOOKS = [
   {
-    title: "一果ゼミ",
+    title: "イン逃げゼミ",
     subtitle: "イン逃げ研究",
     href: "/library/ichika-seminar",
-    cover: "/5A4C4D12-46D8-45A1-A1B6-D14637B81FE4.png",
+    cover: "/ichika-book-innige-zemi.svg",
     tag: "SEMINAR",
   },
   {
-    title: "イン逃げ攻略",
-    subtitle: "1号艇の見方",
-    href: "/guide/inside-course",
-    cover: "/0624D4E1-6C05-4F40-9439-2A093A1B0F0D.png",
-    tag: "GUIDE",
-  },
-  {
-    title: "DATA LAB",
-    subtitle: "数字で検証する",
-    href: "/data-lab",
-    cover: "/A0021C32-58D9-488E-B0E2-F99E8718DB03.png",
-    tag: "RESEARCH",
-  },
-  {
-    title: "教えて！一果センセー",
+    title: "一果センセー",
     subtitle: "初心者向け講座",
     href: "/ichika-sensei",
-    cover: "/59F96330-6F99-4736-8083-6D6508FCD861.png",
+    cover: "/ichika-book-sensei.svg",
     tag: "BEGINNER",
+  },
+  {
+    title: "インツヨ名鑑",
+    subtitle: "1号艇の見方",
+    href: "/guide/inside-course",
+    cover: "/ichika-book-intsuyo-meikan.svg",
+    tag: "MEIKAN",
+  },
+  {
+    title: "DATE LAB",
+    subtitle: "数字で検証する",
+    href: "/data-lab",
+    cover: "/ichika-book-date-lab.svg",
+    tag: "RESEARCH",
   },
 ];
 
 export default function IchikaBookshelf() {
+  const router = useRouter();
+  const [openingHref, setOpeningHref] = useState(null);
+
+  const openBook = (event, href) => {
+    event.preventDefault();
+    if (openingHref) return;
+
+    setOpeningHref(href);
+    window.setTimeout(() => {
+      router.push(href);
+    }, 1200);
+  };
+
   return (
     <section className={styles.section} aria-label="一果の研究書棚">
       <div className={styles.bannerCrop}>
@@ -43,31 +59,45 @@ export default function IchikaBookshelf() {
         />
       </div>
       <div className={styles.heading}>
-        <p>ゼミ・攻略・検証・初心者講座を、本棚から選ぶように読めます。</p>
+        <p>ゼミ・講座・名鑑・データ研究を、本棚から選ぶように読めます。</p>
         <small>横にスワイプ →</small>
       </div>
 
       <div className={styles.shelfViewport}>
         <div className={styles.shelfTrack}>
-          {BOOKS.map((book) => (
-            <Link className={styles.book} href={book.href} key={book.title}>
-              <div className={styles.bookCover}>
-                <img src={book.cover} alt={book.title} />
-                <span>{book.tag}</span>
-              </div>
-              <div className={styles.bookMeta}>
-                <strong>{book.title}</strong>
-                <small>{book.subtitle}</small>
-              </div>
-            </Link>
-          ))}
+          {BOOKS.map((book) => {
+            const isOpening = openingHref === book.href;
+
+            return (
+              <a
+                className={`${styles.book} ${isOpening ? styles.openBook : ""}`}
+                href={book.href}
+                onClick={(event) => openBook(event, book.href)}
+                aria-label={`${book.title}を開く`}
+                aria-busy={isOpening}
+                key={book.title}
+              >
+                <div className={styles.openPage} aria-hidden="true">
+                  <span>📖</span>
+                  <b>OPEN...</b>
+                </div>
+                <div className={styles.bookCover}>
+                  <img src={book.cover} alt={book.title} />
+                  <span>{book.tag}</span>
+                </div>
+                <div className={styles.bookMeta}>
+                  <strong>{book.title}</strong>
+                  <small>{book.subtitle}</small>
+                </div>
+              </a>
+            );
+          })}
         </div>
         <div className={styles.woodShelf} aria-hidden="true">
           <div className={styles.shelfTop} />
           <div className={styles.shelfFront} />
         </div>
       </div>
-
     </section>
   );
 }
