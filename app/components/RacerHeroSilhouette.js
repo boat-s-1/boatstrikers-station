@@ -22,30 +22,48 @@ function createPhotoSlot() {
   return slot;
 }
 
+function cleanupDuplicateStructures(hero, keepGrid, keepSlot) {
+  Array.from(hero.querySelectorAll("[data-racer-photo-slot]")).forEach((slot) => {
+    if (slot !== keepSlot) slot.remove();
+  });
+
+  Array.from(hero.querySelectorAll("[data-racer-identity-grid]")).forEach((grid) => {
+    if (grid === keepGrid) return;
+    const name = grid.querySelector("h1");
+    const kana = grid.querySelector("p");
+    if (name && keepGrid && !keepGrid.contains(name)) {
+      keepGrid.querySelector("[data-racer-name-cell]")?.appendChild(name);
+    }
+    if (kana && keepGrid && !keepGrid.contains(kana)) {
+      keepGrid.querySelector("[data-racer-kana-cell]")?.appendChild(kana);
+    }
+    grid.remove();
+  });
+}
+
 function installSilhouette() {
   const hero = document.querySelector("main section");
   if (!hero) return false;
+
+  const existingGrid = hero.querySelector("[data-racer-identity-grid]");
+  if (existingGrid) {
+    const photoCell = existingGrid.querySelector("[data-racer-photo-cell]");
+    if (!photoCell) return false;
+
+    const slots = Array.from(hero.querySelectorAll("[data-racer-photo-slot]"));
+    const keep = slots[0] || createPhotoSlot();
+    if (keep.parentElement !== photoCell) photoCell.appendChild(keep);
+    cleanupDuplicateStructures(hero, existingGrid, keep);
+    return true;
+  }
 
   const heading = hero.querySelector("h1");
   const inner = heading?.parentElement;
   if (!heading || !inner) return false;
 
-  const existingGrid = inner.querySelector("[data-racer-identity-grid]");
-  if (existingGrid) {
-    const photoCell = existingGrid.querySelector("[data-racer-photo-cell]");
-    const slots = Array.from(inner.querySelectorAll("[data-racer-photo-slot]"));
-    if (photoCell) {
-      const keep = slots[0] || createPhotoSlot();
-      if (keep.parentElement !== photoCell) photoCell.appendChild(keep);
-      slots.slice(1).forEach((slot) => slot.remove());
-    }
-    return true;
-  }
-
   const kana = heading.nextElementSibling?.tagName === "P" ? heading.nextElementSibling : null;
-  const existingSlots = Array.from(inner.querySelectorAll("[data-racer-photo-slot]"));
+  const existingSlots = Array.from(hero.querySelectorAll("[data-racer-photo-slot]"));
   const slot = existingSlots[0] || createPhotoSlot();
-  existingSlots.slice(1).forEach((extraSlot) => extraSlot.remove());
 
   const grid = document.createElement("div");
   grid.dataset.racerIdentityGrid = "true";
@@ -71,6 +89,7 @@ function installSilhouette() {
   grid.appendChild(photoCell);
 
   inner.dataset.racerHeroWithPhoto = "true";
+  cleanupDuplicateStructures(hero, grid, slot);
   return true;
 }
 
