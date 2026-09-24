@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import styles from "./IchikaBookshelf.module.css";
 
 const BOOKS = [
@@ -33,6 +36,19 @@ const BOOKS = [
 ];
 
 export default function IchikaBookshelf() {
+  const router = useRouter();
+  const [openingHref, setOpeningHref] = useState(null);
+
+  const openBook = (event, href) => {
+    event.preventDefault();
+    if (openingHref) return;
+
+    setOpeningHref(href);
+    window.setTimeout(() => {
+      router.push(href);
+    }, 1200);
+  };
+
   return (
     <section className={styles.section} aria-label="一果の研究書棚">
       <div className={styles.bannerCrop}>
@@ -49,25 +65,39 @@ export default function IchikaBookshelf() {
 
       <div className={styles.shelfViewport}>
         <div className={styles.shelfTrack}>
-          {BOOKS.map((book) => (
-            <Link className={styles.book} href={book.href} key={book.title}>
-              <div className={styles.bookCover}>
-                <img src={book.cover} alt={book.title} />
-                <span>{book.tag}</span>
-              </div>
-              <div className={styles.bookMeta}>
-                <strong>{book.title}</strong>
-                <small>{book.subtitle}</small>
-              </div>
-            </Link>
-          ))}
+          {BOOKS.map((book) => {
+            const isOpening = openingHref === book.href;
+
+            return (
+              <a
+                className={`${styles.book} ${isOpening ? styles.openBook : ""}`}
+                href={book.href}
+                onClick={(event) => openBook(event, book.href)}
+                aria-label={`${book.title}を開く`}
+                aria-busy={isOpening}
+                key={book.title}
+              >
+                <div className={styles.openPage} aria-hidden="true">
+                  <span>📖</span>
+                  <b>OPEN...</b>
+                </div>
+                <div className={styles.bookCover}>
+                  <img src={book.cover} alt={book.title} />
+                  <span>{book.tag}</span>
+                </div>
+                <div className={styles.bookMeta}>
+                  <strong>{book.title}</strong>
+                  <small>{book.subtitle}</small>
+                </div>
+              </a>
+            );
+          })}
         </div>
         <div className={styles.woodShelf} aria-hidden="true">
           <div className={styles.shelfTop} />
           <div className={styles.shelfFront} />
         </div>
       </div>
-
     </section>
   );
 }
