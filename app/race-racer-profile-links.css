@@ -1,0 +1,40 @@
+.bs-racer-profile-link{
+  display:inline-flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  color:inherit;
+  text-decoration:none;
+  border-radius:8px;
+  transition:color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+.bs-racer-profile-link:hover,
+.bs-racer-profile-link:focus-visible{
+  color:#0b7c58;
+  background:rgba(24,177,118,.08);
+  box-shadow:0 0 0 3px rgba(24,177,118,.08);
+  outline:none;
+}
+.bs-racer-profile-link__cue{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#0f9965,#20bb7d);
+  color:#fff;
+  font-size:9px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.02em;
+  white-space:nowrap;
+  box-shadow:0 3px 8px rgba(15,153,101,.16);
+}
+@media(max-width:520px){
+  .bs-racer-profile-link{gap:5px}
+  .bs-racer-profile-link__cue{
+    min-height:19px;
+    padding:3px 6px;
+    font-size:8px;
+  }
+}
