@@ -1,0 +1,69 @@
+[data-racer-ichika-highlight="fixed"]{
+  margin:14px 16px 2px!important;
+  width:auto!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:auto 1fr!important;
+  column-gap:14px!important;
+  row-gap:4px!important;
+  align-items:center!important;
+  padding:15px 16px!important;
+  border:1px solid rgba(55,238,155,.6)!important;
+  border-radius:14px!important;
+  background:linear-gradient(135deg,rgba(5,77,57,.95),rgba(2,34,43,.96))!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 0 22px rgba(42,226,145,.08)!important;
+}
+[data-racer-ichika-highlight="fixed"] b{
+  grid-row:1/3!important;
+  align-self:start!important;
+  white-space:nowrap!important;
+  margin:0!important;
+}
+[data-racer-ichika-highlight="fixed"] strong{
+  margin:0!important;
+  font-size:15px!important;
+  line-height:1.4!important;
+}
+[data-racer-ichika-highlight="fixed"] p{
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+}
+[data-racer-ichika-race="true"]{
+  position:relative!important;
+  padding-top:42px!important;
+  outline:2px solid rgba(42,210,131,.45)!important;
+  outline-offset:-2px!important;
+}
+[data-racer-ichika-badge="true"]{
+  position:absolute!important;
+  top:10px!important;
+  left:12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:23px!important;
+  padding:4px 9px!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,#0fa96a,#22c986)!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.03em!important;
+  box-shadow:0 4px 10px rgba(11,126,80,.24)!important;
+  z-index:2!important;
+}
+@media(max-width:520px){
+  [data-racer-ichika-highlight="fixed"]{
+    margin:12px 11px 2px!important;
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+    padding:13px!important;
+  }
+  [data-racer-ichika-highlight="fixed"] b{
+    grid-row:auto!important;
+    justify-self:start!important;
+  }
+  [data-racer-ichika-highlight="fixed"] strong{font-size:14px!important}
+  [data-racer-ichika-highlight="fixed"] p{font-size:10px!important}
+}
