@@ -1,0 +1,10 @@
+[data-racer-favorite-mount]{margin-top:12px}
+.racerFavoriteWrap{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.racerFavoriteWrap small{font-size:10px;font-weight:900;letter-spacing:.08em;color:#8eb8ca;border:1px solid rgba(126,194,226,.28);border-radius:999px;padding:4px 8px;background:rgba(4,24,42,.58)}
+.racerFavoriteButton,.racerFavoriteLogin,.racerFavoriteLoading{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 14px;border-radius:999px;border:1px solid rgba(111,213,255,.52);background:rgba(3,24,42,.82);color:#eaf9ff;font-size:12px;font-weight:950;text-decoration:none;box-shadow:inset 0 0 18px rgba(68,198,255,.06);transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.racerFavoriteButton span,.racerFavoriteLogin span{font-size:17px;line-height:1;color:#ffd75c}
+.racerFavoriteButton:hover,.racerFavoriteLogin:hover{transform:translateY(-1px);border-color:#66d9ff}
+.racerFavoriteButton.isFavorite{border-color:rgba(255,211,75,.78);background:linear-gradient(90deg,rgba(99,72,8,.82),rgba(59,43,8,.8));color:#fff5c9}
+.racerFavoriteButton:disabled{opacity:.66;cursor:wait;transform:none}
+.racerFavoriteError{flex-basis:100%;font-size:10px;color:#ff9fac;font-weight:800}
+@media(max-width:520px){[data-racer-favorite-mount]{margin-top:9px}.racerFavoriteButton,.racerFavoriteLogin,.racerFavoriteLoading{min-height:34px;padding:7px 12px;font-size:11px}.racerFavoriteWrap small{font-size:9px;padding:3px 7px}}

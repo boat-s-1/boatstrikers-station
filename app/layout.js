@@ -8,6 +8,7 @@ import "./racer-ichika-highlight.css";
 import "./race-racer-profile-links.css";
 import "./racer-related-bottom-polish.css";
 import "./racer-hero-silhouette.css";
+import "./racer-favorite.css";
 import Script from "next/script";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
@@ -29,6 +30,7 @@ import RacerIchikaHighlightPolish from "./components/RacerIchikaHighlightPolish"
 import RaceRacerProfileLinks from "./components/RaceRacerProfileLinks";
 import RacerRelatedBottomPolish from "./components/RacerRelatedBottomPolish";
 import RacerHeroSilhouette from "./components/RacerHeroSilhouette";
+import RacerFavoriteButton from "./components/RacerFavoriteButton";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -74,6 +76,7 @@ export default function RootLayout({ children }) {
         <RacerWaterAffinityPanel />
         <RacerRelatedBottomPolish />
         <RacerHeroSilhouette />
+        <RacerFavoriteButton />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
