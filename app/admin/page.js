@@ -33,6 +33,7 @@ const GROUPS = [
       { href: "/admin/editorial", icon: "🗞️", title: "AI編集部", text: "Geminiが集めたニュース候補を採用・不採用に仕分け" },
       { href: "/admin/shorts", icon: "🎬", title: "ショート動画生成", text: "前日予想などから台本・投稿素材を作成" },
       { href: "/admin/seminar-magazines", icon: "📚", title: "攻略マガジン管理", text: "月・水・金の週刊3誌を画像登録・予約公開" },
+      { href: "/admin/ichika-books", icon: "📗", title: "一果の研究書 管理", text: "一果センセー・インツヨ名鑑・DATA LABの新刊作成・画像登録・文章解説・公開管理" },
       { href: "/admin/newspaper", icon: "📰", title: "新聞・画像作成", text: "一果・初音・キイナ・12R特別紙を作成" },
       { href: "/admin/radio-blog", icon: "🎙️", title: "ラジオブログ", text: "放送ブログの記事作成・更新" },
       { href: "/admin/note", icon: "📝", title: "note特集管理", text: "トップに掲載するnote特集を管理" },
