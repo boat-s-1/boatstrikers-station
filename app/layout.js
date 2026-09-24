@@ -4,6 +4,7 @@ import "./public-header-logo-boost.css";
 import "./races-compact-overrides.css";
 import "./ichika-ai-banner-fix.css";
 import "./hatsune-card-unify.css";
+import "./racer-ichika-highlight.css";
 import Script from "next/script";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
@@ -21,6 +22,7 @@ import LatestCharacterPopup from "./components/LatestCharacterPopup";
 import IchikaPagePolish from "./components/IchikaPagePolish";
 import HideCharacterResearchTool from "./components/HideCharacterResearchTool";
 import RacerWaterAffinityPanel from "./components/RacerWaterAffinityPanel";
+import RacerIchikaHighlightPolish from "./components/RacerIchikaHighlightPolish";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -52,6 +54,7 @@ export default function RootLayout({ children }) {
         <PublicSiteHeader />
         <MemberEmailConfirmationHelper />
         {children}
+        <RacerIchikaHighlightPolish />
         <BetaMemberPlacementBanner />
         <CharacterAiRoomPanel />
         <HideCharacterResearchTool />
