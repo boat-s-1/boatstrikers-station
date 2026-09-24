@@ -10,12 +10,30 @@ function installSilhouette() {
   const heading = hero.querySelector("h1");
   const inner = heading?.parentElement;
   if (!heading || !inner) return false;
-  if (inner.querySelector("[data-racer-photo-slot]")) return true;
+  if (inner.querySelector("[data-racer-identity-grid]")) return true;
 
-  const row = document.createElement("div");
-  row.dataset.racerNamePhotoRow = "true";
-  heading.insertAdjacentElement("beforebegin", row);
-  row.appendChild(heading);
+  const kana = heading.nextElementSibling?.tagName === "P" ? heading.nextElementSibling : null;
+
+  const grid = document.createElement("div");
+  grid.dataset.racerIdentityGrid = "true";
+  heading.insertAdjacentElement("beforebegin", grid);
+
+  const kanaCell = document.createElement("div");
+  kanaCell.dataset.racerKanaCell = "true";
+  if (kana) kanaCell.appendChild(kana);
+  grid.appendChild(kanaCell);
+
+  const favoriteCell = document.createElement("div");
+  favoriteCell.dataset.racerFavoriteCell = "true";
+  grid.appendChild(favoriteCell);
+
+  const nameCell = document.createElement("div");
+  nameCell.dataset.racerNameCell = "true";
+  nameCell.appendChild(heading);
+  grid.appendChild(nameCell);
+
+  const photoCell = document.createElement("div");
+  photoCell.dataset.racerPhotoCell = "true";
 
   const slot = document.createElement("div");
   slot.dataset.racerPhotoSlot = "true";
@@ -32,8 +50,9 @@ function installSilhouette() {
       <small>準備中</small>
     </div>
   `;
+  photoCell.appendChild(slot);
+  grid.appendChild(photoCell);
 
-  row.appendChild(slot);
   inner.dataset.racerHeroWithPhoto = "true";
   return true;
 }
