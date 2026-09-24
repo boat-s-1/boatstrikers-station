@@ -42,33 +42,61 @@ export default function IchikaBookshelf() {
   const openBook = (event, href) => {
     event.preventDefault();
     if (openingHref) return;
+
     setOpeningHref(href);
-    window.setTimeout(() => router.push(href), 1200);
+    window.setTimeout(() => {
+      router.push(href);
+    }, 1200);
   };
 
   return (
     <section className={styles.section} aria-label="一果の研究書棚">
       <div className={styles.bannerCrop}>
-        <img src="/D38AD8E9-7516-494E-AD62-0F830BBCC4EE.png" alt="一果の研究書棚" className={styles.banner} />
+        <img
+          src="/D38AD8E9-7516-494E-AD62-0F830BBCC4EE.png"
+          alt="一果の研究書棚"
+          className={styles.banner}
+        />
       </div>
       <div className={styles.heading}>
-        <p>ゼミ・講座・名鑑・データ研究を、本棚から選ぶように読めます。</p>
+        <p>ゼミ・攻略・検証・初心者講座を、本棚から選ぶように読めます。</p>
         <small>横にスワイプ →</small>
       </div>
+
       <div className={styles.shelfViewport}>
         <div className={styles.shelfTrack}>
           {BOOKS.map((book) => {
             const isOpening = openingHref === book.href;
+
             return (
-              <a className={`${styles.book} ${isOpening ? styles.openBook : ""}`} href={book.href} onClick={(event) => openBook(event, book.href)} aria-label={`${book.title}を開く`} aria-busy={isOpening} key={book.title}>
-                <div className={styles.openPage} aria-hidden="true"><span>📖</span><b>OPEN...</b></div>
-                <div className={styles.bookCover}><img src={book.cover} alt={book.title} /><span>{book.tag}</span></div>
-                <div className={styles.bookMeta}><strong>{book.title}</strong><small>{book.subtitle}</small></div>
+              <a
+                className={`${styles.book} ${isOpening ? styles.openBook : ""}`}
+                href={book.href}
+                onClick={(event) => openBook(event, book.href)}
+                aria-label={`${book.title}を開く`}
+                aria-busy={isOpening}
+                key={book.title}
+              >
+                <div className={styles.openPage} aria-hidden="true">
+                  <span>📖</span>
+                  <b>OPEN...</b>
+                </div>
+                <div className={styles.bookCover}>
+                  <img src={book.cover} alt={book.title} />
+                  <span>{book.tag}</span>
+                </div>
+                <div className={styles.bookMeta}>
+                  <strong>{book.title}</strong>
+                  <small>{book.subtitle}</small>
+                </div>
               </a>
             );
           })}
         </div>
-        <div className={styles.woodShelf} aria-hidden="true"><div className={styles.shelfTop} /><div className={styles.shelfFront} /></div>
+        <div className={styles.woodShelf} aria-hidden="true">
+          <div className={styles.shelfTop} />
+          <div className={styles.shelfFront} />
+        </div>
       </div>
     </section>
   );
