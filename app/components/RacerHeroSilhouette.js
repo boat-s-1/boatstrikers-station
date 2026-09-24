@@ -6,8 +6,16 @@ import { usePathname } from "next/navigation";
 function installSilhouette() {
   const hero = document.querySelector("main section");
   if (!hero) return false;
-  const inner = hero.querySelector("h1")?.parentElement;
-  if (!inner || inner.querySelector("[data-racer-photo-slot]")) return true;
+
+  const heading = hero.querySelector("h1");
+  const inner = heading?.parentElement;
+  if (!heading || !inner) return false;
+  if (inner.querySelector("[data-racer-photo-slot]")) return true;
+
+  const row = document.createElement("div");
+  row.dataset.racerNamePhotoRow = "true";
+  heading.insertAdjacentElement("beforebegin", row);
+  row.appendChild(heading);
 
   const slot = document.createElement("div");
   slot.dataset.racerPhotoSlot = "true";
@@ -19,11 +27,13 @@ function installSilhouette() {
         <path d="M23 174c4-45 23-69 57-69s53 24 57 69H23Z" />
       </svg>
     </div>
-    <span>PHOTO</span>
-    <small>選手写真 準備中</small>
+    <div data-racer-photo-copy>
+      <span>PHOTO</span>
+      <small>準備中</small>
+    </div>
   `;
 
-  inner.appendChild(slot);
+  row.appendChild(slot);
   inner.dataset.racerHeroWithPhoto = "true";
   return true;
 }
