@@ -6,6 +6,7 @@ import "./ichika-ai-banner-fix.css";
 import "./hatsune-card-unify.css";
 import "./racer-ichika-highlight.css";
 import "./race-racer-profile-links.css";
+import "./racer-related-bottom-polish.css";
 import Script from "next/script";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
@@ -25,6 +26,7 @@ import HideCharacterResearchTool from "./components/HideCharacterResearchTool";
 import RacerWaterAffinityPanel from "./components/RacerWaterAffinityPanel";
 import RacerIchikaHighlightPolish from "./components/RacerIchikaHighlightPolish";
 import RaceRacerProfileLinks from "./components/RaceRacerProfileLinks";
+import RacerRelatedBottomPolish from "./components/RacerRelatedBottomPolish";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
@@ -68,6 +70,7 @@ export default function RootLayout({ children }) {
         <RaceHitFlashDeduper />
         <LatestCharacterPopup />
         <RacerWaterAffinityPanel />
+        <RacerRelatedBottomPolish />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>
