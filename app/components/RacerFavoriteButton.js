@@ -56,16 +56,18 @@ export default function RacerFavoriteButton() {
     const ensureMount = () => {
       const hero = document.querySelector("main section");
       if (!hero) return false;
-      const row = hero.querySelector("[data-racer-name-photo-row]");
+      const favoriteCell = hero.querySelector("[data-racer-favorite-cell]");
       const heading = hero.querySelector("h1");
-      const anchor = row || heading;
-      if (!anchor) return false;
+      if (!favoriteCell && !heading) return false;
 
       let node = hero.querySelector("[data-racer-favorite-mount]");
       if (!node) {
         node = document.createElement("div");
         node.dataset.racerFavoriteMount = "true";
-        anchor.insertAdjacentElement("afterend", node);
+        if (favoriteCell) favoriteCell.appendChild(node);
+        else heading.insertAdjacentElement("afterend", node);
+      } else if (favoriteCell && node.parentElement !== favoriteCell) {
+        favoriteCell.appendChild(node);
       }
       setMount(node);
       return true;
