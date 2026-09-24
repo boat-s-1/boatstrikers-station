@@ -3,6 +3,25 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+function createPhotoSlot() {
+  const slot = document.createElement("div");
+  slot.dataset.racerPhotoSlot = "true";
+  slot.setAttribute("aria-label", "選手写真準備中");
+  slot.innerHTML = `
+    <div data-racer-silhouette aria-hidden="true">
+      <svg viewBox="0 0 160 190" role="presentation" focusable="false">
+        <circle cx="80" cy="56" r="34" />
+        <path d="M23 174c4-45 23-69 57-69s53 24 57 69H23Z" />
+      </svg>
+    </div>
+    <div data-racer-photo-copy>
+      <span>PHOTO</span>
+      <small>準備中</small>
+    </div>
+  `;
+  return slot;
+}
+
 function installSilhouette() {
   const hero = document.querySelector("main section");
   if (!hero) return false;
@@ -10,9 +29,23 @@ function installSilhouette() {
   const heading = hero.querySelector("h1");
   const inner = heading?.parentElement;
   if (!heading || !inner) return false;
-  if (inner.querySelector("[data-racer-identity-grid]")) return true;
+
+  const existingGrid = inner.querySelector("[data-racer-identity-grid]");
+  if (existingGrid) {
+    const photoCell = existingGrid.querySelector("[data-racer-photo-cell]");
+    const slots = Array.from(inner.querySelectorAll("[data-racer-photo-slot]"));
+    if (photoCell) {
+      const keep = slots[0] || createPhotoSlot();
+      if (keep.parentElement !== photoCell) photoCell.appendChild(keep);
+      slots.slice(1).forEach((slot) => slot.remove());
+    }
+    return true;
+  }
 
   const kana = heading.nextElementSibling?.tagName === "P" ? heading.nextElementSibling : null;
+  const existingSlots = Array.from(inner.querySelectorAll("[data-racer-photo-slot]"));
+  const slot = existingSlots[0] || createPhotoSlot();
+  existingSlots.slice(1).forEach((extraSlot) => extraSlot.remove());
 
   const grid = document.createElement("div");
   grid.dataset.racerIdentityGrid = "true";
@@ -34,22 +67,6 @@ function installSilhouette() {
 
   const photoCell = document.createElement("div");
   photoCell.dataset.racerPhotoCell = "true";
-
-  const slot = document.createElement("div");
-  slot.dataset.racerPhotoSlot = "true";
-  slot.setAttribute("aria-label", "選手写真準備中");
-  slot.innerHTML = `
-    <div data-racer-silhouette aria-hidden="true">
-      <svg viewBox="0 0 160 190" role="presentation" focusable="false">
-        <circle cx="80" cy="56" r="34" />
-        <path d="M23 174c4-45 23-69 57-69s53 24 57 69H23Z" />
-      </svg>
-    </div>
-    <div data-racer-photo-copy>
-      <span>PHOTO</span>
-      <small>準備中</small>
-    </div>
-  `;
   photoCell.appendChild(slot);
   grid.appendChild(photoCell);
 
