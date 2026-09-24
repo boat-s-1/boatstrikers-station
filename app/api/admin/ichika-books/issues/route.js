@@ -1,0 +1,8 @@
+import { NextResponse } from "next/server";
+import { requireRadioBlogAdmin } from "../../../../../lib/radioBlogAdminAuth";
+import { getRadioAdminSupabase } from "../../../../../lib/supabaseRadioAdmin";
+import { normalizeIchikaBook } from "../../../../../lib/ichikaBookDb";
+import { SEMINAR_BUCKET } from "../../../../../lib/seminarMagazineDb";
+async function previews(rows){const s=getRadioAdminSupabase();return Promise.all((rows||[]).map(async row=>({...row,page_paths:await Promise.all((row.page_paths||[]).map(async p=>{const {data}=await s.storage.from(SEMINAR_BUCKET).createSignedUrl(p.path,3600);return {...p,preview_url:data?.signedUrl||""};}))})));}
+export async function GET(){try{await requireRadioBlogAdmin();const {data,error}=await getRadioAdminSupabase().from("ichika_book_issues").select("*").order("created_at",{ascending:false});if(error)throw error;return NextResponse.json({issues:await previews(data)});}catch(error){return NextResponse.json({error:error.message||"取得に失敗しました。"},{status:error.status||500});}}
+export async function POST(request){try{await requireRadioBlogAdmin();const issue=normalizeIchikaBook(await request.json());if(!/^\d{3,4}$/.test(issue.issue_no))return NextResponse.json({error:"本IDは001のように入力してください。"},{status:400});if(!issue.title)return NextResponse.json({error:"タイトルを入力してください。"},{status:400});const {data,error}=await getRadioAdminSupabase().from("ichika_book_issues").insert(issue).select("*").single();if(error)throw error;return NextResponse.json({issue:data},{status:201});}catch(error){return NextResponse.json({error:error?.code==="23505"?"同じシリーズ・本IDがすでにあります。":error.message||"保存に失敗しました。"},{status:error.status||500});}}
