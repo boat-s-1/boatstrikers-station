@@ -1,39 +1,6 @@
 import styles from "./CharacterReadingSlider.module.css";
 import CharacterBookshelf from "./CharacterBookshelf";
-
-const TONES = {
-  hatsune: { accent: "#8a55e6", meta: "#7652b6", border: "#e3d7ff", bg: "#fcf9ff" },
-  kiina: { accent: "#f0a400", meta: "#8d6b13", border: "#f3dda0", bg: "#fffdf5" },
-};
-const HATSUNE_BOOKS=[
- {title:"女子戦攻略",subtitle:"女子戦の見方",href:"/hatsune-books/women",cover:"/top/IMG_7960.jpeg",tag:"WOMEN"},
- {title:"初音センセー",subtitle:"女子戦入門",href:"/hatsune-books/sensei",cover:"/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png",tag:"BEGINNER"},
- {title:"女子レーサー名鑑",subtitle:"選手を知る",href:"/hatsune-books/meikan",cover:"/top/IMG_7960.jpeg",tag:"MEIKAN"},
- {title:"女子戦 DATA LAB",subtitle:"数字で検証する",href:"/hatsune-books/data-lab",cover:"/top/IMG_7960.jpeg",tag:"RESEARCH"}
-];
-const KIINA_BOOKS=[
- {title:"穴狙い講座",subtitle:"穴の入口を学ぶ",href:"/kiina-books/hole",cover:"/top/IMG_7992.jpeg",tag:"SEMINAR"},
- {title:"キイナセンセー",subtitle:"穴狙い入門",href:"/kiina-books/sensei",cover:"/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png",tag:"BEGINNER"},
- {title:"穴ツヨ選手名鑑",subtitle:"穴で注目の選手",href:"/kiina-books/meikan",cover:"/top/IMG_7992.jpeg",tag:"MEIKAN"},
- {title:"穴党 DATA LAB",subtitle:"数字で検証する",href:"/kiina-books/data-lab",cover:"/top/IMG_7992.jpeg",tag:"RESEARCH"}
-];
-
-export default function CharacterReadingSlider({ items = [], character = "hatsune", emptyText = "新着の読み物はまだありません。" }) {
-  if(character==="hatsune"&&emptyText==="初音ラボの記事はまだありません。")return <CharacterBookshelf character="初音" title="初音の女子戦研究書" banner="/top/IMG_7960.jpeg" books={HATSUNE_BOOKS}/>;
-  if(character==="kiina"&&emptyText==="穴党ラボの記事はまだありません。")return <CharacterBookshelf character="キイナ" title="キイナの穴党研究書" banner="/top/IMG_7992.jpeg" books={KIINA_BOOKS}/>;
-  if (!items.length) return <p>{emptyText}</p>;
-  const tone = TONES[character] || TONES.hatsune;
-  return (
-    <div className={styles.wrap} style={{ "--accent": tone.accent, "--meta": tone.meta, "--border": tone.border, "--card-bg": tone.bg }}>
-      {items.length > 1 ? <div className={styles.hint}>横にスワイプ →</div> : null}
-      <div className={styles.slider} aria-label="新着読み物">
-        {items.map((item) => (
-          <a href={item.link} className={styles.card} key={`${item.kind || "item"}-${item.link}`} {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-            <img src={item.image} alt={item.title} className={styles.image} />
-            <div className={styles.body}><small className={styles.meta}>{item.kind}{item.meta ? `・${item.meta}` : ""}</small><h3>{item.title}</h3><p>{item.date ? new Date(item.date).toLocaleDateString("ja-JP") : ""}</p><span className={styles.readButton}>📖 読む</span></div>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
+const TONES={hatsune:{accent:"#8a55e6",meta:"#7652b6",border:"#e3d7ff",bg:"#fcf9ff"},kiina:{accent:"#f0a400",meta:"#8d6b13",border:"#f3dda0",bg:"#fffdf5"}};
+const HATSUNE_BOOKS=[{title:"女子戦攻略",subtitle:"女子戦の見方",href:"/hatsune-books/women",cover:"/top/IMG_7960.jpeg",tag:"WOMEN"},{title:"初音センセー",subtitle:"女子戦入門",href:"/hatsune-books/sensei",cover:"/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png",tag:"BEGINNER"},{title:"女子レーサー名鑑",subtitle:"選手を知る",href:"/hatsune-books/meikan",cover:"/top/IMG_7960.jpeg",tag:"MEIKAN"},{title:"女子戦 DATA LAB",subtitle:"数字で検証する",href:"/hatsune-books/data-lab",cover:"/top/IMG_7960.jpeg",tag:"RESEARCH"}];
+const KIINA_BOOKS=[{title:"穴狙い講座",subtitle:"穴の入口を学ぶ",href:"/kiina-books/hole",cover:"/top/IMG_7992.jpeg",tag:"SEMINAR"},{title:"キイナセンセー",subtitle:"穴狙い入門",href:"/kiina-books/sensei",cover:"/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png",tag:"BEGINNER"},{title:"穴ツヨ選手名鑑",subtitle:"穴で注目の選手",href:"/kiina-books/meikan",cover:"/top/IMG_7992.jpeg",tag:"MEIKAN"},{title:"穴党 DATA LAB",subtitle:"数字で検証する",href:"/kiina-books/data-lab",cover:"/top/IMG_7992.jpeg",tag:"RESEARCH"}];
+export default function CharacterReadingSlider({items=[],character="hatsune",emptyText="新着の読み物はまだありません。"}){if(character==="hatsune"&&emptyText==="初音ラボの記事はまだありません。")return <CharacterBookshelf character="初音" title="初音の女子戦研究書" banner="/top/IMG_7960.jpeg" books={HATSUNE_BOOKS} hideBanner/>;if(character==="kiina"&&emptyText==="穴党ラボの記事はまだありません。")return <CharacterBookshelf character="キイナ" title="キイナの穴党研究書" banner="/top/IMG_7992.jpeg" books={KIINA_BOOKS} hideBanner/>;if(!items.length)return <p>{emptyText}</p>;const tone=TONES[character]||TONES.hatsune;return <div className={styles.wrap} style={{"--accent":tone.accent,"--meta":tone.meta,"--border":tone.border,"--card-bg":tone.bg}}>{items.length>1?<div className={styles.hint}>横にスワイプ →</div>:null}<div className={styles.slider} aria-label="新着読み物">{items.map(item=><a href={item.link} className={styles.card} key={`${item.kind||"item"}-${item.link}`} {...(item.external?{target:"_blank",rel:"noopener noreferrer"}:{})}><img src={item.image} alt={item.title} className={styles.image}/><div className={styles.body}><small className={styles.meta}>{item.kind}{item.meta?`・${item.meta}`:""}</small><h3>{item.title}</h3><p>{item.date?new Date(item.date).toLocaleDateString("ja-JP"):""}</p><span className={styles.readButton}>📖 読む</span></div></a>)}</div></div>}
