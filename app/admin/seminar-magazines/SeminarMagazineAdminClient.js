@@ -18,7 +18,7 @@ function nextPublication(series, now = new Date()) {
 }
 
 function makeEmpty(series = "ichika") {
-  return { id: null, series, issue_no: "002", number_label: "第002号", title: "", summary: "", premium_start_page: 5, status: "draft", published_at: nextPublication(series), page_paths: [] };
+  return { id: null, series, issue_no: "002", number_label: "第002号", title: "", summary: "", premium_start_page: 5, status: "draft", published_at: nextPublication(series), page_paths: [], article: null };
 }
 function localDate(value){ if(!value)return""; const d=new Date(value); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
 function sortPages(pages){ return [...pages].sort((a,b)=>Number(a.page)-Number(b.page)); }
@@ -61,6 +61,15 @@ export default function SeminarMagazineAdminClient(){
       <div className={styles.sectionHead}><div><h2>2. ページ画像</h2><p>1ページ目が一覧の表紙になります。Premium開始ページ以降は認証後だけ表示します。</p></div><strong>{pageCount}ページ登録済み</strong></div>
       <div className={styles.pages}>{slots.map(pageNo=>{const p=(issue.page_paths||[]).find(x=>Number(x.page)===pageNo);const premium=pageNo>=Number(issue.premium_start_page||5);return <article key={pageNo} className={`${styles.pageCard} ${premium?styles.premium:''}`}><div className={styles.pageTop}><b>{pageNo}ページ</b><span>{premium?'PREMIUM':'FREE'}</span></div><div className={styles.preview}>{p?.preview_url?<img src={p.preview_url} alt={`${pageNo}ページ`}/>:<span>画像未登録</span>}</div><label className={styles.upload}>{p?'画像を差し替え':'画像を追加'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>upload(pageNo,e.target.files?.[0])}/></label>{p&&<button className={styles.remove} onClick={()=>removePage(pageNo)}>このページを外す</button>}</article>})}</div>
     </section>
+    {issue.series === "ichika" && issue.article && <section className={styles.panel}>
+      <h2>3. 文章解説</h2>
+      <label>見出し<input value={issue.article.kicker||""} onChange={e=>field('article',{...issue.article,kicker:e.target.value})}/></label>
+      <label>導入文<textarea rows="5" value={issue.article.lead||""} onChange={e=>field('article',{...issue.article,lead:e.target.value})}/></label>
+      {(issue.article.sections||[]).map((section,index)=><div key={index}>
+        <label>解説 {index+1} 見出し<input value={section.heading||""} onChange={e=>field('article',{...issue.article,sections:issue.article.sections.map((part,i)=>i===index?{...part,heading:e.target.value}:part)})}/></label>
+        <label>本文<textarea rows="5" value={section.body||""} onChange={e=>field('article',{...issue.article,sections:issue.article.sections.map((part,i)=>i===index?{...part,body:e.target.value}:part)})}/></label>
+      </div>)}
+    </section>}
     <div className={styles.sticky}><span>{message}</span><a href={preview} target="_blank">プレビュー</a>{issue.id&&<button className={styles.delete} onClick={del}>削除</button>}<button disabled={busy} onClick={()=>save('draft')}>下書き保存</button><button className={styles.publish} disabled={busy} onClick={()=>save('published')}>{busy?'処理中…':'保存して公開'}</button></div>
     <section className={styles.list}><h2>登録済み</h2>{issues.length===0?<p>まだ管理画面から登録した号はありません。</p>:issues.map(x=><article key={x.id}><div><small>{SERIES[x.series]?.label}・{x.number_label||x.issue_no}</small><h3>{x.title}</h3><p>{publicationState(x)}{x.published_at?`（${new Date(x.published_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})}）`:''} / Premium {x.premium_start_page}P〜 / {(x.page_paths||[]).length}P</p></div><button onClick={()=>edit(x)}>編集</button></article>)}</section>
   </>;
