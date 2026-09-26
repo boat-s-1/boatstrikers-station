@@ -5,7 +5,9 @@
     "start": "next start",
     "shorts:render": "node scripts/render-short.mjs",
     "hatsune:render": "node scripts/render-hatsune-news.mjs",
-    "racers:sync": "node scripts/sync-racer-profiles.mjs"
+    "racers:sync": "node scripts/sync-racer-profiles.mjs",
+    "trinity:backtest:v2": "node scripts/trinity/backtest-v2.mjs",
+    "trinity:backtest:compare": "node scripts/trinity/backtest-v2-compare.mjs"
   },
   "dependencies": {
     "@next/third-parties": "latest",
