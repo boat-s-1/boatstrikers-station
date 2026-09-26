@@ -15,9 +15,20 @@ export default async function TrinityShadowPage() {
   if (!await isAdminAuthenticated()) return null;
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } });
-  const { data, error } = await db.from('trinity_prediction_snapshots')
-    .select('*,trinity_prediction_results(*)').order('generated_at', { ascending: false }).limit(1000);
-  const rows = data || [];
+  const rows = [];
+  let error = null;
+  for (let offset = 0; ; offset += 500) {
+    const page = await db.from('trinity_prediction_snapshots')
+      .select('prediction_id,generated_at,race_date,course_code,race_no,timing,engine_version,strategy_tag,recommendation,ticket_count,investment_yen,trinity_prediction_results(hit,payout_yen)')
+      .order('generated_at', { ascending: false }).order('prediction_id', { ascending: false })
+      .range(offset, offset + 499);
+    if (page.error) { error = page.error; break; }
+    rows.push(...page.data);
+    if (page.data.length < 500) break;
+  }
+  const detail = await db.from('trinity_prediction_snapshots')
+    .select('*,trinity_prediction_results(*)').order('generated_at', { ascending: false }).limit(20);
+  if (detail.error) error = detail.error;
   const today = dateJst();
   const by = (version, timing) => rows.filter(r => r.engine_version === version && r.timing === timing);
   const versions = ['trinity-core-v2', 'trinity-v3-candidate-01'];
@@ -63,7 +74,7 @@ export default async function TrinityShadowPage() {
     <h2>直前版（結果確定のみROI）</h2>
     <p>{versions.map(v => { const m = summarizeShadow(by(v,'after_exhibition')); return `${v}: ${m.races}レース、BUY ${m.bought_races}、ROI ${percent(m.roi)}`; }).join(' ／ ')}</p>
     <h2>予想の詳細（最新20件）</h2>
-    {rows.slice(0,20).map(r => <details key={r.prediction_id} style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
+    {(detail.data || []).map(r => <details key={r.prediction_id} style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
       <summary>{r.race_date} {r.course_code}場 {r.race_no}R {r.timing} {r.engine_version} {r.recommendation} / {r.strategy_tag}</summary>
       <p>生成: {r.generated_at} ／ 入力取得: {r.source_captured_at} ／ 使用オッズ: {r.odds_captured_at || 'なし'}</p>
       <p>首位 {r.top_combination} / 確率 {percent(r.top_combination_probability == null ? null : 100 * r.top_combination_probability)} / 点数 {r.ticket_count} / 投資 {yen(r.investment_yen)}</p>
