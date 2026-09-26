@@ -7,6 +7,7 @@ import { getPublishedNewspapers } from "../../lib/newspapers";
 import IchikaBookshelf from "./IchikaBookshelf";
 import IchikaNewArrivalsSlider from "./IchikaNewArrivalsSlider";
 import { listPublishedIchikaBooks } from "../../lib/ichikaBookDb";
+import { listPublishedSeminarIssues } from "../../lib/seminarMagazineDb";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -163,14 +164,24 @@ async function getIchikaArticles() {
 }
 
 export default async function IchikaPage() {
-  const [articles, newspapers, result, bookSeries] = await Promise.all([
+  const [articles, newspapers, result, bookSeries, seminarIssues] = await Promise.all([
     getIchikaArticles(),
     getIchikaNewspaper(),
     getIchikaResults(),
     Promise.all(["sensei", "meikan", "data-lab"].map(listPublishedIchikaBooks)),
+    listPublishedSeminarIssues("ichika"),
   ]);
 
   const latestReadings = [
+    ...seminarIssues.map((issue) => ({
+      title: issue.title,
+      date: issue.date,
+      image: issue.cover,
+      link: `/library/ichika-seminar/${issue.id}`,
+      kind: "イン逃げゼミ",
+      external: false,
+      meta: issue.number,
+    })),
     ...bookSeries.flatMap((books, index) => books.map((book) => ({
       title: book.title,
       date: book.date,
