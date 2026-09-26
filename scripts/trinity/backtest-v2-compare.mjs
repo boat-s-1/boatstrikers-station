@@ -1,17 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { buildTrinityCoreV2 } from '../../app/lib/trinityCoreV2.js';
 
+const offlinePath = process.env.TRINITY_INPUT_JSONL;
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) throw new Error('SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+if (!offlinePath && (!url || !key)) throw new Error('Set TRINITY_INPUT_JSONL or SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
 
-const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+const supabase = offlinePath ? null : (await import('@supabase/supabase-js')).createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 const from = process.env.TRINITY_FROM || '2026-07-01';
 const to = process.env.TRINITY_TO || '2026-09-25';
 const timing = process.env.TRINITY_TIMING || 'previous_day';
 const pageSize = 1000;
+const offlineColumns = ['race_date', 'course_code', 'race_no', 'boat_no', 'national_win_rate',
+  'local_win_rate', 'motor_2_rate', 'motor_top2_rate', 'boat_2_rate', 'race_boat_top2_rate',
+  'average_st', 'sex_code', 'gender', 'gender_code', 'race_name', 'deadline_time',
+  'winning_trifecta', 'trifecta_result', 'trifecta_payout', 'result_status', 'race_status'];
+const offlineBytes = offlinePath ? readFileSync(offlinePath) : null;
+const offlineRows = offlineBytes ? offlineBytes.toString('utf8').trim().split('\n').flatMap(line =>
+  JSON.parse(line).map(values => Object.fromEntries(offlineColumns.map((name, i) => [name, values[i]])))) : null;
 
 async function readAll(table, select, filters = []) {
+  if (offlineRows) {
+    const rows = offlineRows.filter(r => r.race_date >= from && r.race_date <= to);
+    if (table === 'bs_race_entries') return rows;
+    const unique = new Map(rows.map(r => [raceKey(r), r]));
+    return [...unique.values()].sort((a, b) => raceKey(a).localeCompare(raceKey(b)));
+  }
   const rows = [];
   for (let start = 0; ; start += pageSize) {
     let q = supabase.from(table).select(select).range(start, start + pageSize - 1);
@@ -124,10 +139,18 @@ function settle(events, entryMap, resultMap, mode) {
       ticket_count: tickets.length,
       investment: tickets.length * 100,
       hit,
-      payout: hit ? Number(result.trifecta_payout) : 0,
+    payout: hit ? Number(result.trifecta_payout) : 0,
+      official_payout: Number(result.trifecta_payout),
+      result_status: result.result_status,
+      race_status: result.race_status,
       actual,
       top: prediction.trinity.top_combination?.combination || null,
       tickets: tickets.map((t) => t.combination),
+      normalized_inputs: six.map(e => ({ boat_no: e.boat_no,
+        national_win_rate: e.national_win_rate, local_win_rate: e.local_win_rate,
+        motor_2_rate: e.motor_2_rate, boat_2_rate: e.boat_2_rate,
+        average_st: e.average_st, sex_code: e.sex_code, gender: e.gender,
+        gender_code: e.gender_code })),
     });
   }
   return settled;
@@ -170,12 +193,12 @@ const events = await readAll(
 const entries = await readAll(
   'bs_race_entries',
   'race_date,course_code,race_no,boat_no,racer_name,sex_code,gender,gender_code,national_win_rate,local_win_rate,motor_2_rate,motor_top2_rate,boat_2_rate,race_boat_top2_rate,average_st,exhibition_time,exhibition_st,official_lap,lap_time,official_turn,turn_time,official_straight,straight_time,exhibition_fl',
-  [['gte', 'race_date', from], ['lte', 'race_date', to]]
+  [['gte', 'race_date', from], ['lte', 'race_date', to], ['order', 'race_date', { ascending: true }], ['order', 'course_code', { ascending: true }], ['order', 'race_no', { ascending: true }], ['order', 'boat_no', { ascending: true }]]
 );
 const results = await readAll(
   'bs_race_results',
   'race_date,course_code,race_no,winning_trifecta,trifecta_result,trifecta_payout,result_status,race_status',
-  [['gte', 'race_date', from], ['lte', 'race_date', to]]
+  [['gte', 'race_date', from], ['lte', 'race_date', to], ['order', 'race_date', { ascending: true }], ['order', 'course_code', { ascending: true }], ['order', 'race_no', { ascending: true }]]
 );
 
 const entryMap = new Map();
@@ -197,6 +220,7 @@ const report = {
   period: { from, to },
   generated_at: new Date().toISOString(),
   read_only: true,
+  input_sha256: offlineBytes ? createHash('sha256').update(offlineBytes).digest('hex') : null,
   normalization: {
     national_win_rate: 'divide by 100 when value > 20',
     local_win_rate: 'divide by 100 when value > 20',
@@ -220,4 +244,7 @@ const report = {
   prediction_changes: compareRows(raw, safe),
 };
 
+if (process.env.TRINITY_LEDGER_PATH) {
+  writeFileSync(process.env.TRINITY_LEDGER_PATH, safe.map(row => JSON.stringify(row)).join('\n') + '\n');
+}
 console.log(JSON.stringify(report, null, 2));
