@@ -32,10 +32,19 @@ async function rows(query) {
   if (error) throw error;
   return data || [];
 }
+async function allPages(query) {
+  const collected = [];
+  for (let start = 0; ; start += 500) {
+    const page = await rows(query().range(start, start + 499));
+    collected.push(...page);
+    if (page.length < 500) return collected;
+  }
+}
 async function readSnapshots(db, date) {
-  return rows(db.from('trinity_prediction_snapshots')
+  return allPages(() => db.from('trinity_prediction_snapshots')
     .select('prediction_id,race_date,course_code,race_no,timing,engine_version,selected_tickets,investment_yen')
-    .gte('race_date', date).limit(1000));
+    .gte('race_date', date).order('race_date').order('course_code')
+    .order('race_no').order('prediction_id'));
 }
 async function settle(db, snapshots) {
   const pending = snapshots.filter(s => s.race_date <= jstDate());
@@ -45,8 +54,9 @@ async function settle(db, snapshots) {
     .select('race_date,course_code,race_no,winning_trifecta,trifecta_result,trifecta_payout,result_status,race_status')
     .gte('race_date', pending[0].race_date).lte('race_date', today).limit(1000));
   const byRace = new Map(results.map(r => [`${r.race_date}:${r.course_code}:${r.race_no}`, r]));
-  const existing = new Set((await rows(db.from('trinity_prediction_results')
-    .select('prediction_id').gte('race_date', pending[0].race_date).limit(1000)))
+  const existing = new Set((await allPages(() => db.from('trinity_prediction_results')
+    .select('prediction_id').gte('race_date', pending[0].race_date)
+    .order('race_date').order('prediction_id')))
     .map(r => r.prediction_id));
   const inserts = [];
   for (const s of pending) {
