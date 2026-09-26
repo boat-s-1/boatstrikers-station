@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { generateAiDailyRankings } from "../../../lib/aiDailyRankingGenerator";
+import { recoverMissingAiV2Rankings } from "../../../lib/aiV2RankingRecovery";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -98,10 +98,10 @@ export async function GET(request) {
 
     let afterPredictions = recovery.attempted ? await snapshot(supabase, raceDate) : before;
 
-    if (afterPredictions.entries > 0 && afterPredictions.previousRankings === 0) {
+    if (afterPredictions.entries > 0) {
       try {
-        const result = await generateAiDailyRankings(supabase, raceDate, "previous_day");
-        rankingRecovery = { attempted: true, ok: Boolean(result?.ok), ...result };
+        const modelResult = await recoverMissingAiV2Rankings(supabase, raceDate, "previous_day");
+        rankingRecovery = { attempted: true, ok: true, modelResult };
       } catch (error) {
         rankingRecovery = { attempted: true, ok: false, error: String(error?.message || error) };
         console.error("[ai-previous-day-health] ranking recovery failed", rankingRecovery);
@@ -110,11 +110,19 @@ export async function GET(request) {
 
     const after = rankingRecovery.attempted ? await snapshot(supabase, raceDate) : afterPredictions;
     const predictionsReady = after.entries === 0 || after.previousPredictions > 0;
-    const rankingsReady = after.entries === 0 || after.previousRankings > 0;
+    const { data: rankingTypes, error: typesError } = await supabase.from("ai_v2_daily_rankings")
+      .select("ranking_type").eq("ranking_date", raceDate).eq("data_timing", "previous_day");
+    if (typesError) throw typesError;
+    const counts = (rankingTypes || []).reduce((acc, row) => ({ ...acc, [row.ranking_type]: (acc[row.ranking_type] || 0) + 1 }), {});
+    const expectedGroups = rankingRecovery.modelResult?.groups || {};
+    const rankingsReady = after.entries === 0 || (rankingRecovery.ok !== false &&
+      (counts.ichika_escape_best10 || 0) >= Math.min(10, Math.floor(after.entries / 6)) &&
+      Object.entries(expectedGroups).every(([type, group]) => (counts[type] || 0) >= group.expected)
+    );
     const fallbackRankingsReady = after.exhibitionRankings > 0;
     const healthy = predictionsReady && rankingsReady;
     const degraded = predictionsReady && !rankingsReady;
-    const message = `events=${after.events}, entries=${after.entries}, previous_predictions=${after.previousPredictions}, previous_rankings=${after.previousRankings}, exhibition_rankings=${after.exhibitionRankings}`;
+    const message = `events=${after.events}, entries=${after.entries}, previous_predictions=${after.previousPredictions}, previous_rankings=${after.previousRankings}, ranking_types=${JSON.stringify(counts)}, exhibition_rankings=${after.exhibitionRankings}`;
 
     await recordHealth(supabase, raceDate, healthy ? "completed" : "failed", `${degraded ? "WARNING rankings_missing; " : ""}${message}`);
 
