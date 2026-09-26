@@ -1,0 +1,60 @@
+{
+  "caveat": "Current database rows, not immutable as-of inputs; experimental only",
+  "minConfidence": 0.11148521803720483,
+  "training": {
+    "baseline_v2": {
+      "races": 7718,
+      "bought_races": 7568,
+      "investment": 3342100,
+      "payout": 2407940,
+      "hits": 888,
+      "hit_rate": 11.733615221987314,
+      "roi": 72.04871188773527,
+      "avg_tickets": 4.416094080338266,
+      "max_losing_streak": 61,
+      "roi_without_top1": 70.93877184582236,
+      "roi_without_top3": 69.37765670837575
+    },
+    "selective_v3": {
+      "races": 7718,
+      "bought_races": 715,
+      "investment": 204000,
+      "payout": 203380,
+      "hits": 90,
+      "hit_rate": 12.587412587412588,
+      "roi": 99.69607843137254,
+      "avg_tickets": 2.8531468531468533,
+      "max_losing_streak": 39,
+      "roi_without_top1": 95.16936671575846,
+      "roi_without_top3": 87.24766125061547
+    }
+  },
+  "validation": {
+    "baseline_v2": {
+      "races": 3839,
+      "bought_races": 3743,
+      "investment": 1651300,
+      "payout": 1180680,
+      "hits": 464,
+      "hit_rate": 12.39647341704515,
+      "roi": 71.50003027917398,
+      "avg_tickets": 4.41170184344109,
+      "max_losing_streak": 50,
+      "roi_without_top1": 70.08117276472014,
+      "roi_without_top3": 68.27979148987757
+    },
+    "selective_v3": {
+      "races": 3839,
+      "bought_races": 369,
+      "investment": 106200,
+      "payout": 107910,
+      "hits": 45,
+      "hit_rate": 12.195121951219512,
+      "roi": 101.61016949152541,
+      "avg_tickets": 2.8780487804878048,
+      "max_losing_streak": 37,
+      "roi_without_top1": 91.46364494806421,
+      "roi_without_top3": 72.89648622981957
+    }
+  }
+}
