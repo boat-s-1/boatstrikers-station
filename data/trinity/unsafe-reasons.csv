@@ -1,0 +1,6 @@
+reason,races,boats,min_date,max_date,alternative,overlap_with
+U1_post_race_calendar_creation,2856,17136,2026-07-01,2026-07-18,historical_reconstructed_only_for_2852_of_2856_no_verified_asof,
+U2_features_updated_after_closing,2076,12456,2026-07-19,2026-07-31,historical_reconstructed_only_no_verified_asof,
+U3_missing_time,0,0,,,none,
+U4_historical_reconstruction_origin,2852,17112,2026-07-01,2026-07-18,ai_v2_training_rows_aug20_backfill_not_asof,U1
+U5_other,0,0,,,none,

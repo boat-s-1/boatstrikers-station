@@ -1,0 +1,26 @@
+{
+  "name": "STRICT",
+  "official": false,
+  "reason": "No six-boat immutable as-of feature snapshots including average_st",
+  "status": "UNAVAILABLE_NO_CERTIFIED_INPUT",
+  "races": 0,
+  "bought_races": 0,
+  "passed_races": 0,
+  "investment": null,
+  "payout": null,
+  "profit": null,
+  "hits": null,
+  "hit_rate": null,
+  "roi": null,
+  "avg_tickets": null,
+  "max_losing_streak": null,
+  "max_payout": null,
+  "roi_without_top1": null,
+  "roi_without_top3": null,
+  "roi_without_top5": null,
+  "monthly_races": {
+    "2026-07": 0,
+    "2026-08": 0,
+    "2026-09": 0
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "EXTENDED",
+  "official": false,
+  "reason": "No historical reconstruction independently verifies all V2 features at prediction cutoff",
+  "status": "UNAVAILABLE_NO_CERTIFIED_INPUT",
+  "races": 0,
+  "bought_races": 0,
+  "passed_races": 0,
+  "investment": null,
+  "payout": null,
+  "profit": null,
+  "hits": null,
+  "hit_rate": null,
+  "roi": null,
+  "avg_tickets": null,
+  "max_losing_streak": null,
+  "max_payout": null,
+  "roi_without_top1": null,
+  "roi_without_top3": null,
+  "roi_without_top5": null
+}
