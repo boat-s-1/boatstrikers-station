@@ -6,6 +6,7 @@ import { supabase } from "../bsc2/lib/supabaseClient";
 import { getPublishedNewspapers } from "../../lib/newspapers";
 import IchikaBookshelf from "./IchikaBookshelf";
 import IchikaNewArrivalsSlider from "./IchikaNewArrivalsSlider";
+import { listPublishedIchikaBooks } from "../../lib/ichikaBookDb";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -162,13 +163,23 @@ async function getIchikaArticles() {
 }
 
 export default async function IchikaPage() {
-  const [articles, newspapers, result] = await Promise.all([
+  const [articles, newspapers, result, bookSeries] = await Promise.all([
     getIchikaArticles(),
     getIchikaNewspaper(),
     getIchikaResults(),
+    Promise.all(["sensei", "meikan", "data-lab"].map(listPublishedIchikaBooks)),
   ]);
 
   const latestReadings = [
+    ...bookSeries.flatMap((books, index) => books.map((book) => ({
+      title: book.title,
+      date: book.date,
+      image: book.cover,
+      link: `${["/ichika-sensei", "/ichika-meikan", "/ichika-data-lab"][index]}/${book.id}`,
+      kind: "研究書",
+      external: false,
+      meta: ["一果センセー", "インツヨ名鑑", "DATA LAB"][index],
+    }))),
     ...newspapers.map((item) => ({
       ...item,
       kind: "新聞",
