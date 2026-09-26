@@ -122,8 +122,10 @@ export async function GET(request) {
       const until = closingAt(event) - Date.now();
       if (until <= 3 * 60_000) return [];
       const capture = [];
-      if (!existing.has(`${event.race_date}:${event.course_code}:${event.race_no}:previous_day`) &&
-        (event.race_date === tomorrow || until <= 95 * 60_000)) capture.push({ event, timing: 'previous_day' });
+      if (event.race_date === tomorrow &&
+        !existing.has(`${event.race_date}:${event.course_code}:${event.race_no}:previous_day`)) {
+        capture.push({ event, timing: 'previous_day' });
+      }
       if (event.race_date === today && until <= 26 * 60_000 &&
         !existing.has(`${event.race_date}:${event.course_code}:${event.race_no}:after_exhibition`)) {
         capture.push({ event, timing: 'after_exhibition' });

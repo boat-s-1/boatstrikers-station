@@ -32,9 +32,10 @@ export default async function TrinityShadowPage() {
   const today = dateJst();
   const by = (version, timing) => rows.filter(r => r.engine_version === version && r.timing === timing);
   const versions = ['trinity-core-v2', 'trinity-v3-candidate-01'];
-  const status = model => summarizeShadow(by(model, 'previous_day'));
-  const todayRows = rows.filter(r => r.race_date === today && r.timing === 'previous_day');
-  const summary = versions.map(v => ({ version: v, metrics: status(v) }));
+  const timings = ['previous_day', 'after_exhibition'];
+  const todayRows = rows.filter(r => r.race_date === today);
+  const summary = versions.flatMap(version => timings.map(timing => ({ version, timing,
+    metrics: summarizeShadow(by(version, timing)) })));
   const n = tag => todayRows.filter(r => r.engine_version === versions[1] && r.strategy_tag === tag).length;
   const dates = [...new Set(rows.map(r => r.race_date))].sort();
   const start = dates[0];
@@ -43,14 +44,14 @@ export default async function TrinityShadowPage() {
     <h1>TRINITY SHADOW</h1>
     <p>公開予想・購入には使用しません。V3 candidate-01 の条件は固定。ROIは結果確定済みの購入レースだけで集計します。</p>
     {error && <p role="alert">取得エラー: {error.message}</p>}
-    <h2>今日 {today}（前日版）</h2>
+    <h2>今日 {today}（前日版・直前版）</h2>
     <p>対象レース {todayRows.filter(r => r.engine_version === versions[0]).length} ／ V2 BUY {todayRows.filter(r => r.engine_version === versions[0] && r.recommendation === 'BUY').length} ／ V3 BUY {todayRows.filter(r => r.engine_version === versions[1] && r.recommendation === 'BUY').length}</p>
     <p>一果型 {n('ichika_selective')} ／ 初音型 {n('hatsune_watch')} ／ キイナ型 {n('kiina_watch')}</p>
-    <h2>モデル比較（前日版・累計）</h2>
+    <h2>モデル比較（予想時点別・累計）</h2>
     <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 900 }}>
-      <thead><tr>{['モデル','対象/結果確定','BUY/PASS率','ROI','的中率','平均点数','投資','払戻','収支','最大連敗','上位1/3/5件除外ROI'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
-      <tbody>{summary.map(({ version, metrics: m }) => <tr key={version}>
-        <td style={cell}>{version}</td><td style={cell}>{m.races} / {m.settled_races}</td>
+      <thead><tr>{['モデル','時点','対象/結果確定','BUY/PASS率','ROI','的中率','平均点数','投資','払戻','収支','最大連敗','上位1/3/5件除外ROI'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
+      <tbody>{summary.map(({ version, timing, metrics: m }) => <tr key={`${version}-${timing}`}>
+        <td style={cell}>{version}</td><td style={cell}>{timing}</td><td style={cell}>{m.races} / {m.settled_races}</td>
         <td style={cell}>{m.bought_races} / {percent(m.pass_rate)}</td><td style={cell}>{percent(m.roi)}</td>
         <td style={cell}>{percent(m.hit_rate)}</td><td style={cell}>{m.avg_tickets?.toFixed(2) ?? '—'}</td>
         <td style={cell}>{yen(m.investment)}</td><td style={cell}>{yen(m.payout)}</td><td style={cell}>{yen(m.profit)}</td>
@@ -58,16 +59,16 @@ export default async function TrinityShadowPage() {
       </tr>)}</tbody>
     </table></div>
     <p>未来スナップショット開始から {days} 日。7日速報 {days >= 7 ? '集計可能' : '蓄積中'} ／ 30日正式評価 {days >= 30 ? '集計可能' : '蓄積中'} ／ 60日採用検討 {days >= 60 ? '集計可能' : '蓄積中'}。購入300レース未満のV3は採用判定しません。</p>
-    <h2>日次比較（前日版）</h2>
+    <h2>日次比較</h2>
     <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 600 }}>
-      <thead><tr>{['日付','モデル','対象','購入','確定','的中','ROI','上位1件除外'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
-      <tbody>{dates.slice(-30).reverse().flatMap(date => versions.map(version => {
-        const m = summarizeShadow(by(version, 'previous_day').filter(r => r.race_date === date));
-        return <tr key={`${date}-${version}`}><td style={cell}>{date}</td><td style={cell}>{version}</td>
+      <thead><tr>{['日付','モデル','時点','対象','購入','確定','的中','ROI','上位1件除外'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
+      <tbody>{dates.slice(-30).reverse().flatMap(date => versions.flatMap(version => timings.map(timing => {
+        const m = summarizeShadow(by(version, timing).filter(r => r.race_date === date));
+        return <tr key={`${date}-${version}-${timing}`}><td style={cell}>{date}</td><td style={cell}>{version}</td><td style={cell}>{timing}</td>
           <td style={cell}>{m.races}</td><td style={cell}>{m.bought_races}</td>
           <td style={cell}>{m.settled_races}</td><td style={cell}>{m.hits}</td>
           <td style={cell}>{percent(m.roi)}</td><td style={cell}>{percent(m.top1_excluded_roi)}</td></tr>;
-      }))}</tbody>
+      })))}</tbody>
     </table></div>
     <h2>一果・初音・キイナ（V3 前日版）</h2>
     <ul>{['ichika_selective','hatsune_watch','kiina_watch'].map(tag => { const m = summarizeShadow(by(versions[1], 'previous_day').filter(r => r.strategy_tag === tag)); return <li key={tag}>{tag}: 対象 {m.races} / BUY {m.bought_races} / 的中 {m.hits} / ROI {percent(m.roi)} / 平均 {m.avg_tickets?.toFixed(2) ?? '—'} 点</li>; })}</ul>
