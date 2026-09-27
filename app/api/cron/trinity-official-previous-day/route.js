@@ -21,7 +21,8 @@ async function fetchOfficial(url) {
   const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(9000),
     headers: { 'User-Agent': 'BoatStrikers TRINITY shadow research (official race list)' } });
   if (!response.ok || !/text\/html/i.test(response.headers.get('content-type') || '')) {
-    throw new Error(`Official race list unavailable: HTTP ${response.status}`);
+    const sample = (await response.text()).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 220);
+    throw new Error(`Official race list unavailable: HTTP ${response.status}; content-type=${response.headers.get('content-type') || 'missing'}; reason=${sample}`);
   }
   const html = await response.text();
   if (html.length > 250000) throw new Error('Official race list exceeds size limit');
