@@ -8,9 +8,9 @@
 
 ## 公式HTMLを受け取る入口
 
-`POST /api/cron/trinity-official-previous-day` は、承認済み収集環境で公式ページを閲覧できる運用者のための受け口。既存の `CRON_SECRET` を `Authorization: Bearer …` として要求する。本文は `{ "race_date": "YYYY-MM-DD", "course_code": 2, "race_no": 1, "html": "<公式出走表の原文HTML>" }`。前夜21:00〜23:59 JSTに翌日分のみ受け付け、**サーバーの受信時刻**で保存する。URLはサーバーが組み立て、HTMLのレース日・場・R・締切時刻・6艇を検査する。受け取ったHTMLのSHAと表の原文、入力6艇、性別の過去行根拠を不変保存し、V2と固定candidate-01をペア保存する。同一レースの再提出は409で拒否する。
+`POST /api/cron/trinity-official-previous-day` は、承認済み収集環境で公式ページを閲覧できる運用者のための受け口。既存の `CRON_SECRET` を `Authorization: Bearer …` として要求する。本文は `{ "race_date": "YYYY-MM-DD", "course_code": 2, "race_no": 1, "html": "<公式出走表の原文HTML>" }`。前夜21:00〜23:59 JSTに翌日分のみ受け付け、**サーバーの受信時刻**で保存する。URLはサーバーが組み立て、HTMLのレース日・場・R・締切時刻・6艇を検査する。受け取ったHTMLのSHAと表の原文、入力6艇、性別の過去行根拠を不変保存し、V2と固定candidate-01をペア保存する。
 
-提出者が渡したHTMLの取得元をサーバーだけでは独立検証できない。`gender_evidence.capture_method=operator_submitted_html` の行は提出物として識別し、原文の取得元と取得時刻を別途確認するまでSTRICT集計に入れない。運用者または認可済み収集環境との接続は未設定のため、受け口だけでは毎日前夜の自動取得は始まらない。`CRON_SECRET` は第三者に渡さない。
+提出者が渡したHTMLの取得元をサーバーだけでは独立検証できない。`gender_evidence.capture_method=operator_submitted_html` の行は提出物として識別し、原文の取得元と取得時刻を別途確認するまでSTRICT集計に入れない。同じ原文の再送は保存済みの2モデルを確認して200を返し、途中で予想保存に失敗していた場合はその元入力からペアを再実行する。異なる原文は409で拒否する。運用者または認可済み収集環境との接続は未設定のため、受け口だけでは毎日前夜の自動取得は始まらない。`CRON_SECRET` は第三者に渡さない。
 
 ## 2026-09-27 本番状況
 
