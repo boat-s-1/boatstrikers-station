@@ -106,8 +106,11 @@ export async function GET(request) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
   const now = new Date();
-  const local = jst(now);
-  const hour = Number(local.slice(11, 13));
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now);
+  const hour = Number(parts.find(part => part.type === 'hour')?.value);
+  const minute = Number(parts.find(part => part.type === 'minute')?.value);
   if (hour < 21 || hour > 23) return NextResponse.json({ ok: true, status: 'outside_previous_evening' });
   const tomorrow = datePart(new Date(now.getTime() + 86_400_000));
   const result = { race_date: tomorrow, venues: 0, scheduled: 0, saved: 0,
@@ -133,7 +136,6 @@ export async function GET(request) {
     }
     const candidates = courses.flatMap(course => Array.from({ length: 12 }, (_, n) => ({ course, no: n + 1 })))
       .filter(r => !saved.has(raceKey(r.course, r.no))?.size);
-    const minute = Number(local.slice(14, 16));
     const slot = (hour - 21) * 12 + Math.floor(minute / 5);
     const rotating = candidates.slice(slot * 12 % Math.max(1, candidates.length));
     const work = [...new Map([...candidates.slice(0, 4), ...rotating.slice(0, 12)]
