@@ -84,7 +84,7 @@ async function captureRace(db, event, timing, existing) {
   if (existing.has(raceKey)) return 'exists';
   const startedAt = new Date().toISOString();
   const closes = closingAt(event);
-  if (!Number.isFinite(closes) || closes - Date.now() <= 3 * 60_000 || event.result_available !== false) return 'late';
+  if (!Number.isFinite(closes) || closes - Date.now() <= 3 * 60_000) return 'late';
   const source = await rows(db.from('bs_race_entries').select('*')
     .eq('race_date', event.race_date).eq('course_code', event.course_code)
     .eq('race_no', event.race_no).order('boat_no'));
@@ -125,9 +125,9 @@ export async function GET(request) {
     const snapshots = await readSnapshots(db, yesterday);
     const existing = new Set(snapshots.map(key));
     const events = await rows(db.from('bs_race_events')
-      .select('race_date,course_code,race_no,closing_time,result_available')
+      .select('race_date,course_code,race_no,closing_time')
       .gte('race_date', today).lte('race_date', jstHour() >= 21 ? tomorrow : today)
-      .eq('result_available', false).order('race_date').order('closing_time').limit(500));
+      .order('race_date').order('closing_time').limit(500));
     const eligible = events.flatMap(event => {
       const until = closingAt(event) - Date.now();
       if (until <= 3 * 60_000) return [];
@@ -151,9 +151,13 @@ export async function GET(request) {
       }
     }
     const settled = await settle(db, snapshots);
-    return NextResponse.json({ ok: outcomes.errors.length === 0, date: today, eligible: eligible.length,
-      ...outcomes, settled }, { status: outcomes.errors.length ? 500 : 200 });
+    const response = { ok: outcomes.errors.length === 0, date: today, eligible: eligible.length,
+      ...outcomes, settled };
+    console.log(JSON.stringify({ level: outcomes.errors.length ? 'error' : 'info',
+      message: 'trinity shadow cron complete', ...response }));
+    return NextResponse.json(response, { status: outcomes.errors.length ? 500 : 200 });
   } catch (error) {
+    console.error(JSON.stringify({ level: 'error', message: 'trinity shadow cron failed', error: error.message }));
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 }
