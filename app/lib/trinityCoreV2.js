@@ -84,6 +84,9 @@ export function buildTrinityCoreV2({ event = {}, entries = [], timing = 'previou
     ...base,
     engine_version: 'trinity-core-v2',
     trinity: {
+      ranking: base.trinity.ranking,
+      top_boat: base.trinity.top_boat,
+      top_probability: base.trinity.top_probability,
       strategy: 'ichika_anchor_place_specialists',
       first_place_probabilities: first,
       second_place_scores: second,
