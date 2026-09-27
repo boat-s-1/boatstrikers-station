@@ -202,11 +202,12 @@ export default async function IchikaEscapeSurgePanel() {
 
       <div style={{ padding: "0 14px 16px" }}>
         <Link
-          href="/members/ichika-escape-surge"
-          style={{ display: "block", textAlign: "center", textDecoration: "none", padding: "12px 14px", borderRadius: 14, background: "#06c755", color: "#fff", fontWeight: 900, fontSize: 14 }}
+          href="/members/discord"
+          style={{ display: "block", textAlign: "center", textDecoration: "none", padding: "12px 14px", borderRadius: 14, background: "#5865f2", color: "#fff", fontWeight: 900, fontSize: 14 }}
         >
-          LINE通知を設定する
+          通知を設定する
         </Link>
+        <p style={{ margin: "8px 0 0", color: "#526079", fontSize: 13, textAlign: "center" }}>Discordで一果のアラートを受け取る</p>
       </div>
     </section>
   );
