@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { isAdminAuthenticated } from '../sync/_lib/adminAuth';
 import { summarizeShadow } from '../../lib/trinityShadowMetrics';
+import { shadowCoverage } from '../../lib/trinityShadowCoverage';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'TRINITY SHADOW | 管理画面', robots: { index: false } };
@@ -19,7 +20,7 @@ export default async function TrinityShadowPage() {
   let error = null;
   for (let offset = 0; ; offset += 500) {
     const page = await db.from('trinity_prediction_snapshots')
-      .select('prediction_id,generated_at,race_date,course_code,race_no,timing,engine_version,strategy_tag,recommendation,ticket_count,investment_yen,trinity_prediction_results(hit,payout_yen)')
+      .select('prediction_id,generated_at,inserted_at,race_date,course_code,race_no,timing,engine_version,strategy_tag,recommendation,ticket_count,investment_yen,trinity_prediction_results(hit,payout_yen)')
       .order('generated_at', { ascending: false }).order('prediction_id', { ascending: false })
       .range(offset, offset + 499);
     if (page.error) { error = page.error; break; }
@@ -39,6 +40,34 @@ export default async function TrinityShadowPage() {
   const n = tag => todayRows.filter(r => r.engine_version === versions[1] && r.strategy_tag === tag).length;
   const dates = [...new Set(rows.map(r => r.race_date))].sort();
   const start = dates[0];
+  const lastWeek = new Date(Date.parse(`${today}T00:00:00Z`) - 6 * 86_400_000).toISOString().slice(0, 10);
+  const coverageStart = start && start > lastWeek ? start : lastWeek;
+  const raceEvents = [];
+  const coverageRows = [];
+  if (start) for (let offset = 0; ; offset += 500) {
+    const page = await db.from('bs_race_events')
+      .select('race_date,course_code,race_no,closing_time')
+      .gte('race_date', coverageStart).lte('race_date', today)
+      .order('race_date').order('course_code').order('race_no')
+      .range(offset, offset + 499);
+    if (page.error) { error = page.error; break; }
+    raceEvents.push(...page.data);
+    if (page.data.length < 500) break;
+  }
+  if (start) for (let offset = 0; ; offset += 500) {
+    const page = await db.from('trinity_prediction_snapshots')
+      .select('race_date,course_code,race_no,timing,engine_version,generated_at,inserted_at,source_captured_at,boat_features')
+      .gte('race_date', coverageStart).lte('race_date', today)
+      .order('race_date').order('course_code').order('race_no').order('prediction_id')
+      .range(offset, offset + 499);
+    if (page.error) { error = page.error; break; }
+    coverageRows.push(...page.data);
+    if (page.data.length < 500) break;
+  }
+  const launchedAt = rows.length ? Math.min(...rows.map(r => Date.parse(r.inserted_at))) : null;
+  const coverage = shadowCoverage(raceEvents.filter(r => r.race_date === today),
+    coverageRows.filter(r => r.race_date === today), Date.now(), launchedAt);
+  const coverageDates = [...new Set(raceEvents.map(r => r.race_date))].slice(-7).reverse();
   const days = start ? Math.floor((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000) : 0;
   return <main style={{ maxWidth: 1200, margin: '65px auto 120px', padding: 24, color: '#111827', background: '#fff' }}>
     <h1>TRINITY SHADOW</h1>
@@ -47,6 +76,25 @@ export default async function TrinityShadowPage() {
     <h2>今日 {today}（前日版・直前版）</h2>
     <p>対象レース {todayRows.filter(r => r.engine_version === versions[0]).length} ／ V2 BUY {todayRows.filter(r => r.engine_version === versions[0] && r.recommendation === 'BUY').length} ／ V3 BUY {todayRows.filter(r => r.engine_version === versions[1] && r.recommendation === 'BUY').length}</p>
     <p>一果型 {n('ichika_selective')} ／ 初音型 {n('hatsune_watch')} ／ キイナ型 {n('kiina_watch')}</p>
+    <h2>展示後の締切前ペア保存</h2>
+    <p>締切済み・導入後 {coverage.monitored}R ／ 同一入力でV2・V3保存 {coverage.paired}R ／ 保存率 {percent(coverage.rate)}</p>
+    <p>未保存 {coverage.missing}R ／ 片方のみ {coverage.partial}R ／ 締切後 {coverage.late}R ／ 入力不一致 {coverage.inputMismatch}R ／ 導入前 {coverage.beforeLaunch}R</p>
+    <p>分母は締切済みの全レースです。展示データが締切前に揃ったレース数は現在の出走表からは証明できません。欠損理由はCronログのレース別試行記録と照合してください。</p>
+    <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 550 }}>
+      <thead><tr>{['日付','導入後締切済み','ペア保存','保存率','未保存','片方のみ','締切後/入力不一致','導入前'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
+      <tbody>{coverageDates.map(date => {
+        const c = shadowCoverage(raceEvents.filter(r => r.race_date === date),
+          coverageRows.filter(r => r.race_date === date), Date.now(), launchedAt);
+        return <tr key={date}><td style={cell}>{date}</td><td style={cell}>{c.monitored}</td>
+          <td style={cell}>{c.paired}</td><td style={cell}>{percent(c.rate)}</td>
+          <td style={cell}>{c.missing}</td><td style={cell}>{c.partial}</td>
+          <td style={cell}>{c.late + c.inputMismatch}</td><td style={cell}>{c.beforeLaunch}</td></tr>;
+      })}</tbody>
+    </table></div>
+    <details><summary>今日の未保存・不完全なレース</summary><ul>
+      {coverage.races.filter(r => !['paired','before_launch'].includes(r.status)).map(r =>
+        <li key={`${r.course_code}-${r.race_no}`}>{r.course_code}場 {r.race_no}R ／ 締切 {r.closing_time} ／ {r.status}</li>)}
+    </ul></details>
     <h2>モデル比較（予想時点別・累計）</h2>
     <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 900 }}>
       <thead><tr>{['モデル','時点','対象/結果確定','BUY/PASS率','ROI','的中率','平均点数','投資','払戻','収支','最大連敗','上位1/3/5件除外ROI'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
