@@ -80,7 +80,7 @@ async function settle(db, snapshots) {
   if (error) throw error;
   return inserts.length;
 }
-async function captureRace(db, event, timing, existing) {
+async function captureRace(db, event, timing, existing, diagnostics = {}) {
   const raceKey = `${event.race_date}:${event.course_code}:${event.race_no}:${timing}`;
   const savedVersions = existing.get(raceKey);
   if (savedVersions?.size === versions.length) return 'exists';
@@ -92,8 +92,14 @@ async function captureRace(db, event, timing, existing) {
   const source = await rows(db.from('bs_race_entries').select('*')
     .eq('race_date', event.race_date).eq('course_code', event.course_code)
     .eq('race_no', event.race_no).order('boat_no'));
+  diagnostics.entry_count = source.length;
   const entries = captureTrinityEntries(source, timing, startedAt);
-  if (timing === 'after_exhibition' && entries.some(e => e.exhibition_time == null || e.exhibition_st == null)) return 'no_exhibition';
+  if (timing === 'after_exhibition' && entries.some(e => e.exhibition_time == null || e.exhibition_st == null)) {
+    diagnostics.missing_exhibition = entries.filter(e => e.exhibition_time == null || e.exhibition_st == null)
+      .map(e => ({ boat_no: e.boat_no,
+        fields: [e.exhibition_time == null && 'time', e.exhibition_st == null && 'st'].filter(Boolean) }));
+    return 'no_exhibition';
+  }
   const prediction = buildTrinityCoreV2({ event, entries, timing });
   if (!prediction.ok || prediction.timing !== timing) return 'prediction_unavailable';
   const v2 = { selected_tickets: prediction.trinity.selected_tickets, reason: 'v2_baseline' };
@@ -152,21 +158,25 @@ export async function GET(request) {
       return capture;
     }).slice(0, 80);
     const outcomes = { saved: 0, exists: 0, late: 0, no_exhibition: 0, prediction_unavailable: 0,
-      incomplete: 0, partial_pair: 0, errors: [], attempts: [] };
+      incomplete: 0, partial_pair: 0, errors: [], attempts: [],
+      previous_day_source: jstHour() >= 21 ? {
+        race_date: tomorrow, events: events.filter(event => event.race_date === tomorrow).length,
+      } : null };
     for (const { event, timing } of eligible) {
       const race = `${event.race_date}/${event.course_code}/${event.race_no}/${timing}`;
+      const diagnostics = {};
       try {
-        const status = await captureRace(db, event, timing, existing);
+        const status = await captureRace(db, event, timing, existing, diagnostics);
         outcomes[status]++;
-        outcomes.attempts.push({ race, status, closing_time: event.closing_time });
+        outcomes.attempts.push({ race, status, closing_time: event.closing_time, ...diagnostics });
       }
       catch (error) {
         if (error.message === 'Six complete, contemporaneous entries are required') {
           outcomes.incomplete++;
-          outcomes.attempts.push({ race, status: 'incomplete', closing_time: event.closing_time });
+          outcomes.attempts.push({ race, status: 'incomplete', closing_time: event.closing_time, ...diagnostics });
         } else {
           outcomes.errors.push({ race, message: error.message });
-          outcomes.attempts.push({ race, status: 'error', closing_time: event.closing_time });
+          outcomes.attempts.push({ race, status: 'error', closing_time: event.closing_time, ...diagnostics });
         }
       }
     }
