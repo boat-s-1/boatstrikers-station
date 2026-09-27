@@ -44,6 +44,7 @@ export default async function TrinityShadowPage() {
   const coverageStart = start && start > lastWeek ? start : lastWeek;
   const raceEvents = [];
   const coverageRows = [];
+  const officialSources = [];
   if (start) for (let offset = 0; ; offset += 500) {
     const page = await db.from('bs_race_events')
       .select('race_date,course_code,race_no,closing_time')
@@ -55,8 +56,18 @@ export default async function TrinityShadowPage() {
     if (page.data.length < 500) break;
   }
   if (start) for (let offset = 0; ; offset += 500) {
+    const page = await db.from('trinity_official_entry_sources')
+      .select('id,race_date,course_code,race_no,captured_at,gender_evidence')
+      .gte('race_date', coverageStart).lte('race_date', today)
+      .order('race_date').order('course_code').order('race_no')
+      .range(offset, offset + 499);
+    if (page.error) { error = page.error; break; }
+    officialSources.push(...page.data);
+    if (page.data.length < 500) break;
+  }
+  if (start) for (let offset = 0; ; offset += 500) {
     const page = await db.from('trinity_prediction_snapshots')
-      .select('race_date,course_code,race_no,timing,engine_version,generated_at,inserted_at,source_captured_at,boat_features')
+      .select('race_date,course_code,race_no,timing,engine_version,generated_at,inserted_at,source_captured_at,official_source_id,boat_features')
       .gte('race_date', coverageStart).lte('race_date', today)
       .order('race_date').order('course_code').order('race_no').order('prediction_id')
       .range(offset, offset + 499);
@@ -68,6 +79,22 @@ export default async function TrinityShadowPage() {
   const coverage = shadowCoverage(raceEvents.filter(r => r.race_date === today),
     coverageRows.filter(r => r.race_date === today), Date.now(), launchedAt);
   const coverageDates = [...new Set(raceEvents.map(r => r.race_date))].slice(-7).reverse();
+  const officialDay = date => {
+    const venues = raceEvents.filter(r => r.race_date === date);
+    const sources = officialSources.filter(r => r.race_date === date);
+    const snapshots = coverageRows.filter(r => r.race_date === date && r.timing === 'previous_day');
+    const paired = sources.filter(source => {
+      const pair = snapshots.filter(r => r.course_code === source.course_code && r.race_no === source.race_no);
+      const v2 = pair.find(r => r.engine_version === 'trinity-core-v2' && r.official_source_id === source.id);
+      const v3 = pair.find(r => r.engine_version === 'trinity-v3-candidate-01' && r.official_source_id === source.id);
+      return v2 && v3 && v2.source_captured_at === source.captured_at &&
+        v3.source_captured_at === source.captured_at &&
+        JSON.stringify(v2.boat_features) === JSON.stringify(v3.boat_features);
+    }).length;
+    return { venues: venues.length, sources: sources.length, paired,
+      submitted: sources.filter(s => s.gender_evidence?.[0]?.capture_method === 'operator_submitted_html').length,
+      first: sources.length ? sources.map(s => s.captured_at).sort()[0] : null };
+  };
   const days = start ? Math.floor((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000) : 0;
   return <main style={{ maxWidth: 1200, margin: '65px auto 120px', padding: 24, color: '#111827', background: '#fff' }}>
     <h1>TRINITY SHADOW</h1>
@@ -80,6 +107,16 @@ export default async function TrinityShadowPage() {
     <p>締切済み・導入後 {coverage.monitored}R ／ 同一入力でV2・V3保存 {coverage.paired}R ／ 保存率 {percent(coverage.rate)}</p>
     <p>未保存 {coverage.missing}R ／ 片方のみ {coverage.partial}R ／ 締切後 {coverage.late}R ／ 入力不一致 {coverage.inputMismatch}R ／ 導入前 {coverage.beforeLaunch}R</p>
     <p>分母は締切済みの全レースです。展示データが締切前に揃ったレース数は現在の出走表からは証明できません。欠損理由はCronログのレース別試行記録と照合してください。</p>
+    <h2>公式出走表・前夜の保存状況</h2>
+    <p>前夜取得の原文とV2/V3ペアを日別に照合します。提出されたHTMLの取得元は独立検証が必要です。未保存分を翌日に前日版として補いません。</p>
+    <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 650 }}>
+      <thead><tr>{['対象日','実施レース','公式原文保存','V2/V3ペア','提出HTML（要検証）','最初の原文取得（JST）'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
+      <tbody>{coverageDates.map(date => { const c = officialDay(date); return <tr key={date}>
+        <td style={cell}>{date}</td><td style={cell}>{c.venues}</td><td style={cell}>{c.sources}</td>
+        <td style={cell}>{c.paired}</td><td style={cell}>{c.submitted}</td>
+        <td style={cell}>{c.first ? new Date(c.first).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '—'}</td>
+      </tr>; })}</tbody>
+    </table></div>
     <div style={{ overflowX: 'auto' }}><table style={{ borderCollapse: 'collapse', minWidth: 550 }}>
       <thead><tr>{['日付','導入後締切済み','ペア保存','保存率','未保存','片方のみ','締切後/入力不一致','導入前'].map(x => <th key={x} style={header}>{x}</th>)}</tr></thead>
       <tbody>{coverageDates.map(date => {
