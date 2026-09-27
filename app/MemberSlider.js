@@ -11,20 +11,20 @@ const members = [
   {
     name: "一果",
     href: "/ichika",
-    image: "/top/IMG_7676.jpeg",
-    alt: "一果 イン逃げ",
+    image: "/8EAB0AF9-33FC-4A1C-8261-5DCF0B2C2CC0.png",
+    alt: "一果 イン逃げ特集",
   },
   {
     name: "初音",
     href: "/hatsune",
-    image: "/top/2394562F-D79D-4ECA-B618-834D5BFDDDFB.png",
-    alt: "初音 女子戦",
+    image: "/77AE3C3F-5CE0-4FD2-A718-1BB70C68FCED.png",
+    alt: "初音 女子戦特集",
   },
   {
     name: "キイナ",
     href: "/kiina",
-    image: "/top/5BA49F25-D24F-4A8E-BA45-094A604E4EDB.png",
-    alt: "キイナ 穴狙い",
+    image: "/A1906DE1-2E46-42FA-AF3C-0324A7CB8D6B.png",
+    alt: "キイナ 穴狙い特集",
   },
 ];
 
