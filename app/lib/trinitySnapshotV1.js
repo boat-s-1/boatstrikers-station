@@ -51,7 +51,8 @@ export function captureTrinityEntries(rows, timing, capturedAt) {
 }
 
 export function buildTrinityPredictionSnapshot({ event, entries, prediction, selection,
-  timing, generatedAt, sourceCapturedAt, engineVersion, strategyTag, oddsSnapshot = null }) {
+  timing, generatedAt, sourceCapturedAt, engineVersion, strategyTag, oddsSnapshot = null,
+  sourceVersion = 'bs_race_entries_as_of_capture_v1', officialSourceId = null }) {
   if (!prediction?.ok || prediction.timing !== timing ||
     !Number.isFinite(time(generatedAt)) || !Number.isFinite(time(sourceCapturedAt)) ||
     time(sourceCapturedAt) > time(generatedAt) || time(generatedAt) >= closingAt(event) ||
@@ -77,7 +78,7 @@ export function buildTrinityPredictionSnapshot({ event, entries, prediction, sel
     source_captured_at: sourceCapturedAt, race_date: event.race_date,
     course_code: Number(event.course_code), race_no: Number(event.race_no),
     timing, engine_version: engineVersion, feature_version: TRINITY_FEATURE_VERSION,
-    source_version: 'bs_race_entries_as_of_capture_v1',
+    source_version: sourceVersion, official_source_id: officialSourceId,
     boat_features: entries, ichika_scores: prediction.specialists.ichika.ranking,
     hatsune_scores: prediction.specialists.hatsune.ranking,
     kiina_scores: prediction.specialists.kiina.ranking,
