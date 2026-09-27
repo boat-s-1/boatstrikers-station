@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import styles from "./page.module.css";
+import PostEditor from "./PostEditor";
+import { generateCharacterDrafts } from "./generate";
 
 export const dynamic = "force-dynamic";
 
@@ -10,90 +13,23 @@ const ACCOUNTS = [
   { id: "kiina", name: "キイナ", role: "穴・5アタマ・万舟", target: 2 },
 ];
 
-const SLOTS = [
-  { time: "07:30", account: "official", category: "NEWS", title: "今日のボートレース", status: "draft" },
-  { time: "09:00", account: "official", category: "予想", title: "今日の注目BEST3", status: "draft" },
-  { time: "10:30", account: "ichika", category: "キャラ", title: "一果のイン逃げ視点", status: "draft" },
-  { time: "12:00", account: "official", category: "予想", title: "無料予想", status: "draft" },
-  { time: "13:30", account: "hatsune", category: "キャラ", title: "初音の女子戦視点", status: "draft" },
-  { time: "15:00", account: "kiina", category: "キャラ", title: "キイナの穴候補", status: "draft" },
-  { time: "18:30", account: "official", category: "結果", title: "予想の答え合わせ", status: "draft" },
-  { time: "20:30", account: "official", category: "DATA LAB", title: "今日の数字", status: "draft" },
-  { time: "21:30", account: "official", category: "会話", title: "3人の会話・明日予告", status: "draft" },
-];
-
-function jstToday() {
-  return new Intl.DateTimeFormat("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+function db(){
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 }
+function jstToday(){ return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()); }
+function localValue(value){ if(!value) return ""; const d=new Date(value); const parts=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(d); return parts.replace(" ","T"); }
 
-export default function XPostsAdmin() {
-  return (
-    <main className={styles.page}>
-      <div className={styles.shell}>
-        <header className={styles.hero}>
-          <div>
-            <span className={styles.eyebrow}>BOATSTRIKERS SOCIAL STUDIO</span>
-            <h1>X投稿センター</h1>
-            <p>{jstToday()}｜4アカウントの役割を分け、投稿案を確認してから運用するPHASE 1です。</p>
-          </div>
-          <Link href="/admin" className={styles.back}>← 管理TOP</Link>
-        </header>
-
-        <section className={styles.notice}>
-          <strong>安全運用モード</strong>
-          <p>この画面からXへ自動投稿はしません。予想・結果・数値は確認済みデータだけを使用し、TRINITY本体は変更しません。</p>
-        </section>
-
-        <section className={styles.accounts}>
-          {ACCOUNTS.map((account) => (
-            <article key={account.id} className={styles.accountCard} data-account={account.id}>
-              <span>{account.name}</span>
-              <strong>{account.target}投稿/日</strong>
-              <small>{account.role}</small>
-            </article>
-          ))}
-        </section>
-
-        <section className={styles.panel}>
-          <div className={styles.panelHead}>
-            <div><span>TODAY'S PLAN</span><h2>今日の投稿予定</h2></div>
-            <div className={styles.count}>{SLOTS.length}件</div>
-          </div>
-          <div className={styles.list}>
-            {SLOTS.map((slot, index) => {
-              const account = ACCOUNTS.find((item) => item.id === slot.account);
-              return (
-                <article className={styles.postRow} key={`${slot.time}-${index}`}>
-                  <time>{slot.time}</time>
-                  <div className={styles.postMain}>
-                    <div className={styles.meta}><span>{account?.name}</span><em>{slot.category}</em></div>
-                    <strong>{slot.title}</strong>
-                    <p>投稿本文は確定データ接続後にここで編集・確認できるようにします。</p>
-                  </div>
-                  <div className={styles.actions}>
-                    <button type="button" disabled>編集</button>
-                    <button type="button" disabled>コピー</button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className={styles.next}>
-          <h2>次の接続</h2>
-          <p><code>ai_v2_daily_rankings</code> / <code>bsc_official_predictions</code> / <code>bs_race_events</code> / DATA LAB出力から、公開可能な確定データだけを投稿案へ接続します。</p>
-          <div className={styles.links}>
-            <Link href="/admin/ai-candidates">AI候補を確認 →</Link>
-            <Link href="/admin/data-lab-social">DATA LAB SNS →</Link>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
+export default async function XPostsAdmin(){
+  const { data, error } = await db().from("bs_x_post_drafts").select("id,account_code,category,body,status,scheduled_at,posted_at,created_at,source_type").order("created_at",{ascending:false}).limit(40);
+  const posts=(data||[]).map(p=>({...p,scheduled_local:localValue(p.scheduled_at)}));
+  const counts=ACCOUNTS.reduce((acc,a)=>{acc[a.id]=posts.filter(p=>p.account_code===a.id && p.status!=="posted").length;return acc;},{});
+  return <main className={styles.page}><div className={styles.shell}>
+    <header className={styles.hero}><div><span className={styles.eyebrow}>BOATSTRIKERS SOCIAL STUDIO</span><h1>X投稿センター</h1><p>{jstToday()}｜生成 → 確認 → 編集 → コピー → 投稿済み管理を一画面で行います。</p></div><Link href="/admin" className={styles.back}>← 管理TOP</Link></header>
+    <section className={styles.notice}><strong>安全運用モード</strong><p>Xへ自動投稿はしません。DBの確定データから投稿案を作り、人が確認してから利用します。TRINITY本体は変更しません。</p></section>
+    <section className={styles.accounts}>{ACCOUNTS.map(a=><article key={a.id} className={styles.accountCard}><span>{a.name}</span><strong>{counts[a.id]||0}件 確認中</strong><small>目安 {a.target}投稿/日｜{a.role}</small></article>)}</section>
+    <section className={styles.panel}><div className={styles.panelHead}><div><span>GENERATE</span><h2>投稿案を作る</h2></div></div><form action={generateCharacterDrafts}><button type="submit">一果・初音・キイナの今日の投稿案を作る</button></form><p>当日のAIランキングと開催情報に候補がある場合だけ、3キャラの確認待ち投稿を作ります。同じ元データからの重複生成は抑止します。</p></section>
+    <section className={styles.panel}><div className={styles.panelHead}><div><span>DRAFTS</span><h2>投稿案</h2></div><div className={styles.count}>{posts.length}件</div></div>{error?<p>下書き取得エラー: {error.message}</p>:null}<div className={styles.list}>{posts.length?posts.map(post=><article className={styles.postRow} key={post.id}><time>{post.scheduled_at?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"}).format(new Date(post.scheduled_at)):"未定"}</time><div className={styles.postMain}><div className={styles.meta}><span>{ACCOUNTS.find(a=>a.id===post.account_code)?.name||post.account_code}</span><em>{post.category}</em><em>{post.status}</em></div><PostEditor post={post} accounts={ACCOUNTS}/></div></article>):<p>まだ投稿案がありません。上の生成ボタン、または新規作成から始めてください。</p>}</div></section>
+    <section className={styles.panel}><div className={styles.panelHead}><div><span>MANUAL</span><h2>新しい投稿案</h2></div></div><PostEditor accounts={ACCOUNTS}/></section>
+    <section className={styles.next}><h2>次の接続</h2><p>次はDATA LABの確定集計と、公開済み予想に対する確定結果を同じ下書きフローへ接続します。</p><div className={styles.links}><Link href="/admin/ai-candidates">AI候補を確認 →</Link><Link href="/admin/data-lab-social">DATA LAB SNS →</Link></div></section>
+  </div></main>;
 }
