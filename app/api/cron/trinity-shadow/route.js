@@ -16,6 +16,7 @@ const jstHour = () => Number(new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Tokyo', hour: '2-digit', hourCycle: 'h23',
 }).format(new Date()));
 const key = r => `${r.race_date}:${r.course_code}:${r.race_no}:${r.timing}`;
+const versions = [V2, V3];
 const trifecta = value => {
   const digits = String(value || '').replace(/[^1-6]/g, '').slice(0, 3);
   return digits.length === 3 && new Set(digits).size === 3 ? digits.split('').join('-') : null;
@@ -81,7 +82,10 @@ async function settle(db, snapshots) {
 }
 async function captureRace(db, event, timing, existing) {
   const raceKey = `${event.race_date}:${event.course_code}:${event.race_no}:${timing}`;
-  if (existing.has(raceKey)) return 'exists';
+  const savedVersions = existing.get(raceKey);
+  if (savedVersions?.size === versions.length) return 'exists';
+  // A later read cannot recreate the identical input for a missing half of a pair.
+  if (savedVersions?.size) return 'partial_pair';
   const startedAt = new Date().toISOString();
   const closes = closingAt(event);
   if (!Number.isFinite(closes) || closes - Date.now() <= 3 * 60_000) return 'late';
@@ -110,7 +114,7 @@ async function captureRace(db, event, timing, existing) {
   ];
   const { error } = await db.from('trinity_prediction_snapshots').insert(snapshots);
   if (error) throw error;
-  existing.add(raceKey);
+  existing.set(raceKey, new Set(versions));
   return 'saved';
 }
 export async function GET(request) {
@@ -123,7 +127,12 @@ export async function GET(request) {
     const tomorrow = jstDate(new Date(Date.now() + 86_400_000));
     const yesterday = jstDate(new Date(Date.now() - 86_400_000));
     const snapshots = await readSnapshots(db, yesterday);
-    const existing = new Set(snapshots.map(key));
+    const existing = new Map();
+    for (const snapshot of snapshots) {
+      const raceKey = key(snapshot);
+      if (!existing.has(raceKey)) existing.set(raceKey, new Set());
+      existing.get(raceKey).add(snapshot.engine_version);
+    }
     const events = await rows(db.from('bs_race_events')
       .select('race_date,course_code,race_no,closing_time')
       .gte('race_date', today).lte('race_date', jstHour() >= 21 ? tomorrow : today)
@@ -133,21 +142,32 @@ export async function GET(request) {
       if (until <= 3 * 60_000) return [];
       const capture = [];
       if (event.race_date === tomorrow &&
-        !existing.has(`${event.race_date}:${event.course_code}:${event.race_no}:previous_day`)) {
+        existing.get(`${event.race_date}:${event.course_code}:${event.race_no}:previous_day`)?.size !== versions.length) {
         capture.push({ event, timing: 'previous_day' });
       }
       if (event.race_date === today && until <= 26 * 60_000 &&
-        !existing.has(`${event.race_date}:${event.course_code}:${event.race_no}:after_exhibition`)) {
+        existing.get(`${event.race_date}:${event.course_code}:${event.race_no}:after_exhibition`)?.size !== versions.length) {
         capture.push({ event, timing: 'after_exhibition' });
       }
       return capture;
     }).slice(0, 80);
-    const outcomes = { saved: 0, exists: 0, late: 0, no_exhibition: 0, prediction_unavailable: 0, incomplete: 0, errors: [] };
+    const outcomes = { saved: 0, exists: 0, late: 0, no_exhibition: 0, prediction_unavailable: 0,
+      incomplete: 0, partial_pair: 0, errors: [], attempts: [] };
     for (const { event, timing } of eligible) {
-      try { outcomes[await captureRace(db, event, timing, existing)]++; }
+      const race = `${event.race_date}/${event.course_code}/${event.race_no}/${timing}`;
+      try {
+        const status = await captureRace(db, event, timing, existing);
+        outcomes[status]++;
+        outcomes.attempts.push({ race, status, closing_time: event.closing_time });
+      }
       catch (error) {
-        if (error.message === 'Six complete, contemporaneous entries are required') outcomes.incomplete++;
-        else outcomes.errors.push({ race: `${event.race_date}/${event.course_code}/${event.race_no}/${timing}`, message: error.message });
+        if (error.message === 'Six complete, contemporaneous entries are required') {
+          outcomes.incomplete++;
+          outcomes.attempts.push({ race, status: 'incomplete', closing_time: event.closing_time });
+        } else {
+          outcomes.errors.push({ race, message: error.message });
+          outcomes.attempts.push({ race, status: 'error', closing_time: event.closing_time });
+        }
       }
     }
     const settled = await settle(db, snapshots);
