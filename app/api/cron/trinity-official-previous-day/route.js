@@ -33,13 +33,13 @@ async function rows(query) {
   if (error) throw error;
   return data || [];
 }
-async function captureRace(db, date, course, no, existingSource) {
+async function captureRace(db, date, course, no, existingSource, suppliedHtml) {
   // Reuse the original immutable page if the first run saved evidence but not its prediction pair.
   let source = existingSource;
   if (!source) {
     const compact = date.replaceAll('-', '');
     const sourceUrl = `${root}/owpc/pc/race/racelist?rno=${no}&jcd=${String(course).padStart(2, '0')}&hd=${compact}`;
-    const html = await fetchOfficial(sourceUrl);
+    const html = suppliedHtml ?? await fetchOfficial(sourceUrl);
     const capturedAt = new Date().toISOString();
     const parsed = parseOfficialRacelist(html, { raceDate: date, courseCode: course, raceNo: no });
     const registrationNos = parsed.entries.map(e => e.racer_registration_no);
@@ -67,7 +67,9 @@ async function captureRace(db, date, course, no, existingSource) {
       captured_at: capturedAt, closing_time: parsed.closing_time,
       source_url: sourceUrl, source_sha256: parsed.source_sha256, source_html: parsed.source_html,
       boat_features: features,
-      gender_evidence: parsed.entries.map(e => ({ boat_no: e.boat_no,
+      gender_evidence: parsed.entries.map(e => ({
+        capture_method: suppliedHtml === undefined ? 'vercel_official_fetch' : 'operator_submitted_html',
+        boat_no: e.boat_no,
         racer_registration_no: e.racer_registration_no,
         race_date: gender.get(e.racer_registration_no).race_date,
         created_at: gender.get(e.racer_registration_no).created_at,
@@ -100,6 +102,64 @@ async function captureRace(db, date, course, no, existingSource) {
   const { error } = await db.from('trinity_prediction_snapshots').insert(pair);
   if (error) throw error;
   return { status: 'saved', source_id: source.id };
+}
+
+// An operator-controlled browser or an approved data collector may submit the
+// original official HTML when direct Vercel requests are blocked. The server's
+// receipt time is the only capture timestamp; the caller cannot backdate it.
+export async function POST(request) {
+  if (!process.env.CRON_SECRET || request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+  }
+  const now = new Date();
+  const hour = Number(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Tokyo', hour: '2-digit', hourCycle: 'h23',
+  }).format(now));
+  if (hour < 21 || hour > 23) return NextResponse.json({ ok: false, error: 'outside_previous_evening' }, { status: 400 });
+  try {
+    if (Number(request.headers.get('content-length')) > 300000) {
+      return NextResponse.json({ ok: false, error: 'payload_too_large' }, { status: 413 });
+    }
+    const body = await request.json();
+    const date = datePart(new Date(now.getTime() + 86_400_000));
+    const course = Number(body.course_code);
+    const no = Number(body.race_no);
+    if (body.race_date !== date || !Number.isInteger(course) || course < 1 || course > 24 ||
+      !Number.isInteger(no) || no < 1 || no > 12 || typeof body.html !== 'string' ||
+      body.html.length < 3000 || body.html.length > 250000) {
+      return NextResponse.json({ ok: false, error: 'invalid_official_page' }, { status: 400 });
+    }
+    const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { persistSession: false, autoRefreshToken: false } });
+    const existing = await rows(db.from('trinity_official_entry_sources')
+      .select('id,race_date,course_code,race_no,captured_at,closing_time,boat_features,source_sha256')
+      .eq('race_date', date).eq('course_code', course).eq('race_no', no).limit(1));
+    if (existing.length) {
+      const submitted = parseOfficialRacelist(body.html, { raceDate: date, courseCode: course, raceNo: no });
+      if (submitted.source_sha256 !== existing[0].source_sha256) {
+        return NextResponse.json({ ok: false, error: 'immutable_source_differs' }, { status: 409 });
+      }
+      const saved = await rows(db.from('trinity_prediction_snapshots').select('engine_version,official_source_id')
+        .eq('race_date', date).eq('course_code', course).eq('race_no', no).eq('timing', 'previous_day'));
+      if (saved.length) {
+        const both = ['trinity-core-v2', 'trinity-v3-candidate-01'].every(version =>
+          saved.some(row => row.engine_version === version && row.official_source_id === existing[0].id));
+        return NextResponse.json({ ok: both, status: both ? 'already_saved' : 'incomplete_pair_requires_review' },
+          { status: both ? 200 : 409 });
+      }
+      const outcome = await captureRace(db, date, course, no, existing[0]);
+      return NextResponse.json({ ok: outcome.status === 'saved', race_date: date,
+        course_code: course, race_no: no, ...outcome }, { status: outcome.status === 'saved' ? 201 : 422 });
+    }
+    // No remote URL is accepted. The server constructs the official race URL
+    // and the parser checks the page's race key, date, six boats and closing time.
+    const outcome = await captureRace(db, date, course, no, null, body.html);
+    return NextResponse.json({ ok: outcome.status === 'saved', race_date: date,
+      course_code: course, race_no: no, ...outcome }, { status: outcome.status === 'saved' ? 201 : 422 });
+  } catch (error) {
+    console.error('[trinity-official-previous-day] submitted source rejected', error);
+    return NextResponse.json({ ok: false, error: error.message }, { status: 422 });
+  }
 }
 
 export async function GET(request) {
