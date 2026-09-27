@@ -132,9 +132,25 @@ export async function POST(request) {
     const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY,
       { auth: { persistSession: false, autoRefreshToken: false } });
     const existing = await rows(db.from('trinity_official_entry_sources')
-      .select('id,race_date,course_code,race_no,captured_at,closing_time,boat_features')
+      .select('id,race_date,course_code,race_no,captured_at,closing_time,boat_features,source_sha256')
       .eq('race_date', date).eq('course_code', course).eq('race_no', no).limit(1));
-    if (existing.length) return NextResponse.json({ ok: false, error: 'immutable_source_already_exists' }, { status: 409 });
+    if (existing.length) {
+      const submitted = parseOfficialRacelist(body.html, { raceDate: date, courseCode: course, raceNo: no });
+      if (submitted.source_sha256 !== existing[0].source_sha256) {
+        return NextResponse.json({ ok: false, error: 'immutable_source_differs' }, { status: 409 });
+      }
+      const saved = await rows(db.from('trinity_prediction_snapshots').select('engine_version,official_source_id')
+        .eq('race_date', date).eq('course_code', course).eq('race_no', no).eq('timing', 'previous_day'));
+      if (saved.length) {
+        const both = ['trinity-core-v2', 'trinity-v3-candidate-01'].every(version =>
+          saved.some(row => row.engine_version === version && row.official_source_id === existing[0].id));
+        return NextResponse.json({ ok: both, status: both ? 'already_saved' : 'incomplete_pair_requires_review' },
+          { status: both ? 200 : 409 });
+      }
+      const outcome = await captureRace(db, date, course, no, existing[0]);
+      return NextResponse.json({ ok: outcome.status === 'saved', race_date: date,
+        course_code: course, race_no: no, ...outcome }, { status: outcome.status === 'saved' ? 201 : 422 });
+    }
     // No remote URL is accepted. The server constructs the official race URL
     // and the parser checks the page's race key, date, six boats and closing time.
     const outcome = await captureRace(db, date, course, no, null, body.html);
