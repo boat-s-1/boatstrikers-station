@@ -30,10 +30,6 @@
       "schedule": "*/2 22-23,0-13 * * *"
     },
     {
-      "path": "/api/cron/trinity-official-previous-day",
-      "schedule": "*/5 12-14 * * *"
-    },
-    {
       "path": "/api/cron/media-editorials",
       "schedule": "10 3,6,9,13 * * *"
     },
