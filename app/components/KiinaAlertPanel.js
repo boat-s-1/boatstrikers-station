@@ -98,6 +98,6 @@ export default async function KiinaAlertPanel(){
       </article>})}
     </div>:<div style={{padding:"20px 18px 22px",textAlign:"center"}}><div style={{fontSize:30}}>🚨</div><strong style={{display:"block",marginTop:6,color:"#17345c"}}>現在、条件成立レースはありません</strong><p style={{margin:"7px 0 0",fontSize:13,color:"#718096",lineHeight:1.6}}>展示情報が出た後、カド攻め理論の条件が成立すると表示されます。</p></div>}
 
-    <div style={{padding:"0 14px 16px"}}><Link href="/members" style={{display:"block",textAlign:"center",textDecoration:"none",padding:"12px 14px",borderRadius:14,background:"#06c755",color:"#fff",fontWeight:900,fontSize:14}}>LINE通知を設定する</Link></div>
+    <div style={{padding:"0 14px 16px"}}><Link href="/members/discord" style={{display:"block",textAlign:"center",textDecoration:"none",padding:"12px 14px",borderRadius:14,background:"#5865f2",color:"#fff",fontWeight:900,fontSize:14}}>通知を設定する</Link><p style={{margin:"8px 0 0",color:"#526079",fontSize:13,textAlign:"center"}}>Discordでキイナのアラートを受け取る</p></div>
   </section>;
 }
