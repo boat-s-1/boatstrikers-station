@@ -61,4 +61,18 @@ jobs:
             fi
             export TRINITY_CRON_SECRET="$COLLECTOR_SECRET"
           fi
+          if [[ "${{ github.event_name }}" == 'pull_request' && -n "$COLLECTOR_SECRET" ]]; then
+            # An intentionally invalid payload tests authentication without saving a race.
+            status=$(curl --silent --show-error --max-time 20 --output /dev/null \
+              --write-out '%{http_code}' --request POST \
+              --header "Authorization: Bearer $COLLECTOR_SECRET" \
+              --header 'Content-Type: application/json' \
+              --data '{}' \
+              'https://www.boat-strike.online/api/cron/trinity-official-previous-day')
+            echo "Intake authentication probe: HTTP $status"
+            if [[ "$status" != '400' ]]; then
+              echo 'Collector credential does not pass the production intake validation gate.' >&2
+              exit 1
+            fi
+          fi
           node scripts/trinity/collect-official-previous-day.mjs "${args[@]}"
