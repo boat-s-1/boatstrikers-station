@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 function db(){return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}})}
 function today(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function isoJst(date,time){return new Date(`${date}T${time}:00+09:00`).toISOString()}
+// Daily-plan categories intentionally use the DB-supported "news" value.
 const plan=[
  {key:"official-morning",account:"official",category:"news",time:"08:15",body:"🚤 おはようございます、BoatStrikersです。\n\n今日も開催情報・注目レース・DATA LABを追っていきます。\n気になるレースは3人それぞれの目線でも紹介します。\n\n#BoatStrikers #ボートレース"},
  {key:"ichika-talk",account:"ichika",category:"news",time:"10:15",body:"🌱 一果です。\n\nイン逃げを見るときは、1号艇だからという理由だけで決めず、スタート・相手関係・直前気配まで確認したいところ。\n今日も『逃げを信頼できるレースか』を見ていきます。\n\n#BoatStrikers #ボートレース"},
