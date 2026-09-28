@@ -7,6 +7,7 @@ import { officialCourses, parseOfficialRacelist } from '../../app/lib/trinityOff
 const root = 'https://www.boatrace.jp';
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
+const probe = args.includes('--probe');
 const option = name => args[args.indexOf(name) + 1];
 const localDate = offset => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -20,6 +21,7 @@ const hour = Number(new Intl.DateTimeFormat('en-GB', {
 if (!/^\d{4}-\d{2}-\d{2}$/.test(raceDate) || !Number.isInteger(maxRaces) || maxRaces < 1 || maxRaces > 288) {
   throw new Error('Invalid --date or --max-races');
 }
+if (probe && !dryRun) throw new Error('--probe requires --dry-run');
 if (!dryRun && (raceDate !== localDate(1) || hour < 21 || hour > 23)) {
   throw new Error('Submission requires tomorrow JST and 21:00–23:59 JST');
 }
@@ -85,4 +87,9 @@ for (const course of courses) {
   if (report.examined >= maxRaces || blocked) break;
 }
 console.log(JSON.stringify(report));
-if (report.failed.length || report.valid !== report.examined) process.exitCode = 1;
+if (probe) {
+  // A blank official average-ST cell is a genuine source-data gap, not an access failure.
+  // Reachability still requires at least one fully valid page and no other errors.
+  const unexpected = report.failed.filter(item => !/^Official racelist boat [1-6] is incomplete$/.test(item.error));
+  if (!report.valid || unexpected.length) process.exitCode = 1;
+} else if (report.failed.length || report.valid !== report.examined) process.exitCode = 1;
