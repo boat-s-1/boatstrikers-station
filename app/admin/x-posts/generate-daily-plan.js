@@ -7,9 +7,9 @@ function today(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",y
 function isoJst(date,time){return new Date(`${date}T${time}:00+09:00`).toISOString()}
 const plan=[
  {key:"official-morning",account:"official",category:"news",time:"08:15",body:"🚤 おはようございます、BoatStrikersです。\n\n今日も開催情報・注目レース・DATA LABを追っていきます。\n気になるレースは3人それぞれの目線でも紹介します。\n\n#BoatStrikers #ボートレース"},
- {key:"ichika-talk",account:"ichika",category:"conversation",time:"10:15",body:"🌱 一果です。\n\nイン逃げを見るときは、1号艇だからという理由だけで決めず、スタート・相手関係・直前気配まで確認したいところ。\n今日も『逃げを信頼できるレースか』を見ていきます。\n\n#BoatStrikers #ボートレース"},
- {key:"hatsune-talk",account:"hatsune",category:"conversation",time:"12:15",body:"🐰 初音です。\n\n女子戦は選手ごとの近況やスタート気配も見ながら追うと、レースを見る楽しみが増えます。\n今日も女子戦から気になるポイントを探します🐰\n\n#BoatStrikers #女子戦 #ボートレース"},
- {key:"kiina-talk",account:"kiina",category:"conversation",time:"14:15",body:"⭐ キイナです。\n\n穴狙いは高配当だけを追うのではなく、『人気との差がありそうな材料があるか』を大事にしています。\n今日も5アタマや穴候補を探していきます⭐\n\n#BoatStrikers #ボートレース"},
+ {key:"ichika-talk",account:"ichika",category:"chat",time:"10:15",body:"🌱 一果です。\n\nイン逃げを見るときは、1号艇だからという理由だけで決めず、スタート・相手関係・直前気配まで確認したいところ。\n今日も『逃げを信頼できるレースか』を見ていきます。\n\n#BoatStrikers #ボートレース"},
+ {key:"hatsune-talk",account:"hatsune",category:"chat",time:"12:15",body:"🐰 初音です。\n\n女子戦は選手ごとの近況やスタート気配も見ながら追うと、レースを見る楽しみが増えます。\n今日も女子戦から気になるポイントを探します🐰\n\n#BoatStrikers #女子戦 #ボートレース"},
+ {key:"kiina-talk",account:"kiina",category:"chat",time:"14:15",body:"⭐ キイナです。\n\n穴狙いは高配当だけを追うのではなく、『人気との差がありそうな材料があるか』を大事にしています。\n今日も5アタマや穴候補を探していきます⭐\n\n#BoatStrikers #ボートレース"},
  {key:"official-evening",account:"official",category:"news",time:"20:30",body:"📊 今日のボートレースを振り返ります。\n\n結果や荒れたレースはDATA LABでも整理して公開していきます。\n一果・初音・キイナ、それぞれの視点とあわせてチェックしてください。\n\n#BoatStrikers #ボートレース"}
 ];
 export async function generateDailyPlan(){
