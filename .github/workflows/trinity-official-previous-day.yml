@@ -47,7 +47,7 @@ jobs:
           set -euo pipefail
           args=()
           if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-            args+=(--dry-run --date "$(TZ=Asia/Tokyo date +%F)" --max-races 1)
+            args+=(--dry-run --probe --date "$(TZ=Asia/Tokyo date +%F)" --max-races 3)
           elif [[ "${{ github.event_name }}" == 'workflow_dispatch' && "$MANUAL_DRY_RUN" != 'false' ]]; then
             args+=(--dry-run --date "$(TZ=Asia/Tokyo date +%F)")
           fi
