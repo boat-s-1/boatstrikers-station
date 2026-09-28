@@ -11,7 +11,7 @@ export default function PostEditor({ post, accounts }) {
       {post?.id ? <input type="hidden" name="id" value={post.id} /> : null}
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         <select name="account" defaultValue={post?.account_code || "official"}>{accounts.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-        <select name="category" defaultValue={post?.category || "prediction"}><option value="prediction">予想</option><option value="result">結果</option><option value="news">NEWS</option><option value="data_lab">DATA LAB</option><option value="chat">会話</option><option value="lesson">初心者講座</option><option value="announcement">告知</option></select>
+        <select name="category" defaultValue={post?.category || "prediction"}><option value="prediction">予想</option><option value="result">結果</option><option value="news">NEWS</option><option value="data_lab">DATA LAB</option><option value="character_chat">会話・小ネタ</option><option value="beginner">初心者講座</option><option value="announcement">告知</option></select>
         <select name="status" defaultValue={post?.status || "draft"}><option value="draft">下書き</option><option value="review">確認待ち</option><option value="ready">投稿準備OK</option><option value="posted">投稿済み</option></select>
         <input name="scheduled_at" type="datetime-local" defaultValue={post?.scheduled_local || ""} />
       </div>
