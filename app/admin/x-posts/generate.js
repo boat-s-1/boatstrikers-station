@@ -10,6 +10,12 @@ const courseFallback=(code)=>`場コード${String(code).padStart(2,"0")}`;
 function db(){return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}})}
 function todayJst(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function finish(params){revalidatePath("/admin/x-posts");redirect(`/admin/x-posts?${new URLSearchParams(params).toString()}`)}
+function hasSourceId(refs,id){
+ const wanted=String(id);
+ if(Array.isArray(refs)) return refs.some(r=>r&&String(r.id)===wanted);
+ if(refs&&typeof refs==="object") return String(refs.id)===wanted;
+ return false;
+}
 
 export async function generateCharacterDrafts(){
  const supabase=db();const date=todayJst();
@@ -27,8 +33,9 @@ export async function generateCharacterDrafts(){
   const comment=row.social_comment||row.summary||"今日の注目レースです。";
   const body=`${icons[row.character_code]}${names[row.character_code]}の今日の注目\n\n${course}${row.race_no}R${pct?`｜注目度 ${pct}`:""}\n${comment}\n\n#BoatStrikers #ボートレース`;
   const ref={kind:"ai_v2_daily_rankings",id:String(row.id),ranking_date:date,course_code:row.course_code,race_no:row.race_no,probability:row.probability,data_timing:row.data_timing};
-  const {data:existing,error:checkError}=await supabase.from("bs_x_post_drafts").select("id").eq("source_kind","ai_v2_daily_rankings").contains("source_refs",[{id:String(row.id)}]).eq("account_code",row.character_code).maybeSingle();
+  const {data:candidates,error:checkError}=await supabase.from("bs_x_post_drafts").select("id,source_refs").eq("source_kind","ai_v2_daily_rankings").eq("account_code",row.character_code).limit(100);
   if(checkError){failures.push(`${names[row.character_code]} 重複確認: ${checkError.message}`);continue}
+  const existing=(candidates||[]).find(d=>hasSourceId(d.source_refs,row.id));
   if(existing){skipped++;continue}
   const {error:insertError}=await supabase.from("bs_x_post_drafts").insert({account_code:row.character_code,category:"prediction",body,status:"draft",source_kind:"ai_v2_daily_rankings",source_refs:[ref],updated_at:new Date().toISOString()});
   if(insertError)failures.push(`${names[row.character_code]} 保存: ${insertError.message}`);else created++;
