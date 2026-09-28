@@ -10,6 +10,10 @@ BOAT RACE公式の「番組表ダウンロード」は全国24場向けに引き
 
 `scripts/trinity/collect-official-previous-day.mjs` を追加。公式の翌日開催一覧を読み、掲載された開催場のみ各12レースを順番に取得し、既存の公式出走表パーサーで日付・場・R・6艇・締切時刻・全特徴量を検査してから、上記の認証付きPOSTへ送信する。アクセス不可・欠損レースはエラー一覧に残し、時刻を偽って再提出しない。原文の取得元はサーバーでは独立確認できないので、この経路のSTRICT採用は運用監査後に判断する。
 
+GitHub Actions の `.github/workflows/trinity-official-previous-day.yml` は、公式ページへの到達性をPR上で当日1レースだけ読み取り検証し、本番ブランチでは前夜21:15、22:15、23:00 JSTに収集する。後続の実行は既存ソースを再送する場合があるため、サーバーの不変保存・409検知は維持する。GitHub Actionsのスケジュール時刻は遅延する場合があり、23:59 JSTを越えた送信はクライアントとサーバーの双方が拒否する。PRの読み取り検証で403・429などの取得拒否が出る場合、このワークフローを本番ブランチへ入れても収集できないので別の承認済み収集環境を選ぶ。
+
+送信を有効にするにはGitHub ActionsのRepository secret `TRINITY_COLLECTOR_CRON_SECRET` に本番Vercelの `CRON_SECRET` と同じ値を登録する。既存の `HATSUNE_NEWS_CRON_SECRET` が同一値なら代替として使える。**秘密値をworkflowファイルやログに書かない。** 初回は手動のdry-runから始め、前夜の保存結果をDBで確認するまではSTRICTとして集計しない。Actionsの提出HTMLは引き続き `operator_submitted_html` として識別され、取得元の独立確認が必要である。
+
 ローカルのWindows PowerShellで試す場合（Node.jsが必要）。事前に `TRINITY_CRON_SECRET` を安全に環境変数へ設定する。コマンド引数・GitHub・ログへ秘密を記録しない。
 
 ```powershell

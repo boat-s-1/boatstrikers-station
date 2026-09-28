@@ -1,0 +1,78 @@
+name: TRINITY official previous-day collector
+
+on:
+  # GitHub schedules use UTC. These are 21:15, 22:15 and 23:00 JST.
+  schedule:
+    - cron: '15 12,13 * * *'
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Inspect official pages without saving predictions'
+        type: boolean
+        default: true
+      max_races:
+        description: 'Limit inspected races (1-288); omit for all races'
+        type: string
+        required: false
+  pull_request:
+    paths:
+      - '.github/workflows/trinity-official-previous-day.yml'
+      - 'scripts/trinity/collect-official-previous-day.mjs'
+      - 'app/lib/trinityOfficialRacelist.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trinity-official-previous-day
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect or submit official race lists
+        env:
+          COLLECTOR_SECRET: ${{ secrets.TRINITY_COLLECTOR_CRON_SECRET || secrets.HATSUNE_NEWS_CRON_SECRET }}
+          MANUAL_DRY_RUN: ${{ inputs.dry_run }}
+          MANUAL_MAX_RACES: ${{ inputs.max_races }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            args+=(--dry-run --probe --date "$(TZ=Asia/Tokyo date +%F)" --max-races 3)
+          elif [[ "${{ github.event_name }}" == 'workflow_dispatch' && "$MANUAL_DRY_RUN" != 'false' ]]; then
+            args+=(--dry-run --date "$(TZ=Asia/Tokyo date +%F)")
+          fi
+          if [[ -n "$MANUAL_MAX_RACES" && "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
+            args+=(--max-races "$MANUAL_MAX_RACES")
+          fi
+          if [[ " ${args[*]} " != *' --dry-run '* ]]; then
+            if [[ -z "$COLLECTOR_SECRET" ]]; then
+              echo 'Configure TRINITY_COLLECTOR_CRON_SECRET to match the production CRON_SECRET.' >&2
+              exit 1
+            fi
+            export TRINITY_CRON_SECRET="$COLLECTOR_SECRET"
+          fi
+          if [[ "${{ github.event_name }}" == 'pull_request' && -n "$COLLECTOR_SECRET" ]]; then
+            # An intentionally invalid payload tests authentication without saving a race.
+            status=$(curl --silent --show-error --max-time 20 --output /dev/null \
+              --write-out '%{http_code}' --request POST \
+              --header "Authorization: Bearer $COLLECTOR_SECRET" \
+              --header 'Content-Type: application/json' \
+              --data '{}' \
+              'https://www.boat-strike.online/api/cron/trinity-official-previous-day')
+            echo "Intake authentication probe: HTTP $status"
+            if [[ "$status" != '400' ]]; then
+              echo 'Collector credential does not pass the production intake validation gate.' >&2
+              exit 1
+            fi
+          fi
+          node scripts/trinity/collect-official-previous-day.mjs "${args[@]}"
