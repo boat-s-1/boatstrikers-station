@@ -1,3 +1,4 @@
+// X post center diagnostics enabled; keep this comment to identify the preview build.
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import styles from "./page.module.css";
