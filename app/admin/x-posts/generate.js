@@ -37,7 +37,7 @@ export async function generateCharacterDrafts(){
   if(checkError){failures.push(`${names[row.character_code]} 重複確認: ${checkError.message}`);continue}
   const existing=(candidates||[]).find(d=>hasSourceId(d.source_refs,row.id));
   if(existing){skipped++;continue}
-  const {error:insertError}=await supabase.from("bs_x_post_drafts").insert({account_code:row.character_code,category:"prediction",body,status:"draft",source_kind:"ai_v2_daily_rankings",source_refs:[ref],updated_at:new Date().toISOString()});
+  const {error:insertError}=await supabase.from("bs_x_post_drafts").insert({post_date:date,account_code:row.character_code,category:"prediction",body,status:"draft",source_kind:"ai_v2_daily_rankings",source_refs:[ref],updated_at:new Date().toISOString()});
   if(insertError)failures.push(`${names[row.character_code]} 保存: ${insertError.message}`);else created++;
  }
  if(failures.length)finish({gen:"error",created:String(created),skipped:String(skipped),message:failures.join(" / ").slice(0,700)});
