@@ -29,7 +29,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  probe:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check official-page reachability without credentials
+        run: |
+          probe_date=$(TZ=Asia/Tokyo date +%F)
+          if [[ $(TZ=Asia/Tokyo date +%H) -ge 21 ]]; then
+            probe_date=$(TZ=Asia/Tokyo date -d tomorrow +%F)
+          fi
+          node scripts/trinity/collect-official-previous-day.mjs --dry-run --probe --date "$probe_date" --max-races 3
+
   collect:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -46,9 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           args=()
-          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-            args+=(--dry-run --probe --date "$(TZ=Asia/Tokyo date +%F)" --max-races 3)
-          elif [[ "${{ github.event_name }}" == 'workflow_dispatch' && "$MANUAL_DRY_RUN" != 'false' ]]; then
+          if [[ "${{ github.event_name }}" == 'workflow_dispatch' && "$MANUAL_DRY_RUN" != 'false' ]]; then
             args+=(--dry-run --date "$(TZ=Asia/Tokyo date +%F)")
           fi
           if [[ -n "$MANUAL_MAX_RACES" && "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
@@ -60,19 +76,5 @@ jobs:
               exit 1
             fi
             export TRINITY_CRON_SECRET="$COLLECTOR_SECRET"
-          fi
-          if [[ "${{ github.event_name }}" == 'pull_request' && -n "$COLLECTOR_SECRET" ]]; then
-            # An intentionally invalid payload tests authentication without saving a race.
-            status=$(curl --silent --show-error --max-time 20 --output /dev/null \
-              --write-out '%{http_code}' --request POST \
-              --header "Authorization: Bearer $COLLECTOR_SECRET" \
-              --header 'Content-Type: application/json' \
-              --data '{}' \
-              'https://www.boat-strike.online/api/cron/trinity-official-previous-day')
-            echo "Intake authentication probe: HTTP $status"
-            if [[ "$status" != '400' ]]; then
-              echo 'Collector credential does not pass the production intake validation gate.' >&2
-              exit 1
-            fi
           fi
           node scripts/trinity/collect-official-previous-day.mjs "${args[@]}"
