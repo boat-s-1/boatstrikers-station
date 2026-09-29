@@ -39,7 +39,12 @@ jobs:
         with:
           node-version: '22'
       - name: Check official-page reachability without credentials
-        run: node scripts/trinity/collect-official-previous-day.mjs --dry-run --probe --date "$(TZ=Asia/Tokyo date +%F)" --max-races 3
+        run: |
+          probe_date=$(TZ=Asia/Tokyo date +%F)
+          if [[ $(TZ=Asia/Tokyo date +%H) -ge 21 ]]; then
+            probe_date=$(TZ=Asia/Tokyo date -d tomorrow +%F)
+          fi
+          node scripts/trinity/collect-official-previous-day.mjs --dry-run --probe --date "$probe_date" --max-races 3
 
   collect:
     if: github.event_name != 'pull_request'
