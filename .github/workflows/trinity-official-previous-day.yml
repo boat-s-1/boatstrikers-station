@@ -29,10 +29,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: trinity-official-previous-day
-  cancel-in-progress: false
-
 jobs:
   probe:
     if: github.event_name == 'pull_request'
@@ -53,6 +49,17 @@ jobs:
 
   collect:
     if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { course_min: 1, course_max: 6 }
+          - { course_min: 7, course_max: 12 }
+          - { course_min: 13, course_max: 18 }
+          - { course_min: 19, course_max: 24 }
+    concurrency:
+      group: trinity-official-previous-day-${{ matrix.course_min }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -65,10 +72,12 @@ jobs:
           COLLECTOR_SECRET: ${{ secrets.TRINITY_COLLECTOR_CRON_SECRET || secrets.HATSUNE_NEWS_CRON_SECRET }}
           MANUAL_DRY_RUN: ${{ inputs.dry_run }}
           MANUAL_MAX_RACES: ${{ inputs.max_races }}
+          COURSE_MIN: ${{ matrix.course_min }}
+          COURSE_MAX: ${{ matrix.course_max }}
         shell: bash
         run: |
           set -euo pipefail
-          args=()
+          args=(--course-min "$COURSE_MIN" --course-max "$COURSE_MAX")
           if [[ "${{ github.event_name }}" == 'push' ]]; then
             hour=$(TZ=Asia/Tokyo date +%H)
             if (( 10#$hour < 21 || 10#$hour > 23 )); then
