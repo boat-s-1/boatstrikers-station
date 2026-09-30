@@ -14,12 +14,16 @@ const localDate = offset => new Intl.DateTimeFormat('en-CA', {
 }).format(new Date(Date.now() + offset * 86_400_000));
 const raceDate = args.includes('--date') ? option('--date') : localDate(1);
 const maxRaces = args.includes('--max-races') ? Number(option('--max-races')) : 288;
+const courseMin = args.includes('--course-min') ? Number(option('--course-min')) : 1;
+const courseMax = args.includes('--course-max') ? Number(option('--course-max')) : 24;
 const hour = Number(new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Tokyo', hour: '2-digit', hourCycle: 'h23',
 }).format(new Date()));
 
-if (!/^\d{4}-\d{2}-\d{2}$/.test(raceDate) || !Number.isInteger(maxRaces) || maxRaces < 1 || maxRaces > 288) {
-  throw new Error('Invalid --date or --max-races');
+if (!/^\d{4}-\d{2}-\d{2}$/.test(raceDate) || !Number.isInteger(maxRaces) || maxRaces < 1 || maxRaces > 288 ||
+    !Number.isInteger(courseMin) || !Number.isInteger(courseMax) || courseMin < 1 ||
+    courseMax > 24 || courseMin > courseMax) {
+  throw new Error('Invalid --date, --max-races or course range');
 }
 if (probe && !dryRun) throw new Error('--probe requires --dry-run');
 if (!dryRun && (raceDate !== localDate(1) || hour < 21 || hour > 23)) {
@@ -47,9 +51,11 @@ const index = await getHtml(`${root}/owpc/pc/race/index?hd=${compact}`).catch(as
   await delay(3000);
   return getHtml(`${root}/owpc/pc/race/index?hd=${compact}`);
 });
-const courses = officialCourses(index, compact);
-if (!courses.length) throw new Error('No official venue links for the requested date');
-const report = { race_date: raceDate, venues: courses.length, expected_races: courses.length * 12,
+const allCourses = officialCourses(index, compact);
+const courses = allCourses.filter(course => course >= courseMin && course <= courseMax);
+if (!allCourses.length) throw new Error('No official venue links for the requested date');
+const report = { race_date: raceDate, venues: allCourses.length, assigned_venues: courses.length,
+  expected_races: courses.length * 12,
   examined: 0, valid: 0, submitted: 0, already_saved: 0,
   incomplete: [], source_changed: [], failed: [] };
 let blocked = false;
@@ -95,6 +101,10 @@ for (const course of courses) {
   if (report.examined >= maxRaces || blocked) break;
 }
 console.log(JSON.stringify(report));
+if (!courses.length) {
+  // A shard with no active venue is normal; the index still proved which venues run.
+  process.exit(0);
+}
 if (probe) {
   // A blank official average-ST cell is a genuine source-data gap, not an access failure.
   if (!report.valid || report.failed.length) process.exitCode = 1;
