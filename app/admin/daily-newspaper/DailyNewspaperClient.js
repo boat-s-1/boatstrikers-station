@@ -1,0 +1,38 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import styles from "./dailyNewspaper.module.css";
+
+const COURSES=["桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江","尼崎","鳴門","丸亀","児島","宮島","徳山","下関","若松","芦屋","福岡","唐津","大村"];
+const CHARS={
+ ichika:{label:"一果",icon:"🍀",title:"イン逃げ予想新聞",accent:"green",focus:"イン逃げ・1号艇・スリット・逃げ条件",rules:"1号艇を無条件で本命にしない。インが弱いレースは2〜6号艇も本命可。"},
+ hatsune:{label:"初音",icon:"💜",title:"女子戦予想新聞",accent:"purple",focus:"女子レーサー・リズム・展開・女子戦の特徴",rules:"女子戦データを中心に評価し、入力にない性別・成績を推測しない。"},
+ kiina:{label:"キイナ",icon:"⚡",title:"穴党予想新聞",accent:"gold",focus:"5号艇・穴候補・波乱度・高配当シナリオ",rules:"5号艇を無条件で本命にしない。穴条件が弱い場合は見送りを明示する。"}
+};
+function today(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
+const emptyRows=()=>Array.from({length:12},(_,i)=>({race:`${i+1}R`,mark:"○",main:"",bet:"",comment:"",confidence:""}));
+
+export default function DailyNewspaperClient(){
+ const [date,setDate]=useState(today()); const [course,setCourse]=useState("戸田"); const [edition,setEdition]=useState("前日版"); const [character,setCharacter]=useState("ichika"); const [ratio,setRatio]=useState("9:16"); const [rows,setRows]=useState(emptyRows); const [points,setPoints]=useState(""); const [targets,setTargets]=useState(""); const [closing,setClosing]=useState("");
+ const c=CHARS[character];
+ function patch(i,key,value){setRows(v=>v.map((r,n)=>n===i?{...r,[key]:value}:r));}
+ const prompt=useMemo(()=>{
+  const table=rows.map(r=>`${r.race}｜印:${r.mark||"-"}｜本命艇:${r.main||"未入力"}｜買い目:${r.bet||"未入力"}｜信頼度:${r.confidence||"未入力"}｜コメント:${r.comment||"未入力"}`).join("\n");
+  return `添付したBoatStrikersのキャラクター参考画像・新聞参考画像のデザイン品質を基準に、${c.label}の「1場12R・${edition}」新聞を1枚作成してください。\n\n【基本情報】\n日付：${date}\n表示日付：${date.slice(5).replace("-","/")}\n場名：${course}\n対象：1R〜12R\n版：${edition}\nキャラクター：${c.label}\nタイトル：${c.label}の${c.title}\n画像比率：${ratio}\n専門視点：${c.focus}\n\n【最重要ルール】\n・下記の確定入力だけを使用し、数値・艇番・買い目・選手情報を推測で補完しない。\n・${c.rules}\n・1R〜12Rを必ず12行すべて掲載する。\n・各行は「R / 印 / 本命艇 / 買い目 / コメント」が一瞬で読める表にする。\n・内部モデル名、raw、score、shadow、[object Object]は表示しない。\n・競馬用語・馬券用語を使わない。舟券は3連単表記を基本とする。\n・日本語の誤字を避け、入力文言は勝手に言い換えない。\n・キャラクターの髪色、顔立ち、目、衣装、デフォルメ感、BoatStrikersらしさを維持する。\n\n【12R確定入力】\n${table}\n\n【${c.label}の注目ポイント】\n${points||"未入力のため、この欄は作らない"}\n\n【今日の狙い目レース】\n${targets||"未入力のため、この欄は作らない"}\n\n【${c.label}のひとこと】\n${closing||"未入力のため、この欄は作らない"}\n\n【レイアウト】\n上部：BoatStrikersロゴ、日付、場名、${edition}、1R→12R、${c.label}の大きなキャラクター。\n中央：12R一覧表を最優先。文字が潰れないよう装飾より可読性を優先。\n右側または下部：注目ポイント、狙い目レース、ひとこと。\n最下部：「詳しい解説・データは『${c.label}の部屋』で公開中！」。\n全体はSNSで一目で内容が伝わる高密度な日本のスポーツ新聞・学級新聞風。`;
+ },[date,course,edition,character,ratio,rows,points,targets,closing,c]);
+ async function copy(){await navigator.clipboard.writeText(prompt);}
+ return <>
+  <section className={styles.controls}>
+   <div className={styles.field}><label>日付</label><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
+   <div className={styles.field}><label>開催場</label><select value={course} onChange={e=>setCourse(e.target.value)}>{COURSES.map(x=><option key={x}>{x}</option>)}</select></div>
+   <div className={styles.field}><label>版</label><select value={edition} onChange={e=>setEdition(e.target.value)}><option>前日版</option><option>直前版</option><option>最終版</option></select></div>
+   <div className={styles.field}><label>画像比率</label><select value={ratio} onChange={e=>setRatio(e.target.value)}><option>9:16</option><option>16:9</option><option>3:4</option></select></div>
+  </section>
+  <section className={styles.characters}>{Object.entries(CHARS).map(([k,v])=><button key={k} onClick={()=>setCharacter(k)} className={character===k?styles.active:""}><b>{v.icon} {v.label}</b><span>{v.title}</span></button>)}</section>
+  <section className={styles.card}><div className={styles.cardHead}><div><span>12 RACE INPUT</span><h2>{date} {course}｜{c.label} {edition}</h2></div><button onClick={()=>setRows(emptyRows())}>12Rをクリア</button></div>
+   <div className={styles.tableWrap}><table><thead><tr><th>R</th><th>印</th><th>本命艇</th><th>買い目</th><th>信頼度</th><th>コメント</th></tr></thead><tbody>{rows.map((r,i)=><tr key={r.race}><td><b>{r.race}</b></td><td><select value={r.mark} onChange={e=>patch(i,"mark",e.target.value)}><option>◎</option><option>○</option><option>▲</option><option>△</option><option>穴</option><option>見</option></select></td><td><select value={r.main} onChange={e=>patch(i,"main",e.target.value)}><option value="">未入力</option>{[1,2,3,4,5,6].map(n=><option key={n} value={`${n}号艇`}>{n}号艇</option>)}</select></td><td><input value={r.bet} onChange={e=>patch(i,"bet",e.target.value)} placeholder="例 1-2-3"/></td><td><input value={r.confidence} onChange={e=>patch(i,"confidence",e.target.value)} placeholder="例 82%"/></td><td><input value={r.comment} onChange={e=>patch(i,"comment",e.target.value)} placeholder="確定情報だけ入力"/></td></tr>)}</tbody></table></div>
+  </section>
+  <section className={styles.summary}><div><label>{c.label}の注目ポイント</label><textarea value={points} onChange={e=>setPoints(e.target.value)} placeholder="例：イン有利な水面。1号艇のスタートに注目。"/></div><div><label>今日の狙い目レース</label><input value={targets} onChange={e=>setTargets(e.target.value)} placeholder="例：1R・4R・7R・12R"/><label>{c.label}のひとこと</label><textarea value={closing} onChange={e=>setClosing(e.target.value)} /></div></section>
+  <section className={styles.prompt}><div className={styles.cardHead}><div><span>IMAGE PROMPT</span><h2>{c.icon} {c.label} 新聞プロンプト</h2></div><button className={styles.copy} onClick={copy}>プロンプトをコピー</button></div><textarea readOnly value={prompt}/></section>
+ </>;
+}
