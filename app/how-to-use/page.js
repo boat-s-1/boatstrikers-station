@@ -10,7 +10,7 @@ const M={
  kiina:{n:"きいもこ",imgs:["/anime/kiimoko/6712171A-5389-42A8-81C6-3D156A9B9E81.png","/anime/kiimoko/69422FEB-0DC5-4F8D-98B3-21F48D6F5B63.png","/anime/kiimoko/821F9503-E828-46A6-9574-C63B7F739718.png","/anime/kiimoko/A236743D-CDC9-4B8A-8590-3F63F6927CCC.png","/anime/kiimoko/FDA2388B-4EFF-496C-BDB7-B968A4C8C6EB.png"]}
 };
 function Talk({who,children,big=false}){const p=C[who];return <div className={`${styles.talk} ${styles[p.c]} ${big?styles.bigTalk:""}`}><Image src={p.i} alt={p.n} width={70} height={70}/><div><b>{p.n}</b><p>{children}</p></div></div>}
-function Mate({kind,pose=0,children}){const m=M[kind];const src=m.imgs[pose%m.imgs.length];return <div className={`${styles.bot} ${styles[kind]}`}><div><b>{m.n}</b><p>{children}</p></div><figure className={styles.mateImage}><Image src={src} alt={`${m.n}のポーズ`} width={110} height={110}/><small>AI MATE</small></figure></div>}
+function Mate({kind,pose=0,children}){const m=M[kind];const src=m.imgs[pose%m.imgs.length];return <div className={`${styles.bot} ${styles[kind]}`}><div><b>{m.n}</b><p>{children}</p></div><figure className={styles.mateImage}><Image src={src} alt={`${m.n}のポーズ`} width={110} height={110}/></figure></div>}
 const Head=({n,en,children})=><header className={styles.head}><span>{n}</span><div><small>{en}</small><h2>{children}</h2></div></header>;
 export default function HowToUse(){return <main className={styles.page}>
 <section className={styles.hero}><small>HOW TO ENJOY BOATSTRIKERS</small><h1>はじめての<br/><b>BoatStrikers</b></h1><p>AIは答えじゃない。<strong>考えるための相棒だ。</strong></p><div className={styles.faces}>{Object.values(C).map(x=><Image key={x.n} src={x.i} alt={x.n} width={92} height={92}/>)}</div><em>データを見て、3人も考える。あなたも考える。</em></section>
