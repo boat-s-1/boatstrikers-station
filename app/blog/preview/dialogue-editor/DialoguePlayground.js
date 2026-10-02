@@ -12,17 +12,18 @@ const INITIAL=[{id:'50000000-0000-4000-8000-000000000001',type:'DIALOGUE_SCENE',
  {id:'50000000-0000-4000-8000-000000000006',character:'kiina',pose:'pose2',text:'もし進入が変わったら、穴の展開も気になるね。',alignment:'auto'},
 ]}}];
 export default function DialoguePlayground(){
- const [scenes,setScenes]=useState(INITIAL);const keyboardInset=useKeyboardInset();
- return <main className={s.page} style={{'--keyboard-inset':`${keyboardInset}px`}}>
-  <header id="blog-title" className={s.hero}><p className={s.eyebrow}>BOATSTRIKERS BLOG · PHASE 5 PREVIEW</p><h1>会話シーンを編集</h1><p>iPhone操作を確認するためのPreview専用画面です。入力はこの画面の中だけに保持され、記事・DBには保存されません。</p></header>
+ const [scenes,setScenes]=useState(INITIAL);const [foldedScenes,setFoldedScenes]=useState(()=>new Set());const keyboardInset=useKeyboardInset();
+ const toggleScene=id=>setFoldedScenes(current=>{const next=new Set(current);if(next.has(id))next.delete(id);else next.add(id);return next;});
+ return <main className={s.page} data-keyboard-open={keyboardInset>100} style={{'--keyboard-inset':`${keyboardInset}px`}}>
+  <header id="blog-title" className={s.hero}><p className={s.eyebrow}>BOATSTRIKERS BLOG · PHASE 6 PREVIEW</p><h1>会話シーンを編集</h1><p>iPhone操作を確認するためのPreview専用画面です。入力はこの画面の中だけに保持され、記事・DBには保存されません。</p></header>
   <div className={s.notice}>話者・ポーズ・セリフ・配置を編集できます。発言とシーンの矢印・複製・削除も試してください。</div>
   <section id="articles" className={s.panel}><div className={s.panelHeading}><h2>本文ブロック · 会話シーン</h2><span>{scenes.length}件</span></div>
-  <div className={s.blocks}>{scenes.map((scene,i)=><div className={s.block} key={scene.id}><div className={s.blockHead}><strong>会話シーン {i+1}</strong><div className={s.blockActions}>
+  <div className={s.blocks}>{scenes.map((scene,i)=><div className={s.block} key={scene.id}><div className={s.blockHead}><button type="button" className={s.sceneFold} aria-expanded={!foldedScenes.has(scene.id)} onClick={()=>toggleScene(scene.id)}>{foldedScenes.has(scene.id)?'＋':'−'} 会話シーン {i+1} <small>{scene.data.turns.length}発言 · {foldedScenes.has(scene.id)?'開く':'閉じる'}</small></button><div className={s.blockActions}>
     <button type="button" aria-label={`会話シーン ${i+1} を上へ`} disabled={i===0} onClick={()=>setScenes(moveAt(scenes,i,-1))}>↑</button>
     <button type="button" aria-label={`会話シーン ${i+1} を下へ`} disabled={i===scenes.length-1} onClick={()=>setScenes(moveAt(scenes,i,1))}>↓</button>
     <button type="button" aria-label={`会話シーン ${i+1} を複製`} onClick={()=>setScenes([...scenes.slice(0,i+1),cloneScene(scene),...scenes.slice(i+1)])}>複製</button>
     <button type="button" aria-label={`会話シーン ${i+1} を削除`} onClick={()=>setScenes(scenes.filter(x=>x.id!==scene.id))}>削除</button>
-   </div></div><DialogueSceneEditor scene={scene} onChange={next=>setScenes(current=>current.map(x=>x.id===scene.id?next:x))}/></div>)}</div>
+   </div></div>{foldedScenes.has(scene.id)?<p className={s.sceneSummary}>{scene.data.label} · {scene.data.turns.length}発言</p>:null}<div hidden={foldedScenes.has(scene.id)}><DialogueSceneEditor scene={scene} onChange={next=>setScenes(current=>current.map(x=>x.id===scene.id?next:x))}/></div></div>)}</div>
    <div className={s.addBlock}><button type="button" onClick={()=>setScenes([...scenes,makeScene()])}>＋ 会話シーン</button><button type="button" onClick={()=>setScenes(INITIAL)}>最初の状態に戻す</button></div>
    <details className={s.recovery}><summary>構造化された発言データを確認</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(scenes.flatMap(x=>x.data.turns),null,2)}</pre></details>
   </section><div className={s.actionBar}><div className={s.actionInner}><span className={s.status}>Preview専用 · 入力は保存されません</span><button type="button" className={s.primary} disabled>保存</button><button type="button" className={s.button} onClick={()=>document.querySelector('[data-dialogue-live-preview]')?.scrollIntoView({block:'start',behavior:'smooth'})}>プレビュー</button><button type="button" className={s.button} disabled>公開設定</button></div></div>
