@@ -15,4 +15,4 @@ const sections = [
   { title: "初心者が確認する5項目", points: ["今節の着順", "その着順を取ったコース", "今節のST", "モーターの数字", "当日の展示・水面条件"], paragraphs: ["過去の実績と今の状態を分けて見る習慣をつけると、出走表の数字が整理しやすくなります。"] },
 ];
 
-export default function Page(){return <SeoArticle eyebrow="BOAT RACE GUIDE 20" title="今節成績とは？" description="着順、コース、ST、モーター、展示を組み合わせて、今開催での選手の状態を見る基本を初心者向けに解説します。" summary="今節成績は『過去の強さ』ではなく『今回の開催での状態』を見る材料です。着順の中身まで確認します。" sections={sections} related={[{href:"/guide/race-card",label:"出走表の見方"},{href:"/guide/average-st",label:"平均STの見方"},{href:"/guide/local-win-rate",label:"当地勝率とは？"}]} references={[{label:"BOAT RACE オフィシャルウェブサイト",url:"https://www.boatrace.jp/"}]} />}
+export default function Page(){return <SeoArticle topic="series-performance" eyebrow="BOAT RACE GUIDE 20" title="今節成績とは？" description="着順、コース、ST、モーター、展示を組み合わせて、今開催での選手の状態を見る基本を初心者向けに解説します。" summary="今節成績は『過去の強さ』ではなく『今回の開催での状態』を見る材料です。着順の中身まで確認します。" sections={sections} related={[{href:"/guide/race-card",label:"出走表の見方"},{href:"/guide/average-st",label:"平均STの見方"},{href:"/guide/local-win-rate",label:"当地勝率とは？"}]} references={[{label:"BOAT RACE オフィシャルウェブサイト",url:"https://www.boatrace.jp/"}]} />}
