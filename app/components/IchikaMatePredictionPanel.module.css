@@ -2,7 +2,7 @@
 .panel, .panel * { box-sizing: border-box; }
 .header { padding: 7px 2px 20px; }
 .header > span, .step { display: block; color: #367857; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
-.header h2 { margin: 9px 0; font-size: clamp(22px, 5.9vw, 32px); line-height: 1.45; }
+.header h2 { margin: 9px 0; font-size: clamp(20px, 5.4vw, 24px); line-height: 1.45; }
 .header p { margin: 0; font-size: 12px; line-height: 1.8; color: #52725f; }
 .check, .analysis, .view, .reader { padding: 16px; border-radius: 18px; min-width: 0; }
 .check { background: #f1f8f3; border: 1px solid #d7e9dd; }
@@ -45,4 +45,4 @@
 .reader { background: #f5f6f4; }
 .reader > .note { font-size: 11px; }
 @media (max-width: 360px) { .panel { padding: 12px; } .check, .analysis, .view, .reader { padding: 12px; } .characterRow { gap: 8px; align-items: flex-start; } .value strong { font-size: 22px; } .pick h4 { font-size: 20px; } }
-@media (min-width: 761px) { .panel { padding: 28px; } .pickList { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pick { flex-wrap: wrap; } .characterRow p { font-size: 15px; } }
+@media (min-width: 761px) { .panel { padding: 28px; } .pickList { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .pick { flex-wrap: wrap; } .characterRow p { font-size: 15px; } }

@@ -20,7 +20,7 @@ export default function IchikaMatePredictionPanel({ data, loading, picks, perfor
         <p className={styles.speech}>イン逃げを考えるためのデータを整理して、一果に渡すよ！</p>
         <p className={styles.caption}>いちまるの調査テーマ</p>
         <ul className={styles.chips}>{["1号艇", "スタート", "当地成績", "機力", "進入", "相手艇"].map((label) => <li key={label}>{label}</li>)}</ul>
-        <p className={styles.note}>調査テーマの紹介です。この画面では、既存エンジンの分析値と順位を表示します。個別項目の値や確認状況は表示していません。</p>
+        <p className={styles.note}>調査テーマの紹介です。各レースで、すべての項目を確認済みという意味ではありません。</p>
       </section>
 
       <div className={styles.arrow} aria-hidden="true">↓</div>
@@ -35,7 +35,7 @@ export default function IchikaMatePredictionPanel({ data, loading, picks, perfor
             </article>)}
           </div>
         ) : <p className={styles.empty} role="status">本日の分析データは準備中です。</p>}
-        <p className={styles.note}>分析値は一果が考えるための材料です。レース別の平均STや買い目など、取得していない情報は掲載していません。</p>
+        <p className={styles.note}>分析値は一果が考えるための材料です。数値だけで決めず、出走表や直前情報も合わせて確認しましょう。</p>
         <details className={styles.performance}><summary>分析ランキングの過去成績を見る</summary>{performance}<p className={styles.note}>イン逃げ注目ランキングに対し、1号艇が1着になった割合です。舟券の的中率や、一果の最終予想成績とは異なります。</p></details>
       </section>
 
