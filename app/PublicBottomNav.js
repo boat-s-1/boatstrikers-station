@@ -7,7 +7,7 @@ export default function PublicBottomNav() {
   const pathname = usePathname() || "/";
 
   // 管理画面では固定フッターを表示しません。
-  if (pathname.startsWith("/admin")) {
+  if (pathname === "/blog" || pathname.startsWith("/blog/") || pathname.startsWith("/admin")) {
     return null;
   }
 

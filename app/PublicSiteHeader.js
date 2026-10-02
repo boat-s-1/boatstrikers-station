@@ -105,7 +105,7 @@ export default function PublicSiteHeader() {
 
   const hidden = useMemo(() => {
     const isMagazineViewer = /^\/library\/(ichika|hatsune|kiina)-seminar\/[^/]+\/?$/.test(pathname);
-    return pathname.startsWith("/admin") || pathname.startsWith("/bsc2/admin") || pathname.startsWith("/bsc2/") || isMagazineViewer;
+    return pathname === "/blog" || pathname.startsWith("/blog/") || pathname.startsWith("/admin") || pathname.startsWith("/bsc2/admin") || pathname.startsWith("/bsc2/") || isMagazineViewer;
   }, [pathname]);
 
   const compact = pathname.startsWith("/races");
