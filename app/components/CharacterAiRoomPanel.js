@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import styles from "./CharacterAiRoomPanel.module.css";
+import IchikaMatePredictionPanel from "./IchikaMatePredictionPanel";
 
 const STADIUMS = {
   1: "桐生", 2: "戸田", 3: "江戸川", 4: "平和島", 5: "多摩川", 6: "浜名湖",
@@ -217,8 +218,8 @@ export default function CharacterAiRoomPanel() {
     <div className={`${styles.recordArea} ${character === "hatsune" ? styles.hatsunePerformance : ""}`}>
       <div className={styles.recordHeading}>
         <div>
-          <span>AI PERFORMANCE</span>
-          <h3>過去のAI予想 的中率</h3>
+          <span>{character === "ichika" ? "ANALYSIS PERFORMANCE" : "AI PERFORMANCE"}</span>
+          <h3>{character === "ichika" ? "分析ランキングの条件成立率" : "過去のAI予想 的中率"}</h3>
         </div>
         {character !== "ichika" ? <small>結果確定分のみ</small> : null}
       </div>
@@ -245,7 +246,7 @@ export default function CharacterAiRoomPanel() {
                 <strong style={{ fontSize: 28 }}>
                   {card.predictions > 0 && card.hitRate != null ? `${Number(card.hitRate).toFixed(1)}%` : "—%"}
                 </strong>
-                <small>{card.predictions > 0 ? `${card.hits} / ${card.predictions}R 的中` : "結果データなし"}</small>
+                <small>{card.predictions > 0 ? `${card.hits} / ${card.predictions}R ${character === "ichika" ? "条件成立" : "的中"}` : "結果データなし"}</small>
               </div>
             ))}
           </div>
@@ -269,12 +270,14 @@ export default function CharacterAiRoomPanel() {
       )}
 
       <p className={styles.note}>
-        AI v2集計開始：{formatDate(data?.startDate)} ／ 前日版AIランキングと確定結果を集計しています。
+        {character === "ichika" ? "分析集計開始：" : "AI v2集計開始："}{formatDate(data?.startDate)} ／ {character === "ichika" ? "前日版の分析ランキングと確定結果を集計しています。" : "前日版AIランキングと確定結果を集計しています。"}
       </p>
     </div>
   );
 
-  const panel = mount ? (
+  const panel = mount && character === "ichika" ? (
+    <IchikaMatePredictionPanel data={data} loading={loading} picks={picks} performance={performance} stadiums={STADIUMS} percent={percent} formatDate={formatDate} />
+  ) : mount ? (
     <section
       className={`${styles.panel} ${styles[meta.tone]} ${character === "hatsune" ? styles.hatsuneCompact : ""}`}
       aria-label={`${meta.name} AI予想`}

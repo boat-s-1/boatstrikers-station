@@ -243,6 +243,17 @@ export default async function IchikaPage() {
 
       <RealtimeUpdates target="ichika" limit={5} />
 
+      <section id="ichika-published-predictions" className="sectionCard pinkCard" style={{ scrollMarginTop: 100 }}>
+        <h2>一果の公開予想新聞</h2>
+        <p>レースごとの最終コメント・予想・買い目はこちら。日付・場・レース・版を確認してご覧ください。</p>
+        {newspapers.length ? <div style={{ display: "grid", gap: 12 }}>
+          {newspapers.map((item) => <a key={item.link} href={item.link} style={{ display: "block", padding: 14, border: "1px solid #cfe2d5", borderRadius: 12, color: "#276044", textDecoration: "none", overflowWrap: "anywhere" }}>
+            <strong>{item.title}</strong>
+            <span style={{ display: "block", marginTop: 6, fontSize: 12 }}>{item.date ? formatRaceDate(item.date.slice(0, 10)) : "日付は記事内で確認"}{item.edition ? ` ・ ${item.edition === "just_before" ? "直前版" : "前日版"}` : ""}{item.course ? ` ・ ${item.course}${item.raceNo}R` : ""} →</span>
+          </a>)}
+        </div> : <p>公開予想新聞は準備中です。公開までお待ちください。</p>}
+      </section>
+
       <section className="sectionCard pinkCard bannerTopCard">
         <div className="sectionBannerCrop">
           <img
