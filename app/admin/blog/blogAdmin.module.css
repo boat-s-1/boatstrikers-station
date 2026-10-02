@@ -3,3 +3,5 @@
 .blockActions button{min-width:36px;min-height:40px;padding:7px 9px;touch-action:manipulation}.addBlock button:disabled{opacity:.45}.field input,.field textarea,.field select{scroll-margin-bottom:calc(150px + var(--keyboard-inset, 0px))}
 
 .blockHead{flex-wrap:wrap}.blockActions{flex-wrap:wrap;justify-content:flex-end}.blockActions button{min-height:44px}@media(max-width:600px){.blockActions{width:100%}.blockActions button{flex:1}}
+
+.sceneFold{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:5px 2px;border:0;background:transparent;color:var(--green);font-size:14px;font-weight:800;text-align:left;cursor:pointer}.sceneFold small{font-size:11px;font-weight:500;color:var(--muted)}.sceneSummary{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:8px 0 0}.page[data-keyboard-open="true"] .actionBar{display:none}.page[data-keyboard-open="true"]{padding-bottom:calc(32px + var(--keyboard-inset, 0px))}textarea{scroll-margin-bottom:24px}
