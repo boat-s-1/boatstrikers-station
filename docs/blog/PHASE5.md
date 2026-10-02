@@ -1,0 +1,9 @@
+# BLOG PHASE 5 — Dialogue Scene editor
+
+The structured `DIALOGUE_SCENE` block is editable from the article's body block tab. Each scene holds an ordered `turns` array with independent `id`, `character`, `pose`, `text`, and `alignment`. The label and all turn fields are stored via the same versioned draft autosave from PHASE 4. The editor never serializes conversation HTML. Moving a scene or turn changes array order; cloning creates new scene and turn UUIDs. A scene retains at least one turn and limits the number of turns to 100, matching the schema validation. The existing 300 block limit remains enforced in the add and clone buttons. Other article block editing remains in the same component.
+
+Speaker choices and pose thumbnails derive exclusively from `characterAssets.mjs`. Humans use all five registered poses, mates use their registered poses. Changing speakers resets to a known pose. The instant preview renders through the article's `ArticleBlocks`, so speech colors, mate size, right alignment, and compact consecutive turns match the public article renderer.
+
+The `/blog/preview/dialogue-editor` route provides an editable memory-only demonstration while the BLOG verification database remains unconfigured. It exists only in local development/Vercel Preview and returns 404 on production. It is noindex/nofollow, excluded by robots, sitemap, search, and article queries. Its conversational teaching text is a UI fixture, never a public article or database seed. The route has no save/publish action and never calls admin APIs.
+
+On the real authenticated editor, the bottom action bar accounts for the mobile visual viewport keyboard inset and focuses fields into the visible area. On the Preview demonstration there is no fixed bar. iPhone Safari needs final physical device verification of the keyboard/bar relationship before any wider rollout. No production BLOG migration was applied.
