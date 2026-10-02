@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { BLOG_CHARACTERS, characterImage } from '../../lib/blog/characterAssets.mjs';
+import { BLOG_CHARACTERS, characterImage, poseLabel } from '../../lib/blog/characterAssets.mjs';
 import { safeLink } from '../../lib/blog/document.mjs';
 import { safeArticleLink, speechPresentation, resolveRelated } from '../../lib/blog/articleModel.mjs';
 import s from './article.module.css';
@@ -25,7 +25,7 @@ function Speech({turn,previous}) {
   const character=BLOG_CHARACTERS[turn.character];
   const tone=character.kind==='mate'?({ichimaru:'ichika',hatsukoro:'hatsune',kiimoko:'kiina'})[turn.character]:turn.character;
   return <div className={`${s.talk} ${s[tone]} ${view.alignment==='right'?s.right:''} ${view.compact?s.compact:''} ${view.kind==='mate'?s.mate:''}`}
-    data-speaker={turn.character} data-pose={turn.pose} data-compact={view.compact?'true':undefined}>
+    data-speaker={turn.character} data-pose={turn.pose} data-pose-meaning={poseLabel(turn.character,turn.pose)} data-compact={view.compact?'true':undefined}>
     <Image className={s.characterPortrait} src={characterImage(turn.character,turn.pose)} alt="" width={88} height={114} sizes="(max-width: 760px) 54px, 88px"/>
     <div className={s.speech}><span className={s.characterName}>{view.name}{view.compact?<small> 続き</small>:null}{view.kind==='mate'?<small> AI MATE・データ分析</small>:null}</span><div className={s.bubble}><PlainText text={turn.text}/></div></div>
   </div>;
