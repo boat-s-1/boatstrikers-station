@@ -31,6 +31,6 @@ export default function DialogueSceneEditor({scene,onChange}){
       </section>;
     })}</div>
     <button type="button" className={s.add} disabled={turns.length>=100} onClick={()=>list([...turns,makeTurn(turns.at(-1)?.character||'ichika')])}>＋ 発言を追加</button>
-    <div className={s.preview}><div className={s.previewTitle}><strong>即時プレビュー</strong><span>公開ページと同じ表示</span></div><ArticleBlocks blocks={[scene]}/></div>
+    <div className={s.preview} data-dialogue-live-preview><div className={s.previewTitle}><strong>即時プレビュー</strong><span>公開ページと同じ表示</span></div><ArticleBlocks blocks={[scene]}/></div>
   </div>;
 }

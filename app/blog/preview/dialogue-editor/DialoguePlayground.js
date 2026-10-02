@@ -3,6 +3,7 @@ import { useState } from 'react';
 import DialogueSceneEditor from '../../../admin/blog/DialogueSceneEditor';
 import { cloneScene,makeScene,moveAt } from '../../../../lib/blog/dialogueScene.mjs';
 import s from '../../../admin/blog/blogAdmin.module.css';
+import { useKeyboardInset } from '../../../admin/blog/_lib/useKeyboardInset';
 const INITIAL=[{id:'50000000-0000-4000-8000-000000000001',type:'DIALOGUE_SCENE',data:{label:'進入の見方を3人で考える',turns:[
  {id:'50000000-0000-4000-8000-000000000002',character:'ichimaru',pose:'pose1',text:'出走表と展示の見方を整理したよ。',alignment:'auto'},
  {id:'50000000-0000-4000-8000-000000000003',character:'ichika',pose:'pose2',text:'まずは1号艇と実際の進入コースを分けて見てみよう。',alignment:'auto'},
@@ -11,8 +12,8 @@ const INITIAL=[{id:'50000000-0000-4000-8000-000000000001',type:'DIALOGUE_SCENE',
  {id:'50000000-0000-4000-8000-000000000006',character:'kiina',pose:'pose2',text:'もし進入が変わったら、穴の展開も気になるね。',alignment:'auto'},
 ]}}];
 export default function DialoguePlayground(){
- const [scenes,setScenes]=useState(INITIAL);
- return <main className={s.page}>
+ const [scenes,setScenes]=useState(INITIAL);const keyboardInset=useKeyboardInset();
+ return <main className={s.page} style={{'--keyboard-inset':`${keyboardInset}px`}}>
   <header id="blog-title" className={s.hero}><p className={s.eyebrow}>BOATSTRIKERS BLOG · PHASE 5 PREVIEW</p><h1>会話シーンを編集</h1><p>iPhone操作を確認するためのPreview専用画面です。入力はこの画面の中だけに保持され、記事・DBには保存されません。</p></header>
   <div className={s.notice}>話者・ポーズ・セリフ・配置を編集できます。発言とシーンの矢印・複製・削除も試してください。</div>
   <section id="articles" className={s.panel}><div className={s.panelHeading}><h2>本文ブロック · 会話シーン</h2><span>{scenes.length}件</span></div>
@@ -24,6 +25,6 @@ export default function DialoguePlayground(){
    </div></div><DialogueSceneEditor scene={scene} onChange={next=>setScenes(current=>current.map(x=>x.id===scene.id?next:x))}/></div>)}</div>
    <div className={s.addBlock}><button type="button" onClick={()=>setScenes([...scenes,makeScene()])}>＋ 会話シーン</button><button type="button" onClick={()=>setScenes(INITIAL)}>最初の状態に戻す</button></div>
    <details className={s.recovery}><summary>構造化された発言データを確認</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(scenes.flatMap(x=>x.data.turns),null,2)}</pre></details>
-  </section>
+  </section><div className={s.actionBar}><div className={s.actionInner}><span className={s.status}>Preview専用 · 入力は保存されません</span><button type="button" className={s.primary} disabled>保存</button><button type="button" className={s.button} onClick={()=>document.querySelector('[data-dialogue-live-preview]')?.scrollIntoView({block:'start',behavior:'smooth'})}>プレビュー</button><button type="button" className={s.button} disabled>公開設定</button></div></div>
  </main>;
 }

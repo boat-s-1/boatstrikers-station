@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect,useRef,useState } from 'react';
+import { useKeyboardInset } from './_lib/useKeyboardInset';
 import { useRouter } from 'next/navigation';
 import { blankDocument } from '../../../lib/blog/document.mjs';
 import { makeScene,cloneScene } from '../../../lib/blog/dialogueScene.mjs';
@@ -11,16 +12,6 @@ const TABS=['基本情報','本文ブロック','SEO','公開設定','画像'];
 const ADD_TYPES=[['DIALOGUE_SCENE','会話シーン'],['TEXT','文章'],['HEADING','見出し'],['POINT','POINT'],['DATA_CHECK','DATA CHECK'],['WARNING','注意事項'],['QUOTE','引用'],['IMAGE','画像'],['CTA','CTA']];
 const template=type=>type==='DIALOGUE_SCENE'?makeScene():({id:crypto.randomUUID(),type,data:type==='HEADING'?{level:2,text:''}:type==='IMAGE'?{media_id:null,alt:'',caption:''}:type==='CTA'?{label:'レースを見る',href:'/races',text:''}:{text:''}});
 async function api(path,method,body){const res=await fetch(path,{method,credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});let result;try{result=await res.json();}catch{throw new Error('サーバーの応答を確認できません。');}if(!res.ok)throw Object.assign(new Error(result.error||'処理に失敗しました。'),{status:res.status});return result;}
-function useKeyboardInset(){
- const [inset,setInset]=useState(0);
- useEffect(()=>{const viewport=window.visualViewport;if(!viewport)return;
-   const update=()=>{const next=Math.max(0,Math.round(window.innerHeight-viewport.height-viewport.offsetTop));setInset(next);
-     if(next>100&&document.activeElement?.matches('input,textarea,select'))document.activeElement.scrollIntoView({block:'center',behavior:'instant'});
-   };
-   viewport.addEventListener('resize',update);viewport.addEventListener('scroll',update);update();
-   return ()=>{viewport.removeEventListener('resize',update);viewport.removeEventListener('scroll',update);};
- },[]);return inset;
-}
 function stateLabel(editor){return editor?.scheduled_at?'予約':editor?.state==='published'?'公開中':editor?.state==='unpublished'?'非公開':'下書き';}
 export default function BlogEditor({editor=null,catalogue,writable}){
  const [doc,setDoc]=useState(()=>editor?.document||blankDocument()),[slug,setSlug]=useState(editor?.slug||''),[tab,setTab]=useState(TABS[0]),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[publishAt,setPublishAt]=useState('');const router=useRouter();
