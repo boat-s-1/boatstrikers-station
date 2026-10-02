@@ -25,6 +25,7 @@ export default function GuideChapter({ section, index, topic, nextTitle }) {
   const [question, reflection] = CHAPTER_DIALOGUE[topic][index];
   const lead = specialist(section.title);
   const [questioner, partner] = others[lead];
+  const reflectionSpeaker = section.comment?.character === partner ? questioner : partner;
   const turns = explanationTurns(section.paragraphs, lead, partner);
   const hasTeaching = section.points?.length || section.point || section.subsections?.length;
   return <section className={styles.chapter} id={`section-${index + 1}`}>
@@ -46,7 +47,7 @@ export default function GuideChapter({ section, index, topic, nextTitle }) {
     </div>
 
     {section.comment && <GuideTalk character={section.comment.character} pose="recap"><p>{spokenText(section.comment.text, section.comment.character)}</p></GuideTalk>}
-    <GuideTalk character={partner} pose="recap"><p>{reflection}</p></GuideTalk>
+    <GuideTalk character={reflectionSpeaker} pose="recap"><p>{reflection}</p></GuideTalk>
     <div className={styles.transition}>
       <GuideTalk character={lead} pose="welcome"><p>{nextTitle ? `ここまでを踏まえて、次は「${nextTitle}」を3人で見ていこう。` : "この章までのポイントを、実際の出走表や映像で確かめてみよう。分からないところは、目次から戻って一緒に読み直そうね。"}</p></GuideTalk>
     </div>
