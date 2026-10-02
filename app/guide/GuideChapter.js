@@ -42,10 +42,10 @@ export default function GuideChapter({ section, index, topic, nextTitle }) {
         {explanationTurns(subsection.paragraphs, specialist(subsection.title), partner).map((turn, i) => <GuideTalk key={i} character={turn.character}><p>{spokenText(turn.text, turn.character)}</p></GuideTalk>)}
       </div>)}
       {section.point && <p className={styles.keyPoint}>{section.point}</p>}
-      {!hasTeaching && <p className={styles.keyPoint}>{reflection}</p>}
+      {!hasTeaching && <p className={styles.keyPoint}>{section.paragraphs[0]}</p>}
     </div>
 
-    {section.comment && <GuideTalk character={section.comment.character} pose="recap"><p>{section.comment.text}</p></GuideTalk>}
+    {section.comment && <GuideTalk character={section.comment.character} pose="recap"><p>{spokenText(section.comment.text, section.comment.character)}</p></GuideTalk>}
     <GuideTalk character={partner} pose="recap"><p>{reflection}</p></GuideTalk>
     <div className={styles.transition}>
       <GuideTalk character={lead} pose="welcome"><p>{nextTitle ? `ここまでを踏まえて、次は「${nextTitle}」を3人で見ていこう。` : "この章までのポイントを、実際の出走表や映像で確かめてみよう。分からないところは、目次から戻って一緒に読み直そうね。"}</p></GuideTalk>
