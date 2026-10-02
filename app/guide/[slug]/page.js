@@ -1,8 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
+import GuideChapter from "../GuideChapter";
+import { GuideCast, GuideTalk } from "../GuideConversation";
 import { notFound } from "next/navigation";
+import { spokenText } from "../spokenText";
 import styles from "./article.module.css";
-import { CHARACTERS, GUIDE_ARTICLES, GUIDE_UPDATED_AT, getGuideArticle } from "../guideData";
+import { GUIDE_ARTICLES, GUIDE_UPDATED_AT, getGuideArticle } from "../guideData";
 
 export function generateStaticParams() {
   return GUIDE_ARTICLES.map((article) => ({ slug: article.slug }));
@@ -30,7 +32,6 @@ export default async function GuideArticlePage({ params }) {
   const { slug } = await params;
   const article = getGuideArticle(slug);
   if (!article) notFound();
-  const guideCharacter = CHARACTERS[article.character];
   const currentIndex = GUIDE_ARTICLES.findIndex((item) => item.slug === slug);
   const previous = GUIDE_ARTICLES[currentIndex - 1];
   const next = GUIDE_ARTICLES[currentIndex + 1];
@@ -46,18 +47,15 @@ export default async function GuideArticlePage({ params }) {
           <div>
             <span>BEGINNER&apos;S GUIDE {article.number}</span>
             <h1>{article.title}</h1>
-            <p>{article.description}</p>
+            <GuideTalk character="hatsune" pose="welcome"><p>{article.description}</p></GuideTalk>
           </div>
-          <div className={styles.guideCharacter}>
-            <Image src={guideCharacter.image} alt={guideCharacter.name} width={88} height={88} />
-            <strong>{guideCharacter.name}</strong>
-            <small>{guideCharacter.role}</small>
-          </div>
+          <GuideCast />
         </header>
 
         <section className={styles.conclusion} aria-labelledby="article-conclusion">
           <span>最初に結論</span>
-          <h2 id="article-conclusion">{article.lead}</h2>
+          <h2 id="article-conclusion">3人で押さえる、このテーマの基本</h2>
+          <GuideTalk character={article.character} pose="recap"><p>{spokenText(article.lead, article.character)}</p></GuideTalk>
         </section>
 
         <nav className={styles.toc} aria-label="この記事の内容">
@@ -71,23 +69,7 @@ export default async function GuideArticlePage({ params }) {
 
         <div className={styles.body}>
           {article.sections.map((section, index) => (
-            <section id={`section-${index + 1}`} className={styles.section} key={section.title}>
-              <span className={styles.sectionNumber}>{String(index + 1).padStart(2, "0")}</span>
-              <h2>{section.title}</h2>
-              {section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-              {section.points && (
-                <ul>{section.points.map((point) => <li key={point}>{point}</li>)}</ul>
-              )}
-              {section.comment && (() => {
-                const character = CHARACTERS[section.comment.character];
-                return (
-                  <aside className={styles.comment}>
-                    <Image src={character.image} alt={character.name} width={54} height={54} />
-                    <div><strong>{character.name}のポイント</strong><p>{section.comment.text}</p></div>
-                  </aside>
-                );
-              })()}
-            </section>
+            <GuideChapter key={section.title} section={section} index={index} topic={article.slug} nextTitle={article.sections[index + 1]?.title} />
           ))}
         </div>
 
@@ -99,7 +81,7 @@ export default async function GuideArticlePage({ params }) {
 
         <aside className={styles.disclaimer}>
           <strong>注意事項</strong>
-          <p>この記事はボートレースの仕組みを学ぶための情報です。舟券の購入は20歳になってから。掲載情報は的中や利益を保証するものではありません。</p>
+          <GuideTalk character="hatsune" pose="think"><p>この記事はボートレースの仕組みを学ぶための情報です。舟券の購入は20歳になってから。掲載情報は的中や利益を保証するものではありません。</p></GuideTalk>
         </aside>
 
         <footer className={styles.editorial}>

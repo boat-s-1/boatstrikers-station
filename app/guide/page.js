@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { GuideCast, GuideTalk } from "./GuideConversation";
 import styles from "./guide.module.css";
 import { CHARACTERS, GUIDE_ARTICLES, GUIDE_UPDATED_AT } from "./guideData";
 
@@ -45,23 +46,19 @@ export default function GuidePage() {
           <span>BOAT RACE BEGINNER&apos;S GUIDE</span>
           <h1>ボートレース初心者ガイド</h1>
           <p className={styles.subtitle}>〜基本から実戦の見方まで、3人がやさしく解説〜</p>
-          <p>専門用語をできるだけかみ砕き、レースを見るための基礎から、出走表・展示・進入・スタートの見方まで順番に紹介します。</p>
+          <GuideTalk character="hatsune" pose="welcome"><p>専門用語をできるだけかみ砕き、レースを見るための基礎から、出走表・展示・進入・スタートの見方まで順番に紹介します。</p></GuideTalk>
+          <GuideTalk character="ichika" pose="explain"><p>私はイン・1コース・逃げの見方を担当するよ。選手の話は初音、穴や展開の話はキイナ。それぞれの視点で、一緒に考えていこう！</p></GuideTalk>
+          <GuideTalk character="kiina" pose="ask"><p>分からない言葉は、そのままにしないで聞いていこう！ 「どうして？」から、レースの見方を広げたいな。</p></GuideTalk>
         </div>
-        <div className={styles.heroCharacters}>
-          {Object.values(CHARACTERS).map((character) => (
-            <div key={character.name}>
-              <Image src={character.image} alt={`${character.name} ボートレースガイド担当`} width={82} height={82} />
-              <strong>{character.name}</strong>
-              <small>{character.role}</small>
-            </div>
-          ))}
-        </div>
+        <GuideCast />
       </header>
 
       <section className={styles.firstSteps} aria-labelledby="guide-first-title">
         <span>FIRST STEPS</span>
         <h2 id="guide-first-title">初めての方は、01から順番に</h2>
-        <p>基本ルールから風・水面まで、まず押さえておきたい10記事です。気になるテーマだけ選んで読んでも問題ありません。</p>
+        <GuideTalk character="kiina" pose="ask"><p>初めてなら、どの記事から読むといい？</p></GuideTalk>
+        <GuideTalk character="hatsune" pose="explain"><p>基本ルールから風・水面まで、まず押さえておきたい10記事です。気になるテーマだけ選んで読んでも問題ありません。</p></GuideTalk>
+        <GuideTalk character="ichika" pose="recap"><p>順番に読むなら01から。基本を押さえて、出走表や展示を読む練習につなげよう！</p></GuideTalk>
       </section>
 
       <section className={styles.articleGrid} aria-label="初心者ガイド記事一覧">
@@ -72,7 +69,7 @@ export default function GuidePage() {
               <span className={styles.articleNumber}>{article.number}</span>
               <div className={styles.articleCharacter}>
                 <Image src={character.image} alt="" width={48} height={48} />
-                <small>{character.name}が解説</small>
+                <small>3人で学ぶ · {character.name}の注目テーマ</small>
               </div>
               <h2>{article.title}</h2>
               <p>{article.description}</p>
@@ -86,7 +83,9 @@ export default function GuidePage() {
         <div className={styles.deepDiveHeading}>
           <span>STEP UP GUIDE</span>
           <h2 id="guide-deep-title">もう一歩詳しく知りたい方へ</h2>
-          <p>検索されやすい疑問を、1テーマずつ詳しく解説する実践寄りのガイドです。</p>
+          <GuideTalk character="ichika" pose="ask"><p>基本が分かったら、進入やコースの違いも掘り下げてみない？</p></GuideTalk>
+          <GuideTalk character="hatsune" pose="think"><p>検索されやすい疑問を、1テーマずつ詳しく解説する実践寄りのガイドです。</p></GuideTalk>
+          <GuideTalk character="kiina" pose="explain"><p>外の艇が攻められる条件や、水面の変化も気になるね。知りたいテーマから詳しく見ていこう！</p></GuideTalk>
         </div>
         <div className={styles.deepDiveGrid}>
           {DEEP_DIVE_ARTICLES.map((article) => (
@@ -103,8 +102,10 @@ export default function GuidePage() {
 
       <section className={styles.howToUse}>
         <h2>BoatStrikersで実際のレースを見る</h2>
-        <p>基本が分かったら、本日の出走表で選手・モーター・展示情報を確認してみましょう。</p>
-        <div>
+        <GuideTalk character="hatsune" pose="recap"><p>基本が分かったら、本日の出走表で選手・モーター・展示情報を確認してみましょう。</p></GuideTalk>
+        <GuideTalk character="kiina" pose="think"><p>数字や展示を見て、どんな展開になるか考えてみよう。迷ったらガイドに戻って確かめていいんだね。</p></GuideTalk>
+        <GuideTalk character="ichika" pose="welcome"><p>動画・画像の教材や全国24場攻略も使って、実際の走りと場の特徴を見比べよう！</p></GuideTalk>
+        <div className={styles.actionLinks}>
           <Link href="/races">本日の出走表を見る</Link>
           <Link href="/ichika-sensei">動画・画像で学ぶ</Link>
           <Link href="/library/stadiums">全国24場攻略を見る</Link>
@@ -113,7 +114,7 @@ export default function GuidePage() {
 
       <aside className={styles.notice}>
         <strong>安心して楽しむために</strong>
-        <p>舟券の購入は20歳になってから。予想や情報は的中・利益を保証するものではありません。無理のない範囲でお楽しみください。</p>
+        <GuideTalk character="hatsune" pose="think"><p>舟券の購入は20歳になってから。予想や情報は的中・利益を保証するものではありません。無理のない範囲でお楽しみください。</p></GuideTalk>
       </aside>
 
       <footer className={styles.editorial}>

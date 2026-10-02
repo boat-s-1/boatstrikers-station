@@ -1,7 +1,10 @@
 import Link from "next/link";
+import GuideChapter from "./GuideChapter";
+import { GuideCast, GuideTalk } from "./GuideConversation";
+import { spokenText } from "./spokenText";
 import styles from "./seoArticle.module.css";
 
-export default function SeoArticle({ eyebrow, title, description, summary, sections, references = [], related = [] }) {
+export default function SeoArticle({ topic, eyebrow, title, description, summary, sections, references = [], related = [] }) {
   return (
     <main className={styles.page}>
       <nav className={styles.breadcrumb} aria-label="パンくずリスト">
@@ -12,12 +15,14 @@ export default function SeoArticle({ eyebrow, title, description, summary, secti
         <header className={styles.hero}>
           <span className={styles.eyebrow}>{eyebrow}</span>
           <h1>{title}</h1>
-          <p>{description}</p>
+          <GuideCast />
+          <GuideTalk character="hatsune" pose="welcome"><p>{description}</p></GuideTalk>
         </header>
 
         <section className={styles.summary}>
           <span>最初に結論</span>
-          <strong>{summary}</strong>
+          <GuideTalk character="ichika" pose="recap"><p>{spokenText(summary, "ichika")}</p></GuideTalk>
+          <GuideTalk character="kiina" pose="ask"><p>言葉の意味だけじゃなく、実際にどこを見ればいいかも知りたいな！</p></GuideTalk>
         </section>
 
         <nav className={styles.toc} aria-label="この記事の内容">
@@ -27,18 +32,7 @@ export default function SeoArticle({ eyebrow, title, description, summary, secti
 
         <div className={styles.body}>
           {sections.map((section, index) => (
-            <section className={styles.section} id={`section-${index + 1}`} key={section.title}>
-              <h2>{section.title}</h2>
-              {section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-              {section.subsections?.map((subsection) => (
-                <div key={subsection.title}>
-                  <h3>{subsection.title}</h3>
-                  {subsection.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-                </div>
-              ))}
-              {section.points && <ul>{section.points.map((point) => <li key={point}>{point}</li>)}</ul>}
-              {section.point && <aside className={styles.point}>{section.point}</aside>}
-            </section>
+            <GuideChapter key={section.title} section={section} index={index} topic={topic} nextTitle={sections[index + 1]?.title} />
           ))}
         </div>
 
@@ -57,7 +51,7 @@ export default function SeoArticle({ eyebrow, title, description, summary, secti
 
         <aside className={styles.notice}>
           <strong>注意事項</strong>
-          <p>舟券の購入は20歳になってから。掲載内容はレースの見方を学ぶための情報で、的中や利益を保証するものではありません。無理のない範囲でお楽しみください。</p>
+          <GuideTalk character="hatsune" pose="think"><p>舟券の購入は20歳になってから。掲載内容はレースの見方を学ぶための情報で、的中や利益を保証するものではありません。無理のない範囲でお楽しみください。</p></GuideTalk>
         </aside>
 
         <footer className={styles.editorial}>
