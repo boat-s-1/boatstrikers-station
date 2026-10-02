@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<rect width="1200" height="675" fill="#edf0e4"/><path d="M0 5H1200" stroke="#175c49" stroke-width="10"/>
+<g stroke="#cad7c7" fill="none"><path d="M700 130Q900 80 1200 150M700 180Q900 130 1200 200M700 230Q900 180 1200 250M700 280Q900 230 1200 300M700 330Q900 280 1200 350M700 380Q900 330 1200 400M700 430Q900 380 1200 450M700 480Q900 430 1200 500M700 530Q900 480 1200 550"/></g>
+<g font-family="sans-serif" fill="#193d31"><text x="78" y="100" font-size="22" font-weight="700" letter-spacing="4">BOATSTRIKERS BLOG</text><text x="78" y="151" font-size="17" letter-spacing="3">LEARNING NOTE / PREVIEW</text><text x="78" y="286" font-size="64" font-weight="700">艇番とコース。</text><text x="78" y="380" font-size="54" font-weight="700">分けて読む、</text><text x="78" y="467" font-size="54" font-weight="700">見方が変わる。</text><text x="78" y="580" font-size="23" fill="#5c7061">イン逃げ・選手・展開。3つの視点で学ぶ。</text></g>
+<g transform="translate(930 210) rotate(15)"><path d="M0 0Q80 120 0 230Q-80 120 0 0" fill="#fffef9" stroke="#175c49" stroke-width="3"/><rect x="-23" y="76" width="46" height="86" rx="16" fill="#175c49"/><path d="M0 210V320" stroke="#175c49" stroke-width="3" stroke-dasharray="8 12"/></g>
+<rect x="78" y="622" width="84" height="5" fill="#208846"/><rect x="169" y="622" width="84" height="5" fill="#a63a85"/><rect x="260" y="622" width="84" height="5" fill="#ad8524"/>
+</svg>

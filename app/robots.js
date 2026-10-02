@@ -7,6 +7,8 @@ export default function robots() {
       allow: "/",
       disallow: [
         "/admin/",
+        "/blog/preview/",
+        "/blog-preview/",
         "/api/",
         "/bsc2/admin/",
         "/bsc2/login/",

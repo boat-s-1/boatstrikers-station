@@ -31,6 +31,15 @@ const stadiumRedirects = [
 }));
 
 const nextConfig = {
+  async headers() {
+    return ['/blog/preview/:path*', '/blog-preview/:path*'].map(source => ({
+      source,
+      headers: [
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+        { key: 'Cache-Control', value: 'private, no-store' },
+      ],
+    }));
+  },
   async redirects() {
     return stadiumRedirects;
   },

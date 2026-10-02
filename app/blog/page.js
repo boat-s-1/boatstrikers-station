@@ -4,6 +4,8 @@ import { loadPublicBlogIndex } from '../../lib/blog/publicServer';
 import { indexFilters, selectIndex } from '../../lib/blog/publicIndex.mjs';
 import { BLOG_AUTHORS, BLOG_CATEGORIES } from '../../lib/blog/catalogue.mjs';
 import s from './blog.module.css';
+import BlogShell from './BlogShell';
+import { articleHref } from '../../lib/blog/articleModel.mjs';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -27,7 +29,7 @@ function Articles({ posts, index }) {
     const names = [...r.blog_post_authors].sort((a,b)=>a.position-b.position).map(a => index.authors.find(x=>x.id===a.author_id)?.name).filter(Boolean);
     return <article className={s.article} key={p.id}>
       <div className={s.articleTop}><span>{category?.name || '読み物'}</span><time dateTime={p.first_published_at}>{date(p.first_published_at)}</time></div>
-      <h3>{r.title}</h3><p>{r.excerpt}</p><div className={s.articleFoot}><span>{names.join(' / ')}</span><span>記事詳細は近日公開</span></div>
+      <h3><Link href={articleHref(p.slug)}>{r.title}</Link></h3><p>{r.excerpt}</p><div className={s.articleFoot}><span>{names.join(' / ')}</span><Link href={articleHref(p.slug)}>記事を読む →</Link></div>
     </article>;
   })}</div>;
 }
@@ -38,13 +40,7 @@ export default async function BlogPage({ searchParams }) {
   const categories = index.availability === 'ready' ? index.categories : BLOG_CATEGORIES;
   const authors = index.availability === 'ready' ? index.authors : BLOG_AUTHORS;
   const filtering = Boolean(filters.q || filters.category || filters.author || filters.tag);
-  return <div className={s.shell}>
-    <a className={s.skip} href="#articles">記事一覧へ移動</a>
-    <header className={s.header}>
-      <div className={s.headerInner}><Link href="/blog" className={s.brand} aria-label="BOATSTRIKERS BLOG トップ">BOATSTRIKERS<span>BLOG</span></Link>
-        <nav className={s.switch} aria-label="RACEとBLOG"><Link href="/today" prefetch={false}>RACE ↗</Link><Link href="/blog" aria-current="page">BLOG</Link></nav></div>
-      <nav className={s.headerNav} aria-label="BLOGメニュー"><a href="#articles">記事を読む</a><a href="#categories">テーマで探す</a><a href="#authors">著者で探す</a></nav>
-    </header>
+  return <BlogShell>
     <main className={s.main}>
       <section className={s.hero} aria-labelledby="blog-title">
         <div><span className={s.eyebrow}>THE BOAT RACE READING ROOM</span><h1 id="blog-title">ボートレースを、<br/>もっと<span>読み解こう。</span></h1><p className={s.lead}>知ると、レースの見え方が変わる。<br/>一果・初音・キイナと編集部が届ける、<br className={s.mobileBreak}/>ボートレースの読み物メディア。</p>
@@ -70,6 +66,5 @@ export default async function BlogPage({ searchParams }) {
       <section className={s.authors} id="authors"><Heading label="MEET THE AUTHORS" title="違う視点が、読む楽しさに。"/><p className={s.authorIntro}>得意分野の違う3人と、BoatStrikers編集部。著者から読み物を探せます。</p><div className={s.authorGrid}>{authors.map(a=><Link href={url(filters,{author:a.slug})} key={a.slug} className={`${s.author} ${s[a.slug+'Card'] || ''}`} aria-current={filters.author===a.slug?'page':undefined}><div className={s.portrait}>{a.image_path?.startsWith('/anime/')?<Image src={a.image_path} alt={`${a.name}のキャラクター画像`} width={90} height={120} sizes="90px"/>:<span className={s.editorIcon} aria-hidden="true">BS<br/>EDITORS</span>}</div><div><span className={s.authorLabel}>AUTHOR</span><h3>{a.name}</h3><p className={s.role}>{a.role}</p><p>{a.bio}</p><span className={s.authorLink}>この著者の記事を見る →</span></div></Link>)}</div></section>
       <section className={s.raceCta}><div><span className={s.eyebrow}>READ IT. THEN WATCH IT.</span><h2>読んだら、今日のレースへ。</h2><p>学んだ視点を、出走表や3人の見解と合わせて。<br/>データを分析するAI MATES、その情報から考える3人。<br/>最後に判断するのは、あなたです。</p></div><div className={s.raceLinks}><Link className={s.primaryCta} href="/today" prefetch={false}>今日のレースを見る ↗</Link><div><Link href="/ichika" prefetch={false}>一果の部屋</Link><Link href="/hatsune" prefetch={false}>初音の部屋</Link><Link href="/kiina" prefetch={false}>キイナの部屋</Link></div><Link href="/" prefetch={false}>BoatStrikers本体へ →</Link></div></section>
     </main>
-    <footer className={s.footer}><Link href="/blog" className={s.footerBrand}>BOATSTRIKERS BLOG</Link><p>ボートレースを調べる・学ぶ・読む。</p><div><Link href="/" prefetch={false}>BoatStrikers</Link><a href="#blog-title">ページ上部へ ↑</a></div><small>© BoatStrikers</small></footer>
-  </div>;
+  </BlogShell>;
 }
