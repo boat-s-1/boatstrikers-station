@@ -8,3 +8,10 @@ export async function POST(request) {
     return blogAdminRepository().create(body.slug, body.document);
   });
 }
+export async function GET(request) {
+  return blogResponse(async () => {
+    await requireBlogAdmin(request);
+    const { adminPosts } = await import('../../../../../lib/blog/adminData');
+    return { posts: await adminPosts() };
+  });
+}

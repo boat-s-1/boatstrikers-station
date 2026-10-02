@@ -18,7 +18,7 @@ export default function ArticleDetail({article,preview=false,children}) {
   return <BlogShell article>
     <main className={s.main}>
       <nav className={s.breadcrumbs} aria-label="パンくず"><ol><li><Link href="/blog">BLOG</Link></li>{category?<li><Link href={`/blog?category=${category.slug}#articles`}>{category.name}</Link></li>:null}<li aria-current="page">{preview?'表示確認用の記事':doc.title}</li></ol></nav>
-      {preview?<aside className={s.previewNotice}><strong>PREVIEW ONLY · 表示確認用</strong><p>公開記事ではありません。検索・記事一覧・Sitemap・Supabaseには登録していません。</p></aside>:null}
+      {preview?<aside className={s.previewNotice}><strong>PREVIEW ONLY · 表示確認用</strong><p>{preview==='draft'?'編集版の確認です。公開記事には反映されていません。':'公開記事ではありません。検索・記事一覧・Sitemap・Supabaseには登録していません。'}</p></aside>:null}
       <article className={s.article}>
         <header className={s.articleHeader}>
           {category?<Link className={s.category} href={`/blog?category=${category.slug}#articles`}>{category.name}</Link>:null}
