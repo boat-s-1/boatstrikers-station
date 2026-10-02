@@ -48,12 +48,12 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           />
         </a>
 
-        <a href="/guide" className={entryStyles.card}>
+        <a href="/how-to-use" className={entryStyles.card}>
           <span className={entryStyles.icon} aria-hidden="true">📖</span>
           <div>
             <small>FIRST GUIDE</small>
             <strong>初めての方</strong>
-            <p>BoatStrikersの使い方とレースの基本</p>
+            <p>3人とAI MATESでわかるBoatStrikersの使い方</p>
           </div>
           <b aria-hidden="true">›</b>
         </a>
