@@ -105,7 +105,7 @@ export default function GuidePage() {
         <GuideTalk character="hatsune" pose="recap"><p>基本が分かったら、本日の出走表で選手・モーター・展示情報を確認してみましょう。</p></GuideTalk>
         <GuideTalk character="kiina" pose="think"><p>数字や展示を見て、どんな展開になるか考えてみよう。迷ったらガイドに戻って確かめていいんだね。</p></GuideTalk>
         <GuideTalk character="ichika" pose="welcome"><p>動画・画像の教材や全国24場攻略も使って、実際の走りと場の特徴を見比べよう！</p></GuideTalk>
-        <div>
+        <div className={styles.actionLinks}>
           <Link href="/races">本日の出走表を見る</Link>
           <Link href="/ichika-sensei">動画・画像で学ぶ</Link>
           <Link href="/library/stadiums">全国24場攻略を見る</Link>
