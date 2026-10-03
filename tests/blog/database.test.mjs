@@ -145,3 +145,18 @@ test('publication history is private and existing table schemas/data are unchang
  assert.equal(await schemaSnapshot(),existing);
  for(const table of oldTables) assert.deepEqual(await q(`select * from public.${table}`),[{id:1,marker:'unchanged'}]);
 });
+
+test('optional cleared cover publishes, private cover/body/OG images fail closed',async()=>{
+ const privateId=(await q("insert into public.blog_media(storage_path) values('private-guard.png') returning id"))[0].id;
+ const publicId=(await q("insert into public.blog_media(storage_path,status,public_path) values('public-guard.png','public','https://example.test/public.png') returning id"))[0].id;
+ for(const place of ['cover','og','body']){
+   const d=doc(place);
+   if(place==='cover') d.cover={media_id:privateId};
+   if(place==='og') d.seo={og_media_id:privateId};
+   if(place==='body') d.blocks.push({id:randomUUID(),type:'IMAGE',data:{media_id:privateId,alt:'private'}});
+   const p=await rpc('blog_create_draft',[`image-${randomUUID()}`,d],['text','jsonb']);
+   await assert.rejects(()=>release(p),e=>e.code==='22023');assert.equal(await publicDoc(p.id),null);
+ }
+ const d=doc('cleared cover');d.cover={media_id:null};d.seo={og_media_id:publicId};
+ const p=await rpc('blog_create_draft',[`image-${randomUUID()}`,d],['text','jsonb']);await release(p);assert.equal(await publicDoc(p.id),'cleared cover');
+});

@@ -289,8 +289,10 @@ begin
     if b.type='IMAGE' and not exists(select 1 from public.blog_media where id=nullif(b.data->>'media_id','')::uuid and status='public')
       then raise exception 'BLOG_IMAGE_NOT_PUBLIC' using errcode='22023'; end if;
   end loop;
-  if r.cover ? 'media_id' and not exists(select 1 from public.blog_media where id=(r.cover->>'media_id')::uuid and status='public')
+  if nullif(r.cover->>'media_id','') is not null and not exists(select 1 from public.blog_media where id=(r.cover->>'media_id')::uuid and status='public')
     then raise exception 'BLOG_COVER_NOT_PUBLIC' using errcode='22023'; end if;
+  if nullif(r.seo->>'og_media_id','') is not null and not exists(select 1 from public.blog_media where id=(r.seo->>'og_media_id')::uuid and status='public')
+    then raise exception 'BLOG_OG_NOT_PUBLIC' using errcode='22023'; end if;
 end;
 $$;
 
