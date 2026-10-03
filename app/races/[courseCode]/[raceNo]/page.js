@@ -21,6 +21,19 @@ import { getPublishedNewspapers } from "../../../../lib/newspapers";
 
 export const dynamic = "force-dynamic";
 
+// Individual race pages are useful in-product, but are short-lived, date-parametrized
+// utility pages. Keep links crawlable while excluding these pages from search results.
+export const metadata = {
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
+};
+
 const RACE_STATUS_LABELS = {
   open: "発売中",
   on_sale: "発売中",

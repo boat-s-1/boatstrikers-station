@@ -24,9 +24,17 @@ function renderBody(body) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params; const item = await getNewspaperCached(decodeURIComponent(slug));
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
+  const item = await getNewspaperCached(decodedSlug);
   if (!item) return { title: "新聞が見つかりません｜BoatStrikers" };
-  return { title: `${item.title}｜BoatStrikers`, description: item.summary || `${item.course_name}${item.race_no}Rの予想新聞` };
+  return {
+    title: `${item.title}｜BoatStrikers`,
+    description: item.summary || `${item.course_name}${item.race_no}Rの予想新聞`,
+    alternates: {
+      canonical: `/newspapers/${encodeURIComponent(item.slug || decodedSlug)}`,
+    },
+  };
 }
 
 export default async function NewspaperDetailPage({ params }) {
