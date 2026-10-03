@@ -23,11 +23,11 @@ function Speech({turn,previous}) {
   const view=speechPresentation(turn,previous);
   if(!view) return null;
   const character=BLOG_CHARACTERS[turn.character];
-  const tone=character.kind==='mate'?({ichimaru:'ichika',hatsukoro:'hatsune',kiimoko:'kiina'})[turn.character]:turn.character;
+  const tone=character.owner||turn.character;
   return <div className={`${s.talk} ${s[tone]} ${view.alignment==='right'?s.right:''} ${view.compact?s.compact:''} ${view.kind==='mate'?s.mate:''}`}
     data-speaker={turn.character} data-pose={turn.pose} data-pose-meaning={poseLabel(turn.character,turn.pose)} data-compact={view.compact?'true':undefined}>
-    <Image className={s.characterPortrait} src={characterImage(turn.character,turn.pose)} alt="" width={88} height={114} sizes="(max-width: 760px) 54px, 88px"/>
-    <div className={s.speech}><span className={s.characterName}>{view.name}{view.compact?<small> 続き</small>:null}{view.kind==='mate'?<small> AI MATE・データ分析</small>:null}</span><div className={s.bubble}><PlainText text={turn.text}/></div></div>
+    <Image className={s.characterPortrait} src={characterImage(turn.character,turn.pose)} alt="" width={88} height={114} sizes={view.kind==='mate'?'(max-width: 760px) 40px, 48px':'(max-width: 760px) 54px, 88px'}/>
+    <div className={s.speech}><span className={s.characterName}>{view.name}{view.compact?<small> 続き</small>:null}{view.kind==='mate'?<small> AI MATE · DATA CHECK</small>:null}</span>{view.kind==='mate'&&!view.compact?<span className={s.mateRole}>{character.role}</span>:null}<div className={s.bubble}><PlainText text={turn.text}/></div></div>
   </div>;
 }
 export function RelatedLinks({data,relatedPosts=[],heading=true}) {
