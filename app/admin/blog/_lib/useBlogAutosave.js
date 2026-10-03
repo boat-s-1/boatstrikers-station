@@ -37,7 +37,7 @@ export function useBlogAutosave({ postId, initialVersion, savedAt }) {
       },
       async save(document, version) {
         const response = await fetch(`/api/admin/blog/posts/${postId}`, { method: "PUT", credentials: "same-origin",
-          headers: { "Content-Type": "application/json" }, body: JSON.stringify({ document, version }) });
+          headers: { "Content-Type": "application/json" }, body: JSON.stringify({ document, version }), signal: AbortSignal.timeout(20000) });
         const result = await response.json();
         if (!response.ok) throw Object.assign(new Error(result.error || "保存に失敗しました。"), { status: response.status });
         return result;

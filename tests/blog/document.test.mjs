@@ -32,9 +32,11 @@ test('links reject script/protocol-relative/backslash URLs and race links retain
  assert.throws(()=>validateDocument(d));d.blocks[0].data.race_date='2026-10-02';validateDocument(d);
 });
 test('repository autosave calls only draft RPC and refuses unsafe versions or naive dates',async()=>{
- const calls=[];const repository=blogRepository({rpc:async(name,args)=>{calls.push({name,args});return{data:{version:2},error:null};}});
- await repository.save(randomUUID(),1,blankDocument());assert.equal(calls[0].name,'blog_save_draft');
- assert.throws(()=>repository.save(randomUUID(),null,blankDocument()));
+ const calls=[];const repository=blogRepository({rpc:async(name,args)=>{calls.push({name,args});return{data:{version:name==='blog_editor_document'?1:2},error:null};}});
+ await repository.save(randomUUID(),1,blankDocument());assert.deepEqual(calls.map(c=>c.name),['blog_editor_document','blog_save_draft']);
+ await assert.rejects(()=>repository.save(randomUUID(),null,blankDocument()));
+ await assert.rejects(()=>repository.save(randomUUID(),0,blankDocument()),e=>e.status===409);
+ assert.equal(calls.filter(c=>c.name==='blog_save_draft').length,1);
  assert.throws(()=>repository.release(randomUUID(),2,'2027-01-01T10:00:00'));
  assert.throws(()=>repository.changeState(randomUUID(),2,'delete'));
 });

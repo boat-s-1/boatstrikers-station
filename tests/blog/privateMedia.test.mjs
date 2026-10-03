@@ -22,5 +22,5 @@ test('upload remains private, admin auth precedes media access, admin tags match
  const upload=read('app/api/admin/blog/media/route.js');assert.match(upload,/BLOG_PRIVATE_MEDIA_BUCKET/);assert.match(upload,/status:'private',public_path:null/);assert.ok(!upload.includes('getPublicUrl'));
  const route=read('app/api/admin/blog/media/[id]/route.js');assert.ok(route.indexOf('await requireBlogAdmin')<route.indexOf('await readPrivateMedia'));
  const admin=read('lib/blog/adminData.js');assert.match(admin,/rows\('blog_tags','id,slug,name,active'/);assert.match(admin,/public_path:`\/api\/admin\/blog\/media\//);
- assert.match(read('app/blog/ArticleBlocks.js'),/unoptimized=.*startsWith\('\/api\/admin\/'\)/);
+ assert.match(read('app/blog/ArticleBlocks.js'),/unoptimized=.*startsWith\('\/api\/'\)/);
 });
