@@ -21,7 +21,7 @@ export default function ArticleDetail({article,preview=false,children}) {
     <main className={s.main}>
       {articleStructuredData(article,{preview:Boolean(preview),env:process.env.VERCEL_ENV}).map((value,i)=><script key={i} type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLdText(value)}}/>)}
       <nav className={s.breadcrumbs} aria-label="パンくず"><ol><li><Link href="/blog">BLOG</Link></li>{category?<li><Link href={archiveHref('categories',category.slug)}>{category.name}</Link></li>:null}<li aria-current="page">{preview?'表示確認用の記事':doc.title}</li></ol></nav>
-      {preview?<aside className={s.previewNotice}><strong>PREVIEW ONLY · 表示確認用</strong><p>{preview==='draft'?'編集版の確認です。公開記事には反映されていません。':'公開記事ではありません。検索・記事一覧・Sitemap・Supabaseには登録していません。'}</p></aside>:null}
+      {preview?<aside className={s.previewNotice}><strong>PREVIEW ONLY · 表示確認用</strong><p>{preview==='draft'?'編集版の確認です。公開記事には反映されていません。':preview==='trial'?'既存教材をBLOG向けに再編集した試験記事です。公開記事ではなく、検索・公開一覧・Sitemap・Supabaseには登録していません。':'公開記事ではありません。検索・記事一覧・Sitemap・Supabaseには登録していません。'}</p></aside>:null}
       <article className={s.article}>
         <header className={s.articleHeader}>
           {category?<Link className={s.category} href={archiveHref('categories',category.slug)}>{category.name}</Link>:null}
