@@ -2,6 +2,10 @@ import { STADIUMS } from '../lib/stadiums';
 import { GUIDE_ARTICLES } from './guide/guideData';
 import { dataLabArticles } from './data-lab/allArticles';
 
+import { loadPublicBlogIndex } from '../lib/blog/publicServer';
+import { blogSitemapEntries, isPreviewEnvironment } from '../lib/blog/seo.mjs';
+
+export const dynamic = 'force-dynamic';
 const BASE_URL = 'https://www.boat-strike.online';
 const CONTENT_UPDATED_AT = new Date('2026-09-12T00:00:00+09:00');
 
@@ -51,7 +55,9 @@ const STATIC_PAGES = [
   ['/sitemap', 'monthly', 0.3],
 ];
 
-export default function sitemap() {
+export default async function sitemap() {
+  if (isPreviewEnvironment(process.env.VERCEL_ENV)) return [];
+  const blogEntries = blogSitemapEntries(await loadPublicBlogIndex(),{env:process.env.VERCEL_ENV});
   const staticEntries = STATIC_PAGES.map(([path, changeFrequency, priority]) => ({
     url: `${BASE_URL}${path}`,
     lastModified: CONTENT_UPDATED_AT,
@@ -93,5 +99,6 @@ export default function sitemap() {
     ...deepDiveGuideEntries,
     ...dataLabEntries,
     ...stadiumEntries,
+    ...blogEntries,
   ];
 }

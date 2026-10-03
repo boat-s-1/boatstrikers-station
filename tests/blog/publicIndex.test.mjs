@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readPublicIndex, indexFilters, selectIndex } from '../../lib/blog/publicIndex.mjs';
-const post = (id, slug, revision, first = '2026-01-01T00:00:00Z', last = first) => ({ id, slug, published_revision_id: revision.id, first_published_at:first,last_published_at:last,revision });
+const post = (id, slug, revision, first = '2026-01-01T00:00:00Z', last = first) => ({ state:'published', id, slug, published_revision_id: revision.id, first_published_at:first,last_published_at:last,revision });
 const revision = (id, post_id, title = 'イン逃げ', category_id = 'c1') => ({id,post_id,title,excerpt:'展示を考える',category_id,blog_post_authors:[{author_id:'a1',position:0}],blog_post_tags:[{tag_id:'t1'}]});
 const index = {posts:[post('p1','inside',revision('r1','p1')),post('p2','women',revision('r2','p2','女子戦','c2'),'2026-02-01T00:00:00Z','2026-03-01T00:00:00Z')],categories:[{id:'c1',slug:'inside-course'},{id:'c2',slug:'women'}],authors:[{id:'a1',slug:'ichika'}],tags:[{id:'t1',slug:'exhibition'},{id:'t2',slug:'private-only'}]};
 function mockClient(responses) {

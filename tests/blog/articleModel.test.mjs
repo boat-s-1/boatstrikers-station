@@ -8,7 +8,7 @@ import { BLOG_ARTICLE_FIXTURE } from '../../lib/blog/previewFixture.mjs';
 import { validateDocument } from '../../lib/blog/document.mjs';
 import { BLOG_CHARACTERS } from '../../lib/blog/characterAssets.mjs';
 const uid=n=>`40000000-0000-4000-8000-${n.toString(16).padStart(12,'0')}`;
-const post={id:uid(1),slug:'real-public',published_revision_id:uid(2),first_published_at:'2026-10-01T00:00:00Z',last_published_at:'2026-10-01T00:00:00Z'};
+const post={state:'published',id:uid(1),slug:'real-public',published_revision_id:uid(2),first_published_at:'2026-10-01T00:00:00Z',last_published_at:'2026-10-01T00:00:00Z'};
 const revision={id:uid(2),post_id:uid(1),schema_version:1,title:'公開版だけ',excerpt:'実際の公開内容',category_id:uid(3),seo:{},cover:{media_id:uid(4)},noindex:false,
   blog_blocks:[{id:uid(8),position:1,type:'TEXT',data:{text:'公開本文'}},{id:uid(9),position:0,type:'HEADING',data:{level:2,text:'公開見出し'}}],
   blog_post_authors:[{author_id:uid(5),position:0}],blog_post_tags:[],blog_post_relations:[]};
@@ -72,5 +72,5 @@ test('theme CTAs map expertise; related links do not invent inaccessible posts; 
   assert.equal(themeCta('inside-course').href,'/ichika');assert.equal(themeCta('women').href,'/hatsune');assert.equal(themeCta('longshot').href,'/kiina');
   assert.equal(resolveRelated({post_ids:[uid(99)],paths:['/guide/course-entry','/blog/preview/article']},[]).length,1);
   assert.equal(safeArticleLink('javascript:alert(1)'),false);assert.equal(safeArticleLink('/blog/preview/article'),false);
-  const a={...BLOG_ARTICLE_FIXTURE,post,document:{...BLOG_ARTICLE_FIXTURE.document,noindex:false}};const m=articleMetadata(a);assert.equal(m.alternates.canonical,'/blog/articles/real-public');assert.equal(m.openGraph.publishedTime,post.first_published_at);assert.equal(m.robots.index,true);
+  const a={...BLOG_ARTICLE_FIXTURE,post,document:{...BLOG_ARTICLE_FIXTURE.document,noindex:false}};const m=articleMetadata(a);assert.equal(m.alternates.canonical,'/blog/articles/real-public');assert.equal(Date.parse(m.openGraph.publishedTime),Date.parse(post.first_published_at));assert.equal(m.robots.index,true);
 });

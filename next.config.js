@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const { slugRedirects } = require('./lib/blog/slugRedirects.cjs');
 const stadiumRedirects = [
   ['桐生', 'kiryu'],
   ['戸田', 'toda'],
@@ -32,7 +33,9 @@ const stadiumRedirects = [
 
 const nextConfig = {
   async headers() {
-    return ['/blog/preview/:path*', '/blog-preview/:path*'].map(source => ({
+    const isolation = ['/blog/preview/:path*', '/blog-preview/:path*'];
+    if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') isolation.push('/blog', '/blog/:path*');
+    return isolation.map(source => ({
       source,
       headers: [
         { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
@@ -41,7 +44,7 @@ const nextConfig = {
     }));
   },
   async redirects() {
-    return stadiumRedirects;
+    return [...stadiumRedirects, ...slugRedirects()];
   },
   async rewrites() {
     return {
