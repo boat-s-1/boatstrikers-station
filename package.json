@@ -14,6 +14,7 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "rss-parser": "latest"
+    "rss-parser": "latest",
+    "sharp": "0.35.5"
   }
 }

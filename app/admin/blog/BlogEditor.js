@@ -53,7 +53,22 @@ function EditorFields({doc,change,tab,catalogue,slug,setSlug,newPost=false,writa
  const [foldedScenes,setFoldedScenes]=useState(()=>new Set());
  const toggleScene=id=>setFoldedScenes(current=>{const next=new Set(current);if(next.has(id))next.delete(id);else next.add(id);return next;});
  const edit=(key,value)=>change(d=>({...d,[key]:value}));
- async function upload(file){if(!file)return;setUploadError('');setUploading(true);try{const form=new FormData();form.set('file',file);form.set('alt',alt);const response=await fetch('/api/admin/blog/media',{method:'POST',credentials:'same-origin',body:form});const item=await response.json();if(!response.ok)throw new Error(item.error||'アップロードに失敗しました。');setMedia(current=>[item,...current]);setAlt('');}catch(e){setUploadError(e.message);}finally{setUploading(false);}}
+ async function upload(file){if(!file)return;setUploadError('');
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<1||file.size>8*1024*1024||!alt.trim()){setUploadError('JPEG・PNG・WebPの8MB以下の画像と説明文を指定してください。');return;}
+ setUploading(true);try{let item;
+ if(file.size>4*1024*1024){
+  const prepared=await api('/api/admin/blog/media/upload','POST',{type:file.type,size:file.size,alt});
+  const payload=new FormData();payload.set('cacheControl','3600');payload.append('',file);
+  const response=await fetch(prepared.upload_url,{method:'PUT',headers:{'x-upsert':'false'},body:payload});
+  if(!response.ok)throw new Error('非公開Storageへのアップロードに失敗しました。');
+  item=await api('/api/admin/blog/media/upload','POST',{action:'complete',id:prepared.id});
+ }else{
+  const form=new FormData();form.set('file',file);form.set('alt',alt);const response=await fetch('/api/admin/blog/media',{method:'POST',credentials:'same-origin',body:form});
+  try{item=await response.json();}catch{throw new Error(response.status===413?'画像が大きすぎます。8MB以下の画像を指定してください。':'アップロード結果を確認できません。');}
+  if(!response.ok)throw new Error(item.error||'アップロードに失敗しました。');
+ }
+ setMedia(current=>[item,...current]);setAlt('');}catch(e){setUploadError(e.message);}finally{setUploading(false);}}
+
  const editData=(id,key,value)=>change(d=>({...d,blocks:d.blocks.map(b=>b.id===id?{...b,data:{...b.data,[key]:value}}:b)}));
  const editBlock=(id,key,value)=>change(d=>({...d,blocks:d.blocks.map(b=>b.id===id?{...b,[key]:value}:b)}));
  const move=(index,direction)=>change(d=>{const blocks=[...d.blocks],to=index+direction;if(to<0||to>=blocks.length)return d;[blocks[index],blocks[to]]=[blocks[to],blocks[index]];return {...d,blocks};});

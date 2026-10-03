@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { UUID } from '../../../../../lib/blog/document.mjs';
+import { imageResponse } from '../../../../../lib/blog/imageResponse.mjs';
 export const dynamic='force-dynamic';
 export async function GET(request,{params}) {
  const id=(await params).filename.replace(/\.png$/,'');
@@ -21,5 +22,5 @@ export async function GET(request,{params}) {
  const {data:blob,error:downloadError}=await admin.storage.from(bucket).download(media.storage_path);
  if(downloadError||!blob)return deny();
  const type=media.storage_path.endsWith('.jpg')?'image/jpeg':media.storage_path.endsWith('.webp')?'image/webp':'image/png';
- return new Response(blob,{headers:{...headers,'Content-Type':type}});
+ try{return await imageResponse(blob,type,headers);}catch{return deny();}
 }
