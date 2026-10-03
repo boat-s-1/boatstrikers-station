@@ -1,3 +1,5 @@
+import { STADIUMS } from '../../../lib/stadiums';
+import BlogReadingBridge from '../../components/BlogReadingBridge';
 import Link from "next/link";
 import {
   formatJstDateTime,
@@ -187,6 +189,7 @@ export default async function CoursePage({ params, searchParams }) {
           </div>
         )}
       </section>
-    </main>
+    <BlogReadingBridge stadium={STADIUMS.find(s=>s.courseCode===Number(courseCode))?.slug}/>
+</main>
   );
 }

@@ -1,3 +1,4 @@
+import BlogReadingBridge from '../components/BlogReadingBridge';
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -379,6 +380,7 @@ export default async function RacesPage({ searchParams }) {
           )}
         </section>
       </div>
-    </main>
+    <BlogReadingBridge />
+</main>
   );
 }

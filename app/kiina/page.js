@@ -1,3 +1,4 @@
+import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
@@ -127,6 +128,7 @@ export default async function KiinaPage() {
         <p>穴狙いは当たりやすさよりも振れ幅が大きくなります。点数と購入額を先に決め、条件が噛み合わないレースは無理に狙いません。</p>
         <div style={{ display: "grid", gap: 9 }}><a style={guideStyle} href="/guide/average-st"><span>平均STの見方</span><b>→</b></a><a style={guideStyle} href="/guide/exhibition"><span>展示航走の見方</span><b>→</b></a><a style={guideStyle} href="/guide/odds-payout"><span>オッズと払戻の基本</span><b>→</b></a></div>
       </section>
-    </main>
+    <BlogReadingBridge character="kiina"/>
+</main>
   );
 }

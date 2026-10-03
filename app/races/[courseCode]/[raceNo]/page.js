@@ -1,3 +1,5 @@
+import { STADIUMS } from '../../../../lib/stadiums';
+import BlogReadingBridge from '../../../components/BlogReadingBridge';
 import Link from "next/link";
 import { isExhibitionReady } from "../../../../lib/exhibitionDisplay";
 import ExhibitionAutoRefresh from "../../components/ExhibitionAutoRefresh";
@@ -314,6 +316,7 @@ export default async function RaceDetailPage({
           </>
         )}
       </section>
-    </main>
+    <BlogReadingBridge stadium={STADIUMS.find(s=>s.courseCode===Number(courseCode))?.slug}/>
+</main>
   );
 }

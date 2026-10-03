@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { blogFlowEvent } from "../../lib/blog/navigation.mjs";
 import { usePathname } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { trackBoatEvent, trackBoatEventOnce } from "../lib/analytics";
@@ -95,6 +96,8 @@ export default function BoatAnalyticsTracker() {
       if (!target) return;
       const text = String(target.textContent || "").trim();
       const href = target.getAttribute?.("href") || "";
+      const flow=blogFlowEvent({source:pathname,href,origin:window.location.origin,placement:target.closest('[data-blog-placement]')?.getAttribute('data-blog-placement')||'link'});
+      if(flow && ['www.boat-strike.online','boat-strike.online'].includes(window.location.hostname)) trackBoatEvent(flow.name,flow.params);
 
       if (text.includes("LINE連携コードを発行") || text.includes("新しいコードを発行")) {
         mark(LINE_MARKER);

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { articleDestinations } from '../../lib/blog/navigation.mjs';
 import Link from 'next/link';
 import BlogShell from './BlogShell';
 import { ArticleBlocks, ArticleImage, RelatedLinks } from './ArticleBlocks';
@@ -12,7 +13,7 @@ function DateLabel({label,value}) {
 }
 export default function ArticleDetail({article,preview=false,children}) {
   const {post,document:doc,authors,category,tags,media,relatedPosts}=article;
-  const sections=articleSections(doc.blocks),theme=themeCta(category?.slug);
+  const sections=articleSections(doc.blocks),theme=themeCta(category?.slug),destinations=articleDestinations(article);
   const mainRelated={post_ids:[...new Set([...doc.relations.map(r=>r.post_id).filter(Boolean),...sections.related.flatMap(b=>b.data.post_ids||[])])],
     paths:[...new Set([...doc.relations.map(r=>r.path).filter(Boolean),...sections.related.flatMap(b=>b.data.paths||[])])]};
   const props={media,relatedPosts};
@@ -46,7 +47,7 @@ export default function ArticleDetail({article,preview=false,children}) {
         <div><h3>{a.name}</h3><strong className={s.authorRole}>{a.role}</strong><p>{a.bio}</p><small>{authorIdentity(a)}</small><Link href={archiveHref('authors',a.slug)}>この著者の記事一覧 →</Link></div>
       </div>)}</section>:null}
       <section className={s.relatedSection}><span className={s.kicker}>KEEP READING</span><h2>関連記事・関連ガイド</h2>{mainRelated.post_ids.length||mainRelated.paths.length?<RelatedLinks data={mainRelated} relatedPosts={relatedPosts} heading={false}/>:<p className={s.relatedEmpty}>あわせて読める公開記事は、今後こちらでご紹介します。</p>}</section>
-      <section className={`${s.themeCta} ${s[theme.accent]}`}><span className={s.kicker}>READ IT. THEN WATCH IT.</span><h2>読んだ視点を、レースへ。</h2><p>{theme.text}</p>{sections.ctas.length?<ArticleBlocks blocks={sections.ctas} {...props}/>:<Link className={s.ctaButton} href={theme.href} prefetch={false}>{theme.label} ↗</Link>}<div className={s.ctaLinks}><Link href="/races" prefetch={false}>出走表を見る</Link><Link href="/" prefetch={false}>BoatStrikers本体へ</Link></div><small>AI MATESがデータを分析し、3人が専門分野の視点から考察。最終判断は読者自身で。</small></section>
+      <section className={`${s.themeCta} ${s[theme.accent]}`}><span className={s.kicker}>READ IT. THEN WATCH IT.</span><h2>読んだ視点を、レースへ。</h2><p>{theme.text}</p><div className={s.ctaLinks} data-blog-placement="article-theme-cta">{destinations.map(link=><Link key={link.href} className={s.ctaButton} href={link.href} prefetch={false}>{link.label} ↗</Link>)}</div><small>AI MATESがデータを分析し、3人が専門分野の視点から考察。最終判断は読者自身で。</small></section>
       {children}
     </main>
   </BlogShell>;
