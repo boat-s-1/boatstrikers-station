@@ -16,7 +16,7 @@ export function ArticleImage({media,alt,caption,priority=false}) {
   const width=Number.isInteger(media.width)&&media.width>0?media.width:1200;
   const height=Number.isInteger(media.height)&&media.height>0?media.height:675;
   return <figure className={s.figure}><Image src={media.public_path} alt={label(alt,label(media.alt))} width={width} height={height}
-    sizes="(max-width: 760px) calc(100vw - 40px), 760px" priority={priority} unoptimized={media.public_path.startsWith('https:')||media.public_path.startsWith('/api/admin/')}/>
+    sizes="(max-width: 760px) calc(100vw - 40px), 760px" priority={priority} unoptimized={media.public_path.startsWith('https:')||media.public_path.startsWith('/api/')}/>
     {caption?<figcaption>{label(caption)}</figcaption>:null}{media.source?<p className={s.imageCredit}>{label(media.source)}</p>:null}</figure>;
 }
 function Speech({turn,previous}) {
