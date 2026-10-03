@@ -1,3 +1,4 @@
+import BlogReadingBridge from '../../../components/BlogReadingBridge';
 import Link from "next/link";
 import { normalizeCourseCode, normalizeDate } from "../../../lib/boatstrikersPlatform";
 import { resolveStadium, stadiumPath } from "../../../../lib/stadiums";
@@ -400,6 +401,7 @@ export default async function StadiumInfoPage({ params, searchParams }) {
           #{code} {stadium.name} 24場攻略を見る →
         </Link>
       </section>
-    </main>
+    <BlogReadingBridge stadium={stadium?.slug}/>
+</main>
   );
 }

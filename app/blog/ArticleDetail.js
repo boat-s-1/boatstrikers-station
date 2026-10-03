@@ -47,7 +47,7 @@ export default function ArticleDetail({article,preview=false,children}) {
         <div><h3>{a.name}</h3><strong className={s.authorRole}>{a.role}</strong><p>{a.bio}</p><small>{authorIdentity(a)}</small><Link href={archiveHref('authors',a.slug)}>この著者の記事一覧 →</Link></div>
       </div>)}</section>:null}
       <section className={s.relatedSection}><span className={s.kicker}>KEEP READING</span><h2>関連記事・関連ガイド</h2>{mainRelated.post_ids.length||mainRelated.paths.length?<RelatedLinks data={mainRelated} relatedPosts={relatedPosts} heading={false}/>:<p className={s.relatedEmpty}>あわせて読める公開記事は、今後こちらでご紹介します。</p>}</section>
-      <section className={`${s.themeCta} ${s[theme.accent]}`}><span className={s.kicker}>READ IT. THEN WATCH IT.</span><h2>読んだ視点を、レースへ。</h2><p>{theme.text}</p><div className={s.ctaLinks} data-blog-placement="article-theme-cta">{destinations.map(link=><Link key={link.href} className={s.ctaButton} href={link.href} prefetch={false}>{link.label} ↗</Link>)}</div><small>AI MATESがデータを分析し、3人が専門分野の視点から考察。最終判断は読者自身で。</small></section>
+      <section className={`${s.themeCta} ${s[theme.accent]}`}><span className={s.kicker}>READ IT. THEN WATCH IT.</span><h2>読んだ視点を、レースへ。</h2><p>{theme.text}</p><div className={s.ctaLinks} data-blog-placement="article-theme-cta">{destinations.map(link=><div key={link.href}>{link.text?<p>{link.text}</p>:null}<Link className={s.ctaButton} href={link.href} prefetch={false}>{link.label} ↗</Link></div>)}</div><small>AI MATESがデータを分析し、3人が専門分野の視点から考察。最終判断は読者自身で。</small></section>
       {children}
     </main>
   </BlogShell>;

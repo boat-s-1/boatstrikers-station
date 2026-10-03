@@ -35,3 +35,8 @@ test('GA navigation classification excludes Preview/admin/external, strips query
  assert.equal(classify('/blog','/today?secret=x').params.destination_page,'/today');
  for(const [source,href] of [['/blog/preview/article','/today'],['/admin/blog','/blog'],['/blog','https://external.test/today'],['/races','/blog/preview/article'],['/blog','/blog/authors/ichika']])assert.equal(classify(source,href),null);
 });
+
+test('authored ending CTA text is preserved and deduplicated within two links',()=>{
+ const links=articleDestinations({category:{slug:'inside-course'},document:{blocks:[{type:'CTA',data:{placement:'ending',href:'/ichika',label:'選択したリンク',text:'編集部の補足'}}]}});
+ assert.equal(links.length,2);assert.equal(links[0].label,'選択したリンク');assert.equal(links[0].text,'編集部の補足');assert.equal(links[1].href,'/today');
+});
