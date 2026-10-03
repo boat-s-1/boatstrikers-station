@@ -7,6 +7,7 @@ test('theme CTAs have at most two real destinations, not identical mass links',(
   const links=articleDestinations({category:{slug}});assert.equal(links[0].href,path);assert.ok(links.length<=2);
  }
  assert.equal(articleDestinations({authors:[{slug:'kiina'}]})[0].href,'/kiina');
+ assert.equal(articleDestinations({category:{slug:'women'},authors:[{slug:'ichika'}]})[0].href,'/ichika');
  assert.equal(articleDestinations({category:{slug:'news'}}).length,1);
 });
 test('stadium CTA uses explicit actual registry mapping, unknown data does not invent a path',()=>{
