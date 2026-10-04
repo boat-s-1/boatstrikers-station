@@ -127,7 +127,7 @@ export default async function TodayPage(){
         />
       </h2>
       <div className={styles.sectionSubnav}><Link href="/library">過去の記事を見る ›</Link></div>
-      <div className={styles.paperGrid}>{todayPapers.length ? todayPapers.map((item)=>{const ch=CHARACTERS.find(x=>x.key===item.character_key)||CHARACTERS[0];return <Link href={`/newspapers/${item.slug}`} className={`${styles.paper} ${styles[ch.tone]}`} key={item.id}><span>{ch.emoji}</span><div><small>{ch.name}・{item.edition==="just_before"?"直前版":"前日版"}</small><strong>{item.course_name}{item.race_no}R</strong><p>{item.title}</p></div><b>読む ›</b></Link>}) : CHARACTERS.map(ch=><Link href={ch.href} className={`${styles.paper} ${styles[ch.tone]}`} key={ch.key}><span>{ch.emoji}</span><div><small>{ch.role}</small><strong>{ch.name}の新聞</strong><p>本日の新聞は準備中です</p></div><b>見る ›</b></Link>)}</div>
+      {todayPapers.length > 0 ? <div className={styles.paperGrid}>{todayPapers.map((item)=>{const ch=CHARACTERS.find(x=>x.key===item.character_key)||CHARACTERS[0];return <Link href={`/newspapers/${item.slug}`} className={`${styles.paper} ${styles[ch.tone]}`} key={item.id}><span>{ch.emoji}</span><div><small>{ch.name}・{item.edition==="just_before"?"直前版":"前日版"}</small><strong>{item.course_name}{item.race_no}R</strong><p>{item.title}</p></div><b>読む ›</b></Link>})}</div> : null}
       <div className={styles.mediaGrid}>
         <Link href="/data-lab"><span>📊</span><div><small>DATA LAB</small><strong>昨日を数字で振り返る</strong></div><b>›</b></Link>
         <Link href="/news"><span>📰</span><div><small>NEWS</small><strong>今日のニュースを読む</strong></div><b>›</b></Link>

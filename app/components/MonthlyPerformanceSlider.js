@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./MonthlyPerformanceSlider.module.css";
 
 const MODES = [
@@ -56,6 +56,8 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
 
   useEffect(() => {
     let cancelled = false;
+    setDetail(null);
+    setActiveIndex(0);
     const query = character ? `?character=${encodeURIComponent(character)}` : "";
     fetch(`/api/home-performance${query}`, { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
@@ -64,10 +66,12 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
     return () => { cancelled = true; };
   }, [character]);
 
-  const modes = useMemo(() => {
-    const equal = detail?.modes?.equal || { ready: true, stats: initialEqualStats, bets: [] };
-    return { equal, confidence: detail?.modes?.confidence || { ready: false, stats: null, bets: [] }, odds: detail?.modes?.odds || { ready: false, stats: null, bets: [] } };
-  }, [detail, initialEqualStats]);
+  // A successful zero-race summary is real data; an absent summary is not.
+  const modes = detail?.modes || (initialEqualStats ? {
+    equal: { ready: true, stats: initialEqualStats, bets: [] },
+  } : {});
+  const visibleModes = MODES.filter((mode) => modes[mode.key]?.ready && modes[mode.key]?.stats);
+  const selectedIndex = Math.min(activeIndex, Math.max(0, visibleModes.length - 1));
 
   function goTo(index) {
     const slider = sliderRef.current;
@@ -81,17 +85,19 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
     const slider = sliderRef.current;
     if (!slider) return;
     const index = Math.round(slider.scrollLeft / Math.max(1, slider.clientWidth));
-    setActiveIndex(Math.max(0, Math.min(MODES.length - 1, index)));
+    setActiveIndex(Math.max(0, Math.min(visibleModes.length - 1, index)));
   }
+
+  if (!visibleModes.length) return null;
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.tabs} role="tablist" aria-label="資金配分方式">
-        {MODES.map((mode, index) => <button key={mode.key} type="button" role="tab" aria-selected={activeIndex === index} className={activeIndex === index ? styles.activeTab : ""} onClick={() => goTo(index)}>{mode.label}</button>)}
+        {visibleModes.map((mode, index) => <button key={mode.key} type="button" role="tab" aria-selected={selectedIndex === index} className={selectedIndex === index ? styles.activeTab : ""} onClick={() => goTo(index)}>{mode.label}</button>)}
       </div>
-      <div className={styles.swipeHint}>← 横にスライドして切り替え →</div>
+      {visibleModes.length > 1 ? <div className={styles.swipeHint}>← 横にスライドして切り替え →</div> : null}
       <div ref={sliderRef} className={styles.slider} onScroll={handleScroll}>
-        {MODES.map((mode) => {
+        {visibleModes.map((mode) => {
           const data = modes[mode.key];
           const stats = data?.stats || {};
           const note = data?.rule || mode.note;
@@ -101,24 +107,24 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
           const canToggle = bets.length > 4;
           return (
             <section className={styles.slide} key={mode.key} role="tabpanel">
-              <div className={styles.modeHeader}><div><strong>{mode.label}</strong><span>{note}</span>{mode.key === "odds" && data?.ready && data?.coverageRaceCount < data?.totalRaceCount ? <span>※保存オッズがある {data.coverageRaceCount}R のみ集計</span> : null}</div>{!data?.ready ? <b className={styles.preparing}>準備中</b> : null}</div>
+              <div className={styles.modeHeader}><div><strong>{mode.label}</strong><span>{note}</span>{mode.key === "odds" && data?.ready && data?.coverageRaceCount < data?.totalRaceCount ? <span>※保存オッズがある {data.coverageRaceCount}R のみ集計</span> : null}</div></div>
               <div className={styles.metrics}>
                 <MetricCard label="予想レース数" value={data?.ready ? Number(stats.totalRace || 0).toLocaleString("ja-JP") : "—"} suffix="R" />
                 <MetricCard label="的中率" value={data?.ready ? formatNumber(stats.hitRate) : "—"} suffix="%" />
                 <MetricCard label="回収率" value={data?.ready ? formatNumber(stats.recoveryRate) : "—"} suffix="%" />
                 <MetricCard label="最高配当" value={data?.ready ? Math.round(Number(stats.maxPayout || 0)).toLocaleString("ja-JP") : "—"} suffix="円" />
               </div>
-              {data?.ready ? (
+              {bets.length > 0 ? (
                 <div className={styles.betsArea}>
                   <div className={styles.betsHeading}><strong>今月の買い目</strong><span>最新順</span></div>
-                  {bets.length ? <><div className={styles.betGrid}>{visibleBets.map((item) => <BetCard key={`${item.raceDate}-${item.courseCode}-${item.raceNo}-${item.characterCode}`} item={item} />)}</div>{canToggle ? <button type="button" className={styles.moreBetsButton} onClick={() => setExpandedModes((current) => ({ ...current, [mode.key]: !isExpanded }))} aria-expanded={isExpanded}>{isExpanded ? "閉じる ↑" : `もっと見る（あと${Math.min(4, Math.max(0, bets.length - 4))}件） ↓`}</button> : null}</> : <p className={styles.noBets}>対象データがありません。</p>}
+                  <><div className={styles.betGrid}>{visibleBets.map((item) => <BetCard key={`${item.raceDate}-${item.courseCode}-${item.raceNo}-${item.characterCode}`} item={item} />)}</div>{canToggle ? <button type="button" className={styles.moreBetsButton} onClick={() => setExpandedModes((current) => ({ ...current, [mode.key]: !isExpanded }))} aria-expanded={isExpanded}>{isExpanded ? "閉じる ↑" : `もっと見る（あと${Math.min(4, Math.max(0, bets.length - 4))}件） ↓`}</button> : null}</>
                 </div>
-              ) : <div className={styles.pendingBox}><strong>{mode.label}は対象データを準備中です</strong><p>保存済みデータが揃ったレースから自動で集計します。</p></div>}
+              ) : null}
             </section>
           );
         })}
       </div>
-      <div className={styles.dots} aria-hidden="true">{MODES.map((mode, index) => <span key={mode.key} className={activeIndex === index ? styles.activeDot : ""} />)}</div>
+      <div className={styles.dots} aria-hidden="true">{visibleModes.map((mode, index) => <span key={mode.key} className={selectedIndex === index ? styles.activeDot : ""} />)}</div>
     </div>
   );
 }
