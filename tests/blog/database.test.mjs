@@ -37,6 +37,30 @@ before(async()=>{
 });
 after(async()=>await db?.close());
 
+test('worker failure rolls back the batch; retry publishes each reserved snapshot only once',async()=>{
+ const failedAuthor=(await q("insert into blog_authors(slug,name) values($1,'worker retry test') returning id",[`retry-${randomUUID()}`]))[0].id;
+ const good=await create('worker batch good');
+ const badDoc={...doc('worker batch retry'),author_ids:[failedAuthor]};
+ const bad=await rpc('blog_create_draft',[`test-${randomUUID()}`,badDoc],['text','jsonb']);
+ await release(good,new Date(Date.now()+60000).toISOString());
+ await release(bad,new Date(Date.now()+60000).toISOString());
+ await q("update blog_posts set scheduled_at=now()-interval '2 minutes' where id=$1",[good.id]);
+ await q("update blog_posts set scheduled_at=now()-interval '1 minute' where id=$1",[bad.id]);
+ await q('update blog_authors set active=false where id=$1',[failedAuthor]);
+ await assert.rejects(()=>rpc('blog_publish_due'),e=>e.code==='22023');
+ assert.equal(await publicDoc(good.id),null);
+ assert.equal(await publicDoc(bad.id),null);
+ assert.equal((await q("select count(*)::int as n from blog_publication_events where post_id=any($1::uuid[]) and action='scheduled_publish'",[[good.id,bad.id]]))[0].n,0);
+ await q('update blog_authors set active=true where id=$1',[failedAuthor]);
+ const retried=await rpc('blog_publish_due');
+ assert.equal(retried.filter(p=>[good.id,bad.id].includes(p.id)).length,2);
+ assert.deepEqual(await rpc('blog_publish_due'),[]);
+ for(const p of [good,bad]) {
+  const events=await q("select revision_id from blog_publication_events where post_id=$1 and action='scheduled_publish'",[p.id]);
+  assert.equal(events.length,1); assert.equal(events[0].revision_id,p.revision_id);
+ }
+});
+
 test('migration adds 12 RLS-enabled BLOG tables and no public write grants',async()=>{
  const rows=await q("select c.relname,c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and c.relname like 'blog_%'");
  assert.equal(rows.length,12); assert.ok(rows.every(x=>x.relrowsecurity));
