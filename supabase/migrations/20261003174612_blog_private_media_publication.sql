@@ -1,4 +1,6 @@
 -- BLOG only. No Storage public bucket or bearer URL is created.
+-- Apply the policy and release-function changes atomically.
+begin;
 create function public.blog_media_is_published(p_media_id uuid) returns boolean
 language sql stable security invoker set search_path='' as $$
  select exists (
@@ -47,3 +49,5 @@ begin
   return jsonb_build_object('id',p.id,'revision_id',r,'version',p.edit_version+1,'action',action_name,'scheduled_at',p_publish_at);
 end;
 $$;
+
+commit;
