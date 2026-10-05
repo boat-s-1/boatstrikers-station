@@ -386,7 +386,7 @@ create trigger blog_block_validate before insert or update on public.blog_blocks
 
 -- Child guards and grants are restricted to the new BLOG objects only.
 do $migration$
-declare t text; fn record;
+declare t text;
 begin
   foreach t in array array['blog_blocks','blog_post_authors','blog_post_tags','blog_post_relations'] loop
     execute format('create trigger %I before insert or update or delete on public.%I for each row execute function public.blog_guard_revision_child()',t || '_immutable',t);
@@ -404,9 +404,25 @@ begin
     execute format('grant select on public.%I to anon, authenticated',t);
     execute format('create policy %I on public.%I for select to anon, authenticated using (exists (select 1 from public.blog_post_revisions r where r.id = %I.revision_id))',t || '_public_read',t,t);
   end loop;
-  for fn in select p.oid::regprocedure as signature from pg_catalog.pg_proc p join pg_catalog.pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname like 'blog\_%' escape '\' loop
-    execute format('revoke all on function %s from public, anon, authenticated',fn.signature);
-    execute format('grant execute on function %s to service_role',fn.signature);
+  -- Restrict grants to functions created in this migration; never alter unrelated blog_* RPCs.
+  foreach t in array array[
+    'public.blog_guard_revision()',
+    'public.blog_guard_revision_child()',
+    'public.blog_validate_document(jsonb)',
+    'public.blog_guard_post()',
+    'public.blog_check_revision_slots()',
+    'public.blog_save_draft(uuid,bigint,jsonb)',
+    'public.blog_create_draft(text,jsonb)',
+    'public.blog_editor_document(uuid)',
+    'public.blog_assert_publishable(uuid)',
+    'public.blog_release(uuid,bigint,timestamptz)',
+    'public.blog_clone_revision(uuid)',
+    'public.blog_change_state(uuid,bigint,text)',
+    'public.blog_publish_due(integer)',
+    'public.blog_validate_block_row()'
+  ] loop
+    execute format('revoke all on function %s from public, anon, authenticated',t);
+    execute format('grant execute on function %s to service_role',t);
   end loop;
 end;
 $migration$;
