@@ -4,8 +4,8 @@
 .heading h2 { margin: 6px 0 8px; font-size: 1.4rem; line-height: 1.5; }
 .heading p, .history, .countNote, .linkNote { margin: 8px 0; font-size: .875rem; line-height: 1.7; }
 .partners { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
-.partners a { display: flex; flex-direction: column; align-items: center; padding: 10px 3px; background: #fff; border: 1px solid #edd28a; border-radius: 14px; color: var(--ai-color); text-decoration: none; text-align: center; min-width: 0; }
-.partners a:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
+.partners > div { display: flex; flex-direction: column; align-items: center; padding: 10px 3px; background: #fff; border: 1px solid #edd28a; border-radius: 14px; color: var(--ai-color); text-decoration: none; text-align: center; min-width: 0; }
+.partners a:focus-visible, .partners button:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
 .partners img { object-fit: contain; }
 .partners strong { margin-top: 4px; font-size: .875rem; }
 .partners span { margin-top: 4px; color: #526079; font-size: .75rem; line-height: 1.5; }
@@ -19,3 +19,9 @@
 .comparison { margin-top: 14px; border: 1px solid #edd28a; border-radius: 14px; padding: 12px; background: #fffdf7; }
 .comparison summary { color: #806519; font-size: .875rem; font-weight: 800; cursor: pointer; padding: 4px 0; }
 .comparison > p { font-size: .8125rem; line-height: 1.7; color: #526079; }
+
+.partners button { margin-top: 8px; padding: 8px 6px; border: 1px solid var(--ai-color); border-radius: 8px; color: var(--ai-color); background: #fff; font-size: .75rem; cursor: pointer; font-weight: 800; }
+.partners button[aria-pressed="true"] { color: #fff; background: var(--ai-color); }
+.partners a { color: var(--ai-color); font-size: .6875rem; line-height: 1.5; margin-top: 8px; text-decoration: underline; }
+.selection { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .875rem; margin: 12px 0; }
+.selection button { padding: 8px; border: 1px solid #806519; border-radius: 8px; color: #806519; background: #fff; cursor: pointer; }
