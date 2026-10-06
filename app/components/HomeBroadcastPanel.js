@@ -60,9 +60,9 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
         <a href="#ai-partners" className={entryStyles.card}>
           <span className={entryStyles.icon} aria-hidden="true">🔎</span>
           <div>
-            <small>AI &amp; PREDICTION</small>
-            <strong>AI診断・予想</strong>
-            <p>イン逃げ・5号艇・女子戦から選ぶ</p>
+            <small>PREDICTION</small>
+            <strong>AI診断<br />キャラ予想</strong>
+            <p>得意分野から選ぶ</p>
           </div>
           <b aria-hidden="true">›</b>
         </a>
