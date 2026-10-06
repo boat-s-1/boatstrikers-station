@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AiPartnerGuide, { CharacterPredictionHeading } from "../components/AiPartnerGuide";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
@@ -10,11 +11,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "初音｜女子戦・女子レーサー分析・ボートレース攻略",
-  description: "BoatStrikers初音の専門ページ。女子戦を級別だけで決めず、コース、今節成績、スタート、モーター、展示の順に確認する見方を解説します。",
+  title: "初音＆はつころ｜女子戦・女子レーサー分析・ボートレース攻略",
+  description: "相棒AI・はつころが診断し、初音が予想するBoatStrikersの専門ページ。女子戦を級別だけで決めず、コース、今節成績、スタート、モーター、展示の順に確認する見方を解説します。",
   alternates: { canonical: "/hatsune" },
   openGraph: {
-    title: "初音｜女子戦・女子レーサー分析｜BoatStrikers",
+    title: "初音＆はつころ｜女子戦・女子レーサー分析｜BoatStrikers",
     description: "女子戦をコース・今節成績・スタート・モーター・展示から整理するBoatStrikers初音の専門ページです。",
     url: "/hatsune",
     type: "website",
@@ -97,7 +98,15 @@ export default async function HatsunePage() {
       <header className="header"><div className="logo">BOAT<br /><span>STRIKERS</span></div><a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a></header>
       <section className="hero"><Image src="/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png" alt="初音" width={1536} height={864} className="heroImage" priority /></section>
 
-      <RealtimeUpdates target="hatsune" limit={5} />
+      <AiPartnerGuide character="hatsune" />
+      <div id="ai-diagnosis" style={{ scrollMarginTop: 100 }}>
+        <RealtimeUpdates target="hatsune" limit={5} />
+      </div>
+      <div id="character-predictions" style={{ margin: "24px 14px 0", scrollMarginTop: 100 }}>
+        <CharacterPredictionHeading character="hatsune">
+          <p>はつころの診断を参考にした初音の予想は、公開された予想新聞でご覧いただけます。</p>
+        </CharacterPredictionHeading>
+      </div>
 
       <section className="sectionCard purpleCard bannerTopCard">
         <img src="/top/IMG_7884.jpeg?v=20260901-0532" alt="初音の新着読み物" className="homeTitleImage" />
@@ -113,6 +122,7 @@ export default async function HatsunePage() {
 
       <section className="sectionCard purpleCard">
         <img src="/top/IMG_7883.jpeg?v=20260901-0532" alt="初音成績" className="homeTitleImage" />
+        <p className="recordLead">キャラ名義の公開買い目の実績です。従来の予想を含み、AI診断精度とは別に集計しています。</p>
         <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
         {result.errorMessage && <p className="recordLead" style={{ color: "#d93025", wordBreak: "break-word" }}>成績取得エラー：{result.errorMessage}</p>}
         <div className="recordGrid">
@@ -126,7 +136,7 @@ export default async function HatsunePage() {
 
       <section className="sectionCard purpleCard">
         <h1>初音の女子戦研究室</h1>
-        <p>初音は女子戦を「女子レーサーだから」という一括りでは見ません。まず艇番と実進入、選手の級別・当地やコース成績、今節のスタート、モーターと展示を分けて確認し、その日のレース条件に合わせて整理します。</p>
+        <p>はつころが女子戦の展示や相手関係を診断し、初音が狙い方と買い目を考えます。女子戦を「女子レーサーだから」という一括りでは見ません。まず艇番と実進入、選手の級別・当地やコース成績、今節のスタート、モーターと展示を分けて確認し、その日のレース条件に合わせて整理します。</p>
         <h2>女子戦で確認したい5つのポイント</h2>
         <ol><li><strong>コース：</strong>艇番と実際の進入が同じか、前付けや深い進入がないか。</li><li><strong>今節の状態：</strong>着順だけでなくSTや展示の変化も並べて見る。</li><li><strong>スタート：</strong>平均値と今回の展示STが大きく違っていないか確認する。</li><li><strong>モーター：</strong>2連率だけで決めず、当日の直線・ターン気配と一致しているかを見る。</li><li><strong>比較：</strong>人気や級別だけでなく、同じレースの6艇を相対的に比べる。</li></ol>
         <p>ニュースや選手情報は背景を知る材料として使い、実際の予想では公式の出走表・展示・気象情報を優先します。</p>
@@ -135,3 +145,4 @@ export default async function HatsunePage() {
     </main>
   );
 }
+

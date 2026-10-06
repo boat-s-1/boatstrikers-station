@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AiPartnerGuide from "./components/AiPartnerGuide";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
 import { getMonthlyPublicPredictionResults } from "../lib/publicPredictionResults";
@@ -98,7 +99,7 @@ export const metadata = {
     absolute: "BoatStrikers｜ボートレースをもっと楽しく、分かりやすく",
   },
   description:
-    "BoatStrikersは、出走表、展示比較、キャラクター予想、初心者講座、漫画、ラジオ、24場攻略を楽しめるボートレース情報サイトです。",
+    "BoatStrikersは、出走表、相棒AIの診断、キャラクター予想、初心者講座、漫画、ラジオ、24場攻略を楽しめるボートレース情報サイトです。",
   alternates: {
     canonical: "/",
   },
@@ -205,9 +206,11 @@ export default async function Home() {
         <p>
           BoatStrikersは、全国24場の水面特徴、展示データ、選手情報、
           女子戦ニュース、初心者向け講座などを発信するボートレース情報メディアです。
-          一果・初音・キイナの3人と一緒に、レースの見方やデータの活用方法を分かりやすく紹介します。
+          相棒AIのいちまる・きいもこ・はつころがデータを診断し、一果・キイナ・初音がその診断をもとに予想や解説を届けます。
         </p>
       </section>
+
+      <AiPartnerGuide />
 
       <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
 
@@ -325,6 +328,8 @@ export default async function Home() {
       <dd>{results.lastUpdatedLabel} JST</dd>
     </div>
   </dl>
+
+  <p className="homeSectionLead">キャラ名義で公開された買い目の実績です。従来の公開予想も含み、相棒AIの診断精度とは別に集計しています。</p>
 
   {results.totalRace === 0 ? (
     <div className="resultEmptyState">
@@ -476,7 +481,7 @@ export default async function Home() {
       </p>
 
       <p>
-        一果のイン逃げ予想、初音の女子戦攻略、
+        一果＆いちまるのイン逃げ、初音＆はつころの女子戦、
         キイナの5号艇・穴狙い情報を中心に、
         出走表、展示情報、予想新聞、全国24場攻略、
         漫画、動画、ラジオなどを配信しています。
@@ -499,7 +504,7 @@ export default async function Home() {
           <h3>予想を楽しむ</h3>
           <p>
             イン逃げ・女子戦・5号艇を、
-            3人の担当キャラクターが紹介します。
+            相棒AIが診断し、3人が買い目を考えて紹介します。
           </p>
         </div>
       </div>
@@ -548,9 +553,9 @@ export default async function Home() {
 
         <a href="/">ホーム</a>
         <a href="/races">本日の出走表</a>
-        <a href="/ichika">一果のイン逃げ予想</a>
-        <a href="/hatsune">初音の女子戦攻略</a>
-        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/ichika">一果＆いちまるのイン逃げ</a>
+        <a href="/hatsune">初音＆はつころの女子戦</a>
+        <a href="/kiina">キイナ＆きいもこの5号艇</a>
         <a href="/bsc2">BSC</a>
       </div>
 
@@ -596,3 +601,4 @@ export default async function Home() {
 </main>
   );
 }
+

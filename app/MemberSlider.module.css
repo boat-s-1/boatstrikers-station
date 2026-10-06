@@ -79,3 +79,9 @@
     flex-basis: 90%;
   }
 }
+
+
+.partnerCaption { display: flex; gap: 12px; align-items: center; padding: 16px; color: #17345c; }
+.partnerCaption img { flex-shrink: 0; object-fit: contain; }
+.partnerCaption strong { font-size: 1.125rem; line-height: 1.5; }
+.partnerCaption p { margin: 5px 0 0; font-size: 1rem; line-height: 1.6; }

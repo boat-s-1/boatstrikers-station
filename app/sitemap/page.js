@@ -22,9 +22,9 @@ const sitemapGroups = [
     links: [
       { title: "ホーム", description: "今日の予定、開催場、最新情報などをまとめて確認できます。", href: "/" },
       { title: "本日の出走表", description: "当日の開催場と各レースの出走情報を確認できます。", href: "/races" },
-      { title: "一果のイン逃げ予想", description: "1号艇とイン逃げを中心に、レースの狙い方を紹介します。", href: "/ichika" },
-      { title: "初音の女子戦攻略", description: "女子戦の選手情報や展示、レース傾向を紹介します。", href: "/hatsune" },
-      { title: "キイナの5号艇予想", description: "5号艇が頭になる条件や穴狙い情報を紹介します。", href: "/kiina" },
+      { title: "一果＆いちまるのイン逃げ", description: "1号艇とイン逃げを中心に、レースの狙い方を紹介します。", href: "/ichika" },
+      { title: "初音＆はつころの女子戦", description: "女子戦の選手情報や展示、レース傾向を紹介します。", href: "/hatsune" },
+      { title: "キイナ＆きいもこの5号艇", description: "5号艇が頭になる条件や穴狙い情報を紹介します。", href: "/kiina" },
       { title: "BoatStrikers Challenge", description: "BoatStrikersの予想・分析コンテンツを確認できます。", href: "/bsc2" },
     ],
   },
@@ -118,7 +118,7 @@ export default function SitemapPage() {
           <nav className="footerSitemap" aria-label="フッターサイトマップ">
             <div className="footerLinkGroup">
               <h2>予想を見る</h2>
-              <a href="/">ホーム</a><a href="/races">本日の出走表</a><a href="/ichika">一果のイン逃げ予想</a><a href="/hatsune">初音の女子戦攻略</a><a href="/kiina">キイナの5号艇予想</a><a href="/bsc2">BSC</a>
+              <a href="/">ホーム</a><a href="/races">本日の出走表</a><a href="/ichika">一果＆いちまるのイン逃げ</a><a href="/hatsune">初音＆はつころの女子戦</a><a href="/kiina">キイナ＆きいもこの5号艇</a><a href="/bsc2">BSC</a>
             </div>
             <div className="footerLinkGroup">
               <h2>学ぶ・楽しむ</h2>
@@ -138,3 +138,4 @@ export default function SitemapPage() {
     </main>
   );
 }
+

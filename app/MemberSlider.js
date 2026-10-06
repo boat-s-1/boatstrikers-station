@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import MonthlyPerformanceSlider from "./components/MonthlyPerformanceSlider";
 import styles from "./MemberSlider.module.css";
+import { AI_PARTNERS } from "../lib/aiPartners";
 
 const members = [
   {
@@ -114,6 +115,10 @@ export default function MemberSlider() {
                 className={styles.image}
                 sizes="(max-width: 720px) 88vw, 600px"
               />
+              <div className={styles.partnerCaption}>
+                <Image src={AI_PARTNERS[member.href.slice(1)].image} alt={AI_PARTNERS[member.href.slice(1)].ai} width={64} height={64} />
+                <div><strong>{member.name}＆{AI_PARTNERS[member.href.slice(1)].ai}</strong><p>相棒AIが診断。{member.name}が予想。</p></div>
+              </div>
             </Link>
           ))}
         </div>
@@ -140,3 +145,4 @@ export default function MemberSlider() {
     </>
   );
 }
+

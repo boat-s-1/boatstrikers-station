@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./about.module.css";
+import AiPartnerGuide from "../components/AiPartnerGuide";
 
 export const metadata = {
   title: "BoatStrikersについて｜BoatStrikers",
@@ -61,7 +62,7 @@ const contents = [
   {
     icon: "📰",
     title: "予想新聞",
-    text: "一果・初音・キイナ、それぞれの得意分野に合わせた予想情報を配信します。",
+    text: "いちまる・きいもこ・はつころのAI診断を参考に、一果・キイナ・初音がそれぞれの視点で予想を届けます。",
     href: "/",
   },
   {
@@ -161,7 +162,7 @@ export default function AboutPage() {
           </p>
 
           <p>
-            一果のイン逃げ予想、初音の女子戦攻略、
+            一果＆いちまるのイン逃げ、初音＆はつころの女子戦、
             キイナの5号艇・穴狙い情報を中心に、
             出走表、展示情報、予想新聞、初心者ガイド、全国24場攻略、DATA LAB、漫画、動画、ラジオなどを配信しています。
           </p>
@@ -179,7 +180,8 @@ export default function AboutPage() {
       <section className={styles.membersSection}>
         <div className={styles.sectionHeading}>
           <span>OUR MEMBERS</span>
-          <h2>メンバー</h2>
+          <h2>メンバーと相棒AI</h2>
+          <AiPartnerGuide />
           <p>それぞれの得意分野から、ボートレースの楽しみ方をご案内します。</p>
         </div>
 
@@ -334,9 +336,9 @@ export default function AboutPage() {
 
         <a href="/">ホーム</a>
         <a href="/races">本日の出走表</a>
-        <a href="/ichika">一果のイン逃げ予想</a>
-        <a href="/hatsune">初音の女子戦攻略</a>
-        <a href="/kiina">キイナの5号艇予想</a>
+        <a href="/ichika">一果＆いちまるのイン逃げ</a>
+        <a href="/hatsune">初音＆はつころの女子戦</a>
+        <a href="/kiina">キイナ＆きいもこの5号艇</a>
         <a href="/bsc2">BSC</a>
       </div>
 
@@ -382,3 +384,4 @@ export default function AboutPage() {
     </main>
   );
 }
+

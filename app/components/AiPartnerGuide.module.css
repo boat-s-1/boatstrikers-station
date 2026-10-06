@@ -1,0 +1,25 @@
+.section { margin: 24px 14px; scroll-margin-top: 100px; color: #17345c; }
+.heading { margin-bottom: 16px; }
+.eyebrow { display: block; font-size: .875rem; font-weight: 800; color: var(--partner-color, #345a87); }
+.heading h2 { font-size: clamp(1.4rem, 4vw, 2rem); margin: 6px 0 10px; line-height: 1.4; }
+.section p, .diagnosisHeading p, .predictionHeading p { font-size: 1rem; line-height: 1.75; margin: 6px 0 0; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.single { grid-template-columns: minmax(0, 1fr); }
+.card { min-width: 0; padding: 18px; background: #fff; border: 1px solid #d5e1ef; border-top: 4px solid var(--partner-color); border-radius: 20px; box-shadow: 0 8px 24px #17345c0a; }
+.cardTop { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.cardTop h2 { font-size: 1.25rem; margin: 6px 0 0; line-height: 1.5; overflow-wrap: anywhere; }
+.cardTop h2 small { margin: 0 4px; font-size: 1rem; color: #60738c; }
+.portrait { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.aiRow { display: flex; align-items: center; gap: 12px; margin: 14px 0; }
+.aiImage { width: 112px; height: 112px; object-fit: contain; flex-shrink: 0; }
+.aiRow h3 { font-size: 1.25rem; margin: 6px 0; }
+.label { display: inline-block; padding: 3px 8px; background: #edf3f9; border-radius: 6px; color: var(--partner-color); font-size: .875rem; font-weight: 800; }
+.characterRow { border-top: 1px solid #e3ebf4; padding-top: 12px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.links a { display: block; padding: 10px 12px; border: 1px solid var(--partner-color); border-radius: 10px; color: var(--partner-color); text-decoration: none; font-size: .875rem; font-weight: 800; line-height: 1.6; }
+.links a:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
+.diagnosisHeading, .predictionHeading { display: flex; align-items: center; gap: 12px; padding: 16px; margin: 0 0 14px; border-radius: 16px; background: #f0f5fa; color: #17345c; scroll-margin-top: 100px; }
+.diagnosisHeading h3, .predictionHeading h3 { margin: 4px 0; font-size: 1.125rem; line-height: 1.5; }
+.miniImage { object-fit: contain; flex-shrink: 0; }
+@media (max-width: 1100px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 380px) { .card { padding: 14px; } .aiImage { width: 88px; height: 88px; } }

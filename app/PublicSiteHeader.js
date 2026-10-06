@@ -55,12 +55,13 @@ const GROUPS = [
   },
   {
     eyebrow: "PREDICTION",
-    title: "予想を見る",
+    title: "AI診断・キャラ予想",
     links: [
+      { label: "相棒AIと3人の役割", href: "/#ai-partners" },
       { label: "出走表", href: "/races" },
-      { label: "一果のイン逃げ予想", href: "/ichika" },
-      { label: "初音の女子戦攻略", href: "/hatsune" },
-      { label: "キイナの5号艇予想", href: "/kiina" },
+      { label: "一果＆いちまるのイン逃げ", href: "/ichika" },
+      { label: "初音＆はつころの女子戦", href: "/hatsune" },
+      { label: "キイナ＆きいもこの5号艇", href: "/kiina" },
       { label: "BSC", href: "/bsc" },
     ],
   },
@@ -235,3 +236,4 @@ export default function PublicSiteHeader() {
     </>
   );
 }
+
