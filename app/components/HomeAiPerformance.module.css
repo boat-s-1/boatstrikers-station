@@ -1,10 +1,9 @@
 .wrapper { color: #17345c; }
-.heading > span { color: #146eaa; font-size: .6875rem; font-weight: 800; letter-spacing: .08em; }
-.heading h2 { margin: 6px 0; font-size: 1.25rem; line-height: 1.5; }
-.heading p { margin: 0; color: #526079; font-size: .8125rem; line-height: 1.7; }
-.partners { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 16px 0 12px; }
-.partners button { --ai-color: #17345c; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 66px; padding: 6px 2px; border: 1px solid #d5e1ef; border-radius: 12px; background: #fff; color: var(--ai-color); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
-.partners button[aria-pressed="true"] { border: 2px solid var(--ai-color); background: #eef5fa; }
+.body { padding: 16px; background: linear-gradient(180deg, #fff, #fffdf8); }
+.disclosure { margin: 4px 0 12px; color: #687486; font-size: 11px; line-height: 1.7; }
+.partners { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0 0 12px; }
+.partners button { --ai-color: #17345c; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 66px; padding: 6px 2px; border: 1px solid #eddbab; border-radius: 12px; background: linear-gradient(180deg, #fff, #fffdf5); color: var(--ai-color); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.partners button[aria-pressed="true"] { border: 2px solid var(--ai-color); background: #fff5d5; }
 .partners button:hover { background: #f1f7fc; }
 .partners img { object-fit: contain; }
 .partners button:focus-visible, .predictionLink:focus-visible, .conditions summary:focus-visible, .comparison summary:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
@@ -13,7 +12,7 @@
 .updated { margin: 0 0 14px; font-size: .75rem; line-height: 1.7; color: #526079; }
 .status { min-height: 150px; padding: 26px 8px; display: grid; align-content: center; text-align: center; font-size: .875rem; line-height: 1.7; }
 .status button { padding: 10px 16px; border: 1px solid #b8d8ed; border-radius: 10px; color: #17345c; background: #fff; cursor: pointer; }
-.conditions, .comparison { border-top: 1px solid #e2e8f0; padding: 0; margin: 0; }
+.conditions, .comparison { border-top: 1px solid #efdfb7; padding: 0; margin: 0; }
 .conditions summary, .comparison summary { min-height: 44px; padding: 12px 0; color: #526079; font-size: .8125rem; font-weight: 700; line-height: 1.6; cursor: pointer; }
 .conditions p, .comparison > p { margin: 0 0 12px; color: #526079; font-size: .8125rem; line-height: 1.8; }
 .predictionLink { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px; margin-top: 10px; border: 1px solid #b8d8ed; border-radius: 12px; background: #f3f8fc; color: #146eaa; text-decoration: none; font-size: .8125rem; font-weight: 700; line-height: 1.6; }

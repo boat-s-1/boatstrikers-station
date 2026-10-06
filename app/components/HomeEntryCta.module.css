@@ -1,17 +1,15 @@
-.section { margin: 0 0 20px; color: #17345c; }
-.heading { margin: 0 0 12px; font-size: .875rem; font-weight: 700; color: #526079; }
-.nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.card { display: flex; flex-direction: column; align-items: flex-start; position: relative; gap: 9px; min-width: 0; min-height: 116px; padding: 16px 12px; border: 1px solid #b8d8ed; border-radius: 16px; background: #fff; color: #17345c; text-decoration: none; transition: background .15s; }
-.card:hover { background: #f1f7fc; }
-.primary { border-color: #146eaa; color: #fff; background: #146eaa; }
-.primary:hover { background: #105b8d; }
-.icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: #edf5fb; font-size: 18px; }
-.primary .icon { background: #ffffff24; }
-.card strong { display: block; font-size: .9375rem; line-height: 1.5; }
-.card strong span { display: block; font-size: .75rem; font-weight: 500; opacity: .9; margin-top: 2px; }
-.card > b { position: absolute; right: 12px; top: 17px; font-size: 24px; line-height: 1; }
-.guide { display: flex; justify-content: space-between; gap: 8px; padding: 12px 2px 0; color: #526079; font-size: .8125rem; line-height: 1.6; text-decoration: none; }
-.guide span { color: #146eaa; font-size: 18px; }
-.card:focus-visible, .guide:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
-@media (max-width: 360px) { .card { padding: 12px 10px; } .card strong { font-size: .875rem; } }
-@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+.section { margin: 0 0 20px; padding: 14px; border: 2px solid #a8dff6; border-radius: 24px; color: #17345c; background: linear-gradient(180deg, #f1fbff, #fff); box-shadow: 0 8px 22px #1678a714; }
+.heading { margin: 0 0 12px; font-size: 16px; font-weight: 900; color: #153f78; text-align: center; }
+.nav { display: grid; gap: 10px; }
+.featuredBanner { display: block; overflow: hidden; border-radius: 16px; line-height: 0; box-shadow: 0 5px 14px #145f9a1a; }
+.featuredBanner img { display: block; width: 100%; height: auto; }
+.card { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 72px; padding: 12px; border: 1px solid #a5d8f0; border-radius: 16px; background: linear-gradient(135deg, #fff, #eaf8ff); color: #17345c; text-decoration: none; box-shadow: inset 0 1px 0 #fff, 0 4px 12px #145f9a0d; }
+.card:hover { background: #eef9ff; }
+.icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 12px; background: #dbf3ff; font-size: 20px; }
+.card strong { flex: 1; min-width: 0; display: block; font-size: 15px; line-height: 1.5; }
+.card strong span { display: block; color: #526d85; font-size: 11px; font-weight: 600; margin-top: 2px; }
+.card > b { color: #168dc8; font-size: 24px; line-height: 1; }
+.guide { display: flex; justify-content: space-between; gap: 8px; padding: 12px 2px 0; color: #526d85; font-size: 12px; line-height: 1.6; text-decoration: none; }
+.guide span { color: #168dc8; font-size: 18px; }
+.card:focus-visible, .guide:focus-visible, .featuredBanner:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
+@media (max-width: 360px) { .section { padding: 11px; } .card { padding: 10px; gap: 8px; } .card strong { font-size: 14px; } }

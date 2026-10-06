@@ -4,13 +4,11 @@
 
 .todayEntryImageLink{display:block;margin-top:13px;overflow:hidden;border-radius:18px;text-decoration:none;line-height:0;transition:transform .16s ease,box-shadow .16s ease}.todayEntryImageLink:hover{transform:translateY(-2px);box-shadow:0 9px 20px rgba(15,91,140,.12)}.todayEntryImageLink:focus-visible{outline:3px solid #ffd43b;outline-offset:2px}.todayEntryImage{display:block;width:100%;height:auto;object-fit:contain}
 
-/* Quiet functional cards on the home page. */
-.card { border: 1px solid #d5e1ef; border-radius: 20px; box-shadow: 0 4px 16px #17345c08; }
+/* Compact empty schedule; preserve the original blue card treatment. */
 .card header { align-items: center; padding-bottom: 10px; }
 .card header h2 { font-size: 18px; margin: 0; }
-.card header a { color: #146eaa; font-size: 12px; font-weight: 700; text-decoration: none; }
+.card header a { color: #168dc8; font-size: 12px; font-weight: 700; text-decoration: none; }
 .compact .list { margin-top: 8px; }
 .compact .empty { padding: 2px 0; border: 0; background: none; text-align: left; font-size: 13px; }
-.ticker { margin-top: 18px; border-color: #d5e1ef; box-shadow: none; }
-.ticker > strong { background: #146eaa; font-size: 12px; }
+.ticker { margin-top: 18px; }
 @media (prefers-reduced-motion: reduce) { .track { animation: none; } .track span { padding-left: 12px; } }

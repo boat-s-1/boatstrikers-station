@@ -180,7 +180,7 @@ export default async function Home() {
     : noteNews;
 
   return (
-    <main className={`page ${homeStyles.home}`} data-home-design="calm">
+    <main className={`page ${homeStyles.home}`}>
       <header className="header">
         <div className="logo">BOAT<br /><span>STRIKERS</span></div>
         <a className="memberMini" href="/members" aria-label="会員登録・LINE・Discord通知設定">会員・通知</a>
@@ -207,7 +207,7 @@ export default async function Home() {
         realtimeLimit={3}
       />
 
-      <section className="homeSectionCard resultSummarySection" aria-label="今月のAI公開買い目成績">
+      <section className="homeSectionCard yellow resultSummarySection" aria-label="今月のAI公開買い目成績">
         <HomeAiPerformance />
       </section>
 
@@ -252,7 +252,7 @@ export default async function Home() {
       
 
         <section className="homeSectionCard pink homeBannerFlush">
-  <div className="homeSectionHeading"><span>NEWSPAPERS</span><h2>予想新聞を読む</h2><p>AI診断を参考にした、キャラごとの予想と解説。</p></div>
+  <img src="/IMG_6118.jpeg" alt="新聞" className="homeTitleImage" />
 
   <div className="todayNewsGrid">
     {news.map((n) => (

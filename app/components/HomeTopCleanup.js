@@ -49,7 +49,6 @@ function hideHomeExtras() {
 function setupLatestNewsBanner() {
   const root = document.querySelector("main.page");
   if (!root) return;
-  if (root.dataset.homeDesign === "calm") return;
 
   const existing = root.querySelector('[data-home-latest-news-banner="true"]');
   if (existing) return;

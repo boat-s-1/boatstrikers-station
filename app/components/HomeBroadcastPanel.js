@@ -34,17 +34,15 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
         <a
           href={`/races?date=${current.date}`}
-          className={`${entryStyles.card} ${entryStyles.primary}`}
+          className={entryStyles.featuredBanner}
           aria-label="BoatStrikers TODAY 今日のレースを見る"
         >
-          <span className={entryStyles.icon} aria-hidden="true">⚡</span>
-          <strong>今日のレース<span>出走表・展示データ</span></strong>
-          <b aria-hidden="true">›</b>
+          <img src="/todayrace.png" alt="BoatStrikers TODAY 今日のレースを見る" />
         </a>
 
         <a href="#ai-partners" className={entryStyles.card}>
           <span className={entryStyles.icon} aria-hidden="true">🔎</span>
-          <strong>AI診断・予想<span>得意分野から選ぶ</span></strong>
+          <strong>AI診断・キャラ予想<span>イン逃げ・5号艇・女子戦から選ぶ</span></strong>
           <b aria-hidden="true">›</b>
         </a>
       </nav>

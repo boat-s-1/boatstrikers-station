@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { AI_PARTNERS } from "../../lib/aiPartners";
 import styles from "./AiPartnerGuide.module.css";
+import HomeSectionBanner from "./HomeSectionBanner";
 
 export function AiDiagnosisHeading({ character = "ichika", title, children }) {
   const partner = AI_PARTNERS[character];
@@ -58,11 +59,7 @@ export default function AiPartnerGuide({ character }) {
 export function AiPartnerEntry() {
   return (
     <section id="ai-partners" className={styles.entrySection} aria-labelledby="prediction-entry-title">
-      <div className={styles.entryHeading}>
-        <span className={styles.eyebrow}>AI診断・キャラ予想</span>
-        <h2 id="prediction-entry-title">得意分野から予想を選ぶ</h2>
-        <p>相棒AIが診断し、3人が買い目を考えます。</p>
-      </div>
+      <HomeSectionBanner id="prediction-entry-title" portraits eyebrow="AI診断・キャラ予想" title={<><span>得意分野から</span><span>予想を選ぶ</span></>} subtitle="相棒AIが診断。3人が予想。" />
       <nav className={styles.entryList} aria-label="得意分野別のAI診断とキャラ予想">
         {Object.entries(AI_PARTNERS).map(([key, partner]) => (
           <a key={key} href={`/${key}`} className={styles.entryCard} style={{ "--partner-color": partner.color }}>

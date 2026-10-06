@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AI_PARTNERS } from "../../lib/aiPartners";
 import MonthlyPerformanceSlider from "./MonthlyPerformanceSlider";
+import HomeSectionBanner from "./HomeSectionBanner";
 import styles from "./HomeAiPerformance.module.css";
 
 function dateLabel(value) {
@@ -48,11 +49,8 @@ export default function HomeAiPerformance() {
 
   return (
     <div className={styles.wrapper}>
-      <header className={styles.heading}>
-        <span>AI PERFORMANCE</span>
-        <h2>今月のAI公開買い目成績</h2>
-        <p>公開買い目を各点100円で購入した試算です。<br />AIの診断精度とは別の集計です。</p>
-      </header>
+      <HomeSectionBanner tone="gold" eyebrow="AI PERFORMANCE" title={<><span>今月のAI</span><span>公開買い目成績</span></>} subtitle="相棒AIの公開買い目をチェック" />
+      <div className={styles.body}>
       <nav className={styles.partners} aria-label="AI別の成績を切り替える">
         <button type="button" aria-pressed={character === ""} onClick={() => selectCharacter("")}>全AI</button>
         {Object.entries(AI_PARTNERS).map(([key, partner]) => (
@@ -63,6 +61,7 @@ export default function HomeAiPerformance() {
         ))}
       </nav>
       <p className={styles.selection}>{character ? `${AI_PARTNERS[character].ai}の公開買い目` : "全AIの公開買い目"} · 各点100円</p>
+      <p className={styles.disclosure}>公開買い目の試算です。AIの診断精度とは別の集計です。</p>
       {!data ? (
         <div className={styles.status} role="status">
           {failed ? <><p>成績を取得できませんでした。</p><button type="button" onClick={() => setAttempt(value => value + 1)}>再読み込み</button></> : <p>AI公開買い目の成績を読み込んでいます…</p>}
@@ -92,6 +91,7 @@ export default function HomeAiPerformance() {
         </>
       )}
       <a className={styles.predictionLink} href={character ? `/${character}` : "#ai-partners"}>{character ? `${AI_PARTNERS[character].ai}の診断・キャラ予想を見る` : "AI診断・キャラ予想を見る"}<span aria-hidden="true">›</span></a>
+      </div>
     </div>
   );
 }

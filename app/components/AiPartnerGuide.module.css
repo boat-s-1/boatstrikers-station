@@ -39,3 +39,10 @@
 .entryText small { color: #526079; }
 .entryArrow { color: var(--partner-color); font-size: 1.5rem; }
 @media (max-width: 380px) { .entryCard { gap: 8px; padding: 10px; } .entryImages { gap: 0; } .entryImages img { width: 34px; height: 34px; } }
+
+/* Home entry shares the flush illustrated banner and coloured frame. */
+.entrySection { overflow: hidden; border: 2px solid #a8dff6; border-radius: 24px; background: linear-gradient(180deg, #fff, #f5fbff); box-shadow: 0 8px 22px #1678a714; }
+.entryList { padding: 14px; gap: 10px; }
+.entryCard { border-radius: 16px; background: linear-gradient(135deg, #fff, #f8fbff); box-shadow: 0 4px 12px #145f9a0d; }
+.entryCard h3 { font-size: 16px; }
+@media (max-width: 380px) { .entryList { padding: 11px; } .entryCard { gap: 7px; } }
