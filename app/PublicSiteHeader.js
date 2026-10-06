@@ -1,4 +1,6 @@
 "use client";
+import MediaSwitch from "./components/MediaSwitch";
+import navigationStyles from "./components/blogNavigation.module.css";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
@@ -68,6 +70,7 @@ const GROUPS = [
     eyebrow: "CONTENTS",
     title: "学ぶ・楽しむ",
     links: [
+      { label: "BOATSTRIKERS BLOG", href: "/blog" },
       { label: "図書館", href: "/library" },
       { label: "教えて！一果センセー！", href: "/ichika-sensei" },
       { label: "私立みなも学園〜ふなけん研究部〜", href: "/comic" },
@@ -105,7 +108,7 @@ export default function PublicSiteHeader() {
 
   const hidden = useMemo(() => {
     const isMagazineViewer = /^\/library\/(ichika|hatsune|kiina)-seminar\/[^/]+\/?$/.test(pathname);
-    return pathname.startsWith("/admin") || pathname.startsWith("/bsc2/admin") || pathname.startsWith("/bsc2/") || isMagazineViewer;
+    return pathname === "/blog" || pathname.startsWith("/blog/") || pathname.startsWith("/admin") || pathname.startsWith("/bsc2/admin") || pathname.startsWith("/bsc2/") || isMagazineViewer;
   }, [pathname]);
 
   const compact = pathname.startsWith("/races");
@@ -176,6 +179,7 @@ export default function PublicSiteHeader() {
         </div>
       </header>
       <div className={`${styles.headerSpacer} ${compact ? styles.headerSpacerCompact : ""}`} aria-hidden="true" />
+      <div className={navigationStyles.raceSwitch}><MediaSwitch active="race"/></div>
       <div className={`${styles.overlay} ${open ? styles.overlayOpen : ""}`} onClick={() => setOpen(false)} aria-hidden={!open} />
       <aside id="boatstrikers-global-menu" className={`${styles.drawer} ${open ? styles.drawerOpen : ""}`} aria-hidden={!open}>
         <div className={styles.drawerTop}>

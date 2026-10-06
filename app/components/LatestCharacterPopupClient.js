@@ -36,7 +36,7 @@ export default function LatestCharacterPopupClient({
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) return;
+    if ((pathname === "/blog" || pathname?.startsWith("/blog/") || HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix)))) return;
 
     const isPreview = window.location.hostname.endsWith(".vercel.app");
     const key = `bs-character-popup:${todayKey()}:${id}`;
@@ -46,7 +46,7 @@ export default function LatestCharacterPopupClient({
     return () => window.clearTimeout(timer);
   }, [id, pathname]);
 
-  if (!visible || HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) return null;
+  if (!visible || (pathname === "/blog" || pathname?.startsWith("/blog/") || HIDE_PREFIXES.some((prefix) => pathname?.startsWith(prefix)))) return null;
 
   const close = () => {
     const isPreview = window.location.hostname.endsWith(".vercel.app");

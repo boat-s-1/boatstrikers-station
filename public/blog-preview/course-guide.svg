@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+<rect width="1200" height="760" fill="#fffef9"/>
+<g font-family="sans-serif"><text x="70" y="90" font-size="44" font-weight="700" fill="#193d31">艇番とコースは、別の情報</text>
+<rect x="70" y="135" width="1060" height="215" rx="8" fill="#edf2e5"/><text x="105" y="197" font-size="46" font-weight="700" fill="#175c49">艇番 ＝ 各艇に割り当てられた番号</text><text x="105" y="252" font-size="40" fill="#3c5348">出走表で確認する「何号艇か」という情報</text><text x="105" y="310" font-size="36" fill="#62716b">まずは艇番と、出走する選手を確認する。</text>
+<rect x="70" y="380" width="1060" height="215" rx="8" fill="#edf1f2"/><text x="105" y="442" font-size="46" font-weight="700" fill="#375568">コース ＝ 実際にスタートする位置</text><text x="105" y="497" font-size="40" fill="#3c5348">内側から「何番目に入るか」という情報</text><text x="105" y="555" font-size="36" fill="#62716b">スタート展示で、展示時の進入を確認する。</text>
+<text x="70" y="654" font-size="40" font-weight="700" fill="#81600e">番号だけで本番の進入を決めつけない。</text><text x="70" y="707" font-size="25" fill="#62716b">表示確認用の概念図です。特定レースのデータではありません。</text></g>
+</svg>

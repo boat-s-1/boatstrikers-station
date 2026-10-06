@@ -17,6 +17,8 @@ const KiinaFixedWallpaper = dynamic(() => import("./KiinaFixedWallpaper"));
 export default function RouteScopedVisuals() {
   const pathname = usePathname() || "/";
 
+  if (pathname === "/blog" || pathname.startsWith("/blog/")) return null;
+
   if (pathname === "/") {
     return (
       <>

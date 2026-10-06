@@ -1,3 +1,4 @@
+import BlogReadingBridge from '../../../components/BlogReadingBridge';
 import Link from 'next/link';
 import { getStadiumAiV2, premiumPreview } from '../../../../lib/stadiumAiV2';
 import DataBookInteractive from './DataBookInteractive';
@@ -114,7 +115,8 @@ export default async function StadiumDataBookPage({ params, searchParams }) {
     </>}
 
     <footer className={styles.footer}>過去データに基づく傾向であり、将来の結果を保証するものではありません。対象数・欠損率・更新日をご確認ください。{generatedAt && ` 最終生成: ${generatedAt}`}</footer>
-  </main>;
+  <BlogReadingBridge stadium={stadium?.slug}/>
+</main>;
 }
 
 function SectionHeading({ number, eyebrow, title, premium = false }) {

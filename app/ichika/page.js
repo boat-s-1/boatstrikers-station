@@ -1,3 +1,4 @@
+import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
@@ -283,6 +284,7 @@ export default async function IchikaPage() {
           <img src="/1946131E-2FFC-48F9-B850-AB6164F6220C.png" alt="公式LINE登録" className="lineBannerImage" />
         </a>
       </section>
-    </main>
+    <BlogReadingBridge character="ichika"/>
+</main>
   );
 }
