@@ -1,5 +1,5 @@
 import Image from "next/image";
-import AiPartnerGuide from "./components/AiPartnerGuide";
+import { AiPartnerEntry } from "./components/AiPartnerGuide";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
 import { getMonthlyPublicPredictionResults } from "../lib/publicPredictionResults";
@@ -210,9 +210,7 @@ export default async function Home() {
         </p>
       </section>
 
-      <AiPartnerGuide />
-
-      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} />
+      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} predictionEntry={<AiPartnerEntry />} />
 
       <HomeRaceInfo
         courses={raceData.courses}

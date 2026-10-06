@@ -22,3 +22,20 @@
 .diagnosisHeading h3, .predictionHeading h3 { margin: 4px 0; font-size: 1.125rem; line-height: 1.5; }
 .miniImage { object-fit: contain; flex-shrink: 0; }
 @media (max-width: 380px) { .card { padding: 14px; } .aiImage { width: 88px; height: 88px; } }
+
+.entrySection { margin: 18px 0; color: #17345c; scroll-margin-top: 100px; }
+.entryHeading { margin-bottom: 12px; }
+.entryHeading h2 { margin: 5px 0; font-size: 1.35rem; line-height: 1.5; }
+.entryHeading p { margin: 0; font-size: .875rem; line-height: 1.7; }
+.entryList { display: grid; gap: 8px; }
+.entryCard { display: flex; align-items: center; gap: 12px; padding: 12px; min-width: 0; border: 1px solid #d5e1ef; border-left: 4px solid var(--partner-color); border-radius: 14px; background: #fff; color: #17345c; text-decoration: none; }
+.entryCard:hover { background: #f4f8fc; }
+.entryCard:focus-visible { outline: 3px solid #2868c7; outline-offset: 3px; }
+.entryImages { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.entryMascot { object-fit: contain; }
+.entryText { flex: 1; min-width: 0; }
+.entryText h3 { margin: 0 0 2px; color: var(--partner-color); font-size: 1.05rem; line-height: 1.5; }
+.entryText span, .entryText small { display: block; font-size: .8125rem; line-height: 1.6; }
+.entryText small { color: #526079; }
+.entryArrow { color: var(--partner-color); font-size: 1.5rem; }
+@media (max-width: 380px) { .entryCard { gap: 8px; padding: 10px; } .entryImages { gap: 0; } .entryImages img { width: 34px; height: 34px; } }

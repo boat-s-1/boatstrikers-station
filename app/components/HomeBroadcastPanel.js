@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeBroadcastPanel.module.css";
 import entryStyles from "./HomeEntryCta.module.css";
 import { getProgramPresetByTitle } from "../../lib/programPresets";
-import { BETA_ACCESS_END_LABEL } from "../members/planGuide";
 
 const TYPE_LABELS = { radio:"ラジオ", short:"ショート動画", note:"note", live:"生放送", comic:"コミック", other:"お知らせ" };
 
@@ -15,7 +14,7 @@ function jstParts(date = new Date()) {
 }
 function mins(value){ const [h,m]=String(value||"00:00").slice(0,5).split(":").map(Number); return h*60+m; }
 
-export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [] }) {
+export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [], predictionEntry }) {
   const [now,setNow] = useState(new Date());
 
   useEffect(()=>{
@@ -58,17 +57,19 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           <b aria-hidden="true">›</b>
         </a>
 
-        <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}>
-          <span className={entryStyles.icon} aria-hidden="true">✨</span>
+        <a href="#ai-partners" className={entryStyles.card}>
+          <span className={entryStyles.icon} aria-hidden="true">🔎</span>
           <div>
-            <small>β PREMIUM FREE</small>
-            <strong>無料会員になる</strong>
-            <p>{BETA_ACCESS_END_LABEL}までPREMIUM相当機能を無料開放</p>
+            <small>AI &amp; PREDICTION</small>
+            <strong>AI診断・予想</strong>
+            <p>イン逃げ・5号艇・女子戦から選ぶ</p>
           </div>
           <b aria-hidden="true">›</b>
         </a>
       </nav>
     </section>
+
+    {predictionEntry}
 
     <div className={styles.ticker}>
       <strong>📢 速報</strong>

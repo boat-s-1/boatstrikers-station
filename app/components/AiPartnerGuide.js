@@ -54,3 +54,31 @@ export default function AiPartnerGuide({ character }) {
     </section>
   );
 }
+
+export function AiPartnerEntry() {
+  return (
+    <section id="ai-partners" className={styles.entrySection} aria-labelledby="prediction-entry-title">
+      <div className={styles.entryHeading}>
+        <span className={styles.eyebrow}>AI診断・キャラ予想</span>
+        <h2 id="prediction-entry-title">得意分野から予想を選ぶ</h2>
+        <p>相棒AIが診断し、3人が買い目を考えます。</p>
+      </div>
+      <nav className={styles.entryList} aria-label="得意分野別のAI診断とキャラ予想">
+        {Object.entries(AI_PARTNERS).map(([key, partner]) => (
+          <a key={key} href={`/${key}`} className={styles.entryCard} style={{ "--partner-color": partner.color }}>
+            <div className={styles.entryImages}>
+              <Image src={partner.portrait} alt="" width={44} height={44} className={styles.portrait} />
+              <Image src={partner.image} alt="" width={40} height={40} className={styles.entryMascot} />
+            </div>
+            <div className={styles.entryText}>
+              <h3>{partner.specialty}</h3>
+              <span>{partner.character}＆{partner.ai}</span>
+              <small>AI診断・予想を見る</small>
+            </div>
+            <b className={styles.entryArrow} aria-hidden="true">›</b>
+          </a>
+        ))}
+      </nav>
+    </section>
+  );
+}
