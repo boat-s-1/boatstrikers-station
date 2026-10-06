@@ -1,3 +1,4 @@
+import { AiDiagnosisHeading } from "./AiPartnerGuide";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
@@ -62,6 +63,7 @@ export default async function KiinaAlertPanel(){
   const yPerf4=getPerformance(yRows),allPerf4=getPerformance(allRows);
 
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(141,105,20,.10)",border:"2px solid #e8bc48"}}>
+      <AiDiagnosisHeading character="kiina" title="カド攻め診断" />
     <div style={{position:"relative",lineHeight:0,background:"#fff",overflow:"hidden"}}>
       <img src="/top/IMG_8030.jpeg?v=20260906-0706" alt="今日のキイナアラート カド攻め理論" style={{display:"block",width:"100%",height:"auto",margin:0,objectFit:"cover"}} />
       <span style={{position:"absolute",top:10,right:10,padding:"6px 9px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900,lineHeight:1.2}}>{formatDate(today)}</span>
@@ -86,7 +88,7 @@ export default async function KiinaAlertPanel(){
       </div>
     </div>
 
-    <div style={{padding:"8px 14px 2px",fontSize:13,fontWeight:900,color:"#17345c"}}>今日のアラート一覧</div>
+    <div style={{padding:"8px 14px 2px",fontSize:13,fontWeight:900,color:"#17345c"}}>今日のAI診断一覧</div>
     {todayRows.length?<div style={{padding:"14px 14px 8px",display:"flex",gap:12,overflowX:"auto",scrollSnapType:"x mandatory",WebkitOverflowScrolling:"touch"}}>
       {todayRows.map(a=>{const grade=getAttackGrade(a);return <article key={a.id} style={{flex:"0 0 88%",scrollSnapAlign:"start",border:"1px solid #f0dfac",borderRadius:17,padding:14,background:"#fffdf7",boxSizing:"border-box"}}>
         <div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"center"}}><strong style={{fontSize:20,color:"#17345c"}}>{a.course_name||`${a.course_code}場`} {a.race_no}R</strong><span style={{padding:"6px 9px",borderRadius:999,background:"#fff0c7",color:"#a96b00",fontSize:12,fontWeight:900}}>{grade.mark} {grade.label}</span></div>
@@ -101,3 +103,4 @@ export default async function KiinaAlertPanel(){
     <div style={{padding:"0 14px 16px"}}><Link href="/members/discord" style={{display:"block",textAlign:"center",textDecoration:"none",padding:"12px 14px",borderRadius:14,background:"#5865f2",color:"#fff",fontWeight:900,fontSize:14}}>通知を設定する</Link><p style={{margin:"8px 0 0",color:"#526079",fontSize:13,textAlign:"center"}}>Discordでキイナのアラートを受け取る</p></div>
   </section>;
 }
+

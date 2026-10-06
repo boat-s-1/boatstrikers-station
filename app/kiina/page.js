@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AiPartnerGuide, { CharacterPredictionHeading } from "../components/AiPartnerGuide";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
@@ -10,10 +11,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "キイナ｜5号艇・穴狙い・高配当レース分析",
-  description: "BoatStrikersキイナの専門ページ。5号艇や人気薄をオッズだけで選ばず、スタート、センターの攻め、展示、モーター、展開から穴の入口を探す見方を解説します。",
+  title: "キイナ＆きいもこ｜5号艇・穴狙い・高配当レース分析",
+  description: "相棒AI・きいもこが診断し、キイナが予想するBoatStrikersの専門ページ。5号艇や人気薄をオッズだけで選ばず、スタート、センターの攻め、展示、モーター、展開から穴の入口を探す見方を解説します。",
   alternates: { canonical: "/kiina" },
-  openGraph: { title: "キイナ｜5号艇・穴狙い分析｜BoatStrikers", description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。", url: "/kiina", type: "website" },
+  openGraph: { title: "キイナ＆きいもこ｜5号艇・穴狙い分析｜BoatStrikers", description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。", url: "/kiina", type: "website" },
 };
 
 const emptyKiinaResult = { raceCount: 0, hitCount: 0, hitRate: 0, returnRate: 0, profit: 0, bestHit: 0, updated: "", hits: [], errorMessage: "" };
@@ -94,7 +95,15 @@ export default async function KiinaPage() {
       <header className="header"><div className="logo">BOAT<br /><span>STRIKERS</span></div><a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a></header>
       <section className="hero"><Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority /></section>
 
-      <RealtimeUpdates target="kiina" limit={5} />
+      <AiPartnerGuide character="kiina" />
+      <div id="ai-diagnosis" style={{ scrollMarginTop: 100 }}>
+        <RealtimeUpdates target="kiina" limit={5} />
+      </div>
+      <div id="character-predictions" style={{ margin: "24px 14px 0", scrollMarginTop: 100 }}>
+        <CharacterPredictionHeading character="kiina">
+          <p>きいもこの診断を参考にしたキイナの予想は、公開された予想新聞でご覧いただけます。</p>
+        </CharacterPredictionHeading>
+      </div>
 
       <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_8019.jpeg?v=20260906-0649" alt="キイナの新着読み物" className="homeTitleImage" style={edgeBannerImageStyle} /></div>
@@ -110,6 +119,7 @@ export default async function KiinaPage() {
 
       <section className="sectionCard purpleCard" style={{ overflow: "hidden" }}>
         <div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_8020.jpeg?v=20260906-0649" alt="今月の成績" className="homeTitleImage" style={edgeBannerImageStyle} /></div>
+        <p className="recordLead">キャラ名義の公開買い目の実績です。従来の予想を含み、AI診断精度とは別に集計しています。</p>
         <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
         {result.errorMessage && <p className="recordLead" style={{ color: "#d93025", wordBreak: "break-word" }}>成績取得エラー：{result.errorMessage}</p>}
         <div className="recordGrid"><div className="recordCard"><span>予想レース数</span><strong>{result.raceCount}R</strong><p>今月の予想数</p></div><div className="recordCard"><span>的中率</span><strong>{result.hitRate}%</strong><p>{result.hitCount}R的中</p></div><div className="recordCard"><span>回収率</span><strong>{result.returnRate}%</strong><p>収支{result.profit > 0 ? "+" : ""}{result.profit.toLocaleString()}円</p></div><div className="recordCard"><span>最高配当</span><strong>{result.bestHit.toLocaleString()}円</strong><p>今月最高払戻</p></div></div>
@@ -121,7 +131,7 @@ export default async function KiinaPage() {
 
       <section className="sectionCard yellowCard">
         <h1>キイナの5アタマ・穴狙い研究室</h1>
-        <p>キイナは「高配当だから」「5号艇だから」という理由だけでは狙いません。内側に崩れる材料があり、センター勢の攻めによって外へ展開が向きそうなときに、5号艇を含む人気薄を比較します。</p>
+        <p>きいもこがセンターの攻めや5号艇への展開を診断し、キイナが穴を狙う買い目を考えます。「高配当だから」「5号艇だから」という理由だけでは狙いません。内側に崩れる材料があり、センター勢の攻めによって外へ展開が向きそうなときに、5号艇を含む人気薄を比較します。</p>
         <h2>穴艇を見る5つのチェック</h2>
         <ol><li><strong>インの弱点：</strong>1号艇の進入・ST・展示に不安材料があるか。</li><li><strong>攻めの起点：</strong>3・4コースにスタートから仕掛けられそうな艇がいるか。</li><li><strong>展開：</strong>攻め艇のさらに外、特に5号艇へ差し場やまくり差しの余地があるか。</li><li><strong>展示：</strong>人気薄でも直線・ターン出口・展示タイムに上向き材料があるか。</li><li><strong>価格：</strong>根拠を確認してからオッズを見る。高オッズそのものは買う理由にしない。</li></ol>
         <p>穴狙いは当たりやすさよりも振れ幅が大きくなります。点数と購入額を先に決め、条件が噛み合わないレースは無理に狙いません。</p>
@@ -130,3 +140,4 @@ export default async function KiinaPage() {
     </main>
   );
 }
+

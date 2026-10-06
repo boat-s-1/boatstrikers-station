@@ -1,3 +1,4 @@
+import { AiDiagnosisHeading } from "./AiPartnerGuide";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
@@ -224,6 +225,7 @@ export default async function IchikaAlertPanel() {
         border: "2px solid #ff7eaa",
       }}
     >
+      <AiDiagnosisHeading character="ichika" title="隠れイン診断" />
       <div
         style={{
           position: "relative",
@@ -278,7 +280,7 @@ export default async function IchikaAlertPanel() {
       </div>
 
       <div style={{ padding: "8px 14px 2px" }}>
-        <div style={{ fontSize: 13, fontWeight: 900, color: "#17345c" }}>今日のアラート一覧</div>
+        <div style={{ fontSize: 13, fontWeight: 900, color: "#17345c" }}>今日のAI診断一覧</div>
       </div>
 
       {alerts.length ? (
@@ -379,3 +381,4 @@ export default async function IchikaAlertPanel() {
     </section>
   );
 }
+

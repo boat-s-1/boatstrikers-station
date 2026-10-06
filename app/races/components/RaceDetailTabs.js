@@ -7,13 +7,14 @@ import RaceResultPanel from "./RaceResultPanel";
 import AnimatedStartSlit from "./AnimatedStartSlit";
 import AiRaceTheater from "./AiRaceTheater";
 import styles from "../phase2.module.css";
+import { AiDiagnosisHeading, CharacterPredictionHeading } from "../../components/AiPartnerGuide";
 
 const TABS = [
   { key: "entries", icon: "📋", label: "出走表" },
   { key: "exhibition", icon: "⏱️", label: "展示" },
   { key: "bscExhibition", icon: "📊", label: "BS展示" },
-  { key: "previous", icon: "🌙", label: "前日版" },
-  { key: "live", icon: "⚡", label: "直前版" },
+  { key: "previous", icon: "🌙", label: "前日AI診断" },
+  { key: "live", icon: "⚡", label: "直前AI診断" },
   { key: "previousBets", icon: "🎫", label: "前日買い目" },
   { key: "liveBets", icon: "🎯", label: "直前買い目" },
   { key: "result", icon: "🏁", label: "結果" },
@@ -75,7 +76,7 @@ function EmptyAi({ type }) {
       </div>
 
       <h3>
-        {isLive ? "一果の直前版" : "一果の前日版"}
+        {isLive ? "いちまるの直前AI診断" : "いちまるの前日AI診断"}
         は準備中です
       </h3>
 
@@ -259,14 +260,14 @@ function MarksPanel({ prediction, title = "最終印" }) {
   );
 }
 
-function AiBetList({ prediction, title = "AIおすすめ買い目" }) {
+function AiBetList({ prediction, title = "一果の買い目" }) {
   const bets = Array.isArray(prediction?.bet_json) ? prediction.bet_json : [];
 
   if (!bets.length) {
     return (
       <div className={styles.emptyAi} style={{ marginTop: "16px" }}>
         <div className={styles.emptyAiIcon}>🎯</div>
-        <h3>AI買い目はまだありません</h3>
+        <h3>一果の買い目はまだありません</h3>
         <p>予測データが揃うと自動表示されます。</p>
       </div>
     );
@@ -512,6 +513,7 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
 
   return (
     <div className={styles.predictionPanel}>
+      <AiDiagnosisHeading title="前日イン逃げ診断"><p>取得済みのデータをもとに、評価と注意点を整理しています。</p></AiDiagnosisHeading>
       <div
   style={{
     position: "relative",
@@ -524,7 +526,7 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
 >
   <img
     src="/banners/S__21585946.jpg"
-    alt="一果AI予想 前日版"
+    alt="一果の前日版バナー"
     style={{
       display: "block",
       width: "100%",
@@ -549,7 +551,7 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
       >
         <div>
           <span style={{ color: "#9a5a20", fontSize: "12px", fontWeight: 900, letterSpacing: ".08em" }}>
-            一果のイン逃げ診断
+            いちまるのイン逃げ診断
           </span>
           <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
             <strong style={{ color: "#d65f0d", fontSize: "34px", lineHeight: 1 }}>
@@ -613,14 +615,15 @@ function IchikaPreviousPanel({ prediction, entries, noteFeature }) {
         </div>
       )}
 
-      <MarksPanel prediction={prediction} title="前日印" />
+      <MarksPanel prediction={prediction} title="いちまるの前日評価印" />
 
       {prediction.comment_text && (
         <div className={styles.aiComment} style={{ marginTop: "14px" }}>
-          <span>一果の前日コメント</span><p>{prediction.comment_text}</p>
+          <span>いちまるの前日診断コメント</span><p>{prediction.comment_text}</p>
         </div>
       )}
 
+      <CharacterPredictionHeading />
       {hasNote ? <NoteGuideCard noteFeature={noteFeature} timing="previous" /> : <AiBetList prediction={prediction} />}
     </div>
   );
@@ -681,6 +684,7 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
 
   return (
     <div className={styles.predictionPanel}>
+      <AiDiagnosisHeading title="展示後イン逃げ診断"><p>取得済みのデータをもとに、評価と注意点を整理しています。</p></AiDiagnosisHeading>
       <div className={styles.predictionPanel}>
         <div
   style={{
@@ -693,7 +697,7 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
 >
   <img
     src="/banners/S__21585947.jpg"
-    alt="一果AI予想 直前版"
+    alt="一果の直前版バナー"
     style={{
       width: "100%",
       display: "block",
@@ -722,15 +726,16 @@ function IchikaLivePanel({ prediction, previousPrediction, entries, event, noteF
         <AiPredictedStartSlit rows={analysis.rows} />
       </div>
 
-      <MarksPanel prediction={prediction} title="最終印" />
+      <MarksPanel prediction={prediction} title="いちまるの最終評価印" />
 
       {prediction.comment_text && (
         <div className={styles.aiComment} style={{ marginTop: "14px" }}>
-          <span>一果の展示後コメント</span><p>{prediction.comment_text}</p>
+          <span>いちまるの展示後診断コメント</span><p>{prediction.comment_text}</p>
         </div>
       )}
 
-      {hasNote ? <NoteGuideCard noteFeature={noteFeature} timing="live" /> : <AiBetList prediction={prediction} title="AI最終買い目" />}
+      <CharacterPredictionHeading />
+      {hasNote ? <NoteGuideCard noteFeature={noteFeature} timing="live" /> : <AiBetList prediction={prediction} title="一果の最終買い目" />}
     </div>
   );
 }
@@ -1468,7 +1473,7 @@ function MultiModeBetPanel({ prediction, result, resultEntries, event }) {
             letterSpacing: ".08em",
           }}
         >
-          一果AIの推奨モード
+          いちまるの診断に基づく推奨モード
         </span>
 
         <strong
@@ -1603,7 +1608,8 @@ function BetPanel({ prediction, noteFeature, result, resultEntries, event }) {
   ) {
     return (
       <>
-        <MarksPanel prediction={prediction} title="最終印" />
+        <CharacterPredictionHeading />
+        <MarksPanel prediction={prediction} title="いちまるの最終評価印" />
         <NoteGuideCard
           noteFeature={noteFeature}
           timing={
@@ -1617,12 +1623,15 @@ function BetPanel({ prediction, noteFeature, result, resultEntries, event }) {
   }
 
   return (
+    <>
+    <CharacterPredictionHeading />
     <MultiModeBetPanel
       prediction={prediction}
       result={result}
       resultEntries={resultEntries}
       event={event}
     />
+    </>
   );
 }
 
@@ -3675,3 +3684,4 @@ export default function RaceDetailTabs({
     </>
   );
 }
+

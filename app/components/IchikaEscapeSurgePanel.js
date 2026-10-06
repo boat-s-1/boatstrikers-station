@@ -1,3 +1,4 @@
+import { AiDiagnosisHeading } from "./AiPartnerGuide";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
@@ -115,6 +116,7 @@ export default async function IchikaEscapeSurgePanel() {
 
   return (
     <section style={{ margin: "18px 14px", borderRadius: "24px 24px 0 0", overflow: "hidden", background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.10)", border: "2px solid #ff9a3d" }}>
+      <AiDiagnosisHeading character="ichika" title="イン逃げ急上昇診断" />
       <div style={{ position: "relative", overflow: "hidden", background: "#f7fbff", borderBottom: "1px solid rgba(255,154,61,.35)" }}>
         <img
           src="/top/IMG_7810.jpeg?v=20260831-1755"
@@ -140,7 +142,7 @@ export default async function IchikaEscapeSurgePanel() {
         </div>
       </div>
 
-      <div style={{ padding: "8px 14px 2px", fontSize: 13, fontWeight: 900, color: "#17345c" }}>今日のアラート一覧</div>
+      <div style={{ padding: "8px 14px 2px", fontSize: 13, fontWeight: 900, color: "#17345c" }}>今日のAI診断一覧</div>
       {alerts.length ? (
         <div
           className="ichikaEscapeSurgeAlertRail"
@@ -212,3 +214,4 @@ export default async function IchikaEscapeSurgePanel() {
     </section>
   );
 }
+

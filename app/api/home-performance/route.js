@@ -129,6 +129,18 @@ function toBetCard(row) {
   };
 }
 
+async function fetchMonthlyPages(makeQuery) {
+  const all = [];
+  const pageSize = 500;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await makeQuery().range(from, from + pageSize - 1);
+    if (error) return { data: [], error };
+    const page = Array.isArray(data) ? data : [];
+    all.push(...page);
+    if (page.length < pageSize) return { data: all, error: null };
+  }
+}
+
 export async function GET(request) {
   const supabase = getClient();
   if (!supabase) return NextResponse.json({ error: "supabase_not_configured" }, { status: 503 });
@@ -138,13 +150,13 @@ export async function GET(request) {
     const character = CHARACTER_CODES.has(requestedCharacter) ? requestedCharacter : "";
     const { start, next } = currentMonthRange();
     const [performanceRes, predictionsRes, oddsRes] = await Promise.all([
-      supabase
+      fetchMonthlyPages(() => supabase
         .from("v_bsc_official_performance")
-        .select("prediction_id,race_date,course_code,race_no,character_code,timing,tickets,result_combination,trifecta_payout,is_hit,settled_at")
+        .select("prediction_id,race_date,course_code,race_no,character_code,timing,tickets,result_combination,trifecta_payout,is_hit,settled_at,published_at")
         .gte("race_date", start).lt("race_date", next).eq("timing", "previous_day")
-        .order("race_date", { ascending: false }).order("prediction_id", { ascending: false }),
-      supabase.from("bsc_official_predictions").select("id,snapshot").gte("race_date", start).lt("race_date", next).eq("timing", "previous_day"),
-      supabase.from("bs_elimination_odds_snapshots").select("race_date,course_code,race_no,captured_at,odds").gte("race_date", start).lt("race_date", next).order("captured_at", { ascending: true }),
+        .order("race_date", { ascending: false }).order("prediction_id", { ascending: false })),
+      fetchMonthlyPages(() => supabase.from("bsc_official_predictions").select("id,snapshot").gte("race_date", start).lt("race_date", next).eq("timing", "previous_day").order("id", { ascending: true })),
+      fetchMonthlyPages(() => supabase.from("bs_elimination_odds_snapshots").select("race_date,course_code,race_no,captured_at,odds").gte("race_date", start).lt("race_date", next).order("captured_at", { ascending: true }).order("id", { ascending: true })),
     ]);
 
     if (performanceRes.error) throw performanceRes.error;
@@ -177,7 +189,22 @@ export async function GET(request) {
     const confidenceStats = summarize(confidenceRows);
     const oddsStats = summarize(oddsRows);
 
+    const settledRows = rows.filter((row) => row.settled_at);
+    const latestResultAt = settledRows.reduce((latest, row) => row.settled_at > latest ? row.settled_at : latest, "");
+    const endDate = settledRows.reduce((latest, row) => row.race_date > latest ? row.race_date : latest, "");
+    const uniqueRaceCount = new Set(settledRows.map(raceKey)).size;
+
     return NextResponse.json({
+      scope: {
+        startDate: start,
+        endDate: endDate || null,
+        latestResultAt: latestResultAt || null,
+        generatedAt: new Date().toISOString(),
+        predictionCount: settledRows.length,
+        uniqueRaceCount,
+        timing: "previous_day",
+        settledOnly: true,
+      },
       character: character || null,
       modes: {
         equal: {
@@ -190,15 +217,15 @@ export async function GET(request) {
           ready: true,
           stats: confidenceStats,
           bets: confidenceRows.slice(0, 16).map(toBetCard),
-          rule: "自信上位300円・中間200円・下位100円",
+          rule: "保存された買い目順位の上位300円・中間200円・下位100円",
         },
         odds: {
           ready: oddsRows.length > 0,
           stats: oddsRows.length ? oddsStats : null,
           bets: oddsRows.slice(0, 16).map(toBetCard),
           rule: "低オッズ側300円・中間200円・高オッズ側100円",
-          coverageRaceCount: oddsRows.length,
-          totalRaceCount: rows.length,
+          coverageRaceCount: oddsStats.totalRace,
+          totalRaceCount: equalStats.totalRace,
         },
       },
     }, { headers: { "Cache-Control": "no-store" } });

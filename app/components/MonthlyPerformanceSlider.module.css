@@ -382,3 +382,13 @@
   .ticketText { font-size: 11px; }
   .ticketStake { font-size: 7px; }
 }
+
+/* Compact equal-stake overview used only by the home AI summary. */
+.overview { margin-top: 10px; }
+.overview .slide { padding: 0; }
+.overview .modeHeader { display: none; }
+.overview .metricCard { min-height: 94px; padding: 14px 8px; border-color: #edcf7d; border-radius: 16px; background: linear-gradient(180deg, #fff, #fffdf5); box-shadow: 0 3px 10px #9d74100a; }
+.overview .metricCard span { color: #806519; font-size: 12px; font-weight: 700; }
+.overview .metricCard strong { color: #17345c; font-size: 30px; font-variant-numeric: tabular-nums; margin-top: 8px; }
+.overview .metricCard small { color: #526079; font-size: 12px; }
+@media (max-width: 360px) { .overview .metricCard strong { font-size: 26px; } .overview .metricCard span { font-size: 11px; } }

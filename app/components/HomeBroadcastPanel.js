@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./HomeBroadcastPanel.module.css";
 import entryStyles from "./HomeEntryCta.module.css";
 import { getProgramPresetByTitle } from "../../lib/programPresets";
-import { BETA_ACCESS_END_LABEL } from "../members/planGuide";
 
 const TYPE_LABELS = { radio:"ラジオ", short:"ショート動画", note:"note", live:"生放送", comic:"コミック", other:"お知らせ" };
 
@@ -15,7 +14,7 @@ function jstParts(date = new Date()) {
 }
 function mins(value){ const [h,m]=String(value||"00:00").slice(0,5).split(":").map(Number); return h*60+m; }
 
-export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [] }) {
+export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [], predictionEntry, membershipEntry }) {
   const [now,setNow] = useState(new Date());
 
   useEffect(()=>{
@@ -30,11 +29,7 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
 
   return <section className={styles.wrap}>
     <section className={entryStyles.section} aria-labelledby="home-entry-title">
-      <div className={entryStyles.heading}>
-        <span>START HERE</span>
-        <h2 id="home-entry-title">まずはここから</h2>
-        <p>目的に合わせて、3つの入口からすぐに始められます。</p>
-      </div>
+      <h2 id="home-entry-title" className={entryStyles.heading}>今日のレース・予想を見る</h2>
 
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
         <a
@@ -42,33 +37,20 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           className={entryStyles.featuredBanner}
           aria-label="BoatStrikers TODAY 今日のレースを見る"
         >
-          <img
-            src="/todayrace.png"
-            alt="BoatStrikers TODAY 今日のレースを見る"
-          />
+          <img src="/todayrace.png" alt="BoatStrikers TODAY 今日のレースを見る" />
         </a>
 
-        <a href="/guide" className={entryStyles.card}>
-          <span className={entryStyles.icon} aria-hidden="true">📖</span>
-          <div>
-            <small>FIRST GUIDE</small>
-            <strong>初めての方</strong>
-            <p>BoatStrikersの使い方とレースの基本</p>
-          </div>
-          <b aria-hidden="true">›</b>
-        </a>
-
-        <a href="/members" className={`${entryStyles.card} ${entryStyles.member}`}>
-          <span className={entryStyles.icon} aria-hidden="true">✨</span>
-          <div>
-            <small>β PREMIUM FREE</small>
-            <strong>無料会員になる</strong>
-            <p>{BETA_ACCESS_END_LABEL}までPREMIUM相当機能を無料開放</p>
-          </div>
+        <a href="#ai-partners" className={entryStyles.card}>
+          <span className={entryStyles.icon} aria-hidden="true">🔎</span>
+          <strong>AI診断・キャラ予想<span>イン逃げ・5号艇・女子戦から選ぶ</span></strong>
           <b aria-hidden="true">›</b>
         </a>
       </nav>
+      <a href="/guide" className={entryStyles.guide}>はじめての方へ · レースの基本と使い方 <span aria-hidden="true">›</span></a>
     </section>
+
+    {predictionEntry}
+    {membershipEntry}
 
     <div className={styles.ticker}>
       <strong>📢 速報</strong>
@@ -76,14 +58,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
     </div>
 
 
-    <div className={styles.card}>
-      <div className={styles.todayBannerWrap}>
-        <img
-          className={styles.todayBanner}
-          src="/top/Untitled design.png"
-          alt="今日の予定 本日の配信をチェック"
-        />
-      </div>
+    <div className={`${styles.card} ${!today.length ? styles.compact : ""}`}>
+      <header><h2>今日の配信予定</h2><a href="/schedule">番組表 ›</a></header>
       <div className={styles.list}>
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
@@ -107,12 +83,10 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           const rowClass=`${preset?styles.hasIcon:""} ${ended?styles.past:""}`.trim();
           return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
         }):<div className={styles.empty}>
-          <strong>📅 本日の配信予定はありません</strong>
-          <span>初心者講座やDATA LAB、全国24場攻略の最新記事をお楽しみください。</span>
-          <div><a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library/stadiums">24場攻略</a></div>
+          <span>本日の配信予定はありません。</span>
         </div>}
       </div>
-      <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
+      {today.length > 0 && <a className={styles.more} href="/schedule">番組表をすべて見る →</a>}
     </div>
 
   </section>;

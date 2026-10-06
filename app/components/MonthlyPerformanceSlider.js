@@ -5,7 +5,7 @@ import styles from "./MonthlyPerformanceSlider.module.css";
 
 const MODES = [
   { key: "equal", label: "均等買い", note: "全買い目を100円で購入" },
-  { key: "confidence", label: "自信配分", note: "自信上位300円・中間200円・下位100円" },
+  { key: "confidence", label: "買い目順位配分", note: "保存された買い目順位の上位300円・中間200円・下位100円" },
   { key: "odds", label: "オッズ配分", note: "低オッズ側300円・中間200円・高オッズ側100円" },
 ];
 
@@ -48,13 +48,14 @@ function BetCard({ item }) {
   );
 }
 
-export default function MonthlyPerformanceSlider({ initialEqualStats, character }) {
+export default function MonthlyPerformanceSlider({ initialEqualStats, character, detailData, overview = false, showBets = true }) {
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [detail, setDetail] = useState(null);
   const [expandedModes, setExpandedModes] = useState({});
 
   useEffect(() => {
+    if (detailData) return;
     let cancelled = false;
     setDetail(null);
     setActiveIndex(0);
@@ -64,13 +65,13 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
       .then((data) => { if (!cancelled && data) setDetail(data); })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [character]);
+  }, [character, detailData]);
 
   // A successful zero-race summary is real data; an absent summary is not.
-  const modes = detail?.modes || (initialEqualStats ? {
+  const modes = (detailData || detail)?.modes || (initialEqualStats ? {
     equal: { ready: true, stats: initialEqualStats, bets: [] },
   } : {});
-  const visibleModes = MODES.filter((mode) => modes[mode.key]?.ready && modes[mode.key]?.stats);
+  const visibleModes = MODES.filter((mode) => (!overview || mode.key === "equal") && modes[mode.key]?.ready && modes[mode.key]?.stats);
   const selectedIndex = Math.min(activeIndex, Math.max(0, visibleModes.length - 1));
 
   function goTo(index) {
@@ -91,10 +92,10 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
   if (!visibleModes.length) return null;
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.tabs} role="tablist" aria-label="資金配分方式">
+    <div className={`${styles.wrapper} ${overview ? styles.overview : ""}`}>
+      {!overview && <div className={styles.tabs} role="tablist" aria-label="資金配分方式">
         {visibleModes.map((mode, index) => <button key={mode.key} type="button" role="tab" aria-selected={selectedIndex === index} className={selectedIndex === index ? styles.activeTab : ""} onClick={() => goTo(index)}>{mode.label}</button>)}
-      </div>
+      </div>}
       {visibleModes.length > 1 ? <div className={styles.swipeHint}>← 横にスライドして切り替え →</div> : null}
       <div ref={sliderRef} className={styles.slider} onScroll={handleScroll}>
         {visibleModes.map((mode) => {
@@ -107,14 +108,14 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
           const canToggle = bets.length > 4;
           return (
             <section className={styles.slide} key={mode.key} role="tabpanel">
-              <div className={styles.modeHeader}><div><strong>{mode.label}</strong><span>{note}</span>{mode.key === "odds" && data?.ready && data?.coverageRaceCount < data?.totalRaceCount ? <span>※保存オッズがある {data.coverageRaceCount}R のみ集計</span> : null}</div></div>
+              <div className={styles.modeHeader}><div><strong>{mode.label}</strong><span>{note}</span>{mode.key === "odds" && data?.ready && data?.coverageRaceCount < data?.totalRaceCount ? <span>※保存オッズがある {data.coverageRaceCount}件のみ集計</span> : null}</div></div>
               <div className={styles.metrics}>
-                <MetricCard label="予想レース数" value={data?.ready ? Number(stats.totalRace || 0).toLocaleString("ja-JP") : "—"} suffix="R" />
+                <MetricCard label="集計対象の予想件数" value={data?.ready ? Number(stats.totalRace || 0).toLocaleString("ja-JP") : "—"} suffix="件" />
                 <MetricCard label="的中率" value={data?.ready ? formatNumber(stats.hitRate) : "—"} suffix="%" />
                 <MetricCard label="回収率" value={data?.ready ? formatNumber(stats.recoveryRate) : "—"} suffix="%" />
-                <MetricCard label="最高配当" value={data?.ready ? Math.round(Number(stats.maxPayout || 0)).toLocaleString("ja-JP") : "—"} suffix="円" />
+                <MetricCard label="最高払戻額" value={data?.ready ? Math.round(Number(stats.maxPayout || 0)).toLocaleString("ja-JP") : "—"} suffix="円" />
               </div>
-              {bets.length > 0 ? (
+              {showBets && bets.length > 0 ? (
                 <div className={styles.betsArea}>
                   <div className={styles.betsHeading}><strong>今月の買い目</strong><span>最新順</span></div>
                   <><div className={styles.betGrid}>{visibleBets.map((item) => <BetCard key={`${item.raceDate}-${item.courseCode}-${item.raceNo}-${item.characterCode}`} item={item} />)}</div>{canToggle ? <button type="button" className={styles.moreBetsButton} onClick={() => setExpandedModes((current) => ({ ...current, [mode.key]: !isExpanded }))} aria-expanded={isExpanded}>{isExpanded ? "閉じる ↑" : `もっと見る（あと${Math.min(4, Math.max(0, bets.length - 4))}件） ↓`}</button> : null}</>
@@ -124,7 +125,7 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character 
           );
         })}
       </div>
-      <div className={styles.dots} aria-hidden="true">{visibleModes.map((mode, index) => <span key={mode.key} className={selectedIndex === index ? styles.activeDot : ""} />)}</div>
+      {!overview && <div className={styles.dots} aria-hidden="true">{visibleModes.map((mode, index) => <span key={mode.key} className={selectedIndex === index ? styles.activeDot : ""} />)}</div>}
     </div>
   );
 }

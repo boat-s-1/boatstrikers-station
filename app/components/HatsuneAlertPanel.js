@@ -1,3 +1,4 @@
+import { AiDiagnosisHeading } from "./AiPartnerGuide";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
@@ -58,6 +59,7 @@ export default async function HatsuneAlertPanel(){
   const [todayRows,yRows,allRows]=await Promise.all([getRows(supabase,today),getRows(supabase,yesterday),getRows(supabase)]);
   const [yPerf,allPerf]=await Promise.all([getPerformance(supabase,yRows),getPerformance(supabase,allRows)]);
   return <section style={{margin:"18px 14px",borderRadius:24,overflow:"hidden",background:"#fff",boxShadow:"0 8px 24px rgba(101,56,122,.10)",border:"2px solid #f06aa6"}}>
+      <AiDiagnosisHeading character="hatsune" title="女子イン崩れ診断" />
     <div style={{position:"relative",overflow:"hidden",background:"#fff4fa",borderBottom:"1px solid #ead7f5"}}>
       <img src="/top/IMG_7873.jpeg?v=20260901-0506" alt="女子イン崩れ理論" style={{display:"block",width:"100%",height:"auto",margin:0,borderRadius:0}} />
       <span style={{position:"absolute",top:10,right:10,padding:"7px 10px",borderRadius:999,background:"rgba(255,255,255,.92)",color:"#526079",fontSize:12,fontWeight:900}}>{formatDate(today)}</span>
@@ -69,7 +71,7 @@ export default async function HatsuneAlertPanel(){
       </div>
       <div style={{marginTop:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><PerfCard label="昨日" perf={yPerf}/><PerfCard label="全期間" perf={allPerf}/></div>
     </div>
-    <div style={{padding:"8px 14px 2px",fontSize:13,fontWeight:900,color:"#17345c"}}>今日のアラート一覧</div>
+    <div style={{padding:"8px 14px 2px",fontSize:13,fontWeight:900,color:"#17345c"}}>今日のAI診断一覧</div>
     {todayRows.length?<div style={{padding:"14px 14px 8px",display:"flex",gap:12,overflowX:"auto",scrollSnapType:"x mandatory",WebkitOverflowScrolling:"touch"}}>
       {todayRows.map(a=><article key={a.id} style={{flex:"0 0 88%",scrollSnapAlign:"start",border:"1px solid #ead3f1",borderRadius:17,padding:14,background:"#fffaff",boxSizing:"border-box"}}>
         <div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"center"}}><strong style={{fontSize:20,color:"#17345c"}}>{a.course_name||`${a.course_code}場`} {a.race_no}R</strong><span style={{padding:"6px 9px",borderRadius:999,background:"#fde6f1",color:"#b43d78",fontSize:12,fontWeight:900}}>{a.danger_level==="super_danger"?"超警戒":"条件成立"}</span></div>
@@ -80,3 +82,4 @@ export default async function HatsuneAlertPanel(){
     <div style={{padding:"0 14px 16px"}}><Link href="/members/discord" style={{display:"block",textAlign:"center",textDecoration:"none",padding:"12px 14px",borderRadius:14,background:"#5865f2",color:"#fff",fontWeight:900,fontSize:14}}>通知を設定する</Link><p style={{margin:"8px 0 0",color:"#526079",fontSize:13,textAlign:"center"}}>Discordで初音のアラートを受け取る</p></div>
   </section>;
 }
+

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AiPartnerGuide, { CharacterPredictionHeading } from "../components/AiPartnerGuide";
 import RealtimeUpdates from "../components/RealtimeUpdates";
 import Parser from "rss-parser";
 import HitGallery from "../components/HitGallery";
@@ -13,11 +14,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "一果｜イン逃げ・1号艇分析・ボートレース攻略",
-  description: "BoatStrikers一果の専門ページ。イン逃げ、1号艇、進入、スタート、展示、相手関係の見方を解説し、新聞・研究記事・成績とあわせて確認できます。",
+  title: "一果＆いちまる｜イン逃げ・1号艇分析・ボートレース攻略",
+  description: "相棒AI・いちまるが診断し、一果が予想するBoatStrikersの専門ページ。イン逃げ、1号艇、進入、スタート、展示、相手関係の見方を解説し、新聞・研究記事・成績とあわせて確認できます。",
   alternates: { canonical: "/ichika" },
   openGraph: {
-    title: "一果｜イン逃げ・1号艇分析｜BoatStrikers",
+    title: "一果＆いちまる｜イン逃げ・1号艇分析｜BoatStrikers",
     description: "イン逃げを艇番だけで決めず、進入・スタート・展示・相手関係まで重ねて見るBoatStrikers一果の専門ページです。",
     url: "/ichika",
     type: "website",
@@ -224,7 +225,7 @@ export default async function IchikaPage() {
 
       <section className="sectionCard pinkCard">
         <h1>一果のイン逃げ研究室</h1>
-        <p>一果は「1号艇だから買う」ではなく、1コースに入れるか、スタートで外に先行されないか、展示で足落ちがないか、2〜4コースに強い攻め艇がいないかを順番に確認します。イン逃げは1号艇単体ではなく、相手との比較で見ます。</p>
+        <p>いちまるが進入・スタート・展示・相手関係を診断し、一果が買い目を考えます。「1号艇だから買う」ではなく、1コースに入れるか、スタートで外に先行されないか、展示で足落ちがないか、2〜4コースに強い攻め艇がいないかを順番に確認します。イン逃げは1号艇単体ではなく、相手との比較で見ます。</p>
         <h2>イン逃げを見る5つのポイント</h2>
         <ol>
           <li><strong>進入：</strong>1号艇が1コースを確保できるか、前付けで深くならないか。</li>
@@ -241,7 +242,15 @@ export default async function IchikaPage() {
         </div>
       </section>
 
-      <RealtimeUpdates target="ichika" limit={5} />
+      <AiPartnerGuide character="ichika" />
+      <div id="ai-diagnosis" style={{ scrollMarginTop: 100 }}>
+        <RealtimeUpdates target="ichika" limit={5} />
+      </div>
+      <div id="character-predictions" style={{ margin: "24px 14px 0", scrollMarginTop: 100 }}>
+        <CharacterPredictionHeading character="ichika">
+          <p>いちまるの診断を参考にした一果の予想は、公開された予想新聞でご覧いただけます。</p>
+        </CharacterPredictionHeading>
+      </div>
 
       <section className="sectionCard pinkCard bannerTopCard">
         <div className="sectionBannerCrop">
@@ -261,6 +270,7 @@ export default async function IchikaPage() {
 
       <section className="sectionCard pinkCard">
         <img src="/IMG_6131.jpeg" alt="一果成績" className="homeTitleImage" />
+        <p className="recordLead">キャラ名義の公開買い目の実績です。従来の予想を含み、AI診断精度とは別に集計しています。</p>
         <p className="recordLead">最終更新：{result.updated || "まだ登録がありません"}</p>
         {result.errorMessage && <p className="recordLead" style={{ color: "#d93025", wordBreak: "break-word" }}>成績取得エラー：{result.errorMessage}</p>}
         <div className="recordGrid">
@@ -286,3 +296,4 @@ export default async function IchikaPage() {
     </main>
   );
 }
+

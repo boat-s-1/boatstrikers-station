@@ -34,3 +34,13 @@
 @media(max-width:480px){.popup{bottom:calc(65px + env(safe-area-inset-bottom));grid-template-columns:minmax(0,216px) 80px}.bubble{padding:17px 12px 11px}.bubble strong{font-size:13px}.character{width:114px}.tags span{font-size:7.5px}}
 @media(max-width:380px){.popup{right:8px;bottom:calc(63px + env(safe-area-inset-bottom));grid-template-columns:minmax(0,196px) 66px;max-width:calc(100vw - 16px)}.characterWrap{height:116px}.character{width:100px;bottom:0}.bubble{padding:16px 11px 10px}.bubble strong{font-size:12.5px}.name{left:11px}}
 @media(prefers-reduced-motion:reduce){.popup{animation:none}}
+/* Home notice remains available without covering the central reading column. */
+.homePopup { grid-template-columns: minmax(0,180px) 48px; gap: 4px; filter: drop-shadow(0 4px 10px #17345c14); }
+.homePopup .characterWrap { height: 80px; }
+.homePopup .character { width: 72px; }
+.homePopup .bubble { padding: 14px 10px 8px; border-width: 1px; border-radius: 14px; }
+.homePopup .bubble strong { font-size: 12px; }
+.homePopup .bubble small, .homePopup .bubble p, .homePopup .sparkleOne, .homePopup .sparkleTwo { display: none; }
+.homePopup .link { padding: 5px 8px; margin-top: 5px; box-shadow: none; }
+.homePopup .name { min-height: 19px; font-size: 9px; padding: 2px 8px; box-shadow: none; }
+@media (max-width: 600px) { .homePopup { position: relative; right: auto; bottom: auto; width: 100%; max-width: 400px; margin: 18px auto 110px; padding: 0 14px; } .homePopup .close { right: 8px; } }

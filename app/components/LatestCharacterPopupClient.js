@@ -61,7 +61,7 @@ export default function LatestCharacterPopupClient({
   const cta = characterKey === "hatsune" ? "チェックする♡" : characterKey === "kiina" ? "見にいく☆" : "見てみる♪";
 
   return (
-    <aside className={`${styles.popup} ${styles[characterKey] || ""}`} aria-label="最新更新のお知らせ">
+    <aside className={`${styles.popup} ${styles[characterKey] || ""} ${pathname === "/" ? styles.homePopup : ""}`} aria-label="最新更新のお知らせ">
       <button className={styles.close} type="button" onClick={close} aria-label="閉じる">×</button>
       <div className={styles.characterWrap}>
         <img src={image} alt={`${name} ${pose}`} className={styles.character} />
