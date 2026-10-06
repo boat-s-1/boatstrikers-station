@@ -79,8 +79,8 @@ export default function HomeAiPerformance() {
           <p className={styles.updated}>結果更新 {timeLabel(data.scope.latestResultAt)}</p>
           <details className={styles.conditions}>
             <summary>集計条件・過去データについて</summary>
-            <p className={styles.history}>従来のキャラ名義で保存された公開買い目を、担当する相棒AI別に表示しています。診断精度とは別の集計です。</p>
-            <p className={styles.countNote}>対象は{data.scope.uniqueRaceCount}レース。同じレースの担当別買い目はそれぞれ1件として集計します。</p>
+            <p>従来のキャラ名義で保存された公開買い目を、担当する相棒AI別に表示しています。診断精度とは別の集計です。</p>
+            <p>対象は{data.scope.uniqueRaceCount}レース。同じレースの担当別買い目はそれぞれ1件として集計します。</p>
           </details>
           {data.scope.predictionCount > 0 && (
               <details className={styles.comparison}>
