@@ -3,7 +3,7 @@ import AiPartnerGuide from "./components/AiPartnerGuide";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
 import { getMonthlyPublicPredictionResults } from "../lib/publicPredictionResults";
-import MemberSlider from "./MemberSlider";
+import MonthlyPerformanceSlider from "./components/MonthlyPerformanceSlider";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
 import HomeRaceInfo from "./components/HomeRaceInfo";
@@ -292,21 +292,6 @@ export default async function Home() {
   </div>
 </section>   
 
-      <section className="homeSectionCard purple homeBannerFlush">
-  <img
-  src="/IMG_6117.jpeg"
-  alt="メンバー紹介"
-  className="homeTitleImage"
-/>
-
-  <MemberSlider />
-</section>
-
-
-
-
-  
-
    <section className="homeSectionCard yellow resultSummarySection homeBannerFlush">
   <img
     src="/IMG_6116.jpeg"
@@ -331,79 +316,8 @@ export default async function Home() {
 
   <p className="homeSectionLead">キャラ名義で公開された買い目の実績です。従来の公開予想も含み、相棒AIの診断精度とは別に集計しています。</p>
 
-  {results.totalRace === 0 ? (
-    <div className="resultEmptyState">
-      <span aria-hidden="true">📊</span>
-      <strong>今月の予想実績は集計中です</strong>
-      <p>予想実績が登録されると、ここに自動で表示されます。</p>
-      <a href="/library" className="resultEmptyLink">最新の攻略記事・データを見る ›</a>
-    </div>
-  ) : (
-    <>
-      <div className="resultStatsGrid">
-        <div className="resultStatCard">
-          <span>予想レース数</span>
-          <strong>{results.totalRace}<small>R</small></strong>
-        </div>
-        <div className="resultStatCard">
-          <span>的中率</span>
-          <strong>{results.hitRate.toFixed(1)}<small>%</small></strong>
-        </div>
-        <div className="resultStatCard">
-          <span>回収率</span>
-          <strong>{results.recoveryRate.toFixed(1)}<small>%</small></strong>
-        </div>
-        <div className="resultStatCard">
-          <span>最高払戻</span>
-          <strong>{results.maxPayout.toLocaleString()}<small>円</small></strong>
-        </div>
-      </div>
+  <MonthlyPerformanceSlider initialEqualStats={results} />
 
-      <div className="resultMemberGrid" aria-label="キャラクター別予想実績">
-        {results.members.map((member) => (
-          <a
-            href={member.href}
-            className={`resultMemberCard resultMemberCard--${member.name}`}
-            key={member.name}
-            aria-label={`${member.label}のページを見る`}
-          >
-            <img
-              src={member.icon}
-              alt={`${member.label}のアイコン`}
-              className="resultMemberIcon"
-              width="52"
-              height="52"
-              style={{
-                width: "52px",
-                height: "52px",
-                minWidth: "52px",
-                maxWidth: "52px",
-                minHeight: "52px",
-                maxHeight: "52px",
-                objectFit: "cover",
-                borderRadius: "50%",
-                flexShrink: 0,
-              }}
-            />
-            <div className="resultMemberContent">
-              <div className="resultMemberHeading">
-                <div>
-                  <span className="resultMemberName">{member.label}</span>
-                  <span className="resultMemberRole">{member.role}</span>
-                </div>
-                <span className="resultMemberArrow" aria-hidden="true">›</span>
-              </div>
-              <div className="resultMemberNumbers">
-                <span><b>{member.raceCount}</b>R</span>
-                <span><b>{member.hitCount}</b>的中</span>
-                <span>回収率 <b>{member.recoveryRate.toFixed(1)}</b>%</span>
-              </div>
-            </div>
-          </a>
-        ))}
-      </div>
-    </>
-  )}
 </section>
 
     
