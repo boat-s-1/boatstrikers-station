@@ -3,3 +3,14 @@
 @media(prefers-reduced-motion:reduce){.track{animation:none}.track span{padding-left:14px}.track span+span{display:none}}.todayBannerWrap{position:relative;overflow:hidden;background:#eaf8ff}.todayBanner{display:block;width:100%;height:auto;object-fit:contain}.card{overflow:hidden;padding:0 15px 15px}.todayBannerWrap{width:auto;margin:0 -15px;border-radius:20px 20px 0 0;box-shadow:none}.todayBanner{display:block;width:100%;height:auto;aspect-ratio:auto;object-fit:contain}.list{margin-top:12px}.more{margin-top:13px}@media(max-width:520px){.card{padding:0 11px 12px}.todayBannerWrap{width:auto;margin-left:-11px;margin-right:-11px;border-radius:20px 20px 0 0}.list{margin-top:10px}}.empty strong,.empty span{display:block}.empty span{margin-top:6px;font-size:11px;line-height:1.6}.empty div{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}.empty a{padding:6px 11px;border-radius:999px;color:#087eb9;background:#e3f5fd;text-decoration:none;font-size:10px;font-weight:900}
 
 .todayEntryImageLink{display:block;margin-top:13px;overflow:hidden;border-radius:18px;text-decoration:none;line-height:0;transition:transform .16s ease,box-shadow .16s ease}.todayEntryImageLink:hover{transform:translateY(-2px);box-shadow:0 9px 20px rgba(15,91,140,.12)}.todayEntryImageLink:focus-visible{outline:3px solid #ffd43b;outline-offset:2px}.todayEntryImage{display:block;width:100%;height:auto;object-fit:contain}
+
+/* Quiet functional cards on the home page. */
+.card { border: 1px solid #d5e1ef; border-radius: 20px; box-shadow: 0 4px 16px #17345c08; }
+.card header { align-items: center; padding-bottom: 10px; }
+.card header h2 { font-size: 18px; margin: 0; }
+.card header a { color: #146eaa; font-size: 12px; font-weight: 700; text-decoration: none; }
+.compact .list { margin-top: 8px; }
+.compact .empty { padding: 2px 0; border: 0; background: none; text-align: left; font-size: 13px; }
+.ticker { margin-top: 18px; border-color: #d5e1ef; box-shadow: none; }
+.ticker > strong { background: #146eaa; font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .track { animation: none; } .track span { padding-left: 12px; } }

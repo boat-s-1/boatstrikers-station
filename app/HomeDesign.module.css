@@ -1,0 +1,30 @@
+/* Home-only reading surfaces; specialist pages retain their character styling. */
+.home { --home-ink: #17345c; --home-line: #d5e1ef; --home-radius: 20px; }
+.home :global(.homeMediaIntro) { margin-top: 18px; padding: 20px 18px 8px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.home :global(.homeMediaIntro) h1 { font-size: 22px; line-height: 1.55; letter-spacing: -.025em; margin: 6px 0 10px; }
+.home :global(.homeMediaIntro) h1 span { display: block; }
+.home :global(.homeMediaIntro) p { font-size: .875rem; line-height: 1.8; color: #526079; }
+.home :global(.homeMediaIntro) > span { color: #146eaa; }
+.home :global(.homeSectionCard), .home :global(.homeMediaGuide), .home :global(.aboutBoatStrikers) { border: 1px solid var(--home-line); border-radius: var(--home-radius); background: #fff; box-shadow: 0 4px 16px #17345c08; }
+.home :global(.homeMediaGuide) { padding: 18px; }
+.home :global(.homeMediaGuideHeading) h2 { font-size: 20px; line-height: 1.5; }
+.home :global(.homeMediaGuideGrid) { grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+.home :global(.homeMediaGuideCard) { min-height: 0; padding: 14px 12px 14px 64px; border-radius: 14px; box-shadow: none; background: #fff; border-top-width: 1px; }
+.home :global(.homeMediaGuideIcon) { width: 36px; height: 36px; top: 14px; left: 14px; border-radius: 10px; }
+.home :global(.homeMediaGuideCard) h3 { font-size: 16px; }
+.home :global(.homeMediaGuideCard) p { font-size: 12px; }
+.home :global(.aboutBoatStrikersInner) { padding: 22px 18px; border-radius: var(--home-radius); background: #fff; }
+.home :global(.aboutHeading) h2 { font-size: 24px; line-height: 1.5; letter-spacing: 0; }
+.home :global(.aboutHeading) h2 span { display: inline-block; }
+.home :global(.aboutHeading) h2::after { height: 3px; margin-top: 10px; }
+.home :global(.aboutDescription) { margin-top: 16px; padding: 0; border: 0; background: none; }
+.home :global(.aboutDescription) p { font-size: 14px; line-height: 1.9; }
+.home :global(.aboutFeatureGrid) { grid-template-columns: 1fr; gap: 10px; }
+.home :global(.aboutFeatureCard) { padding: 14px; border-radius: 14px; box-shadow: none; border-top-width: 1px; }
+.home :global(.hero) { margin-top: 20px; border-radius: 16px; }
+.home :global([data-beta-member-placement]) { margin: 20px 0; }
+@media (max-width: 380px) { .home :global(.homeMediaIntro) { padding-inline: 12px; } .home :global(.homeMediaIntro) h1 { font-size: 19px; } }
+.home :global(.homeSectionHeading) { padding: 18px 18px 0; }
+.home :global(.homeSectionHeading) > span { color: #146eaa; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.home :global(.homeSectionHeading) h2 { font-size: 20px; line-height: 1.5; margin: 6px 0; }
+.home :global(.homeSectionHeading) p { font-size: 13px; line-height: 1.7; color: #526079; margin: 0; }

@@ -3,6 +3,7 @@ import { AiPartnerEntry } from "./components/AiPartnerGuide";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
 import HomeAiPerformance from "./components/HomeAiPerformance";
+import homeStyles from "./HomeDesign.module.css";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
 import HomeRaceInfo from "./components/HomeRaceInfo";
@@ -179,41 +180,36 @@ export default async function Home() {
     : noteNews;
 
   return (
-    <main className="page">
+    <main className={`page ${homeStyles.home}`} data-home-design="calm">
       <header className="header">
         <div className="logo">BOAT<br /><span>STRIKERS</span></div>
         <a className="memberMini" href="/members" aria-label="会員登録・LINE・Discord通知設定">会員・通知</a>
       </header>
 
-      <section className="hero">
-        <Image
-          src="/hero.jpg"
-          alt="BoatStrikers"
-          width={1536}
-          height={864}
-          priority
-          className="heroImage"
-        />
-
-      </section>
-
       <section className="homeMediaIntro" aria-labelledby="home-media-intro-title">
-        <span>BOAT RACE INFORMATION MEDIA</span>
-        <h1 id="home-media-intro-title">ボートレースを、もっと楽しく、もっと分かりやすく。</h1>
+        <span>BOATSTRIKERS</span>
+        <h1 id="home-media-intro-title"><span>ボートレースを、</span><span>もっと楽しく、分かりやすく。</span></h1>
         <p>
-          BoatStrikersは、全国24場の水面特徴、展示データ、選手情報、
-          女子戦ニュース、初心者向け講座などを発信するボートレース情報メディアです。
-          相棒AIのいちまる・きいもこ・はつころがデータを診断し、一果・キイナ・初音がその診断をもとに予想や解説を届けます。
+          相棒AIの診断と、3人のキャラ予想。<br />今日のレースを楽しむヒントを届けます。
         </p>
       </section>
 
-      <HomeBroadcastPanel tickerItems={cms.tickerItems} scheduleItems={cms.scheduleItems} predictionEntry={<AiPartnerEntry />} />
+      <HomeBroadcastPanel
+        tickerItems={cms.tickerItems}
+        scheduleItems={cms.scheduleItems}
+        predictionEntry={<AiPartnerEntry />}
+        membershipEntry={<section className="hero" aria-label="BoatStrikersのご案内"><Image src="/hero.jpg" alt="BoatStrikers" width={1536} height={864} className="heroImage" /></section>}
+      />
 
       <HomeRaceInfo
         courses={raceData.courses}
         raceDate={raceData.raceDate}
         realtimeLimit={3}
       />
+
+      <section className="homeSectionCard resultSummarySection" aria-label="今月のAI公開買い目成績">
+        <HomeAiPerformance />
+      </section>
 
       <section className="homeMediaGuide" aria-labelledby="home-media-guide-title">
         <div className="homeMediaGuideHeading">
@@ -256,11 +252,7 @@ export default async function Home() {
       
 
         <section className="homeSectionCard pink homeBannerFlush">
-  <img
-  src="/IMG_6118.jpeg"
-  alt="新聞"
-  className="homeTitleImage"
-/>
+  <div className="homeSectionHeading"><span>NEWSPAPERS</span><h2>予想新聞を読む</h2><p>AI診断を参考にした、キャラごとの予想と解説。</p></div>
 
   <div className="todayNewsGrid">
     {news.map((n) => (
@@ -286,10 +278,6 @@ export default async function Home() {
     ))}
   </div>
 </section>   
-
-      <section className="homeSectionCard yellow resultSummarySection" aria-label="今月のAI公開買い目成績">
-        <HomeAiPerformance />
-      </section>
 
     
 
@@ -351,7 +339,7 @@ export default async function Home() {
       <span className="aboutHeadingEnglish">ABOUT BOATSTRIKERS</span>
 
       <h2 id="about-title">
-        BoatStrikersについて
+        <span>BoatStrikers</span><span>について</span>
       </h2>
 
       <p className="aboutHeadingSub">
@@ -367,7 +355,7 @@ export default async function Home() {
 
       <p>
         一果＆いちまるのイン逃げ、初音＆はつころの女子戦、
-        キイナの5号艇・穴狙い情報を中心に、
+        キイナ＆きいもこの5号艇・穴狙い情報を中心に、
         出走表、展示情報、予想新聞、全国24場攻略、
         漫画、動画、ラジオなどを配信しています。
       </p>
@@ -486,4 +474,3 @@ export default async function Home() {
 </main>
   );
 }
-

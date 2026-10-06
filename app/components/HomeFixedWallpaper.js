@@ -18,7 +18,7 @@ export default function HomeFixedWallpaper() {
           zIndex: 0,
           pointerEvents: "none",
           backgroundColor: "#f5f9ff",
-          backgroundImage: `url("${WALLPAPER}")`,
+          backgroundImage: `linear-gradient(rgba(245,249,255,.52), rgba(245,249,255,.52)), url("${WALLPAPER}")`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center center",
           backgroundSize: "cover",

@@ -92,7 +92,7 @@ export default function MonthlyPerformanceSlider({ initialEqualStats, character,
   if (!visibleModes.length) return null;
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${overview ? styles.overview : ""}`}>
       {!overview && <div className={styles.tabs} role="tablist" aria-label="資金配分方式">
         {visibleModes.map((mode, index) => <button key={mode.key} type="button" role="tab" aria-selected={selectedIndex === index} className={selectedIndex === index ? styles.activeTab : ""} onClick={() => goTo(index)}>{mode.label}</button>)}
       </div>}

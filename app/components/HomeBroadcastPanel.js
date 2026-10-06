@@ -14,7 +14,7 @@ function jstParts(date = new Date()) {
 }
 function mins(value){ const [h,m]=String(value||"00:00").slice(0,5).split(":").map(Number); return h*60+m; }
 
-export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [], predictionEntry }) {
+export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [], predictionEntry, membershipEntry }) {
   const [now,setNow] = useState(new Date());
 
   useEffect(()=>{
@@ -29,47 +29,30 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
 
   return <section className={styles.wrap}>
     <section className={entryStyles.section} aria-labelledby="home-entry-title">
-      <div className={entryStyles.heading}>
-        <span>START HERE</span>
-        <h2 id="home-entry-title">まずはここから</h2>
-        <p>目的に合わせて、3つの入口からすぐに始められます。</p>
-      </div>
+      <h2 id="home-entry-title" className={entryStyles.heading}>今日のレース・予想を見る</h2>
 
       <nav className={entryStyles.nav} aria-label="BoatStrikersを始める">
         <a
           href={`/races?date=${current.date}`}
-          className={entryStyles.featuredBanner}
+          className={`${entryStyles.card} ${entryStyles.primary}`}
           aria-label="BoatStrikers TODAY 今日のレースを見る"
         >
-          <img
-            src="/todayrace.png"
-            alt="BoatStrikers TODAY 今日のレースを見る"
-          />
-        </a>
-
-        <a href="/guide" className={entryStyles.card}>
-          <span className={entryStyles.icon} aria-hidden="true">📖</span>
-          <div>
-            <small>FIRST GUIDE</small>
-            <strong>初めての方</strong>
-            <p>BoatStrikersの使い方とレースの基本</p>
-          </div>
+          <span className={entryStyles.icon} aria-hidden="true">⚡</span>
+          <strong>今日のレース<span>出走表・展示データ</span></strong>
           <b aria-hidden="true">›</b>
         </a>
 
         <a href="#ai-partners" className={entryStyles.card}>
           <span className={entryStyles.icon} aria-hidden="true">🔎</span>
-          <div>
-            <small>PREDICTION</small>
-            <strong>AI診断<br />キャラ予想</strong>
-            <p>得意分野から選ぶ</p>
-          </div>
+          <strong>AI診断・予想<span>得意分野から選ぶ</span></strong>
           <b aria-hidden="true">›</b>
         </a>
       </nav>
+      <a href="/guide" className={entryStyles.guide}>はじめての方へ · レースの基本と使い方 <span aria-hidden="true">›</span></a>
     </section>
 
     {predictionEntry}
+    {membershipEntry}
 
     <div className={styles.ticker}>
       <strong>📢 速報</strong>
@@ -77,14 +60,8 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
     </div>
 
 
-    <div className={styles.card}>
-      <div className={styles.todayBannerWrap}>
-        <img
-          className={styles.todayBanner}
-          src="/top/Untitled design.png"
-          alt="今日の予定 本日の配信をチェック"
-        />
-      </div>
+    <div className={`${styles.card} ${!today.length ? styles.compact : ""}`}>
+      <header><h2>今日の配信予定</h2><a href="/schedule">番組表 ›</a></header>
       <div className={styles.list}>
         {today.length ? today.map(item=>{
           const ended=mins(item.start_time)<current.minutes;
@@ -108,12 +85,10 @@ export default function HomeBroadcastPanel({ tickerItems = [], scheduleItems = [
           const rowClass=`${preset?styles.hasIcon:""} ${ended?styles.past:""}`.trim();
           return item.link_url?<a key={item.id} href={item.link_url} className={rowClass}>{body}</a>:<div key={item.id} className={rowClass}>{body}</div>
         }):<div className={styles.empty}>
-          <strong>📅 本日の配信予定はありません</strong>
-          <span>初心者講座やDATA LAB、全国24場攻略の最新記事をお楽しみください。</span>
-          <div><a href="/guide">初心者ガイド</a><a href="/data-lab">DATA LAB</a><a href="/library/stadiums">24場攻略</a></div>
+          <span>本日の配信予定はありません。</span>
         </div>}
       </div>
-      <a className={styles.more} href="/schedule">番組表をすべて見る →</a>
+      {today.length > 0 && <a className={styles.more} href="/schedule">番組表をすべて見る →</a>}
     </div>
 
   </section>;

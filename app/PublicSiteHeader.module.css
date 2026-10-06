@@ -559,3 +559,7 @@
 .linkList a:active {
   background: rgba(226, 247, 255, .72);
 }
+
+/* Keep the closed drawer off the desktop canvas. */
+.drawer { visibility: hidden; pointer-events: none; }
+.drawerOpen { visibility: visible; pointer-events: auto; }
