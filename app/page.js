@@ -2,8 +2,7 @@ import Image from "next/image";
 import { AiPartnerEntry } from "./components/AiPartnerGuide";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
-import { getMonthlyPublicPredictionResults } from "../lib/publicPredictionResults";
-import MonthlyPerformanceSlider from "./components/MonthlyPerformanceSlider";
+import HomeAiPerformance from "./components/HomeAiPerformance";
 import LatestInfoSlider from "./LatestInfoSlider";
 import HomeBroadcastPanel from "./components/HomeBroadcastPanel";
 import HomeRaceInfo from "./components/HomeRaceInfo";
@@ -153,13 +152,11 @@ async function getHomeRaceData() {
 export default async function Home() {
   const [
     noteData,
-    results,
     cms,
     raceData,
     siteNewspapers,
   ] = await Promise.all([
     getHomeNoteData(),
-    getMonthlyPublicPredictionResults(),
     getHomeCmsData(),
     getHomeRaceData(),
     getPublishedNewspapers({ limit: 3 }),
@@ -290,33 +287,9 @@ export default async function Home() {
   </div>
 </section>   
 
-   <section className="homeSectionCard yellow resultSummarySection homeBannerFlush">
-  <img
-    src="/IMG_6116.jpeg"
-    alt="今月の予想実績"
-    className="homeTitleImage"
-  />
-
-  <dl className="homeResultScope" aria-label="予想実績の集計条件">
-    <div>
-      <dt>集計期間</dt>
-      <dd>{results.periodLabel}</dd>
-    </div>
-    <div>
-      <dt>対象予想</dt>
-      <dd>{results.targetLabel}</dd>
-    </div>
-    <div>
-      <dt>最終更新</dt>
-      <dd>{results.lastUpdatedLabel} JST</dd>
-    </div>
-  </dl>
-
-  <p className="homeSectionLead">キャラ名義で公開された買い目の実績です。従来の公開予想も含み、相棒AIの診断精度とは別に集計しています。</p>
-
-  <MonthlyPerformanceSlider initialEqualStats={results} />
-
-</section>
+      <section className="homeSectionCard yellow resultSummarySection" aria-label="今月のAI公開買い目成績">
+        <HomeAiPerformance />
+      </section>
 
     
 
