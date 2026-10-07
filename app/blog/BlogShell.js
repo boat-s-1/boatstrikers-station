@@ -10,6 +10,6 @@ export default function BlogShell({children,article=false}) {
       <nav className={s.headerNav} aria-label="BLOGメニュー"><Link href="/blog#articles">記事を読む</Link><Link href="/blog#categories">テーマで探す</Link><Link href="/blog#authors">著者で探す</Link></nav>
     </header>
     {children}
-    <footer className={s.footer}><Link href="/blog" className={s.footerBrand}>BOATSTRIKERS BLOG</Link><p>ボートレースを調べる・学ぶ・読む。</p><div><Link href="/" prefetch={false}>BoatStrikers</Link><a href={article?'#article-title':'#blog-title'}>ページ上部へ ↑</a></div><small>© BoatStrikers</small></footer>
+    <footer className={s.footer}><Link href="/blog" className={s.footerBrand}>BOATSTRIKERS BLOG</Link><p>ボートレースを調べる・学ぶ・読む。</p><div><Link href="/" prefetch={false}>BoatStrikers</Link><Link href="/library" prefetch={false}>図書館・既存の読み物</Link><a href={article?'#article-title':'#blog-title'}>ページ上部へ ↑</a></div><small>© BoatStrikers</small></footer>
   </div>;
 }
