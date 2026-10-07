@@ -8,7 +8,7 @@ const navItems = [
   { href: "/", label: "ホーム", icon: "home", tone: "home" },
   { href: "/today", label: "TODAY", icon: "today", tone: "today" },
   { href: "/races", label: "出走表", icon: "boat", tone: "races" },
-  { href: "/library", label: "図書館", icon: "book", tone: "library" },
+  { href: "/blog", label: "ブログ", icon: "book", tone: "library" },
   { href: "/radio", label: "ラジオ", icon: "radio", tone: "radio", onAir: true },
 ];
 
