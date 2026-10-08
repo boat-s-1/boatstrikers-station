@@ -36,6 +36,7 @@ const GROUPS = [
       { href: "/admin/blog", icon: "✍️", title: "BOATSTRIKERS BLOG", text: "記事の下書き・公開設定・画像を管理" },
       { href: "/admin/ichika-books", icon: "📗", title: "一果の研究書 管理", text: "一果センセー・インツヨ名鑑・DATA LABの新刊作成・画像登録・文章解説・公開管理" },
       { href: "/admin/newspaper", icon: "📰", title: "新聞・画像作成", text: "一果・初音・キイナ・12R特別紙を作成" },
+      { href: "/admin/newspaper-drafts", icon: "🗂️", title: "前日版 自動下書き", text: "自動で作成された前日版新聞の下書きと実行ログを確認（閲覧専用）" },
       { href: "/admin/radio-blog", icon: "🎙️", title: "ラジオブログ", text: "放送ブログの記事作成・更新" },
       { href: "/admin/note", icon: "📝", title: "note特集管理", text: "トップに掲載するnote特集を管理" },
       { href: "/admin/hatsune-news/video", icon: "🎥", title: "初音ヴィーナスNEWS制作", text: "今日のショート・週間ヴィーナスNEWSの素材を作成" },

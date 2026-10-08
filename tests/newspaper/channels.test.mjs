@@ -23,7 +23,7 @@ test("buildNewspaperChannels・newspaperSlug の出力が変更前と一致す�
   assert.deepStrictEqual(current.NEWSPAPER_CHARACTERS, legacy.NEWSPAPER_CHARACTERS);
 });
 
-test("lib/newspaperContent.js は既存の名前をそのまま再エクスポートする", async () => {
+test("lib/newspaperContent.js は既存の名前（と共通化した newspaperChannelInput）を再エクスポートする", async () => {
   const source = await readFile(path.join(ROOT, "lib/newspaperContent.js"), "utf8");
-  assert.match(source, /export \{ newspaperSlug, buildNewspaperChannels, NEWSPAPER_CHARACTERS \} from "\.\/newspaper\/channels\.mjs";/);
+  assert.match(source, /export \{ newspaperSlug, buildNewspaperChannels, newspaperChannelInput, NEWSPAPER_CHARACTERS \} from "\.\/newspaper\/channels\.mjs";/);
 });
