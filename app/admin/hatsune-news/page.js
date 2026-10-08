@@ -241,8 +241,8 @@ export default function HatsuneNewsAdmin(){
         message:(json.frozen?"freeze済み公式予想":"AI候補")+"を取得しました（"+d.category+" / BEST3 #"+d.rankNo+"）。注目艇・チェックポイントも艇別データから更新しました。",
         source:json.frozen?"ai_frozen":"ai_candidate"
       });
-    }catch{
-      setImportState({status:"error",message:"AI予想の取得に失敗しました。手動入力はそのまま利用できます。",source:"manual"});
+    }catch(error){
+      setImportState({status:"error",message:error?.message==="unauthorized"?"ログインの有効期限が切れました。管理画面に再ログインしてください。":"AI予想の取得に失敗しました。手動入力はそのまま利用できます。",source:"manual"});
     }
   }
 

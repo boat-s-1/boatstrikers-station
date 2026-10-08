@@ -243,8 +243,8 @@ export default function KiinaNewsAdmin() {
         message:(json.frozen ? "freeze済み公式予想" : "AI候補") + "を取得しました（BEST5 #" + d.rankNo + "）。取得後もすべて手動修正できます。",
         source:json.frozen ? "ai_frozen" : "ai_candidate"
       });
-    } catch {
-      setImportState({status:"error",message:"AI予想の取得に失敗しました。手動入力はそのまま利用できます。",source:"manual"});
+    } catch (error) {
+      setImportState({status:"error",message:error?.message === "unauthorized" ? "ログインの有効期限が切れました。管理画面に再ログインしてください。" : "AI予想の取得に失敗しました。手動入力はそのまま利用できます。",source:"manual"});
     }
   }
 

@@ -25,10 +25,10 @@ export default function NewsCandidatePicker({ character, date, edition, onSelect
         if(!alive) return;
         setCandidates(json.candidates||[]);
         setStatus((json.candidates||[]).length?"ready":"empty");
-      }catch{
+      }catch(error){
         if(!alive) return;
         setCandidates([]);
-        setStatus("error");
+        setStatus(error?.message==="unauthorized"?"unauthorized":"error");
       }
     }
     if(date) load();
@@ -53,7 +53,7 @@ export default function NewsCandidatePicker({ character, date, edition, onSelect
       </div>
       <div className={styles.controls}>
         <select value={selected} onChange={(e)=>setSelected(e.target.value)} disabled={status!=="ready"}>
-          <option value="">{status==="loading"?"候補を読み込み中…":status==="empty"?"この版の候補はまだありません":status==="error"?"候補取得に失敗しました":"レースを選択してください"}</option>
+          <option value="">{status==="loading"?"候補を読み込み中…":status==="empty"?"この版の候補はまだありません":status==="unauthorized"?"ログインの有効期限が切れました。再ログインしてください":status==="error"?"候補取得に失敗しました":"レースを選択してください"}</option>
           {options.map((c)=><option key={c.key} value={c.key}>{c.category} #{c.rankNo}｜{c.courseName}{c.raceNo}R｜{c.probability}%{c.selectedForSocial?"｜SNS使用":""}</option>)}
         </select>
         <button type="button" onClick={apply} disabled={!selected}>このレースを反映</button>

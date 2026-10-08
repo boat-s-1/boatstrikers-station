@@ -110,9 +110,20 @@ export default function NewspaperPublishingPanel({ character, value }) {
     if (uploading || busy) return;
     setBusy(true); setMessage("");
     try {
-      const response = await fetch("/api/admin/newspapers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...source, ...effective, imageUrl, noteUrl, status, sourcePayload: value }) });
+      const submit = (extra = {}) => fetch("/api/admin/newspapers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...source, ...effective, imageUrl, noteUrl, status, sourcePayload: value, ...extra }) });
+      let response = await submit();
       if (response.status === 401) { location.href = "/admin/sync/login"; return; }
-      const json = await response.json();
+      let json = await response.json();
+      // 公開中の新聞は、確認して明示的に更新するときだけ変更する。
+      if (response.status === 409 && json.code === "published_exists" && json.current?.updated_at) {
+        const question = status === "published"
+          ? "この新聞は公開中です。公開中の内容をこの入力内容で更新しますか？"
+          : `この新聞は公開中です。保存すると公開が取り消され「${status === "archived" ? "アーカイブ" : "下書き"}」になります。よろしいですか？`;
+        if (!window.confirm(question)) { setMessage("保存を中止しました。公開中の新聞は変更していません。"); return; }
+        response = await submit({ confirmPublishedUpdate: true, expectedUpdatedAt: json.current.updated_at });
+        if (response.status === 401) { location.href = "/admin/sync/login"; return; }
+        json = await response.json();
+      }
       if (!response.ok) throw new Error(json.error || "保存に失敗しました");
       setMessage(status === "published" ? "サイトに公開しました。" : "下書きを保存しました。");
     } catch (error) { setMessage(error.message || "保存に失敗しました"); }
