@@ -11,6 +11,7 @@ export const maxDuration = 120;
 // - 本番環境では NEWSPAPER_AUTO_DRAFT_ALLOW_PRODUCTION=true が無い限り何もしない。
 // - ?dry_run=1 はDB読み取りのみ（AI呼び出し・書き込みなし）。
 // - NEWSPAPER_AUTO_DRAFT_ENABLED=true でなければ書き込まない。
+// - 書き込みには「1日・1キャラ・1件」のDB制約が必要（NEWSPAPER_AUTO_DRAFT_SLOT_CONSTRAINT=true で作成済みを示す）。
 function db() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,6 +41,7 @@ export async function GET(request) {
       date: run.date,
       now,
       model,
+      slotConstraint: run.slotConstraint === true,
       aiWrite: (body) => runNewspaperAiWrite({
         apiKey: process.env.OPENAI_API_KEY,
         model: process.env.OPENAI_NEWSPAPER_MODEL,

@@ -4,14 +4,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-import { ROOT, FakeNextResponse, loadRouteModule, createFakeSupabase, NEWSPAPER_UNIQUE_KEYS } from "./helpers.mjs";
+import { ROOT, FakeNextResponse, loadRouteModule, createFakeSupabase, NEWSPAPER_UNIQUE_KEYS_WITH_SLOT } from "./helpers.mjs";
 import { jstDate } from "../../lib/newspaper/autoDraft.mjs";
 import { loadDraftReview } from "../../lib/newspaper/draftReview.mjs";
 import * as channels from "../../lib/newspaper/channels.mjs";
 
 const ROUTE = path.join(ROOT, "app/api/cron/newspaper-previous-day-drafts/route.js");
 const TODAY = jstDate();
-const ENV_KEYS = ["CRON_SECRET", "VERCEL_ENV", "NEWSPAPER_AUTO_DRAFT_ENABLED", "NEWSPAPER_AUTO_DRAFT_ALLOW_PRODUCTION", "OPENAI_API_KEY", "OPENAI_NEWSPAPER_MODEL", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"];
+const ENV_KEYS = ["CRON_SECRET", "VERCEL_ENV", "NEWSPAPER_AUTO_DRAFT_ENABLED", "NEWSPAPER_AUTO_DRAFT_SLOT_CONSTRAINT", "NEWSPAPER_AUTO_DRAFT_ALLOW_PRODUCTION", "OPENAI_API_KEY", "OPENAI_NEWSPAPER_MODEL", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"];
 
 function tables() {
   const full = [[1, 6.8, 7.1, 0.15, 42, 38], [2, 5.2, 7.4, 0.18, 35, 30], [3, 6.1, 6.6, 0.14, 55.5, 40], [4, 4.9, 5.0, 0.21, 31, 33], [5, 5.6, 4.8, 0.19, 28, 31], [6, 3.9, 3.2, 0.2, 30, 29]];
@@ -30,7 +30,7 @@ async function run({ env, query = "", authorization = "Bearer test-secret", aiTe
   const saved = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
   for (const key of ENV_KEYS) delete process.env[key];
   Object.assign(process.env, { CRON_SECRET: "test-secret", NEXT_PUBLIC_SUPABASE_URL: "https://fake.supabase.test", SUPABASE_SERVICE_ROLE_KEY: "service", OPENAI_API_KEY: "sk-test", ...env });
-  const state = { clients: 0, fetches: [], db: createFakeSupabase(tables(), { uniqueKeys: NEWSPAPER_UNIQUE_KEYS }) };
+  const state = { clients: 0, fetches: [], db: createFakeSupabase(tables(), { uniqueKeys: NEWSPAPER_UNIQUE_KEYS_WITH_SLOT }) };
   const savedFetch = globalThis.fetch;
   const savedInfo = console.info;
   console.info = () => {};
@@ -84,6 +84,13 @@ test("NEWSPAPER_AUTO_DRAFT_ENABLED 未設定なら書き込まない（DB接続�
   assert.equal(state.fetches.length, 0);
 });
 
+test("有効でも「1日・1キャラ・1件」のDB制約を示すフラグが無ければ書き込まない（DB接続もしない）", async () => {
+  const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true" } });
+  assert.deepStrictEqual(response.body, { ok: true, mode: "blocked", reason: "slot_constraint_required", date: TODAY });
+  assert.equal(state.clients, 0);
+  assert.equal(state.fetches.length, 0);
+});
+
 test("dry_run はAI呼び出し・DB書き込み・ログ記録をしない", async () => {
   const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true" }, query: "?dry_run=1" });
   assert.equal(response.status, 200);
@@ -94,7 +101,7 @@ test("dry_run はAI呼び出し・DB書き込み・ログ記録をしない", as
 });
 
 test("有効時は下書きを1件作り、実行ログを残す（公開しない）", async () => {
-  const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true", OPENAI_NEWSPAPER_MODEL: "test-model" } });
+  const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true", NEWSPAPER_AUTO_DRAFT_SLOT_CONSTRAINT: "true", OPENAI_NEWSPAPER_MODEL: "test-model" } });
   assert.equal(response.status, 200, JSON.stringify(response.body));
   assert.deepStrictEqual(response.body.results.map((r) => r.outcome), ["no_candidates", "no_candidates", "created"]);
   const [row] = state.db.tables.bs_newspaper_publications;
@@ -109,7 +116,7 @@ test("有効時は下書きを1件作り、実行ログを残す（公開しな�
 });
 
 test("AIが数値を作ったら保存せず、実行ログで知らせる", async () => {
-  const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true" }, aiText: "宮島12Rは5号艇の穴狙い期待度16.2%。前走は3連勝。" });
+  const { response, state } = await run({ env: { NEWSPAPER_AUTO_DRAFT_ENABLED: "true", NEWSPAPER_AUTO_DRAFT_SLOT_CONSTRAINT: "true" }, aiText: "宮島12Rは5号艇の穴狙い期待度16.2%。前走は3連勝。" });
   assert.equal(response.status, 200);
   assert.equal(response.body.results[2].outcome, "fact_guard_rejected");
   assert.equal(state.db.tables.bs_newspaper_publications.length, 0);

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { rejectUnlessAdminOrInternal } from "../../_lib/adminGuard";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -83,7 +82,7 @@ function buildDaily(rows) {
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
-async function handleGET(request) {
+export async function GET(request) {
   try {
     const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
@@ -122,7 +121,7 @@ async function handleGET(request) {
   }
 }
 
-async function handlePOST() {
+export async function POST() {
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase.rpc("evaluate_boat4_double_top_alerts");
@@ -134,16 +133,4 @@ async function handlePOST() {
       { status: 500 }
     );
   }
-}
-
-// 管理者Cookie、またはCron等の内部呼び出し（CRON_SECRET / Supabaseトークン）のみ実行できる。
-export async function GET(request) {
-  const denied = await rejectUnlessAdminOrInternal(request);
-  if (denied) return denied;
-  return handleGET(request);
-}
-export async function POST(request) {
-  const denied = await rejectUnlessAdminOrInternal(request);
-  if (denied) return denied;
-  return handlePOST(request);
 }

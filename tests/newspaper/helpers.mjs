@@ -26,7 +26,7 @@ export async function loadRouteModule({ source, sourcePath, stubs }) {
   globalThis.__routeStubs ??= {};
   globalThis.__routeStubs[id] = {};
   const baseDir = sourcePath ? path.dirname(sourcePath) : ROOT;
-  const rewritten = code.replace(/^import\s+(\{[^}]*\}|[\w$]+)\s+from\s+"([^"]+)";\s*$/gm, (line, names, specifier) => {
+  const rewritten = code.replace(/^import\s+(\{[^}]*\}|[\w$]+)\s+from\s+["']([^"']+)["'];\s*$/gm, (line, names, specifier) => {
     const stub = Object.entries(stubs).find(([key]) => specifier === key || specifier.endsWith(key));
     if (stub) {
       globalThis.__routeStubs[id][specifier] = stub[1];
@@ -122,8 +122,9 @@ class Query {
   }
 
   uniqueClash(candidate, exceptRow = null) {
-    const keys = this.db.uniqueKeys[this.table] || [];
-    return keys.find((key) => this.rows().some((row) => row !== exceptRow && key.every((c) => row[c] === candidate[c])));
+    // 一意キーは列名の配列、または { columns, where }（部分ユニーク：where(row) が真の行だけが対象）。
+    const keys = (this.db.uniqueKeys[this.table] || []).map((key) => Array.isArray(key) ? { columns: key, where: null } : key);
+    return keys.find(({ columns, where }) => (!where || where(candidate)) && this.rows().some((row) => row !== exceptRow && (!where || where(row)) && columns.every((c) => row[c] === candidate[c])));
   }
 
   execute() {
@@ -177,18 +178,36 @@ class Query {
   }
 }
 
-export function createFakeSupabase(tables = {}, { uniqueKeys = {}, failures = {} } = {}) {
+export function createFakeSupabase(tables = {}, options = {}) {
+  const { uniqueKeys = {}, failures = {} } = options;
   const db = {
     tables: JSON.parse(JSON.stringify(tables)),
     uniqueKeys,
     failures,
     calls: [],
     nextId: 1000,
+    rpcResults: options.rpcResults || {},
     from(table) { return new Query(db, table); },
+    // RPC は呼び出しを記録し、rpcResults[name]（値または (args) => 値）を返す。
+    async rpc(name, args) {
+      db.calls.push({ table: `rpc:${name}`, action: "rpc", values: args });
+      const failure = db.failures[`rpc:${name}`];
+      if (failure) return { data: null, error: failure };
+      const result = db.rpcResults[name];
+      return { data: typeof result === "function" ? result(args) : (result ?? null), error: null };
+    },
   };
   return db;
 }
 
 export const NEWSPAPER_UNIQUE_KEYS = {
   bs_newspaper_publications: [["slug"], ["race_date", "course_name", "race_no", "character_key", "edition"]],
+};
+
+// 提案中の部分ユニーク制約（auto_draft_generator がある行は、日付・キャラ・版で1件まで）を加えたもの。
+export const NEWSPAPER_UNIQUE_KEYS_WITH_SLOT = {
+  bs_newspaper_publications: [
+    ...NEWSPAPER_UNIQUE_KEYS.bs_newspaper_publications,
+    { columns: ["race_date", "character_key", "edition"], where: (row) => row.auto_draft_generator !== null && row.auto_draft_generator !== undefined },
+  ],
 };

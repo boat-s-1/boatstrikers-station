@@ -1,4 +1,4 @@
-# 管理API 認証不足の調査（読み取りのみ）
+# 管理API 認証不足の調査と修正状況
 
 調査日：2026-10-08。対象：`app/api/admin/**`、`app/api/ai/**`、`app/api/ai-v2/**`、`app/api/bsc2/**` の `route.js`。
 方法：ソースの読み取りのみ。DBの更新・削除・RPC実行、APIの呼び出しは行っていない。新聞関連（PHASE 1 で修正済み）は対象外。
@@ -28,9 +28,36 @@
 - キー認証：`assertAiAdminRequest` / `assertAiAdmin` / `assertAdmin`（`x-bsc-ai-key`。`ai/generate-predictions`、`bsc2/*`）、`CRON_SECRET`（`hatsune-news/generate-ai`）
 - 公開前提：`GET /api/ai-v2/character-panel`（公開統計RPC `ai_v2_public_character_stats`。公開画面から利用）
 
-## 修正の方針（未実施・承認待ち）
+## 修正状況（PHASE 2.5、ローカルのみ・未デプロイ）
 
-1. #1〜#6・#8〜#10：呼び出し元はすべて `/admin` 配下の画面（管理Cookieでログイン済み）なので、PHASE 1 と同じく `isAdminAuthenticated` を先頭で確認して 401 を返す。画面側は 401 時に再ログインを案内する。
-2. #7：呼び出し元（外部の定期実行の有無）を本番の `cron.job` 等で確認してから、`CRON_SECRET` による認証を追加する。
-3. #11：管理Cookie必須にするか、不要になった診断APIを削除する。
-4. いずれも、変更前後の比較テスト（未認証は401・DBに触れない／認証時は応答が変わらない）を PHASE 1 と同じ方法で追加する。
+#1〜#8 の7本は修正済み。各ハンドラの先頭で `app/api/_lib/adminGuard.js` の `rejectUnlessAdminOrInternal` を呼び、次のどれかが無ければ 401 `{ ok: false, error: "unauthorized" }` を返す（DB接続・外部取得・RPCの前に止まる）。
+
+- 管理者Cookie（`bs_admin_sync`。`/admin` 画面と同じ）
+- `Authorization: Bearer <CRON_SECRET>`（既存のVercel Cronと同じ）
+- `x-supabase-cron-token`（既存のCronルートと同じSHA-256照合。`lib/security/requestAuth.mjs`）
+
+| API | 呼び出し元（コード上） | Cron・内部サービスからの利用 | 適用した認証 |
+|---|---|---|---|
+| `POST exhibition-backfill` | `/admin/exhibition-data-status`（BackfillButton） | リポジトリ内に無し | 管理者Cookie または Cron認証 |
+| `GET/POST engine-v3/refresh` | `/admin/engine-v3` | 週次の再集計は Supabase の pg_cron がDB関数を直接実行（APIは経由しない） | 同上 |
+| `POST stadium-ai-v2/refresh` | `/admin/stadium-ai-v2` | リポジトリ内に無し | 同上 |
+| `GET/POST exhibition-alerts` | `/admin/exhibition-alerts` | 通知は `/api/cron/exhibition-alerts`（別ルート、認証あり）がRPCを直接実行 | 同上 |
+| `GET/POST ichika-hidden-escape` | `/admin/ichika-hidden-escape` | 同上（`/api/cron/ichika-hidden-escape`） | 同上 |
+| `GET/POST hatsune-womens-inner-break` | `/admin/hatsune-womens-inner-break` | 同上（`/api/cron/hatsune-womens-inner-break`） | 同上 |
+| `GET settle-bets`（＋新設 `POST`） | アプリ内に無し | **不明**。`vercel.json`・マイグレーション・Actions に無い。Supabase の pg_cron や外部サービスから呼ばれている可能性がある | 同上 |
+
+### settle-bets（GETでDBを更新するAPI）の扱い
+
+- 認証なしのGETは 401（副作用なし）。認証付きのGETは従来どおり精算を行う（Vercel Cron はGETしか送れないため、既存・将来の定期実行との互換を残した）。
+- 明示的に実行するための認証付き `POST` を追加（処理はGETと同じ）。
+- 完全な分離（GETは集計の参照だけ、精算はPOSTのみ）は、呼び出し元を本番で確認してから行う。手順：
+  1. 本番の `select jobid, jobname, schedule, command from cron.job;` と Vercel のアクセスログで `/api/ai-v2/settle-bets` の呼び出し元を確認する。
+  2. 呼び出し元が Supabase pg_cron なら `net.http_post` に変え、`x-supabase-cron-token` を付ける。Vercel Cron なら `CRON_SECRET` 付きGETのまま。
+  3. 呼び出し元を切り替えた後で、GETを読み取り専用にする。
+- **注意**：呼び出し元が認証情報を送っていない場合、デプロイ後に精算が止まる（401）。デプロイ前に上記1の確認が必要。
+
+## 未修正（次の候補）
+
+1. #9〜#10（未公開素材・集計の読み取り）：呼び出し元はすべて `/admin` 配下の画面なので、同じ `rejectUnlessAdminOrInternal` を適用できる。
+2. #11（診断API）：管理Cookie必須にするか、不要になったものを削除する。
+3. いずれも、変更前後の比較テスト（未認証は401・DBに触れない／認証時は応答が変わらない）を同じ方法で追加する。

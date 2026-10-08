@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
 import { fetchOfficialOriginalTenji } from "../../../../lib/officialOriginalTenji";
-import { rejectUnlessAdminOrInternal } from "../../_lib/adminGuard";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -66,7 +65,7 @@ async function fetchSource(race) {
   };
 }
 
-async function handlePOST(request) {
+export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const date = String(body.date || jstToday());
@@ -129,11 +128,4 @@ async function handlePOST(request) {
   } catch (error) {
     return NextResponse.json({ ok: false, error: error?.message || "backfill failed" }, { status: 500 });
   }
-}
-
-// 管理者Cookie、またはCron等の内部呼び出し（CRON_SECRET / Supabaseトークン）のみ実行できる。
-export async function POST(request) {
-  const denied = await rejectUnlessAdminOrInternal(request);
-  if (denied) return denied;
-  return handlePOST(request);
 }
