@@ -16,5 +16,7 @@
 /* Compact ranking link, outside article conversations and RACE navigation. */
 .rankingBanner{margin:18px auto 0;padding-top:18px;border-top:1px solid var(--line);max-width:360px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
 .rankingBanner a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:120px;min-height:44px;padding:6px 12px}
-.rankingBanner img{display:block;width:88px;height:31px;max-width:100%;border:0}
+.rankingBanner img{display:block;width:auto;height:31px;max-width:100%;border:0}
 .rankingBanner a span{text-decoration:underline;text-underline-offset:3px}
+
+.rankingLinks{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 20px;max-width:100%}
