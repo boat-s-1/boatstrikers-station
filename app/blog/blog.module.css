@@ -12,3 +12,9 @@
 .bannerLead{font-size:14px;line-height:1.9;color:var(--muted);max-width:34em}
 .heroTools .search{margin-top:0;max-width:none}
 @media(max-width:760px){.bannerHero{padding:0 0 20px}.bannerImage{width:calc(100% + 40px);max-width:none;margin-inline:-20px;border-radius:0}.heroTools{grid-template-columns:1fr;gap:14px;margin-top:16px}.bannerLead{font-size:12px;line-height:1.9}}
+
+/* Compact ranking link, outside article conversations and RACE navigation. */
+.rankingBanner{margin:18px auto 0;padding-top:18px;border-top:1px solid var(--line);max-width:360px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.rankingBanner a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:120px;min-height:44px;padding:6px 12px}
+.rankingBanner img{display:block;width:88px;height:31px;max-width:100%;border:0}
+.rankingBanner a span{text-decoration:underline;text-underline-offset:3px}
