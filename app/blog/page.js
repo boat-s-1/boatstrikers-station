@@ -40,11 +40,14 @@ export default async function BlogPage({ searchParams }) {
   const filtering = Boolean(filters.q || filters.category || filters.author || filters.tag);
   return <BlogShell>
     <main className={s.main}>
-      <section className={s.hero} aria-labelledby="blog-title">
-        <div><span className={s.eyebrow}>THE BOAT RACE READING ROOM</span><h1 id="blog-title">ボートレースを、<br/>もっと<span>読み解こう。</span></h1><p className={s.lead}>知ると、レースの見え方が変わる。<br/>一果・初音・キイナと編集部が届ける、<br className={s.mobileBreak}/>ボートレースの読み物メディア。</p>
-          <form className={s.search} action="/blog" role="search"><label className={s.srOnly} htmlFor="blog-search">記事のタイトル・紹介文を検索</label><input id="blog-search" type="search" name="q" placeholder="気になるテーマを検索" defaultValue={filters.q} maxLength={100}/><button type="submit">検索 <span aria-hidden="true">↗</span></button></form>
+      <section className={s.bannerHero} aria-labelledby="blog-title">
+        <h1 id="blog-title" className={s.srOnly}>BOATSTRIKERS BLOG — ボートレースを、もっと読み解こう。</h1>
+        <Image className={s.bannerImage} src="/boatstrikers-blog-header.jpg" alt="一果・初音・キイナと学ぶBOATSTRIKERS BLOG。ボートレースを、もっと読み解こう。レース解説・データ分析・コース攻略。" width={1536} height={576} sizes="(max-width: 760px) 100vw, (max-width: 1200px) calc(100vw - 64px), 1136px" priority/>
+        <div className={s.heroTools}>
+          <p className={s.bannerLead}>一果・初音・キイナと編集部が届ける、ボートレースの読み物メディア。</p>
+          <div><form className={s.search} action="/blog" role="search"><label className={s.srOnly} htmlFor="blog-search">記事のタイトル・紹介文を検索</label><input id="blog-search" type="search" name="q" placeholder="気になるテーマを検索" defaultValue={filters.q} maxLength={100}/><button type="submit">検索 <span aria-hidden="true">↗</span></button></form>
           <p className={s.searchHint}>イン逃げ、女子戦、展示… 知りたいことから。</p></div>
-        <div className={s.heroArt} aria-hidden="true"><span className={s.artLabel}>LEARN / READ / DISCOVER</span><span className={s.artCircle}/>{BLOG_AUTHORS.filter(a=>a.image_path).map(a=><Image key={a.slug} src={a.image_path} alt="" width={160} height={210} sizes="(max-width: 760px) 28vw, 140px" className={s[a.slug]} priority/>)}<span className={s.artNote}>3人と、ひとつずつ。</span></div>
+        </div>
       </section>
       <section className={s.categories} id="categories"><Heading label="EXPLORE TOPICS" title="どこから読もう？"/><div className={s.chips}><Link href={url(filters,{category:''})} aria-current={!filters.category?'page':undefined}>すべて</Link>{categories.map(c=><Link key={c.slug} href={archiveHref('categories',c.slug)} aria-current={filters.category===c.slug?'page':undefined}>{c.name}</Link>)}</div></section>
       {index.availability === 'unavailable' ? <p className={s.notice} role="status">記事を読み込めませんでした。時間をおいて再度お試しください。</p> : null}
