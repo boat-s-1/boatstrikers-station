@@ -144,3 +144,32 @@ test('ops pre-check passes before the migrations and post-check passes after the
   assert.equal(preAfter.find(r => r.check === 'ai_tables_not_yet_created').ok, false, 'pre-check detects an already-applied migration');
   await d.close();
 });
+
+test('article snapshot is read-only and identical before and after the migrations', async () => {
+  const d = new PGlite();
+  await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+  for (const n of BASE) await d.exec(migration(n));
+  const sql = readFileSync(new URL('../../ops/blog/ai-drafts-article-snapshot.sql', import.meta.url), 'utf8');
+  assert.doesNotMatch(sql.replace(/--[^\n]*/g, '').toLowerCase(), /\b(insert|update|delete|drop|alter|create|grant|revoke|truncate)\b/);
+  const cat = slug => d.query("select id from public.blog_categories where slug=$1", [slug]).then(r => r.rows[0].id);
+  const author = (await d.query("select id from public.blog_authors where slug='ichika'")).rows[0].id;
+  const doc = (title, category) => ({ schema_version: 1, title, excerpt: '', category_id: category, seo: {}, cover: {}, noindex: false, author_ids: [author], tag_ids: [], relations: [], blocks: [{ id: crypto.randomUUID(), type: 'TEXT', data: { text: title } }] });
+  // Five articles in different states, like staging: published, edited-after-publish, scheduled, draft, unpublished.
+  const make = async (slug, category) => (await d.query("select public.blog_create_draft($1, $2::jsonb) as r", [slug, doc(slug, await cat(category))])).rows[0].r;
+  const rel = (p, at = null) => d.query("select public.blog_release($1,$2,$3) as r", [p.id, p.version, at]).then(r => r.rows[0].r);
+  const a = await make('a-published', 'data-lab'); await rel(a);
+  const b = await make('b-edited', 'beginner'); const b1 = await rel(b);
+  await d.query("select public.blog_save_draft($1,$2,$3::jsonb)", [b.id, b1.version, doc('b edited', await cat('beginner'))]);
+  const c = await make('c-scheduled', 'stadiums'); await rel(c, new Date(Date.now() + 86400000).toISOString());
+  await make('d-draft', 'women');
+  const e = await make('e-unpublished', 'news'); const e1 = await rel(e);
+  await d.query("select public.blog_change_state($1,$2,'unpublish')", [e.id, e1.version]);
+  const before = (await d.query(sql)).rows;
+  assert.equal(before.length, 5);
+  for (const n of AI) await d.exec(migration(n));
+  assert.deepEqual((await d.query(sql)).rows, before);
+  // Publishing still works for an existing human-written article after the migrations.
+  const ed = (await d.query("select public.blog_editor_document($1) as r", [b.id])).rows[0].r;
+  assert.equal((await rel({ id: b.id, version: ed.version })).action, 'publish');
+  await d.close();
+});

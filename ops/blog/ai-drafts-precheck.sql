@@ -22,4 +22,8 @@ union all select 'core_blog_tables_present',
   to_regclass('public.blog_posts') is not null and to_regclass('public.blog_post_revisions') is not null and to_regclass('public.blog_blocks') is not null
   and to_regclass('public.blog_media') is not null and to_regclass('public.blog_categories') is not null and to_regclass('public.blog_authors') is not null
 union all select 'character_authors_present',
-  (select count(*) from public.blog_authors where slug in ('ichika','hatsune','kiina') and active) = 3;
+  (select count(*) from public.blog_authors where slug in ('ichika','hatsune','kiina') and active) = 3
+union all select 'new_category_slugs_unused',
+  not exists (select 1 from public.blog_categories where slug in ('stadium-charm','stadium-basics','characters'))
+union all select 'data_lab_category_present',
+  exists (select 1 from public.blog_categories where slug = 'data-lab');
