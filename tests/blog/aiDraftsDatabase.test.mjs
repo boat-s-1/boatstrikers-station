@@ -144,3 +144,19 @@ test('content changed after approval without a version change is refused at rele
   await approve(post);
   assert.equal((await release(post)).action, 'publish');
 });
+
+test('each approval stores the exact approved document; earlier approvals stay auditable after later edits', async () => {
+  let post = await create('AI 監査用 v1');
+  await markAi(post);
+  const first = await approve(post);
+  post = { ...post, ...(await save(post, 'AI 監査用 v2')) };
+  await markAi(post, { validatedVersion: post.version });
+  const second = await approve(post);
+  const rows = await role('service_role', () => q('select id, document->>\'title\' as title, document_md5 = md5(document::text) as consistent from public.blog_ai_approvals where post_id=$1 order by created_at', [post.id]));
+  assert.deepEqual(rows.map(r => [r.id, r.title, r.consistent]), [[first.approval_id, 'AI 監査用 v1', true], [second.approval_id, 'AI 監査用 v2', true]]);
+  // The stored fingerprint is the one checked at release time.
+  const md5 = (await role('service_role', () => q('select public.blog_ai_document_md5($1) as m', [post.id])))[0].m;
+  assert.equal((await role('service_role', () => q('select document_md5 from public.blog_ai_approvals where id=$1', [second.approval_id])))[0].document_md5, md5);
+  // A document that does not match its fingerprint cannot be recorded.
+  await assert.rejects(() => role('service_role', () => q("insert into public.blog_ai_approvals(post_id,revision_id,edit_version,document_md5,document,approver_name,approver_session) values($1,$2,1,$3,'{\"title\":\"x\"}'::jsonb,'n','abcdef0123456789')", [post.id, post.revision_id, 'a'.repeat(32)])), e => e.code === '23514');
+});

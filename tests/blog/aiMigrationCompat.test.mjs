@@ -190,7 +190,7 @@ test('rollback also works when only the first AI migration was applied', async (
   } finally { db = prev; await d.close(); }
 });
 
-test('strict post-check: 77 individual rows, all true; each kind of misconfiguration turns its own row false', async () => {
+test('strict post-check: 78 individual rows, all true; each kind of misconfiguration turns its own row false', async () => {
   const sql = readFileSync(new URL('../../ops/blog/ai-drafts-postcheck.sql', import.meta.url), 'utf8');
   const fresh = async () => {
     const d = new PGlite();
@@ -202,7 +202,7 @@ test('strict post-check: 77 individual rows, all true; each kind of misconfigura
   const failing = async d => (await d.query(sql)).rows.filter(r => r.ok !== true).map(r => r.check);
   let d = await fresh();
   const rows = (await d.query(sql)).rows;
-  assert.equal(rows.length, 77);
+  assert.equal(rows.length, 78);
   assert.deepEqual(rows.filter(r => r.ok !== true), []);
   for (const [breakIt, expected] of [
     ['alter table public.blog_ai_runs disable row level security', ['table_rls_enabled:blog_ai_runs']],
@@ -271,5 +271,44 @@ test('rollback keeps every history row in the private archive, detached from liv
   await assert.rejects(() => d.exec(rollback), e => /blog_ai_archive already exists/.test(e.message));
   await d.exec('rollback').catch(() => {});
   assert.equal((await dq("select to_regclass('public.blog_ai_drafts') is not null as present"))[0].present, true);
+  await d.close();
+});
+
+test('archive stays auditable after live rows change: approved documents, reference snapshot and md5 proof survive', async () => {
+  const d = new PGlite();
+  const dq = async (sql, args = []) => (await d.query(sql, args)).rows;
+  await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+  for (const n of [...BASE, ...AI]) await d.exec(migration(n));
+  const cat = (await dq("select id from public.blog_categories where slug='beginner'"))[0].id, author = (await dq("select id from public.blog_authors where slug='kiina'"))[0].id;
+  const media = (await dq("insert into public.blog_media(storage_path,status,alt,source) values('drafts/2026-10-09/00000000-0000-4000-8000-0000000000cc.png','private','表紙','BoatStrikers自動生成') returning id"))[0].id;
+  const doc = title => ({ schema_version: 1, title, excerpt: '要約', category_id: cat, seo: { og_media_id: media }, cover: { media_id: media }, noindex: false, author_ids: [author], tag_ids: [], relations: [], blocks: [{ id: '00000000-0000-4000-8000-0000000000bb', type: 'TEXT', data: { text: title } }] });
+  let post = (await dq("select public.blog_create_draft('audit-post', $1::jsonb) as r", [doc('承認前の本文')]))[0].r;
+  await dq("insert into public.blog_ai_drafts(post_id,model,prompt_version,source_pack,validated_version,cover_media_id) values($1,'m','v','{}'::jsonb,$2,$3)", [post.id, post.version, media]);
+  const first = (await dq("select public.blog_ai_approve($1,$2,'山田','abcdef0123456789',now()) as r", [post.id, post.version]))[0].r;
+  post = { ...post, ...(await dq("select public.blog_save_draft($1,$2,$3::jsonb) as r", [post.id, post.version, doc('承認後に直した本文')]))[0].r };
+  await dq('update public.blog_ai_drafts set validated_version=$2 where post_id=$1', [post.id, post.version]);
+  const second = (await dq("select public.blog_ai_approve($1,$2,'佐藤','abcdef0123456789',now()) as r", [post.id, post.version]))[0].r;
+  await dq("select public.blog_release($1,$2,null)", [post.id, post.version]);
+
+  await d.exec(readFileSync(new URL('../../ops/blog/ai-drafts-rollback.sql', import.meta.url), 'utf8'));
+  // Live rows change after archiving: category renamed, media metadata deleted, author renamed.
+  await dq("update public.blog_categories set name='名前変更後' where slug='beginner'");
+  await dq('delete from public.blog_media where id=$1', [media]);
+  await dq("update public.blog_authors set name='改名後' where slug='kiina'");
+
+  // Every approval keeps its own approved document (including the superseded first one).
+  const approvals = await dq("select id, approver_name, document->>'title' as title, document_md5 = md5(document::text) as ok from blog_ai_archive.blog_ai_approvals order by created_at");
+  assert.deepEqual(approvals.map(a => [a.id, a.approver_name, a.title, a.ok]), [[first.approval_id, '山田', '承認前の本文', true], [second.approval_id, '佐藤', '承認後に直した本文', true]]);
+  // Reference snapshot is as of archive time, and proves the published content is exactly the last approved one.
+  const snap = (await dq('select slug, state, published_document->>\'title\' as title, published_document_md5 from blog_ai_archive.post_snapshot'))[0];
+  assert.deepEqual([snap.slug, snap.state, snap.title], ['audit-post', 'published', '承認後に直した本文']);
+  assert.equal(snap.published_document_md5, (await dq('select document_md5 from blog_ai_archive.blog_ai_approvals where id=$1', [second.approval_id]))[0].document_md5);
+  assert.equal((await dq("select name from blog_ai_archive.category_snapshot where slug='beginner'"))[0].name, '初心者');
+  assert.equal((await dq("select name from blog_ai_archive.author_snapshot where slug='kiina'"))[0].name, 'キイナ');
+  assert.deepEqual(await dq('select alt, source from blog_ai_archive.media_snapshot where id=$1', [media]), [{ alt: '表紙', source: 'BoatStrikers自動生成' }]);
+  // Snapshot tables are private and read-only like the rest of the archive.
+  for (const t of ['post_snapshot', 'category_snapshot', 'author_snapshot', 'media_snapshot', 'publication_event_approvals']) {
+    assert.equal((await dq(`select has_table_privilege('anon','blog_ai_archive.${t}','SELECT') a, has_table_privilege('service_role','blog_ai_archive.${t}','UPDATE') u, (select relrowsecurity from pg_class where oid='blog_ai_archive.${t}'::regclass) r`))[0].u, false, t);
+  }
   await d.close();
 });

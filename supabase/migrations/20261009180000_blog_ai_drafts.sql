@@ -95,12 +95,15 @@ create table public.blog_ai_drafts (
 
 -- Append-only approval log. An approval is bound to one editing revision and one edit_version.
 -- Any later save increments edit_version, so the approval stops matching and re-approval is required.
+-- The approved document itself is stored with each approval, so what was approved stays auditable even after
+-- the draft is edited again (unpublished revisions are rewritten on save) or live rows change later.
 create table public.blog_ai_approvals (
   id uuid primary key default gen_random_uuid(),
   post_id uuid not null references public.blog_ai_drafts(post_id),
   revision_id uuid not null references public.blog_post_revisions(id),
   edit_version bigint not null,
   document_md5 text not null check (document_md5 ~ '^[0-9a-f]{32}$'),
+  document jsonb not null check (jsonb_typeof(document) = 'object' and md5(document::text) = document_md5),
   approver_name text not null check (length(trim(approver_name)) between 1 and 80),
   approver_session text not null check (approver_session ~ '^[0-9a-f]{16,64}$'),
   approver_login_at timestamptz,
@@ -139,7 +142,7 @@ $$;
 create function public.blog_ai_approve(p_post_id uuid, p_expected_version bigint, p_approver_name text,
   p_approver_session text, p_approver_login_at timestamptz)
 returns jsonb language plpgsql security invoker set search_path = '' as $$
-declare p public.blog_posts; d public.blog_ai_drafts; approval uuid;
+declare p public.blog_posts; d public.blog_ai_drafts; approval uuid; doc jsonb;
 begin
   select * into p from public.blog_posts where id = p_post_id for update;
   if not found then raise exception 'BLOG_NOT_FOUND' using errcode = 'P0002'; end if;
@@ -150,8 +153,10 @@ begin
   -- The server must re-validate the exact version being approved; blocking issues prevent approval.
   if d.validated_version is distinct from p.edit_version then raise exception 'BLOG_AI_NOT_VALIDATED' using errcode = '22023'; end if;
   if d.blocking_issues > 0 then raise exception 'BLOG_AI_BLOCKING_ISSUES' using errcode = '22023'; end if;
-  insert into public.blog_ai_approvals(post_id, revision_id, edit_version, document_md5, approver_name, approver_session, approver_login_at)
-    values (p.id, p.editing_revision_id, p.edit_version, public.blog_ai_document_md5(p.id), trim(p_approver_name), p_approver_session, p_approver_login_at)
+  -- Same document and fingerprint as blog_ai_document_md5 (used again at release time).
+  doc := (public.blog_editor_document(p.id)) -> 'document';
+  insert into public.blog_ai_approvals(post_id, revision_id, edit_version, document_md5, document, approver_name, approver_session, approver_login_at)
+    values (p.id, p.editing_revision_id, p.edit_version, md5(doc::text), doc, trim(p_approver_name), p_approver_session, p_approver_login_at)
     returning id into approval;
   update public.blog_ai_drafts set status = 'approved', rejected_reason = null, updated_at = now() where post_id = p.id;
   return jsonb_build_object('approval_id', approval, 'post_id', p.id, 'revision_id', p.editing_revision_id, 'version', p.edit_version);

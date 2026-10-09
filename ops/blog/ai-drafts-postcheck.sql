@@ -1,11 +1,11 @@
 -- READ-ONLY. Run in the same BLOG project AFTER applying both AI drafting migrations.
--- One SELECT; returns check / ok (true/false) only. Expected: 77 rows (48 table checks + 25 function checks + 4 others), ALL true.
+-- One SELECT; returns check / ok (true/false) only. Expected: 78 rows (48 table checks + 25 function checks + 5 others), ALL true.
 -- Each AI table and each AI-related function is checked individually (no aggregated pass).
 --   per table (8 tables x 6): exists, RLS enabled, no policies, no privileges for anon/authenticated
 --     (table level incl. PUBLIC inheritance, and column level), service_role can read and write, owned by the same role as blog_posts
 --   per function (5 functions x 5): exists, body matches the repository, SECURITY INVOKER,
 --     anon/authenticated cannot execute (incl. PUBLIC), service_role can execute
---   plus: append-only trigger, nullable approval column on publication events, categories
+--   plus: append-only trigger, approvals store the approved document, nullable approval column on publication events, categories
 with ai_tables(name) as (
   values ('blog_source_urls'), ('blog_source_documents'), ('blog_topics'), ('blog_ai_drafts'),
          ('blog_ai_approvals'), ('blog_post_derivatives'), ('blog_ai_manual_sources'), ('blog_ai_runs')
@@ -13,7 +13,7 @@ with ai_tables(name) as (
   values ('anon'), ('authenticated')
 ), ai_functions(signature, expected_md5) as (
   values ('public.blog_release(uuid,bigint,timestamptz)', '033010356f7375115da33373ba25837c'),
-         ('public.blog_ai_approve(uuid,bigint,text,text,timestamptz)', 'b299905017edf758297b752f0d01b2a5'),
+         ('public.blog_ai_approve(uuid,bigint,text,text,timestamptz)', '75a623daa1de5512cb7ff7e4822740a7'),
          ('public.blog_ai_current_approval(uuid)', '7951fc2106f46da1787a2bc4f97e06cb'),
          ('public.blog_ai_document_md5(uuid)', '340966e4d25efe9f7a7b04b5d74a0b09'),
          ('public.blog_ai_approvals_append_only()', '972585b0120c165f9d5a3e0519a7cff4')
@@ -44,6 +44,9 @@ with ai_tables(name) as (
   union all select 11, signature, 'function_service_role_execute:' || signature, oid is not null and has_function_privilege('service_role', f.oid, 'EXECUTE') from f
   union all select 12, 'trigger', 'approvals_append_only_trigger_enabled',
     exists (select 1 from pg_trigger tg where tg.tgrelid = to_regclass('public.blog_ai_approvals') and tg.tgname = 'blog_ai_approvals_append_only' and tg.tgenabled <> 'D')
+  union all select 13, 'column', 'approvals_store_approved_document',
+    exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'blog_ai_approvals' and column_name = 'document' and is_nullable = 'NO')
+    and exists (select 1 from pg_constraint where conrelid = to_regclass('public.blog_ai_approvals') and contype = 'c' and pg_get_constraintdef(oid) like '%md5((document)::text)%')
   union all select 13, 'column', 'publication_events_ai_approval_id_nullable',
     exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'blog_publication_events' and column_name = 'ai_approval_id' and is_nullable = 'YES')
   union all select 14, 'categories', 'new_categories_present',
