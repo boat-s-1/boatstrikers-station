@@ -138,3 +138,28 @@ test('editor status is not "approved" when the content fingerprint no longer mat
   store.documentMd5 = async () => 'b'.repeat(32); // content changed without a version change
   assert.equal((await draftStatus({ repo, store, postId })).approved_current, false);
 });
+
+test('AI functions ship every coverable character pose but not the rest of public/ (Vercel 250MB limit)', async () => {
+  const { createRequire } = await import('node:module');
+  const { existsSync } = await import('node:fs');
+  const { BLOG_CHARACTERS, characterImage } = await import('../../lib/blog/characterAssets.mjs');
+  const { coverSpec } = await import('../../lib/blog/ai/cover.mjs');
+  const config = createRequire(import.meta.url)('../../next.config.js');
+  const routes = Object.keys(config.outputFileTracingIncludes);
+  assert.deepEqual(Object.keys(config.outputFileTracingExcludes), routes);
+  assert.ok(routes.every(r => r.startsWith('/admin/blog/ai') || r.startsWith('/api/admin/blog/ai') || r === '/api/cron/blog-ai-drafts'), 'only AI functions are affected');
+  const glob = pattern => new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*\*/g, '.*').replace(/(?<!\.)\*/g, '[^/]*')}$`);
+  for (const route of routes) {
+    assert.deepEqual(config.outputFileTracingExcludes[route], ['public/**']);
+    const included = config.outputFileTracingIncludes[route].map(glob);
+    for (const [character, c] of Object.entries(BLOG_CHARACTERS)) {
+      for (const pose of Object.keys(c.poses)) {
+        let spec; try { spec = coverSpec({ title: 't', categoryName: 'c', character, pose }); } catch { continue; } // not usable for covers
+        const file = `public${spec.imagePath}`;
+        assert.equal(spec.imagePath, characterImage(character, pose));
+        assert.ok(existsSync(new URL(`../../${file}`, import.meta.url)), file);
+        assert.ok(included.some(re => re.test(file)), `${route} must include ${file}`);
+      }
+    }
+  }
+});
