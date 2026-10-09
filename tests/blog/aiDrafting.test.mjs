@@ -109,7 +109,8 @@ test('validator blocks fabricated numbers, uncited numbers, banned phrases and u
   assert.deepEqual(edit(d => { d.blocks[2].data.text = '1コース1着率は52.2%です。'; delete d.blocks[2].data.source_url; }), ['missing_source']);
   assert.deepEqual(edit(d => { d.blocks[2].data.text = 'ここは絶対イン。'; }), ['banned_phrase']);
   assert.deepEqual(edit(d => { d.blocks[2].data.text = '詳しくは https://evil.example/ へ'; }), ['unknown_url']);
-  assert.deepEqual(edit(d => { d.title = '桐生で2019年に起きたこと'; }), ['unsupported_number']);
+  assert.deepEqual(edit(d => { d.title = '桐生で2019年に起きたこと'; }), ['unsupported_date']); // a year is checked as a date
+  assert.deepEqual(edit(d => { d.title = '桐生で2019件の記録'; }), ['unsupported_number']);
   assert.deepEqual(edit(d => { d.blocks[2].data.text = '3コースや5号艇、12Rまで、24場それぞれ確認します。'; }), []);
   assert.deepEqual(edit(d => { d.blocks[2].data.text = '５２．２％'; }), []); // full-width digits normalise to a known, cited value
 });
@@ -122,7 +123,7 @@ test('pipeline: topic → sources → AI → cover → draft with provenance; ne
     callAi: async ({ schema, instructions, input }) => { aiCalls++; assert.equal(schema, ARTICLE_SCHEMA); assert.match(instructions, /一果/); assert.match(input, /52\.2/); return { data: goodAi(), model: 'test-model' }; } });
   assert.equal(aiCalls, 1); assert.equal(repo.calls.release, 0); assert.equal(result.blocking, 0);
   const draft = store.state.drafts.get(result.post_id);
-  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v1');
+  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v2');
   assert.ok(draft.source_pack.sources.some(s => s.fetched_at === NOW().toISOString()), 'fetched official page recorded with its time');
   assert.equal(store.state.documents.length, 1); assert.equal(store.state.media.length, 1);
   assert.equal(store.state.topics.get(basicsTopic.id).status, 'drafted');

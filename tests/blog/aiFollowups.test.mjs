@@ -55,7 +55,7 @@ test('derivatives require an approved or sealed version and never add facts', as
   assert.deepEqual(out.map(d => d.channel).sort(), ['note', 'x', 'youtube_description', 'youtube_script']);
   assert.match(seen.input, /52\.2/); assert.doesNotMatch(seen.input, /取得日時 記録なし/, 'system source lines are not sent to the AI');
   const by = Object.fromEntries(out.map(d => [d.channel, d]));
-  assert.match(by.note.body, /元記事：https:\/\/www\.boat-strike\.online/); assert.match(by.note.body, /出典\n・BOAT RACE公式データ/);
+  assert.match(by.note.body, /元記事：https:\/\/www\.boat-strike\.online/); assert.match(by.note.body, /出典\n・BoatStrikers収録データ（BOAT RACE公式/);
   assert.equal(by.x.blocking_issues, 0, JSON.stringify(by.x.validation)); assert.match(by.x.body, /#ボートレース #桐生\n/); assert.doesNotMatch(by.x.body, /bad tag/);
   assert.match(by.youtube_script.body, /一果：1コース1着率は52\.2%だよ/); assert.equal(by.youtube_script.blocking_issues, 0);
   assert.ok(out.every(d => d.validation.some(v => v.code === 'not_published')));
