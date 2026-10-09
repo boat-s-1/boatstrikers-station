@@ -50,8 +50,9 @@ $$;
 revoke all on function public.blog_release(uuid,bigint,timestamptz) from public, anon, authenticated;
 grant execute on function public.blog_release(uuid,bigint,timestamptz) to service_role;
 
-alter table public.blog_publication_events drop column ai_approval_id;
-drop table public.blog_ai_runs, public.blog_ai_manual_sources, public.blog_post_derivatives;
+alter table public.blog_publication_events drop column if exists ai_approval_id;
+-- The follow-up tables may be absent if only the first migration was applied.
+drop table if exists public.blog_ai_runs, public.blog_ai_manual_sources, public.blog_post_derivatives;
 drop table public.blog_ai_approvals, public.blog_ai_drafts, public.blog_topics, public.blog_source_documents, public.blog_source_urls;
 drop function public.blog_ai_approve(uuid,bigint,text,text,timestamptz);
 drop function public.blog_ai_current_approval(uuid);

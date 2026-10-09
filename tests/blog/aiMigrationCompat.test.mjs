@@ -173,3 +173,18 @@ test('article snapshot is read-only and identical before and after the migration
   assert.equal((await rel({ id: b.id, version: ed.version })).action, 'publish');
   await d.close();
 });
+
+test('rollback also works when only the first AI migration was applied', async () => {
+  const d = new PGlite();
+  await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+  await d.exec('alter default privileges in schema public grant all on tables to anon,authenticated,service_role; alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;');
+  for (const n of BASE) await d.exec(migration(n));
+  const prev = db; db = d;
+  try {
+    const base = await snapshot(existingTables, existingFunctions);
+    await d.exec(migration(AI[0]));
+    await d.exec(readFileSync(new URL('../../ops/blog/ai-drafts-rollback.sql', import.meta.url), 'utf8'));
+    assert.deepEqual(await snapshot(existingTables, existingFunctions), base);
+    assert.equal((await d.query("select to_regclass('public.blog_topics') is null as gone")).rows[0].gone, true);
+  } finally { db = prev; await d.close(); }
+});
