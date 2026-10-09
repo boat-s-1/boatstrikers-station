@@ -1,0 +1,51 @@
+'use client';
+import { useCallback, useEffect, useState } from 'react';
+import s from './blogAdmin.module.css';
+import a from './aiAdmin.module.css';
+
+const jst = v => v ? new Date(v).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '';
+async function call(path, method = 'GET', body) {
+  const res = await fetch(path, { method, credentials: 'same-origin', cache: 'no-store', headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
+  let json; try { json = await res.json(); } catch { throw new Error('サーバーの応答を確認できません。'); }
+  if (!res.ok) throw new Error(json.error || '処理に失敗しました。');
+  return json;
+}
+
+// Shown in the editor for AI-generated posts. Approval is tied to the saved version on screen;
+// the database refuses publication if the approved version is not the current one.
+export default function AiReviewPanel({ postId, autosave, writable, onStatus }) {
+  const [status, setStatus] = useState(null), [name, setName] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState('');
+  const load = useCallback(async () => {
+    try { const result = await call(`/api/admin/blog/ai/drafts/${postId}`); setStatus(result); onStatus?.(result); }
+    catch { setStatus({ error: true }); onStatus?.(null); }
+  }, [postId, onStatus]);
+  useEffect(() => { load(); }, [load, autosave.version]);
+  if (!status) return null;
+  if (status.error) return <p className={s.notice}>AI下書きの情報を確認できませんでした（AI生成の記事は、承認がないと公開できません）。</p>;
+  if (!status.ai) return null;
+  const current = status.approved_current && status.version === autosave.version && !autosave.dirty;
+  const issues = [...(status.validation || [])].sort((x, y) => (x.level === 'blocking' ? 0 : 1) - (y.level === 'blocking' ? 0 : 1));
+  const stale = status.validated_version !== autosave.version;
+  async function approve() {
+    if (busy) return; setBusy(true); setMessage('');
+    try {
+      const saved = await autosave.saveNow();
+      if (saved.dirty || saved.status !== 'saved') throw new Error('保存できていない変更があります。保存してから承認してください。');
+      const result = await call(`/api/admin/blog/ai/drafts/${postId}/approve`, 'POST', { version: saved.version, approver_name: name });
+      setMessage(result.approved ? 'この版を承認しました。「公開設定」から公開・予約できます。' : '要修正の項目があるため承認できません。下の一覧を確認してください。');
+      await load();
+    } catch (e) { setMessage(e.message); } finally { setBusy(false); }
+  }
+  return <section className={a.review} aria-label="AI下書きの確認">
+    <div className={a.reviewHead}><h2>AI下書きの確認</h2>
+      {current ? <span className={a.tag}>承認済み（この版）</span> : status.status === 'rejected' ? <span className={`${a.tag} ${a.tagBad}`}>却下</span> : <span className={`${a.tag} ${a.tagWarn}`}>未承認</span>}</div>
+    <p className={a.meta}>AIが作成した下書きです（{status.model}・{jst(status.generated_at)}）。事実・数値・出典を確認し、問題がなければこの版を承認してください。承認後に本文を修正すると、再承認が必要になります。
+      {status.approval ? <><br />最終承認：{status.approval.name}（{jst(status.approval.at)}・版{status.approval.version}）</> : null}</p>
+    {issues.length ? <><p className={a.meta}>{stale ? '※ 下の確認結果は以前の版のものです。承認ボタンを押すと、現在の版で確認し直します。' : '確認結果（現在の版）'}</p>
+      <ul className={a.issues}>{issues.map((i, n) => <li key={n} data-level={i.level}>{i.level === 'blocking' ? '要修正：' : '確認：'}{i.message}</li>)}</ul></> : <p className={a.meta}>自動確認で指摘はありません。</p>}
+    <details><summary className={a.meta}>出典と取得日時（{status.sources.length}件）</summary><ol className={a.sources}>{status.sources.map((x, n) => <li key={n}>{x.label}：{x.fetched_at ? `取得 ${jst(x.fetched_at)}` : `取得日時の記録なし（集計期間 ${x.period}）`}<br /><a href={x.url} target="_blank" rel="noreferrer noopener">{x.url}</a></li>)}</ol></details>
+    {!current && writable ? <div className={a.approve}><label>承認者名（記録されます）<input value={name} maxLength={80} onChange={e => setName(e.target.value)} autoComplete="name" /></label>
+      <button className={s.primary} disabled={busy || !name.trim() || autosave.status === 'conflict'} onClick={approve}>この版を承認する</button></div> : null}
+    {message ? <p role="status" className={a.meta}>{message}</p> : null}
+  </section>;
+}

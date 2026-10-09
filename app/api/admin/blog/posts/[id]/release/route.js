@@ -6,6 +6,12 @@ export async function POST(request, { params }) {
   return blogResponse(async () => {
     await requireBlogAdmin(request, { write: true });
     const body = await blogBody(request);
-    return blogAdminRepository().release((await params).id, body.version, releaseTime(body));
+    try { return await blogAdminRepository().release((await params).id, body.version, releaseTime(body)); }
+    catch (error) {
+      // The database enforces the rule; this only turns its code into a readable message.
+      if (String(error?.message || "").includes("BLOG_AI_APPROVAL_REQUIRED"))
+        throw Object.assign(new Error("AI生成の下書きです。現在の版を承認してから公開・予約してください（承認後に修正した場合は再承認が必要です）。"), { status: 403 });
+      throw error;
+    }
   });
 }

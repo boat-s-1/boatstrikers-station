@@ -7,7 +7,7 @@ const date=v=>v?new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'num
 export default async function BlogAdminPage(){
  const ready=blogAdminReady(),writes=blogWritesReady();let posts=[],error='';
  if(ready) try{posts=await adminPosts();}catch{error='記事一覧を取得できません。BLOG検証環境を確認してください。';}
- return <main className={s.page}><header className={s.hero}><p className={s.eyebrow}>BOATSTRIKERS · EDITORIAL</p><div className={s.heroRow}><div><h1>BLOG 記事管理</h1><p>編集版を保存し、確認してから公開する。</p></div><Link className={s.primary} href="/admin/blog/new">＋ 新しい記事</Link></div></header>
+ return <main className={s.page}><header className={s.hero}><p className={s.eyebrow}>BOATSTRIKERS · EDITORIAL</p><div className={s.heroRow}><div><h1>BLOG 記事管理</h1><p>編集版を保存し、確認してから公開する。</p></div><div className={s.heroActions}><Link className={s.button} href="/admin/blog/ai">AI下書き</Link><Link className={s.primary} href="/admin/blog/new">＋ 新しい記事</Link></div></div></header>
  {!ready?<div className={s.notice}>現在のPreviewにはBLOG検証DBが接続されていません。画面構成と新規記事入力を確認できます。保存・公開は検証環境の設定後に利用できます。</div>:!writes?<div className={s.notice}>BLOG書き込みは停止中です。記事の閲覧のみ可能です。</div>:null}
  {error?<p role="alert" className={s.error}>{error}</p>:null}
  {process.env.VERCEL_ENV==='preview'?<p className={s.footnote}><Link href="/blog/preview/dialogue-editor">Preview専用：会話シーン編集をiPhoneで試す →</Link></p>:null}
