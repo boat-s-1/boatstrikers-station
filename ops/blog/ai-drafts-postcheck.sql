@@ -12,7 +12,7 @@ with ai_tables(name) as (
 ), client_roles(role_name) as (
   values ('anon'), ('authenticated')
 ), ai_functions(signature, expected_md5) as (
-  values ('public.blog_release(uuid,bigint,timestamptz)', '033010356f7375115da33373ba25837c'),
+  values ('public.blog_release(uuid,bigint,timestamptz)', 'f3eed4734217c5229cdcd508defdd252'),
          ('public.blog_ai_approve(uuid,bigint,text,text,timestamptz)', '75a623daa1de5512cb7ff7e4822740a7'),
          ('public.blog_ai_current_approval(uuid)', '7951fc2106f46da1787a2bc4f97e06cb'),
          ('public.blog_ai_document_md5(uuid)', '340966e4d25efe9f7a7b04b5d74a0b09'),

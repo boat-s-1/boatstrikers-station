@@ -160,3 +160,20 @@ test('each approval stores the exact approved document; earlier approvals stay a
   // A document that does not match its fingerprint cannot be recorded.
   await assert.rejects(() => role('service_role', () => q("insert into public.blog_ai_approvals(post_id,revision_id,edit_version,document_md5,document,approver_name,approver_session) values($1,$2,1,$3,'{\"title\":\"x\"}'::jsonb,'n','abcdef0123456789')", [post.id, post.revision_id, 'a'.repeat(32)])), e => e.code === '23514');
 });
+
+test('several approvals in one transaction: release uses the approval that matches the current content', async () => {
+  const post = await create('AI 同一トランザクション');
+  await markAi(post);
+  await role('service_role', async () => {
+    await db.exec('begin');
+    try {
+      await q("select public.blog_ai_approve($1,$2,'a','abcdef0123456789',now())", [post.id, post.version]);
+      await q("update public.blog_blocks set data = jsonb_set(data,'{text}','\"差し替え\"') where revision_id=$1", [post.revision_id]);
+      await q("select public.blog_ai_approve($1,$2,'b','abcdef0123456789',now())", [post.id, post.version]);
+      const r = (await q('select public.blog_release($1,$2,null) as r', [post.id, post.version]))[0].r;
+      assert.equal(r.action, 'publish');
+      const ev = (await q("select a.approver_name from public.blog_publication_events e join public.blog_ai_approvals a on a.id=e.ai_approval_id where e.post_id=$1", [post.id]))[0];
+      assert.equal(ev.approver_name, 'b', 'the approval of the current content is recorded');
+    } finally { await db.exec('rollback'); }
+  });
+});

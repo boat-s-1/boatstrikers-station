@@ -107,7 +107,8 @@ create table public.blog_ai_approvals (
   approver_name text not null check (length(trim(approver_name)) between 1 and 80),
   approver_session text not null check (approver_session ~ '^[0-9a-f]{16,64}$'),
   approver_login_at timestamptz,
-  created_at timestamptz not null default now()
+  -- clock_timestamp(): approvals recorded in the same transaction still get distinct, ordered times.
+  created_at timestamptz not null default clock_timestamp()
 );
 create index blog_ai_approvals_post on public.blog_ai_approvals(post_id, created_at desc);
 create function public.blog_ai_approvals_append_only() returns trigger
@@ -175,13 +176,14 @@ begin
   if p.scheduled_revision_id is not null then raise exception 'BLOG_CANCEL_EXISTING_SCHEDULE' using errcode='22023'; end if;
   if p_publish_at is not null and p_publish_at <= now() then raise exception 'BLOG_SCHEDULE_MUST_BE_FUTURE' using errcode='22023'; end if;
   if exists (select 1 from public.blog_ai_drafts where post_id = p.id) then
-    -- 1) the approval must be for the current editing revision and edit_version (unchanged rule);
-    approval := public.blog_ai_current_approval(p.id);
-    if approval is null then raise exception 'BLOG_AI_APPROVAL_REQUIRED' using errcode='22023'; end if;
-    -- 2) and the current content must be exactly what was approved.
-    if (select a.document_md5 from public.blog_ai_approvals a where a.id = approval) is distinct from public.blog_ai_document_md5(p.id) then
-      raise exception 'BLOG_AI_CONTENT_CHANGED' using errcode='22023';
-    end if;
+    -- 1) there must be an approval for the current editing revision and edit_version (unchanged rule);
+    if public.blog_ai_current_approval(p.id) is null then raise exception 'BLOG_AI_APPROVAL_REQUIRED' using errcode='22023'; end if;
+    -- 2) and one of those approvals must be for exactly the current content (not just the latest one).
+    select a.id into approval from public.blog_ai_approvals a
+      where a.post_id = p.id and a.revision_id = p.editing_revision_id and a.edit_version = p.edit_version
+        and a.document_md5 = public.blog_ai_document_md5(p.id)
+      order by a.created_at desc limit 1;
+    if approval is null then raise exception 'BLOG_AI_CONTENT_CHANGED' using errcode='22023'; end if;
   end if;
   r := p.editing_revision_id;
   -- Atomic preparation: storage remains private; only a visible snapshot permits delivery.

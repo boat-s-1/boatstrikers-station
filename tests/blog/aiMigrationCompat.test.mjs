@@ -312,3 +312,36 @@ test('archive stays auditable after live rows change: approved documents, refere
   }
   await d.close();
 });
+
+test('staging behaviour test SQL passes 9 checks, always rolls back, and reports FAILED when a rule is broken', async () => {
+  const sql = readFileSync(new URL('../../ops/blog/ai-drafts-behavior-test.sql', import.meta.url), 'utf8');
+  const setup = async () => {
+    const d = new PGlite();
+    await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+    for (const n of [...BASE, ...AI]) await d.exec(migration(n));
+    const cat = (await d.query("select id from public.blog_categories where slug='beginner'")).rows[0].id, au = (await d.query("select id from public.blog_authors where slug='ichika'")).rows[0].id;
+    const doc = t => ({ schema_version: 1, title: t, excerpt: '', category_id: cat, seo: {}, cover: {}, noindex: false, author_ids: [au], tag_ids: [], relations: [], blocks: [{ id: crypto.randomUUID(), type: 'TEXT', data: { text: t } }] });
+    for (const s of ['phase12b-save-check', 'phase12b-schedule-check', 'phase12c-auto-schedule-check', 'phase12c-retry-check']) {
+      const p = (await d.query('select public.blog_create_draft($1,$2::jsonb) r', [s, doc(s)])).rows[0].r;
+      await d.query('select public.blog_release($1,$2,null)', [p.id, p.version]);
+    }
+    await d.query('select public.blog_create_draft($1,$2::jsonb)', ['staging-setup-check', doc('x')]);
+    return d;
+  };
+  const state = async d => JSON.stringify(await Promise.all(['blog_posts', 'blog_post_revisions', 'blog_blocks', 'blog_publication_events', 'blog_ai_drafts', 'blog_ai_approvals']
+    .map(async t => [t, (await d.query(`select count(*)::int n from public.${t}`)).rows[0].n])));
+  let d = await setup();
+  const before = await state(d);
+  await assert.rejects(() => d.exec(sql), e => /BLOG_AI_BEHAVIOR_TEST_OK: 9 checks passed/.test(e.message));
+  await d.exec('rollback').catch(() => {});
+  assert.equal(await state(d), before, 'nothing persists after the test');
+  await d.close();
+  // If the approval guard were missing, the test must report a failure (and still roll back).
+  d = await setup();
+  await d.exec(`create or replace function public.blog_ai_current_approval(p_post_id uuid) returns uuid language sql stable as $$ select gen_random_uuid() $$;`);
+  const broken = await state(d);
+  await assert.rejects(() => d.exec(sql), e => /BLOG_AI_BEHAVIOR_TEST_FAILED: 1 /.test(e.message));
+  await d.exec('rollback').catch(() => {});
+  assert.equal(await state(d), broken);
+  await d.close();
+});
