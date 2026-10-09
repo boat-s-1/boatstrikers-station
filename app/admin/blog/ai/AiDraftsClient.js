@@ -6,7 +6,7 @@ import a from '../aiAdmin.module.css';
 
 const jst = v => v ? new Date(v).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '—';
 const STATUS = { candidate: '候補', drafted: '下書き作成済み', published: '公開済み', rejected: '不採用' };
-const DRAFT = { needs_review: '確認待ち', approved: '承認済み', rejected: '却下' };
+const DRAFT = { needs_review: '確認待ち', approved: '承認済み', reapproval_needed: '要再承認（承認後に修正あり）', rejected: '却下' };
 async function call(path, method = 'GET', body) {
   const res = await fetch(path, { method, credentials: 'same-origin', cache: 'no-store', headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
   let json; try { json = await res.json(); } catch { throw new Error('サーバーの応答を確認できません。'); }
@@ -87,7 +87,7 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories, 
 
     <section className={s.panel}><div className={s.panelHeading}><h2>3. AI下書き（確認と承認）</h2><span>{drafts.length}件</span></div>
       <ol className={a.steps}><li>記事編集画面で本文・出典・表紙を確認し、必要なら修正します。</li><li>「AI下書きの確認」で承認者名を入力し、その版を承認します（要修正が残っていると承認できません）。</li><li>承認後、「公開設定」から公開・予約します。承認後に修正した場合は再承認が必要です。</li></ol>
-      <div className={a.rows}>{drafts.length ? drafts.map(d => <div className={a.row} key={d.post_id}><span><span className={`${a.tag} ${d.status === 'approved' ? '' : d.status === 'rejected' ? a.tagBad : a.tagWarn}`}>{DRAFT[d.status]}</span> 要修正 {d.blocking_issues}件<br /><span className={a.small}>作成 {jst(d.generated_at)}・{d.model}</span></span>
+      <div className={a.rows}>{drafts.length ? drafts.map(d => <div className={a.row} key={d.post_id}><span><span className={`${a.tag} ${(d.approval_state ?? d.status) === 'approved' ? '' : d.status === 'rejected' ? a.tagBad : a.tagWarn}`}>{DRAFT[d.approval_state ?? d.status]}</span> 要修正 {d.blocking_issues}件（版{d.validated_version ?? '-'}の確認時）<br /><span className={a.small}>作成 {jst(d.generated_at)}・{d.model}</span></span>
         <span className={a.rowActions}><Link className={s.button} href={`/admin/blog/posts/${d.post_id}`}>確認・編集</Link><Link className={s.button} href={`/admin/blog/posts/${d.post_id}/preview`}>プレビュー</Link></span></div>) : <p className={a.small}>AI下書きはまだありません。</p>}</div>
     </section>
     <section className={s.panel}><div className={s.panelHeading}><h2>4. 定時の自動作成</h2><span className={`${a.tag} ${schedule.enabled ? '' : a.tagWarn}`}>{schedule.enabled ? '有効' : '無効'}</span></div>

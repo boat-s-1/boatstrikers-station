@@ -177,3 +177,19 @@ test('several approvals in one transaction: release uses the approval that match
     } finally { await db.exec('rollback'); }
   });
 });
+
+test('edited LIST / TABLE blocks and their citations survive save and reload through the database, and the edit voids the approval', async () => {
+  const post = await create('リストと表の保存');
+  await markAi(post);
+  await approve(post);
+  const cite = { source_ids: ['S1', 'S2'], source_url: 'https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01', source_label: '収録データ / 公式ページ' };
+  const document = { ...doc('リストと表の保存'), blocks: [
+    { id: randomUUID(), type: 'LIST', data: { items: ['1コース：54.7％', ''], placement: 'takeaways', ...cite } },
+    { id: randomUUID(), type: 'TABLE', data: { caption: '1着率', header: true, rows: [['コース', '1着率'], ['1', '54.7%'], ['2']], source_ids: ['S2'], source_url: cite.source_url, source_label: '公式ページ' } },
+  ] };
+  const saved = await rpc('blog_save_draft', [post.id, post.version, document], ['uuid', 'bigint', 'jsonb']);
+  const editor = (await rpc('blog_editor_document', [post.id], ['uuid'])).document;
+  assert.deepEqual(editor.blocks.map(b => b.data), document.blocks.map(b => b.data), 'items, empty item, uneven row and citations are kept as saved');
+  assert.equal(await rpc('blog_ai_current_approval', [post.id], ['uuid']), null, 'the approval of the earlier version no longer applies');
+  await rejectsWith(() => release({ ...post, version: Number(saved.version) }), 'BLOG_AI_APPROVAL_REQUIRED');
+});

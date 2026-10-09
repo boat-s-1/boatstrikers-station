@@ -26,7 +26,8 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
   if (!status.ai) return null;
   const current = status.approved_current && status.version === autosave.version && !autosave.dirty;
   const issues = [...(status.validation || [])].sort((x, y) => (x.level === 'blocking' ? 0 : 1) - (y.level === 'blocking' ? 0 : 1));
-  const stale = status.validated_version !== autosave.version;
+  // The server re-checks the saved version on every load; unsaved edits are checked once autosave stores them.
+  const stale = status.checked_version !== autosave.version || autosave.dirty;
   async function approve() {
     if (busy) return; setBusy(true); setMessage('');
     try {
@@ -51,11 +52,11 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
       {current ? <span className={a.tag}>承認済み（この版）</span> : status.status === 'rejected' ? <span className={`${a.tag} ${a.tagBad}`}>却下</span> : <span className={`${a.tag} ${a.tagWarn}`}>未承認</span>}</div>
     <p className={a.meta}>AIが作成した下書きです（{status.model}・{jst(status.generated_at)}）。事実・数値・出典を確認し、問題がなければこの版を承認してください。承認後に本文を修正すると、再承認が必要になります。
       {status.approval ? <><br />最終承認：{status.approval.name}（{jst(status.approval.at)}・版{status.approval.version}）</> : null}</p>
-    {issues.length ? <><p className={a.meta}>{stale ? '※ 下の確認結果は以前の版のものです。承認ボタンを押すと、現在の版で確認し直します。' : '確認結果（現在の版）'}</p>
-      <ul className={a.issues}>{issues.map((i, n) => <li key={n} data-level={i.level}>{i.level === 'blocking' ? '要修正：' : '確認：'}{i.message}</li>)}</ul></> : <p className={a.meta}>自動確認で指摘はありません。</p>}
-    <details><summary className={a.meta}>出典と取得日時（{status.sources.length}件）</summary><ol className={a.sources}>{status.sources.map((x, n) => <li key={n}>{x.label}：{x.fetched_at ? `取得 ${jst(x.fetched_at)}` : `取得日時の記録なし（集計期間 ${x.period}）`}<br /><a href={x.url} target="_blank" rel="noreferrer noopener">{x.url}</a></li>)}</ol></details>
+    {issues.length ? <><p className={a.meta}>{stale ? '※ 未保存の変更があります。保存すると、現在の内容で確認し直します。' : `確認結果（保存済みの版${status.checked_version}）`}</p>
+      <ul className={a.issues}>{issues.map((i, n) => <li key={n} data-level={i.level}>{i.level === 'blocking' ? '要修正：' : '確認：'}{i.origin === 'generation' ? '（作成時）' : ''}{i.message}</li>)}</ul></> : <p className={a.meta}>自動確認で指摘はありません。</p>}
+    <details><summary className={a.meta}>出典と取得日時（{status.sources.length}件）</summary><ol className={a.sources}>{status.sources.map((x, n) => <li key={n}>{x.id ? `${x.id}：` : ''}{x.label}：{x.fetched_at ? `取得 ${jst(x.fetched_at)}` : x.period ? `取得日時の記録なし（集計期間 ${x.period}）` : '取得日時の記録なし（収録データ）'}<br /><a href={x.url} target="_blank" rel="noreferrer noopener">{x.url}</a></li>)}</ol></details>
     {writable ? <details><summary className={a.meta}>人が追記した事実の出典を登録する</summary>
-      <p className={a.meta}>本文に事実（数値など）を追記した場合は、確認したページと日時を登録します。登録すると記事の出典欄に追加され、その段落の「出典URL」に同じURLを入れると確認を通過します。登録後は再承認が必要です。</p>
+      <p className={a.meta}>本文に事実（数値など）を追記した場合は、確認したページと日時を登録します。登録すると記事の出典欄に追加されます。そのブロックの「このブロックの出典」で登録した出典を選ぶと、確認を通過します。登録後は再承認が必要です。</p>
       <form className={a.form} onSubmit={addSource}>
         <label>追記した事実<input value={fact.statement} maxLength={500} onChange={e => setFact({ ...fact, statement: e.target.value })} /></label>
         <label>出典名<input value={fact.source_label} maxLength={200} onChange={e => setFact({ ...fact, source_label: e.target.value })} /></label>
