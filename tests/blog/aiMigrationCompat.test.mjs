@@ -132,7 +132,8 @@ test('ops pre-check passes before the migrations and post-check passes after the
   await d.exec('alter default privileges in schema public grant all on tables to anon,authenticated,service_role; alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;');
   for (const n of BASE) await d.exec(migration(n));
   const sql = name => readFileSync(new URL(`../../ops/blog/${name}`, import.meta.url), 'utf8');
-  for (const name of ['ai-drafts-precheck.sql', 'ai-drafts-postcheck.sql']) assert.doesNotMatch(sql(name).replace(/--[^\n]*/g, '').toLowerCase(), /\b(insert|update|delete|drop|alter|create|grant|revoke|truncate)\b/);
+  // String literals are data (e.g. privilege names passed to has_table_privilege), so strip them before scanning for statements.
+  for (const name of ['ai-drafts-precheck.sql', 'ai-drafts-postcheck.sql']) assert.doesNotMatch(sql(name).replace(/--[^\n]*/g, '').replace(/'[^']*'/g, "''").toLowerCase(), /\b(insert|update|delete|merge|drop|alter|create|grant|revoke|truncate|copy|call|do|lock|set)\b/);
   const pre = (await d.query(sql('ai-drafts-precheck.sql'))).rows;
   assert.ok(pre.length >= 10 && pre.every(r => r.ok === true), JSON.stringify(pre));
   const postBefore = (await d.query(sql('ai-drafts-postcheck.sql'))).rows;
@@ -187,4 +188,88 @@ test('rollback also works when only the first AI migration was applied', async (
     assert.deepEqual(await snapshot(existingTables, existingFunctions), base);
     assert.equal((await d.query("select to_regclass('public.blog_topics') is null as gone")).rows[0].gone, true);
   } finally { db = prev; await d.close(); }
+});
+
+test('strict post-check: 77 individual rows, all true; each kind of misconfiguration turns its own row false', async () => {
+  const sql = readFileSync(new URL('../../ops/blog/ai-drafts-postcheck.sql', import.meta.url), 'utf8');
+  const fresh = async () => {
+    const d = new PGlite();
+    await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+    await d.exec('alter default privileges in schema public grant all on tables to anon,authenticated,service_role; alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;');
+    for (const n of [...BASE, ...AI]) await d.exec(migration(n));
+    return d;
+  };
+  const failing = async d => (await d.query(sql)).rows.filter(r => r.ok !== true).map(r => r.check);
+  let d = await fresh();
+  const rows = (await d.query(sql)).rows;
+  assert.equal(rows.length, 77);
+  assert.deepEqual(rows.filter(r => r.ok !== true), []);
+  for (const [breakIt, expected] of [
+    ['alter table public.blog_ai_runs disable row level security', ['table_rls_enabled:blog_ai_runs']],
+    ['create policy leak on public.blog_topics for select to anon using (true)', ['table_has_no_policies:blog_topics']],
+    ['grant select on public.blog_ai_drafts to anon', ['table_closed_to_anon_and_authenticated:blog_ai_drafts']],
+    ['grant select (id) on public.blog_source_urls to authenticated', ['table_closed_to_anon_and_authenticated:blog_source_urls']],
+    ['grant insert on public.blog_ai_manual_sources to public', ['table_closed_to_anon_and_authenticated:blog_ai_manual_sources']],
+    ['revoke delete on public.blog_post_derivatives from service_role', ['table_service_role_read_write:blog_post_derivatives']],
+    ['grant execute on function public.blog_ai_approve(uuid,bigint,text,text,timestamptz) to public', ['function_closed_to_anon_and_authenticated:public.blog_ai_approve(uuid,bigint,text,text,timestamptz)']],
+    ['alter function public.blog_ai_document_md5(uuid) security definer', ['function_security_invoker:public.blog_ai_document_md5(uuid)']],
+    ['revoke execute on function public.blog_ai_current_approval(uuid) from service_role', ['function_service_role_execute:public.blog_ai_current_approval(uuid)']],
+    ['alter table public.blog_ai_approvals disable trigger blog_ai_approvals_append_only', ['approvals_append_only_trigger_enabled']],
+    [`create or replace function public.blog_release(p_post_id uuid,p_expected_version bigint,p_publish_at timestamptz default null) returns jsonb language plpgsql security invoker set search_path = '' as $$ begin return null; end; $$`, ['function_body_matches_repository:public.blog_release(uuid,bigint,timestamptz)']],
+  ]) {
+    await d.close(); d = await fresh();
+    await d.exec(breakIt);
+    assert.deepEqual(await failing(d), expected, breakIt);
+  }
+  await d.close();
+});
+
+test('rollback keeps every history row in the private archive, detached from live tables, and refuses to overwrite an archive', async () => {
+  const d = new PGlite();
+  const dq = async (sql, args = []) => (await d.query(sql, args)).rows;
+  await d.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
+  await d.exec('alter default privileges in schema public grant all on tables to anon,authenticated,service_role; alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;');
+  for (const n of [...BASE, ...AI]) await d.exec(migration(n));
+  const rollback = readFileSync(new URL('../../ops/blog/ai-drafts-rollback.sql', import.meta.url), 'utf8');
+  // A published AI article with full history in every AI table.
+  const cat = (await dq("select id from public.blog_categories where slug='stadium-basics'"))[0].id, author = (await dq("select id from public.blog_authors where slug='ichika'"))[0].id;
+  const doc = { schema_version: 1, title: 'AI 記事', excerpt: '', category_id: cat, seo: {}, cover: {}, noindex: false, author_ids: [author], tag_ids: [], relations: [], blocks: [{ id: '00000000-0000-4000-8000-0000000000aa', type: 'TEXT', data: { text: 'AI' } }] };
+  const post = (await dq("select public.blog_create_draft('ai-history', $1::jsonb) as r", [doc]))[0].r;
+  const topic = (await dq("insert into public.blog_topics(topic_key,category_slug,stadium_slug,angle,title_hint,status,post_id) values('stadium-basics:kiryu:water','stadium-basics','kiryu','water','桐生','drafted',$1) returning id", [post.id]))[0].id;
+  const url = (await dq("insert into public.blog_source_urls(stadium_slug,url,label,kind) values('kiryu','https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01','公式','official_data') returning id"))[0].id;
+  await dq("insert into public.blog_source_documents(source_url_id,stadium_slug,url,kind,fetched_at,extracted_text) values($1,'kiryu','https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01','official_data',now(),'本文')", [url]);
+  await dq("insert into public.blog_ai_drafts(post_id,topic_id,model,prompt_version,source_pack,validated_version) values($1,$2,'m','v','{}'::jsonb,$3)", [post.id, topic, post.version]);
+  const approval = (await dq("select public.blog_ai_approve($1,$2,'山田','abcdef0123456789',now()) as r", [post.id, post.version]))[0].r;
+  await dq("select public.blog_release($1,$2,null)", [post.id, post.version]);
+  await dq("insert into public.blog_ai_manual_sources(post_id,statement,source_label,source_url,checked_at,registered_by) values($1,'事実','公式','https://a.example/',now(),'山田')", [post.id]);
+  await dq("insert into public.blog_post_derivatives(post_id,revision_id,channel,body) values($1,$2,'x','本文')", [post.id, post.revision_id]);
+  await dq("insert into public.blog_ai_runs(trigger,status,topic_id,post_id) values('schedule','succeeded',$1,$2)", [topic, post.id]);
+  const tables = ['blog_source_urls','blog_source_documents','blog_topics','blog_ai_drafts','blog_ai_approvals','blog_post_derivatives','blog_ai_manual_sources','blog_ai_runs'];
+  const before = {}; for (const t of tables) before[t] = (await dq(`select count(*)::int n from public.${t}`))[0].n;
+  assert.ok(Object.values(before).every(n => n === 1));
+
+  await d.exec(rollback);
+  // History preserved, row for row, in the private archive.
+  for (const t of tables) assert.equal((await dq(`select count(*)::int n from blog_ai_archive.${t}`))[0].n, before[t], t);
+  assert.deepEqual(await dq('select publication_event_id is not null as e, ai_approval_id from blog_ai_archive.publication_event_approvals'), [{ e: true, ai_approval_id: approval.approval_id }]);
+  assert.equal((await dq('select approver_name from blog_ai_archive.blog_ai_approvals'))[0].approver_name, '山田');
+  // Live schema is back to the pre-AI shape; the published article and its events are untouched.
+  for (const t of tables) assert.equal((await dq(`select to_regclass('public.${t}') is null as gone`))[0].gone, true, t);
+  assert.equal((await dq("select state from public.blog_posts where id=$1", [post.id]))[0].state, 'published');
+  assert.equal((await dq("select count(*)::int n from public.blog_publication_events where post_id=$1", [post.id]))[0].n, 1);
+  // stadium-basics is still used by the article, so it is kept; the unused ones are removed; DATA LAB name restored.
+  assert.deepEqual((await dq("select slug from public.blog_categories where slug in ('stadium-charm','stadium-basics','characters') order by slug")).map(r => r.slug), ['stadium-basics']);
+  assert.equal((await dq("select name from public.blog_categories where slug='data-lab'"))[0].name, 'DATA LAB');
+  // Archive is private and read-only; approvals stay append-only.
+  for (const r of ['anon', 'authenticated']) assert.equal((await dq(`select has_schema_privilege('${r}','blog_ai_archive','USAGE') as u`))[0].u, false);
+  assert.equal((await dq("select has_table_privilege('service_role','blog_ai_archive.blog_ai_approvals','SELECT') s, has_table_privilege('service_role','blog_ai_archive.blog_ai_approvals','DELETE') x"))[0].x, false);
+  await assert.rejects(() => dq("delete from blog_ai_archive.blog_ai_approvals"), e => /BLOG_AI_APPROVAL_IMMUTABLE/.test(e.message));
+  // Archived history no longer blocks changes to live rows (no foreign keys into public).
+  assert.deepEqual(await dq("select conname from pg_constraint c join pg_class r on r.oid=c.confrelid where c.contype='f' and c.connamespace='blog_ai_archive'::regnamespace and r.relnamespace='public'::regnamespace"), []);
+  // Re-applying the feature later works, and a second rollback refuses to overwrite the first archive.
+  for (const n of AI) await d.exec(migration(n));
+  await assert.rejects(() => d.exec(rollback), e => /blog_ai_archive already exists/.test(e.message));
+  await d.exec('rollback').catch(() => {});
+  assert.equal((await dq("select to_regclass('public.blog_ai_drafts') is not null as present"))[0].present, true);
+  await d.close();
 });

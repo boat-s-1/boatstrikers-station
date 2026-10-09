@@ -126,10 +126,20 @@ language sql stable security invoker set search_path = '' as $$
   order by a.created_at desc limit 1;
 $$;
 
+-- Fingerprint of the post's current editor document (what a reviewer sees and approves).
+-- Used both when approving and when releasing, so any content change after approval is detected
+-- even if it bypassed the normal save path (and therefore did not move edit_version).
+create function public.blog_ai_document_md5(p_post_id uuid) returns text
+language plpgsql security invoker set search_path = '' as $$
+begin
+  return md5(((public.blog_editor_document(p_post_id)) -> 'document')::text);
+end;
+$$;
+
 create function public.blog_ai_approve(p_post_id uuid, p_expected_version bigint, p_approver_name text,
   p_approver_session text, p_approver_login_at timestamptz)
 returns jsonb language plpgsql security invoker set search_path = '' as $$
-declare p public.blog_posts; d public.blog_ai_drafts; doc jsonb; approval uuid;
+declare p public.blog_posts; d public.blog_ai_drafts; approval uuid;
 begin
   select * into p from public.blog_posts where id = p_post_id for update;
   if not found then raise exception 'BLOG_NOT_FOUND' using errcode = 'P0002'; end if;
@@ -140,16 +150,15 @@ begin
   -- The server must re-validate the exact version being approved; blocking issues prevent approval.
   if d.validated_version is distinct from p.edit_version then raise exception 'BLOG_AI_NOT_VALIDATED' using errcode = '22023'; end if;
   if d.blocking_issues > 0 then raise exception 'BLOG_AI_BLOCKING_ISSUES' using errcode = '22023'; end if;
-  doc := public.blog_editor_document(p.id) -> 'document';
   insert into public.blog_ai_approvals(post_id, revision_id, edit_version, document_md5, approver_name, approver_session, approver_login_at)
-    values (p.id, p.editing_revision_id, p.edit_version, md5(doc::text), trim(p_approver_name), p_approver_session, p_approver_login_at)
+    values (p.id, p.editing_revision_id, p.edit_version, public.blog_ai_document_md5(p.id), trim(p_approver_name), p_approver_session, p_approver_login_at)
     returning id into approval;
   update public.blog_ai_drafts set status = 'approved', rejected_reason = null, updated_at = now() where post_id = p.id;
   return jsonb_build_object('approval_id', approval, 'post_id', p.id, 'revision_id', p.editing_revision_id, 'version', p.edit_version);
 end;
 $$;
 
--- Same as 20261003174612 blog_release, plus the AI approval guard and the approval reference in the event log.
+-- Same as 20261003174612 blog_release, plus the AI approval guard (version, revision and content) and the approval reference in the event log.
 create or replace function public.blog_release(p_post_id uuid,p_expected_version bigint,p_publish_at timestamptz default null)
 returns jsonb language plpgsql security invoker set search_path = '' as $$
 declare p public.blog_posts; r uuid; action_name text; approval uuid;
@@ -161,8 +170,13 @@ begin
   if p.scheduled_revision_id is not null then raise exception 'BLOG_CANCEL_EXISTING_SCHEDULE' using errcode='22023'; end if;
   if p_publish_at is not null and p_publish_at <= now() then raise exception 'BLOG_SCHEDULE_MUST_BE_FUTURE' using errcode='22023'; end if;
   if exists (select 1 from public.blog_ai_drafts where post_id = p.id) then
+    -- 1) the approval must be for the current editing revision and edit_version (unchanged rule);
     approval := public.blog_ai_current_approval(p.id);
     if approval is null then raise exception 'BLOG_AI_APPROVAL_REQUIRED' using errcode='22023'; end if;
+    -- 2) and the current content must be exactly what was approved.
+    if (select a.document_md5 from public.blog_ai_approvals a where a.id = approval) is distinct from public.blog_ai_document_md5(p.id) then
+      raise exception 'BLOG_AI_CONTENT_CHANGED' using errcode='22023';
+    end if;
   end if;
   r := p.editing_revision_id;
   -- Atomic preparation: storage remains private; only a visible snapshot permits delivery.
@@ -199,6 +213,7 @@ begin
   foreach t in array array[
     'public.blog_ai_approvals_append_only()',
     'public.blog_ai_current_approval(uuid)',
+    'public.blog_ai_document_md5(uuid)',
     'public.blog_ai_approve(uuid,bigint,text,text,timestamptz)',
     'public.blog_release(uuid,bigint,timestamptz)'
   ] loop

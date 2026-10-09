@@ -128,3 +128,13 @@ test('cover regeneration replaces cover and OGP in one save and requires re-appr
   const r2 = await regenerateCover({ repo, store, postId, version: r.version, renderCover: async spec => { rendered = spec; return fakeCover(); } });
   assert.equal(rendered.character, 'ichika', 'defaults to the article author'); assert.ok(r2.version > r.version);
 });
+
+test('editor status is not "approved" when the content fingerprint no longer matches', async () => {
+  const { store, repo, postId } = await drafted();
+  await approveDraft({ repo, store, postId, version: 1, name: '山田', session });
+  store.state.approvals.at(-1).document_md5 = 'a'.repeat(32);
+  store.documentMd5 = async () => 'a'.repeat(32);
+  assert.equal((await draftStatus({ repo, store, postId })).approved_current, true);
+  store.documentMd5 = async () => 'b'.repeat(32); // content changed without a version change
+  assert.equal((await draftStatus({ repo, store, postId })).approved_current, false);
+});

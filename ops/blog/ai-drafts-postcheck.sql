@@ -1,22 +1,54 @@
 -- READ-ONLY. Run in the same BLOG project AFTER applying both AI drafting migrations.
--- One SELECT; returns check / ok (true/false) only. All rows must be true.
-select 'blog_release_is_ai_version' as check,
-  coalesce((select md5(replace(prosrc, chr(13), '')) from pg_proc where oid = to_regprocedure('public.blog_release(uuid,bigint,timestamptz)')) = 'e265c870242487dafc5a585b675a3381', false) as ok
-union all select 'blog_ai_approve_present',
-  coalesce((select md5(replace(prosrc, chr(13), '')) from pg_proc where oid = to_regprocedure('public.blog_ai_approve(uuid,bigint,text,text,timestamptz)')) = '18354bb7cfc70a02b5ca2cf357c0f4a0', false)
-union all select 'ai_tables_present',
-  to_regclass('public.blog_ai_drafts') is not null and to_regclass('public.blog_topics') is not null and to_regclass('public.blog_ai_approvals') is not null
-  and to_regclass('public.blog_source_urls') is not null and to_regclass('public.blog_source_documents') is not null
-  and to_regclass('public.blog_post_derivatives') is not null and to_regclass('public.blog_ai_manual_sources') is not null and to_regclass('public.blog_ai_runs') is not null
-union all select 'ai_tables_rls_enabled',
-  not exists (select 1 from pg_class where relnamespace = 'public'::regnamespace and relname in
-    ('blog_ai_drafts','blog_topics','blog_ai_approvals','blog_source_urls','blog_source_documents','blog_post_derivatives','blog_ai_manual_sources','blog_ai_runs') and not relrowsecurity)
-union all select 'ai_tables_closed_to_anon_and_authenticated',
-  not exists (select 1 from information_schema.role_table_grants where table_schema = 'public' and grantee in ('anon','authenticated','PUBLIC') and table_name in
-    ('blog_ai_drafts','blog_topics','blog_ai_approvals','blog_source_urls','blog_source_documents','blog_post_derivatives','blog_ai_manual_sources','blog_ai_runs'))
-union all select 'ai_functions_closed_to_anon_and_authenticated',
-  not exists (select 1 from pg_proc p where p.pronamespace = 'public'::regnamespace and (p.proname like 'blog\_ai\_%' or p.proname = 'blog_release')
-    and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute')))
-union all select 'new_categories_present',
-  (select count(*) from public.blog_categories where slug in ('stadium-charm','stadium-basics','characters') and active) = 3
-union all select 'data_lab_display_name', exists (select 1 from public.blog_categories where slug = 'data-lab' and name = 'BoatStrikers DATA LAB');
+-- One SELECT; returns check / ok (true/false) only. Expected: 77 rows (48 table checks + 25 function checks + 4 others), ALL true.
+-- Each AI table and each AI-related function is checked individually (no aggregated pass).
+--   per table (8 tables x 6): exists, RLS enabled, no policies, no privileges for anon/authenticated
+--     (table level incl. PUBLIC inheritance, and column level), service_role can read and write, owned by the same role as blog_posts
+--   per function (5 functions x 5): exists, body matches the repository, SECURITY INVOKER,
+--     anon/authenticated cannot execute (incl. PUBLIC), service_role can execute
+--   plus: append-only trigger, nullable approval column on publication events, categories
+with ai_tables(name) as (
+  values ('blog_source_urls'), ('blog_source_documents'), ('blog_topics'), ('blog_ai_drafts'),
+         ('blog_ai_approvals'), ('blog_post_derivatives'), ('blog_ai_manual_sources'), ('blog_ai_runs')
+), client_roles(role_name) as (
+  values ('anon'), ('authenticated')
+), ai_functions(signature, expected_md5) as (
+  values ('public.blog_release(uuid,bigint,timestamptz)', '033010356f7375115da33373ba25837c'),
+         ('public.blog_ai_approve(uuid,bigint,text,text,timestamptz)', 'b299905017edf758297b752f0d01b2a5'),
+         ('public.blog_ai_current_approval(uuid)', '7951fc2106f46da1787a2bc4f97e06cb'),
+         ('public.blog_ai_document_md5(uuid)', '340966e4d25efe9f7a7b04b5d74a0b09'),
+         ('public.blog_ai_approvals_append_only()', '972585b0120c165f9d5a3e0519a7cff4')
+), t as (
+  select a.name, c.oid, c.relrowsecurity, c.relowner
+  from ai_tables a left join pg_class c on c.oid = to_regclass('public.' || a.name)
+), f as (
+  select a.signature, a.expected_md5, p.oid, p.prosecdef, md5(replace(p.prosrc, chr(13), '')) as body_md5
+  from ai_functions a left join pg_proc p on p.oid = to_regprocedure(a.signature)
+), checks as (
+  select 1 as grp, name as item, 'table_exists:' || name as check_name, oid is not null as ok from t
+  union all select 2, name, 'table_rls_enabled:' || name, coalesce(relrowsecurity, false) from t
+  union all select 3, name, 'table_has_no_policies:' || name, oid is not null and not exists (select 1 from pg_policy pol where pol.polrelid = t.oid) from t
+  union all select 4, name, 'table_closed_to_anon_and_authenticated:' || name,
+    oid is not null and not exists (select 1 from client_roles r where
+      has_table_privilege(r.role_name, t.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+      or has_any_column_privilege(r.role_name, t.oid, 'SELECT,INSERT,UPDATE,REFERENCES')) from t
+  union all select 5, name, 'table_service_role_read_write:' || name,
+    oid is not null and has_table_privilege('service_role', t.oid, 'SELECT') and has_table_privilege('service_role', t.oid, 'INSERT')
+    and has_table_privilege('service_role', t.oid, 'UPDATE') and has_table_privilege('service_role', t.oid, 'DELETE') from t
+  union all select 6, name, 'table_owner_same_as_blog_posts:' || name,
+    oid is not null and relowner = (select relowner from pg_class where oid = to_regclass('public.blog_posts')) from t
+  union all select 7, signature, 'function_exists:' || signature, oid is not null from f
+  union all select 8, signature, 'function_body_matches_repository:' || signature, coalesce(body_md5 = expected_md5, false) from f
+  union all select 9, signature, 'function_security_invoker:' || signature, oid is not null and not prosecdef from f
+  union all select 10, signature, 'function_closed_to_anon_and_authenticated:' || signature,
+    oid is not null and not exists (select 1 from client_roles r where has_function_privilege(r.role_name, f.oid, 'EXECUTE')) from f
+  union all select 11, signature, 'function_service_role_execute:' || signature, oid is not null and has_function_privilege('service_role', f.oid, 'EXECUTE') from f
+  union all select 12, 'trigger', 'approvals_append_only_trigger_enabled',
+    exists (select 1 from pg_trigger tg where tg.tgrelid = to_regclass('public.blog_ai_approvals') and tg.tgname = 'blog_ai_approvals_append_only' and tg.tgenabled <> 'D')
+  union all select 13, 'column', 'publication_events_ai_approval_id_nullable',
+    exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'blog_publication_events' and column_name = 'ai_approval_id' and is_nullable = 'YES')
+  union all select 14, 'categories', 'new_categories_present',
+    (select count(*) from public.blog_categories where slug in ('stadium-charm','stadium-basics','characters') and active) = 3
+  union all select 15, 'categories', 'data_lab_display_name',
+    exists (select 1 from public.blog_categories where slug = 'data-lab' and name = 'BoatStrikers DATA LAB')
+)
+select check_name as check, ok from checks order by grp, item;

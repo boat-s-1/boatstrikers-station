@@ -129,3 +129,18 @@ test('follow-up tables enforce https sources, past check times, known channels a
   await role('service_role', () => q("insert into public.blog_ai_runs(trigger,status) values('schedule','skipped')"));
   await assert.rejects(() => role('service_role', () => q("insert into public.blog_ai_runs(trigger) values('auto')")), e => e.code === '23514');
 });
+
+test('content changed after approval without a version change is refused at release', async () => {
+  const post = await create('AI 本文照合');
+  await markAi(post);
+  await approve(post);
+  // Simulate a change that bypasses blog_save_draft (so edit_version and revision stay the same).
+  await role('service_role', () => q("update public.blog_blocks set data = jsonb_set(data, '{text}', '\"差し替えられた本文\"') where revision_id = $1", [post.revision_id]));
+  await rejectsWith(() => release(post), 'BLOG_AI_CONTENT_CHANGED');
+  await role('service_role', () => q("update public.blog_post_revisions set title = 'タイトルだけ変更' where id = $1", [post.revision_id]));
+  await rejectsWith(() => release(post), 'BLOG_AI_CONTENT_CHANGED');
+  assert.equal((await q('select state from public.blog_posts where id=$1', [post.id]))[0].state, 'draft');
+  // Re-validation + re-approval of the exact current content makes it releasable again.
+  await approve(post);
+  assert.equal((await release(post)).action, 'publish');
+});
