@@ -9,6 +9,7 @@ import { blankDocument } from '../../../lib/blog/document.mjs';
 import { makeScene,cloneScene } from '../../../lib/blog/dialogueScene.mjs';
 import DialogueSceneEditor from './DialogueSceneEditor';
 import AiReviewPanel from './AiReviewPanel';
+import PostToolsPanel from './PostToolsPanel';
 import { useBlogAutosave,readBlogRecovery } from './_lib/useBlogAutosave';
 import s from './blogAdmin.module.css';
 const TABS=['基本情報','本文ブロック','SEO','公開設定','画像'];
@@ -46,6 +47,7 @@ function ExistingWorkspace({editor,doc,setDoc,catalogue,writable,tab,setTab,publ
  return <><nav className={s.tabs} aria-label="記事編集メニュー">{TABS.map(name=><button key={name} type="button" className={tab===name?s.active:''} onClick={()=>setTab(name)}>{name}</button>)}</nav>
  {recovery?<div className={s.recovery}><strong>この端末に未保存の入力が残っています。</strong><p>サーバーの版 {editor.version}、端末の控え {recovery.version}。自動では上書きしません。</p>{recovery.version===editor.version&&writable?<button className={s.button} onClick={()=>{change(()=>recovery.document);setRecovery(null);}}>端末の入力を編集画面へ戻す</button>:<p>競合しているため復元できません。別の記事編集履歴を確認してください。</p>}<button className={s.button} onClick={()=>setRecovery(null)}>閉じる</button></div>:null}
  <AiReviewPanel postId={editor.id} autosave={autosave} writable={writable} onStatus={setAi}/>
+ <PostToolsPanel postId={editor.id} autosave={autosave} writable={writable}/>
  <EditorFields doc={doc} change={change} tab={tab} catalogue={catalogue} writable={writable}/>
  {tab==='公開設定'?<section className={s.panel}><h2>公開操作</h2>{aiLocked?<p className={s.error}>AI生成の下書きです。上の「AI下書きの確認」で現在の版を承認すると、公開・予約できます。</p>:null}<p className={s.info}>公開・予約は現在の編集版を確定します。自動保存は公開中の版を更新しません。予約公開の実行には別途BLOGワーカーの設定が必要です。</p><div className={s.publication}>{editor.scheduled_at?<><p>予約日時：{new Date(editor.scheduled_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})}</p><button className={s.button} disabled={!writable||working} onClick={()=>publish('cancel_schedule')}>予約を取り消す</button></>:<><button className={s.primary} disabled={!writable||working||autosave.status==='conflict'||aiLocked} onClick={()=>publish('publish')}>編集版を公開する</button><label className={s.field}>予約公開日時（端末の現地時刻）<input type="datetime-local" value={publishAt} onChange={e=>setPublishAt(e.target.value)}/></label><button className={s.button} disabled={!writable||working||!publishAt||aiLocked} onClick={()=>publish('schedule')}>日時を指定して予約</button></>}{editor.state==='published'?<button className={s.button} disabled={!writable||working} onClick={()=>publish('unpublish')}>公開を停止する</button>:null}</div></section>:null}
  {message?<p role="alert" className={s.error}>{message}</p>:null}

@@ -14,10 +14,10 @@ async function call(path, method = 'GET', body) {
   return json;
 }
 
-export default function AiDraftsClient({ ready, writable, stadiums, categories }) {
+export default function AiDraftsClient({ ready, writable, stadiums, categories, schedule }) {
   const [catalog, setCatalog] = useState({ registered: [], candidates: [] });
   const [category, setCategory] = useState('stadium-basics'), [stadium, setStadium] = useState('kiryu');
-  const [sources, setSources] = useState({ urls: [], documents: [] }), [drafts, setDrafts] = useState([]);
+  const [sources, setSources] = useState({ urls: [], documents: [] }), [drafts, setDrafts] = useState([]), [runs, setRuns] = useState([]);
   const [form, setForm] = useState({ url: '', label: '', kind: 'official_site', registered_by: '' });
   const [busy, setBusy] = useState(''), [message, setMessage] = useState(''), [result, setResult] = useState(null);
   const perStadium = categories.find(c => c.slug === category)?.perStadium ?? true;
@@ -33,7 +33,7 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories }
   }, [ready, stadium]);
   const loadDrafts = useCallback(async () => {
     if (!ready) return;
-    try { setDrafts((await call('/api/admin/blog/ai/drafts')).drafts); } catch (e) { setMessage(e.message); }
+    try { const r = await call('/api/admin/blog/ai/drafts'); setDrafts(r.drafts); setRuns(r.runs || []); } catch (e) { setMessage(e.message); }
   }, [ready]);
   useEffect(() => { loadTopics(); }, [loadTopics]);
   useEffect(() => { loadSources(); }, [loadSources]);
@@ -89,6 +89,12 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories }
       <ol className={a.steps}><li>記事編集画面で本文・出典・表紙を確認し、必要なら修正します。</li><li>「AI下書きの確認」で承認者名を入力し、その版を承認します（要修正が残っていると承認できません）。</li><li>承認後、「公開設定」から公開・予約します。承認後に修正した場合は再承認が必要です。</li></ol>
       <div className={a.rows}>{drafts.length ? drafts.map(d => <div className={a.row} key={d.post_id}><span><span className={`${a.tag} ${d.status === 'approved' ? '' : d.status === 'rejected' ? a.tagBad : a.tagWarn}`}>{DRAFT[d.status]}</span> 要修正 {d.blocking_issues}件<br /><span className={a.small}>作成 {jst(d.generated_at)}・{d.model}</span></span>
         <span className={a.rowActions}><Link className={s.button} href={`/admin/blog/posts/${d.post_id}`}>確認・編集</Link><Link className={s.button} href={`/admin/blog/posts/${d.post_id}/preview`}>プレビュー</Link></span></div>) : <p className={a.small}>AI下書きはまだありません。</p>}</div>
+    </section>
+    <section className={s.panel}><div className={s.panelHeading}><h2>4. 定時の自動作成</h2><span className={`${a.tag} ${schedule.enabled ? '' : a.tagWarn}`}>{schedule.enabled ? '有効' : '無効'}</span></div>
+      <p className={a.meta}>{schedule.enabled ? `1回あたり最大${schedule.maxPerRun}件、登録済みのテーマから下書きを作ります${schedule.autoTopics ? `（テーマが無いときは ${schedule.categories.map(c => categories.find(x => x.slug === c)?.name || c).join('・')} から自動で選びます）` : ''}。公開はしません。` : '現在は無効です。有効にするには、環境変数と定時実行の設定が必要です（手順書を参照）。下書きの自動作成だけで、公開は常に人の承認が必要です。'}</p>
+      <h3 className={a.meta}>最近の作成履歴（7日間）</h3>
+      <div className={a.rows}>{runs.length ? runs.map(r => <div className={a.row} key={r.id}><span><span className={`${a.tag} ${r.status === 'failed' ? a.tagBad : r.status === 'succeeded' ? '' : a.tagWarn}`}>{{ succeeded: '成功', failed: '失敗', running: '実行中', skipped: '見送り' }[r.status]}</span> {r.trigger === 'schedule' ? '定時' : '手動'}・{jst(r.started_at)}<br /><span className={a.small}>{r.message || ''}</span></span>
+        {r.post_id ? <Link className={s.button} href={`/admin/blog/posts/${r.post_id}`}>下書きを開く</Link> : null}</div>) : <p className={a.small}>履歴はありません。</p>}</div>
     </section>
     <p className={s.footnote}>テーマの状態：{Object.entries(STATUS).map(([k, v]) => `${v} ${catalog.registered.filter(t => t.status === k).length}件`).join('・')}</p>
   </>;

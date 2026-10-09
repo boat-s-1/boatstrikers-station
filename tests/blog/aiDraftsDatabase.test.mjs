@@ -30,7 +30,7 @@ before(async () => {
   db = new PGlite();
   await db.exec('create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;');
   await db.exec('alter default privileges in schema public grant all on tables to anon,authenticated,service_role; alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;');
-  for (const name of ['20261002141712_blog_media_platform.sql', '20261003174612_blog_private_media_publication.sql', '20261009180000_blog_ai_drafts.sql']) await db.exec(migration(name));
+  for (const name of ['20261002141712_blog_media_platform.sql', '20261003174612_blog_private_media_publication.sql', '20261009180000_blog_ai_drafts.sql', '20261010090000_blog_ai_followups.sql']) await db.exec(migration(name));
   author = (await q("select id from public.blog_authors where slug='ichika'"))[0].id;
   category = (await q("select id from public.blog_categories where slug='stadium-basics'"))[0].id;
 });
@@ -104,7 +104,7 @@ test('approvals are append-only', async () => {
 
 test('new tables and RPCs are not reachable by anon or authenticated', async () => {
   for (const r of ['anon', 'authenticated']) {
-    for (const table of ['blog_source_urls', 'blog_source_documents', 'blog_topics', 'blog_ai_drafts', 'blog_ai_approvals'])
+    for (const table of ['blog_source_urls', 'blog_source_documents', 'blog_topics', 'blog_ai_drafts', 'blog_ai_approvals', 'blog_post_derivatives', 'blog_ai_manual_sources', 'blog_ai_runs'])
       await assert.rejects(() => role(r, () => q(`select * from public.${table}`)), e => e.code === '42501');
     await assert.rejects(() => role(r, () => q(`select public.blog_ai_approve('${randomUUID()}'::uuid,0,'x','${session}',null)`)), e => e.code === '42501');
   }
@@ -115,4 +115,17 @@ test('topic keys are unique and source documents record fetch time and outcome',
   await assert.rejects(() => role('service_role', () => q("insert into public.blog_topics(topic_key,category_slug,stadium_slug,angle,title_hint) values('stadium-basics:kiryu:water','stadium-basics','kiryu','water','重複')")), e => e.code === '23505');
   await assert.rejects(() => role('service_role', () => q("insert into public.blog_source_documents(stadium_slug,url,kind,fetched_at) values('kiryu','https://example.com/','manual',now())")), e => e.code === '23514');
   await assert.rejects(() => role('service_role', () => q("insert into public.blog_source_urls(stadium_slug,url,label,kind) values('kiryu','http://example.com/','x','manual')")), e => e.code === '23514');
+});
+
+test('follow-up tables enforce https sources, past check times, known channels and run states', async () => {
+  const post = await create('AI 追記');
+  const sr = sql => role('service_role', () => q(sql, [post.id]));
+  await sr("insert into public.blog_ai_manual_sources(post_id,statement,source_label,source_url,checked_at,registered_by) values($1,'観覧席','公式','https://a.example/x',now()-interval '1 hour','山田')");
+  await assert.rejects(() => sr("insert into public.blog_ai_manual_sources(post_id,statement,source_label,source_url,checked_at,registered_by) values($1,'x','y','http://a.example/','2020-01-01','z')"), e => e.code === '23514');
+  await assert.rejects(() => sr("insert into public.blog_ai_manual_sources(post_id,statement,source_label,source_url,checked_at,registered_by) values($1,'x','y','https://a.example/',now()+interval '1 day','z')"), e => e.code === '23514');
+  const rev = (await q('select editing_revision_id as r from public.blog_posts where id=$1', [post.id]))[0].r;
+  await role('service_role', () => q("insert into public.blog_post_derivatives(post_id,revision_id,channel,body) values($1,$2,'x','本文')", [post.id, rev]));
+  await assert.rejects(() => role('service_role', () => q("insert into public.blog_post_derivatives(post_id,revision_id,channel,body) values($1,$2,'instagram','本文')", [post.id, rev])), e => e.code === '23514');
+  await role('service_role', () => q("insert into public.blog_ai_runs(trigger,status) values('schedule','skipped')"));
+  await assert.rejects(() => role('service_role', () => q("insert into public.blog_ai_runs(trigger) values('auto')")), e => e.code === '23514');
 });

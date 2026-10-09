@@ -6,6 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request) {
   return blogResponse(async () => {
     await requireBlogAdmin(request);
-    return { drafts: await aiServerDeps().store.aiDrafts() };
+    const { store } = aiServerDeps();
+    const [drafts, runs] = await Promise.all([store.aiDrafts(), store.recentRuns(new Date(Date.now() - 7 * 86400000).toISOString()).catch(() => [])]);
+    return { drafts, runs: runs.slice(0, 20) };
   });
 }

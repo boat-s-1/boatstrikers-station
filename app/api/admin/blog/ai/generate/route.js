@@ -2,6 +2,7 @@ import { blogBody, blogResponse, requireBlogAdmin } from "../../../../../../lib/
 import { aiServerDeps, aiCaller, dataLabTitles } from "../../../../../../lib/blog/ai/server";
 import { requireAiEnabled } from "../../../../../../lib/blog/ai/config.mjs";
 import { runDraftPipeline } from "../../../../../../lib/blog/ai/pipeline.mjs";
+import { runLoggedDraft } from "../../../../../../lib/blog/ai/schedule.mjs";
 import { renderCoverPng } from "../../../../../../lib/blog/ai/cover.mjs";
 import { UUID } from "../../../../../../lib/blog/document.mjs";
 export const runtime = "nodejs";
@@ -16,6 +17,6 @@ export async function POST(request) {
     const body = await blogBody(request);
     if (!UUID.test(String(body.topic_id || ""))) throw Object.assign(new Error("テーマを選んでください。"), { status: 400 });
     const { repo, store } = aiServerDeps();
-    return runDraftPipeline({ topicId: body.topic_id, store, repo, callAi: aiCaller(config), renderCover: renderCoverPng, fetchImpl: fetch, config, extraTitles: dataLabTitles() });
+    return runLoggedDraft({ store, topicId: body.topic_id, run: () => runDraftPipeline({ topicId: body.topic_id, store, repo, callAi: aiCaller(config), renderCover: renderCoverPng, fetchImpl: fetch, config, extraTitles: dataLabTitles() }) });
   });
 }

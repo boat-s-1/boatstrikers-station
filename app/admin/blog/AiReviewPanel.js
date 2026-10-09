@@ -15,6 +15,7 @@ async function call(path, method = 'GET', body) {
 // the database refuses publication if the approved version is not the current one.
 export default function AiReviewPanel({ postId, autosave, writable, onStatus }) {
   const [status, setStatus] = useState(null), [name, setName] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState('');
+  const [fact, setFact] = useState({ statement: '', source_label: '', source_url: '', checked_at: '', registered_by: '' });
   const load = useCallback(async () => {
     try { const result = await call(`/api/admin/blog/ai/drafts/${postId}`); setStatus(result); onStatus?.(result); }
     catch { setStatus({ error: true }); onStatus?.(null); }
@@ -36,6 +37,15 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
       await load();
     } catch (e) { setMessage(e.message); } finally { setBusy(false); }
   }
+  async function addSource(e) {
+    e.preventDefault(); if (busy) return; setBusy(true); setMessage('');
+    try {
+      const saved = await autosave.saveNow();
+      if (saved.dirty || saved.status !== 'saved') throw new Error('保存できていない変更があります。保存してから登録してください。');
+      await call(`/api/admin/blog/ai/drafts/${postId}/sources`, 'POST', { version: saved.version, ...fact, checked_at: fact.checked_at ? new Date(fact.checked_at).toISOString() : '' });
+      window.location.reload();
+    } catch (err) { setMessage(err.message); setBusy(false); }
+  }
   return <section className={a.review} aria-label="AI下書きの確認">
     <div className={a.reviewHead}><h2>AI下書きの確認</h2>
       {current ? <span className={a.tag}>承認済み（この版）</span> : status.status === 'rejected' ? <span className={`${a.tag} ${a.tagBad}`}>却下</span> : <span className={`${a.tag} ${a.tagWarn}`}>未承認</span>}</div>
@@ -44,6 +54,16 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
     {issues.length ? <><p className={a.meta}>{stale ? '※ 下の確認結果は以前の版のものです。承認ボタンを押すと、現在の版で確認し直します。' : '確認結果（現在の版）'}</p>
       <ul className={a.issues}>{issues.map((i, n) => <li key={n} data-level={i.level}>{i.level === 'blocking' ? '要修正：' : '確認：'}{i.message}</li>)}</ul></> : <p className={a.meta}>自動確認で指摘はありません。</p>}
     <details><summary className={a.meta}>出典と取得日時（{status.sources.length}件）</summary><ol className={a.sources}>{status.sources.map((x, n) => <li key={n}>{x.label}：{x.fetched_at ? `取得 ${jst(x.fetched_at)}` : `取得日時の記録なし（集計期間 ${x.period}）`}<br /><a href={x.url} target="_blank" rel="noreferrer noopener">{x.url}</a></li>)}</ol></details>
+    {writable ? <details><summary className={a.meta}>人が追記した事実の出典を登録する</summary>
+      <p className={a.meta}>本文に事実（数値など）を追記した場合は、確認したページと日時を登録します。登録すると記事の出典欄に追加され、その段落の「出典URL」に同じURLを入れると確認を通過します。登録後は再承認が必要です。</p>
+      <form className={a.form} onSubmit={addSource}>
+        <label>追記した事実<input value={fact.statement} maxLength={500} onChange={e => setFact({ ...fact, statement: e.target.value })} /></label>
+        <label>出典名<input value={fact.source_label} maxLength={200} onChange={e => setFact({ ...fact, source_label: e.target.value })} /></label>
+        <label>出典URL（https）<input value={fact.source_url} inputMode="url" onChange={e => setFact({ ...fact, source_url: e.target.value })} /></label>
+        <label>確認した日時<input type="datetime-local" value={fact.checked_at} onChange={e => setFact({ ...fact, checked_at: e.target.value })} /></label>
+        <label>登録者名<input value={fact.registered_by} maxLength={80} onChange={e => setFact({ ...fact, registered_by: e.target.value })} /></label>
+        <button className={s.button} disabled={busy || !fact.registered_by.trim() || !fact.statement || !fact.source_label || !fact.source_url || !fact.checked_at}>出典を登録</button>
+      </form></details> : null}
     {!current && writable ? <div className={a.approve}><label>承認者名（記録されます）<input value={name} maxLength={80} onChange={e => setName(e.target.value)} autoComplete="name" /></label>
       <button className={s.primary} disabled={busy || !name.trim() || autosave.status === 'conflict'} onClick={approve}>この版を承認する</button></div> : null}
     {message ? <p role="status" className={a.meta}>{message}</p> : null}

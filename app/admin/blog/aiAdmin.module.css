@@ -12,7 +12,7 @@
 .sources{font-size:12px;line-height:1.7;margin:12px 0 0;padding-left:18px;color:#3b4d46;word-break:break-all}
 .approve{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:14px}
 .approve label{display:grid;gap:4px;font-size:12px;font-weight:700;flex:1 1 220px}
-.approve input,.form input,.form select{min-height:44px;border:1px solid #cfd8cc;border-radius:8px;padding:8px 10px;font-size:15px;width:100%}
+.approve input,.form input,.form select{min-width:0;box-sizing:border-box;min-height:44px;border:1px solid #cfd8cc;border-radius:8px;padding:8px 10px;font-size:15px;width:100%}
 .form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-items:end}
 .form label{display:grid;gap:4px;font-size:12px;font-weight:700}
 .rows{display:grid;gap:8px;margin-top:12px}
