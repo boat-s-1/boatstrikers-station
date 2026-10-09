@@ -82,7 +82,7 @@ test('schedule is off by default and needs both flags', () => {
   assert.equal(scheduleConfig({}).enabled, false);
   assert.equal(scheduleConfig({ BLOG_AI_SCHEDULE_ENABLED: 'true' }).enabled, false);
   const on = scheduleConfig({ BLOG_AI_DRAFTS_ENABLED: 'true', BLOG_AI_SCHEDULE_ENABLED: 'true', BLOG_AI_SCHEDULE_MAX_PER_RUN: '9', BLOG_AI_SCHEDULE_CATEGORIES: 'stadium-basics,news,stadiums' });
-  assert.deepEqual([on.enabled, on.maxPerRun, on.autoTopics, on.categories], [true, 3, false, ['stadium-basics', 'stadiums']]);
+  assert.deepEqual([on.enabled, on.maxPerRun, on.autoTopics, on.categories], [true, 1, false, ['stadium-basics', 'stadiums']]);
   const t = nextAutoTopic({ existingKeys: ['stadium-basics:kiryu:water'], categories: ['stadium-basics'], now: NOW });
   assert.equal(t.topic_key, 'stadium-basics:kiryu:course');
 });

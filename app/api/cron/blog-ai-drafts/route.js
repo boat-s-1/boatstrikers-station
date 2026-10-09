@@ -6,7 +6,7 @@ import { renderCoverPng } from "../../../../lib/blog/ai/cover.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 120;
 
 // Scheduled AI drafts. Off unless BLOG_AI_DRAFTS_ENABLED and BLOG_AI_SCHEDULE_ENABLED are both "true".
 // Creates drafts only; publication always needs a person's approval. Not registered in vercel.json.

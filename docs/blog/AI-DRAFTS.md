@@ -15,7 +15,7 @@
      - BOAT RACE 公式の場データ（リポジトリで確認済みの URL。`lib/stadiumBasicGuide24.js` の `officialUrl`）
      - 管理者が登録した場の公式サイトや、手動で登録した URL
    - 取得のたびに、取得元・取得日時・HTTP ステータス・SHA-256・抽出した本文、または失敗の理由を `blog_source_documents` に残す。
-   - 取得の条件：https のみ、登録済みのホストのみ、robots.txt に従う、15秒で打ち切り、2MBまで、Shift_JIS・EUC-JP に対応。
+   - 取得の条件：https のみ、登録済みのホストのみ、robots.txt に従う、10秒で打ち切り、2MBまで、Shift_JIS・EUC-JP に対応。
 3. **生成**（手順 1 の「AIで下書きを作成」）
    - 公式情報の取得が7日以上前なら、取り直す。
    - ソースパックを作る（事実・出典 ID・取得日時）。
@@ -65,7 +65,7 @@
 | `OPENAI_API_KEY` | 既存のものを使う |
 | `BLOG_AI_MODEL` | 任意。無ければ `EDITORIAL_AI_MODEL` → `HATSUNE_NEWS_AI_MODEL` → 既存の既定値 |
 | `BLOG_AI_SCHEDULE_ENABLED` | 定時の自動作成。既定は無効。`BLOG_AI_DRAFTS_ENABLED` も必要 |
-| `BLOG_AI_SCHEDULE_MAX_PER_RUN` | 1回あたりの最大件数（1〜3、既定は1） |
+| `BLOG_AI_SCHEDULE_MAX_PER_RUN` | 1回あたりの最大件数。実行時間の上限（120秒）のため、現在は1件に固定。増やしたい場合は実行回数を増やす |
 | `BLOG_AI_SCHEDULE_AUTO_TOPICS` | `true` のとき、登録済みのテーマが無ければ自動で選ぶ。既定は無効 |
 | `BLOG_AI_SCHEDULE_CATEGORIES` | 自動で選ぶカテゴリー（既定は `stadium-basics,stadiums,stadium-charm`） |
 | `CRON_SECRET` | 既存のもの。定時実行の認証に使う |

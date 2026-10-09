@@ -5,6 +5,21 @@
 -- and an AI draft can only be released while an approval exists for the exact editing version.
 begin;
 
+-- Preconditions. This migration replaces blog_release with the 20261003174612 version plus an approval check.
+-- If the target's blog_release differs (missing 20261003174612, or edited outside the repository), stop
+-- without changing anything rather than silently overwriting it.
+do $precheck$
+begin
+  if to_regprocedure('public.blog_media_is_published(uuid)') is null then
+    raise exception 'BLOG_AI_PRECHECK: 20261003174612_blog_private_media_publication is not applied';
+  end if;
+  if (select md5(replace(prosrc, chr(13), '')) from pg_proc where oid = to_regprocedure('public.blog_release(uuid,bigint,timestamptz)'))
+     is distinct from '18a51872abfecdb03c043cedc917299b' then
+    raise exception 'BLOG_AI_PRECHECK: blog_release differs from 20261003174612; review before applying';
+  end if;
+end;
+$precheck$;
+
 -- Categories approved for the AI drafting project. DATA LAB keeps its slug; only the display name changes.
 insert into public.blog_categories(slug,name,description,position) values
  ('stadium-charm','24場の魅力','各ボートレース場の施設・歴史・グルメなどを、公式情報をもとに紹介します。',10),
