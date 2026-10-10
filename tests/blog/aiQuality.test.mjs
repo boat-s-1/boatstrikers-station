@@ -24,7 +24,7 @@ const wellWritten = () => ({
   sections: [
     { heading: '水質は淡水、干満差はなし', blocks: [block('text', '桐生の水質は淡水で、干満差は「なし」とBOAT RACE公式データに記載されています。レースはナイター開催です。', ['S2', 'S1'])] },
     { heading: 'コース別1着率は1コースが54.7%', blocks: [
-      block('text', 'コース別1着率は、そのコースから進入した艇が1着になった割合です。枠番（号艇）ではなく、実際に進入したコースで集計されています。2026年7月1日から9月30日の集計では、1コースが54.7%でした。', ['S2']),
+      block('text', 'コース別1着率は、そのコースから進入した艇が1着になった割合です。枠番（号艇）ではなく、実際に進入したコースで集計されています。2026年7月1日から9月30日の集計では、1コースが54.7%と6つのコースの中で最も高く、半分を超えています。2コース（13.2%）と3コース（13.4%）はほぼ同じ水準で、6コース（3.0%）が最も低くなっています。', ['S2']),
       { type: 'list', text: null, items: ['1コース：54.7%', '2コース：13.2%', '3コース：13.4%', '4コース：9.4%', '5コース：6.8%', '6コース：3.0%'], turns: [], source_ids: ['S2'] },
       { type: 'dialogue', text: null, items: [], turns: [{ character: 'ichika', pose: 'pose2', text: '進入したコースの成績だから、出走表の枠番とは分けて読もうね。' }], source_ids: [] },
     ] },
@@ -39,7 +39,7 @@ const wellWritten = () => ({
 
 test('regression (Kiryu draft 2026-10-10): the repetitive first draft is reported for each quality problem', () => {
   const issues = qualityIssues({ document: storedDocument, pack: storedPack });
-  assert.deepEqual(codes(issues), ['dialogue_restates', 'repeated_fact', 'stock_phrase', 'too_long_for_facts', 'too_many_dialogues', 'unexplained_data']);
+  assert.deepEqual(codes(issues), ['dialogue_restates', 'numbers_without_reading', 'repeated_caveat', 'repeated_fact', 'stock_phrase', 'summary_restates', 'too_long_for_facts', 'too_many_dialogues', 'unexplained_data']);
   assert.ok(issues.every(i => i.level === 'warning'), 'quality notes do not change what blocks approval');
   assert.match(issues.find(i => i.code === 'repeated_fact').message, /桐生の干満差：5か所/);
   assert.match(issues.find(i => i.code === 'stock_phrase').message, /「判断材料」2回/);

@@ -90,7 +90,7 @@ test('compose builds a valid BLOG document with citations, notes and a dated sou
   assert.equal(document.blocks[0].data.placement, 'takeaways');
   assert.ok(document.blocks.some(b => b.type === 'DIALOGUE_SCENE' && b.data.turns.length === 2));
   const sources = document.blocks.filter(b => b.data.placement === 'sources');
-  assert.equal(sources.length, 1); assert.match(sources[0].data.text, /取得日時 記録なし（集計期間 2026\/05\/01〜2026\/07\/31）/);
+  assert.equal(sources.length, 1); assert.equal(sources[0].data.text, 'BoatStrikers収録データ（BOAT RACE公式・桐生・2026/05/01〜2026/07/31集計）｜集計期間 2026/05/01〜2026/07/31｜取得日時 記録なし');
   assert.ok(document.blocks.some(b => b.data.text === NOTE_TEXT));
   assert.equal(document.seo.stadium_slug, 'kiryu'); assert.ok(document.cover.media_id); assert.equal(document.author_ids[0], catalogue.authorIds.ichika);
   assert.deepEqual(issues.map(i => i.code), ['needs_check']);
@@ -123,7 +123,7 @@ test('pipeline: topic → sources → AI → cover → draft with provenance; ne
     callAi: async ({ schema, instructions, input }) => { aiCalls++; assert.equal(schema, ARTICLE_SCHEMA); assert.match(instructions, /一果/); assert.match(input, /52\.2/); return { data: goodAi(), model: 'test-model' }; } });
   assert.equal(aiCalls, 1); assert.equal(repo.calls.release, 0); assert.equal(result.blocking, 0);
   const draft = store.state.drafts.get(result.post_id);
-  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v3');
+  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v4');
   assert.ok(draft.source_pack.sources.some(s => s.fetched_at === NOW().toISOString()), 'fetched official page recorded with its time');
   assert.equal(store.state.documents.length, 1); assert.equal(store.state.media.length, 1);
   assert.equal(store.state.topics.get(basicsTopic.id).status, 'drafted');
