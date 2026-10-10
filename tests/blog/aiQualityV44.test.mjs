@@ -13,7 +13,7 @@ import { articlePlan } from '../../lib/blog/ai/articlePlan.mjs';
 import { buildInstructions, buildInput, ARTICLE_SCHEMA } from '../../lib/blog/ai/prompt.mjs';
 import { PROMPT_VERSION } from '../../lib/blog/ai/config.mjs';
 import { scorecard } from '../../lib/blog/ai/scorecard.mjs';
-import { GLOSSARY, DATA_CHECK_PURPOSES, dataCheckLine } from '../../lib/blog/ai/glossary.mjs';
+import { GLOSSARY, DATA_CHECK_PURPOSES, RATE_WARNING, dataCheckLine } from '../../lib/blog/ai/glossary.mjs';
 import { articleSections } from '../../lib/blog/articleModel.mjs';
 import { claimsIn } from '../../lib/blog/ai/claims.mjs';
 
@@ -45,7 +45,7 @@ const ideal = () => ({
       t('rate_table', null),
       { type: 'dialogue', text: null, items: [], source_ids: ['S2'], turns: [
         { character: 'kiina', pose: 'pose3', text: 'あれ、4コースの1着率10.0%が3コースの8.5%より上だ。外の方が上って、ちょっと意外じゃない？' },
-        { character: 'ichika', pose: 'pose1', text: 'いい発見だね。理由は表だけでは分からないよ。表は過去の集計期間の数字で、レースの日の進入はスタート展示が参考になるけど、本番で変わることもあるんだ。' }] },
+        { character: 'ichika', pose: 'pose1', text: 'いい発見だね。理由は表だけでは分からないけど、並び方に例外がある期間だと覚えておこう。誰が4コースに入りそうかは、下の確認項目のスタート展示で見てみよう。' }] },
     ] },
     { heading: '当日に確かめること', blocks: [
       t('data_check', DATA_CHECK_PURPOSES.slice(0, 3).map(dataCheckLine).join('\n')),
@@ -137,7 +137,7 @@ test('v7 structure: the lead, the 号艇/course explanation, DATA CHECK reasons 
 });
 
 test('prompt blog-ai-v7: lead, glossary, DATA CHECK reasons, findings in the summary, title and lead framing', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v7');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v8', 'PHASE 4.5 keeps the blog-ai-v7 rules checked here');
   assert.ok(ARTICLE_SCHEMA.required.includes('lead'));
   const pack = v7Pack();
   const plan = articlePlan(pack);
@@ -159,15 +159,15 @@ test('prompt blog-ai-v7: lead, glossary, DATA CHECK reasons, findings in the sum
   assert.match(input.data_check_purposes[1], /^・スタート展示の進入コース ― /);
   // The glossary and DATA CHECK wording bring no figure into an article.
   for (const text of [...GLOSSARY.map(g => g.text), ...input.data_check_purposes]) assert.deepEqual(claimsIn(text), [], text);
-  // New packs are version 3; answers without a lead (earlier prompts) still compose.
-  assert.equal(buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date() }).version, 3);
+  // New packs are version 4 (blog-ai-v8, PHASE 4.5); answers without a lead (earlier prompts) still compose.
+  assert.equal(buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date() }).version, 4);
   const old = ideal(); delete old.lead;
   assert.ok(!compose(old).document.blocks.some(b => b.data.placement === 'lead'));
 });
 
 test('wording: the exhibition is never the race entry, and past course rates never become a chance of winning today', () => {
   const kiryu = buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date('2026-10-09T20:21:00Z') });
-  const texts = [...GLOSSARY.map(g => `${g.term}：${g.text}`), ...DATA_CHECK_PURPOSES.map(dataCheckLine), buildInstructions(v7Pack()), buildInstructions({ ...kiryu, version: 3 }),
+  const texts = [...GLOSSARY.map(g => `${g.term}：${g.text}`), RATE_WARNING, ...DATA_CHECK_PURPOSES.map(dataCheckLine), buildInstructions(v7Pack()), buildInstructions({ ...kiryu, version: 3 }),
     ...compose(ideal()).document.blocks.flatMap(b => [b.data.text, ...(b.data.turns || []).map(t => t.text)]).filter(Boolean)];
   for (const text of texts) {
     // 「当てはめる」: using a past rate on today's race; 「勝つ確率／勝率」 only as a negation ("…ではない").
@@ -176,10 +176,13 @@ test('wording: the exhibition is never the race entry, and past course rates nev
     // Every mention of the exhibition's entry says the race may differ; none says it is fixed.
     assert.ok(!/(スタート)?展示[^。]{0,30}(進入|コース)[^。]{0,20}(確定|必ず|そのまま|確かめられる)/.test(text), text.slice(0, 80));
     for (const m of text.matchAll(/スタート展示[^。]*進入[^。]*。?/g)) if (!/^スタート展示の進入コース$/.test(m[0]))
-      assert.match(m[0], /(変わることもある|同じになるとは限らない|参考|同じものとして書きません)/, m[0]);
+      assert.match(m[0], /(変わることもある|同じになるとは限らない|参考|同じものとして(書きません|話さず))/, m[0]);
   }
   const glossary = Object.fromEntries(GLOSSARY.map(g => [g.term, g.text]));
-  assert.match(glossary['コース別1着率'], /過去の集計で、これからのレースで勝つ確率ではない/);
+  // blog-ai-v8: the definition stays a definition; the caveat lives in the WARNING (RATE_WARNING).
+  assert.doesNotMatch(glossary['コース別1着率'], /勝つ確率/);
+  assert.match(glossary['コース別1着率'], /そのコースから進入した艇が1着になった割合/);
+  assert.match(RATE_WARNING, /過去の集計期間の数字で、これからのレースで勝つ確率ではありません/);
   assert.match(glossary['号艇（枠番）'], /レースごとに出走表で決まる/);
   assert.match(glossary['スタート展示'], /本番の進入が同じになるとは限らない/);
   assert.match(glossary['集計期間'], /変わることもある/);
@@ -191,6 +194,7 @@ test('the glossary and DATA CHECK wording in the docs match the code', async () 
   const docs = await readFile(new URL('../../docs/blog/AI-QUALITY-REVIEW.md', import.meta.url), 'utf8');
   for (const g of GLOSSARY) assert.ok(docs.includes(`| ${g.term} | ${g.text} |`), g.term);
   for (const d of DATA_CHECK_PURPOSES) assert.ok(docs.includes(`| ${d.item} | ${d.reason} |`), d.item);
+  assert.ok(docs.includes(RATE_WARNING), 'RATE_WARNING');
   assert.match(docs, /スタート展示の正式な定義.*公式資料で確認/);
   assert.match(docs, /直前情報の具体的な中身.*公式資料で確認できるまで/);
 });

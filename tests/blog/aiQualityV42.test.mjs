@@ -59,7 +59,7 @@ test('regression (Tokoname v4 draft 2026-10-10): uncited takeaways, scattered ca
   const issues = check(v4Document, v4Pack);
   assert.equal(blockingCount(issues), 0, 'as on staging: no wrong figure');
   assert.deepEqual(codes(issues.filter(i => QUALITY.includes(i.code))),
-    ['caveat_misplaced', 'low_information', 'repeated_caveat', 'repeated_reading', 'statement_without_source', 'takeaways_restate']);
+    ['low_information', 'repeated_caveat', 'repeated_reading', 'statement_without_source', 'takeaways_restate']); // PHASE 4.5: the misplaced places are named in repeated_caveat
   assert.match(issues.find(i => i.code === 'statement_without_source').message, /^ブロック1（LIST）.*該当する出典：S2/);
   assert.match(issues.find(i => i.code === 'repeated_reading').message, /1コースが最も高い：ブロック1（LIST）、ブロック7（TEXT）/);
   assert.match(issues.find(i => i.code === 'source_without_fetch_time').message, /この出典の事実：レース時間帯「デイ」/);
@@ -214,14 +214,14 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
 });
 
 test('prompt blog-ai-v5: system table, featured readings, takeaways without figures, caveats in their place', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v7', 'PHASE 4.4 (the blog-ai-v5 rules below are kept)');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v8', 'PHASE 4.5 (the blog-ai-v5 rules below are kept)');
   const types = ARTICLE_SCHEMA.properties.sections.items.properties.blocks.items.properties.type.enum;
   assert.ok(types.includes('rate_table'));
   const prompt = buildInstructions(v5Pack());
   assert.match(prompt, /\{"type":"rate_table"\}/);
   assert.match(prompt, /readings の R2・R4・R5（featured）/);
   assert.match(prompt, /takeaways：.*数値・比較・注意書きは書きません/);
-  assert.match(prompt, /「過去の数字だけで判断しない」は warning ブロック1つだけ（.*?）、「当日の出走表・進入を確認する」は data_check の項目だけ/);
+  assert.match(prompt, /「過去の数字だけで判断しない」は warning ブロック1つだけに書き.*「当日の出走表・進入を確認する」「本番では変わることもある」は data_check の項目だけ/);
   assert.match(buildInstructions({ ...v5Pack(), facts: v4Pack.facts.filter(f => !/6コース/.test(f.label)) }), /rate_table は使いません/);
   // Statements are read the same way the prompt asks them to be written.
   assert.deepEqual(rateStatements('4コースの1着率（10.0%）は3コース（8.5%）より高い', v4Pack.facts).map(s => s.key), ['pair:4>3']);

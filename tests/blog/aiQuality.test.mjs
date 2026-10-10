@@ -39,7 +39,8 @@ const wellWritten = () => ({
 
 test('regression (Kiryu draft 2026-10-10): the repetitive first draft is reported for each quality problem', () => {
   const issues = qualityIssues({ document: storedDocument, pack: storedPack });
-  assert.deepEqual(codes(issues), ['caveat_misplaced', 'dialogue_restates', 'low_information', 'numbers_without_reading', 'repeated_caveat', 'repeated_fact', 'stock_phrase', 'summary_restates', 'too_long_for_facts', 'too_many_dialogues', 'unexplained_data']);
+  // PHASE 4.5: a repeated caveat is one finding (naming the places outside its home); caveat_misplaced is for one written once.
+  assert.deepEqual(codes(issues), ['dialogue_restates', 'low_information', 'numbers_without_reading', 'repeated_caveat', 'repeated_fact', 'stock_phrase', 'summary_restates', 'too_long_for_facts', 'too_many_dialogues', 'unexplained_data']);
   assert.ok(issues.every(i => i.level === 'warning'), 'quality notes do not change what blocks approval');
   assert.match(issues.find(i => i.code === 'repeated_fact').message, /桐生の干満差：4か所/);
   assert.match(issues.find(i => i.code === 'stock_phrase').message, /「判断材料」2回/);

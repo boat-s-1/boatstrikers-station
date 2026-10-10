@@ -133,7 +133,7 @@ test('DATA CHECK: items that repeat other items are reported; distinct items are
 });
 
 test('plan and prompt blog-ai-v6: each featured reading told once, in the body or by the partner in the dialogue', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v7', 'PHASE 4.4 keeps the blog-ai-v6 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v8', 'PHASE 4.5 keeps the blog-ai-v6 rules checked here');
   const tokoname = articlePlan(v6Pack());
   assert.deepEqual(tokoname.placements, { 'half:1': 'body', 'except:2:高': 'body', 'pair:4>3': 'dialogue' });
   assert.deepEqual(tokoname.dialogueFocus, { kind: 'reading', key: 'pair:4>3', text: '4コースの1着率（10.0%）は3コース（8.5%）より高い' });
@@ -143,7 +143,7 @@ test('plan and prompt blog-ai-v6: each featured reading told once, in the body o
   assert.match(prompt, /高い順・低い順の並び（readings の order）は表を見れば分かるので、文章で並べ直しません/);
   assert.match(prompt, /data_check は「読者が当日に確認する項目」を、重ならない3〜4項目/);
   // blog-ai-v7 rewords the summary rule: one or two findings, no definitions, caveats or DATA CHECK items.
-  assert.match(prompt, /summary：1〜2文。この記事で分かった重要な発見を.*定義・注意書き・data_check の項目は繰り返しません/);
+  assert.match(prompt, /summary：1〜2文。この記事で分かった重要な発見を.*定義・注意書き・data_check の項目も繰り返しません/);
   assert.match(prompt, /理由やレース展開を推測せず/);
   assert.match(prompt, /質問より発見として話す/);
   const input = JSON.parse(buildInput(v6Pack()));
