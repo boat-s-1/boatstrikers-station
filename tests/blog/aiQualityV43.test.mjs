@@ -71,18 +71,18 @@ test('scorecard: v4 and v5 rescored, with the reasons that changed', () => {
   // v5 (PHASE 4.2: 5,5,3,4,4,5 → 4.3): the reversal is credited (numbers 4→5); the restating dialogue costs a point
   // under characters only (no longer under duplication as well), where the order told again now does; the
   // overlapping DATA CHECK costs a point of readability.
-  assert.deepEqual(v5.axes.map(a => a.score), [5, 5, 3, 5, 4, 4]); assert.equal(v5.average, 4.3);
+  assert.deepEqual(v5.axes.map(a => a.score), [5, 5, 3, 5, 4, 4, null]); assert.equal(v5.average, 4.3);
   assert.deepEqual(v5.axes.find(a => a.key === 'duplication').notes, ['注意書きの置き場所', '表の並びを本文で再掲']);
   assert.deepEqual(v5.axes.find(a => a.key === 'characters').notes, ['会話が本文の言い換え']);
   assert.match(v5.axes.find(a => a.key === 'explanation').notes.join(), /注目したい特徴 3個のうち本文で説明 3個/);
   // v4: its DATA CHECK overlaps as well (readability 3→2).
-  assert.deepEqual(v4.axes.map(a => a.score), [5, 4, 1, 3, 4, 2]);
+  assert.deepEqual(v4.axes.map(a => a.score), [5, 4, 1, 3, 4, 2, null]);
   // The article blog-ai-v6 asks for: every axis at 5, no quality note.
   const pack = v6Pack(), { document } = composeDocument({ ai: ideal(), pack, topic: v4Topic, catalogue });
   const issues = validateAiDocument({ document, pack });
   assert.equal(blockingCount(issues), 0, JSON.stringify(blocking(issues)));
   assert.deepEqual(issues.filter(i => QUALITY.includes(i.code)), []);
-  assert.deepEqual(scorecard({ document, pack, issues }).axes.map(a => a.score), [5, 5, 5, 5, 5, 5]);
+  assert.deepEqual(scorecard({ document, pack, issues }).axes.map(a => a.score), [5, 5, 5, 5, 5, 5, null], 'framing applies from blog-ai-v7 packs');
 });
 
 test('negation: a comparison stands when the negation belongs to another clause; a negated comparison states nothing', () => {
@@ -133,7 +133,7 @@ test('DATA CHECK: items that repeat other items are reported; distinct items are
 });
 
 test('plan and prompt blog-ai-v6: each featured reading told once, in the body or by the partner in the dialogue', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v6');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v7', 'PHASE 4.4 keeps the blog-ai-v6 rules checked here');
   const tokoname = articlePlan(v6Pack());
   assert.deepEqual(tokoname.placements, { 'half:1': 'body', 'except:2:高': 'body', 'pair:4>3': 'dialogue' });
   assert.deepEqual(tokoname.dialogueFocus, { kind: 'reading', key: 'pair:4>3', text: '4コースの1着率（10.0%）は3コース（8.5%）より高い' });
@@ -142,7 +142,8 @@ test('plan and prompt blog-ai-v6: each featured reading told once, in the body o
   assert.match(prompt, /キイナが表を見て「4コースの1着率（10\.0%）は3コース（8\.5%）より高い」に気づき、それを発見として話します（質問の形にしません）/);
   assert.match(prompt, /高い順・低い順の並び（readings の order）は表を見れば分かるので、文章で並べ直しません/);
   assert.match(prompt, /data_check は「読者が当日に確認する項目」を、重ならない3〜4項目/);
-  assert.match(prompt, /summary：1〜2文。data_check の項目や注意書きを繰り返さず、この記事で覚えておく1点/);
+  // blog-ai-v7 rewords the summary rule: one or two findings, no definitions, caveats or DATA CHECK items.
+  assert.match(prompt, /summary：1〜2文。この記事で分かった重要な発見を.*定義・注意書き・data_check の項目は繰り返しません/);
   assert.match(prompt, /理由やレース展開を推測せず/);
   assert.match(prompt, /質問より発見として話す/);
   const input = JSON.parse(buildInput(v6Pack()));

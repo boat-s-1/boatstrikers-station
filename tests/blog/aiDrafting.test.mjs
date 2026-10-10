@@ -125,7 +125,7 @@ test('pipeline: topic → sources → AI → cover → draft with provenance; ne
     callAi: async ({ schema, instructions, input }) => { aiCalls++; assert.equal(schema, ARTICLE_SCHEMA); assert.match(instructions, /一果/); assert.match(input, /52\.2/); return { data: goodAi(), model: 'test-model' }; } });
   assert.equal(aiCalls, 1); assert.equal(repo.calls.release, 0); assert.equal(result.blocking, 0);
   const draft = store.state.drafts.get(result.post_id);
-  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v6');
+  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v7');
   assert.ok(draft.source_pack.sources.some(s => s.fetched_at === NOW().toISOString()), 'fetched official page recorded with its time');
   assert.equal(store.state.documents.length, 1); assert.equal(store.state.media.length, 1);
   assert.equal(store.state.topics.get(basicsTopic.id).status, 'drafted');

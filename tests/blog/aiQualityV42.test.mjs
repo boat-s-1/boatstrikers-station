@@ -194,10 +194,11 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
   const pack = v5Pack(), { document } = compose(improved(), pack), issues = check(document, pack);
   const after = scorecard({ document, pack, issues });
   assert.equal(after.reference_only, true);
-  assert.deepEqual(after.axes.map(a => a.key), ['accuracy', 'sources', 'duplication', 'explanation', 'characters', 'readability']);
-  assert.deepEqual(after.axes.map(a => a.score), [5, 5, 5, 5, 5, 5]);
+  // PHASE 4.4 adds a seventh axis (framing), scored for blog-ai-v7 packs only; the six classic ones stay comparable.
+  assert.deepEqual(after.axes.map(a => a.key), ['accuracy', 'sources', 'duplication', 'explanation', 'characters', 'readability', 'framing']);
+  assert.deepEqual(after.axes.map(a => a.score), [5, 5, 5, 5, 5, 5, null]);
   // PHASE 4.3: the overlapping DATA CHECK item (「当日の出走表のコース進入」) now costs a point of readability.
-  assert.deepEqual(before.axes.map(a => a.score), [5, 4, 1, 3, 4, 2]);
+  assert.deepEqual(before.axes.map(a => a.score), [5, 4, 1, 3, 4, 2, null]);
   assert.ok(after.average > before.average);
   assert.match(before.axes.find(a => a.key === 'explanation').notes.join(), /未使用：.*4コースの1着率（10\.0%）は3コース（8\.5%）より高い/);
   // A wrong figure scores 1 on accuracy, and approval is decided by the blocking checks exactly as before.
@@ -213,7 +214,7 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
 });
 
 test('prompt blog-ai-v5: system table, featured readings, takeaways without figures, caveats in their place', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v6', 'PHASE 4.3 (the blog-ai-v5 rules below are kept)');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v7', 'PHASE 4.4 (the blog-ai-v5 rules below are kept)');
   const types = ARTICLE_SCHEMA.properties.sections.items.properties.blocks.items.properties.type.enum;
   assert.ok(types.includes('rate_table'));
   const prompt = buildInstructions(v5Pack());
