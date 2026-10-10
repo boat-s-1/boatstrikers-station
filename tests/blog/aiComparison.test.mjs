@@ -118,3 +118,61 @@ test('comparison drafts stay out of scheduled generation, and lookups by post ne
   const originalDraft = await store.aiDraft(original.post_id);
   assert.equal(blockingCount(validateAiDocument({ document: (await repo.editor(original.post_id)).document, pack: originalDraft.source_pack })), 0);
 });
+
+// Staging, 2026-10-11: with the original and the v5/v6 comparison drafts in place, regenerating again stopped before
+// the AI with "よく似た記事があります" — v6's own title was 0.82 similar to the theme name, and only the original was
+// left out of the duplicate check. The theme's posts are now known by the topic id recorded with each draft.
+async function withEarlierComparison() {
+  const titles = [];
+  const store = memoryStore({ titles }), repo = memoryRepo();
+  store.state.repoPosts = repo.posts;
+  let calls = 0;
+  const callAi = async () => { calls++; return { data: goodAi(), model: 'test-model' }; };
+  const original = await runDraftPipeline({ topicId: basicsTopic.id, store, repo, renderCover: fakeCover, now: NOW, fetchImpl, callAi });
+  titles.push({ post_id: original.post_id, title: goodAi().title });
+  // An earlier comparison draft (as v6 on staging): its title is almost the theme name.
+  const v6 = await repo.create(`${comparisonSlug(basicsTopic)}-earlier`, (await repo.editor(original.post_id)).document);
+  store.state.drafts.set(v6.id, { post_id: v6.id, topic_id: basicsTopic.id, prompt_version: 'blog-ai-v6', source_pack: { comparison: { of_post_id: original.post_id } } });
+  titles.push({ post_id: v6.id, title: '桐生の水面と干満差｜基本' });
+  return { store, repo, original, v6, titles, callAi, aiCalls: () => calls };
+}
+
+test('comparison: the theme\'s original and earlier comparison drafts are not duplicates; the new draft is still unapprovable', async () => {
+  const deps = await withEarlierComparison();
+  const before = structuredClone([...deps.store.state.drafts.entries()]);
+  const result = await regenerate(deps);
+  assert.equal(deps.aiCalls(), 2);
+  assert.equal(result.slug, comparisonSlug(basicsTopic));
+  assert.ok(!result.issues.some(i => i.code === 'similar_title' && /水面と干満差｜基本|水面と干満差を基本から/.test(i.message)), 'the theme\'s own posts are not reported either');
+  // Nothing recorded for the original or the earlier draft changed; the theme still points to the original.
+  for (const [id, draft] of before) assert.deepEqual(structuredClone(deps.store.state.drafts.get(id)), draft);
+  assert.equal(deps.store.state.topics.get(basicsTopic.id).post_id, deps.original.post_id);
+  await assert.rejects(() => approveDraft({ repo: deps.repo, store: deps.store, postId: result.post_id, version: 1, name: '山田', session }), e => e.status === 409 && e.message === COMPARISON_MESSAGE);
+  await assert.rejects(() => assertNotComparison({ store: deps.store, postId: result.post_id, action: '公開' }), e => e.status === 409);
+});
+
+test('comparison: a similar title from another theme still stops it before the AI; a look-alike title or slug is not "the same theme"', async () => {
+  const noAi = async () => assert.fail('AI must not be called');
+  // Another theme's post with the theme name as its title.
+  let deps = await withEarlierComparison();
+  deps.titles.push({ post_id: 'other-theme-post', title: '桐生の水面と干満差' });
+  await assert.rejects(() => regenerate(deps, noAi), e => e.status === 409 && /よく似た記事があります：「桐生の水面と干満差」/.test(e.message));
+  // A post whose slug and title look like the theme's but was not drafted from it (no draft with this topic id).
+  deps = await withEarlierComparison();
+  const lookalike = await deps.repo.create(`${comparisonSlug(basicsTopic)}-copy`, (await deps.repo.editor(deps.original.post_id)).document);
+  deps.titles.push({ post_id: lookalike.id, title: '桐生の水面と干満差｜まとめ' });
+  await assert.rejects(() => regenerate(deps, noAi), e => e.status === 409 && /よく似た記事/.test(e.message));
+  // A draft recorded for another topic is not this theme's either.
+  deps = await withEarlierComparison();
+  deps.store.state.drafts.get(deps.v6.id).topic_id = 'another-topic';
+  await assert.rejects(() => regenerate(deps, noAi), e => e.status === 409 && /桐生の水面と干満差｜基本/.test(e.message));
+});
+
+test('normal generation keeps its duplicate check, whatever drafts the store holds', async () => {
+  const noAi = async () => assert.fail('AI must not be called');
+  const titles = [{ post_id: 'x', title: '桐生の水面と干満差' }];
+  const store = memoryStore({ titles }), repo = memoryRepo();
+  store.state.drafts.set('x', { post_id: 'x', topic_id: basicsTopic.id });
+  await assert.rejects(() => runDraftPipeline({ topicId: basicsTopic.id, store, repo, renderCover: fakeCover, now: NOW, fetchImpl, callAi: noAi }), e => e.status === 409 && /よく似た記事/.test(e.message));
+  assert.equal(repo.posts.size, 0);
+});

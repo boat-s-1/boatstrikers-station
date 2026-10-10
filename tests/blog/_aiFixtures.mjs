@@ -38,6 +38,7 @@ export function memoryStore({ documents = [], titles = [] } = {}) {
     async uploadCover(bytes, meta) { const m = { id: randomUUID(), bytes: bytes.length, ...meta }; state.media.push(m); return m; },
     async insertAiDraft(row) { state.drafts.set(row.post_id, { status: 'needs_review', ...row }); },
     async aiDraft(id) { return state.drafts.get(id) ?? null; },
+    async topicPostIds(topicId) { return [...state.drafts.values()].filter(d => d.topic_id === topicId).map(d => d.post_id); },
     async recordValidation(id, issues, version) { Object.assign(state.drafts.get(id), { validation: issues, blocking_issues: blockingCount(issues), validated_version: version }); },
     async approve(postId, version, name, session) { const a = { id: randomUUID(), post_id: postId, edit_version: version, approver_name: name, session }; state.approvals.push(a); return { approval_id: a.id }; },
     async latestApproval(postId) { const a = state.approvals.filter(x => x.post_id === postId).at(-1); return a ? { ...a, revision_id: a.revision_id ?? 'rev-1', created_at: NOW().toISOString() } : null; },
