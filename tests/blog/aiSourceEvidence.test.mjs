@@ -84,7 +84,8 @@ test('source pack: other stadiums and categories keep their repository data unch
   assert.equal(toda.sources.length, 1); assert.equal(toda.sources[0].period, '2026/05/01〜2026/07/31');
   assert.equal(toda.facts.length, 9); assert.equal(toda.facts[3].value, '38.7'); assert.deepEqual(toda.gaps, []);
   const lab = buildSourcePack({ topic: { topic_key: 'data-lab:inside-24', category_slug: 'data-lab', stadium_slug: null, angle: 'inside-24', title_hint: '24場の1コース1着率を並べて見る' }, now: () => new Date() });
-  assert.equal(lab.sources.length, 24); assert.equal(lab.facts.length, 24 * 9);
+  // Each stadium's copy: 水質・干満差 and six rates (the race time slot is for the water theme only since PHASE 4.3).
+  assert.equal(lab.sources.length, 24); assert.equal(lab.facts.length, 24 * 8);
   // A stadium page fetched for a charm article only loses its bare table cells; no data facts are added.
   const charm = buildSourcePack({ topic: { ...kiryuTopic, category_slug: 'stadium-charm', angle: 'facilities' }, documents: [kiryuPageRow], now: () => new Date() });
   assert.deepEqual(charm.facts, []); assert.equal(charm.documents.length, 1); assert.ok(!/^54\.7$/m.test(charm.documents[0].excerpt));

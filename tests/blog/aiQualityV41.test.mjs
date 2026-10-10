@@ -13,7 +13,14 @@ import { buildInstructions, buildInput } from '../../lib/blog/ai/prompt.mjs';
 
 const QUALITY = ['repeated_content', 'repeated_fact', 'stock_phrase', 'too_long_for_facts', 'dialogue_restates', 'cast_mismatch', 'too_many_dialogues', 'unexplained_data', 'causal_claim',
   'course_frame_confusion', 'repeated_caveat', 'summary_restates', 'empty_data_check', 'dialogue_missing', 'numbers_without_reading', 'comparison_mismatch'];
-const pack = () => buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date('2026-10-09T20:21:00Z') });
+// The pack as stored with the v3 draft (built before PHASE 4.3): the repository copy (S1) still supplied the race time
+// slot to course-rate articles. Rebuilt here from the current code plus that copy, so ids and facts are as stored.
+const pack = () => {
+  const now = () => new Date('2026-10-09T20:21:00Z');
+  const p = buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now });
+  const water = buildSourcePack({ topic: { ...v3Topic, angle: 'water' }, documents: [kiryuPageRow], now });
+  return { ...p, sources: [water.sources[0], ...p.sources], facts: [{ ...water.facts[0], id: 'F0' }, ...p.facts] };
+};
 const codes = issues => [...new Set(issues.map(i => i.code))].sort();
 const t = (type, text, ids = []) => ({ type, text, items: [], turns: [], source_ids: ids });
 
@@ -104,7 +111,7 @@ test('dialogue: used when the article has room for it, never forced into a short
   assert.equal(articlePlan(charm).maxDialogues, 0);
   assert.match(buildInstructions(charm), /この記事は短いので、dialogue は使いません/);
   const course = buildInstructions(p);
-  assert.match(course, /登場するのは一果・初音だけです/); assert.match(course, /「読者が抱きそうな疑問・気づき → 数字の読み方」/); assert.match(course, /readings/);
+  assert.match(course, /登場するのは一果・初音だけです/); assert.match(course, /2発言目で一果が「データからどう読むか」を答えます/); assert.match(course, /readings/);
   // A short data article without a dialogue is not asked to add one.
   const short = improved(); short.sections = short.sections.slice(0, 2); short.sections[1].blocks = short.sections[1].blocks.slice(0, 2);
   assert.ok(!qualityIssues({ document: composeDocument({ ai: short, pack: p, topic: v3Topic, catalogue }).document, pack: p }).some(i => i.code === 'dialogue_missing'));

@@ -154,7 +154,8 @@ test('sources: comparisons without numbers are cited too; the repository copy li
   const basic = compose(only).document.blocks.find(b => b.type === 'TEXT' && /デイ/.test(b.data.text));
   assert.deepEqual([basic.data.source_ids, basic.data.source_url], [['S1'], '/races/08/info']);
   // Built from the code: the copy is named after what it supplies and keeps the official page it was taken from.
-  const kiryu = buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date('2026-10-09T20:21:00Z') });
+  // Since PHASE 4.3 it supplies the race time slot only to the water theme (course-rate articles have no use for it).
+  const kiryu = buildSourcePack({ topic: { ...v3Topic, angle: 'water' }, documents: [kiryuPageRow], now: () => new Date('2026-10-09T20:21:00Z') });
   assert.deepEqual([kiryu.sources[0].url, kiryu.sources[0].official_url, kiryu.sources[0].label],
     ['/races/01/info', 'https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01', 'BoatStrikers収録データ（桐生の基本情報：レース時間帯）']);
   const noPage = buildSourcePack({ topic: v3Topic, now: () => new Date('2026-10-09T20:21:00Z') });
@@ -174,7 +175,7 @@ test('characters: the partner follows the data; each does their part; nobody is 
   const prompt = buildInstructions(v5Pack());
   assert.match(prompt, /登場するのは一果・キイナだけです/);
   assert.match(prompt, /外コースや、内側から順に並ばない意外なデータに気づいて話題にする/);
-  assert.match(prompt, /初心者向けに、数字の読み方/);
+  assert.match(prompt, /初心者向けに、データの読み方/);
   // Role checks on the dialogue.
   const ai = improved();
   ai.sections[1].blocks[3].turns = [
@@ -195,7 +196,8 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
   assert.equal(after.reference_only, true);
   assert.deepEqual(after.axes.map(a => a.key), ['accuracy', 'sources', 'duplication', 'explanation', 'characters', 'readability']);
   assert.deepEqual(after.axes.map(a => a.score), [5, 5, 5, 5, 5, 5]);
-  assert.deepEqual(before.axes.map(a => a.score), [5, 4, 1, 3, 4, 3]);
+  // PHASE 4.3: the overlapping DATA CHECK item (「当日の出走表のコース進入」) now costs a point of readability.
+  assert.deepEqual(before.axes.map(a => a.score), [5, 4, 1, 3, 4, 2]);
   assert.ok(after.average > before.average);
   assert.match(before.axes.find(a => a.key === 'explanation').notes.join(), /未使用：.*4コースの1着率（10\.0%）は3コース（8\.5%）より高い/);
   // A wrong figure scores 1 on accuracy, and approval is decided by the blocking checks exactly as before.
@@ -211,14 +213,14 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
 });
 
 test('prompt blog-ai-v5: system table, featured readings, takeaways without figures, caveats in their place', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v5');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v6', 'PHASE 4.3 (the blog-ai-v5 rules below are kept)');
   const types = ARTICLE_SCHEMA.properties.sections.items.properties.blocks.items.properties.type.enum;
   assert.ok(types.includes('rate_table'));
   const prompt = buildInstructions(v5Pack());
   assert.match(prompt, /\{"type":"rate_table"\}/);
   assert.match(prompt, /readings の R2・R4・R5（featured）/);
   assert.match(prompt, /takeaways：.*数値・比較・注意書きは書きません/);
-  assert.match(prompt, /「過去の数字だけで判断しない」は warning ブロック1つだけ、「当日の出走表・進入を確認する」は data_check の項目だけ/);
+  assert.match(prompt, /「過去の数字だけで判断しない」は warning ブロック1つだけ（.*?）、「当日の出走表・進入を確認する」は data_check の項目だけ/);
   assert.match(buildInstructions({ ...v5Pack(), facts: v4Pack.facts.filter(f => !/6コース/.test(f.label)) }), /rate_table は使いません/);
   // Statements are read the same way the prompt asks them to be written.
   assert.deepEqual(rateStatements('4コースの1着率（10.0%）は3コース（8.5%）より高い', v4Pack.facts).map(s => s.key), ['pair:4>3']);
