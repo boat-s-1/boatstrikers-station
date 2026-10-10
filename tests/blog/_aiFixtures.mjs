@@ -43,7 +43,9 @@ export function memoryStore({ documents = [], titles = [] } = {}) {
     async latestApproval(postId) { const a = state.approvals.filter(x => x.post_id === postId).at(-1); return a ? { ...a, revision_id: a.revision_id ?? 'rev-1', created_at: NOW().toISOString() } : null; },
     async manualSources(postId) { return state.manual.filter(m => m.post_id === postId); },
     async insertManualSource(row) { state.manual.push(row); return { id: randomUUID() }; },
-    async postState(postId) { return state.posts?.get(postId) ?? { id: postId, slug: 'x', state: 'draft', editing_revision_id: 'rev-1', scheduled_revision_id: null, published_revision_id: null }; },
+    async postState(postId) { const p = state.repoPosts?.get(postId); return state.posts?.get(postId) ?? { id: postId, slug: p?.slug ?? 'x', state: 'draft', editing_revision_id: 'rev-1', scheduled_revision_id: null, published_revision_id: null }; },
+    // Set state.repoPosts = memoryRepo().posts to look slugs up in the repository's posts.
+    async postIdBySlug(slug) { return [...(state.repoPosts?.values() ?? [])].find(p => p.slug === slug)?.id ?? null; },
     async authors() { return Object.entries(catalogue.authorIds).map(([slug, id]) => ({ id, slug, character_key: ['ichika', 'hatsune', 'kiina'].includes(slug) ? slug : null })); },
     async categoryName() { return catalogue.categoryName; },
     async setDraftCover(postId, mediaId) { if (state.drafts.get(postId)) state.drafts.get(postId).cover_media_id = mediaId; },

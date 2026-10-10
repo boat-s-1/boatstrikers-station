@@ -193,3 +193,24 @@ test('edited LIST / TABLE blocks and their citations survive save and reload thr
   assert.equal(await rpc('blog_ai_current_approval', [post.id], ['uuid']), null, 'the approval of the earlier version no longer applies');
   await rejectsWith(() => release({ ...post, version: Number(saved.version) }), 'BLOG_AI_APPROVAL_REQUIRED');
 });
+
+test('a comparison draft (its blocking issue recorded) cannot be approved, published or scheduled; slugs stay unique; no schema change', async () => {
+  const original = await rpc('blog_create_draft', ['stadium-basics-tokoname-course', doc('常滑 v4')], ['text', 'jsonb']);
+  const copy = await rpc('blog_create_draft', ['stadium-basics-tokoname-course-v5', doc('常滑 v5')], ['text', 'jsonb']);
+  await markAi(original);
+  // As the pipeline stores it: the mark in the source pack, the blocking "comparison_draft" counted.
+  await role('service_role', () => q(`insert into public.blog_ai_drafts(post_id,model,prompt_version,source_pack,validated_version,blocking_issues,validation)
+    values($1,'test-model','blog-ai-v5',$2::jsonb,$3,1,$4::jsonb)`, [copy.id, JSON.stringify({ facts: [], comparison: { of_post_id: original.id, of_slug: 'stadium-basics-tokoname-course' } }), copy.version,
+    JSON.stringify([{ level: 'blocking', code: 'comparison_draft', message: '比較用' }])]));
+  await rejectsWith(() => approve(copy), 'BLOG_AI_BLOCKING_ISSUES');
+  await rejectsWith(() => release(copy), 'BLOG_AI_APPROVAL_REQUIRED');
+  await rejectsWith(() => release(copy, new Date(Date.now() + 3600000).toISOString()), 'BLOG_AI_APPROVAL_REQUIRED');
+  assert.equal((await q('select state, scheduled_revision_id from public.blog_posts where id=$1', [copy.id]))[0].state, 'draft');
+  assert.equal((await q("select source_pack->'comparison'->>'of_slug' as of from public.blog_ai_drafts where post_id=$1", [copy.id]))[0].of, 'stadium-basics-tokoname-course');
+  // The same slug again is refused by the database; the original is not touched.
+  await assert.rejects(() => rpc('blog_create_draft', ['stadium-basics-tokoname-course-v5', doc('上書き')], ['text', 'jsonb']));
+  await assert.rejects(() => rpc('blog_create_draft', ['stadium-basics-tokoname-course', doc('上書き')], ['text', 'jsonb']));
+  // The original keeps the usual rules: approved, then released.
+  await approve(original);
+  assert.equal((await release(original)).action, 'publish');
+});

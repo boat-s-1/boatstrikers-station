@@ -50,9 +50,20 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories, 
     const r = await call('/api/admin/blog/ai/generate', 'POST', { topic_id: t.id });
     setResult(r); await Promise.all([loadTopics(), loadDrafts(), loadSources()]);
   });
+  // A second draft of a drafted theme with the current prompt, under its own slug, for comparing prompt versions.
+  // The original post and the theme stay as they are; the new draft can be neither approved nor published.
+  const regenerate = t => {
+    if (!window.confirm(`「${t.title_hint}」を現在のプロンプトで比較用に再生成します。元の記事・テーマは変更しません。比較用の下書きは承認・公開できません。AIの呼び出しが1回発生します。実行しますか？`)) return;
+    run(`regenerate-${t.id}`, async () => {
+      setResult(null);
+      const r = await call('/api/admin/blog/ai/generate', 'POST', { topic_id: t.id, mode: 'comparison' });
+      setResult(r); await Promise.all([loadTopics(), loadDrafts()]);
+    });
+  };
   const fetchSources = () => run('fetch', async () => { const r = await call('/api/admin/blog/ai/sources', 'POST', { action: 'fetch', stadium_slug: stadium }); setMessage(`取得：成功 ${r.results.filter(x => x.ok).length}件・失敗 ${r.results.filter(x => !x.ok).length}件`); await loadSources(); });
   const addSource = e => { e.preventDefault(); run('add', async () => { await call('/api/admin/blog/ai/sources', 'POST', { action: 'register', stadium_slug: stadium, ...form }); setForm(f => ({ ...f, url: '', label: '' })); await loadSources(); }); };
   const open = catalog.registered.filter(t => t.status === 'candidate');
+  const drafted = catalog.registered.filter(t => t.status === 'drafted' && t.post_id && (!perStadium || t.stadium_slug === stadium) && t.category_slug === category);
 
   return <>
     {message ? <p role="alert" className={s.notice}>{message}</p> : null}
@@ -68,7 +79,11 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories, 
       <div className={a.rows}>{open.length ? open.map(t => <div className={a.row} key={t.id}><span><strong>{t.title_hint}</strong><br /><span className={a.small}>{t.topic_key}</span></span>
         <span className={a.rowActions}><button className={s.primary} disabled={!writable || !!busy} onClick={() => generate(t)}>{busy === `generate-${t.id}` ? '作成中…（1〜3分）' : 'AIで下書きを作成'}</button>
           <button className={s.button} disabled={!writable || !!busy} onClick={() => rejectTopic(t)}>不採用</button></span></div>) : <p className={a.small}>登録済みのテーマはありません。</p>}</div>
-      {result ? <div className={s.notice}>下書きを作成しました：/{result.slug}（要修正 {result.blocking}件・確認 {result.warnings}件）。<Link href={`/admin/blog/posts/${result.post_id}`}>記事編集で確認する →</Link></div> : null}
+      <h3 className={a.meta}>下書き作成済みのテーマ（比較用に再生成できます）</h3>
+      <p className={a.small}>現在のプロンプトで、同じテーマの下書きを別の記事（URLに版名が付きます）として作ります。元の記事・テーマ・承認記録は変更しません。比較用の下書きは承認・公開・予約公開できません。</p>
+      <div className={a.rows}>{drafted.length ? drafted.map(t => <div className={a.row} key={t.id}><span><strong>{t.title_hint}</strong><br /><span className={a.small}>{t.topic_key}・<Link href={`/admin/blog/posts/${t.post_id}`}>元の下書き</Link></span></span>
+        <span className={a.rowActions}><button className={s.button} disabled={!writable || !!busy} onClick={() => regenerate(t)}>{busy === `regenerate-${t.id}` ? '作成中…（1〜3分）' : '比較用に再生成'}</button></span></div>) : <p className={a.small}>この条件で下書き作成済みのテーマはありません。</p>}</div>
+      {result ? <div className={s.notice}>{result.comparison ? '比較用の下書きを作成しました（承認・公開はできません）' : '下書きを作成しました'}：/{result.slug}（要修正 {result.blocking}件・確認 {result.warnings}件）。<Link href={`/admin/blog/posts/${result.post_id}`}>記事編集で確認する →</Link></div> : null}
     </section>
 
     <section className={s.panel}><div className={s.panelHeading}><h2>2. 公式情報（{stadiumName(stadium)}）</h2><button className={s.button} disabled={!writable || !!busy} onClick={fetchSources}>{busy === 'fetch' ? '取得中…' : '公式情報を取得'}</button></div>
@@ -87,7 +102,7 @@ export default function AiDraftsClient({ ready, writable, stadiums, categories, 
 
     <section className={s.panel}><div className={s.panelHeading}><h2>3. AI下書き（確認と承認）</h2><span>{drafts.length}件</span></div>
       <ol className={a.steps}><li>記事編集画面で本文・出典・表紙を確認し、必要なら修正します。</li><li>「AI下書きの確認」で承認者名を入力し、その版を承認します（要修正が残っていると承認できません）。</li><li>承認後、「公開設定」から公開・予約します。承認後に修正した場合は再承認が必要です。</li></ol>
-      <div className={a.rows}>{drafts.length ? drafts.map(d => <div className={a.row} key={d.post_id}><span><span className={`${a.tag} ${(d.approval_state ?? d.status) === 'approved' ? '' : d.status === 'rejected' ? a.tagBad : a.tagWarn}`}>{DRAFT[d.approval_state ?? d.status]}</span> 要修正 {d.blocking_issues}件（版{d.validated_version ?? '-'}の確認時）<br /><span className={a.small}>作成 {jst(d.generated_at)}・{d.model}</span></span>
+      <div className={a.rows}>{drafts.length ? drafts.map(d => <div className={a.row} key={d.post_id}><span><span className={`${a.tag} ${(d.approval_state ?? d.status) === 'approved' ? '' : d.status === 'rejected' ? a.tagBad : a.tagWarn}`}>{DRAFT[d.approval_state ?? d.status]}</span> 要修正 {d.blocking_issues}件（版{d.validated_version ?? '-'}の確認時）<br />{d.comparison ? <><span className={`${a.tag} ${a.tagWarn}`}>比較用</span> </> : null}<span className={a.small}>作成 {jst(d.generated_at)}・{d.model}・プロンプト {d.prompt_version}{d.comparison ? `・元記事 /${d.comparison.of_slug}（${d.comparison.of_prompt_version ?? '版不明'}）` : ''}</span></span>
         <span className={a.rowActions}><Link className={s.button} href={`/admin/blog/posts/${d.post_id}`}>確認・編集</Link><Link className={s.button} href={`/admin/blog/posts/${d.post_id}/preview`}>プレビュー</Link></span></div>) : <p className={a.small}>AI下書きはまだありません。</p>}</div>
     </section>
     <section className={s.panel}><div className={s.panelHeading}><h2>4. 定時の自動作成</h2><span className={`${a.tag} ${schedule.enabled ? '' : a.tagWarn}`}>{schedule.enabled ? '有効' : '無効'}</span></div>

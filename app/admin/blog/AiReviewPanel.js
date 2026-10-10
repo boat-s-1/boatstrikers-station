@@ -50,6 +50,7 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
   return <section className={a.review} aria-label="AI下書きの確認">
     <div className={a.reviewHead}><h2>AI下書きの確認</h2>
       {current ? <span className={a.tag}>承認済み（この版）</span> : status.status === 'rejected' ? <span className={`${a.tag} ${a.tagBad}`}>却下</span> : <span className={`${a.tag} ${a.tagWarn}`}>未承認</span>}</div>
+    {status.comparison ? <p role="note" className={s.notice}><strong>比較用の下書きです。</strong>元記事 /{status.comparison.of_slug}（{status.comparison.of_prompt_version ?? '版不明'}）と比べるために、{status.comparison.prompt_version}で作成しました。この下書きは承認・公開・予約公開できません（正式に採用するには、別途の採用操作が必要です）。</p> : null}
     <p className={a.meta}>AIが作成した下書きです（{status.model}・{jst(status.generated_at)}）。事実・数値・出典を確認し、問題がなければこの版を承認してください。承認後に本文を修正すると、再承認が必要になります。
       {status.approval ? <><br />最終承認：{status.approval.name}（{jst(status.approval.at)}・版{status.approval.version}）</> : null}</p>
     {issues.length ? <><p className={a.meta}>{stale ? '※ 未保存の変更があります。保存すると、現在の内容で確認し直します。' : `確認結果（保存済みの版${status.checked_version}）`}</p>
@@ -68,7 +69,7 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
         <label>登録者名<input value={fact.registered_by} maxLength={80} onChange={e => setFact({ ...fact, registered_by: e.target.value })} /></label>
         <button className={s.button} disabled={busy || !fact.registered_by.trim() || !fact.statement || !fact.source_label || !fact.source_url || !fact.checked_at}>出典を登録</button>
       </form></details> : null}
-    {!current && writable ? <div className={a.approve}><label>承認者名（記録されます）<input value={name} maxLength={80} onChange={e => setName(e.target.value)} autoComplete="name" /></label>
+    {!current && writable && !status.comparison ? <div className={a.approve}><label>承認者名（記録されます）<input value={name} maxLength={80} onChange={e => setName(e.target.value)} autoComplete="name" /></label>
       <button className={s.primary} disabled={busy || !name.trim() || autosave.status === 'conflict'} onClick={approve}>この版を承認する</button></div> : null}
     {message ? <p role="status" className={a.meta}>{message}</p> : null}
   </section>;
