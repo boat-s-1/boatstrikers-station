@@ -133,7 +133,8 @@ test('regression (Kiryu draft 2026-10-10): rebuilt from the page fetched that da
 test('regression (Kiryu draft 2026-10-10): the answer written from the fetched figures passes with automatic citations', () => {
   const pack = freshPack();
   const { document, issues: composeIssues } = compose(correctedAi(), pack);
-  assert.deepEqual(document.blocks[0].data.source_ids, ['S2']);
+  // Takeaways: the figures from the fetched page, and the race time slot (ナイター) from the repository copy.
+  assert.deepEqual(document.blocks[0].data.source_ids, ['S2', 'S1']);
   assert.ok(composeIssues.some(i => i.code === 'auto_cited'));
   const issues = validateAiDocument({ document, pack });
   assert.equal(blockingCount(issues), 0, JSON.stringify(blocking(issues)));
@@ -150,7 +151,7 @@ test('period, source and heading mismatches stay blocking and are grouped per bl
   // The repository period with today's figures → the date is backed by nothing any more.
   assert.deepEqual(codes(check(d => { d.blocks[6].data.text = '2026年5月1日から7月31日の1コース1着率は54.7％です。'; })), ['unsupported_date']);
   // A fetched figure cited to the repository source → source mismatch.
-  issues = check(d => { d.blocks[6].data = { ...d.blocks[6].data, source_ids: ['S1'], text: '1コース1着率は54.7％です。' }; });
+  issues = check(d => { d.blocks[6].data = { ...d.blocks[6].data, source_ids: ['S1'], source_url: pack.sources[0].url, text: '1コース1着率は54.7％です。' }; });
   assert.deepEqual(codes(issues), ['source_mismatch']); assert.match(blocking(issues)[0].message, /設定された出典（S1）/);
   // Heading number not repeated in its section → blocked even though the figure exists.
   issues = check(d => { d.blocks[5].data.text = '2コース1着率は13.2％'; d.blocks[6].data.text = '1コース1着率は54.7％です。'; d.blocks[7].data.items = ['1コース：54.7％']; });

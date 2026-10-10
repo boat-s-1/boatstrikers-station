@@ -54,6 +54,9 @@ export default function AiReviewPanel({ postId, autosave, writable, onStatus }) 
       {status.approval ? <><br />最終承認：{status.approval.name}（{jst(status.approval.at)}・版{status.approval.version}）</> : null}</p>
     {issues.length ? <><p className={a.meta}>{stale ? '※ 未保存の変更があります。保存すると、現在の内容で確認し直します。' : `確認結果（保存済みの版${status.checked_version}）`}</p>
       <ul className={a.issues}>{issues.map((i, n) => <li key={n} data-level={i.level}>{i.level === 'blocking' ? '要修正：' : '確認：'}{i.origin === 'generation' ? '（作成時）' : ''}{i.message}</li>)}</ul></> : <p className={a.meta}>自動確認で指摘はありません。</p>}
+    {status.scorecard ? <details><summary className={a.meta}>記事品質の目安（参考）：平均 {status.scorecard.average} / 5</summary>
+      <p className={a.meta}>編集の参考にする目安です。点数で承認・公開が決まることはありません（承認できるかは上の「要修正」だけで決まります）。</p>
+      <ul className={a.issues}>{status.scorecard.axes.map(x => <li key={x.key}><strong>{x.label}：{x.score === null ? '対象外' : `${x.score} / 5`}</strong>{x.notes.length ? <><br />{x.notes.join('、')}</> : null}</li>)}</ul></details> : null}
     <details><summary className={a.meta}>出典と取得日時（{status.sources.length}件）</summary><ol className={a.sources}>{status.sources.map((x, n) => <li key={n}>{x.id ? `${x.id}：` : ''}{x.label}：{x.fetched_at ? `取得 ${jst(x.fetched_at)}` : x.period ? `取得日時の記録なし（集計期間 ${x.period}）` : '取得日時の記録なし（収録データ）'}<br /><a href={x.url} target="_blank" rel="noreferrer noopener">{x.url}</a></li>)}</ol></details>
     {writable ? <details><summary className={a.meta}>人が追記した事実の出典を登録する</summary>
       <p className={a.meta}>本文に事実（数値など）を追記した場合は、確認したページと日時を登録します。登録すると記事の出典欄に追加されます。そのブロックの「このブロックの出典」で登録した出典を選ぶと、確認を通過します。登録後は再承認が必要です。</p>

@@ -62,13 +62,12 @@ test('regression (Kiryu v3 theme): written as PHASE 4.1 intends, it passes every
 
 test('readings: what the official rates show, computed without new numbers', () => {
   const p = pack();
-  assert.deepEqual(p.readings.map(r => [r.source_id, r.period, r.text]), [
-    ['S2', '2026/07/01〜2026/09/30', '1コースの1着率（54.7%）が6つのコースの中で最も高い'],
-    ['S2', '2026/07/01〜2026/09/30', '1コースの1着率（54.7%）は半分を超えている'],
-    ['S2', '2026/07/01〜2026/09/30', '6コースの1着率（3.0%）が最も低い'],
-    ['S2', '2026/07/01〜2026/09/30', '2コース（13.2%）と3コース（13.4%）の1着率はほぼ同じ水準（わずかに3コースが高い）'],
-  ]);
-  assert.deepEqual(JSON.parse(buildInput(p)).readings.length, 4);
+  // The PHASE 4.1 readings stay; PHASE 4.2 adds the best of the rest and the order (aiQualityV42.test.mjs).
+  const texts = p.readings.map(r => r.text);
+  for (const text of ['1コースの1着率（54.7%）が6つのコースの中で最も高い', '1コースの1着率（54.7%）は半分を超えている', '6コースの1着率（3.0%）が最も低い',
+    '2コース（13.2%）と3コース（13.4%）の1着率はほぼ同じ水準（わずかに3コースが高い）']) assert.ok(texts.includes(text), text);
+  assert.ok(p.readings.every(r => r.source_id === 'S2' && r.period === '2026/07/01〜2026/09/30'));
+  assert.deepEqual(JSON.parse(buildInput(p)).readings.length, p.readings.length);
   assert.deepEqual(courseReadings(p.facts.filter(f => !/6コース/.test(f.label))), [], 'no readings from an incomplete table');
   assert.deepEqual(JSON.parse(buildInput({ ...p, readings: undefined })).readings, [], 'older packs without readings still work');
 });
@@ -95,7 +94,7 @@ test('sources section: name, collection period and retrieval time for readers; i
   assert.equal(p.sources[1].label, 'BOAT RACE公式 ボートレース場データ（桐生）');
   assert.equal(p.sources[1].page_title, 'ボートレース場データ｜BOAT RACE オフィシャルウェブサイト');
   const lines = composeDocument({ ai: improved(), pack: p, topic: v3Topic, catalogue }).document.blocks.filter(b => b.data.placement === 'sources').map(b => b.data.text);
-  assert.deepEqual(lines, ['BoatStrikers収録データ（桐生の基本情報）｜取得日時 記録なし', 'BOAT RACE公式 ボートレース場データ（桐生）｜集計期間 2026/07/01〜2026/09/30｜取得日時 2026/10/10 05:20']);
+  assert.deepEqual(lines, ['BoatStrikers収録データ（桐生の基本情報：レース時間帯）｜取得日時 記録なし', 'BOAT RACE公式 ボートレース場データ（桐生）｜集計期間 2026/07/01〜2026/09/30｜取得日時 2026/10/10 05:20']);
   assert.equal(sourceLine({ label: '施設案内', fetched_at: '2026-10-09T01:30:00Z' }), '施設案内｜取得日時 2026/10/09 10:30', 'manual sources keep their format');
 });
 
@@ -105,7 +104,7 @@ test('dialogue: used when the article has room for it, never forced into a short
   assert.equal(articlePlan(charm).maxDialogues, 0);
   assert.match(buildInstructions(charm), /この記事は短いので、dialogue は使いません/);
   const course = buildInstructions(p);
-  assert.match(course, /登場するのは一果・初音だけです/); assert.match(course, /「読者が抱きそうな疑問 → 数字の読み方」/); assert.match(course, /readings/);
+  assert.match(course, /登場するのは一果・初音だけです/); assert.match(course, /「読者が抱きそうな疑問・気づき → 数字の読み方」/); assert.match(course, /readings/);
   // A short data article without a dialogue is not asked to add one.
   const short = improved(); short.sections = short.sections.slice(0, 2); short.sections[1].blocks = short.sections[1].blocks.slice(0, 2);
   assert.ok(!qualityIssues({ document: composeDocument({ ai: short, pack: p, topic: v3Topic, catalogue }).document, pack: p }).some(i => i.code === 'dialogue_missing'));

@@ -93,7 +93,9 @@ test('compose builds a valid BLOG document with citations, notes and a dated sou
   assert.equal(sources.length, 1); assert.equal(sources[0].data.text, 'BoatStrikers収録データ（BOAT RACE公式・桐生・2026/05/01〜2026/07/31集計）｜集計期間 2026/05/01〜2026/07/31｜取得日時 記録なし');
   assert.ok(document.blocks.some(b => b.data.text === NOTE_TEXT));
   assert.equal(document.seo.stadium_slug, 'kiryu'); assert.ok(document.cover.media_id); assert.equal(document.author_ids[0], catalogue.authorIds.ichika);
-  assert.deepEqual(issues.map(i => i.code), ['needs_check']);
+  // The summary states 淡水・干満差なし without numbers: cited automatically from the source of those facts (PHASE 4.2).
+  assert.deepEqual(issues.map(i => i.code), ['auto_cited', 'needs_check']);
+  assert.deepEqual(document.blocks.find(b => b.data.placement === 'summary').data.source_ids, ['S1']);
   const bad = goodAi(); bad.sections[0].blocks[0].source_ids = ['S9'];
   assert.equal(composeDocument({ ai: bad, pack, topic: basicsTopic, catalogue }).issues[0].code, 'unknown_source');
 });
@@ -123,7 +125,7 @@ test('pipeline: topic → sources → AI → cover → draft with provenance; ne
     callAi: async ({ schema, instructions, input }) => { aiCalls++; assert.equal(schema, ARTICLE_SCHEMA); assert.match(instructions, /一果/); assert.match(input, /52\.2/); return { data: goodAi(), model: 'test-model' }; } });
   assert.equal(aiCalls, 1); assert.equal(repo.calls.release, 0); assert.equal(result.blocking, 0);
   const draft = store.state.drafts.get(result.post_id);
-  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v4');
+  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v5');
   assert.ok(draft.source_pack.sources.some(s => s.fetched_at === NOW().toISOString()), 'fetched official page recorded with its time');
   assert.equal(store.state.documents.length, 1); assert.equal(store.state.media.length, 1);
   assert.equal(store.state.topics.get(basicsTopic.id).status, 'drafted');
