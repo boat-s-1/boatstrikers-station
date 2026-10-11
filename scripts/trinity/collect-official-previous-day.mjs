@@ -88,7 +88,10 @@ for (const course of courses) {
       }
     } catch (error) {
       const item = { course_code: course, race_no: no, error: error.message };
-      if (/^Official racelist boat [1-6] is incomplete$/.test(error.message)) report.incomplete.push(item);
+      if (error.code === 'OFFICIAL_RACELIST_INCOMPLETE') {
+        report.incomplete.push({ ...item, boat_no: error.boat_no,
+          missing_fields: error.missing_fields });
+      }
       else report.failed.push(item);
       if (/Official HTML unavailable: HTTP (403|429)/.test(error.message)) blocked = true;
     }
