@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { officialCourses, parseOfficialRacelist } from '../../app/lib/trinityOfficialRacelist.js';
+import { OfficialRacelistIncompleteError, officialCourses, parseOfficialRacelist } from '../../app/lib/trinityOfficialRacelist.js';
 
 const date = '20260928';
 const links = Array.from({ length: 12 }, (_, i) =>
@@ -35,9 +35,29 @@ test('extracts six official entry vectors and closing time without exhibition da
 
 test('rejects missing, wrong date, and incorrectly keyed entry lists', () => {
   assert.throws(() => parseOfficialRacelist(document.replace('23<br>29.63', '23<br>-'),
-    { raceDate: '2026-09-28', courseCode: 2, raceNo: 1 }), /incomplete/);
+    { raceDate: '2026-09-28', courseCode: 2, raceNo: 1 }), error => {
+    assert.ok(error instanceof OfficialRacelistIncompleteError);
+    assert.equal(error.boat_no, 1);
+    assert.deepEqual(error.missing_fields, [{
+      field: 'motor_2_rate', raw_value: '-', cell_text: '23\n-\n62.96',
+    }]);
+    return true;
+  });
   assert.throws(() => parseOfficialRacelist(document,
     { raceDate: '2026-09-29', courseCode: 2, raceNo: 1 }), /date/);
   assert.throws(() => parseOfficialRacelist(document,
     { raceDate: '2026-09-28', courseCode: 3, raceNo: 1 }), /race key/);
+});
+
+test('reports the exact missing average ST cell without accepting an incomplete boat', () => {
+  const missingSt = document.replace('F0<br>L0<br>0.15', 'F0<br>L0<br>-');
+  assert.throws(() => parseOfficialRacelist(missingSt,
+    { raceDate: '2026-09-28', courseCode: 2, raceNo: 1 }), error => {
+    assert.equal(error.code, 'OFFICIAL_RACELIST_INCOMPLETE');
+    assert.equal(error.boat_no, 1);
+    assert.deepEqual(error.missing_fields, [{
+      field: 'average_st', raw_value: '-', cell_text: 'F0\nL0\n-',
+    }]);
+    return true;
+  });
 });

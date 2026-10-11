@@ -12,6 +12,17 @@ const number = (value, min, max) => {
 };
 const cells = row => [...row.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map(m => m[1]);
 const findRaceDate = (html, date) => new RegExp(`(?:hd=${date}|${date.slice(0,4)}[年/.-]0?${Number(date.slice(4,6))}[月/.-]0?${Number(date.slice(6,8))})`).test(html);
+const evidenceText = value => String(value ?? '').trim().slice(0, 120);
+
+export class OfficialRacelistIncompleteError extends Error {
+  constructor(boatNo, missingFields) {
+    super(`Official racelist boat ${boatNo} is incomplete`);
+    this.name = 'OfficialRacelistIncompleteError';
+    this.code = 'OFFICIAL_RACELIST_INCOMPLETE';
+    this.boat_no = boatNo;
+    this.missing_fields = missingFields;
+  }
+}
 
 export function officialCourses(indexHtml, compactDate) {
   if (!findRaceDate(indexHtml, compactDate)) throw new Error('Official index does not show the target race date');
@@ -65,9 +76,25 @@ export function parseOfficialRacelist(html, { raceDate, courseCode, raceNo }) {
       motor_2_rate: number(motor[1], 0, 100),
       boat_2_rate: number(boat[1], 0, 100),
     };
-    if (entry.boat_no !== index + 1 || !entry.racer_registration_no || !entry.racer_name ||
-      Object.values(entry).some(v => v == null || v === '')) {
-      throw new Error(`Official racelist boat ${index + 1} is incomplete`);
+    const evidence = {
+      boat_no: [plain(fields[0]), fields[0]],
+      racer_registration_no: [registration, fields[2]],
+      racer_name: [plain(name), fields[2]],
+      average_st: [stats.at(-1), fields[3]],
+      national_win_rate: [national[0], fields[4]],
+      local_win_rate: [local[0], fields[5]],
+      motor_2_rate: [motor[1], fields[6]],
+      boat_2_rate: [boat[1], fields[7]],
+    };
+    const missingFields = Object.entries(entry).filter(([field, value]) =>
+      (field === 'boat_no' && value !== index + 1) || value == null || value === '')
+      .map(([field]) => ({
+        field,
+        raw_value: evidenceText(evidence[field][0]),
+        cell_text: evidenceText(plain(evidence[field][1])),
+      }));
+    if (missingFields.length) {
+      throw new OfficialRacelistIncompleteError(index + 1, missingFields);
     }
     return entry;
   });
