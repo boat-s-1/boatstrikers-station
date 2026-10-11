@@ -214,7 +214,7 @@ test('scorecard: six axes for the reviewer, higher for the article PHASE 4.2 int
 });
 
 test('prompt blog-ai-v5: system table, featured readings, takeaways without figures, caveats in their place', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v8', 'PHASE 4.5 (the blog-ai-v5 rules below are kept)');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v9', 'PHASE 4.6 (the blog-ai-v5 rules below are kept)');
   const types = ARTICLE_SCHEMA.properties.sections.items.properties.blocks.items.properties.type.enum;
   assert.ok(types.includes('rate_table'));
   const prompt = buildInstructions(v5Pack());
