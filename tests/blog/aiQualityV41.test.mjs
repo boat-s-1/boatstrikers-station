@@ -109,7 +109,8 @@ test('dialogue: used when the article has room for it, never forced into a short
   const p = pack();
   const charm = { ...p, facts: [], readings: [], documents: [{ source_id: 'S1', excerpt: '売店' }], topic: { ...p.topic, category_slug: 'stadium-charm', angle: 'gourmet', character_key: null } };
   assert.equal(articlePlan(charm).maxDialogues, 0);
-  assert.match(buildInstructions(charm), /この記事は短いので、dialogue は使いません/);
+  // 初音 alone (PHASE 4.7): no one to talk with, which is said instead of the length.
+  assert.match(buildInstructions(charm), /登場するのは初音だけなので、dialogue は使いません/);
   const course = buildInstructions(p);
   assert.match(course, /登場するのは一果・初音だけです/); assert.match(course, /2発言目で一果が「データからどう読むか」を答えます/); assert.match(course, /readings/);
   // A short data article without a dialogue is not asked to add one.

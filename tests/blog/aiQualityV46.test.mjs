@@ -94,7 +94,7 @@ test('basics: what the lead gave is not repeated in the body; elsewhere it is fi
 });
 
 test('prompt blog-ai-v9: summary close, source ids, basics and definition once', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v9');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v10');
   const prompt = buildInstructions(pack());
   assert.match(prompt, /締めの文は、発見が表の読み方にどう役立つかで終え、当日の確認（出走表・進入・展示）に話を戻しません/);
   assert.match(prompt, /source_ids に入れてよいのは sources の id だけです。readings の id（"R1" など）は出典IDではないので入れません/);

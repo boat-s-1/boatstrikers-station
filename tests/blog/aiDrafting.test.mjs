@@ -17,9 +17,9 @@ import { NOW, catalogue, basicsTopic, charmTopic, goodAi, memoryStore, memoryRep
 
 test('topic candidates cover each stadium, skip registered keys and build stable slugs', () => {
   const all = candidateTopics({ categorySlug: 'stadium-basics' });
-  assert.equal(all.length, 48);
+  assert.equal(all.length, 72, '24 stadiums × water, course and water-hatsune (PHASE 4.7)');
   const kiryu = candidateTopics({ categorySlug: 'stadium-basics', stadiumSlug: 'kiryu', existingKeys: ['stadium-basics:kiryu:water'] });
-  assert.deepEqual(kiryu.map(t => t.angle), ['course']);
+  assert.deepEqual(kiryu.map(t => [t.angle, t.character_key]), [['course', 'ichika'], ['water-hatsune', 'hatsune']]);
   assert.equal(topicKey('data-lab', null, 'inside-24'), 'data-lab:all:inside-24');
   assert.equal(topicSlug(basicsTopic), 'stadium-basics-kiryu-water');
   assert.equal(candidateTopics({ categorySlug: 'characters', stadiumSlug: 'kiryu' }).map(t => t.character_key).join(), 'ichika,hatsune,kiina');
@@ -125,7 +125,7 @@ test('pipeline: topic → sources → AI → cover → draft with provenance; ne
     callAi: async ({ schema, instructions, input }) => { aiCalls++; assert.equal(schema, ARTICLE_SCHEMA); assert.match(instructions, /一果/); assert.match(input, /52\.2/); return { data: goodAi(), model: 'test-model' }; } });
   assert.equal(aiCalls, 1); assert.equal(repo.calls.release, 0); assert.equal(result.blocking, 0);
   const draft = store.state.drafts.get(result.post_id);
-  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v9');
+  assert.equal(draft.model, 'test-model'); assert.equal(draft.validated_version, 1); assert.equal(draft.prompt_version, 'blog-ai-v10');
   assert.ok(draft.source_pack.sources.some(s => s.fetched_at === NOW().toISOString()), 'fetched official page recorded with its time');
   assert.equal(store.state.documents.length, 1); assert.equal(store.state.media.length, 1);
   assert.equal(store.state.topics.get(basicsTopic.id).status, 'drafted');
