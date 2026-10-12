@@ -21,7 +21,8 @@ export function NewsMarks({ item, now, showNew = true }) {
 // timeMode="time" は日付区切りの下で時刻だけ、"date" は月日を表示する。
 export default function NewsHeadlineRow({ item, now, timeMode = "time", showNew = true }) {
   const character = item.character ? NEWS_CHARACTERS[item.character] : null;
-  const characterTitle = character ? `${character.name}担当：${item.characterReason || character.role}` : undefined;
+  // 判定理由（characterReason）は内部用。読者向けには担当名と担当分野だけを出す。
+  const characterTitle = character ? `${character.name}担当（${character.role}）` : undefined;
   return (
     <Link href={`/news/${item.id}`} className={styles.row}>
       <time dateTime={item.publishedAt || undefined}>{timeMode === "time" ? formatNewsTime(item.publishedAt) : formatNewsShortDate(item.publishedAt)}</time>

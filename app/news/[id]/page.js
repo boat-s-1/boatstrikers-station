@@ -13,7 +13,6 @@ import {
   assignNewsCharacter,
   classifyNewsBucket,
   cleanNewsHeadline,
-  describeNewsCharacterReason,
   isBsDataNews,
   newsBucketLabel,
   newsCharacterNote,
@@ -183,12 +182,7 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
 
         {summary && <div className={styles.lead}><span>要約</span><p>{summary}</p></div>}
 
-        {item.image_url && (
-          <figure className={styles.articlePhoto}>
-            <img src={item.image_url} alt={`${item.title} 関連画像`} loading="eager" decoding="async" referrerPolicy="no-referrer" />
-            {item.source_name && <figcaption>画像：{item.source_name}</figcaption>}
-          </figure>
-        )}
+        {/* 外部出典の画像（image_url）は利用条件を確認できるまで表示しない。DB の値はそのまま残す。 */}
 
         {articleBody && <div className={styles.bodyContent}>{renderArticleBody(articleBody)}</div>}
 
@@ -216,7 +210,6 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
               <Link href={newsListHref({ character: character.key })}>{character.name}担当のニュース ›</Link>
               <Link href="/races">今日の出走表 ›</Link>
             </div>
-            <p className={styles.guideReason}>担当の理由：{describeNewsCharacterReason(assignment)}</p>
           </div>
         </aside>
       ) : (

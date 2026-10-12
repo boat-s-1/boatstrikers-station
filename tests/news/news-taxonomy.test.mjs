@@ -142,6 +142,7 @@ test('list items reuse index classification so counts and lists agree', () => {
   const item = toNewsListItem(row, entry);
   assert.equal(item.bucket, 'women');
   assert.equal(item.character, 'hatsune');
+  assert.equal('characterReason' in item, false, 'assignment reason stays internal');
 });
 
 test('date separators label today and yesterday in Japan time', () => {

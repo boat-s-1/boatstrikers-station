@@ -81,7 +81,7 @@ export default async function NewsTopPage({ searchParams }) {
           <div className={styles.kicker}><span className={theme.goldMark}>TOP</span><NewsMarks item={featured} now={now} showNew={false} /><time dateTime={featured.publishedAt || undefined}>{formatHatsuneNewsDate(featured.publishedAt)}</time></div>
           <Link href={`/news/${featured.id}`} className={styles.topLink}><h2>{featured.headline}</h2>{featured.summary && <p>{featured.summary}</p>}</Link>
           {featuredNote && (
-            <Link href={newsListHref({ character: featured.character })} className={styles.guideLine} title={featured.characterReason}>
+            <Link href={newsListHref({ character: featured.character })} className={styles.guideLine}>
               <NewsCharacterFace character={featured.character} size={28} pose="point" />
               <span className={theme.guideLabel}>{featuredNote.label}</span>
               <span className={styles.guideText}>{NEWS_CHARACTERS[featured.character].name}担当の記事一覧（{NEWS_CHARACTERS[featured.character].deskLabel}）</span>

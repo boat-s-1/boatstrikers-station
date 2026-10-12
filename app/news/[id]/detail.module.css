@@ -11,9 +11,6 @@
 .lead span { display: block; margin-bottom: 3px; font-size: 10px; font-weight: 900; letter-spacing: .12em; color: var(--news-guide-label); }
 .lead p { margin: 0; font-size: 16px; line-height: 1.75; font-weight: 700; color: var(--news-ink); }
 
-.articlePhoto { margin: 16px 0 0; border: 1px solid var(--news-line); border-radius: 8px; overflow: hidden; background: var(--news-soft); }
-.articlePhoto img { display: block; width: 100%; max-height: 520px; object-fit: cover; }
-.articlePhoto figcaption { padding: 6px 10px; font-size: 10.5px; color: var(--news-muted); text-align: right; background: #fff; }
 
 .bodyContent { margin-top: 16px; color: #1d2b3e; }
 .bodyContent p { margin: 0 0 16px; font-size: 17px; line-height: 1.9; }
@@ -44,7 +41,6 @@
 .guideMain > p { margin: 5px 0 6px; font-size: 13.5px; line-height: 1.6; color: var(--news-guide-ink); }
 .guideLinks { display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .guideLinks a { font-size: 12.5px; font-weight: 900; color: var(--c); text-decoration: none; }
-.guideMain > p.guideReason { margin: 6px 0 0; font-size: 10.5px; line-height: 1.5; color: #8a7a52; }
 
 .nextBox { margin: 18px 12px 0; padding: 12px 14px; border-radius: 8px; background: var(--news-soft); }
 .nextBox b { font-size: 14px; color: var(--news-navy); }
