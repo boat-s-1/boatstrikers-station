@@ -71,7 +71,7 @@ test('repeated sentences: the period is set aside before comparing, real repeats
 });
 
 test('prompt blog-ai-v10: periods with their numbers, no period-only sentence, basics placed by theme', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v10');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v11', 'PHASE 4.9 keeps the blog-ai-v10 rules checked here');
   const course = buildInstructions(packFor('stadium-basics', 'course', 'ichika'));
   assert.match(course, /「今回の集計期間は〜です」のような期間だけの文は書かず、期間は数値の文に添えます/);
   assert.match(course, /その期間の数値を最初に書く文に期間を添えます.*期間の違う数値を同じ文で混ぜません/);
@@ -86,10 +86,12 @@ test('prompt blog-ai-v10: periods with their numbers, no period-only sentence, b
 
 test('stadium plans: Toda, Tamagawa and Hamanako (repository data) get the right cast, focus and framing', () => {
   const toda = articlePlan(repositoryPack('toda', 'stadium-basics', 'course'));
-  // Toda's 1コース is below half: the title takes the top reading; no reversal, so 初音 asks a beginner's question.
-  assert.deepEqual([toda.cast, toda.explainer, toda.speaker, toda.dialogueFocus.kind, toda.framing.title.key], [['ichika', 'hatsune'], 'ichika', 'hatsune', 'question', 'top:1:高']);
+  // Toda's 1コース is below half: the title takes that (PHASE 4.9); no reversal, so 初音 asks a beginner's question
+  // about the reading the lead hints at.
+  assert.deepEqual([toda.cast, toda.explainer, toda.speaker, toda.dialogueFocus.kind, toda.dialogueFocus.key, toda.framing.title.key], [['ichika', 'hatsune'], 'ichika', 'hatsune', 'question', 'except:3:高', 'under_half:1']);
   const tamagawa = articlePlan(repositoryPack('tamagawa', 'stadium-basics', 'course'));
-  assert.deepEqual([tamagawa.cast, tamagawa.dialogueFocus.kind, tamagawa.framing.title.key, tamagawa.framing.basicsInLead], [['ichika', 'hatsune'], 'question', 'half:1', true]);
+  // Tamagawa (repository data) falls from 1コース to 6コース in order: that is the hook and 初音's question (PHASE 4.9).
+  assert.deepEqual([tamagawa.cast, tamagawa.dialogueFocus.kind, tamagawa.dialogueFocus.key, tamagawa.framing.title.key, tamagawa.framing.hook.key, tamagawa.framing.basicsInLead], [['ichika', 'hatsune'], 'question', 'sequence:in', 'half:1', 'sequence:in', true]);
   // Hamanako: 3コース above 2コース, so キイナ joins and brings it up as a find.
   const hamanako = articlePlan(repositoryPack('hamanako', 'stadium-basics', 'course'));
   assert.deepEqual([hamanako.cast, hamanako.speaker, hamanako.dialogueFocus.key, hamanako.placements['pair:3>2']], [['ichika', 'kiina'], 'kiina', 'pair:3>2', 'dialogue']);
@@ -109,17 +111,18 @@ test('leads: 初音 and キイナ can lead their themes; 一果 explains in the 
   const water = repositoryPack('hamanako', 'stadium-basics', 'water-hatsune');
   assert.ok(water.facts.some(f => /レース時間帯$/.test(f.label)));
   const hp = articlePlan(water);
-  assert.deepEqual([hp.lead, hp.cast, hp.explainer, hp.speaker, hp.dialogueFocus.kind, hp.framing.basicsInLead], ['hatsune', ['hatsune', 'ichika'], 'ichika', 'hatsune', 'question', false]);
+  assert.deepEqual([hp.lead, hp.cast, hp.explainer, hp.speaker, hp.dialogueFocus.kind, hp.dialogueFocus.key, hp.framing.basicsInLead], ['hatsune', ['hatsune', 'ichika'], 'ichika', 'hatsune', 'question', 'pair:3>2', false]);
   const kp = articlePlan(repositoryPack('hamanako', 'stadiums', 'outer-kiina'));
   assert.deepEqual([kp.lead, kp.cast, kp.explainer, kp.speaker, kp.dialogueFocus.key], ['kiina', ['kiina', 'ichika'], 'ichika', 'kiina', 'pair:3>2']);
-  // Without a reversal キイナ still opens with a reading about the outer courses.
-  assert.match(articlePlan(repositoryPack('tamagawa', 'stadiums', 'outer-kiina')).dialogueFocus.key, /[3-6]/);
+  // Without a reversal キイナ still opens with a find about the outer courses: none of them rises above an inner one.
+  assert.equal(articlePlan(repositoryPack('tamagawa', 'stadiums', 'outer-kiina')).dialogueFocus.key, 'sequence:in');
   // The prompt names who opens and who explains, with their parts.
   const hi = buildInstructions(water);
   assert.match(hi, /主に案内するのは初音です（初音の個性：/);
   assert.match(hi, /1発言目は初音が役割どおりに話し（初音の役割：初心者が抱きそうな疑問を、読者の目線で質問する/);
   assert.match(hi, /2発言目で一果が「データからどう読むか」を答えます/);
-  assert.match(hi, /初音が初心者の疑問として「出走表の号艇（枠番）と、表の進入コースは同じものか」を質問し、一果が/);
+  assert.match(hi, /初音が表を見て、readings の「3コースの1着率（13\.5%）は2コース（11\.9%）より高い」について初心者の疑問として質問し.*一果が、その数字が何を示すかを答えます/);
+  assert.match(hi, /号艇とコースの違いは本文と data_check で説明しているので、会話では扱いません/);
   const ki = buildInstructions(repositoryPack('hamanako', 'stadiums', 'outer-kiina'));
   assert.match(ki, /主に案内するのはキイナです/);
   assert.match(ki, /1発言目はキイナが役割どおりに話し（キイナの役割：外コースや、内側から順に並ばない意外なデータに気づいて話題にする/);

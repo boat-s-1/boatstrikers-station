@@ -62,7 +62,8 @@ test('regression (Tokoname v5 draft 2026-10-10): the restating dialogue, the sum
   assert.match(issues.find(i => i.code === 'data_check_overlap').message, /^ブロック10（DATA_CHECK）.*「当日の出走表・進入」/);
   assert.match(issues.find(i => i.code === 'caveat_misplaced').message, /ブロック12（TEXT）/);
   // Block 7's "4コースは3コースより高く、…わけではありません" is now read as the 4 > 3 reading.
-  assert.deepEqual(rateStatements(v5Document.blocks[6].data.text, facts).map(s => s.key), ['order', 'pair:4>3']);
+  // PHASE 4.9: its "…内側から順に下がるわけではありません" is also read, as the (true) claim that the order has an exception.
+  assert.deepEqual(rateStatements(v5Document.blocks[6].data.text, facts).map(s => s.key), ['order', 'sequence:out', 'pair:4>3']);
 });
 
 test('scorecard: v4 and v5 rescored, with the reasons that changed', () => {
@@ -87,7 +88,8 @@ test('scorecard: v4 and v5 rescored, with the reasons that changed', () => {
 
 test('negation: a comparison stands when the negation belongs to another clause; a negated comparison states nothing', () => {
   const keys = text => rateStatements(text, facts).map(s => s.key);
-  assert.deepEqual(keys('4コースの1着率は3コースより高く、内側から順に下がるわけではありません。'), ['pair:4>3']);
+  // PHASE 4.9: the second clause is read too, as a claim about the inside-first order (true for Tokoname).
+  assert.deepEqual(keys('4コースの1着率は3コースより高く、内側から順に下がるわけではありません。'), ['sequence:out', 'pair:4>3']);
   assert.deepEqual(keys('4コースの1着率が3コースより高いわけではありません。'), []);
   assert.deepEqual(keys('3コースの1着率は4コースより高いとは言えません。'), []);
   assert.deepEqual(keys('6コースが最も低い1着率とは限りません。'), []);
@@ -133,7 +135,7 @@ test('DATA CHECK: items that repeat other items are reported; distinct items are
 });
 
 test('plan and prompt blog-ai-v6: each featured reading told once, in the body or by the partner in the dialogue', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v10', 'PHASE 4.7 keeps the blog-ai-v6 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v11', 'PHASE 4.9 keeps the blog-ai-v6 rules checked here');
   const tokoname = articlePlan(v6Pack());
   assert.deepEqual(tokoname.placements, { 'half:1': 'body', 'except:2:高': 'body', 'pair:4>3': 'dialogue' });
   assert.deepEqual(tokoname.dialogueFocus, { kind: 'reading', key: 'pair:4>3', text: '4コースの1着率（10.0%）は3コース（8.5%）より高い' });
@@ -148,12 +150,14 @@ test('plan and prompt blog-ai-v6: each featured reading told once, in the body o
   assert.match(prompt, /質問より発見として話す/);
   const input = JSON.parse(buildInput(v6Pack()));
   assert.deepEqual(input.readings.map(r => [r.id, r.place]), [['R1', 'reference'], ['R2', 'body'], ['R3', 'reference'], ['R4', 'body'], ['R5', 'dialogue'], ['R6', 'reference']]);
-  // 初音 as the partner (no outer course above an inner one): a beginner's question, every reading in the body.
+  // 初音 as the partner (no outer course above an inner one): a beginner's question. PHASE 4.9: about the reading the
+  // lead hints at (told in the dialogue only), no longer the 号艇/course difference the body and DATA CHECK explain.
   const kiryu = buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: kiryuNow });
   const plan = articlePlan(kiryu);
-  assert.equal(plan.partner, 'hatsune'); assert.equal(plan.dialogueFocus.kind, 'question');
-  assert.ok(Object.values(plan.placements).every(p => p === 'body'));
-  assert.match(buildInstructions(kiryu), /初音が初心者の疑問として「出走表の号艇（枠番）と、表の進入コースは同じものか」を質問し/);
+  assert.equal(plan.partner, 'hatsune'); assert.deepEqual(plan.dialogueFocus, { kind: 'question', key: 'except:3:高', text: '3コースの1着率（13.4%）は1コース以外で最も高い' });
+  assert.deepEqual(plan.placements, { 'half:1': 'body', 'except:3:高': 'dialogue', 'near:2:3': 'body' });
+  assert.match(buildInstructions(kiryu), /初音が表を見て、readings の「3コースの1着率（13\.4%）は1コース以外で最も高い」について初心者の疑問として質問し/);
+  assert.doesNotMatch(buildInstructions(kiryu), /「出走表の号艇（枠番）と、表の進入コースは同じものか」を質問し/);
   // A short article: no dialogue, nothing placed there.
   const charm = { ...v6Pack(), facts: [], readings: [], topic: { ...v6Pack().topic, category_slug: 'stadium-charm', angle: 'gourmet' } };
   assert.equal(articlePlan(charm).dialogueFocus, null);
