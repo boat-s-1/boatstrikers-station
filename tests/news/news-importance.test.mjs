@@ -123,7 +123,7 @@ function makeRows(count) {
   const rows = [];
   for (let i = 0; i < count; i += 1) {
     const url = `https://www.nikkansports.com/public_race/news/2026101200${String(1000 + Math.floor(i / 2)).padStart(5, '0')}.html`;
-    rows.push(news(`【ボートレース】テスト選手${i}が今年初優勝／戸田 [18:00]`, {
+    rows.push(news(`【ボートレース】テスト選手${i % 4 < 2 ? Math.floor(i / 2) : i}が今年初優勝／戸田 [18:00]`, {
       id: 5000 - i, category: i % 3 ? 'topic' : 'women', source_url: i % 4 < 2 ? url : `https://sp.macour.jp/news/${900000 + i}/`,
       summary: '戸田で行われた優勝戦の結果をまとめた記事です。'.repeat(3), article_body: '本文'.repeat(100 + i), published_at: new Date(base - i * 3600000).toISOString(),
     }));
@@ -172,6 +172,7 @@ test('event list counts match the ?event= listing', () => {
 test('past results and goals are not counted as finals or milestones', () => {
   assert.equal(type(news('【ボートレース】「ターン回りは悪くない」香川陽太が前節優出２着の相棒に及第点／びわこ [17:57]')), 'talk');
   assert.equal(type(news('【ボートレース】甲斐貴大が２、３着で舟券貢献「回り足が良さそう」と初勝利目指す／児島 [19:00]')), 'talk');
+  assert.equal(type(news('【ボートレース】地元で初優出を目指す常盤海心「合えばポテンシャルはあると思う」／鳴門 [19:00]')), 'final', 'a goal is a preview, not a milestone');
   assert.equal(type(news('【ボートレース】鳥本智史がデビュー112走目で初勝利、9R後に華々しく水神祭／びわこ [22:00]')), 'milestone');
 });
 
@@ -182,4 +183,23 @@ test('a days-old big win yields TOP to fresher news but stays among highlights',
     { id: 1798, importance: 48, eventType: 'digest', topicKey: 'bs:digest', publishedAt: '2026-10-11T14:10:00Z' },
   ], { now, count: 4 });
   assert.deepEqual(picks.map((p) => p.id), [1798, 1709]);
+});
+
+test('a final preview phrased with Ｖ is not a completed win (id1670)', () => {
+  const preview = news('【ボートレース】毒島誠が王道Ｖで賞金ランク浮上決める「インから逃げるには問題ない足」三国G1 [20:45]', {
+    summary: '三国G1で毒島誠が準優を唯一逃げ切り、優勝戦1枠を確保した。複勝率26.8％の機を出足と行き足の実戦的な仕上がりに整え、優勝による賞金ランキング浮上に注目が集まる。',
+  });
+  assert.equal(type(preview), 'final');
+  const win = news('【ボートレース】百戦錬磨の毒島誠が逃げ切りＶ 賞金ランクは９位に浮上／三国G1 [19:19]', { summary: '12R優勝戦は毒島誠（42＝群馬）が逃げ切って優勝した。G1制覇は通算19度目。' });
+  assert.equal(type(win), 'win');
+  assert.equal(type(news('【ボートレース】野中一平がイン速攻でＶ「記念を取りたいしSGも取りたい」／津3Days [19:40]')), 'win');
+});
+
+test('same URL with different headlines is not merged (id465 / id326)', () => {
+  const url = 'https://www.nikkansports.com/public_race/news/202609080000709.html';
+  const groups = groupDuplicateNews([
+    news('SGチャレンジカップ盛り上げ企画 松本日向コラム 第１回／常滑ボート - ボート : 日刊スポーツ', { id: 465, source_url: url }),
+    news('SGチャレンジカップ盛り上げ企画 松本日向コラム12日スタート／常滑ボート [18:19]', { id: 326, source_url: url }),
+  ]);
+  assert.equal(groups.length, 2);
 });
