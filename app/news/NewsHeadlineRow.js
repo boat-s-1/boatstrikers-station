@@ -12,6 +12,7 @@ export function NewsMarks({ item, now, showNew = true }) {
     <>
       <span className={`${styles.chip} ${categoryClass(item.bucket)}`}>{newsBucketLabel(item.bucket)}</span>
       {item.bsData && <span className={styles.bsMark}>BS DATA</span>}
+      {item.isKey && <span className={styles.keyMark}>重要</span>}
       {showNew && isNewNews(item.publishedAt, now) && <span className={styles.newMark}>NEW</span>}
     </>
   );
@@ -24,8 +25,8 @@ export default function NewsHeadlineRow({ item, now, timeMode = "time", showNew 
   // 判定理由（characterReason）は内部用。読者向けには担当名と担当分野だけを出す。
   const characterTitle = character ? `${character.name}担当（${character.role}）` : undefined;
   return (
-    <Link href={`/news/${item.id}`} className={styles.row}>
-      <time dateTime={item.publishedAt || undefined}>{timeMode === "time" ? formatNewsTime(item.publishedAt) : formatNewsShortDate(item.publishedAt)}</time>
+    <Link href={`/news/${item.id}`} className={`${styles.row} ${item.isKey ? styles.rowKey : ""}`}>
+      <time dateTime={item.publishedAt || undefined} title="BoatStrikers NEWSへの掲載時刻"><small>掲載</small>{timeMode === "time" ? formatNewsTime(item.publishedAt) : formatNewsShortDate(item.publishedAt)}</time>
       <span className={styles.rowMain}>
         <strong>{item.headline}</strong>
         <span className={styles.rowMeta}><NewsMarks item={item} now={now} showNew={showNew} /></span>

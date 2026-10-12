@@ -3,28 +3,25 @@ import { supabase } from "../bsc2/lib/supabaseClient";
 import { getHatsuneNews } from "../hatsune/newsData";
 import {
   NEWS_CHARACTERS,
-  NEWS_TABS,
   buildNewsSearchQuery,
-  isMeaningfulEditorialNews,
   isWithinNewsHours,
-  matchesNewsTab,
   newsDayKey,
   parseNewsSearchTerms,
-  selectFeaturedNews,
-  toNewsIndexEntry,
   toNewsListItem,
 } from "../../lib/newsTaxonomy";
+import { NEWS_PAGE_SIZE, buildNewsIndex, listNewsEvents, selectNewsListing } from "../../lib/newsListing";
 
 // NEWS 一覧専用の読み取り処理。hatsune_news への書き込みや、既存の取得関数（newsData.js）の変更は行わない。
 
-export const NEWS_PAGE_SIZE = 20;
+export { NEWS_PAGE_SIZE };
 export const NEWS_SECTION_SIZE = 6;
 const INDEX_CHUNK_SIZE = 1000;
 const INDEX_MAX_CHUNKS = 50;
 const INDEX_REVALIDATE_SECONDS = 120;
 const SEARCH_MAX_RESULTS = 2000;
+const HIGHLIGHT_COUNT = 3; // TOP 1件 + 主なニュース 2件（最新ニュースの開始位置を大きく下げないため）
 
-const INDEX_SELECT = "id,title,list_headline,summary,article_body,category,source_type,source_name,published_at,is_featured,priority";
+const INDEX_SELECT = "id,title,list_headline,summary,article_body,category,source_type,source_name,source_url,place,published_at,is_featured,priority";
 const LIST_SELECT = "id,title,list_headline,summary,category,source_type,source_name,place,published_at,is_featured,priority";
 
 function publishedNewsQuery(select) {
@@ -38,26 +35,24 @@ function publishedNewsQuery(select) {
     .order("id", { ascending: false });
 }
 
-// 全公開記事の軽量インデックス（id・日時・表示カテゴリーなど）。本文は分類にだけ使い、キャッシュには残さない。
+// 全公開記事の軽量インデックス（id・日時・表示カテゴリー・重要度など）。本文は判定にだけ使い、キャッシュには残さない。
 async function loadNewsIndex() {
   if (!supabase) return [];
-  const entries = [];
+  const rows = [];
   let from = 0;
   for (let chunk = 0; chunk < INDEX_MAX_CHUNKS; chunk += 1) {
     const { data, error } = await publishedNewsQuery(INDEX_SELECT).range(from, from + INDEX_CHUNK_SIZE - 1);
     // 例外にしてキャッシュさせない（一時的な失敗で空の一覧を保持しないため）。
     if (error) throw new Error(error.message);
-    const rows = Array.isArray(data) ? data : [];
-    if (!rows.length) break;
-    for (const row of rows) {
-      if (isMeaningfulEditorialNews(row)) entries.push(toNewsIndexEntry(row));
-    }
-    from += rows.length;
+    const chunkRows = Array.isArray(data) ? data : [];
+    if (!chunkRows.length) break;
+    rows.push(...chunkRows);
+    from += chunkRows.length;
   }
-  return entries;
+  return buildNewsIndex(rows);
 }
 
-const getCachedNewsIndex = unstable_cache(loadNewsIndex, ["boatstrikers-news-index-v2"], {
+const getCachedNewsIndex = unstable_cache(loadNewsIndex, ["boatstrikers-news-index-v3"], {
   revalidate: INDEX_REVALIDATE_SECONDS,
   tags: ["boatstrikers-news-index"],
 });
@@ -69,7 +64,7 @@ async function getNewsIndex() {
     console.warn("NEWSインデックス取得:", error?.message || error);
     // 失敗時は従来どおり直近100件だけで表示を続ける。
     const rows = await getHatsuneNews({ limit: 100, category: "all" });
-    return { entries: rows.filter(isMeaningfulEditorialNews).map(toNewsIndexEntry), degraded: true };
+    return { entries: buildNewsIndex(rows), degraded: true };
   }
 }
 
@@ -116,6 +111,11 @@ export function parseNewsPage(value) {
   return Number.isFinite(page) && page >= 1 ? Math.min(page, 10000) : 1;
 }
 
+export function normalizeNewsEvent(value) {
+  const name = String(value || "").trim();
+  return name.length <= 24 ? name : "";
+}
+
 export const NEWS_SECTIONS = [
   { key: "women", title: "女子戦・女子レーサー", character: "hatsune", href: { category: "women" }, match: (entry) => entry.women },
   { key: "kiina", title: "万舟・高配当・波乱", character: "kiina", href: { category: "all", character: "kiina" }, match: (entry) => entry.character === "kiina" },
@@ -124,53 +124,47 @@ export const NEWS_SECTIONS = [
 ];
 
 // 一覧ページ・「もっと見る」API 共通の取得処理。
-// タブ件数・一覧・検索・ページ送りはすべて同じ index と matchesNewsTab で絞り込むため件数が一致する。
-export async function getNewsListing({ category = "all", character = "", q = "", page = 1, includeSections = false } = {}) {
+// タブ件数・一覧・検索・ページ送りはすべて同じ index（同一記事を1件にまとめた後）から数えるため件数が一致する。
+export async function getNewsListing({ category = "all", character = "", event = "", q = "", page = 1, includeSections = false } = {}) {
   const now = Date.now();
   const { entries, degraded } = await getNewsIndex();
-
   const search = String(q || "").trim() ? await searchNewsIds(q) : null;
-  const base = search ? entries.filter((entry) => search.ids.has(String(entry.id))) : entries;
-  const tabCounts = Object.fromEntries(NEWS_TABS.filter((tab) => !tab.href).map((tab) => [tab.key, base.filter((entry) => matchesNewsTab(entry, tab.key)).length]));
-
-  let pool = base.filter((entry) => matchesNewsTab(entry, category));
-  if (character) pool = pool.filter((entry) => entry.character === character);
-
-  const featuredEntry = selectFeaturedNews(pool, now);
-  const rest = featuredEntry ? pool.filter((entry) => entry.id !== featuredEntry.id) : pool;
-  const totalPages = Math.max(1, Math.ceil(rest.length / NEWS_PAGE_SIZE));
-  const pageEntries = rest.slice((page - 1) * NEWS_PAGE_SIZE, page * NEWS_PAGE_SIZE);
+  const isMain = category === "all" && !character && !event && !search;
+  const listing = selectNewsListing(entries, { category, character, event, searchIds: search?.ids || null, page, now, highlightCount: isMain && page === 1 ? HIGHLIGHT_COUNT : 0 });
 
   const sectionEntries = {};
   if (includeSections) {
     for (const section of NEWS_SECTIONS) sectionEntries[section.key] = entries.filter(section.match).slice(0, NEWS_SECTION_SIZE);
   }
-
+  const showFeatured = page === 1 && listing.featured;
   const wantedIds = [
-    ...(page === 1 && featuredEntry ? [featuredEntry.id] : []),
-    ...pageEntries.map((entry) => entry.id),
+    ...(showFeatured ? [listing.featured.id] : []),
+    ...(page === 1 ? listing.keyEntries.map((entry) => entry.id) : []),
+    ...listing.pageEntries.map((entry) => entry.id),
     ...Object.values(sectionEntries).flat().map((entry) => entry.id),
   ];
   const rowsById = await fetchNewsRowsByIds(wantedIds);
 
   const sections = {};
   for (const [key, list] of Object.entries(sectionEntries)) sections[key] = pickItems(list, rowsById);
-  const featured = page === 1 && featuredEntry ? pickItems([featuredEntry], rowsById)[0] || null : null;
 
   // 「直近24時間」の本数と担当キャラ別の本数（絞り込みに関係なく全公開記事が対象）。
   const recent = entries.filter((entry) => isWithinNewsHours(entry.publishedAt, 24, now));
   const recentByCharacter = Object.fromEntries(Object.keys(NEWS_CHARACTERS).map((key) => [key, recent.filter((entry) => entry.character === key).length]));
+  const lastEntry = listing.pageEntries[listing.pageEntries.length - 1];
 
   return {
-    total: pool.length,
+    total: listing.total,
     page,
-    totalPages,
-    hasMore: page < totalPages,
-    featured,
-    items: pickItems(pageEntries, rowsById),
-    lastDayKey: pageEntries.length ? newsDayKey(pageEntries[pageEntries.length - 1].publishedAt) : "",
+    totalPages: listing.totalPages,
+    hasMore: listing.hasMore,
+    featured: showFeatured ? pickItems([listing.featured], rowsById)[0] || null : null,
+    keyItems: page === 1 ? pickItems(listing.keyEntries, rowsById) : [],
+    items: pickItems(listing.pageEntries, rowsById),
+    lastDayKey: lastEntry ? newsDayKey(lastEntry.publishedAt) : "",
     sections,
-    tabCounts,
+    events: includeSections ? listNewsEvents(entries, { now }) : [],
+    tabCounts: listing.tabCounts,
     allTotal: entries.length,
     recentTotal: recent.length,
     recentByCharacter,

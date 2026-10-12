@@ -7,23 +7,24 @@ import { newsListHref } from "./newsLinks";
 import styles from "./newsTheme.module.css";
 
 // 「もっと見る」で次のページを同じ画面に追記する。JS が無い環境では通常のページ送りリンクとして動く。
-export default function NewsLoadMore({ category, character, q, initialPage, totalPages, lastDayKey }) {
+export default function NewsLoadMore({ category, character, event, q, initialPage, totalPages, lastDayKey }) {
   const [items, setItems] = useState([]);
   const [lastPage, setLastPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const nextPage = lastPage + 1;
   const hasMore = lastPage < totalPages;
-  const nextHref = newsListHref({ category, character, q, page: nextPage });
+  const nextHref = newsListHref({ category, character, event, q, page: nextPage });
 
-  async function loadMore(event) {
-    event.preventDefault();
+  async function loadMore(clickEvent) {
+    clickEvent.preventDefault();
     if (loading || !hasMore) return;
     setLoading(true);
     setFailed(false);
     try {
       const params = new URLSearchParams({ category, page: String(nextPage) });
       if (character) params.set("character", character);
+      if (event) params.set("event", event);
       if (q) params.set("q", q);
       const response = await fetch(`/api/news/list?${params.toString()}`);
       if (!response.ok) throw new Error(String(response.status));
@@ -51,7 +52,7 @@ export default function NewsLoadMore({ category, character, q, initialPage, tota
       {failed && <p className={styles.moreError}>読み込みに失敗しました。<Link href={nextHref}>次のページを開く</Link></p>}
       {totalPages > 1 && (
         <nav className={styles.pager} aria-label="ニュース一覧のページ送り">
-          {initialPage > 1 ? <Link href={newsListHref({ category, character, q, page: initialPage - 1 })}>‹ 前のページ</Link> : <span />}
+          {initialPage > 1 ? <Link href={newsListHref({ category, character, event, q, page: initialPage - 1 })}>‹ 前のページ</Link> : <span />}
           <span>{initialPage === lastPage ? `${lastPage} / ${totalPages}ページ` : `${initialPage}〜${lastPage} / ${totalPages}ページ`}</span>
           {hasMore ? <Link href={nextHref}>次のページ ›</Link> : <span />}
         </nav>

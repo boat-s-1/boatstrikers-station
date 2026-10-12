@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatHatsuneNewsDate } from "../hatsune/newsData";
-import { NEWS_CHARACTERS, NEWS_TABS, newsCharacterNote, normalizeNewsCharacter, normalizeNewsTab } from "../../lib/newsTaxonomy";
-import { getNewsListing, parseNewsPage, NEWS_SECTIONS } from "./newsQueries";
+import { NEWS_CHARACTERS, NEWS_TABS, formatNewsShortDate, formatNewsTime, newsCharacterNote, newsDayKey, normalizeNewsCharacter, normalizeNewsTab } from "../../lib/newsTaxonomy";
+import { getNewsListing, normalizeNewsEvent, parseNewsPage, NEWS_SECTIONS } from "./newsQueries";
 import NewsHeadlineRow, { NewsDatedList, NewsMarks } from "./NewsHeadlineRow";
 import NewsCharacterFace from "./NewsCharacterFace";
 import NewsLoadMore from "./NewsLoadMore";
@@ -19,6 +19,11 @@ export const metadata = {
 
 const UPDATED_FORMAT = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false });
 
+// 主なニュースの掲載時刻：今日なら時刻、それ以外は月日。
+function postedLabel(value, now) {
+  return newsDayKey(value) === newsDayKey(now) ? formatNewsTime(value) : formatNewsShortDate(value);
+}
+
 function updatedLabel(value) {
   if (!value) return "";
   const parts = Object.fromEntries(UPDATED_FORMAT.formatToParts(new Date(value)).map((p) => [p.type, p.value]));
@@ -29,16 +34,17 @@ export default async function NewsTopPage({ searchParams }) {
   const params = await searchParams;
   const category = normalizeNewsTab(params?.category);
   const character = normalizeNewsCharacter(params?.character);
+  const event = normalizeNewsEvent(params?.event);
   const q = String(params?.q || "").slice(0, 200);
   const page = parseNewsPage(params?.page);
   const searching = !!q.trim();
-  const showSections = category === "all" && !character && !searching && page === 1;
-  const listing = await getNewsListing({ category, character, q, page, includeSections: showSections });
+  const showSections = category === "all" && !character && !event && !searching && page === 1;
+  const listing = await getNewsListing({ category, character, event, q, page, includeSections: showSections });
   const { featured, items, sections, total, totalPages, tabCounts } = listing;
   const now = Date.now();
   const tabLabel = NEWS_TABS.find((x) => x.key === category)?.label;
   const filterCharacter = character ? NEWS_CHARACTERS[character] : null;
-  const listTitle = searching ? "検索結果" : filterCharacter ? `${filterCharacter.name}担当のニュース` : category === "all" ? "最新ニュース" : `${tabLabel}のニュース`;
+  const listTitle = searching ? "検索結果" : event ? `${event}のニュース` : filterCharacter ? `${filterCharacter.name}担当のニュース` : category === "all" ? "最新ニュース" : `${tabLabel}のニュース`;
   const featuredNote = featured?.character ? newsCharacterNote(featured.character) : null;
 
   return (
@@ -54,6 +60,7 @@ export default async function NewsTopPage({ searchParams }) {
         <form className={theme.searchForm} method="get" action="/news">
           <input type="hidden" name="category" value={category} />
           {character && <input type="hidden" name="character" value={character} />}
+          {event && <input type="hidden" name="event" value={event} />}
           <input name="q" defaultValue={q} placeholder="選手名・場名・キーワード（スペースで複数語）" aria-label="検索キーワード" />
           <button type="submit">検索</button>
         </form>
@@ -63,7 +70,7 @@ export default async function NewsTopPage({ searchParams }) {
       <nav className={theme.tabs} aria-label="ニュースのカテゴリー">
         {NEWS_TABS.map((tab) => {
           const href = tab.href || newsListHref({ category: tab.key, q });
-          const on = !tab.href && category === tab.key && !character;
+          const on = !tab.href && category === tab.key && !character && !event;
           return <Link key={tab.key} href={href} className={on ? theme.tabOn : undefined} aria-current={on ? "page" : undefined}>{tab.label}{!tab.href && <small>{tabCounts[tab.key] ?? 0}</small>}</Link>;
         })}
       </nav>
@@ -72,6 +79,13 @@ export default async function NewsTopPage({ searchParams }) {
         <div className={styles.filterNote}>
           <NewsCharacterFace character={character} size={26} />
           <span><b>{filterCharacter.name}</b>担当（{filterCharacter.role}）の記事に絞り込み中</span>
+          <Link href={newsListHref({ category, q })}>解除 ×</Link>
+        </div>
+      )}
+
+      {event && (
+        <div className={styles.filterNote}>
+          <span><b>{event}</b>の記事に絞り込み中（見出しの開催名で判定）</span>
           <Link href={newsListHref({ category, q })}>解除 ×</Link>
         </div>
       )}
@@ -88,10 +102,25 @@ export default async function NewsTopPage({ searchParams }) {
               <b>›</b>
             </Link>
           )}
+          {listing.keyItems.length > 0 && (
+            <div className={styles.keyNews}>
+              <span className={styles.keyNewsLabel}>主なニュース</span>
+              <ul>
+                {listing.keyItems.map((item) => (
+                  <li key={item.id}>
+                    <Link href={`/news/${item.id}`}>
+                      <time dateTime={item.publishedAt || undefined}>{postedLabel(item.publishedAt, now)}</time>
+                      <strong>{item.headline}</strong>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       )}
 
-      {!searching && !character && (
+      {!searching && !character && !event && (
         <nav className={styles.desk} aria-label="編集部の担当別ニュース">
           {Object.values(NEWS_CHARACTERS).map((c) => (
             <Link key={c.key} href={newsListHref({ character: c.key })} className={styles[`desk_${c.key}`]} aria-label={`${c.name}担当（${c.role}）のニュース。直近24時間の新着${listing.recentByCharacter[c.key] ?? 0}本`}>
@@ -108,15 +137,30 @@ export default async function NewsTopPage({ searchParams }) {
       <section aria-label={listTitle}>
         <div className={theme.listHead}>
           <h2>{listTitle}</h2>
-          <span>{category === "all" && !character && !searching ? <>直近24時間 <b>{listing.recentTotal}本</b>・全{listing.allTotal}件</> : <>{searching ? `「${q.trim()}」 ` : ""}{total}件</>}{page > 1 ? `・${page}ページ目` : ""}</span>
+          <span>{category === "all" && !character && !event && !searching ? <>直近24時間 <b>{listing.recentTotal}本</b>・全{listing.allTotal}件</> : <>{searching ? `「${q.trim()}」 ` : ""}{total}件</>}{page > 1 ? `・${page}ページ目` : ""}</span>
         </div>
         {items.length > 0 && <NewsDatedList items={items} now={now} />}
-        <NewsLoadMore key={`${category}:${character}:${q}:${page}`} category={category} character={character} q={q} initialPage={page} totalPages={totalPages} lastDayKey={listing.lastDayKey} />
+        <NewsLoadMore key={`${category}:${character}:${event}:${q}:${page}`} category={category} character={character} event={event} q={q} initialPage={page} totalPages={totalPages} lastDayKey={listing.lastDayKey} />
       </section>
 
       {listing.searchFailed && <div className={theme.empty}>検索に失敗しました。時間をおいて再度お試しください。</div>}
       {!listing.searchFailed && total === 0 && <div className={theme.empty}>該当するニュースはありません。</div>}
-      {total > 0 && !featured && items.length === 0 && <div className={theme.empty}>このページに記事はありません。<Link href={newsListHref({ category, character, q })}>1ページ目へ</Link></div>}
+      {total > 0 && !featured && items.length === 0 && <div className={theme.empty}>このページに記事はありません。<Link href={newsListHref({ category, character, event, q })}>1ページ目へ</Link></div>}
+
+      {showSections && listing.events.length > 0 && (
+        <section className={styles.section}>
+          <div className={theme.listHead}><h3>開催別のニュース</h3><span>直近7日に記事がある開催</span></div>
+          <div className={theme.list}>
+            {listing.events.map((item) => (
+              <Link key={item.name} href={newsListHref({ event: item.name })} className={styles.eventRow}>
+                <b>{item.name}</b>
+                <span>{item.count}本</span>
+                <i>›</i>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {showSections && NEWS_SECTIONS.map((section) => sections[section.key]?.length > 0 && (
         <section key={section.key} className={styles.section}>

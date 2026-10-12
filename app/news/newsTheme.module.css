@@ -82,7 +82,11 @@
 .dateSep { padding: 4px 14px; font-size: 11.5px; font-weight: 800; color: var(--news-navy2); background: var(--news-soft); border-bottom: 1px solid var(--news-line); }
 .row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 14px; border-bottom: 1px solid var(--news-line); color: inherit; text-decoration: none; }
 .row:active { background: var(--news-soft); }
-.row time { flex: none; width: 36px; padding-top: 2px; font-size: 11.5px; color: var(--news-muted); font-variant-numeric: tabular-nums; }
+.row time { flex: none; width: 36px; padding-top: 1px; font-size: 11.5px; line-height: 1.3; color: var(--news-muted); font-variant-numeric: tabular-nums; }
+.row time small { display: block; font-size: 9px; letter-spacing: .04em; color: #9aa6b4; }
+/* 重要記事：時系列はそのまま、左の金線と小さな「重要」で控えめに示す */
+.rowKey { box-shadow: inset 3px 0 0 var(--news-gold); }
+.keyMark { font-size: 9.5px; font-weight: 900; letter-spacing: .04em; color: #8a6a14; border: 1px solid var(--news-guide-line); border-radius: 2px; padding: 0 4px; line-height: 1.5; background: var(--news-guide-bg); }
 .rowMain { flex: 1; min-width: 0; }
 .row strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 15px; line-height: 1.45; font-weight: 700; color: var(--news-ink); }
 .rowMeta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 3px; }

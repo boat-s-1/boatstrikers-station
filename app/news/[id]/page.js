@@ -20,6 +20,7 @@ import {
 } from "../../../lib/newsTaxonomy";
 import NewsHeadlineRow, { categoryClass } from "../NewsHeadlineRow";
 import { NewsCharacterBust } from "../NewsCharacterFace";
+import { groupDuplicateNews, newsDuplicateKey } from "../../../lib/newsImportance";
 import { newsListHref } from "../newsLinks";
 import { getOfficialYoutubeUpdates } from "../media/mediaData";
 
@@ -144,8 +145,10 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
     getOfficialYoutubeUpdates({ limit: 60 }),
   ]);
 
-  const relatedNews = allNews
-    .filter((candidate) => String(candidate.id) !== String(item.id))
+  // 同じ出典URLの記事（同じ記事の別収集分）は関連記事に出さず、候補側も1件にまとめる。
+  const ownKey = newsDuplicateKey(item);
+  const candidates = groupDuplicateNews(allNews.filter((candidate) => String(candidate.id) !== String(item.id) && (!ownKey || newsDuplicateKey(candidate) !== ownKey))).map((group) => group.representative);
+  const relatedNews = candidates
     .map((candidate) => ({ ...candidate, _score: relatedScore(item, candidate) }))
     .filter((candidate) => candidate._score > 0)
     .sort((a, b) => b._score - a._score || new Date(b.published_at) - new Date(a.published_at))
