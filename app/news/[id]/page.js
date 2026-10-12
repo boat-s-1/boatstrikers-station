@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import theme from "../newsTheme.module.css";
 import styles from "./detail.module.css";
 import relatedStyles from "./related.module.css";
 import {
@@ -7,7 +8,20 @@ import {
   getHatsuneNews,
   formatHatsuneNewsDate,
 } from "../../hatsune/newsData";
-import { classifyNewsBucket, cleanNewsHeadline, newsBucketLabel, newsHeadline } from "../../../lib/newsTaxonomy";
+import {
+  NEWS_CHARACTERS,
+  assignNewsCharacter,
+  classifyNewsBucket,
+  cleanNewsHeadline,
+  describeNewsCharacterReason,
+  isBsDataNews,
+  newsBucketLabel,
+  newsCharacterNote,
+  toNewsListItem,
+} from "../../../lib/newsTaxonomy";
+import NewsHeadlineRow, { categoryClass } from "../NewsHeadlineRow";
+import { NewsCharacterBust } from "../NewsCharacterFace";
+import { newsListHref } from "../newsLinks";
 import { getOfficialYoutubeUpdates } from "../media/mediaData";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +51,17 @@ function words(item) {
   return `${item?.list_headline || ""} ${item?.title || ""} ${item?.summary || ""} ${item?.article_body || ""} ${item?.place || ""}`;
 }
 
+// 見出し末尾の「／戸田」「／三国G1」などから開催場を取り出す（place が空の報道記事向け）。
+function headlineVenue(item) {
+  const match = cleanNewsHeadline(item?.title).match(/／([^／」]{1,8})$/);
+  return match ? match[1].replace(/(?:SG|G[123]|PG1|ミッド|3Days)$/, "").trim() : "";
+}
+
 function relatedScore(base, candidate) {
   let score = 0;
+  const venue = headlineVenue(base);
+  if (venue && venue === headlineVenue(candidate)) score += 6;
+  if (classifyNewsBucket(base) === classifyNewsBucket(candidate)) score += 4;
   const a = words(base);
   const b = words(candidate);
   if (base.place && candidate.place && base.place === candidate.place) score += 8;
@@ -48,12 +71,6 @@ function relatedScore(base, candidate) {
   const published = new Date(candidate.published_at || 0).getTime();
   if (published) score += Math.max(0, 3 - (Date.now() - published) / 86400000 / 7);
   return score;
-}
-
-function shortDate(value) {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric" }).format(d);
 }
 
 function shortMediaTitle(title) {
@@ -109,25 +126,19 @@ function renderArticleBody(body) {
   return nodes;
 }
 
-function getCheckLabel(item) {
-  const text = words(item);
-  if (/女子|ヴィーナス|オールレディース|レディース/.test(text)) return "初音 CHECK";
-  if (/イン逃げ|1コース|イン戦/.test(text)) return "一果 CHECK";
-  if (/5号艇|穴狙い|カド攻め/.test(text)) return "キイナ CHECK";
-  return "BoatStrikers CHECK";
-}
-
 export default async function BoatStrikersNewsDetailPage({ params }) {
   const { id } = await params;
   const item = await getHatsuneNewsById(id);
   if (!item) notFound();
 
-  // 一覧と同じ表示カテゴリーを使う（DB の category は変更しない）。
   const bucket = classifyNewsBucket(item);
   const label = newsBucketLabel(bucket);
   const summary = cleanSummary(item);
   const articleBody = !isGenericCopy(item.article_body) ? String(item.article_body || "").trim() : "";
-  const checkLabel = getCheckLabel(item);
+  const assignment = assignNewsCharacter(item);
+  const character = assignment ? NEWS_CHARACTERS[assignment.key] : null;
+  const note = assignment ? newsCharacterNote(assignment.key) : null;
+  const now = Date.now();
 
   const [allNews, media] = await Promise.all([
     getHatsuneNews({ limit: 80, category: "all" }),
@@ -139,7 +150,8 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
     .map((candidate) => ({ ...candidate, _score: relatedScore(item, candidate) }))
     .filter((candidate) => candidate._score > 0)
     .sort((a, b) => b._score - a._score || new Date(b.published_at) - new Date(a.published_at))
-    .slice(0, 3);
+    .slice(0, 5)
+    .map((candidate) => toNewsListItem(candidate));
 
   const baseText = words(item);
   const isWomen = /女子|ヴィーナス|オールレディース|レディース/.test(baseText);
@@ -148,33 +160,28 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
     .slice(0, 2);
 
   return (
-    <main className={styles.page}>
-      <div className={styles.topLinks}>
-        <Link href="/news">← NEWS一覧</Link>
-        <Link href="/">BoatStrikers TOP</Link>
-      </div>
+    <main className={theme.theme}><div className={theme.shell}>
+      <header className={theme.band}>
+        <Link href="/news" className={theme.logo}><b>BoatStrikers</b><span>NEWS</span></Link>
+        <div className={theme.bandMeta}><Link href="/news" className={styles.bandBack}>ニュース一覧 ›</Link></div>
+      </header>
+      <nav className={styles.crumb} aria-label="パンくずリスト">
+        <Link href="/news">NEWS</Link><span>›</span>
+        {bucket === "all" ? <span>{label}</span> : <Link href={newsListHref({ category: bucket })}>{label}</Link>}
+      </nav>
 
       <article className={styles.article}>
-        <div className={styles.tags}>
-          {bucket === "all" ? <span className={styles.tag}>{label}</span> : <Link href={`/news?category=${bucket}`} className={styles.tag}>{label}</Link>}
-          {item.source_type === "bs_data" && <span className={styles.bsTag}>BS DATA</span>}
+        <div className={styles.kicker}>
+          {bucket === "all" ? <span className={`${theme.chip} ${categoryClass(bucket)}`}>{label}</span> : <Link href={newsListHref({ category: bucket })} className={`${theme.chip} ${categoryClass(bucket)}`}>{label}</Link>}
+          {isBsDataNews(item) && <span className={theme.bsMark}>BS DATA</span>}
+          <time dateTime={item.published_at || undefined}>{formatHatsuneNewsDate(item.published_at)}</time>
+          {item.place && <span>{item.place}</span>}
+          {item.source_name && <span>出典：{item.source_name}</span>}
         </div>
 
         <h1>{cleanNewsHeadline(item.title)}</h1>
 
-        <div className={styles.meta}>
-          {item.place && <span>{item.place}</span>}
-          <span>{formatHatsuneNewsDate(item.published_at)}</span>
-          {item.source_name && <span>{item.source_name}</span>}
-        </div>
-
-        {summary && (
-          <section className={styles.summaryLead}>
-            <span>NEWS SUMMARY</span>
-            <h2>この記事の要約</h2>
-            <p>{summary}</p>
-          </section>
-        )}
+        {summary && <div className={styles.lead}><span>要約</span><p>{summary}</p></div>}
 
         {item.image_url && (
           <figure className={styles.articlePhoto}>
@@ -183,59 +190,53 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
           </figure>
         )}
 
-        {articleBody && (
-          <section className={styles.articleBody}>
-            <span>BOATSTRIKERS EDIT</span>
-            <h2>ニュースを詳しく</h2>
-            <div className={styles.bodyContent}>{renderArticleBody(articleBody)}</div>
-          </section>
-        )}
+        {articleBody && <div className={styles.bodyContent}>{renderArticleBody(articleBody)}</div>}
 
         {!summary && !articleBody && (
-          <section className={styles.summaryPending}>
-            <span>NEWS SUMMARY</span>
-            <p>このニュースは現在、公開情報をもとに要約を整理しています。</p>
-          </section>
+          <p className={styles.summaryPending}>このニュースは現在、公開情報をもとに要約を整理しています。</p>
         )}
 
-        <section className={styles.checkBox}>
-          <span>{checkLabel}</span>
-          <strong>次にチェックしたい情報</strong>
-          <p>{item.place ? `${item.place}の開催・出走表、続報、展示・直前情報もBoatStrikers内で続けて確認できます。` : "このニュースの続報や次走情報、展示・直前情報もBoatStrikers NEWSで続けて確認できます。"}</p>
-        </section>
-
         {item.source_url && (
-          <section className={styles.sourceBox}>
-            <div>
-              <span>SOURCE</span>
-              <h2>{item.source_name || "出典・関連情報"}</h2>
-              <p>詳しい内容は出典元で確認できます。</p>
-            </div>
+          <div className={styles.sourceBox}>
+            <div><small>SOURCE</small><b>{item.source_name || "出典・関連情報"}</b><span>詳しい内容は出典元で確認できます。</span></div>
             <a href={item.source_url} target="_blank" rel="noopener noreferrer">元記事を見る ↗</a>
-          </section>
+          </div>
         )}
 
         <p className={styles.notice}>BoatStrikers NEWSは公開情報をもとに要点を整理しています。出典元の記事本文は転載していません。</p>
       </article>
 
-      {relatedNews.length > 0 && (
-        <section className={relatedStyles.relatedSection}>
-          <div className={relatedStyles.heading}><h2>関連記事</h2><span>このニュースに近い記事</span></div>
-          <div className={relatedStyles.newsList}>
-            {relatedNews.map((news) => (
-              <Link key={news.id} href={`/news/${news.id}`} className={relatedStyles.newsRow}>
-                <time>{shortDate(news.published_at)}</time>
-                <strong>{newsHeadline(news)}</strong>
-                <span>›</span>
-              </Link>
-            ))}
+      {character ? (
+        <aside className={`${styles.guide} ${styles[`guide_${character.key}`]}`} aria-label="編集部の案内">
+          <NewsCharacterBust character={character.key} />
+          <div className={styles.guideMain}>
+            <div className={styles.guideHead}><span className={theme.guideLabel}>{note.label}</span><b>{character.name}</b><small>{character.role} 担当</small></div>
+            <p>{note.text}</p>
+            <div className={styles.guideLinks}>
+              <Link href={newsListHref({ character: character.key })}>{character.name}担当のニュース ›</Link>
+              <Link href="/races">今日の出走表 ›</Link>
+            </div>
+            <p className={styles.guideReason}>担当の理由：{describeNewsCharacterReason(assignment)}</p>
           </div>
+        </aside>
+      ) : (
+        <aside className={styles.nextBox} aria-label="次にチェックしたい情報">
+          <b>次にチェックしたい情報</b>
+          <p>{item.place ? `${item.place}の開催・出走表、続報、展示・直前情報もBoatStrikers内で続けて確認できます。` : "このニュースの続報や次走情報、展示・直前情報もBoatStrikers NEWSで続けて確認できます。"}</p>
+        </aside>
+      )}
+
+      {relatedNews.length > 0 && (
+        <section className={styles.related}>
+          <div className={theme.listHead}><h2>関連記事</h2><span>同じ場・同じカテゴリー</span></div>
+          <div className={theme.list}>{relatedNews.map((news) => <NewsHeadlineRow key={news.id} item={news} now={now} timeMode="date" showNew={false} />)}</div>
+          {bucket !== "all" && <Link href={newsListHref({ category: bucket })} className={styles.moreLink}>{label}の記事をもっと見る ›</Link>}
         </section>
       )}
 
       {relatedMedia.length > 0 && (
         <section className={relatedStyles.relatedSection}>
-          <div className={relatedStyles.heading}><h2>関連動画</h2><span>公式YouTube</span></div>
+          <div className={theme.listHead}><h2>関連動画</h2><span>公式YouTube</span></div>
           <div className={relatedStyles.mediaGrid}>
             {relatedMedia.map((video) => (
               <Link key={video.id} href={`/news/media/${video.videoId}`} className={relatedStyles.mediaCard}>
@@ -251,19 +252,12 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
         </section>
       )}
 
-      {item.place && (
-        <section className={relatedStyles.relatedSection}>
-          <Link href="/races" className={relatedStyles.raceLink}>
-            <div><span>RACE INFORMATION</span><strong>{item.place}の開催・出走表をチェック</strong></div>
-            <b>出走表へ →</b>
-          </Link>
-        </section>
-      )}
+      <Link href="/races" className={theme.raceCta}><span>RACE</span><b>{item.place ? `${item.place}の開催・出走表をチェック` : "今日の出走表・AI予想を見る"}</b><i>›</i></Link>
 
       <div className={styles.bottomLinks}>
-        <Link href="/news">ニュース一覧へ戻る</Link>
-        <Link href="/races">今日の出走表へ</Link>
+        <Link href="/news">‹ ニュース一覧へ</Link>
+        <Link href="/races">今日の出走表へ ›</Link>
       </div>
-    </main>
+    </div></main>
   );
 }

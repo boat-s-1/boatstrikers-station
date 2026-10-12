@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { normalizeNewsTab } from "../../../../lib/newsTaxonomy";
+import { newsDayKey, normalizeNewsCharacter, normalizeNewsTab } from "../../../../lib/newsTaxonomy";
 import { getNewsListing, parseNewsPage } from "../../../news/newsQueries";
 
 export const dynamic = "force-dynamic";
@@ -8,11 +8,13 @@ export const dynamic = "force-dynamic";
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const category = normalizeNewsTab(searchParams.get("category"));
+  const character = normalizeNewsCharacter(searchParams.get("character"));
   const q = String(searchParams.get("q") || "").slice(0, 200);
   const page = parseNewsPage(searchParams.get("page"));
-  const listing = await getNewsListing({ category, q, page });
+  const listing = await getNewsListing({ category, character, q, page });
+  const last = listing.items[listing.items.length - 1];
   return NextResponse.json(
-    { items: listing.items, page: listing.page, totalPages: listing.totalPages, hasMore: listing.hasMore, total: listing.total },
+    { items: listing.items, page: listing.page, totalPages: listing.totalPages, hasMore: listing.hasMore, total: listing.total, lastDayKey: last ? newsDayKey(last.publishedAt) : "" },
     { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } },
   );
 }

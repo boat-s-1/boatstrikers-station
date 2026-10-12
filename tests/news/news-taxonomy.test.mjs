@@ -71,3 +71,82 @@ test('short dates use Japan time regardless of server time zone', () => {
   assert.equal(formatNewsShortDate('2026-10-11T16:30:00Z'), '10/12');
   assert.equal(formatNewsShortDate(null), '');
 });
+
+import {
+  isWomenNews, isBsDataNews, matchesNewsTab, assignNewsCharacter, describeNewsCharacterReason,
+  newsCharacterNote, normalizeNewsCharacter, toNewsIndexEntry, toNewsListItem, newsDayLabel, NEWS_TABS,
+} from '../../lib/newsTaxonomy.js';
+
+const BOILER_SUMMARY = '日刊スポーツで掲載された女子ボートレース関連ニュースです。初音NEWSでは元記事の内容を転載せず、確認できる事実をもとに注目ポイントを初音の視点で整理します。';
+const BOILER_BODY = '開催地に関する今回の情報は、女子戦をチェックするうえで見逃せない材料のひとつです。女子ボートレースを追ううえで押さえておきたいニュースです。';
+
+test('tab keys stay URL compatible and BS DATA keeps the bs key', () => {
+  assert.deepEqual(NEWS_TABS.map((t) => t.key), ['all', 'result', 'women', 'grade', 'focus', 'racer', 'bs', 'media']);
+  assert.equal(NEWS_TABS.find((t) => t.key === 'bs').label, 'BS DATA');
+});
+
+test('category=women is always women news', () => {
+  assert.equal(isWomenNews({ category: 'women', title: '岡本亜子が３着で初の舟券絡み' }), true);
+});
+
+test('clear women keywords in headline or non-boilerplate text count', () => {
+  assert.equal(isWomenNews({ category: 'topic', title: '三国ヴィーナスシリーズ第11戦が開幕' }), true);
+  assert.equal(isWomenNews({ category: 'result', title: '徳山9R 9Rの結果を更新', summary: '徳山9Rで、女子戦のレース結果が確定しました。' }), true);
+});
+
+test('collector boilerplate alone does not make an article women news', () => {
+  assert.equal(isWomenNews({ category: 'win', title: '四宮与寛が逃げ切って今年２度目Ｖ／戸田', summary: BOILER_SUMMARY, article_body: BOILER_BODY }), false);
+});
+
+test('BS DATA is decided by source_type only', () => {
+  assert.equal(isBsDataNews({ source_type: 'bs_data' }), true);
+  assert.equal(isBsDataNews({ source_type: 'news', source_name: 'BoatStrikers レースDB' }), false);
+});
+
+test('tab matching: women and bs cut across display categories', () => {
+  const entry = toNewsIndexEntry({ id: 1, category: 'result', source_type: 'bs_data', title: '徳山9R 9Rの結果を更新', summary: '女子戦のレース結果が確定しました。' });
+  assert.equal(entry.bucket, 'result');
+  for (const tab of ['all', 'result', 'women', 'bs']) assert.equal(matchesNewsTab(entry, tab), true, tab);
+  for (const tab of ['grade', 'focus', 'racer']) assert.equal(matchesNewsTab(entry, tab), false, tab);
+});
+
+test('characters are only assigned when the article matches', () => {
+  assert.equal(assignNewsCharacter({ title: '宮地元輝が圧巻の初日DR1周2Mで豪快ツケマイの逆転勝ち／下関ミッド' }), null);
+  assert.equal(assignNewsCharacter({ title: '優勝戦１枠は白神優 通算17度目Ｖへ／戸田' }).key, 'ichika');
+  assert.equal(assignNewsCharacter({ title: '10月11日結果｜万舟27本・最高147,880円' }).key, 'kiina');
+  assert.equal(assignNewsCharacter({ title: '四宮与寛が逃げ切って今年２度目Ｖ', summary: BOILER_SUMMARY, article_body: BOILER_BODY }).key, 'ichika');
+});
+
+test('multiple matches follow the documented priority and explain why', () => {
+  const a = assignNewsCharacter({ title: '女子戦で万舟、インから逃げ切り' });
+  assert.equal(a.key, 'hatsune');
+  assert.deepEqual(a.others.map((m) => m.key), ['kiina', 'ichika']);
+  const reason = describeNewsCharacterReason(a);
+  assert.match(reason, /初音が担当/);
+  assert.match(reason, /キイナ/);
+  assert.match(reason, /優先順位（初音→キイナ→一果）/);
+  assert.equal(describeNewsCharacterReason(null), '');
+});
+
+test('character note is a fixed guide now, and can switch to a per-article comment later', () => {
+  assert.deepEqual(newsCharacterNote('ichika'), { kind: 'guide', label: '編集部の案内', text: '1枠・イン戦に関するニュースは、ここからまとめて読めます。' });
+  assert.equal(newsCharacterNote('kiina', { text: 'テスト' }).kind, 'comment');
+  assert.equal(newsCharacterNote('nobody'), null);
+  assert.equal(normalizeNewsCharacter('hatsune'), 'hatsune');
+  assert.equal(normalizeNewsCharacter('<script>'), '');
+});
+
+test('list items reuse index classification so counts and lists agree', () => {
+  const row = { id: 9, category: 'topic', title: '見出し', summary: '要約' };
+  const entry = { id: 9, bucket: 'women', character: 'hatsune', characterReason: '本文に「女子」を含むため初音が担当' };
+  const item = toNewsListItem(row, entry);
+  assert.equal(item.bucket, 'women');
+  assert.equal(item.character, 'hatsune');
+});
+
+test('date separators label today and yesterday in Japan time', () => {
+  const now = Date.parse('2026-10-12T05:30:00Z');
+  assert.equal(newsDayLabel('2026-10-12T05:00:00Z', now), '今日 10月12日(月)');
+  assert.equal(newsDayLabel('2026-10-11T13:00:00Z', now), '昨日 10月11日(日)');
+  assert.equal(newsDayLabel('2026-10-10T13:00:00Z', now), '10月10日(土)');
+});
