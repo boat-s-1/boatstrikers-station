@@ -12,7 +12,7 @@
 .article { border-top: 1px solid #eee7f2; padding-top: 18px; }
 .tags { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
 .tag,.bsTag { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; }
-.tag { color: #6f319d; background: #f3e8fb; }
+.tag { color: #6f319d; background: #f3e8fb; text-decoration: none; }
 .bsTag { color: #fff; background: #23172c; }
 .article h1 { margin: 10px 0 9px; color: #32194e; font-size: clamp(26px,5.8vw,40px); line-height: 1.38; }
 .meta { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; color: #918794; font-size: 12px; }

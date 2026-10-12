@@ -5,9 +5,9 @@ import relatedStyles from "./related.module.css";
 import {
   getHatsuneNewsById,
   getHatsuneNews,
-  HATSUNE_NEWS_LABELS,
   formatHatsuneNewsDate,
 } from "../../hatsune/newsData";
+import { classifyNewsBucket, cleanNewsHeadline, newsBucketLabel, newsHeadline } from "../../../lib/newsTaxonomy";
 import { getOfficialYoutubeUpdates } from "../media/mediaData";
 
 export const dynamic = "force-dynamic";
@@ -122,7 +122,9 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
   const item = await getHatsuneNewsById(id);
   if (!item) notFound();
 
-  const label = HATSUNE_NEWS_LABELS[item.category] || HATSUNE_NEWS_LABELS.topic;
+  // 一覧と同じ表示カテゴリーを使う（DB の category は変更しない）。
+  const bucket = classifyNewsBucket(item);
+  const label = newsBucketLabel(bucket);
   const summary = cleanSummary(item);
   const articleBody = !isGenericCopy(item.article_body) ? String(item.article_body || "").trim() : "";
   const checkLabel = getCheckLabel(item);
@@ -154,11 +156,11 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
 
       <article className={styles.article}>
         <div className={styles.tags}>
-          <span className={styles.tag}>{label}</span>
+          {bucket === "all" ? <span className={styles.tag}>{label}</span> : <Link href={`/news?category=${bucket}`} className={styles.tag}>{label}</Link>}
           {item.source_type === "bs_data" && <span className={styles.bsTag}>BS DATA</span>}
         </div>
 
-        <h1>{item.title}</h1>
+        <h1>{cleanNewsHeadline(item.title)}</h1>
 
         <div className={styles.meta}>
           {item.place && <span>{item.place}</span>}
@@ -223,7 +225,7 @@ export default async function BoatStrikersNewsDetailPage({ params }) {
             {relatedNews.map((news) => (
               <Link key={news.id} href={`/news/${news.id}`} className={relatedStyles.newsRow}>
                 <time>{shortDate(news.published_at)}</time>
-                <strong>{news.list_headline || news.title}</strong>
+                <strong>{newsHeadline(news)}</strong>
                 <span>›</span>
               </Link>
             ))}
