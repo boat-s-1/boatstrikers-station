@@ -1,0 +1,57 @@
+/* NEWS 新旧比較 Preview（管理者限定）。既存の NEWS 画面のスタイルとは独立。 */
+.page { max-width: 1180px; margin: 0 auto; padding: 56px 16px 80px; color: #14243b; background: #fff; font-size: 14px; line-height: 1.6; }
+.page a { color: #0b4f8a; }
+.badge { display: inline-block; margin: 0 0 8px; padding: 2px 8px; font-size: 11px; font-weight: 900; letter-spacing: .06em; color: #fff; background: #8a1f1f; border-radius: 3px; }
+.title { margin: 4px 0 8px; font-size: 20px; line-height: 1.4; }
+.lead, .meta, .note { color: #5f6f82; font-size: 13px; }
+.error { color: #a33a2f; font-weight: 700; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 6px; }
+.filter, .filterOn { padding: 5px 10px; border: 1px solid #c9d3e0; border-radius: 999px; text-decoration: none; font-weight: 700; }
+.filterOn { background: #071b35; color: #fff !important; border-color: #071b35; }
+.filter small, .filterOn small { margin-left: 4px; font-weight: 400; }
+.table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 13px; }
+.table th, .table td { border-bottom: 1px solid #e3e8ef; padding: 6px 6px; text-align: left; vertical-align: top; }
+.table th { background: #f4f7fb; font-size: 12px; }
+.nowrap { white-space: nowrap; }
+.source { display: block; color: #7d8a99; font-size: 11px; }
+.issues { color: #8a5a00; font-size: 12px; }
+.tone_ok, .tone_warn, .tone_muted { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 12px; font-weight: 900; white-space: nowrap; }
+.tone_ok { background: #e3f4ea; color: #1d6b40; }
+.tone_warn { background: #fff1d6; color: #8a5a00; }
+.tone_muted { background: #eef2f6; color: #4b5d70; }
+.okText { color: #1d6b40; font-weight: 700; }
+.ngText { color: #a33a2f; font-weight: 700; }
+.mutedText { color: #7d8a99; }
+.pager { display: flex; justify-content: space-between; margin: 8px 0 16px; }
+.legend div { display: flex; gap: 8px; font-size: 12px; color: #5f6f82; }
+.legend dt { font-weight: 900; min-width: 4em; }
+.legend dd { margin: 0; }
+.verdict { display: flex; gap: 10px; align-items: center; margin: 8px 0 14px; font-size: 13px; color: #5f6f82; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { border: 1px solid #e3e8ef; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; min-width: 0; }
+.panel h2 { margin: 0 0 8px; font-size: 15px; }
+.panel h3 { margin: 12px 0 4px; font-size: 13px; color: #071b35; }
+.panel h3 small { margin-left: 6px; font-weight: 400; color: #7d8a99; }
+.body, .bodySmall { white-space: pre-wrap; overflow-wrap: anywhere; color: #3d4b5c; }
+.bodySmall { font-size: 12px; max-height: 220px; overflow: auto; }
+.issueLine { margin: 0 0 6px; color: #8a5a00; font-size: 12px; font-weight: 700; }
+.leadText { margin: 0 0 6px; font-weight: 700; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows li { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #e3e8ef; }
+.rows b { flex: none; min-width: 6.5em; color: #4b5d70; font-size: 12px; }
+.empty { color: #7d8a99; font-size: 12px; margin: 2px 0; }
+.view { margin: 0; padding: 8px 10px; background: #fffbef; border: 1px dashed #d9c48e; border-radius: 6px; }
+.view b { margin-right: 8px; color: #8a6a14; }
+.qualityList { margin: 0; padding-left: 18px; }
+.qError { color: #a33a2f; }
+.qWarn { color: #8a5a00; }
+.options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.option { border: 1px solid #e3e8ef; border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.option h3 { margin-top: 0; }
+.mock { border-top: 1px solid #e3e8ef; padding-top: 6px; }
+.mockHead { margin: 0 0 4px; font-weight: 700; }
+.mockList { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 6px 0; border-bottom: 1px solid #e3e8ef; }
+@media (max-width: 860px) {
+  .compare, .options { grid-template-columns: 1fr; }
+  .table { display: block; overflow-x: auto; }
+}

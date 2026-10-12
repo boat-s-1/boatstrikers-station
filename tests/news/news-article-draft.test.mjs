@@ -193,7 +193,7 @@ test("レースデータの取得は読み取り（select）だけを使う", as
   const calls = [];
   const chain = (table) => {
     const q = {};
-    for (const method of ["select", "eq", "gte", "lte", "limit", "in", "order"]) {
+    for (const method of ["select", "eq", "gte", "lte", "limit", "in", "order", "range"]) {
       q[method] = (...args) => {
         calls.push(`${table}.${method}`);
         return q;
@@ -205,7 +205,7 @@ test("レースデータの取得は読み取り（select）だけを使う", as
   const fake = { from: (table) => chain(table) };
   for (const forbidden of ["insert", "update", "upsert", "delete", "rpc"]) fake[forbidden] = () => assert.fail(`${forbidden} が呼ばれた`);
   const data = await loadNewsRaceData(fake, { courseCode: 10, from: "2026-10-03", to: "2026-10-09", digestDate: "2026-10-09" });
-  assert.deepEqual(Object.keys(data), ["entries", "races", "grades", "digests"]);
-  assert.ok(calls.every((c) => /\.(select|eq|gte|lte|limit|in|order)$/.test(c)));
+  assert.deepEqual(Object.keys(data), ["entries", "races", "grades", "digests", "dailyEvents", "meta"]);
+  assert.ok(calls.every((c) => /\.(select|eq|gte|lte|limit|in|order|range)$/.test(c)));
   assert.ok(calls.some((c) => c.startsWith("bs_race_entries.select")));
 });
