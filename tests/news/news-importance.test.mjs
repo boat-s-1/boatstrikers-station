@@ -172,7 +172,7 @@ test('event list counts match the ?event= listing', () => {
 test('past results and goals are not counted as finals or milestones', () => {
   assert.equal(type(news('【ボートレース】「ターン回りは悪くない」香川陽太が前節優出２着の相棒に及第点／びわこ [17:57]')), 'talk');
   assert.equal(type(news('【ボートレース】甲斐貴大が２、３着で舟券貢献「回り足が良さそう」と初勝利目指す／児島 [19:00]')), 'talk');
-  assert.equal(type(news('【ボートレース】地元で初優出を目指す常盤海心「合えばポテンシャルはあると思う」／鳴門 [19:00]')), 'final', 'a goal is a preview, not a milestone');
+  assert.equal(type(news('【ボートレース】地元で初優出を目指す常盤海心「合えばポテンシャルはあると思う」／鳴門 [19:00]')), 'qualifying', 'a goal is not a confirmed final or milestone');
   assert.equal(type(news('【ボートレース】鳥本智史がデビュー112走目で初勝利、9R後に華々しく水神祭／びわこ [22:00]')), 'milestone');
 });
 
@@ -202,4 +202,37 @@ test('same URL with different headlines is not merged (id465 / id326)', () => {
     news('SGチャレンジカップ盛り上げ企画 松本日向コラム12日スタート／常滑ボート [18:19]', { id: 326, source_url: url }),
   ]);
   assert.equal(groups.length, 2);
+});
+
+test('confirmed finals are separated from qualifying talk (G1 三国 real headlines)', () => {
+  const g1 = (title, summary = '') => scoreNewsImportance(news(title, { summary }));
+  const confirmed = [
+    g1('【ボートレース】「でもいかないとね…」中野次郎は優勝戦も攻めに徹する／三国G1 [20:40]', '三国G1の準優勝戦10Rで、中野次郎が3カドからコンマ05のトップスタートを決め、インの末永和也をまくり切った。'),
+    g1('【ボートレース】毒島誠が王道Ｖで賞金ランク浮上決める「インから逃げるには問題ない足」三国G1 [20:45]', '三国G1で毒島誠が準優を唯一逃げ切り、優勝戦1枠を確保した。'),
+  ];
+  const qualifying = [
+    g1('【ボートレース】上昇ムード漂わせる中野次郎が準優でも攻撃力発揮する／三国G1 [19:00]', '3日目から好気配をにじませる中野次郎（45＝東京）が、予選最後の12Rでも足の良さを見せつけた。'),
+    g1('【ボートレース】「優出を狙います」上條暢嵩が準優勝負駆け決めた勢いで優出狙う／三国G1 [19:00]', '上條暢嵩（32＝大阪）が、予選最後を2、1着で締めて得点率19位タイからの厳しい勝負駆けを成功させた。'),
+    g1('【ボートレース】権藤俊光が準優に向けて手応え「変わらず行き足は良かった」／三国G1 [19:00]'),
+  ];
+  for (const c of confirmed) assert.equal(c.type, 'final');
+  for (const q of qualifying) assert.equal(q.type, 'qualifying');
+  assert.ok(Math.min(...confirmed.map((c) => c.score)) > Math.max(...qualifying.map((q) => q.score)) + 15);
+  assert.equal(type(news('低勝率モーターを仕上げた三浦永理が準優1枠を確保/江戸川・GⅢオールレディース')), 'qualifying');
+  assert.notEqual(type(news('【ボートレース】向井美鈴が連続優出中の56号機ゲット、選手間では早くも評判／尼崎 [19:00]')), 'final', 'a motor record is not a final');
+  assert.equal(type(news('【ボートレース】「気持ち良く決まった」小原聡将が準優で鮮やかにまくり差し優出／児島 [18:16]')), 'final');
+  assert.equal(type(news('【ボートレース】予選１位通過の中亮太が準優完勝「明日（優勝戦）にしたかったですね」／多摩川', { summary: '予選1位で迎えた準優12Rを中亮太がインから完勝した。' })), 'final');
+});
+
+test('grade from article text only when the same venue is named with the grade', () => {
+  const edogawa = scoreNewsImportance(news('魚谷香織、岩崎芳美がパワフルな足を披露／江戸川', { summary: '江戸川・GⅢオールレディースの前検で、魚谷香織と岩崎芳美が好気配を見せた。' }));
+  assert.equal(edogawa.grade, 'G2G3');
+  assert.match(edogawa.gradeSource, /本文/);
+  const mikuni = scoreNewsImportance(news('【ボートレース】百戦錬磨の毒島誠が逃げ切りＶ 賞金ランクは９位に浮上／三国', { summary: '12R優勝戦は毒島誠が逃げ切って優勝した。三国周年は5大会ぶり2度目。' }));
+  assert.equal(mikuni.grade, 'G1');
+  // 他場の大会への言及では推測しない（野中一平の記事は津の一般戦）
+  const tsu = scoreNewsImportance(news('【ボートレース】野中一平がイン速攻でＶ「記念を取りたいしSGも取りたい」／津3Days [19:40]', { summary: '野中一平がイン逃げで今年初優勝。来年1月に三国で行われるプレミアムG1「第8回ボートレースバトルチャンピオントーナメント（BBCT）」の優先出場…' }));
+  assert.equal(tsu.grade, null);
+  // 定型文しかない記事は推測しない
+  assert.equal(scoreNewsImportance(news('【ボートレース】魚谷香織が７年ぶりＶ「本当にエンジンに助けられました」／江戸川 - ボート : 日刊スポーツ', { summary: BOILER })).grade, null);
 });

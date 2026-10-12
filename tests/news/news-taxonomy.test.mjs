@@ -151,3 +151,8 @@ test('date separators label today and yesterday in Japan time', () => {
   assert.equal(newsDayLabel('2026-10-11T13:00:00Z', now), '昨日 10月11日(日)');
   assert.equal(newsDayLabel('2026-10-10T13:00:00Z', now), '10月10日(土)');
 });
+
+test('SG/G1 inside a quoted comment does not make the SG・G1 category', () => {
+  assert.notEqual(classifyNewsBucket({ category: 'result', title: '【ボートレース】野中一平がイン速攻でＶ「記念を取りたいしSGも取りたい」／津3Days [19:40]' }), 'grade');
+  assert.equal(classifyNewsBucket({ category: 'grade', title: '【ボートレース】百戦錬磨の毒島誠が逃げ切りＶ 賞金ランクは９位に浮上／三国G1 [19:19]' }), 'grade');
+});
