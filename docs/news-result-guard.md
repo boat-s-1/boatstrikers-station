@@ -145,3 +145,96 @@
 - `lib/hatsuneNewsCollector.js`（結果記事の候補作成部分のみ）
 - `tests/news/race-result-guard.test.mjs`（新規）
 - `docs/news-result-guard.md`（本書）
+
+---
+
+# 追補（マージ前の最終確認：2026-10-13 18時台 JST）
+
+## 6. ガードの最終検証（実データ・読み取りのみ）
+
+| 確認項目 | 方法 | 結果 |
+|---|---|---|
+| 本番の権限・RLS で新しいクエリが実行できるか | 結果記事の収集処理は `SUPABASE_SERVICE_ROLE_KEY`（service_role）で動く。読み取り専用トランザクションで `set local role service_role` とし、追加した4つの読み取り（bs_race_events・bs_race_results・bs_race_entries・hatsune_news の `source_key like 'bs:result:日付:%'`）を実行 | 4表とも SELECT 権限あり。service_role は RLS をバイパスする（rolbypassrls=true）。10/13 で events 24・results 24・entries 72・既存結果記事1件を取得できた |
+| 確定状態・着順・3連単・払戻の照合が正しいか | 10/6〜10/12 の全1,068レースを、各日 24:00 時点の判定で再生 | 1,063件を許可、5件を不可。不可5件の内訳：10/8 鳴門5R（返還艇ありで3連単なし）、10/9 鳴門11R・児島6R/8R/10R（確定結果の行に3連単が入っていない不完全なデータ）。どれもデータが不足・矛盾しているため生成しないのが正しい扱い |
+| 過去の確定レースで正常に生成できるか | 上と同じ。加えて、既存の結果記事55件を作成時刻で再判定 | 締切後に作られた9件は、9件とも作成時刻の判定で許可。締切前に作られた46件は、46件とも不可 |
+| 締切から10分以上たっても確定結果が無ければ生成しないか | 10/13 17:02 の実データで、締切から10分以上たって確定結果の行が無いレースを抽出 | 2件（丸亀4R・若松4R。どちらも result_available=true で3連単なし）。2件とも不可 |
+| DBエラー時に生成しないか | 実データを返す偽のクライアントで、bs_race_results・hatsune_news の読み取りを失敗させて収集処理を実行 | どちらの場合も結果記事は0件。他の候補（高モーター2件）は通常どおり作られた |
+| 既存 NEWS の他の収集処理に影響がないか | main の収集処理と新しい収集処理に、10/13・10/14 の同じ実データ（出走792・レース132・確定結果105）を与えて比較 | 結果記事以外の候補は完全に一致（`bs:motor:2026-10-13:13`・`:20`） |
+| 旧処理との差 | 同じ実データで `result_available` を全レース true にした状態（14:30 に観測した状態）を再現 | 旧処理は、締切前の若松12Rについて「結果が確定」という記事候補を作った。新処理は確定済みの尼崎5R・若松6Rだけを作り、既存の徳山5R（id 1848）は重複として除外した |
+
+補足：18:22 JST の時点では、10/13 の132レースすべてが `result_available = false` だった（終了済みのレースも含む）。このフラグは同期のたびに全レース一括で true にも false にもなり、どちらの値も信用できない（8章）。新しい処理はこのフラグを使わないため、この影響を受けない。
+
+テスト：`tests/news/race-result-guard.test.mjs`（10件）、`tests/news/news-result-correction.test.mjs`（4件）、既存の NEWS テストを合わせて54件すべて成功。
+
+## 7. 既存46件の訂正案（B案・未適用）
+
+- 訂正案：`docs/news-result-corrections.json`（訂正前・訂正後・照合根拠を機械可読で記録）と `docs/news-result-corrections.md`（46件の訂正前後の差分）。生成は `lib/newsResultCorrection.js`。
+- 46件すべてで確定値との照合に成功した（確定状態、3連単と払戻、1〜3着、記事と source_key の対応）。803・889 は決まり手が未登録のため、その行を省いた。46件とも出走6名がすべて女子選手（gender_code=2）であることを確認したため、「女子選手のレース」と明記した。
+- 訂正後の内容：
+  - 見出し（title）と公開日時（published_at）は変更しない。
+  - 要約は「1着の艇・選手、3連単、払戻」に置き換える。
+  - 本文の先頭に「【訂正】訂正日時」と訂正理由（公開時点で締切前だったのに『結果が確定』と掲載していた）を入れ、1〜3着（コース・ST）、決まり手、3連単・払戻、出典（BoatStrikers レースDB）を載せる。
+  - `article_body_source` を `manual` にする（`lib/hatsuneNewsAi.js` は manual の本文を AI で再生成しないため、訂正が上書きされない）。
+- 監査用の保全（案・未実施）：訂正の前に、訂正前の内容を別テーブルに残す。
+
+```sql
+-- 案（未適用）。適用には承認が必要。
+create table public.hatsune_news_corrections (
+  id bigserial primary key,
+  news_id bigint not null references public.hatsune_news(id),
+  corrected_at timestamptz not null default now(),
+  reason text not null,
+  before jsonb not null,      -- title, list_headline, summary, article_body, article_body_source, article_ai_model, updated_at
+  after jsonb not null,       -- summary, article_body, article_body_source
+  evidence jsonb not null,    -- race_date, course_code, race_no, trifecta, payout, top3 など照合根拠
+  applied_by text not null
+);
+alter table public.hatsune_news_corrections enable row level security; -- ポリシーなし（service_role のみ）
+```
+
+- 適用の手順（案）：
+  1. 適用直前に、もう一度 DB の確定値で訂正案を作り直し、JSON と差分が無いことを確認する。
+  2. 1件ずつトランザクションで、訂正前の内容を保全してから `summary`・`article_body`・`article_body_source` だけを更新する（`published_at`・`title`・`is_published` は変更しない）。
+  3. 本文の「［訂正日時：適用時に記入］」は、適用時刻に置き換える。
+  4. 元に戻すときは、保全した `before` から復元する。
+- 注意：DB トリガー `trg_hatsune_news_article_body` は空の本文だけを補うため、訂正本文は上書きされない。
+
+## 8. 外部同期処理：result_available を全レースに設定している処理
+
+### 特定できたこと
+
+- 書き込み元は、このリポジトリの外にある Python の同期処理。Supabase の API ログ上の User-Agent は `python-requests/2.34.2`。
+  - 送信先：`POST /rest/v1/bs_race_events?on_conflict=race_date,course_code,race_no`
+  - 頻度：およそ5分ごと（1時間に10〜12回）、JST 8時台〜24時台。
+- `pg_stat_statements` を見ると、この upsert は `api_synced_at, closing_time, course_code, course_name, distance, is_fixed_entry, opening_date, program_available, race_date, race_day_no, race_kind_code, race_no, result_available` を送っている。競合時には `result_available = EXCLUDED.result_available` で上書きしていて、合計約7,500回呼ばれている。
+- 出走表（番組）の同期が、毎回 `result_available` を含めて送っているため、その時点の値で全レースが一括で true にも false にもなる（14:30 は全件 true、18:22 は全件 false）。
+- 別に、DB関数 `bs_apply_openapi_results`（23:27 の結果反映）にも同じ型の問題がある。確定結果テーブル（bs_race_results）には「3連単か1着艇があるレース」だけを書くのに、bs_race_events には受け取った全レースに無条件で `result_available = true` を設定している。
+- 確定結果テーブル（bs_race_results）の行は、結果が入ったレースにしか作られない。そのため確定判定の根拠として信頼できる（6章の検証結果と一致）。
+
+### 修正箇所の特定方法
+
+1. Python 同期のリポジトリ・サーバーで、`on_conflict=race_date,course_code,race_no` と `"result_available"` を含むコードを検索する（このセッションで見えるリポジトリ11件には該当なし）。
+2. 実行環境（cron・GitHub Actions・常駐サーバー）を、5分間隔・JST 8〜24時台・`python-requests/2.34.2` で突き合わせる。
+3. Supabase の API ログ（edge_logs）で、上記の POST の送信元 IP・時刻を確認する。
+4. DB 側で、`bs_race_events` に一時的な監査トリガーを入れて `result_available` を変えた接続（application_name・ロール・時刻）を記録する方法もある。DB の変更になるため、承認後に限る。
+
+### 安全な修正案（どれも未実施・要承認）
+
+1. 番組の同期（Python）：upsert の送信項目から `result_available` を外す。番組データからは結果の有無が分からないため、この項目を書かない。最小で安全な修正。
+2. 結果反映（`bs_apply_openapi_results`）：`result_available = true` を、3連単と払戻（または1着艇）がある行だけに限定する（例：`result_available = e.result_available or (p.trifecta_result is not null and p.trifecta_payout is not null)`）。
+3. 判定の一本化：`result_available` を「bs_race_results に確定行があり、締切を過ぎている」から導くビュー・生成列に置き換え、利用側をそちらへ移す。中期の対応。
+4. 修正後の確認：締切前のレースで `result_available` が false のままであること、確定後に true になることを、1日分の時系列で監視する。
+
+## 9. 影響を受ける機能（優先順位）
+
+| 優先 | 機能 | 現状の影響 | 対応案 |
+|---|---|---|---|
+| 1 | NEWS 結果記事 | 締切前の「結果確定」記事を公開（46件）。このブランチで防止 | このブランチのマージ。既存46件は7章の訂正案 |
+| 2 | 中止検知（`lib/officialRaceCancellationSync.js`） | true のレースを確認対象から外し、更新も false の行に限る。全件 true の時間帯は、中止・順延を記録できない | 同期の修正（8章1・2）。暫定として、判定に bs_race_results の有無を使う |
+| 3 | TRINITY（DB関数 `trinity_shadow_guard`） | false でなければ、締切前でも予測の保存を拒否する。全件 true の時間帯は予測が残らない | 同期の修正。暫定として、関数の判定を「確定結果の行がある」に変える（DB変更のため要承認） |
+| 4 | 予想用オッズの記録（`elimination-odds-snapshots`） | false のレースだけを記録する。10/13 は0件（10/12 は15件）。全件 false の時間帯は終了済みのレースも対象に入るが、締切前の時間条件で除外される | 同期の修正。暫定として、条件を「締切前で確定結果なし」に変える |
+| 5 | レース画面（`lib/boatstrikersPlatform.js`、`app/races/[courseCode]/[raceNo]/page.js`、トップのレース帯） | true なら「結果」扱いにして、締切前のレースを「結果確定」として表示したり、今後のレースから外したりし得る。全件 false の時間帯は、確定結果テーブル・着順で補われる | 同期の修正。暫定として、`racesIndexLight.js` と同じく確定結果テーブルを根拠にする |
+| 6 | X投稿・NEWS候補（`lib/newsCandidateVerifier.js`、`lib/xNightCandidateSnapshot.js`） | 締切後かつ true なら「確定」とする。締切直後・結果前に確定扱いになり得る。夜間の実行なら影響は小さい | 確定結果テーブルを条件に加える |
+| 7 | 結果集計・DATA LAB | 日次まとめの「全件 true」という前提条件が働いていない（実害は確認されていない）。DATA LAB は翌朝の実行で、影響は小さい | 同期の修正後に確認 |
+
+これらの修正（同期処理・DB関数・各機能）は、どれもこのブランチに含めていない。
