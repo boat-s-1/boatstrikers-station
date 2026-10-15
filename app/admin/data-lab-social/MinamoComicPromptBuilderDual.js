@@ -146,7 +146,7 @@ export default function MinamoComicPromptBuilderDual({ payload, newsItems = [] }
       ? `\n【選択した4コマ候補】\nタイトル：${selectedCandidate.title}\n要約：${selectedCandidate.lead}\n主役候補：${selectedCandidate.recommendedCharacters.map((c) => CHARACTER_LABELS[c] || c).join(" → ")}\n演出方針：${selectedCandidate.comicAngle}\n使用事実：\n${selectedCandidate.facts.map((f) => `・${f.label}：${f.value}`).join("\n")}\n`
       : "";
 
-    const factData = `日付：${date}\n開催：${clean(s["開催"] || s["開催数"])}\n万舟：${clean(s["万舟"])}\n万舟率：${clean(s["万舟率"])}\n1号艇1着：${clean(s["1号艇1着"] || s["1号艇1着数"])}\n5号艇1着：${clean(s["5号艇1着"] || s["5号艇1着数"])}\n逃げ：${clean(s["逃げ"])}\n最高配当：${topText(payload)}\n万舟が多かった場TOP5：\n${rankingLines(payload)}\n事故・異常者：${payload?.incident_races==null?"集計確認中":`${payload.incident_races}R`}\n優勝戦・DR：${clean(payload?.featured_races)}R`;
+    const factData = `日付：${date}\n開催：${clean(s["開催"] || s["開催数"])}\n万舟：${clean(s["万舟"])}\n万舟率：${clean(s["万舟率"])}\n1号艇1着：${clean(s["1号艇1着"] || s["1号艇1着数"])}\n5号艇1着：${clean(s["5号艇1着"] || s["5号艇1着数"])}\n逃げ：${s["逃げ"] ? s["逃げ"] : payload?.character_details?.ichika?.technique_status === "incomplete" ? "集計確認中" : clean(s["逃げ"])}\n最高配当：${topText(payload)}\n万舟が多かった場TOP5：\n${rankingLines(payload)}\n事故・異常者：${payload?.incident_races==null?"集計確認中":`${payload.incident_races}R`}\n優勝戦・DR：${clean(payload?.featured_races)}R`;
 
     const outputFormat = layout === "comic_single"
       ? `【出力形式】\n1. タイトル\n2. 採用テーマと理由\n3. 使用した事実データ一覧（使っていない場合は「実データ使用なし」）\n4. 【1枚4コマ版】\n   ■1コマ目〜■4コマ目：役割 / 場面 / 登場キャラ / セリフ / 表示文字・事実 / 表情・ポーズ・演出\n5. 【1枚4コマ版の画像生成プロンプト】\n6. X投稿文\n7. ファクトチェック`
