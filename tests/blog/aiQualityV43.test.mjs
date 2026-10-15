@@ -135,7 +135,7 @@ test('DATA CHECK: items that repeat other items are reported; distinct items are
 });
 
 test('plan and prompt blog-ai-v6: each featured reading told once, in the body or by the partner in the dialogue', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v11', 'PHASE 4.9 keeps the blog-ai-v6 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v12', 'PHASE 5.0 keeps the blog-ai-v6 rules checked here');
   const tokoname = articlePlan(v6Pack());
   assert.deepEqual(tokoname.placements, { 'half:1': 'body', 'except:2:高': 'body', 'pair:4>3': 'dialogue' });
   assert.deepEqual(tokoname.dialogueFocus, { kind: 'reading', key: 'pair:4>3', text: '4コースの1着率（10.0%）は3コース（8.5%）より高い' });
@@ -152,7 +152,8 @@ test('plan and prompt blog-ai-v6: each featured reading told once, in the body o
   assert.deepEqual(input.readings.map(r => [r.id, r.place]), [['R1', 'reference'], ['R2', 'body'], ['R3', 'reference'], ['R4', 'body'], ['R5', 'dialogue'], ['R6', 'reference']]);
   // 初音 as the partner (no outer course above an inner one): a beginner's question. PHASE 4.9: about the reading the
   // lead hints at (told in the dialogue only), no longer the 号艇/course difference the body and DATA CHECK explain.
-  const kiryu = buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: kiryuNow });
+  // A version 4 pack (PHASE 5.0 builds version 5; its plans are tested in aiQualityV50.test.mjs).
+  const kiryu = { ...buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: kiryuNow }), version: 4 };
   const plan = articlePlan(kiryu);
   assert.equal(plan.partner, 'hatsune'); assert.deepEqual(plan.dialogueFocus, { kind: 'question', key: 'except:3:高', text: '3コースの1着率（13.4%）は1コース以外で最も高い' });
   assert.deepEqual(plan.placements, { 'half:1': 'body', 'except:3:高': 'dialogue', 'near:2:3': 'body' });

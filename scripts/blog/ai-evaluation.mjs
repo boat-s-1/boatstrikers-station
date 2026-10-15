@@ -14,6 +14,7 @@ import { v7Pack, v7Document } from "../../tests/blog/_tokonameV7.mjs";
 import { v8Pack, v8Document, generationValidation as v8Generation } from "../../tests/blog/_tokonameV8.mjs";
 import { v9Pack, v9Document } from "../../tests/blog/_tokonameV9.mjs";
 import { todaPack, todaDocument, todaGenerationValidation } from "../../tests/blog/_todaV10.mjs";
+import { todaV11Pack, todaV11Document, todaV11GenerationValidation } from "../../tests/blog/_todaV11.mjs";
 
 // generation: the notes recorded when the draft was made, where the fixture keeps them (null: not copied).
 export const ARTICLES = [
@@ -25,6 +26,7 @@ export const ARTICLES = [
   { name: "常滑 v9", prompt: "blog-ai-v9", document: v9Document, pack: v9Pack, generation: [
     { code: "auto_cited", level: "warning" }, { code: "auto_cited", level: "warning" }, { code: "comparison_draft", level: "blocking" }] },
   { name: "戸田 v10", prompt: "blog-ai-v10", document: todaDocument, pack: todaPack, generation: todaGenerationValidation },
+  { name: "戸田 v11", prompt: "blog-ai-v11", document: todaV11Document, pack: todaV11Pack, generation: todaV11GenerationValidation },
 ];
 
 const textOf = b => b.type === "DIALOGUE_SCENE" ? (b.data.turns || []).map(t => t.text).join("") : b.type === "LIST" ? (b.data.items || []).join("") : b.type === "TABLE" ? "" : b.data?.text ?? "";

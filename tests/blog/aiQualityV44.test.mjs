@@ -137,7 +137,7 @@ test('v7 structure: the lead, the 号艇/course explanation, DATA CHECK reasons 
 });
 
 test('prompt blog-ai-v7: lead, glossary, DATA CHECK reasons, findings in the summary, title and lead framing', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v11', 'PHASE 4.9 keeps the blog-ai-v7 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v12', 'PHASE 5.0 keeps the blog-ai-v7 rules checked here');
   assert.ok(ARTICLE_SCHEMA.required.includes('lead'));
   const pack = v7Pack();
   const plan = articlePlan(pack);
@@ -160,7 +160,8 @@ test('prompt blog-ai-v7: lead, glossary, DATA CHECK reasons, findings in the sum
   // The glossary and DATA CHECK wording bring no figure into an article.
   for (const text of [...GLOSSARY.map(g => g.text), ...input.data_check_purposes]) assert.deepEqual(claimsIn(text), [], text);
   // New packs are version 4 (blog-ai-v8, PHASE 4.5); answers without a lead (earlier prompts) still compose.
-  assert.equal(buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date() }).version, 4);
+  // PHASE 5.0: new packs are version 5.
+  assert.equal(buildSourcePack({ topic: v3Topic, documents: [kiryuPageRow], now: () => new Date() }).version, 5);
   const old = ideal(); delete old.lead;
   assert.ok(!compose(old).document.blocks.some(b => b.data.placement === 'lead'));
 });

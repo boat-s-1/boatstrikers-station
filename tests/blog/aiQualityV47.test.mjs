@@ -15,6 +15,7 @@ import { PROMPT_VERSION } from '../../lib/blog/ai/config.mjs';
 import { scorecard } from '../../lib/blog/ai/scorecard.mjs';
 import { articlePlan } from '../../lib/blog/ai/articlePlan.mjs';
 import { buildSourcePack } from '../../lib/blog/ai/sourcePack.mjs';
+import { courseReadings } from '../../lib/blog/ai/dataReadings.mjs';
 import { candidateTopics, angleBase } from '../../lib/blog/ai/topics.mjs';
 import { DATA_CHECK_PURPOSES, RATE_WARNING, dataCheckLine } from '../../lib/blog/ai/glossary.mjs';
 
@@ -32,9 +33,12 @@ const compose = (ai, pack) => composeDocument({ ai, pack, topic: { ...v4Topic, .
 // A stadium's pack from the repository dataset (lib/stadiumBasicGuide24.js): the official pages of Toda, Tamagawa and
 // Hamanako could not be fetched for this test (the session's network policy refused www.boatrace.jp), so the plans
 // below rest on the copy in the repository. On the day, the fetched page decides the readings.
+// PHASE 5.0: packs are built as version 5 now; these tests keep the version 4 plans of PHASE 4.7 (version 5 plans are
+// tested in aiQualityV50.test.mjs).
 const repositoryPack = (stadiumSlug, categorySlug, angle) => {
   const topic = candidateTopics({ categorySlug, stadiumSlug }).find(x => x.angle === angle);
-  return buildSourcePack({ topic, documents: [], now: () => new Date('2026-10-12T00:00:00Z') });
+  const pack = { ...buildSourcePack({ topic, documents: [], now: () => new Date('2026-10-12T00:00:00Z') }), version: 4 };
+  return { ...pack, readings: courseReadings(pack.facts) };
 };
 const EXPL = '出走表の号艇はレースごとの艇の番号で、コースはスタートのときに実際に入った位置です。この表は進入したコースで数えていて、コース別1着率は、そのコースから進入した艇が1着になった割合です。';
 
@@ -71,7 +75,7 @@ test('repeated sentences: the period is set aside before comparing, real repeats
 });
 
 test('prompt blog-ai-v10: periods with their numbers, no period-only sentence, basics placed by theme', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v11', 'PHASE 4.9 keeps the blog-ai-v10 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v12', 'PHASE 5.0 keeps the blog-ai-v10 rules checked here');
   const course = buildInstructions(packFor('stadium-basics', 'course', 'ichika'));
   assert.match(course, /「今回の集計期間は〜です」のような期間だけの文は書かず、期間は数値の文に添えます/);
   assert.match(course, /その期間の数値を最初に書く文に期間を添えます.*期間の違う数値を同じ文で混ぜません/);
