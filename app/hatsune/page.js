@@ -1,3 +1,4 @@
+import ResponsiblePlayNotice from "../components/ResponsiblePlayNotice";
 import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
@@ -96,7 +97,7 @@ export default async function HatsunePage() {
   return (
     <main className="page hatsunePage">
       <header className="header"><div className="logo">BOAT<br /><span>STRIKERS</span></div><a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a></header>
-      <section className="hero"><Image src="/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB.png" alt="初音" width={1536} height={864} className="heroImage" priority /></section>
+      <section className="hero"><Image src="/8A7A7A27-B954-4A3F-9DC3-52DB3DCE80AB-copy-v2.png" alt="初音の女子戦データ分析" width={1672} height={941} className="heroImage" priority /></section>
 
       <RealtimeUpdates target="hatsune" limit={5} />
 
@@ -107,7 +108,7 @@ export default async function HatsunePage() {
       </section>
 
       <section className="sectionCard purpleCard bannerTopCard">
-        <img src="/top/IMG_7960.jpeg?v=20260904-0315" alt="初音の研究書棚" className="homeTitleImage" />
+        <img src="/top/IMG_7960-copy-v2.png" alt="初音の研究書棚" className="homeTitleImage" />
         <p style={{ margin: "0 0 12px", color: "#746b83", fontSize: 12, lineHeight: 1.7 }}>女子戦の見方や研究記事を、横にスワイプして選べます。</p>
         <CharacterReadingSlider items={articles.map((item) => ({ ...item, kind: "研究", external: true, meta: "女子戦ラボ" })).slice(0, 6)} character="hatsune" emptyText="初音ラボの記事はまだありません。" />
       </section>
@@ -123,7 +124,7 @@ export default async function HatsunePage() {
       </section>
 
       <section className="sectionCard purpleCard"><div className="sectionTitleRow"><img src="/top/IMG_7954.jpeg?v=20260904-0315" alt="初音ラジオ" className="homeTitleImage" /></div><p className="radioLead">初音が女子戦の流れやデータの見方をやさしく解説♪ 一果・キイナとの掛け合いも配信中！</p><a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="purpleBtn fullBtn">🎙 ラジオ一覧を見る</a></section>
-      <section className="sectionCard lineBannerCard"><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink"><img src="/90F7EE0F-5EE8-4E71-BF86-D254BB00750D.png" alt="公式LINE登録" className="lineBannerImage" /></a></section>
+      <section className="sectionCard lineBannerCard"><ResponsiblePlayNotice variant="registration" tone="hatsune" /><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink"><img src="/90F7EE0F-5EE8-4E71-BF86-D254BB00750D-copy-v2.png" alt="公式LINE登録" className="lineBannerImage" /></a></section>
 
       <section className="sectionCard purpleCard">
         <h1>初音の女子戦研究室</h1>

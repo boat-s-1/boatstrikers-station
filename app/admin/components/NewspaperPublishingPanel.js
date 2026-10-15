@@ -1,5 +1,7 @@
 "use client";
 
+import EditorialCopyReview from "./EditorialCopyReview";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -160,6 +162,7 @@ export default function NewspaperPublishingPanel({ character, value }) {
         <textarea rows={4} value={effective.summary || ""} onChange={(e) => setAiResult((prev) => ({ ...prev, summary: e.target.value }))} />
       </div>}
     </section>
+    <EditorialCopyReview fields={{ summary: effective.summary, articleBody: effective.articleBody, noteTitle: effective.noteTitle, noteBody: effective.noteBody, xPost: generated.xPost, shortsScript: generated.shortsScript }} />
     <div className={styles.outputs}>
       <article><header><b>サイト記事</b><button onClick={() => copy(effective.articleBody, "site")}>{copied === "site" ? "コピー済み" : "コピー"}</button></header><strong>{generated.title}</strong><textarea readOnly={!aiResult} value={effective.articleBody} onChange={(e) => aiResult && setAiResult((prev) => ({ ...prev, articleBody: e.target.value }))} rows={16} /></article>
       <article><header><b>note記事</b><button onClick={() => copy(`${effective.noteTitle}\n\n${effective.noteBody}`, "note")}>{copied === "note" ? "コピー済み" : "コピー"}</button></header><strong>{effective.noteTitle}</strong><textarea readOnly={!aiResult} value={effective.noteBody} onChange={(e) => aiResult && setAiResult((prev) => ({ ...prev, noteBody: e.target.value }))} rows={12} /></article>

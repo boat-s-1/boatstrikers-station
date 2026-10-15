@@ -17,8 +17,8 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const title = `${stadium.name}競艇場の特徴・水面・風・コース傾向｜BoatStrikers`;
-  const description = `${stadium.name}競艇場の特徴を初心者向けに解説。1コース・イン逃げ、コース別傾向、風や水面、進入・展示で確認したいポイントをBoatStrikersの場別データとあわせて紹介します。`;
+  const title = `ボートレース${stadium.name}の特徴・水面・風・コース傾向｜BoatStrikers`;
+  const description = `ボートレース${stadium.name}の特徴を初心者向けに解説。1コース・イン逃げ、コース別傾向、風や水面、進入・展示で確認したいポイントをBoatStrikersの場別データとあわせて紹介します。`;
   const canonical = `/library/stadium/${stadium.slug}`;
 
   return {
@@ -58,7 +58,7 @@ export default async function StadiumGuideLayout({ children, params }) {
       {
         '@type': 'ListItem',
         position: 3,
-        name: `${stadium.name}競艇場`,
+        name: `ボートレース${stadium.name}`,
         item: `${BASE_URL}/library/stadium/${stadium.slug}`,
       },
     ],

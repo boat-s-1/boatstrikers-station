@@ -10,6 +10,7 @@ import "./racer-related-bottom-polish.css";
 import "./racer-hero-silhouette.css";
 import "./racer-favorite.css";
 import Script from "next/script";
+import PublicResponsibleFooter from "./components/PublicResponsibleFooter";
 import PublicBottomNav from "./PublicBottomNav";
 import PublicSiteHeader from "./PublicSiteHeader";
 import CharacterAiRoomPanel from "./components/CharacterAiRoomPanel";
@@ -77,6 +78,7 @@ export default function RootLayout({ children }) {
         <RacerRelatedBottomPolish />
         <RacerHeroSilhouette />
         <RacerFavoriteButton />
+        <PublicResponsibleFooter />
         <PublicBottomNav />
         <GoogleAnalytics gaId="G-DXF6FFZ574" />
       </body>

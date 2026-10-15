@@ -22,7 +22,7 @@ export default function BscLessonList({ lessons }) {
           >
             <span>{isCleared ? "✅ CLEAR" : `Mission ${lesson.id}`}</span>
             <h3>{lesson.title}</h3>
-            <p>クリア報酬：🏅{lesson.badge}</p>
+            <p>クリア報酬：🏅{lesson.badge === "競艇入門" ? "ボートレース入門" : lesson.badge}</p>
             <b>{isCleared ? "復習する ›" : "挑戦する ›"}</b>
           </a>
         );

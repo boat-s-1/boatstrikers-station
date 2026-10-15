@@ -5,12 +5,12 @@ import styles from './shimonosekiSeo.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: '下関競艇場の特徴・水面・風・コース傾向｜BoatStrikers',
-  description: '下関競艇場の特徴を初心者向けに解説。海水面、風や潮位の見方、イン逃げ・コース別傾向、展示で確認したいポイントをBoatStrikersのデータブックとあわせて紹介します。',
+  title: 'ボートレース下関の特徴・水面・風・コース傾向｜BoatStrikers',
+  description: 'ボートレース下関の特徴を初心者向けに解説。海水面、風や潮位の見方、イン逃げ・コース別傾向、展示で確認したいポイントをBoatStrikersのデータブックとあわせて紹介します。',
   alternates: { canonical: '/library/stadium/shimonoseki' },
   openGraph: {
-    title: '下関競艇場の特徴・水面・風・コース傾向｜BoatStrikers',
-    description: '下関競艇場の水面・風・潮位・コース傾向を、データと初心者向け解説で確認できます。',
+    title: 'ボートレース下関の特徴・水面・風・コース傾向｜BoatStrikers',
+    description: 'ボートレース下関の水面・風・潮位・コース傾向を、データと初心者向け解説で確認できます。',
     url: '/library/stadium/shimonoseki',
     type: 'article',
   },
@@ -36,13 +36,13 @@ export default async function ShimonosekiStadiumPage({ searchParams }) {
 
       <section className={styles.seoWrap} aria-labelledby="shimonoseki-guide-title">
         <div className={styles.eyebrow}>SHIMONOSEKI BOAT RACE GUIDE</div>
-        <h2 id="shimonoseki-guide-title">下関競艇場の特徴・水面・風・コース傾向</h2>
+        <h2 id="shimonoseki-guide-title">ボートレース下関の特徴・水面・風・コース傾向</h2>
         <p className={styles.lead}>
-          下関競艇場を初めて見る方に向けて、水面・風・潮位・進入・コース別の見方を整理します。
+          ボートレース下関を初めて見る方に向けて、水面・風・潮位・進入・コース別の見方を整理します。
           上のDATA BOOKで数値を確認し、この解説で「どこを見るか」をつかむ使い方がおすすめです。
         </p>
 
-        <nav className={styles.toc} aria-label="下関競艇場攻略の目次">
+        <nav className={styles.toc} aria-label="ボートレース下関攻略の目次">
           <strong>このページで分かること</strong>
           <a href="#shimonoseki-water">水面の特徴</a>
           <a href="#shimonoseki-inside">イン・1コースの見方</a>

@@ -1,3 +1,4 @@
+import ResponsiblePlayNotice from "../components/ResponsiblePlayNotice";
 import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
@@ -220,7 +221,7 @@ export default async function IchikaPage() {
       </header>
 
       <section className="hero">
-        <Image src="/7562660D-EB9C-4981-A1D1-789E6211DACA.png" alt="一果" width={1536} height={2048} className="heroImage" priority />
+        <Image src="/7562660D-EB9C-4981-A1D1-789E6211DACA-copy-v2.png" alt="一果のイン逃げ予想・分析" width={1681} height={935} className="heroImage" priority />
       </section>
 
       <section className="sectionCard pinkCard">
@@ -275,13 +276,13 @@ export default async function IchikaPage() {
 
       <section className="sectionCard pinkCard">
         <div className="sectionTitleRow"><img src="/IMG_6133.jpeg" alt="一果ラジオ" className="homeTitleImage" /></div>
-        <p className="radioLead">一果・初音・キイナがお届けする競艇ラジオ♪ イン飛び研究や女子戦考察、穴党反省会を配信中！</p>
+        <p className="radioLead">一果・初音・キイナがお届けするボートレースラジオ♪ イン飛び研究や女子戦考察、穴党反省会を配信中！</p>
         <a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="pinkBtn fullBtn">🎙 ラジオ一覧を見る</a>
       </section>
 
       <section className="sectionCard lineBannerCard">
-        <a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink">
-          <img src="/1946131E-2FFC-48F9-B850-AB6164F6220C.png" alt="公式LINE登録" className="lineBannerImage" />
+        <ResponsiblePlayNotice variant="registration" tone="ichika" /><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink">
+          <img src="/1946131E-2FFC-48F9-B850-AB6164F6220C-copy-v2.png" alt="公式LINE登録" className="lineBannerImage" />
         </a>
       </section>
     <BlogReadingBridge character="ichika"/>

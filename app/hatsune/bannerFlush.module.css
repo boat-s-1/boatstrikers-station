@@ -15,12 +15,12 @@
   border-radius: 22px 22px 0 0;
 }
 
-.shell :global(.sectionCard:has(.sectionTitleRow img[src*="IMG_7960.jpeg"])),
+.shell :global(.sectionCard:has(.sectionTitleRow img[src*="IMG_7960-copy-v2.png"])),
 .shell :global(.sectionCard:has(.sectionTitleRow img[src*="IMG_7954.jpeg"])) {
   overflow: hidden;
 }
 
-.shell :global(.sectionTitleRow:has(img[src*="IMG_7960.jpeg"])),
+.shell :global(.sectionTitleRow:has(img[src*="IMG_7960-copy-v2.png"])),
 .shell :global(.sectionTitleRow:has(img[src*="IMG_7954.jpeg"])) {
   width: calc(100% + 36px);
   max-width: none;
@@ -28,7 +28,7 @@
   display: block;
 }
 
-.shell :global(.sectionTitleRow img[src*="IMG_7960.jpeg"]),
+.shell :global(.sectionTitleRow img[src*="IMG_7960-copy-v2.png"]),
 .shell :global(.sectionTitleRow img[src*="IMG_7954.jpeg"]) {
   display: block;
   width: 100% !important;

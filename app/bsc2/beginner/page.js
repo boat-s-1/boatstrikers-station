@@ -6,7 +6,7 @@ const chapters = [
   {
     id: "chapter1-lesson1",
     title: "Chapter 1",
-    subtitle: "競艇入門編",
+    subtitle: "ボートレース入門編",
     href: "/bsc2/play/chapter1",
     top: "78%",
     left: "43%",
