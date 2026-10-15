@@ -6,7 +6,8 @@ import { buildCharacterDetailsFrom, buildOutputs } from '../lib/dataLabSocialGen
 
 const confirmed = (course_code, race_no, winning_technique, extra = {}) => ({ course_code, race_no, winning_technique, winning_method: winning_technique, result_status: 'confirmed', race_status: 'finished', ...extra });
 const event = (course_code, race_no, extra = {}) => ({ course_code, course_name: `場${course_code}`, race_no, race_name: null, race_kind_code: '0001', trifecta: '123', trifecta_payout: 1000, result_available: true, race_cancel_code: null, ...extra });
-const entries = (course_code, race_no, order = [1, 2, 3, 4, 5, 6], extra = {}) => order.map((arrival_order, i) => ({ course_code, race_no, boat_no: i + 1, racer_name: `選手${i + 1}`, arrival_order, result_code: null, gender_code: '1', ...extra }));
+// 本番と同じく、完走艇の result_code は "01"〜"06"（同期済みの状態）
+const entries = (course_code, race_no, order = [1, 2, 3, 4, 5, 6], extra = {}) => order.map((arrival_order, i) => ({ course_code, race_no, boat_no: i + 1, racer_name: `選手${i + 1}`, arrival_order, result_code: arrival_order ? `0${arrival_order}` : null, gender_code: '1', ...extra }));
 
 test('six official technique labels are recognised and nothing else', () => {
   assert.deepEqual(WINNING_TECHNIQUES, ['逃げ', '差し', 'まくり', 'まくり差し', '抜き', '恵まれ']);
@@ -87,7 +88,7 @@ test('DATA LAB recounts escapes from confirmed techniques instead of the stored 
   assert.equal(details.ichika.escape_success_count, 2);
   assert.equal(details.ichika.escape_failure_count, 1);
   assert.equal(details.ichika.escape_rate, 66.7);
-  const out = buildOutputs(digest, details);
+  const out = buildOutputs(digest, details, { status: 'complete', race_count: 0, races: [] });
   assert.match(out.x_post_text, /🏁逃げ 2R（66\.7%）/);
   assert.match(out.short_script, /逃げ決着は2レース/);
   assert.deepEqual(out.image_payload.stats.find((x) => x.label === '逃げ'), { label: '逃げ', value: '2R (66.7%)' });
@@ -104,7 +105,7 @@ test('DATA LAB omits escape figures when a technique is missing', () => {
   assert.deepEqual(details.ichika.strong_venues, []);
   assert.equal(details.hatsune.women_escape_count, null);
   assert.match(details.ichika.comment, /見送り/);
-  const out = buildOutputs(digest, details);
+  const out = buildOutputs(digest, details, { status: 'complete', race_count: 0, races: [] });
   assert.doesNotMatch(out.x_post_text, /逃げ/);
   assert.doesNotMatch(out.short_script, /逃げ決着/);
   assert.equal(out.image_payload.stats.some((x) => x.label === '逃げ'), false);
