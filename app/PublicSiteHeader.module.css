@@ -157,6 +157,7 @@
   transform: translateX(105%);
   visibility: hidden;
   pointer-events: none;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 90% 0, rgba(94, 203, 248, .25), transparent 26%),
     linear-gradient(180deg, #f9fdff 0%, #edf8ff 58%, #ffffff 100%);
