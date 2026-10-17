@@ -155,6 +155,8 @@
   overflow-y: auto;
   padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
   transform: translateX(105%);
+  visibility: hidden;
+  pointer-events: none;
   background:
     radial-gradient(circle at 90% 0, rgba(94, 203, 248, .25), transparent 26%),
     linear-gradient(180deg, #f9fdff 0%, #edf8ff 58%, #ffffff 100%);
@@ -165,6 +167,8 @@
 
 .drawerOpen {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .drawerTop {
