@@ -1,3 +1,4 @@
+import ResponsiblePlayNotice from "../../components/ResponsiblePlayNotice";
 import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
@@ -89,6 +90,7 @@ export default async function NewspaperDetailPage({ params }) {
         {item.summary && <p className={styles.summary}>{item.summary}</p>}
       </header>
 
+      <ResponsiblePlayNotice tone={theme.key} />
       <section className={styles.raceBridge}>
         <div className={styles.raceBridgeMain}>
           <span>RACE LINK</span>

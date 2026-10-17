@@ -1,3 +1,5 @@
+
+import EditorialCopyReview from "../../components/EditorialCopyReview";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
@@ -129,6 +131,7 @@ export default async function EditorialXPage({ searchParams }) {
                 {row.x_post_text && (
                   <div style={{ marginTop: 16, padding: 16, borderRadius: 14, background: "#f7f9fc", border: "1px solid #dce4ef" }}>
                     <strong style={{ display: "block", marginBottom: 8 }}>X投稿案</strong>
+                    <EditorialCopyReview fields={{ x_post_text: row.x_post_text }} />
                     <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.75 }}>{row.x_post_text}</div>
                     {hashtags && <div style={{ marginTop: 8, color: "#3568a8" }}>{hashtags}</div>}
                   </div>

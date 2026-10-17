@@ -3,38 +3,38 @@ import LessonClient from "./LessonClient";
 const lessons = {
   1: {
     id: 1,
-    title: "競艇ってどんな競技？",
+    title: "ボートレースってどんな競技？",
     badge: "競艇入門",
     characterName: "一果",
     characterImage: "/characters/ichika-talk.png",
     steps: [
       {
         type: "talk",
-        text: "BOAT STRIKERSへようこそ♪今日は競艇の基本を一緒に覚えよう！",
+        text: "BOAT STRIKERSへようこそ♪今日はボートレースの基本を一緒に覚えよう！",
       },
       {
         type: "talk",
-        text: "まず大事なのは、競艇は6艇で走るレースってことだよ。",
+        text: "まず大事なのは、ボートレースは6艇で走るレースってことだよ。",
       },
       {
         type: "quiz",
-        question: "競艇は基本的に何艇で走る？",
+        question: "ボートレースは基本的に何艇で走る？",
         choices: ["4艇", "6艇", "8艇"],
         answer: 1,
-        correct: "正解！競艇は6艇で走るよ✨",
-        wrong: "惜しい！競艇は6艇で走るんだよ♪",
+        correct: "正解！ボートレースは6艇で走るよ✨",
+        wrong: "惜しい！ボートレースは6艇で走るんだよ♪",
       },
       {
         type: "talk",
-        text: "次は、競艇がどこで行われるか確認してみよう！",
+        text: "次は、ボートレースがどこで行われるか確認してみよう！",
       },
       {
         type: "quiz",
-        question: "競艇はどこで行われる？",
+        question: "ボートレースはどこで行われる？",
         choices: ["水面", "芝生", "道路"],
         answer: 0,
         correct: "ピンポーン！水面を走るレースだよ🚤",
-        wrong: "惜しい！競艇は水面で行われるよ。",
+        wrong: "惜しい！ボートレースは水面で行われるよ。",
       },
       {
         type: "talk",
@@ -42,11 +42,11 @@ const lessons = {
       },
       {
         type: "quiz",
-        question: "競艇で使う乗り物は？",
+        question: "ボートレースで使う乗り物は？",
         choices: ["ボート", "自転車", "馬"],
         answer: 0,
         correct: "正解！これで基本はバッチリ♪",
-        wrong: "惜しい！競艇はボートで走る競技だよ。",
+        wrong: "惜しい！ボートレースはボートで走る競技だよ。",
       },
     ],
   },
@@ -60,7 +60,7 @@ const lessons = {
     steps: [
       {
         type: "talk",
-        text: "競艇には1号艇から6号艇まであって、それぞれ色が決まっているよ♪",
+        text: "ボートレースには1号艇から6号艇まであって、それぞれ色が決まっているよ♪",
       },
       {
         type: "talk",

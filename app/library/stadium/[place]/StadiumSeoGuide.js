@@ -48,8 +48,8 @@ export default function StadiumSeoGuide({ place }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: `${stadium.name}競艇場の特徴・水面・風・コース傾向`,
-    description: `${stadium.name}競艇場の特徴を、場別データと直前情報の見方から初心者向けに解説します。`,
+    headline: `ボートレース${stadium.name}の特徴・水面・風・コース傾向`,
+    description: `ボートレース${stadium.name}の特徴を、場別データと直前情報の見方から初心者向けに解説します。`,
     mainEntityOfPage: `https://www.boat-strike.online/library/stadium/${stadium.slug}`,
     author: { '@type': 'Organization', name: 'BoatStrikers' },
     publisher: { '@type': 'Organization', name: 'BoatStrikers' },
@@ -65,7 +65,7 @@ export default function StadiumSeoGuide({ place }) {
         場の固定イメージだけで決めず、当日の進入・スタート・展示・風などで上書きして見るのがBoatStrikersの基本です。
       </p>
 
-      <nav className={styles.toc} aria-label={`${stadium.name}競艇場攻略の目次`}>
+      <nav className={styles.toc} aria-label={`ボートレース${stadium.name}攻略の目次`}>
         <strong>このページで分かること</strong>
         <a href={`#${prefix}-data`}>場別データの見方</a>
         <a href={`#${prefix}-inside`}>イン・1コースの見方</a>

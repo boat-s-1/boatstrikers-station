@@ -1,3 +1,5 @@
+
+import EditorialCopyReview from "../components/EditorialCopyReview";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
@@ -103,6 +105,7 @@ export default async function NewsShortsPage({ searchParams }) {
             </article>)}
           </section>
 
+          <EditorialCopyReview fields={{ narration: current.narration, youtube_title: current.youtube_title, description: current.description, x_post: current.x_post }} />
           <section className={styles.outputCard}><h2>🎙️ AivisSpeech用ナレーション</h2><textarea readOnly value={current.narration || ""} rows={7}/></section>
 
           <section className={styles.segmentList}><h2>📱 画面・字幕構成</h2>{(current.segments || []).map((segment) => <article key={segment.rank}><b>NEWS {segment.rank}</b><h3>{segment.headline}</h3><p>{segment.caption}</p><small>{segment.narration}</small></article>)}</section>

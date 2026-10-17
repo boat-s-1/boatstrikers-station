@@ -1,5 +1,8 @@
 "use client";
 
+import { EDITORIAL_INSTRUCTIONS, SHORT_COPY } from "../../../lib/editorial/copyPolicy.mjs";
+import EditorialCopyReview from "../components/EditorialCopyReview";
+
 import { useMemo, useState } from "react";
 import styles from "./SocialMaterialsPanel.module.css";
 
@@ -33,7 +36,7 @@ const CHARACTER_META = {
     detail: "5アタマAIから今日の穴狙い候補を厳選。",
     verticalTitle: "キイナの朝刊",
     verticalTheme: "今日の穴狙い",
-    fallbackComment: "5号艇の一撃に期待！",
+    fallbackComment: SHORT_COPY.kiina,
     empty: "キイナの候補で「SNS使用」にチェックして「選択を保存」すると、ここに画像作成プロンプトとX投稿文が表示されます。",
   },
 };
@@ -99,7 +102,7 @@ function friendlyInternalComment(character, rankingType, percent, fallback) {
   }
 
   if (character === "kiina") {
-    return percent ? `穴期待度 ${percent}` : "高配当狙いで注目！";
+    return percent ? `穴期待度 ${percent}` : SHORT_COPY.longshot;
   }
 
   return fallback;
@@ -146,7 +149,7 @@ function buildImagePrompt(picks) {
     })
     .join("\n\n");
 
-  return `添付テンプレート画像の「1位・2位・3位」の白枠内だけを編集してください。その他のデザイン、キャラクター、背景、タイトル、ボート、色、レイアウトは一切変更しないでください。\n\n${raceLines}\n\n【文字配置】\n・各順位の既存の「1位」「2位」「3位」はそのまま残す\n・順位番号の下に「場名＋R」を大きく太字で中央揃え\n・その下に「HH:MM〆切」を少し小さく中央揃え\n・文字は白枠内に収め、はみ出さない\n・日本語文字を崩さず、読みやすさを最優先する\n・上記以外の要素は変更しない`;
+  return `${EDITORIAL_INSTRUCTIONS}\n\n添付テンプレート画像の「1位・2位・3位」の白枠内だけを編集してください。その他のデザイン、キャラクター、背景、タイトル、ボート、色、レイアウトは一切変更しないでください。\n\n${raceLines}\n\n【文字配置】\n・各順位の既存の「1位」「2位」「3位」はそのまま残す\n・順位番号の下に「場名＋R」を大きく太字で中央揃え\n・その下に「HH:MM〆切」を少し小さく中央揃え\n・文字は白枠内に収め、はみ出さない\n・日本語文字を崩さず、読みやすさを最優先する\n・上記以外の要素は変更しない`;
 }
 
 function buildVerticalImagePrompt(picks, meta, character) {
@@ -158,7 +161,7 @@ function buildVerticalImagePrompt(picks, meta, character) {
     })
     .join("\n\n");
 
-  return `添付した縦長の「${meta.verticalTitle}」テンプレート画像をそのまま使用し、「1位・2位・3位」の白い順位枠の中だけを編集してください。\n\n【最重要】\n・画像全体の縦横比、キャラクター、ボート、背景、水しぶき、タイトル「${meta.verticalTitle}」、中央の見出し「${meta.verticalTheme}」、吹き出し、色、装飾、順位デザインは一切変更しない\n・白い3つの順位枠以外には文字や要素を追加しない\n・既存の「1位」「2位」「3位」は消さず、そのまま残す\n・「AI v2」「shadow」「model」「raw」「score」などの内部用モデル名・内部指標名は画像内に表示しない\n・内部用の文字列しかない場合は、一般ユーザー向けの自然な日本語コメントに変換した文言だけを表示する\n\n${raceLines}\n\n【各順位枠の文字配置】\n・順位表示の右側の空きスペースを使う\n・1段目：「場名＋R」を最も大きく、太字で見やすく配置\n・2段目：「HH:MM〆切」を1段目より少し小さく配置\n・3段目：「一言コメント」をさらに少し小さく配置し、1〜2行以内に収める\n・コメントは短く読みやすくし、枠から絶対にはみ出さない\n・3つの枠で文字サイズ、行間、位置を統一する\n・日本語文字を崩さず、読みやすさを最優先する\n・元画像の雰囲気を維持し、画像全体を描き直さない`;
+  return `${EDITORIAL_INSTRUCTIONS}\n\n添付した縦長の「${meta.verticalTitle}」テンプレート画像をそのまま使用し、「1位・2位・3位」の白い順位枠の中だけを編集してください。\n\n【最重要】\n・画像全体の縦横比、キャラクター、ボート、背景、水しぶき、タイトル「${meta.verticalTitle}」、中央の見出し「${meta.verticalTheme}」、吹き出し、色、装飾、順位デザインは一切変更しない\n・白い3つの順位枠以外には文字や要素を追加しない\n・既存の「1位」「2位」「3位」は消さず、そのまま残す\n・「AI v2」「shadow」「model」「raw」「score」などの内部用モデル名・内部指標名は画像内に表示しない\n・内部用の文字列しかない場合は、一般ユーザー向けの自然な日本語コメントに変換した文言だけを表示する\n\n${raceLines}\n\n【各順位枠の文字配置】\n・順位表示の右側の空きスペースを使う\n・1段目：「場名＋R」を最も大きく、太字で見やすく配置\n・2段目：「HH:MM〆切」を1段目より少し小さく配置\n・3段目：「一言コメント」をさらに少し小さく配置し、1〜2行以内に収める\n・コメントは短く読みやすくし、枠から絶対にはみ出さない\n・3つの枠で文字サイズ、行間、位置を統一する\n・日本語文字を崩さず、読みやすさを最優先する\n・元画像の雰囲気を維持し、画像全体を描き直さない`;
 }
 
 function countChars(text) {
@@ -347,6 +350,7 @@ export default function SocialMaterialsPanel({ picks = [], date, timing, charact
 
   return (
     <section className={styles.panel}>
+      <EditorialCopyReview fields={{ xPost }} />
       <div className={styles.heading}>
         <div>
           <span>SNS MATERIALS</span>

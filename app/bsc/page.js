@@ -2,7 +2,7 @@ import BscStatus from "./BscStatus";
 import BscLessonList from "./BscLessonList";
 
 const lessons = [
-  { id: 1, title: "競艇ってどんな競技？", badge: "競艇入門" },
+  { id: 1, title: "ボートレースってどんな競技？", badge: "競艇入門" },
   { id: 2, title: "6艇で走るってどういうこと？", badge: "6艇理解" },
   { id: 3, title: "コースと枠番を学ぼう", badge: "コース理解" },
   { id: 4, title: "1号艇とイン逃げとは？", badge: "イン逃げ初級" },
@@ -25,8 +25,8 @@ export default function BscPage() {
       <section className="bscHero">
         <span>🎮 BSC</span>
         <h1>BOAT STRIKERS CHALLENGE</h1>
-        <p>競艇の基礎をゲーム感覚で学ぼう！</p>
-        <b>Chapter1：競艇入門編</b>
+        <p>ボートレースの基礎をゲーム感覚で学ぼう！</p>
+        <b>Chapter1：ボートレース入門編</b>
       </section>
 
       <BscStatus />

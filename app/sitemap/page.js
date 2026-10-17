@@ -40,7 +40,7 @@ const sitemapGroups = [
       { title: "全国24場攻略", description: "全国24ボートレース場の特徴や水面傾向を場ごとに紹介します。", href: "/library/stadiums" },
       { title: "一果のイン逃げ鉄板ゼミ", description: "イン逃げを見極めるための知識を学べます。", href: "/library/ichika-seminar" },
       { title: "初音の女子戦攻略マガジン", description: "女子戦を楽しむための情報をまとめています。", href: "/library/hatsune-seminar" },
-      { title: "キイナの穴党塾", description: "高配当や穴狙いの考え方を学べます。", href: "/library/kiina-seminar" },
+      { title: "キイナの穴党塾", description: "人気薄の条件や展開の見方を学べます。", href: "/library/kiina-seminar" },
       { title: "教えて！一果センセー", description: "ボートレースの基本を動画で分かりやすく解説します。", href: "/ichika-sensei" },
     ],
   },

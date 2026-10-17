@@ -16,7 +16,7 @@ export default function StadiumsDirectoryLayout({ children }) {
     itemListElement: STADIUMS.map((stadium, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      name: `${stadium.name}競艇場`,
+      name: `ボートレース${stadium.name}`,
       url: `${BASE_URL}/library/stadium/${stadium.slug}`,
     })),
   };

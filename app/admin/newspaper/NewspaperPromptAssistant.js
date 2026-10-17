@@ -1,5 +1,8 @@
 "use client";
 
+import EditorialCopyReview from "../components/EditorialCopyReview";
+import { EDITORIAL_INSTRUCTIONS, SHORT_COPY } from "../../../lib/editorial/copyPolicy.mjs";
+
 import { useEffect, useState } from "react";
 
 const COPY_INDEX_KEY = "boatstrikers:newspaper-copy-index";
@@ -126,7 +129,7 @@ function makeCopy(data) {
     kiina: [
       {
         main: anaTarget ? `穴の狙い目は${anaTarget}` : `本命以外の攻め筋をチェック`,
-        bubble: fiveRate ? `5アタマ${fiveRate}、外からの一撃も見たい！` : `人気だけで決めるのはまだ早いよ！`,
+        bubble: fiveRate ? `5アタマ${fiveRate}、${SHORT_COPY.outer}` : `人気だけで決めるのはまだ早いよ！`,
       },
       {
         main: wave ? `波乱${wave}、穴の入り口を探す` : `荒れるなら1マークが勝負どころ`,
@@ -154,7 +157,7 @@ function buildPrompt() {
   const copy = makeCopy(data);
   const fixedCopy = copy ? `\n\n【今回画像に必ず使用する可変コピー】\nメインコピー：${copy.main}\n吹き出しコメント：${copy.bubble}\n\n・上の2文をそのまま画像内に使用する。元の固定コメントが入力欄に残っていても、メインコピーと吹き出しは上記を優先する。\n・再生成時は直前と違う文章パターンを選ぶ。\n・メインコピーと吹き出しコメントを同じ内容にしない。` : "";
 
-  return `【BoatStrikers 画像作成プロンプト】\n\n対象：${data.mode}${data.edition ? ` / ${data.edition}` : ""}\n\n${detail}${fixedCopy}\n\n【画像生成ルール】\n・現在のBoatStrikers新聞／SNS画像／速報ステッカーの完成済みデザインを基準にする。\n・既存のキャラクター、背景、配色、ロゴ、装飾、フレーム、全体レイアウトは変更しない。\n・上記の入力データに該当する文字・数値・選択内容だけを正確に反映する。\n・艇番、レース場、R数、時刻、％、買い目などの数字を最優先で正確に表示する。\n・入力されていない情報を勝手に追加しない。\n・AI v2、shadow、model、raw、scoreなど内部用モデル名・内部指標名は表示しない。\n・[object Object]を絶対に表示しない。\n・日本語文字を崩さず、各枠内に収める。\n・完成画像としてそのまま公開できる品質で仕上げる。`;
+  return `${EDITORIAL_INSTRUCTIONS}\n\n【BoatStrikers 画像作成プロンプト】\n\n対象：${data.mode}${data.edition ? ` / ${data.edition}` : ""}\n\n${detail}${fixedCopy}\n\n【画像生成ルール】\n・現在のBoatStrikers新聞／SNS画像／速報ステッカーの完成済みデザインを基準にする。\n・既存のキャラクター、背景、配色、ロゴ、装飾、フレーム、全体レイアウトは変更しない。\n・上記の入力データに該当する文字・数値・選択内容だけを正確に反映する。\n・艇番、レース場、R数、時刻、％、買い目などの数字を最優先で正確に表示する。\n・入力されていない情報を勝手に追加しない。\n・AI v2、shadow、model、raw、scoreなど内部用モデル名・内部指標名は表示しない。\n・[object Object]を絶対に表示しない。\n・日本語文字を崩さず、各枠内に収める。\n・完成画像としてそのまま公開できる品質で仕上げる。`;
 }
 
 export default function NewspaperPromptAssistant() {
@@ -206,7 +209,8 @@ export default function NewspaperPromptAssistant() {
               <div><span>BOATSTRIKERS AI ASSIST</span><h2>画像作成プロンプト</h2><p>再生成するたび、メインコピーと吹き出し文も変わります。</p></div>
               <button className="newspaperPromptClose" onClick={() => setOpen(false)} type="button">×</button>
             </header>
-            <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} spellCheck={false} />
+            <EditorialCopyReview fields={{ mainCopy: prompt.match(/メインコピー：([^\n]*)/)?.[1], bubble: prompt.match(/吹き出しコメント：([^\n]*)/)?.[1] }} />
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} spellCheck={false} />
             <div className="newspaperPromptActions">
               <button className="newspaperPromptRefresh" onClick={refresh} type="button">↻ コピーも含めて再生成</button>
               <button className="newspaperPromptCopy" onClick={copy} type="button">{copied ? "✓ コピーしました" : "📋 プロンプトをコピー"}</button>
