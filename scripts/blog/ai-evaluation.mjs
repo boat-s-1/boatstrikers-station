@@ -15,6 +15,7 @@ import { v8Pack, v8Document, generationValidation as v8Generation } from "../../
 import { v9Pack, v9Document } from "../../tests/blog/_tokonameV9.mjs";
 import { todaPack, todaDocument, todaGenerationValidation } from "../../tests/blog/_todaV10.mjs";
 import { todaV11Pack, todaV11Document, todaV11GenerationValidation } from "../../tests/blog/_todaV11.mjs";
+import { todaV12Staging, kiryuV12Staging, todaV12Pack, kiryuV12Pack, todaV12Document, kiryuV12Document } from "../../tests/blog/_v12Staging.mjs";
 
 // generation: the notes recorded when the draft was made, where the fixture keeps them (null: not copied).
 export const ARTICLES = [
@@ -27,6 +28,8 @@ export const ARTICLES = [
     { code: "auto_cited", level: "warning" }, { code: "auto_cited", level: "warning" }, { code: "comparison_draft", level: "blocking" }] },
   { name: "戸田 v10", prompt: "blog-ai-v10", document: todaDocument, pack: todaPack, generation: todaGenerationValidation },
   { name: "戸田 v11", prompt: "blog-ai-v11", document: todaV11Document, pack: todaV11Pack, generation: todaV11GenerationValidation },
+  { name: "戸田 v12", prompt: "blog-ai-v12", document: todaV12Document, pack: todaV12Pack, generation: todaV12Staging.validation },
+  { name: "桐生 v12", prompt: "blog-ai-v12", document: kiryuV12Document, pack: kiryuV12Pack, generation: kiryuV12Staging.validation },
 ];
 
 const textOf = b => b.type === "DIALOGUE_SCENE" ? (b.data.turns || []).map(t => t.text).join("") : b.type === "LIST" ? (b.data.items || []).join("") : b.type === "TABLE" ? "" : b.data?.text ?? "";

@@ -134,7 +134,7 @@ test('similar titles: the same theme at another stadium is no duplicate; the sam
 });
 
 test('prompt blog-ai-v11: examples follow the stadium\'s own data; the dialogue and the DATA CHECK keep their places', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v12');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v13');
   const toda = buildInstructions(todaPack), tokoname = buildInstructions({ ...structuredClone(v6Pack), version: 4, comparison: undefined });
   // Tokoname's example is never handed to Toda.
   assert.doesNotMatch(toda, /内側から順に並んでいないところがあります/);

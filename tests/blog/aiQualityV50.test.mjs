@@ -302,8 +302,8 @@ test('plans from version 5 packs: two discoveries, each with its lesson; the dia
   assert.deepEqual(pack.readings, courseReadings(pack.facts, { extended: true }));
 });
 
-test('prompt blog-ai-v12: discoveries with their lessons, honest titles, descriptive headings, no computed gaps', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v12');
+test('prompt blog-ai-v12 rules kept in v13: discoveries with their lessons, honest titles, descriptive headings, no computed gaps', () => {
+  assert.equal(PROMPT_VERSION, 'blog-ai-v13');
   const toda = buildInstructions(todaV5Pack);
   assert.match(toda, /②発見の節：readings の「1コースの1着率（42\.8%）は6つのコースの中で最も高いが、半分には届いていない」。この節は dialogue で伝えます/);
   assert.match(toda, /③発見の節：readings の「1着率は外側のコースほど順に低い/);
@@ -314,7 +314,8 @@ test('prompt blog-ai-v12: discoveries with their lessons, honest titles, descrip
   assert.match(toda, /ちょうど50%のときはどちらも使いません/);
   assert.match(toda, /説明は必ず「この集計期間では」のように集計期間と対象（そのコースから進入した艇）に限り、これからのレースの結果・勝つ確率・原因・舟券の有利不利には広げません/);
   assert.match(toda, /この会話は数字の読み方の話なので、当日の確認項目（スタート展示など）には触れず、読み方を答えて終えます/);
-  assert.match(toda, /「一方で」は、2つが対照的なとき.*だけに使い、そうでなければ「また」でつなぐか2文に分けます/);
+  // blog-ai-v13 (PHASE 5.1) keeps the rule; the summary is no longer told to take two sentences or a fixed closing.
+  assert.match(toda, /「一方で」は、2つが対照的なとき.*だけに使います/);
   assert.match(toda, /「〜と捉えると読み違えにくくなります」のような中身のない文にしません/);
   // The category's own rules stay (the outer theme is in the stadiums category).
   assert.match(buildInstructions(tokonameOuterV5Pack), /展開予想・買い目・選手評価は書きません/);
@@ -331,7 +332,9 @@ test('prompt blog-ai-v12: discoveries with their lessons, honest titles, descrip
     const examples = [...prompt.matchAll(/例：?「([^」]{6,})」/g)].map(m => m[1]);
     for (const example of examples) assert.deepEqual(verdict(example, pack.facts), [0, 0], `${pack.stadium.name}: ${example}`);
   }
-  assert.match(toda, /話題だけを短く書き（例：「戸田のコース別1着率の見方」「1コースの数字の読み方」）/);
+  // blog-ai-v13: the takeaways name the topics of the discoveries' sections (an older pack keeps the stadium's example).
+  assert.match(toda, /この記事の発見の節で実際に扱う話題と一致させます（例：「1コースの数字の読み方」「6つのコースの並び方」）/);
+  assert.match(buildInstructions(todaPack), /話題だけを短く書き（例：「戸田のコース別1着率の見方」「1コースの数字の読み方」）/);
   // The input carries the lessons the discoveries use.
   const input = buildInput(todaV5Pack);
   const lessons = (typeof input === 'string' ? JSON.parse(input) : input).reading_lessons;

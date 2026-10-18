@@ -75,7 +75,7 @@ test('repeated sentences: the period is set aside before comparing, real repeats
 });
 
 test('prompt blog-ai-v10: periods with their numbers, no period-only sentence, basics placed by theme', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v12', 'PHASE 5.0 keeps the blog-ai-v10 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v13', 'PHASE 5.1 keeps the blog-ai-v10 rules checked here');
   const course = buildInstructions(packFor('stadium-basics', 'course', 'ichika'));
   assert.match(course, /「今回の集計期間は〜です」のような期間だけの文は書かず、期間は数値の文に添えます/);
   assert.match(course, /その期間の数値を最初に書く文に期間を添えます.*期間の違う数値を同じ文で混ぜません/);

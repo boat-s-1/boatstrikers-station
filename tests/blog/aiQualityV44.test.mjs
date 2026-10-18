@@ -137,7 +137,7 @@ test('v7 structure: the lead, the 号艇/course explanation, DATA CHECK reasons 
 });
 
 test('prompt blog-ai-v7: lead, glossary, DATA CHECK reasons, findings in the summary, title and lead framing', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v12', 'PHASE 5.0 keeps the blog-ai-v7 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v13', 'PHASE 5.1 keeps the blog-ai-v7 rules checked here');
   assert.ok(ARTICLE_SCHEMA.required.includes('lead'));
   const pack = v7Pack();
   const plan = articlePlan(pack);
