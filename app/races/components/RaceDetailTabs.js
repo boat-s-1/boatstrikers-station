@@ -1,5 +1,7 @@
 "use client";
 
+import ResponsiblePlayNotice from "../../components/ResponsiblePlayNotice";
+
 import { useMemo, useState } from "react";
 import RaceNumberNav from "./RaceNumberNav";
 import AiDashboard from "./AiDashboard";
@@ -896,7 +898,7 @@ function buildBetModes(prediction) {
   } else if (score !== null && score < 55) {
     recommendedMode = "穴狙い";
     recommendationReason =
-      "本命信頼度が低いため、別艇の1着から高配当を狙う構成です。";
+      "本命艇以外が1着になる展開を比較した参考構成です。";
   } else if (exactBets.length >= 4) {
     recommendedMode = "回収率";
     recommendationReason =
@@ -946,7 +948,7 @@ function buildBetModes(prediction) {
         title: "穴狙い",
         subtitle: "本命以外の1着",
         tickets: hole,
-        note: "本命艇が崩れた展開を想定した高配当狙いです。",
+        note: "本命艇が先手を取れない展開を想定した参考構成です。",
         accent: "#8a45b8",
         background: "#faf4ff",
         border: "#dec2f0",
@@ -3397,7 +3399,7 @@ function CorrectedExhibitionSuite({
           lineHeight: 1.7,
         }}
       >
-        展示進入、競艇場ごとの傾向、展示内容などを
+        展示進入、ボートレース場ごとの傾向、展示内容などを
         BoatStrikers独自基準で補正しています。
       </div>
     </div>
@@ -3610,6 +3612,7 @@ export default function RaceDetailTabs({
           />
         )}
 
+        {["ai", "previous", "live", "previousBets", "liveBets"].includes(activeTab) && <ResponsiblePlayNotice />}
         {activeTab === "ai" && (
           <AiDashboard
             event={event}

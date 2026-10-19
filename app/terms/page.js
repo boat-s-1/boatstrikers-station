@@ -96,6 +96,8 @@ const termsSections = [
           </span>
         </div>
 
+        <p><a href="https://www.motorboatracing-association.jp/info/included2.html" target="_blank" rel="noopener noreferrer">購入にのめり込んでしまう等の不安のある方へ（公式の相談案内）</a></p>
+
         <p>
           利用者は、開催状況、出走情報、オッズ、レース結果その他の重要な情報を、
           主催者や公式発表でも確認するものとします。

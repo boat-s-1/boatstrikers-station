@@ -36,7 +36,7 @@ export default function BSC2MenuPage() {
 
         <div className="gameHomeCatch">
           <span>🎮 DAILY CHALLENGE</span>
-          <p>一果たちと競艇を楽しく学ぼう！</p>
+          <p>一果たちとボートレースを楽しく学ぼう！</p>
         </div>
       </section>
 

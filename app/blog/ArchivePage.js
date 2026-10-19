@@ -1,3 +1,4 @@
+import { getAuthorRole } from '../../lib/blog/authorPresentation.mjs';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BlogShell from './BlogShell';
@@ -34,7 +35,7 @@ export default async function ArchivePage({kind,slug,params={}}) {
   return <BlogShell><main className={s.main}><section className={s.categories}>
     <p><Link href="/blog">BLOG</Link> / {kind==='authors'?'著者':kind==='tags'?'タグ':'カテゴリー'}</p>
     <span className={s.eyebrow}>{kind==='authors'?'FROM THE AUTHOR':'EXPLORE TOPICS'}</span><h1>{item.name}</h1><p>{description}</p>
-    {kind==='authors'?<p>{item.role}</p>:null}
+    {kind==='authors'?<p>{getAuthorRole(item)}</p>:null}
   </section><section className={s.latest} id="articles"><div className={s.sectionHeading}><h2>公開記事</h2><span>{view.filtered.length}件</span></div>
     {view.latest.length?<div className={s.articleGrid}>{view.latest.map(p=><article className={s.article} key={p.id}><div className={s.articleTop}><span>{index.categories.find(x=>x.id===p.revision.category_id)?.name}</span><time dateTime={p.first_published_at}>{new Date(p.first_published_at).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo'})}</time></div><h3><Link href={articleHref(p.slug)}>{p.revision.title}</Link></h3><p>{p.revision.excerpt}</p><Link href={articleHref(p.slug)}>記事を読む →</Link></article>)}</div>:<div className={s.empty}><p>このテーマの公開記事は、公開後にご紹介します。</p></div>}
     {view.pages>1?<nav className={s.pagination} aria-label="記事一覧のページ">{view.page>1?<Link href={`${archiveHref(kind,slug)}?page=${view.page-1}`}>← 前へ</Link>:null}<span>{view.page} / {view.pages}</span>{view.page<view.pages?<Link href={`${archiveHref(kind,slug)}?page=${view.page+1}`}>次へ →</Link>:null}</nav>:null}

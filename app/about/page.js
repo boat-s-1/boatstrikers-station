@@ -43,7 +43,7 @@ const members = [
     name: "キイナ",
     role: "5アタマ担当",
     description:
-      "5号艇が頭になる条件や高配当を狙うための考え方など、穴党向けの情報をお届けします。",
+      "5号艇が先頭に立つ条件や、人気薄が浮上する展開をデータから考えます。穴党ならではの視点をお届けします。",
     href: "/kiina",
     image: "/results/icons/kiina.jpg",
     color: "yellow",
