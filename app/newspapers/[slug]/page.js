@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
   const item = await getNewspaperCached(decodedSlug);
   if (!item) return { title: "新聞が見つかりません｜BoatStrikers" };
   return {
-    title: `${item.title}｜BoatStrikers`,
+    title: item.title,
     description: item.summary || `${item.course_name}${item.race_no}Rの予想新聞`,
     alternates: {
       canonical: `/newspapers/${encodeURIComponent(item.slug || decodedSlug)}`,
