@@ -163,7 +163,7 @@ test('accuracy: the exhibition entry as the race entry, or a past rate as today\
 });
 
 test('prompt blog-ai-v8: the caveat in the WARNING, the dialogue points at the DATA CHECK, the summary recalls in new words', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v13', 'PHASE 5.1 keeps the blog-ai-v8 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v14', 'PHASE 5.2 keeps the blog-ai-v8 rules checked here');
   const pack = v8Pack(), prompt = buildInstructions(pack);
   assert.deepEqual(JSON.parse(buildInput(pack)).warning_notes, [RATE_WARNING]);
   assert.match(prompt, /warning ブロック1つだけに書き、入力JSONの warning_notes の文をそのまま含めます/);

@@ -303,7 +303,7 @@ test('plans from version 5 packs: two discoveries, each with its lesson; the dia
 });
 
 test('prompt blog-ai-v12 rules kept in v13: discoveries with their lessons, honest titles, descriptive headings, no computed gaps', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v13');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v14');
   const toda = buildInstructions(todaV5Pack);
   assert.match(toda, /②発見の節：readings の「1コースの1着率（42\.8%）は6つのコースの中で最も高いが、半分には届いていない」。この節は dialogue で伝えます/);
   assert.match(toda, /③発見の節：readings の「1着率は外側のコースほど順に低い/);

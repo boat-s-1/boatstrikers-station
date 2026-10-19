@@ -135,7 +135,7 @@ test('DATA CHECK: items that repeat other items are reported; distinct items are
 });
 
 test('plan and prompt blog-ai-v6: each featured reading told once, in the body or by the partner in the dialogue', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v13', 'PHASE 5.1 keeps the blog-ai-v6 rules checked here');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v14', 'PHASE 5.2 keeps the blog-ai-v6 rules checked here');
   const tokoname = articlePlan(v6Pack());
   assert.deepEqual(tokoname.placements, { 'half:1': 'body', 'except:2:高': 'body', 'pair:4>3': 'dialogue' });
   assert.deepEqual(tokoname.dialogueFocus, { kind: 'reading', key: 'pair:4>3', text: '4コースの1着率（10.0%）は3コース（8.5%）より高い' });

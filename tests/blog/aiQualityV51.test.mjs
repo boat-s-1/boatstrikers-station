@@ -198,7 +198,7 @@ test('the new wordings of Kiryu v12 (version 5): "1コースから進入した�
 });
 
 test('prompt blog-ai-v13: the one asking gives figures and a question; the answer starts from the reading; summaries and takeaways fit the article', () => {
-  assert.equal(PROMPT_VERSION, 'blog-ai-v13');
+  assert.equal(PROMPT_VERSION, 'blog-ai-v14');
   const kiryu = buildInstructions(kiryuV12Pack), toda = buildInstructions(todaV12Pack);
   // The one asking: figures and a question that fits their expertise, never the reading.
   assert.match(kiryu, /初音は、気づいた数字と疑問だけを話し、一果が答える読み方や結論（「差は小さい」「ほぼ同じ」「半分以上ではない」など）を先に言いません/);
