@@ -1,3 +1,6 @@
+
+import { EDITORIAL_INSTRUCTIONS } from "../../../../../lib/editorial/copyPolicy.mjs";
+import { reviewFreeTextFields } from "../../../../../lib/editorial/reviewGeneratedCopy.mjs";
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "../../../../admin/sync/_lib/adminAuth";
 import { getAiAdminSupabase } from "../../../../../lib/aiAdminSupabase";
@@ -258,6 +261,7 @@ export async function POST(request) {
   const officialExhibition = isJustBefore ? await loadOfficialExhibitionFacts(facts) : [];
 
   const prompt = [
+    EDITORIAL_INSTRUCTIONS,
     `あなたはBoatStrikersの${profile.name}本人として、読者に語りかける一人称の記事を書きます。`,
     `役割：${profile.role}。`,
     `記事の中心：${profile.focus}。`,
@@ -356,7 +360,7 @@ export async function POST(request) {
       noteBody: plain(output.noteBody),
     };
     if (!result.articleBody || !result.noteBody) throw new Error("empty_output");
-    return NextResponse.json({ ok: true, result, length: lengthKey });
+    return NextResponse.json({ ok: true, result, length: lengthKey, copy_review: reviewFreeTextFields(result) });
   } catch (error) {
     console.error("新聞AI生成JSON解析エラー:", error);
     return NextResponse.json({ error: "AI出力の解析に失敗しました。もう一度生成してください。" }, { status: 502 });

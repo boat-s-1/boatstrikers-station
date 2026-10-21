@@ -1,3 +1,5 @@
+
+import EditorialCopyReview from "../components/EditorialCopyReview";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { generateDataLabSocialOutputs } from "../../../lib/dataLabSocialGenerator";
@@ -110,6 +112,7 @@ export default async function DataLabSocialAdmin({ searchParams }) {
                   <label>万舟が多かった場 TOP5</label>
                   <div className={styles.ranking}>{ranking.length ? ranking.map((r, i) => <div className={styles.rankRow} key={`${r.venue}-${i}`}><span>{i + 1}. {r.venue}</span><strong>{r.count}本</strong></div>) : <div className={styles.rankRow}><span>該当なし</span><strong>0本</strong></div>}</div>
                 </div>
+                <EditorialCopyReview fields={{ x_post_text: item.x_post_text, short_script: item.short_script }} />
                 <PromptBuilder payload={p} />
                 <XPostImagePromptBuilder payload={p} />
                 <div className={styles.section}><label>X投稿文</label><textarea readOnly value={item.x_post_text || ""} /></div>

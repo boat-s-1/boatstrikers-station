@@ -1,5 +1,8 @@
 "use client";
 
+import { STANDARD_HASHTAGS } from "../../../lib/editorial/copyPolicy.mjs";
+import EditorialCopyReview from "../components/EditorialCopyReview";
+
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import styles from "./shorts.module.css";
@@ -38,7 +41,7 @@ function defaultScript(date, picks) {
 
 function defaultPost(date, picks) {
   const list = picks.map((row, i) => `${i + 1}位 ${row.stadium}${row.race_no}R ${percent(row.probability)}`).join("\n");
-  return `【一果のイン逃げ予想TOP3｜${date}】\n${list}\n\n詳しい根拠は動画でチェック！\n※予想は参考情報です。舟券購入は無理のない範囲で。\n#ボートレース #BoatStrikers #競艇予想`;
+  return `【一果のイン逃げ予想TOP3｜${date}】\n${list}\n\n詳しい根拠は動画でチェック！\n※予想は参考情報です。舟券購入は無理のない範囲で。\n${STANDARD_HASHTAGS.join(" ")}`;
 }
 
 export default function ShortsEditor({ date, candidates }) {
@@ -91,6 +94,7 @@ export default function ShortsEditor({ date, candidates }) {
   return (
     <>
       <section className={styles.workflow}>
+      <EditorialCopyReview fields={{ script, post }} />
         <div className={`${styles.step} ${styles.active}`}><b>1</b><span>TOP3・台本</span></div>
         <div className={styles.line} />
         <div className={styles.step}><b>2</b><span>ナレーター音声</span></div>

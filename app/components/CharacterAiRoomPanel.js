@@ -1,5 +1,7 @@
 "use client";
 
+import ResponsiblePlayNotice from "./ResponsiblePlayNotice";
+
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -296,6 +298,7 @@ export default function CharacterAiRoomPanel() {
         </div>
       )}
 
+      <ResponsiblePlayNotice tone={character} />
       {loading ? (
         <div className={styles.loading}>AI予想を読み込み中...</div>
       ) : picks.length > 0 ? (

@@ -1,3 +1,4 @@
+import ResponsiblePlayNotice from "../components/ResponsiblePlayNotice";
 import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
 import RealtimeUpdates from "../components/RealtimeUpdates";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "キイナ｜5号艇・穴狙い・高配当レース分析",
+  title: "キイナ｜5号艇・穴狙い・ボートレース分析",
   description: "BoatStrikersキイナの専門ページ。5号艇や人気薄をオッズだけで選ばず、スタート、センターの攻め、展示、モーター、展開から穴の入口を探す見方を解説します。",
   alternates: { canonical: "/kiina" },
   openGraph: { title: "キイナ｜5号艇・穴狙い分析｜BoatStrikers", description: "5号艇や人気薄をスタート・展示・モーター・展開から比較するBoatStrikersキイナの専門ページです。", url: "/kiina", type: "website" },
@@ -93,7 +94,7 @@ export default async function KiinaPage() {
   return (
     <main className="page kiinaPage">
       <header className="header"><div className="logo">BOAT<br /><span>STRIKERS</span></div><a className="lineMini" href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer">LINE登録</a></header>
-      <section className="hero"><Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F.png" alt="キイナ" width={1536} height={864} className="heroImage" priority /></section>
+      <section className="hero"><Image src="/6D4CA65A-8CA7-403B-AF8D-C4A6581C423F-copy-v2.png" alt="キイナの5号艇・穴展開研究" width={1672} height={941} className="heroImage" priority /></section>
 
       <RealtimeUpdates target="kiina" limit={5} />
 
@@ -117,8 +118,8 @@ export default async function KiinaPage() {
         {result.hits.length > 0 ? <HitGallery hits={result.hits} /> : null}
       </section>
 
-      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}><div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_7993.jpeg?v=20260905-0810" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} /></div><p className="radioLead">キイナが高配当狙い・5アタマの考え方・穴党反省会を配信中！</p><a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="yellowBtn fullBtn">🎙 ラジオ一覧を見る</a></section>
-      <section className="sectionCard lineBannerCard"><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink"><img src="/C5AD4F38-3CAF-4C4D-9A4A-8313644E05BB.png" alt="公式LINE登録" className="lineBannerImage" /></a></section>
+      <section className="sectionCard yellowCard" style={{ overflow: "hidden" }}><div className="sectionTitleRow" style={edgeBannerRowStyle}><img src="/top/IMG_7993-copy-v2.png" alt="キイナラジオ" className="homeTitleImage" style={edgeBannerImageStyle} /></div><p className="radioLead">キイナが5アタマの展開研究・穴党反省会を配信中！</p><a href="https://www.youtube.com/@boatstrikers_official" target="_blank" rel="noopener noreferrer" className="yellowBtn fullBtn">🎙 ラジオ一覧を見る</a></section>
+      <section className="sectionCard lineBannerCard"><ResponsiblePlayNotice variant="registration" tone="kiina" /><a href="https://lin.ee/Pf3FEEQ" target="_blank" rel="noopener noreferrer" className="lineBannerLink"><img src="/C5AD4F38-3CAF-4C4D-9A4A-8313644E05BB-copy-v2.png" alt="公式LINE登録" className="lineBannerImage" /></a></section>
 
       <section className="sectionCard yellowCard">
         <h1>キイナの5アタマ・穴狙い研究室</h1>

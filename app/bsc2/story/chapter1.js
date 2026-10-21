@@ -2,7 +2,7 @@ const chapter1 = {
   id: "chapter1-lesson1",
   area: "beginner",
   title: "Chapter 1",
-  subtitle: "競艇の世界へようこそ",
+  subtitle: "ボートレースの世界へようこそ",
   teacher: "ichika",
 
   reward: {
@@ -12,7 +12,7 @@ const chapter1 = {
     },
     badge: {
       id: "beginner_chapter1",
-      name: "競艇入門認定",
+      name: "ボートレース入門認定",
       icon: "🏅",
     },
   },
@@ -30,7 +30,7 @@ const chapter1 = {
       type: "talk",
       character: "ichika",
       face: "happy",
-      text: "私は一果！\n今日から一緒に競艇を勉強していこう✨",
+      text: "私は一果！\n今日から一緒にボートレースを勉強していこう✨",
       autoNext: true,
       delay: 900,
     },
@@ -55,11 +55,11 @@ const chapter1 = {
       type: "quiz",
       character: "ichika",
       face: "thinking",
-      question: "競艇は何艇でレースをする？",
+      question: "ボートレースは何艇でレースをする？",
       choices: ["4艇", "6艇", "8艇"],
       answer: 1,
-      correctText: "ピンポーン✨\n競艇は6艇で走るよ🚤",
-      wrongText: "惜しい😊\n競艇は6艇で競走するんだ♪",
+      correctText: "ピンポーン✨\nボートレースは6艇で走るよ🚤",
+      wrongText: "惜しい😊\nボートレースは6艇で競走するんだ♪",
     },
 
     {
@@ -75,11 +75,11 @@ const chapter1 = {
       type: "quiz",
       character: "ichika",
       face: "thinking",
-      question: "競艇はどこで走る？",
+      question: "ボートレースはどこで走る？",
       choices: ["水面", "芝生", "道路"],
       answer: 0,
-      correctText: "その通り✨\n競艇は水上スポーツなんだ😊",
-      wrongText: "惜しい！\n競艇は水面で走るレースだよ♪",
+      correctText: "その通り✨\nボートレースは水上スポーツなんだ😊",
+      wrongText: "惜しい！\nボートレースは水面で走るレースだよ♪",
     },
 
     {
@@ -95,11 +95,11 @@ const chapter1 = {
       type: "quiz",
       character: "ichika",
       face: "thinking",
-      question: "競艇は何周する？",
+      question: "ボートレースは何周する？",
       choices: ["2周", "3周", "4周"],
       answer: 1,
-      correctText: "そう！\n競艇は3周して順位を競うよ🚤",
-      wrongText: "惜しい😊\n競艇は基本的に3周するよ♪",
+      correctText: "そう！\nボートレースは3周して順位を競うよ🚤",
+      wrongText: "惜しい😊\nボートレースは基本的に3周するよ♪",
     },
 
     {
@@ -137,11 +137,11 @@ const chapter1 = {
       type: "quiz",
       character: "ichika",
       face: "thinking",
-      question: "競艇場は全国に何場ある？",
+      question: "ボートレース場は全国に何場ある？",
       choices: ["12場", "24場", "48場"],
       answer: 1,
       correctText: "正解😊✨\n全国に24場あるよ♪",
-      wrongText: "惜しい！\n競艇場は全国に24場あるよ😊",
+      wrongText: "惜しい！\nボートレース場は全国に24場あるよ😊",
     },
 
     {
@@ -156,7 +156,7 @@ const chapter1 = {
       type: "talk",
       character: "ichika",
       face: "happy",
-      text: "おめでとう😊✨\nこれで競艇の基本はバッチリ！",
+      text: "おめでとう😊✨\nこれでボートレースの基本はバッチリ！",
       autoNext: true,
       delay: 1000,
     },
@@ -172,7 +172,7 @@ const chapter1 = {
       type: "clear",
       character: "ichika",
       face: "happy",
-      text: "MISSION CLEAR！\nChapter1 Complete！\n競艇入門認定、GETだよ🏅",
+      text: "MISSION CLEAR！\nChapter1 Complete！\nボートレース入門認定、GETだよ🏅",
     },
   ],
 };

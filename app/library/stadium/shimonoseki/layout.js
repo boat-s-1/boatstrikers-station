@@ -5,8 +5,8 @@ export default function ShimonosekiLayout({ children }) {
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: '下関競艇場の特徴・水面・風・コース傾向',
-    description: '下関競艇場の水面・風・潮位・コース傾向を、場別データと初心者向け解説で確認できます。',
+    headline: 'ボートレース下関の特徴・水面・風・コース傾向',
+    description: 'ボートレース下関の水面・風・潮位・コース傾向を、場別データと初心者向け解説で確認できます。',
     mainEntityOfPage: PAGE_URL,
     author: { '@type': 'Organization', name: 'BoatStrikers' },
     publisher: { '@type': 'Organization', name: 'BoatStrikers' },
@@ -31,7 +31,7 @@ export default function ShimonosekiLayout({ children }) {
       {
         '@type': 'ListItem',
         position: 3,
-        name: '下関競艇場',
+        name: 'ボートレース下関',
         item: PAGE_URL,
       },
     ],

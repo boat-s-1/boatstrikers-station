@@ -181,7 +181,7 @@ export default function LessonClient({ lesson }) {
                 ? "復習完了！ポイントは初回クリア時のみ加算されます。"
                 : "+20pt 獲得！"}
             </p>
-            <strong>🏅 {lesson.badge} GET!</strong>
+            <strong>🏅 {lesson.badge === "競艇入門" ? "ボートレース入門" : lesson.badge} GET!</strong>
             <a href="/bsc">ミッション一覧へ戻る ›</a>
           </div>
         )}

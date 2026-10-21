@@ -48,7 +48,7 @@ export default function BscCollectionPage() {
               className={`bscBadgeCard ${got ? "got" : "locked"}`}
             >
               <span>{got ? "🏅" : "🔒"}</span>
-              <strong>{badge}</strong>
+              <strong>{badge === "競艇入門" ? "ボートレース入門" : badge}</strong>
               <p>{got ? "GET!" : "未取得"}</p>
             </div>
           );
