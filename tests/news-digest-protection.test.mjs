@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { register } from 'node:module';
 import { createClient } from './fixtures/supabase-fake.mjs';
-import { saveDailyResultArticle } from '../lib/dailyResultArticleWriter.js';
+import { saveDailyResultArticle, saveDailyResultDigestRow } from '../lib/dailyResultArticleWriter.js';
 import { isAiRewriteTarget, isDailyResultSourceKey, dailyResultProtectionReason } from '../lib/newsRewritePolicy.js';
 
 // 以降の動的 import では @supabase/supabase-js を偽クライアントに差し替える
@@ -38,7 +38,7 @@ test('新規日付：従来どおり公開状態で作成する', async () => {
 });
 
 test('既存の公開記事：内容は更新するが published_at と公開状態は維持する', async () => {
-  const s = reset([article({ article_body_source: 'ai' })]);
+  const s = reset([article()]);
   const r = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
   assert.equal(r.action, 'updated');
   const a = row(s, 1967);
@@ -73,6 +73,45 @@ test('非公開かつ manual の記事も書き換えない', async () => {
   assert.equal(r.action, 'skipped');
   assert.equal(row(s, 1967).is_published, false);
   assert.equal(row(s, 1967).article_body_source, 'manual');
+});
+
+test('B：AI 本文の日次まとめ（公開中）は再生成で上書きせず、公開状態・公開日時も変えない', async () => {
+  const s = reset([article({ id: 926, article_body_source: 'ai', article_body: 'AI本文' })]);
+  const r = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
+  assert.deepEqual([r.action, r.reason, r.id], ['skipped', 'ai', 926]);
+  assert.deepEqual(row(s, 926), article({ id: 926, article_body_source: 'ai', article_body: 'AI本文' }));
+  assert.equal(newsWrites(s).length, 0);
+});
+
+test('B：未知の article_body_source の記事も保護側に倒す', async () => {
+  const s = reset([article({ article_body_source: 'something_new' })]);
+  const r = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
+  assert.deepEqual([r.action, r.reason], ['skipped', 'protected_source']);
+  assert.equal(newsWrites(s).length, 0);
+});
+
+test('B：公開中の template 記事は従来どおり更新でき、article_body_source が NULL の記事は保護側に倒す', async () => {
+  const s = reset([article({ article_body_source: 'template' })]);
+  const r = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
+  assert.equal(r.action, 'updated');
+  assert.equal(row(s, 1967).article_body_source, 'bs_data_template');
+  assert.equal(row(s, 1967).published_at, OLD);
+  const s2 = reset([article({ article_body_source: null })]);
+  const r2 = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
+  assert.deepEqual([r2.action, r2.reason], ['skipped', 'protected_source']);
+  assert.equal(newsWrites(s2).length, 0);
+});
+
+test('B 競合：読み取り後に AI 本文へ変わったら、更新の条件で弾いて上書きしない', async () => {
+  const s = reset([article()]);
+  let once = true;
+  s.hooks.beforeUpdate = ({ tables }) => {
+    if (once) { once = false; Object.assign(tables.hatsune_news[0], { article_body_source: 'ai', article_body: 'AI本文' }); }
+  };
+  const r = await saveDailyResultArticle(createClient(), { sourceKey: KEY, content, now: NOW });
+  assert.deepEqual([r.action, r.reason], ['skipped', 'ai']);
+  assert.equal(row(s, 1967).article_body, 'AI本文');
+  assert.equal(row(s, 1967).published_at, OLD);
 });
 
 test('競合：読み取り後に manual 化されたら、更新の条件で弾いて上書きしない', async () => {
@@ -121,6 +160,11 @@ test('保護判定と AI リライト対象の判定', () => {
   assert.equal(dailyResultProtectionReason(article({ is_published: false })), 'unpublished');
   assert.equal(dailyResultProtectionReason(article({ is_published: null })), 'unpublished');
   assert.equal(dailyResultProtectionReason(article()), null);
+  assert.equal(dailyResultProtectionReason(article({ article_body_source: 'template' })), null);
+  assert.equal(dailyResultProtectionReason(article({ article_body_source: null })), 'protected_source');
+  assert.equal(dailyResultProtectionReason(article({ article_body_source: 'ai' })), 'ai');
+  assert.equal(dailyResultProtectionReason(article({ article_body_source: 'ai', is_published: false })), 'ai');
+  assert.equal(dailyResultProtectionReason(article({ article_body_source: 'something_new' })), 'protected_source');
   assert.equal(isDailyResultSourceKey('bs-daily-result-2026-10-15'), true);
   assert.equal(isDailyResultSourceKey('bs:result:2026-10-15:1:1'), false);
   assert.equal(isDailyResultSourceKey(null), false);
@@ -170,6 +214,86 @@ test('新規日付の生成：従来どおり公開記事を作る', async () =>
   assert.equal(a.is_published, true);
   assert.equal(a.source_key, KEY);
   assert.equal(a.article_body_source, 'bs_data_template');
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id, r.newsId);
+});
+
+test('B 日付指定の再生成：AI 本文の公開記事は上書きされず、digest は既存記事を参照する', async () => {
+  const s = reset([article({ id: 926, article_body_source: 'ai', article_body: 'AI本文' })], raceTables());
+  const r = await generateDailyResultDigest({ date: DATE });
+  assert.deepEqual([r.newsAction, r.newsSkipReason, r.newsId], ['skipped', 'ai', 926]);
+  assert.deepEqual(row(s, 926), article({ id: 926, article_body_source: 'ai', article_body: 'AI本文' }));
+  assert.equal(newsWrites(s).length, 0);
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id, 926);
+});
+
+// ── A：digest.news_id の保護 ──
+const digest = (over = {}) => ({ id: 38, race_date: DATE, status: 'complete', race_count: 99, article_body: '旧集計', news_id: 1967, generated_at: OLD, updated_at: OLD, ...over });
+const digestRow = { race_date: DATE, status: 'complete', race_count: 2, article_body: '新集計', generated_at: NOW, updated_at: NOW };
+const digestWrites = (s) => s.writes.filter((w) => w.table === 'bs_daily_result_digests');
+
+test('A：記事IDが取れたときは従来どおり upsert し、news_id を設定する', async () => {
+  const s = reset([], { bs_daily_result_digests: [digest({ news_id: null })] });
+  const r = await saveDailyResultDigestRow(createClient(), digestRow, 2001);
+  assert.equal(r.action, 'upserted');
+  assert.equal(s.tables.bs_daily_result_digests.length, 1);
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id, 2001);
+  assert.equal(s.tables.bs_daily_result_digests[0].race_count, 2);
+});
+
+test('A 競合：記事IDが取れなくても既存 digest の news_id を null で上書きしない', async () => {
+  const s = reset([], { bs_daily_result_digests: [digest()] });
+  const r = await saveDailyResultDigestRow(createClient(), digestRow, null);
+  assert.equal(r.action, 'updated_keep_news_id');
+  const d = s.tables.bs_daily_result_digests[0];
+  assert.equal(d.news_id, 1967);
+  assert.equal(d.race_count, 2);
+  assert.equal(d.article_body, '新集計');
+  assert.equal(digestWrites(s).some((w) => 'news_id' in (w.payload || w.row || {})), false);
+  assert.equal(digestWrites(s).some((w) => w.op === 'upsert'), false);
+});
+
+test('A 新規：記事IDが取れず digest もまだ無い日は、news_id なしで新規作成する', async () => {
+  const s = reset([], { bs_daily_result_digests: [] });
+  const r = await saveDailyResultDigestRow(createClient(), digestRow, null);
+  assert.equal(r.action, 'inserted_without_news_id');
+  assert.equal(s.tables.bs_daily_result_digests.length, 1);
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id ?? null, null);
+});
+
+test('A 競合：digest が同時に作られたら、一意制約エラーから UPDATE し直し news_id を残す', async () => {
+  const s = reset([], { bs_daily_result_digests: [] });
+  let once = true;
+  s.hooks.beforeInsert = ({ table }) => {
+    if (table === 'bs_daily_result_digests' && once) { once = false; s.tables.bs_daily_result_digests.push(digest()); }
+  };
+  const r = await saveDailyResultDigestRow(createClient(), digestRow, null);
+  assert.equal(r.action, 'updated_keep_news_id');
+  assert.equal(s.tables.bs_daily_result_digests.length, 1);
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id, 1967);
+  assert.equal(s.tables.bs_daily_result_digests[0].race_count, 2);
+});
+
+test('A 日付指定の再生成：記事の更新が競合し続けても、digest の既存参照（news_id）を維持する', async () => {
+  const s = reset([article()], { ...raceTables(), bs_daily_result_digests: [digest()] });
+  // 毎回、UPDATE の直前に manual 化され、直後に戻る（3回とも更新できない）
+  s.hooks.beforeUpdate = ({ table, tables }) => { if (table === 'hatsune_news') tables.hatsune_news[0].article_body_source = 'manual'; };
+  s.hooks.afterUpdate = ({ table, tables }) => { if (table === 'hatsune_news') tables.hatsune_news[0].article_body_source = 'bs_data_template'; };
+  const r = await generateDailyResultDigest({ date: DATE });
+  assert.deepEqual([r.newsAction, r.newsSkipReason, r.newsId], ['skipped', 'concurrent_change', null]);
+  assert.equal(row(s, 1967).article_body, '旧本文');
+  const d = s.tables.bs_daily_result_digests[0];
+  assert.equal(d.news_id, 1967);
+  assert.equal(d.race_count, 2);
+  const log = s.writes.find((w) => w.table === 'bs_news_sync_logs');
+  assert.equal(log.row.details.digest_action, 'updated_keep_news_id');
+});
+
+test('A 日付指定の再生成：digest の既存参照は、記事を保護した場合も同じ記事IDのまま', async () => {
+  const s = reset([article({ is_published: false })], { ...raceTables(), bs_daily_result_digests: [digest()] });
+  const r = await generateDailyResultDigest({ date: DATE });
+  assert.deepEqual([r.newsAction, r.newsSkipReason], ['skipped', 'unpublished']);
+  assert.equal(s.tables.bs_daily_result_digests.length, 1);
+  assert.equal(s.tables.bs_daily_result_digests[0].news_id, 1967);
 });
 
 // ── AI 本文リライト ──
