@@ -62,7 +62,8 @@ async function fetchSource(race) {
 // 同じ日の再取得は同時に1つだけ（管理画面は cursor を進めながら順に呼ぶので影響しない）
 const MAX_BATCH_SIZE = 18;
 const MAX_CURSOR = 300;
-const LOCK_TTL_SECONDS = 120;
+// ロックの期限：1要求は最悪約144秒（3R並行×6回、1Rあたり外部取得4回×各6秒）なので余裕を見て300秒
+const LOCK_TTL_SECONDS = 300;
 
 export async function POST(request) {
   const denied = await guardAdminWrite(request);

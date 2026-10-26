@@ -82,4 +82,30 @@ test('ロック：DB 関数が未適用（PGRST202）ならインスタンス内
 
   const broken = fakeRpc(() => ({ data: null, error: { code: '57014', message: 'timeout' } }));
   assert.equal((await acquireAdminJobLock(broken, 'job3', { ttlSeconds: 60 })).reason, 'error');
+  const denied = fakeRpc(() => ({ data: null, error: { code: '42501', message: 'permission denied' } }));
+  assert.equal((await acquireAdminJobLock(denied, 'job3', { ttlSeconds: 60 })).reason, 'error');
+});
+
+test('ロック：期限内は取れない、期限切れ後は取り直せる、所有者以外は解除できない（提案 SQL と同じ規則の偽 DB）', async () => {
+  let now = 0;
+  const locks = new Map();
+  const db = fakeRpc((fn, args) => {
+    const cur = locks.get(args.p_job);
+    if (fn === 'bs_admin_try_lock') {
+      if (cur && cur.until > now) return { data: false, error: null };
+      locks.set(args.p_job, { holder: args.p_holder, until: now + args.p_ttl_seconds * 1000 });
+      return { data: true, error: null };
+    }
+    if (cur && cur.holder === args.p_holder) cur.until = now + (args.p_cooldown_seconds || 0) * 1000;
+    return { data: null, error: null };
+  });
+  const a = await acquireAdminJobLock(db, 'all', { ttlSeconds: 2400 });
+  now = 2399 * 1000;
+  assert.equal((await acquireAdminJobLock(db, 'all', { ttlSeconds: 2400 })).ok, false);
+  now = 2401 * 1000;
+  const b = await acquireAdminJobLock(db, 'all', { ttlSeconds: 2400 });
+  assert.equal(b.ok, true);
+  await releaseAdminJobLock(db, a); // 期限切れ後に元の実行が解放しても、b のロックは残る
+  assert.equal(locks.get('all').holder, b.holder);
+  assert.equal((await acquireAdminJobLock(db, 'all', { ttlSeconds: 2400 })).ok, false);
 });

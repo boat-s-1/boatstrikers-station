@@ -95,7 +95,9 @@ export async function GET() {
 const AS_OF_DAYS_BACK = 7;
 const ALL_COOLDOWN_SECONDS = 30 * 60;
 const SINGLE_COOLDOWN_SECONDS = 60;
-const LOCK_TTL_SECONDS = 15 * 60;
+// ロックの期限：1場は実績最大74秒に対して15分。全場は実績最大約22分（1328秒）に対して40分
+const SINGLE_LOCK_TTL_SECONDS = 15 * 60;
+const ALL_LOCK_TTL_SECONDS = 40 * 60;
 
 export async function POST(request) {
   const denied = await guardAdminWrite(request);
@@ -128,7 +130,7 @@ export async function POST(request) {
     const lastFinished = runs?.[0]?.finished_at ? new Date(runs[0].finished_at).getTime() : 0;
     if (Date.now() - lastFinished < cooldown * 1000) return adminError(429, '直前に再集計したばかりです。しばらくしてから実行してください。');
 
-    lock = await acquireAdminJobLock(db, 'engine-v3-refresh', { ttlSeconds: LOCK_TTL_SECONDS });
+    lock = await acquireAdminJobLock(db, 'engine-v3-refresh', { ttlSeconds: scope === 'all' ? ALL_LOCK_TTL_SECONDS : SINGLE_LOCK_TTL_SECONDS });
     if (!lock.ok) {
       if (lock.reason === 'error') throw lock.error;
       return adminError(409, '別の再集計が実行中です。終わってから実行してください。');
