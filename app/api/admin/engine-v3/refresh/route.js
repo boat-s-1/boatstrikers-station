@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { adminError, adminServerError, guardAdminWrite, intInRange, jstToday, readJsonBody, validDateInRange } from '../../../../../lib/adminApiGuard.js';
+import { acquireAdminJobLock, releaseAdminJobLock } from '../../../../../lib/adminJobLock.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,30 +91,67 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const asOf = body.asOf || new Date().toISOString().slice(0, 10);
-    const db = getSupabase();
+// 書き込み（再集計）の制限。基準日は JST の今日から7日前まで、全場は30分に1回、1場は同じ場で60秒に1回
+const AS_OF_DAYS_BACK = 7;
+const ALL_COOLDOWN_SECONDS = 30 * 60;
+const SINGLE_COOLDOWN_SECONDS = 60;
+// ロックの期限：1場は実績最大74秒に対して15分。全場は実績最大約22分（1328秒）に対して40分
+const SINGLE_LOCK_TTL_SECONDS = 15 * 60;
+const ALL_LOCK_TTL_SECONDS = 40 * 60;
 
-    if (body.scope === 'all') {
+export async function POST(request) {
+  const denied = await guardAdminWrite(request);
+  if (denied) return denied;
+
+  const body = await readJsonBody(request);
+  if (!body) return adminError(400, 'リクエストの形式が不正です。');
+  const scope = body.scope;
+  if (scope !== 'all' && scope !== 'single') return adminError(400, 'scope は all か single を指定してください。');
+  const asOf = body.asOf ?? jstToday();
+  if (!validDateInRange(asOf, { daysBack: AS_OF_DAYS_BACK })) return adminError(400, `基準日は今日から${AS_OF_DAYS_BACK}日前までの日付で指定してください。`);
+  const code = scope === 'single' ? body.courseCode : null;
+  if (scope === 'single' && !intInRange(code, 1, 24)) return adminError(400, '場コードは1〜24で指定してください。');
+
+  let db;
+  let lock;
+  try {
+    db = getSupabase();
+
+    // 直近の成功した実行より古い基準日で上書きしない（意図して戻すときは allowOlder: true）
+    let latest = db.from('boatstrikers_engine_v3_runs').select('as_of_date,finished_at,success').eq('run_type', scope).order('id', { ascending: false }).limit(20);
+    if (scope === 'single') latest = latest.eq('course_code', code);
+    const { data: runs, error: runError } = await latest;
+    if (runError) throw runError;
+    const lastSuccess = (runs || []).find((run) => run.success);
+    if (lastSuccess?.as_of_date && asOf < lastSuccess.as_of_date && body.allowOlder !== true) {
+      return adminError(409, `最新の集計（基準日 ${lastSuccess.as_of_date}）より古い基準日です。戻す場合は確認のうえ allowOlder を指定してください。`);
+    }
+    const cooldown = scope === 'all' ? ALL_COOLDOWN_SECONDS : SINGLE_COOLDOWN_SECONDS;
+    const lastFinished = runs?.[0]?.finished_at ? new Date(runs[0].finished_at).getTime() : 0;
+    if (Date.now() - lastFinished < cooldown * 1000) return adminError(429, '直前に再集計したばかりです。しばらくしてから実行してください。');
+
+    lock = await acquireAdminJobLock(db, 'engine-v3-refresh', { ttlSeconds: scope === 'all' ? ALL_LOCK_TTL_SECONDS : SINGLE_LOCK_TTL_SECONDS });
+    if (!lock.ok) {
+      if (lock.reason === 'error') throw lock.error;
+      return adminError(409, '別の再集計が実行中です。終わってから実行してください。');
+    }
+
+    if (scope === 'all') {
       const { data, error } = await db.rpc('bs_engine_v3_refresh_all', { p_as_of: asOf });
       if (error) throw error;
+      await releaseAdminJobLock(db, lock, { cooldownSeconds: ALL_COOLDOWN_SECONDS });
       return NextResponse.json({ ok: true, scope: 'all', rows: data });
     }
 
-    const code = Number(body.courseCode || 1);
-    if (!Number.isInteger(code) || code < 1 || code > 24) {
-      return NextResponse.json({ ok: false, error: '場コードは1〜24で指定してください。' }, { status: 400 });
-    }
     const { data, error } = await db.rpc('bs_engine_v3_refresh_stadium', {
       p_course_code: code,
       p_as_of: asOf,
     });
     if (error) throw error;
+    await releaseAdminJobLock(db, lock, { cooldownSeconds: SINGLE_COOLDOWN_SECONDS });
     return NextResponse.json({ ok: true, scope: 'single', result: data });
   } catch (error) {
-    console.error('engine v3 refresh error', error);
-    return NextResponse.json({ ok: false, error: error?.message || '再集計に失敗しました。' }, { status: 500 });
+    if (lock?.ok) await releaseAdminJobLock(db, lock).catch(() => {});
+    return adminServerError('engine-v3-refresh', error);
   }
 }

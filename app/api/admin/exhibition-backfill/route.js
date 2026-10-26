@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
 import { fetchOfficialOriginalTenji } from "../../../../lib/officialOriginalTenji";
+import { adminError, adminServerError, guardAdminWrite, intInRange, jstToday, readJsonBody, validDateInRange } from "../../../../lib/adminApiGuard.js";
+import { acquireAdminJobLock, releaseAdminJobLock } from "../../../../lib/adminJobLock.js";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,15 +13,6 @@ function getSupabase() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error("Supabase環境変数が未設定です");
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-}
-
-function jstToday() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
 }
 
 function has(v) { return v !== null && v !== undefined && v !== ""; }
@@ -65,13 +58,36 @@ async function fetchSource(race) {
   };
 }
 
+// 対象日は JST の今日か前日だけ。1回の要求で確認するのは最大18R（外部取得は1Rにつき BOATERS・公式で最大4回＝最大72回）。
+// 同じ日の再取得は同時に1つだけ（管理画面は cursor を進めながら順に呼ぶので影響しない）
+const MAX_BATCH_SIZE = 18;
+const MAX_CURSOR = 300;
+// ロックの期限：1要求は最悪約144秒（3R並行×6回、1Rあたり外部取得4回×各6秒）なので余裕を見て300秒
+const LOCK_TTL_SECONDS = 300;
+
 export async function POST(request) {
+  const denied = await guardAdminWrite(request);
+  if (denied) return denied;
+
+  const body = await readJsonBody(request);
+  if (!body) return adminError(400, "リクエストの形式が不正です。");
+  const date = body.date ?? jstToday();
+  if (!validDateInRange(date, { daysBack: 1 })) return adminError(400, "対象日は今日か前日を指定してください。");
+  const cursor = body.cursor ?? 0;
+  const batchSize = body.batchSize ?? MAX_BATCH_SIZE;
+  if (!intInRange(cursor, 0, MAX_CURSOR) || !intInRange(batchSize, 1, MAX_BATCH_SIZE)) {
+    return adminError(400, `cursor は0〜${MAX_CURSOR}、batchSize は1〜${MAX_BATCH_SIZE}の整数で指定してください。`);
+  }
+
+  let supabase;
+  let lock;
   try {
-    const body = await request.json().catch(() => ({}));
-    const date = String(body.date || jstToday());
-    const cursor = Math.max(0, Number(body.cursor || 0));
-    const batchSize = Math.min(24, Math.max(1, Number(body.batchSize || 18)));
-    const supabase = getSupabase();
+    supabase = getSupabase();
+    lock = await acquireAdminJobLock(supabase, `exhibition-backfill:${date}`, { ttlSeconds: LOCK_TTL_SECONDS });
+    if (!lock.ok) {
+      if (lock.reason === "error") throw lock.error;
+      return adminError(409, "同じ日の再取得が実行中です。終わってから実行してください。");
+    }
 
     const { data: events, error: eventError } = await supabase.from("bs_race_events")
       .select("race_date,course_code,course_name,race_no,closing_time")
@@ -126,6 +142,8 @@ export async function POST(request) {
       results,
     });
   } catch (error) {
-    return NextResponse.json({ ok: false, error: error?.message || "backfill failed" }, { status: 500 });
+    return adminServerError("exhibition-backfill", error);
+  } finally {
+    if (lock?.ok) await releaseAdminJobLock(supabase, lock).catch(() => {});
   }
 }
