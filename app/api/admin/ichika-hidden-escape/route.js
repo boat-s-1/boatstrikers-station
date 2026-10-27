@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { adminError, adminServerError, guardAdminRead } from "../../../../lib/adminApiGuard.js";
+import { runAdminAlertEvaluation } from "../../../../lib/adminAlertEvaluate.js";
+import { validAlertQuery } from "../../../../lib/adminApiInput.js";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -96,11 +99,14 @@ async function enrichRows(supabase, rows) {
 }
 
 export async function GET(request) {
+  const denied = await guardAdminRead(request);
+  if (denied) return denied;
+  const { searchParams } = new URL(request.url);
+  const date = searchParams.get("date") || jstToday();
+  const mode = searchParams.get("mode") || "day";
+  if (!validAlertQuery(date, mode)) return adminError(400, "date は YYYY-MM-DD、mode は day か all を指定してください。");
   try {
     const supabase = getSupabase();
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get("date") || jstToday();
-    const mode = searchParams.get("mode") || "day";
     const fields = "id,race_date,course_code,course_name,race_no,closing_time,racer_class,exhibition_time,exhibition_rank,exhibition_best_time,exhibition_gap,lap_time,lap_rank,detected_at,notified,notified_at";
 
     let dayRows = [];
@@ -134,17 +140,15 @@ export async function GET(request) {
       fetchedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return NextResponse.json({ ok: false, error: error?.message || "取得に失敗しました" }, { status: 500 });
+    return adminServerError("ichika-hidden-escape", error);
   }
 }
 
-export async function POST() {
-  try {
-    const supabase = getSupabase();
-    const { data, error } = await supabase.rpc("evaluate_ichika_hidden_escape_alerts");
-    if (error) throw error;
-    return NextResponse.json({ ok: true, inserted: Number(data || 0) });
-  } catch (error) {
-    return NextResponse.json({ ok: false, error: error?.message || "判定に失敗しました" }, { status: 500 });
-  }
+export async function POST(request) {
+  return runAdminAlertEvaluation(request, {
+    getClient: getSupabase,
+    rpc: "evaluate_ichika_hidden_escape_alerts",
+    job: "alerts-evaluate:ichika-hidden-escape",
+    tag: "ichika-hidden-escape",
+  });
 }
