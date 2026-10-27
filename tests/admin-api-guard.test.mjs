@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkSameOrigin, validDateInRange, intInRange, jstToday } from '../lib/adminApiInput.js';
+import { checkSameOrigin, validDateInRange, intInRange, jstToday, validAlertQuery } from '../lib/adminApiInput.js';
 import { acquireAdminJobLock, releaseAdminJobLock, resetAdminJobLocksForTest } from '../lib/adminJobLock.js';
 
 const req = (headers = {}, url = 'https://www.boat-strike.online/api/admin/engine-v3/refresh') => new Request(url, { method: 'POST', headers });
@@ -108,4 +108,13 @@ test('ロック：期限内は取れない、期限切れ後は取り直せる�
   await releaseAdminJobLock(db, a); // 期限切れ後に元の実行が解放しても、b のロックは残る
   assert.equal(locks.get('all').holder, b.holder);
   assert.equal((await acquireAdminJobLock(db, 'all', { ttlSeconds: 2400 })).ok, false);
+});
+
+test('アラート一覧の date・mode：実在する日付と day / all だけ（過去の日付は可）', () => {
+  assert.equal(validAlertQuery('2026-10-27', 'day'), true);
+  assert.equal(validAlertQuery('2025-01-01', 'all'), true);
+  assert.equal(validAlertQuery('2026-02-30', 'day'), false);
+  assert.equal(validAlertQuery('2026-10-27', 'week'), false);
+  assert.equal(validAlertQuery("2026-10-27' or 1=1", 'day'), false);
+  assert.equal(validAlertQuery(null, 'day'), false);
 });

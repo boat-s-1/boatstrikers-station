@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { guardAdminRead } from "../../../../../lib/adminApiGuard.js";
+
+export const dynamic = "force-dynamic";
 
 const STADIUMS = ["桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡","常滑","津","三国","びわこ","住之江","尼崎","鳴門","丸亀","児島","宮島","徳山","下関","若松","芦屋","福岡","唐津","大村"];
 
 function validDate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(String(v||"")); }
 
 export async function GET(request){
+  const denied = await guardAdminRead(request);
+  if (denied) return denied;
+
   const { searchParams } = new URL(request.url);
   const date = searchParams.get("date");
   const course = searchParams.get("course");
