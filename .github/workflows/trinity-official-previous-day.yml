@@ -86,7 +86,7 @@ jobs:
             fi
           fi
           if [[ "${{ github.event_name }}" == 'workflow_dispatch' && "$MANUAL_DRY_RUN" != 'false' ]]; then
-            args+=(--dry-run --date "$(TZ=Asia/Tokyo date +%F)")
+            args+=(--dry-run --date "$(TZ=Asia/Tokyo date -d tomorrow +%F)")
           fi
           if [[ -n "$MANUAL_MAX_RACES" && "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
             args+=(--max-races "$MANUAL_MAX_RACES")
