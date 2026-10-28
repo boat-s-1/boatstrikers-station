@@ -1,7 +1,7 @@
 import Parser from "rss-parser";
 
 export const metadata = {
-  title: "無料新聞｜BoatStrikers",
+  title: "無料新聞",
   description: "一果・初音・キイナの前日版への案内ページです。",
   alternates: { canonical: "/library/free" },
   robots: { index: false, follow: true },

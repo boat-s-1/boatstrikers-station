@@ -3,7 +3,7 @@ import { getPublishedNewspapers } from "../../lib/newspapers";
 import { NEWSPAPER_CHARACTERS } from "../../lib/newspaperContent";
 import styles from "./newspapers.module.css";
 
-export const metadata = { title: "予想新聞｜BoatStrikers", description: "一果・初音・キイナの予想新聞。前日版・直前版と過去記事を公式サイトで確認できます。" };
+export const metadata = { title: "予想新聞", description: "一果・初音・キイナの予想新聞。前日版・直前版と過去記事を公式サイトで確認できます。" };
 export const revalidate = 60;
 
 export default async function NewspapersPage({ searchParams }) {
