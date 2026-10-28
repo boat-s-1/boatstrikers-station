@@ -1,0 +1,28 @@
+name: Supabase View Security Check
+
+# public スキーマのビューが security_invoker で、anon・authenticated に書き込み権限を与えていないことを確かめる（S1 の再発防止）。
+# DB には接続しない。リポジトリの supabase/migrations だけを読む。
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/check-view-security.mjs"
+      - "tests/supabase-view-security.test.mjs"
+      - ".github/workflows/view-security-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: View security tests
+        run: node --test tests/supabase-view-security.test.mjs
+      - name: Scan migrations
+        run: node scripts/check-view-security.mjs supabase/migrations
