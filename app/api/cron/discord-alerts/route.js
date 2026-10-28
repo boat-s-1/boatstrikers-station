@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ensureNotificationRoles, getAdminClient, sendDiscordMessage, discordApi } from "../../../lib/discordPremium";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
+import { deliverOnce, isDeliverable } from "../../../lib/discordAlertDelivery";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -153,23 +154,20 @@ const QUALITY_SOURCE={
     return `🚨 **管理者向け｜レースデータ欠損**\n${a.course_name||a.course_code} ${a.race_no}R（${a.race_date}）\n欠損: ${missing}\nhttps://www.boat-strike.online/admin/alerts`;
   },
 };
-async function alreadySent(admin,type,alertId,channelKey){const {data,error}=await admin.from("bs_discord_notification_deliveries").select("id,sent_at").eq("alert_type",type).eq("alert_id",alertId).eq("channel_key",channelKey).maybeSingle();if(error)throw error;return Boolean(data?.sent_at);}
+// 配信の権利を取ってから送る（同時実行でも1回だけ。失敗は MAX_ATTEMPTS 回で打ち切り）
 async function deliver(admin,source,alert,channelKey,channelId,roleId){
   if(!channelId)return {skipped:true};
-  if(await alreadySent(admin,source.type,alert.id,channelKey))return {skipped:true};
-  try{
+  return deliverOnce(admin,{
+    alertType:source.type,alertId:alert.id,channelKey,
     // キャラ別チャンネルはキャラ専用Webhook、全アラートはBoatStrikers Botアイコンのまま送信。
-    const message=channelKey==="all"
-      ?await sendDiscordMessage(channelId,source.build(alert),{roleId})
-      :await sendCharacterAlert(channelId,source.build(alert),{roleId,roleKey:source.roleKey});
-    const now=new Date().toISOString();
-    const {error}=await admin.from("bs_discord_notification_deliveries").upsert({alert_type:source.type,alert_id:alert.id,channel_key:channelKey,discord_message_id:message?.id||null,sent_at:now,error:null,updated_at:now},{onConflict:"alert_type,alert_id,channel_key"});
-    if(error)throw error;return {sent:true};
-  }catch(error){const message=String(error?.message||error).slice(0,1000);await admin.from("bs_discord_notification_deliveries").upsert({alert_type:source.type,alert_id:alert.id,channel_key:channelKey,error:message,updated_at:new Date().toISOString()},{onConflict:"alert_type,alert_id,channel_key"});return {sent:false,error:message};}
+    send:()=>channelKey==="all"
+      ?sendDiscordMessage(channelId,source.build(alert),{roleId})
+      :sendCharacterAlert(channelId,source.build(alert),{roleId,roleKey:source.roleKey}),
+  });
 }
 export async function GET(request){
   if(!authorized(request))return NextResponse.json({ok:false,error:"unauthorized"},{status:401});
-  const admin=getAdminClient();const raceDate=jstToday();const allChannel=process.env.DISCORD_ALL_ALERTS_CHANNEL_ID;const summary={raceDate,sent:0,failed:0,skipped:0};
+  const admin=getAdminClient();const raceDate=jstToday();const allChannel=process.env.DISCORD_ALL_ALERTS_CHANNEL_ID;const summary={raceDate,sent:0,failed:0,skipped:0,expired:0};
   try{
     const roles=await ensureNotificationRoles();
     const adminChannel=process.env.DISCORD_ADMIN_ALERTS_CHANNEL_ID||allChannel;
@@ -191,6 +189,8 @@ export async function GET(request){
     for(const source of SOURCES){
       const {data:alerts,error}=await admin.from(source.table).select(source.select).eq("race_date",raceDate).order("detected_at",{ascending:true}).limit(100);if(error)throw error;
       for(const rawAlert of alerts||[]){
+        // 締切後（締切が無いものは検出から15分超）は送らない。停止中に溜まった分の一斉配信もここで止まる
+        if(!isDeliverable(rawAlert)){summary.expired+=1;continue;}
         const alert={...rawAlert};
         if(["ichika_escape_surge","kiina_double_top"].includes(source.type)){
           const context=await getRacePredictionContext(admin,alert);
