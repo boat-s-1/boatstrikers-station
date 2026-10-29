@@ -1,8 +1,9 @@
-// /api/cron/discord-alerts の認証。Discord 通知専用の DISCORD_ALERTS_CRON_SECRET を使えるようにする。
+// Discord の cron 5本（discord-alerts・discord-race-threads・discord-community-setup・
+// discord-membership-sync・discord-community-poll）の認証。Discord 専用の DISCORD_ALERTS_CRON_SECRET を使えるようにする。
 //   ・DISCORD_ALERTS_CRON_SECRET が設定されていれば、その値の Bearer だけを受け付ける（CRON_SECRET では通らない）
 //   ・未設定（空文字・空白だけ）のときは、従来どおり CRON_SECRET の Bearer を受け付ける
 //   ・どちらも無ければ常に拒否する
-// 他の cron（TRINITY・NEWS・BLOG など）は CRON_SECRET のままで、この処理を使わない。
+// Discord 以外の cron（TRINITY・NEWS・BLOG など）は CRON_SECRET のままで、この処理を使わない。
 // 秘密値はログに出さない。比較は長さに依らない時間で行う（SHA-256 にしてから timingSafeEqual）。
 
 import crypto from "node:crypto";

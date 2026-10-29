@@ -64,15 +64,19 @@ test('専用キーが未設定なら、判定は変更前の実装と同じ（�
   assert.equal(isDiscordAlertsCronAuthorized(req('Bearer'), { CRON_SECRET: ' ' }), false);
 });
 
-test('discord-alerts の route だけが専用キーを使い、秘密値やヘッダーをログに出さない', () => {
-  const route = readFileSync('app/api/cron/discord-alerts/route.js', 'utf8');
-  assert.match(route, /import \{ isDiscordAlertsCronAuthorized \} from "\.\.\/\.\.\/\.\.\/lib\/discordAlertsCronAuth";/);
-  assert.match(route, /function authorized\(request\)\{\n\s*return isDiscordAlertsCronAuthorized\(request\);\n\}/);
-  assert.doesNotMatch(route, /process\.env\.CRON_SECRET/);
-  assert.match(route, /if\(!authorized\(request\)\)return NextResponse\.json\(\{ok:false,error:"unauthorized"\},\{status:401\}\);/);
-  // 認証の値やヘッダーをログ・応答に出さない
-  for (const src of [route, readFileSync('app/lib/discordAlertsCronAuth.js', 'utf8')]) {
+const DISCORD_CRON_ROUTES = ['discord-alerts', 'discord-race-threads', 'discord-community-setup', 'discord-membership-sync', 'discord-community-poll'];
+
+test('Discord の5つの cron：秘密値・認証ヘッダーをログに出さない', () => {
+  for (const src of [...DISCORD_CRON_ROUTES.map((name) => readFileSync(`app/api/cron/${name}/route.js`, 'utf8')), readFileSync('app/lib/discordAlertsCronAuth.js', 'utf8')]) {
     assert.doesNotMatch(src, /console\.[a-z]+\([^)]*(secret|authorization|CRON_SECRET)/i);
+  }
+});
+
+test('Discord の5つの cron：公開しているのは GET だけで、認証が GET の最初の処理（DB・Discord に触れる前に 401）', () => {
+  for (const name of DISCORD_CRON_ROUTES) {
+    const route = readFileSync(`app/api/cron/${name}/route.js`, 'utf8');
+    assert.deepEqual(route.match(/export (?:async )?function [A-Z]+/g), ['export async function GET'], name);
+    assert.match(route, /export async function GET\(request\)\{\n\s*if\(!authorized\(request\)\)return NextResponse\.json\(\{ok:false,error:"unauthorized"\},\{status:401\}\);/, name);
   }
 });
 
