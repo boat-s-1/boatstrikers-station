@@ -4,6 +4,7 @@ import path from "node:path";
 import { ensureNotificationRoles, getAdminClient, sendDiscordMessage, discordApi } from "../../../lib/discordPremium";
 import { buildPhase2Predictions } from "../../../lib/phase2PredictionEngine";
 import { deliverOnce, finishedDeliveryKeys, isDeliverable } from "../../../lib/discordAlertDelivery";
+import { isDiscordAlertsCronAuthorized } from "../../../lib/discordAlertsCronAuth";
 
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
@@ -18,9 +19,9 @@ const webhookCache=new Map();
 const WEBHOOK_TIMEOUT_MS=10_000;
 const RUN_BUDGET_MS=18_000; // maxDuration（30秒）から、送信1件（最大10秒）と記録の分を残す
 
+// Discord 通知専用の DISCORD_ALERTS_CRON_SECRET があればそれだけを、無ければ従来の CRON_SECRET を受け付ける
 function authorized(request){
-  const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  return isDiscordAlertsCronAuthorized(request);
 }
 function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
 function jstYesterday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(Date.now()-86_400_000));}
