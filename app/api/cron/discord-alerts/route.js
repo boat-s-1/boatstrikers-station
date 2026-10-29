@@ -23,6 +23,7 @@ function authorized(request){
   return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
 }
 function jstToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
+function jstYesterday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(Date.now()-86_400_000));}
 function raceLink(alert){return `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`;}
 function closeText(alert){return alert.closing_time?String(alert.closing_time).slice(0,5):"--:--";}
 function finite(value){const n=Number(value);return Number.isFinite(n)?n:null;}
@@ -208,7 +209,9 @@ export async function GET(request){
       const {data:qualityAlerts,error:qualityError}=await admin
         .from("bs_race_data_quality_alerts")
         .select("id,race_date,course_code,course_name,race_no,missing_fields,last_detected_at")
-        .eq("race_date",raceDate)
+        // 欠損の検出は翌日 01:10 JST ごろに前日の日付で作られるため、前日分と当日分を読む（それより古いものは送らない）
+        .gte("race_date",jstYesterday())
+        .lte("race_date",raceDate)
         .eq("severity","critical")
         .eq("status","active")
         .order("last_detected_at",{ascending:true})

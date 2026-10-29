@@ -287,3 +287,14 @@ test('管理者向けデータ欠損通知：Bot のメッセージで管理者�
   // 会員向けのアラートを先に処理し、管理者向けはその後（時間の予算を会員向けに優先して使う）
   assert.ok(route.indexOf('for(const source of SOURCES)') < route.indexOf('from("bs_race_data_quality_alerts")'));
 });
+
+test('管理者向けデータ欠損通知：翌日に前日の日付で作られるため、前日分と当日分だけを読む（それより古いものは読まない）', () => {
+  const route = readFileSync('app/api/cron/discord-alerts/route.js', 'utf8');
+  const quality = route.slice(route.indexOf('from("bs_race_data_quality_alerts")'));
+  assert.match(quality, /\.gte\("race_date",jstYesterday\(\)\)\s*\.lte\("race_date",raceDate\)/);
+  assert.doesNotMatch(quality.slice(0, 400), /\.eq\("race_date",raceDate\)/);
+  // 会員向けのアラートは従来どおり当日分だけ
+  assert.match(route, /\.from\(source\.table\)\.select\(source\.select\)\.eq\("race_date",raceDate\)/);
+  // 前日の計算は JST
+  assert.match(route, /function jstYesterday\(\)\{return new Intl\.DateTimeFormat\("en-CA",\{timeZone:"Asia\/Tokyo"/);
+});
