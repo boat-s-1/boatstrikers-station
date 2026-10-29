@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDiscordAlertsCronAuthorized } from "../../../lib/discordAlertsCronAuth";
 import { discordApi, discordConfig } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
@@ -8,8 +9,7 @@ export const maxDuration=30;
 const VIEW_CHANNEL="1024";
 
 function authorized(request){
-  const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  return isDiscordAlertsCronAuthorized(request);
 }
 
 function categoryPerms(kind,{guildId,premiumRoleId}){

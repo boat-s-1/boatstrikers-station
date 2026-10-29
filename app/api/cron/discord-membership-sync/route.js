@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDiscordAlertsCronAuthorized } from "../../../lib/discordAlertsCronAuth";
 import { addPremiumRole, ensureDefaultNotificationRoles, getAdminClient, isDiscordEligible, removePremiumRole } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
@@ -6,8 +7,7 @@ export const runtime="nodejs";
 export const maxDuration=30;
 
 function authorized(request){
-  const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  return isDiscordAlertsCronAuthorized(request);
 }
 
 export async function GET(request){
