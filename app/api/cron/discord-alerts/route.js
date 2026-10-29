@@ -164,8 +164,8 @@ async function deliver(admin,source,alert,channelKey,channelId,roleId){
     alertType:source.type,alertId:alert.id,channelKey,
     // 権利を取った直後にもう一度締切を確かめる（判定から送信までの間に締切を過ぎた場合は送らない）
     stillDeliverable:source.type===QUALITY_SOURCE.type?()=>true:()=>isDeliverable(alert),
-    // キャラ別チャンネルはキャラ専用Webhook、全アラートはBoatStrikers Botアイコンのまま送信。
-    send:()=>channelKey==="all"
+    // キャラ別チャンネルはキャラ専用Webhook、全アラートと管理者向けはBoatStrikers Botアイコンのまま送信。
+    send:()=>channelKey==="all"||source.type===QUALITY_SOURCE.type
       ?sendDiscordMessage(channelId,source.build(alert),{roleId})
       :sendCharacterAlert(channelId,source.build(alert),{roleId,roleKey:source.roleKey}),
   });
@@ -178,22 +178,6 @@ export async function GET(request){
   const outOfTime=()=>Date.now()-startedAt>RUN_BUDGET_MS;
   try{
     const roles=await ensureNotificationRoles();
-    const adminChannel=process.env.DISCORD_ADMIN_ALERTS_CHANNEL_ID||allChannel;
-    if(adminChannel){
-      const {data:qualityAlerts,error:qualityError}=await admin
-        .from("bs_race_data_quality_alerts")
-        .select("id,race_date,course_code,course_name,race_no,missing_fields,last_detected_at")
-        .eq("race_date",raceDate)
-        .eq("severity","critical")
-        .eq("status","active")
-        .order("last_detected_at",{ascending:true})
-        .limit(100);
-      if(qualityError)throw qualityError;
-      for(const alert of qualityAlerts||[]){
-        if(outOfTime()){summary.deferred+=1;continue;}
-        count(await deliver(admin,QUALITY_SOURCE,alert,"admin",adminChannel,null));
-      }
-    }
     for(const source of SOURCES){
       const {data:alerts,error}=await admin.from(source.table).select(source.select).eq("race_date",raceDate).order("detected_at",{ascending:true}).limit(100);if(error)throw error;
       const deliverable=(alerts||[]).filter(rawAlert=>{
@@ -215,6 +199,24 @@ export async function GET(request){
         }
         const targets=[["all",allChannel,roles.all_alerts],[source.channel,process.env[source.channel],roles[source.roleKey]]];
         for(const [channelKey,channelId,roleId] of targets){if(!channelId)continue;count(await deliver(admin,source,alert,channelKey,channelId,roleId));}
+      }
+    }
+    // 管理者向けのデータ欠損通知：管理者チャンネルが明示されている場合だけ送る（会員向けの通知を先に処理する）
+    // 全体チャンネルは sendDiscordMessage が投稿しないため、送り先にしない（以前はここで必ず失敗していた）
+    const adminChannel=process.env.DISCORD_ADMIN_ALERTS_CHANNEL_ID;
+    if(adminChannel&&String(adminChannel)!==String(allChannel||"")){
+      const {data:qualityAlerts,error:qualityError}=await admin
+        .from("bs_race_data_quality_alerts")
+        .select("id,race_date,course_code,course_name,race_no,missing_fields,last_detected_at")
+        .eq("race_date",raceDate)
+        .eq("severity","critical")
+        .eq("status","active")
+        .order("last_detected_at",{ascending:true})
+        .limit(100);
+      if(qualityError)throw qualityError;
+      for(const alert of qualityAlerts||[]){
+        if(outOfTime()){summary.deferred+=1;continue;}
+        count(await deliver(admin,QUALITY_SOURCE,alert,"admin",adminChannel,null));
       }
     }
     console.info(JSON.stringify({level:"info",message:"discord alerts cron complete",...summary}));return NextResponse.json({ok:true,...summary,ranAt:new Date().toISOString()});
