@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDiscordAlertsCronAuthorized } from "../../../lib/discordAlertsCronAuth";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { discordApi, discordConfig, getAdminClient, sendDiscordMessage } from "../../../lib/discordPremium";
@@ -24,8 +25,7 @@ const CHARACTERS={
 const webhookCache=new Map();
 
 function authorized(request){
-  const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  return isDiscordAlertsCronAuthorized(request);
 }
 
 function jstToday(){
