@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDiscordAlertsCronAuthorized } from "../../../lib/discordAlertsCronAuth";
 import { discordApi, discordConfig, getAdminClient } from "../../../lib/discordPremium";
 
 export const dynamic="force-dynamic";
@@ -15,8 +16,7 @@ const COURSE_NAMES={
 };
 
 function authorized(request){
-  const secret=process.env.CRON_SECRET;
-  return Boolean(secret&&request.headers.get("authorization")===`Bearer ${secret}`);
+  return isDiscordAlertsCronAuthorized(request);
 }
 
 function jstDate(){
