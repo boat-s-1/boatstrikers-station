@@ -24,7 +24,7 @@ const sitemapGroups = [
       { title: "本日の出走表", description: "当日の開催場と各レースの出走情報を確認できます。", href: "/races" },
       { title: "一果のイン逃げ予想", description: "1号艇とイン逃げを中心に、レースの狙い方を紹介します。", href: "/ichika" },
       { title: "初音の女子戦攻略", description: "女子戦の選手情報や展示、レース傾向を紹介します。", href: "/hatsune" },
-      { title: "キイナの5号艇予想", description: "5号艇が頭になる条件や穴狙い情報を紹介します。", href: "/kiina" },
+      { title: "キイナの5号艇予想", description: "5号艇が1着になる条件やレース展開の分析を紹介します。", href: "/kiina" },
       { title: "BoatStrikers Challenge", description: "BoatStrikersの予想・分析コンテンツを確認できます。", href: "/bsc2" },
     ],
   },

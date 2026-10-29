@@ -26,7 +26,7 @@ const programs = [
     name: "キイナ",
     title: "キイナのボート・ナイト・ニッポン",
     schedule: "毎週金曜日 22:00 ON AIR",
-    description: "5号艇や高配当レースを中心に、穴狙いを振り返ります。",
+    description: "5号艇の展開やレース結果を中心に、データを交えて振り返ります。",
     image: "/radio/kiina-program.jpeg",
   },
 ];
