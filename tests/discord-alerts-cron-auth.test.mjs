@@ -76,7 +76,8 @@ test('discord-alerts の route だけが専用キーを使い、秘密値やヘ�
   }
 });
 
-test('他の cron の認証は変えていない：DISCORD_ALERTS_CRON_SECRET を参照するのは discord-alerts だけ', () => {
+test('Discord の5つの cron だけが専用認証ヘルパーを使用する', () => {
+  const discordRoutes = ['discord-alerts', 'discord-race-threads', 'discord-community-setup', 'discord-membership-sync', 'discord-community-poll'];
   const users = [];
   const walk = (dir) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -87,9 +88,12 @@ test('他の cron の認証は変えていない：DISCORD_ALERTS_CRON_SECRET �
   };
   walk('app');
   walk('lib');
-  assert.deepEqual(users.sort(), ['app/api/cron/discord-alerts/route.js', 'app/lib/discordAlertsCronAuth.js']);
-  // 他の Discord の cron（段階2で再開する4本）は、従来どおり CRON_SECRET
-  for (const name of ['discord-race-threads', 'discord-community-setup', 'discord-membership-sync', 'discord-community-poll']) {
-    assert.match(readFileSync(`app/api/cron/${name}/route.js`, 'utf8'), /process\.env\.CRON_SECRET/);
+  assert.deepEqual(users.sort(), [...discordRoutes.map(name => `app/api/cron/${name}/route.js`), 'app/lib/discordAlertsCronAuth.js'].sort());
+  for (const name of discordRoutes) {
+    const route = readFileSync(`app/api/cron/${name}/route.js`, 'utf8');
+    assert.match(route, /import \{ isDiscordAlertsCronAuthorized \} from "\.\.\/\.\.\/\.\.\/lib\/discordAlertsCronAuth";/);
+    assert.match(route, /function authorized\(request\)\{\n\s*return isDiscordAlertsCronAuthorized\(request\);\n\}/);
+    assert.doesNotMatch(route, /process\.env\.CRON_SECRET/);
+    assert.match(route, /if\(!authorized\(request\)\)return NextResponse\.json\(\{ok:false,error:"unauthorized"\},\{status:401\}\);/);
   }
 });
