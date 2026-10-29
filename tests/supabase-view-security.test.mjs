@@ -67,3 +67,28 @@ test('対象外：public 以外のスキーマ、マテリアライズドビュ�
   assert.equal(viewName('other.v'), null);
   assert.equal(stripSql('a $$ create view x $$ b').includes('create view'), false);
 });
+
+test('ALTER TABLE でもビューの invoker を外せるので検出する（通常のテーブルへの ALTER TABLE は対象外）', () => {
+  const created = 'create view public.v1 with (security_invoker = true) as select 1;';
+  assert.deepEqual(problems(run(created, 'alter table public.v1 reset (security_invoker);')), ['v1:security_invoker なし']);
+  assert.deepEqual(problems(run(created, 'alter table public.v1 set (security_invoker = false);')), ['v1:security_invoker なし']);
+  assert.deepEqual(problems(run('create view public.v1 as select 1;', 'alter table public.v1 set (security_invoker = true);')), []);
+  assert.deepEqual(problems(run('alter table public.some_table set (fillfactor = 70);')), []);
+});
+
+test('関数・DO ブロック内の動的 SQL でのビュー作成・変更は要確認として検出し、確認済みの印があれば除外', () => {
+  const dynamic = "do $$ begin execute 'create view public.v2 as select 1'; end $$;";
+  assert.deepEqual(problems(run(dynamic)), ['(動的SQL):関数・DO ブロック内の動的 SQL でビューを作成・変更（要確認）']);
+  assert.deepEqual(problems(run("create function mk() returns void language plpgsql as $f$ begin execute 'alter view public.v alter column x set default 1; alter table public.v reset (security_invoker)'; end $f$;")).length, 1);
+  assert.deepEqual(problems(run(`-- check-view-security: dynamic-reviewed\n${dynamic}`)), []);
+  // ビューと関係のない動的 SQL は対象外
+  assert.deepEqual(problems(run("do $$ begin execute 'create table public.t (id int)'; end $$;")), []);
+});
+
+test('ON ALL TABLES IN SCHEMA public での書き込み権限の付与は検出し、同じ範囲の REVOKE で解消', () => {
+  const grant = 'grant all on all tables in schema public to anon, authenticated;';
+  assert.deepEqual(problems(run(grant)), ['(public の全テーブル):ON ALL TABLES IN SCHEMA public での anon・authenticated への書き込み権限の付与']);
+  assert.deepEqual(problems(run(grant, 'revoke insert, update, delete, truncate on all tables in schema public from anon, authenticated;')), []);
+  assert.deepEqual(problems(run('grant select on all tables in schema public to anon;')), []);
+  assert.deepEqual(problems(run('grant all on all tables in schema public to service_role;')), []);
+});
