@@ -278,8 +278,9 @@ test('discord-alerts route：送信直前の再判定・時間の予算・Webhoo
 test('管理者向けデータ欠損通知：Bot のメッセージで管理者チャンネルへ送る。明示された管理者チャンネルが無ければ送らない', () => {
   const route = readFileSync('app/api/cron/discord-alerts/route.js', 'utf8');
   // キャラ用 Webhook（キャラ設定が必要）ではなく、Bot のメッセージで送る
-  assert.match(route, /send:\(\)=>channelKey==="all"\|\|source\.type===QUALITY_SOURCE\.type\s*\?sendDiscordMessage\(channelId,source\.build\(alert\),\{roleId\}\)/);
-  // 全体チャンネルへの代替はしない（全体チャンネル宛ては実際には投稿されないため）
+  assert.match(route, /channelKey==="all" \? discordApi\(/);
+  assert.match(route, /: sendDiscordMessage\(channelId,source\.build\(alert\),\{roleId\}\)/);
+  // 管理者向けは明示された管理者チャンネルにのみ送る
   assert.match(route, /const adminChannel=process\.env\.DISCORD_ADMIN_ALERTS_CHANNEL_ID;\n\s*if\(adminChannel&&String\(adminChannel\)!==String\(allChannel\|\|""\)\)\{/);
   assert.doesNotMatch(route, /DISCORD_ADMIN_ALERTS_CHANNEL_ID\|\|allChannel/);
   // メンションなし（ロールは渡さない）
