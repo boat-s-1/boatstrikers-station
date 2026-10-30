@@ -21,7 +21,12 @@ export function parseGamagoriChart(html: string): ChartMark[] {
     const cells = [...row[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)];
     if (cells.length !== 5) throw new Error("Chart must contain five columns");
     cells.forEach((cell, columnIndex) => {
-      for (const match of cell[1].matchAll(/taka_([1-6])M(_up|_down)?\.png/gi)) {
+      for (const img of cell[1].replace(/<!--[\s\S]*?-->/g, '').matchAll(/<img\b[^>]*>/gi)) {
+        const src = img[0].match(/\bsrc=["']([^"']+)["']/i)?.[1] ?? '';
+        const match = src.match(/(?:^|\/)taka_([1-6])M(_up|_down)?\.png$/i);
+        if (!match) continue;
+        const alt = img[0].match(/\balt=["']([1-6])["']/i)?.[1];
+        if (alt && alt !== match[1]) throw new Error("Boat image and alt disagree");
         marks.push({
           boat_no: Number(match[1]),
           slit_rating: columnIndex + 1,
