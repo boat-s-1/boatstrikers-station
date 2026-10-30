@@ -23,6 +23,9 @@ const CHARACTERS={
 };
 
 const webhookCache=new Map();
+const MAX_THREADS_PER_RUN=2;
+const RUN_BUDGET_MS=18_000;
+const DISCORD_SEND_TIMEOUT_MS=8_000;
 
 function authorized(request){
   return isDiscordAlertsCronAuthorized(request);
@@ -114,6 +117,7 @@ async function sendCharacterThreadMessage(parentChannelId,threadId,roleKey,conte
       allowed_mentions:{parse:[]},
     }),
     cache:"no-store",
+    signal:AbortSignal.timeout(DISCORD_SEND_TIMEOUT_MS),
   });
   if(!response.ok){
     const text=await response.text().catch(()=>"");
@@ -185,7 +189,8 @@ export async function GET(request){
 
   const raceDate=jstToday();
   const admin=getAdminClient();
-  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0};
+  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0,deferred:0};
+  const startedAt=Date.now();
 
   try{
     const channel=await findRaceChatChannel();
@@ -213,6 +218,7 @@ export async function GET(request){
     summary.races=unique.size;
     const activeThreads=await getActiveThreads();
     for(const record of unique.values()){
+      if(summary.created>=MAX_THREADS_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
         const result=await ensureRaceThread(channel,record,activeThreads);
         if(result.created){
