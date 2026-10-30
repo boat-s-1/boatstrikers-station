@@ -923,5 +923,79 @@
         "mean_winning_race_trifecta_yen": 3826
       }
     ]
-  }
+  },
+  "strict_escape": [
+    {
+      "slit_rating": 2,
+      "turn_rating": 3,
+      "saved_n": 1,
+      "known_n": 1,
+      "nige_success": 0,
+      "nige_failure": 1
+    },
+    {
+      "slit_rating": 3,
+      "turn_rating": 3,
+      "saved_n": 3,
+      "known_n": 3,
+      "nige_success": 1,
+      "nige_failure": 2
+    },
+    {
+      "slit_rating": 3,
+      "turn_rating": 4,
+      "saved_n": 18,
+      "known_n": 17,
+      "nige_success": 6,
+      "nige_failure": 11
+    },
+    {
+      "slit_rating": 4,
+      "turn_rating": 3,
+      "saved_n": 28,
+      "known_n": 26,
+      "nige_success": 10,
+      "nige_failure": 16
+    },
+    {
+      "slit_rating": 4,
+      "turn_rating": 4,
+      "saved_n": 105,
+      "known_n": 98,
+      "nige_success": 55,
+      "nige_failure": 43
+    },
+    {
+      "slit_rating": 4,
+      "turn_rating": 5,
+      "saved_n": 17,
+      "known_n": 15,
+      "nige_success": 11,
+      "nige_failure": 4
+    },
+    {
+      "slit_rating": 5,
+      "turn_rating": 3,
+      "saved_n": 1,
+      "known_n": 1,
+      "nige_success": 1,
+      "nige_failure": 0
+    },
+    {
+      "slit_rating": 5,
+      "turn_rating": 4,
+      "saved_n": 13,
+      "known_n": 13,
+      "nige_success": 10,
+      "nige_failure": 3
+    },
+    {
+      "slit_rating": 5,
+      "turn_rating": 5,
+      "saved_n": 6,
+      "known_n": 6,
+      "nige_success": 6,
+      "nige_failure": 0
+    }
+  ]
 }
