@@ -1,0 +1,927 @@
+{
+  "observed_at": "2026-10-31 JST",
+  "stats": {
+    "groups": [
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 1,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 3
+      },
+      {
+        "wins": 1,
+        "total": 3,
+        "boat_no": 1,
+        "settled": 3,
+        "win_pct": 33.33,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 7,
+        "total": 18,
+        "boat_no": 1,
+        "settled": 18,
+        "win_pct": 38.89,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 10,
+        "total": 28,
+        "boat_no": 1,
+        "settled": 27,
+        "win_pct": 37.04,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 60,
+        "total": 105,
+        "boat_no": 1,
+        "settled": 105,
+        "win_pct": 57.14,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 11,
+        "total": 17,
+        "boat_no": 1,
+        "settled": 17,
+        "win_pct": 64.71,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 1,
+        "total": 1,
+        "boat_no": 1,
+        "settled": 1,
+        "win_pct": 100,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 10,
+        "total": 13,
+        "boat_no": 1,
+        "settled": 13,
+        "win_pct": 76.92,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 6,
+        "total": 6,
+        "boat_no": 1,
+        "settled": 6,
+        "win_pct": 100,
+        "slit_rating": 5,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 2,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 2
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 2,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 2
+      },
+      {
+        "wins": 0,
+        "total": 14,
+        "boat_no": 2,
+        "settled": 14,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 2,
+        "total": 25,
+        "boat_no": 2,
+        "settled": 25,
+        "win_pct": 8,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 2,
+        "boat_no": 2,
+        "settled": 2,
+        "win_pct": 0,
+        "slit_rating": 4,
+        "turn_rating": 2
+      },
+      {
+        "wins": 3,
+        "total": 44,
+        "boat_no": 2,
+        "settled": 43,
+        "win_pct": 6.98,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 14,
+        "total": 77,
+        "boat_no": 2,
+        "settled": 77,
+        "win_pct": 18.18,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 3,
+        "total": 8,
+        "boat_no": 2,
+        "settled": 8,
+        "win_pct": 37.5,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 2,
+        "total": 6,
+        "boat_no": 2,
+        "settled": 6,
+        "win_pct": 33.33,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 1,
+        "total": 11,
+        "boat_no": 2,
+        "settled": 11,
+        "win_pct": 9.09,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 3,
+        "boat_no": 2,
+        "settled": 3,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 2,
+        "boat_no": 3,
+        "settled": 2,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 3
+      },
+      {
+        "wins": 1,
+        "total": 13,
+        "boat_no": 3,
+        "settled": 13,
+        "win_pct": 7.69,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 2,
+        "total": 28,
+        "boat_no": 3,
+        "settled": 28,
+        "win_pct": 7.14,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 3,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 3,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 4,
+        "turn_rating": 2
+      },
+      {
+        "wins": 4,
+        "total": 35,
+        "boat_no": 3,
+        "settled": 34,
+        "win_pct": 11.76,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 15,
+        "total": 86,
+        "boat_no": 3,
+        "settled": 86,
+        "win_pct": 17.44,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 3,
+        "total": 11,
+        "boat_no": 3,
+        "settled": 11,
+        "win_pct": 27.27,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 3,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 5,
+        "total": 13,
+        "boat_no": 3,
+        "settled": 13,
+        "win_pct": 38.46,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 3,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 4,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 3
+      },
+      {
+        "wins": 0,
+        "total": 3,
+        "boat_no": 4,
+        "settled": 3,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 2
+      },
+      {
+        "wins": 1,
+        "total": 16,
+        "boat_no": 4,
+        "settled": 16,
+        "win_pct": 6.25,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 0,
+        "total": 38,
+        "boat_no": 4,
+        "settled": 37,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 4,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 5
+      },
+      {
+        "wins": 2,
+        "total": 23,
+        "boat_no": 4,
+        "settled": 23,
+        "win_pct": 8.7,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 3,
+        "total": 78,
+        "boat_no": 4,
+        "settled": 78,
+        "win_pct": 3.85,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 8,
+        "boat_no": 4,
+        "settled": 8,
+        "win_pct": 0,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 1,
+        "total": 3,
+        "boat_no": 4,
+        "settled": 3,
+        "win_pct": 33.33,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 5,
+        "total": 20,
+        "boat_no": 4,
+        "settled": 20,
+        "win_pct": 25,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 4,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 5,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 2
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 5,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 2,
+        "turn_rating": 3
+      },
+      {
+        "wins": 0,
+        "total": 21,
+        "boat_no": 5,
+        "settled": 21,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 2,
+        "total": 31,
+        "boat_no": 5,
+        "settled": 31,
+        "win_pct": 6.45,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 1,
+        "total": 32,
+        "boat_no": 5,
+        "settled": 32,
+        "win_pct": 3.13,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 3,
+        "total": 73,
+        "boat_no": 5,
+        "settled": 72,
+        "win_pct": 4.17,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 1,
+        "total": 12,
+        "boat_no": 5,
+        "settled": 12,
+        "win_pct": 8.33,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 5,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 2
+      },
+      {
+        "wins": 0,
+        "total": 2,
+        "boat_no": 5,
+        "settled": 2,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 1,
+        "total": 14,
+        "boat_no": 5,
+        "settled": 14,
+        "win_pct": 7.14,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 1,
+        "total": 4,
+        "boat_no": 5,
+        "settled": 4,
+        "win_pct": 25,
+        "slit_rating": 5,
+        "turn_rating": 5
+      },
+      {
+        "wins": 0,
+        "total": 20,
+        "boat_no": 6,
+        "settled": 19,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 3
+      },
+      {
+        "wins": 2,
+        "total": 50,
+        "boat_no": 6,
+        "settled": 50,
+        "win_pct": 4,
+        "slit_rating": 3,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 1,
+        "boat_no": 6,
+        "settled": 1,
+        "win_pct": 0,
+        "slit_rating": 3,
+        "turn_rating": 5
+      },
+      {
+        "wins": 2,
+        "total": 32,
+        "boat_no": 6,
+        "settled": 32,
+        "win_pct": 6.25,
+        "slit_rating": 4,
+        "turn_rating": 3
+      },
+      {
+        "wins": 3,
+        "total": 59,
+        "boat_no": 6,
+        "settled": 59,
+        "win_pct": 5.08,
+        "slit_rating": 4,
+        "turn_rating": 4
+      },
+      {
+        "wins": 1,
+        "total": 17,
+        "boat_no": 6,
+        "settled": 17,
+        "win_pct": 5.88,
+        "slit_rating": 4,
+        "turn_rating": 5
+      },
+      {
+        "wins": 1,
+        "total": 4,
+        "boat_no": 6,
+        "settled": 4,
+        "win_pct": 25,
+        "slit_rating": 5,
+        "turn_rating": 3
+      },
+      {
+        "wins": 0,
+        "total": 5,
+        "boat_no": 6,
+        "settled": 5,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 4
+      },
+      {
+        "wins": 0,
+        "total": 4,
+        "boat_no": 6,
+        "settled": 4,
+        "win_pct": 0,
+        "slit_rating": 5,
+        "turn_rating": 5
+      }
+    ],
+    "target": [
+      {
+        "boat_no": 1,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 2,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 3,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 4,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 3,
+        "turn_rating": 4,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 5,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 4,
+        "turn_rating": 4,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 6,
+        "race_no": 1,
+        "race_date": "2025-08-09",
+        "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090701.htm",
+        "captured_at": "2026-10-30T16:09:59.878031+00:00",
+        "slit_rating": 3,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      }
+    ],
+    "quality": {
+      "races": 192,
+      "incomplete": 0
+    },
+    "results_examples": [
+      {
+        "trifecta": null,
+        "trifecta_payout": null,
+        "winning_technique_code": null
+      },
+      {
+        "trifecta": "123",
+        "trifecta_payout": 1170,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "132",
+        "trifecta_payout": 2040,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "124",
+        "trifecta_payout": 1570,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "145",
+        "trifecta_payout": 4470,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "153",
+        "trifecta_payout": 1690,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "142",
+        "trifecta_payout": 1080,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "235",
+        "trifecta_payout": 20300,
+        "winning_technique_code": "3"
+      },
+      {
+        "trifecta": "143",
+        "trifecta_payout": 2120,
+        "winning_technique_code": "2"
+      },
+      {
+        "trifecta": "153",
+        "trifecta_payout": 2140,
+        "winning_technique_code": "2"
+      }
+    ]
+  },
+  "more": {
+    "boat1": [
+      {
+        "n": 1,
+        "boat1_wins": 0,
+        "slit_rating": 2,
+        "turn_rating": 3,
+        "course1_wins": 0,
+        "course_known_1": 1
+      },
+      {
+        "n": 3,
+        "boat1_wins": 1,
+        "slit_rating": 3,
+        "turn_rating": 3,
+        "course1_wins": 1,
+        "course_known_1": 3
+      },
+      {
+        "n": 18,
+        "boat1_wins": 7,
+        "slit_rating": 3,
+        "turn_rating": 4,
+        "course1_wins": 7,
+        "course_known_1": 17
+      },
+      {
+        "n": 27,
+        "boat1_wins": 10,
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "course1_wins": 10,
+        "course_known_1": 26
+      },
+      {
+        "n": 105,
+        "boat1_wins": 60,
+        "slit_rating": 4,
+        "turn_rating": 4,
+        "course1_wins": 60,
+        "course_known_1": 104
+      },
+      {
+        "n": 17,
+        "boat1_wins": 11,
+        "slit_rating": 4,
+        "turn_rating": 5,
+        "course1_wins": 11,
+        "course_known_1": 16
+      },
+      {
+        "n": 1,
+        "boat1_wins": 1,
+        "slit_rating": 5,
+        "turn_rating": 3,
+        "course1_wins": 1,
+        "course_known_1": 1
+      },
+      {
+        "n": 13,
+        "boat1_wins": 10,
+        "slit_rating": 5,
+        "turn_rating": 4,
+        "course1_wins": 10,
+        "course_known_1": 13
+      },
+      {
+        "n": 6,
+        "boat1_wins": 6,
+        "slit_rating": 5,
+        "turn_rating": 5,
+        "course1_wins": 6,
+        "course_known_1": 6
+      }
+    ],
+    "by_boat": [
+      {
+        "n": 191,
+        "wins": 106,
+        "boat_no": 1
+      },
+      {
+        "n": 191,
+        "wins": 25,
+        "boat_no": 2
+      },
+      {
+        "n": 191,
+        "wins": 30,
+        "boat_no": 3
+      },
+      {
+        "n": 191,
+        "wins": 12,
+        "boat_no": 4
+      },
+      {
+        "n": 191,
+        "wins": 9,
+        "boat_no": 5
+      },
+      {
+        "n": 191,
+        "wins": 9,
+        "boat_no": 6
+      }
+    ],
+    "target_result": [
+      {
+        "race_no": 1,
+        "trifecta": null,
+        "race_date": "2025-08-09",
+        "trifecta_payout": null
+      }
+    ],
+    "placing_payout": [
+      {
+        "boats": 2,
+        "firsts": 0,
+        "thirds": 0,
+        "seconds": 0,
+        "slit_rating": 2,
+        "turn_rating": 2,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 5,
+        "firsts": 0,
+        "thirds": 0,
+        "seconds": 0,
+        "slit_rating": 2,
+        "turn_rating": 3,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 4,
+        "firsts": 0,
+        "thirds": 0,
+        "seconds": 0,
+        "slit_rating": 3,
+        "turn_rating": 2,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 86,
+        "firsts": 3,
+        "thirds": 12,
+        "seconds": 5,
+        "slit_rating": 3,
+        "turn_rating": 3,
+        "mean_winning_race_trifecta_yen": 16723
+      },
+      {
+        "boats": 189,
+        "firsts": 15,
+        "thirds": 22,
+        "seconds": 23,
+        "slit_rating": 3,
+        "turn_rating": 4,
+        "mean_winning_race_trifecta_yen": 15185
+      },
+      {
+        "boats": 3,
+        "firsts": 0,
+        "thirds": 0,
+        "seconds": 0,
+        "slit_rating": 3,
+        "turn_rating": 5,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 3,
+        "firsts": 0,
+        "thirds": 1,
+        "seconds": 1,
+        "slit_rating": 4,
+        "turn_rating": 2,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 191,
+        "firsts": 22,
+        "thirds": 31,
+        "seconds": 27,
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "mean_winning_race_trifecta_yen": 10733
+      },
+      {
+        "boats": 477,
+        "firsts": 98,
+        "thirds": 94,
+        "seconds": 94,
+        "slit_rating": 4,
+        "turn_rating": 4,
+        "mean_winning_race_trifecta_yen": 5228
+      },
+      {
+        "boats": 73,
+        "firsts": 19,
+        "thirds": 12,
+        "seconds": 17,
+        "slit_rating": 4,
+        "turn_rating": 5,
+        "mean_winning_race_trifecta_yen": 5441
+      },
+      {
+        "boats": 1,
+        "firsts": 0,
+        "thirds": 0,
+        "seconds": 1,
+        "slit_rating": 5,
+        "turn_rating": 2,
+        "mean_winning_race_trifecta_yen": null
+      },
+      {
+        "boats": 17,
+        "firsts": 5,
+        "thirds": 1,
+        "seconds": 3,
+        "slit_rating": 5,
+        "turn_rating": 3,
+        "mean_winning_race_trifecta_yen": 2580
+      },
+      {
+        "boats": 76,
+        "firsts": 22,
+        "thirds": 15,
+        "seconds": 17,
+        "slit_rating": 5,
+        "turn_rating": 4,
+        "mean_winning_race_trifecta_yen": 4905
+      },
+      {
+        "boats": 19,
+        "firsts": 7,
+        "thirds": 3,
+        "seconds": 3,
+        "slit_rating": 5,
+        "turn_rating": 5,
+        "mean_winning_race_trifecta_yen": 3826
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 /**
  * Gamagori official eye-chart parser.
  * Pure function; no network calls or database writes.
- * The chart's x/y axes should be independently verified against official labels.
+ * Official taka_chart.png: x = slit (1 left to 5 right), y = turn (1 bottom to 5 top).
  */
 export type ChartMark = {
   boat_no: number;
@@ -10,8 +10,11 @@ export type ChartMark = {
   arrow_direction: "up" | "down" | "none";
 };
 export function parseGamagoriChart(html: string): ChartMark[] {
-  const chart = html.match(/<div\b[^>]*\bid=["']chart["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? html;
-  const rows = [...chart.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)];
+  if ((html.match(/<div\b[^>]*\bid=["\']chart["\']/gi) || []).length !== 1) throw new Error("Exactly one chart required");
+  const chart = html.match(/<div\b[^>]*\bid=["']chart["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? "";
+  // Official HTML omits the final </tr>; HTML permits this before </table>.
+  const table = chart.match(/<table\b[^>]*>([\s\S]*?)<\/table>/i)?.[1] ?? "";
+  const rows = [...table.matchAll(/<tr\b[^>]*>([\s\S]*?)(?=<tr\b|$)/gi)];
   if (rows.length !== 5) throw new Error("Chart must contain five rows");
   const marks: ChartMark[] = [];
   rows.forEach((row, rowIndex) => {
