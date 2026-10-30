@@ -17,6 +17,25 @@ const ALERT_CHARACTERS={
 };
 const webhookCache=new Map();
 const WEBHOOK_TIMEOUT_MS=10_000;
+const WEBHOOK_SETUP_TIMEOUT_MS=4_000;
+async function webhookSetupApi(endpoint,options={}){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),WEBHOOK_SETUP_TIMEOUT_MS);
+  try {
+    const response=await fetch(`https://discord.com/api/v10${endpoint}`,{
+      method:options.method||"GET",
+      headers:{Authorization:`Bot ${process.env.DISCORD_BOT_TOKEN}`,...(options.body?{"Content-Type":"application/json"}:{})},
+      body:options.body?JSON.stringify(options.body):undefined,
+      signal:controller.signal,
+      cache:"no-store",
+    });
+    if(!response.ok){const error=new Error(`Discord webhook setup failed: ${response.status}`);error.status=response.status;throw error;}
+    return response.json();
+  } finally {clearTimeout(timeout);}
+}
+function logWebhookStage(stage, roleKey, startedAt, outcome="ok"){
+  console.info(JSON.stringify({level:"info",message:"discord webhook stage",stage,roleKey,outcome,durationMs:Date.now()-startedAt}));
+}
 const RUN_BUDGET_MS=18_000; // maxDuration（30秒）から、送信1件（最大10秒）と記録の分を残す
 
 // Discord 通知専用の DISCORD_ALERTS_CRON_SECRET があればそれだけを、無ければ従来の CRON_SECRET を受け付ける
@@ -116,11 +135,16 @@ async function getCharacterWebhook(channelId,roleKey){
   if(webhookCache.has(cacheKey))return webhookCache.get(cacheKey);
   const spec=ALERT_CHARACTERS[roleKey];
   if(!spec)throw new Error(`通知キャラクター設定がありません: ${roleKey}`);
-  const hooks=await discordApi(`/channels/${channelId}/webhooks`);
+  const lookupStart=Date.now();
+  let hooks;
+  try { hooks=await webhookSetupApi(`/channels/${channelId}/webhooks`); logWebhookStage("lookup",roleKey,lookupStart); }
+  catch(error){logWebhookStage("lookup",roleKey,lookupStart,"failed");throw error;}
   let hook=(hooks||[]).find(h=>h.name===spec.webhookName&&h.token);
   if(!hook){
     const avatar=await loadAvatarDataUri(spec);
-    hook=await discordApi(`/channels/${channelId}/webhooks`,{method:"POST",body:{name:spec.webhookName,avatar}});
+    const createStart=Date.now();
+    try { hook=await webhookSetupApi(`/channels/${channelId}/webhooks`,{method:"POST",body:{name:spec.webhookName,avatar}}); logWebhookStage("create",roleKey,createStart); }
+    catch(error){logWebhookStage("create",roleKey,createStart,"failed");throw error;}
   }
   if(!hook?.id||!hook?.token)throw new Error(`${spec.name}通知Webhookを作成できませんでした`);
   webhookCache.set(cacheKey,{hook,spec});
@@ -129,7 +153,9 @@ async function getCharacterWebhook(channelId,roleKey){
 async function sendCharacterAlert(channelId,content,{roleId,roleKey}={}){
   const {hook,spec}=await getCharacterWebhook(channelId,roleKey);
   const bodyContent=roleId?`<@&${roleId}> ${content}`:content;
-  const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true`,{
+  const sendStart=Date.now();
+  let response;
+  try { response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true`,{
     method:"POST",
     signal:AbortSignal.timeout(WEBHOOK_TIMEOUT_MS), // 応答が無ければ打ち切る（結果不明として再送しない）
     headers:{"Content-Type":"application/json"},
@@ -139,7 +165,8 @@ async function sendCharacterAlert(channelId,content,{roleId,roleKey}={}){
       allowed_mentions:roleId?{parse:[],roles:[roleId]}:{parse:[]},
     }),
     cache:"no-store",
-  });
+  }); logWebhookStage("send",roleKey,sendStart,response.ok?"ok":`http_${response.status}`); }
+  catch(error){logWebhookStage("send",roleKey,sendStart,"failed");throw error;}
   if(!response.ok){const text=await response.text().catch(()=>"");throw new Error(`Discord Webhook failed: ${response.status} ${text}`.slice(0,1200));}
   return response.json().catch(()=>null);
 }
@@ -168,7 +195,7 @@ async function deliver(admin,source,alert,channelKey,channelId,roleId){
     stillDeliverable:source.type===QUALITY_SOURCE.type?()=>true:()=>isDeliverable(alert),
     // キャラ別チャンネルはキャラ専用Webhook、全アラートと管理者向けはBoatStrikers Botアイコンのまま送信。
     send:()=>channelKey==="all"||source.type===QUALITY_SOURCE.type
-      ?sendDiscordMessage(channelId,source.build(alert),{roleId})
+      ?(channelKey==="all" ? discordApi(`/channels/${channelId}/messages`,{method:"POST",body:{content:String(roleId?`<@&${roleId}> ${source.build(alert)}`:source.build(alert)).slice(0,2000),allowed_mentions:roleId?{parse:[],roles:[roleId]}:{parse:[]}}}) : sendDiscordMessage(channelId,source.build(alert),{roleId}))
       :sendCharacterAlert(channelId,source.build(alert),{roleId,roleKey:source.roleKey}),
   });
 }

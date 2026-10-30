@@ -178,6 +178,12 @@ export async function deliverOnce(admin, { alertType, alertId, channelKey, send,
     const recorded = await finishClaim(admin, claimed, { error: `${marker}; ${text}` });
     return { sent: false, error: text, attempt: claimed.attempt, kind, recorded };
   }
-  const recorded = await finishClaim(admin, claimed, { sent_at: new Date().toISOString(), discord_message_id: message?.id || null, error: null });
+  if (!message?.id) {
+    // Discord が応答したものの投稿IDが無い場合、送信の成否は確定できない。
+    // 二重投稿を防ぐため再送せず、成功にも数えない。
+    const recorded = await finishClaim(admin, claimed, { error: "final=unknown; Discord response missing message id" });
+    return { sent: false, error: "Discord response missing message id", kind: "unknown", recorded };
+  }
+  const recorded = await finishClaim(admin, claimed, { sent_at: new Date().toISOString(), discord_message_id: message.id, error: null });
   return { sent: true, attempt: claimed.attempt, recorded };
 }
