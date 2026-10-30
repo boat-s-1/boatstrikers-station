@@ -145,18 +145,33 @@ function characterOpening(roleKey,alert,signalRoles){
     :`🚨 アタシは穴目線でチェック！ 人気薄や外枠に妙味が出る展開がないか見ていくね。`;
 }
 
-async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles){
+async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,admin){
   for(const roleKey of ["ichika","hatsune","kiina"]){
-    await sendCharacterThreadMessage(
-      parentChannelId,
-      thread.id,
-      roleKey,
-      characterOpening(roleKey,alert,signalRoles),
-    );
+    const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:roleKey};
+    const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+      p_race_date:identity.race_date,p_course_code:identity.course_code,
+      p_race_no:identity.race_no,p_message_key:identity.message_key,
+    });
+    if(claimError)throw claimError;
+    if(!claimed)continue;
+    try{
+      const message=await sendCharacterThreadMessage(parentChannelId,thread.id,roleKey,characterOpening(roleKey,alert,signalRoles));
+      const {error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"sent",discord_thread_id:thread.id,discord_message_id:message.id,updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending");
+      if(saveError)throw saveError;
+    }catch(error){
+      // A timeout or DB error may occur after Discord accepted the message.
+      // Never retry automatically; require reconciliation against Discord.
+      await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending");
+      throw error;
+    }
   }
 }
 
-async function ensureRaceThread(channel,record,activeThreads){
+async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
   const existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
@@ -181,7 +196,7 @@ async function ensureRaceThread(channel,record,activeThreads){
     `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`,
   ].join("\n");
   await sendDiscordMessage(thread.id,starter);
-  await postOpeningCharacters(channel.id,thread,alert,signalRoles);
+  await postOpeningCharacters(channel.id,thread,alert,signalRoles,admin);
   activeThreads.push(thread);
   return {thread,created:true};
 }
@@ -222,7 +237,7 @@ export async function GET(request){
     for(const record of unique.values()){
       if(summary.created>=MAX_RACES_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
-        const result=await ensureRaceThread(channel,record,activeThreads);
+        const result=await ensureRaceThread(channel,record,activeThreads,admin);
         if(result.created){
           summary.created+=1;
           summary.characterPosts+=3;
