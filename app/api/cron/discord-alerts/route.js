@@ -214,7 +214,7 @@ export async function GET(request){
         if(isDeliverable(rawAlert))return true;
         summary.expired+=1;return false;
       });
-      const targetKeys=["all",source.channel].filter(key=>key==="all"?allChannel:process.env[source.channel]);
+      const targetKeys=[source.channel].filter(key=>process.env[key]);
       // すべての通知先で送信済み・確定済みのアラートは、予想の計算もせずに飛ばす
       const finished=await finishedDeliveryKeys(admin,source.type,deliverable.map(a=>a.id));
       for(const rawAlert of deliverable){
@@ -226,7 +226,7 @@ export async function GET(request){
           alert.second_recommendation=context.second;
           alert.strength_score=context.score;
         }
-        const targets=[["all",allChannel,roles.all_alerts],[source.channel,process.env[source.channel],roles[source.roleKey]]];
+        const targets=[[source.channel,process.env[source.channel],roles[source.roleKey]]];
         for(const [channelKey,channelId,roleId] of targets){if(!channelId)continue;count(await deliver(admin,source,alert,channelKey,channelId,roleId));}
       }
     }
