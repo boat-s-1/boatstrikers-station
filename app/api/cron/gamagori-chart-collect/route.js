@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { collectCharts } from '../../../../lib/gamagori-chart-collector.mjs';
+import { withGamagoriLease } from '../../../../lib/gamagori-chart-lease.mjs';
 import { parseGamagoriChart } from '../../../../lib/gamagori-chart-parser';
 
 export const runtime = 'nodejs';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function GET(request) {
-  const secret = process.env.CRON_SECRET;
+  const secret = process.env.GAMAGORI_COLLECTOR_SECRET || process.env.CRON_SECRET;
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
@@ -29,7 +30,12 @@ export async function GET(request) {
       global: { fetch: (input, init) => fetch(input, { ...init,
         signal: AbortSignal.any([AbortSignal.timeout(3000), ...(init?.signal ? [init.signal] : [])]) }) } });
   try {
-    const result = await collectCharts({ db, parse: parseGamagoriChart, date, first, limit });
+    const leased = await withGamagoriLease(db, () => collectCharts({ db, parse: parseGamagoriChart, date, first, limit }));
+    if (leased.busy) {
+      console.info('gamagori_chart_collect', JSON.stringify({ date, status: 'collector_busy' }));
+      return NextResponse.json({ error: 'collector_busy' }, { status: 409, headers: { 'Retry-After': '120' } });
+    }
+    const result = leased.value;
     console.info('gamagori_chart_collect', JSON.stringify(result));
     return NextResponse.json(result, { status: result.results.some(x => ['failed', 'blocked_partial_existing'].includes(x.status)) ? 207 : 200 });
   } catch {
