@@ -17,6 +17,22 @@ const ALERT_CHARACTERS={
 };
 const webhookCache=new Map();
 const WEBHOOK_TIMEOUT_MS=10_000;
+const WEBHOOK_SETUP_TIMEOUT_MS=4_000;
+async function webhookSetupApi(endpoint,options={}){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),WEBHOOK_SETUP_TIMEOUT_MS);
+  try {
+    const response=await fetch(`https://discord.com/api/v10${endpoint}`,{
+      method:options.method||"GET",
+      headers:{Authorization:`Bot ${process.env.DISCORD_BOT_TOKEN}`,...(options.body?{"Content-Type":"application/json"}:{})},
+      body:options.body?JSON.stringify(options.body):undefined,
+      signal:controller.signal,
+      cache:"no-store",
+    });
+    if(!response.ok){const error=new Error(`Discord webhook setup failed: ${response.status}`);error.status=response.status;throw error;}
+    return response.json();
+  } finally {clearTimeout(timeout);}
+}
 function logWebhookStage(stage, roleKey, startedAt, outcome="ok"){
   console.info(JSON.stringify({level:"info",message:"discord webhook stage",stage,roleKey,outcome,durationMs:Date.now()-startedAt}));
 }
@@ -121,13 +137,13 @@ async function getCharacterWebhook(channelId,roleKey){
   if(!spec)throw new Error(`通知キャラクター設定がありません: ${roleKey}`);
   const lookupStart=Date.now();
   let hooks;
-  try { hooks=await discordApi(`/channels/${channelId}/webhooks`); logWebhookStage("lookup",roleKey,lookupStart); }
+  try { hooks=await webhookSetupApi(`/channels/${channelId}/webhooks`); logWebhookStage("lookup",roleKey,lookupStart); }
   catch(error){logWebhookStage("lookup",roleKey,lookupStart,"failed");throw error;}
   let hook=(hooks||[]).find(h=>h.name===spec.webhookName&&h.token);
   if(!hook){
     const avatar=await loadAvatarDataUri(spec);
     const createStart=Date.now();
-    try { hook=await discordApi(`/channels/${channelId}/webhooks`,{method:"POST",body:{name:spec.webhookName,avatar}}); logWebhookStage("create",roleKey,createStart); }
+    try { hook=await webhookSetupApi(`/channels/${channelId}/webhooks`,{method:"POST",body:{name:spec.webhookName,avatar}}); logWebhookStage("create",roleKey,createStart); }
     catch(error){logWebhookStage("create",roleKey,createStart,"failed");throw error;}
   }
   if(!hook?.id||!hook?.token)throw new Error(`${spec.name}通知Webhookを作成できませんでした`);
