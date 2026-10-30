@@ -298,3 +298,26 @@ test('管理者向けデータ欠損通知：翌日に前日の日付で作ら�
   // 前日の計算は JST
   assert.match(route, /function jstYesterday\(\)\{return new Intl\.DateTimeFormat\("en-CA",\{timeZone:"Asia\/Tokyo"/);
 });
+
+
+test('DiscordがメッセージIDを返さない場合は成功扱いせず再送もしない', async () => {
+  const db = fakeDb();
+  let sends = 0;
+  const send = async () => { sends++; return null; };
+  const first = await deliverOnce(db, { ...key, alertId: 987654, send });
+  assert.equal(first.sent, false);
+  assert.equal(first.kind, 'unknown');
+  assert.equal(db.rows[0].sent_at, null);
+  assert.match(db.rows[0].error, /^final=unknown;/);
+  const second = await deliverOnce(db, { ...key, alertId: 987654, send });
+  assert.equal(second.skipped, true);
+  assert.equal(sends, 1);
+});
+
+test('全体チャンネル送信はDiscord APIを呼び出す経路を持つ', () => {
+  const route = readFileSync(new URL('../app/api/cron/discord-alerts/route.js', import.meta.url), 'utf8');
+  assert.match(route, /channelKey==="all" \? discordApi\(/);
+  assert.match(route, /logWebhookStage\("lookup"/);
+  assert.match(route, /logWebhookStage\("create"/);
+  assert.match(route, /logWebhookStage\("send"/);
+});
