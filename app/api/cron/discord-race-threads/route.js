@@ -23,6 +23,9 @@ const CHARACTERS={
 };
 
 const webhookCache=new Map();
+const DISCORD_SEND_TIMEOUT_MS=10_000;
+const MAX_RACES_PER_RUN=2;
+const RUN_BUDGET_MS=20_000;
 
 function authorized(request){
   return isDiscordAlertsCronAuthorized(request);
@@ -107,6 +110,7 @@ async function sendCharacterThreadMessage(parentChannelId,threadId,roleKey,conte
   const {hook,spec}=await getCharacterWebhook(parentChannelId,roleKey);
   const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true&thread_id=${threadId}`,{
     method:"POST",
+    signal:AbortSignal.timeout(DISCORD_SEND_TIMEOUT_MS),
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       username:spec.name,
@@ -119,7 +123,9 @@ async function sendCharacterThreadMessage(parentChannelId,threadId,roleKey,conte
     const text=await response.text().catch(()=>"");
     throw new Error(`${spec.name}実況投稿に失敗しました: ${response.status} ${text}`.slice(0,1200));
   }
-  return response.json().catch(()=>null);
+  const message=await response.json().catch(()=>null);
+  if(!message?.id)throw new Error(`${spec.name}実況投稿のDiscordメッセージIDを確認できませんでした`);
+  return message;
 }
 
 function characterOpening(roleKey,alert,signalRoles){
@@ -185,7 +191,8 @@ export async function GET(request){
 
   const raceDate=jstToday();
   const admin=getAdminClient();
-  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0};
+  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0,deferred:0};
+  const startedAt=Date.now();
 
   try{
     const channel=await findRaceChatChannel();
@@ -213,6 +220,7 @@ export async function GET(request){
     summary.races=unique.size;
     const activeThreads=await getActiveThreads();
     for(const record of unique.values()){
+      if(summary.created>=MAX_RACES_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
         const result=await ensureRaceThread(channel,record,activeThreads);
         if(result.created){
