@@ -29,10 +29,5 @@ jobs:
             [ "$f" = "tests/discord-alert-delivery.test.mjs" ] && continue
             node --test "$f"
           done
-      - name: Next.js compile and build (Firebase credentials unavailable in CI)
+      - name: Next.js build
         run: npm run build
-        continue-on-error: true
-      - name: Verify build compiled and failed only during environment-dependent prerender
-        run: |
-          echo 'The build step is diagnostic only until Firebase CI configuration is available.'
-          echo 'Vercel deployment status must be checked independently before merge.'
