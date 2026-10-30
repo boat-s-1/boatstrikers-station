@@ -20,7 +20,7 @@ export async function GET(request) {
    collect:options=>collectCharts({db,parse:parseGamagoriChart,...options})}));
   if(leased.busy)return Response.json({error:'collector_busy'},{status:409,headers:{'Retry-After':'120'}});
   console.info('gamagori_orchestrate',JSON.stringify(leased.value));
-  return Response.json(leased.value,{status:leased.value.results.some(r=>r.status==='failed'||r.status==='blocked_partial_existing')?207:200});
+  return Response.json(leased.value,{status:['calendar_unknown','event_data_missing'].includes(leased.value.outcome)?503:leased.value.results.some(r=>r.status==='failed'||r.status==='blocked_partial_existing')?207:200});
  }catch{
   console.error('gamagori_orchestrate',JSON.stringify({date,error:'orchestration_failed'}));
   return Response.json({error:'orchestration_failed'},{status:502});
