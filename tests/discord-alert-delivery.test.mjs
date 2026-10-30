@@ -155,7 +155,7 @@ test('送信済みの行は、失敗の記録で上書きしない（処理中�
   assert.equal(db.rows[0].discord_message_id, 'other');
 });
 
-test('discord-alerts route：送信前に判定と配信の権利の取得を行い、当日分だけを読む。通知先とロールは変えない', () => {
+test('discord-alerts route：送信前に判定と配信の権利の取得を行い、当日分だけを読む。キャラ別通知先とロールを維持する', () => {
   const route = readFileSync('app/api/cron/discord-alerts/route.js', 'utf8');
   assert.match(route, /import \{ deliverOnce, finishedDeliveryKeys, isDeliverable \} from "\.\.\/\.\.\/\.\.\/lib\/discordAlertDelivery"/);
   assert.match(route, /if\(isDeliverable\(rawAlert\)\)return true;/);
@@ -163,7 +163,7 @@ test('discord-alerts route：送信前に判定と配信の権利の取得を行
   assert.doesNotMatch(route, /alreadySent/);
   assert.doesNotMatch(route, /upsert\(\{alert_type/); // 送信後の上書き upsert は使わない
   assert.match(route, /\.from\(source\.table\)\.select\(source\.select\)\.eq\("race_date",raceDate\)/);
-  assert.match(route, /const targets=\[\["all",allChannel,roles\.all_alerts\],\[source\.channel,process\.env\[source\.channel\],roles\[source\.roleKey\]\]\];/);
+  assert.match(route, /const targets=\[\[source\.channel,process\.env\[source\.channel\],roles\[source\.roleKey\]\]\];/);
   for (const channel of ['DISCORD_KIINA_CHANNEL_ID', 'DISCORD_ICHIKA_CHANNEL_ID', 'DISCORD_HATSUNE_CHANNEL_ID']) assert.match(route, new RegExp(channel));
   assert.match(route, /DISCORD_ADMIN_ALERTS_CHANNEL_ID/);
 });
@@ -278,7 +278,8 @@ test('discord-alerts route：送信直前の再判定・時間の予算・Webhoo
 test('管理者向けデータ欠損通知：Bot のメッセージで管理者チャンネルへ送る。明示された管理者チャンネルが無ければ送らない', () => {
   const route = readFileSync('app/api/cron/discord-alerts/route.js', 'utf8');
   // キャラ用 Webhook（キャラ設定が必要）ではなく、Bot のメッセージで送る
-  assert.match(route, /channelKey==="all" \? discordApi\(/);
+  assert.match(route, /const targetKeys=\[source\.channel\]/);
+  assert.doesNotMatch(route, /const targets=\[\["all"/);
   assert.match(route, /: sendDiscordMessage\(channelId,source\.build\(alert\),\{roleId\}\)/);
   // 管理者向けは明示された管理者チャンネルにのみ送る
   assert.match(route, /const adminChannel=process\.env\.DISCORD_ADMIN_ALERTS_CHANNEL_ID;\n\s*if\(adminChannel&&String\(adminChannel\)!==String\(allChannel\|\|""\)\)\{/);
@@ -315,7 +316,7 @@ test('DiscordがメッセージIDを返さない場合は成功扱いせず再�
   assert.equal(sends, 1);
 });
 
-test('全体チャンネル送信はDiscord APIを呼び出す経路を持つ', () => {
+test('全体通知は送信対象から除外しキャラ別Webhook送信は維持する', () => {
   const route = readFileSync(new URL('../app/api/cron/discord-alerts/route.js', import.meta.url), 'utf8');
   assert.match(route, /channelKey==="all" \? discordApi\(/);
   assert.match(route, /logWebhookStage\("lookup"/);
