@@ -10,15 +10,15 @@ export type ChartMark = {
   arrow_direction: "up" | "down" | "none";
 };
 export function parseGamagoriChart(html: string): ChartMark[] {
-  const chart = html.match(/<div\\b[^>]*\\bid=["']chart["'][^>]*>([\\s\\S]*?)<\\/div>/i)?.[1] ?? html;
-  const rows = [...chart.matchAll(/<tr\\b[^>]*>([\\s\\S]*?)<\\/tr>/gi)];
+  const chart = html.match(/<div\b[^>]*\bid=["']chart["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? html;
+  const rows = [...chart.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)];
   if (rows.length !== 5) throw new Error("Chart must contain five rows");
   const marks: ChartMark[] = [];
   rows.forEach((row, rowIndex) => {
-    const cells = [...row[1].matchAll(/<td\\b[^>]*>([\\s\\S]*?)<\\/td>/gi)];
+    const cells = [...row[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)];
     if (cells.length !== 5) throw new Error("Chart must contain five columns");
     cells.forEach((cell, columnIndex) => {
-      for (const match of cell[1].matchAll(/taka_([1-6])M(_up|_down)?\\.png/gi)) {
+      for (const match of cell[1].matchAll(/taka_([1-6])M(_up|_down)?\.png/gi)) {
         marks.push({
           boat_no: Number(match[1]),
           slit_rating: columnIndex + 1,
