@@ -31,6 +31,8 @@ jobs:
           done
       - name: Next.js build with non-production Firebase CI placeholders
         env:
+          NEXT_PUBLIC_SUPABASE_URL: 'https://ci-placeholder.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'ci-placeholder-anon-key'
           NEXT_PUBLIC_FIREBASE_API_KEY: 'AIzaSyCIPlaceholder000000000000000000000'
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: 'ci-placeholder.firebaseapp.com'
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'ci-placeholder'
