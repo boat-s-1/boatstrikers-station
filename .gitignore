@@ -1,0 +1,5 @@
+# Next.js のビルド出力（ローカルの next build で作られる）
+.next/
+
+# npm の依存パッケージ
+node_modules/
