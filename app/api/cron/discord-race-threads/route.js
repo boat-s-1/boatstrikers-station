@@ -146,6 +146,7 @@ function characterOpening(roleKey,alert,signalRoles){
 }
 
 async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,admin){
+  let posted=0;
   for(const roleKey of ["ichika","hatsune","kiina"]){
     const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:roleKey};
     const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
@@ -161,6 +162,7 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
         .match(identity).eq("state","sending").select("id");
       if(saveError)throw saveError;
       if(savedRows?.length!==1)throw new Error("Discord delivery confirmation did not update exactly one row");
+      posted+=1;
     }catch(error){
       // A timeout or DB error may occur after Discord accepted the message.
       // Never retry automatically; require reconciliation against Discord.
@@ -171,6 +173,7 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
       throw error;
     }
   }
+  return posted;
 }
 
 async function postStarterOnce(thread,alert,admin){
@@ -268,8 +271,8 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
   }
   await postStarterOnce(existing,alert,admin);
   // Existing thread is safe to reuse. Pending character messages are claimed individually.
-  await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
-  return {thread:existing,created:!wasExisting,deferred:false};
+  const characterPosts=await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
+  return {thread:existing,created:!wasExisting,deferred:false,characterPosts};
 }
 
 export async function GET(request){
@@ -309,9 +312,9 @@ export async function GET(request){
       if(summary.created>=MAX_RACES_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
         const result=await ensureRaceThread(channel,record,activeThreads,admin);
+        summary.characterPosts+=result.characterPosts||0;
         if(result.deferred){summary.deferred+=1;}else if(result.created){
           summary.created+=1;
-          summary.characterPosts+=3;
         }else summary.existing+=1;
       }catch(error){
         summary.failed+=1;
