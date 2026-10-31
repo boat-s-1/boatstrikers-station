@@ -27,7 +27,8 @@ function fixture({timeoutKey=null}={}){
         return {select(){return this},eq(){return this},order(){return this},limit:async()=>({data:table==="bs_exhibition_alerts"?[alert]:[],error:null})};
       }
       return {update(value){this.value=value;return this},match(identity){this.identity=identity;return this},eq(){return this},
-        select(columns){if(columns==="state,discord_thread_id")return this;return this.writeUpdate()},\n        async writeUpdate(){const k=keyOf(this.identity),previous=state.get(k);if(previous?.state!=="sending")return {data:[],error:null};state.set(k,{...previous,...this.value});return {data:[{id:1}],error:null}},
+        select(columns){if(columns==="state,discord_thread_id")return this;return this.writeUpdate()},
+        async writeUpdate(){const k=keyOf(this.identity),previous=state.get(k);if(previous?.state!=="sending")return {data:[],error:null};state.set(k,{...previous,...this.value});return {data:[{id:1}],error:null}},
         maybeSingle:async function(){return {data:state.get(keyOf(this.identity))||null,error:null}},
         async selectLegacy(){const k=keyOf(this.identity),previous=state.get(k);
           if(previous?.state!=="sending")return {data:[],error:null};
