@@ -209,21 +209,45 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
   const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:"thread"};
-  let existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
-  const wasExisting=Boolean(existing);
-  if(!existing){
+  // History is authoritative. Never trust an active-thread name alone.
+  const {data:history,error:historyError}=await admin.from("bs_discord_race_thread_deliveries")
+    .select("state,discord_thread_id").match(identity).maybeSingle();
+  if(historyError)throw historyError;
+  let existing=null;
+  let wasExisting=false;
+  if(history){
+    if(history.state!=="sent"||!history.discord_thread_id){
+      console.warn(JSON.stringify({level:"warn",message:"discord thread history unresolved",race:raceKey(alert)}));
+      return {thread:null,created:false,deferred:true};
+    }
+    try{
+      // Read only. Archived threads may still be fetched by their channel ID.
+      const verified=await discordApi(`/channels/${encodeURIComponent(history.discord_thread_id)}`);
+      if(String(verified?.id)!==String(history.discord_thread_id)||
+         String(verified?.parent_id)!==String(channel.id)||
+         verified?.name!==name||verified?.type!==11||
+         verified?.thread_metadata?.archived===true){
+        console.warn(JSON.stringify({level:"warn",message:"discord thread requires manual reconciliation",race:raceKey(alert)}));
+        return {thread:null,created:false,deferred:true};
+      }
+      existing=verified;
+      wasExisting=true;
+    }catch(error){
+      console.warn(JSON.stringify({level:"warn",message:"discord thread lookup failed; manual reconciliation required",race:raceKey(alert),error:String(error?.message||error).slice(0,200)}));
+      return {thread:null,created:false,deferred:true};
+    }
+  }else{
+    // A pre-existing thread with the same name is not proof of identity.
+    if(activeThreads.some(t=>t.parent_id===channel.id&&t.name===name)){
+      console.warn(JSON.stringify({level:"warn",message:"untracked Discord thread; manual reconciliation required",race:raceKey(alert)}));
+      return {thread:null,created:false,deferred:true};
+    }
     const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
       p_race_date:identity.race_date,p_course_code:identity.course_code,
       p_race_no:identity.race_no,p_message_key:"thread",
     });
     if(claimError)throw claimError;
-    if(!claimed){
-      // A persisted sent/unknown/sending claim must never trigger another POST.
-      // An archived or deleted thread is not listed among active threads.
-      // Stop safely until a separate reconciliation verifies the Discord thread ID.
-      console.warn(JSON.stringify({level:"warn",message:"discord thread history requires reconciliation",race:raceKey(alert)}));
-      return {thread:null,created:false,deferred:true};
-    }
+    if(!claimed)return {thread:null,created:false,deferred:true};
     try{
       existing=await discordApi(`/channels/${channel.id}/threads`,{
         method:"POST",
