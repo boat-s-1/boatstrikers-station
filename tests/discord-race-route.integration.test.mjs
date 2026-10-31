@@ -64,7 +64,7 @@ function fixture({timeoutKey=null}={}){
     AbortSignal,Date,Intl,Map,Set,JSON,String,Number,Error,console,
   };
   vm.runInNewContext(source+"\nthis.routeGET=GET;",sandbox,{filename:path});
-  return {GET:sandbox.routeGET,calls,state};
+  return {GET:sandbox.routeGET,calls,state,threads};
 }
 test("full route: concurrent runs do not duplicate thread/starter/characters",async()=>{
   const f=fixture();
@@ -92,4 +92,24 @@ test("full route: partial character timeout does not duplicate successful posts"
   const f=fixture({timeoutKey:"hatsune"});await f.GET({});await f.GET({});
   assert.equal(f.calls.filter(x=>x==="character:ichika").length,1);
   assert.equal(f.calls.filter(x=>x==="character:hatsune").length,1);
+});
+
+test("history says sent but active Discord thread is missing: safe defer, no duplicate",async()=>{
+  const f=fixture();
+  const key=[date,"01",1,"thread"].join(":");
+  f.state.set(key,{state:"sent",discord_thread_id:"archived-or-deleted"});
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(result.body.created,0);
+  assert.equal(result.body.failed,0);
+  assert.equal(f.calls.length,0);
+  assert.equal(f.state.get(key).discord_thread_id,"archived-or-deleted");
+});
+test("history says unknown but active Discord thread is missing: safe defer",async()=>{
+  const f=fixture();
+  const key=[date,"01",1,"thread"].join(":");
+  f.state.set(key,{state:"unknown"});
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(f.calls.length,0);
 });
