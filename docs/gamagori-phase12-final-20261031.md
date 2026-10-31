@@ -1,7 +1,7 @@
 # PHASE 12 観測証跡の永続化と正常収集条件
 
 2026-10-31 JST。本番導入判定は **HOLD**。
-PHASE11の84件から44件追加し、**128 PASS / 0 FAIL / 0 skipped**。コレクター専用の追記型観測、隔離DBでの永続化・再送、Preview用の観測/監視APIを実装した。公式の肯定的な発売表示も実測できたが、当日の6艇展示・チャートは未公開で、正常保存とVercel実行経路は未検証。
+PHASE11の84件から45件追加し、**129 PASS / 0 FAIL / 0 skipped**。コレクター専用の追記型観測、隔離DBでの永続化・再送、Preview用の観測/監視APIを実装した。公式の肯定的な発売表示も実測できたが、当日の6艇展示・チャートは未公開で、正常保存とVercel実行経路は未検証。
 
 ## 実装と適用範囲
 
@@ -66,7 +66,7 @@ RLS有効。PUBLIC/anon/authenticatedは表とRPCの権限なし。service_role�
 
 | 項目 | 結果 |
 |---|---|
-| 単体・実fixture・回帰 | **128 PASS / 0 FAIL / 0 skipped**。既報84＋観測13＋発売候補7＋SQL16＋API handler8 |
+| 単体・実fixture・回帰 | **129 PASS / 0 FAIL / 0 skipped**。既報84＋観測14＋発売候補7＋SQL16＋API handler8 |
 | 隔離PostgreSQLでのmigration/RPC | PASS。6艇内容成功時のDB時刻、空preview/偽時刻/古いHTTP/不一致拒否、idempotency、役割制限、追記専用を実行 |
 | 実中止・欠場 | PASS。2024-08-31の実中止fragment、10/7 7Rの実K0、K1/S系等の既知コードを優先。会場発売表示があっても許可しない |
 | 当日採取済み応答の永続再生 | PASS（拒否観測）。1件保持、再送追加0、checked_at=NULL、チャート保存0 |
