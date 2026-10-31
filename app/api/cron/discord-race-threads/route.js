@@ -156,16 +156,18 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
     if(!claimed)continue;
     try{
       const message=await sendCharacterThreadMessage(parentChannelId,thread.id,roleKey,characterOpening(roleKey,alert,signalRoles));
-      const {error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
+      const {data:savedRows,error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
         .update({state:"sent",discord_thread_id:thread.id,discord_message_id:message.id,updated_at:new Date().toISOString()})
-        .match(identity).eq("state","sending");
+        .match(identity).eq("state","sending").select("id");
       if(saveError)throw saveError;
+      if(savedRows?.length!==1)throw new Error("Discord delivery confirmation did not update exactly one row");
     }catch(error){
       // A timeout or DB error may occur after Discord accepted the message.
       // Never retry automatically; require reconciliation against Discord.
-      await admin.from("bs_discord_race_thread_deliveries")
+      const {error:markError}=await admin.from("bs_discord_race_thread_deliveries")
         .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
         .match(identity).eq("state","sending");
+      if(markError)console.error("discord delivery unknown-state update failed",String(markError.message).slice(0,300));
       throw error;
     }
   }
@@ -175,7 +177,10 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
   const existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
-  if(existing)return {thread:existing,created:false};
+  if(existing){
+    await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
+    return {thread:existing,created:false};
+  }
 
   const thread=await discordApi(`/channels/${channel.id}/threads`,{
     method:"POST",
