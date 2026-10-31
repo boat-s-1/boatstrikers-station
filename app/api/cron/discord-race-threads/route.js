@@ -173,6 +173,38 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
   }
 }
 
+async function postStarterOnce(thread,alert,admin){
+  const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:"starter"};
+  const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+    p_race_date:identity.race_date,p_course_code:identity.course_code,
+    p_race_no:identity.race_no,p_message_key:"starter",
+  });
+  if(claimError)throw claimError;
+  if(!claimed)return false;
+  const starter=[
+    "🏁 **BoatStrikers 注目レース実況**",
+    `${alert.course_name} ${alert.race_no}R｜〆切 ${closeText(alert)}`,
+    "このスレッドで一果・初音・キイナと一緒にレースを追います。",
+    "予想・展示後の変化・実況・結果振り返りをここにまとめていきます。",
+    `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`,
+  ].join("\n");
+  try{
+    const message=await sendDiscordMessage(thread.id,starter);
+    if(!message?.id)throw new Error("Starter message ID not confirmed");
+    const {data:rows,error}=await admin.from("bs_discord_race_thread_deliveries")
+      .update({state:"sent",discord_thread_id:thread.id,discord_message_id:message.id,updated_at:new Date().toISOString()})
+      .match(identity).eq("state","sending").select("id");
+    if(error||rows?.length!==1)throw error||new Error("Starter confirmation did not update exactly one row");
+    return true;
+  }catch(error){
+    const {error:markError}=await admin.from("bs_discord_race_thread_deliveries")
+      .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+      .match(identity).eq("state","sending");
+    if(markError)console.error("starter unknown-state update failed",String(markError.message).slice(0,300));
+    throw error;
+  }
+}
+
 async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
@@ -204,6 +236,7 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
       throw error;
     }
   }
+  await postStarterOnce(existing,alert,admin);
   // Existing thread is safe to reuse. Pending character messages are claimed individually.
   await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
   return {thread:existing,created:!wasExisting,deferred:false};
