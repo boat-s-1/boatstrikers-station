@@ -1,0 +1,308 @@
+{
+  "today": {
+    "date": "2026-10-31",
+    "races": [
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 1,
+        "deadline": "15:21:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 2,
+        "deadline": "15:48:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 3,
+        "deadline": "16:16:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 4,
+        "deadline": "16:43:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 5,
+        "deadline": "17:10:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 6,
+        "deadline": "17:37:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 7,
+        "deadline": "18:04:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 8,
+        "deadline": "18:33:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 9,
+        "deadline": "19:04:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 10,
+        "deadline": "19:36:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 11,
+        "deadline": "20:07:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 12,
+        "deadline": "20:38:00",
+        "finished": null,
+        "preview_at": null,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      }
+    ],
+    "live_sync": null
+  },
+  "privilege": {
+    "anon_execute": false,
+    "service_execute": true,
+    "security_definer": false
+  },
+  "historical": {
+    "date": "2026-10-30",
+    "races": [
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 1,
+        "deadline": "15:19:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T06:15:00.264602+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 2,
+        "deadline": "15:44:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T06:36:00.401335+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 3,
+        "deadline": "16:11:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T07:06:00.354312+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 4,
+        "deadline": "16:39:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T07:36:00.513591+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 5,
+        "deadline": "17:08:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T07:54:00.329794+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 6,
+        "deadline": "17:37:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T08:24:00.222283+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 7,
+        "deadline": "18:04:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T08:54:00.258828+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 8,
+        "deadline": "18:32:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T09:24:00.285329+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 9,
+        "deadline": "19:02:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T09:54:00.452579+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 10,
+        "deadline": "19:32:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T10:24:00.301125+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 11,
+        "deadline": "20:04:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T10:54:00.298548+00:00"
+      },
+      {
+        "boats": 6,
+        "cancel": null,
+        "status": "scheduled",
+        "program": true,
+        "race_no": 12,
+        "deadline": "20:35:00",
+        "finished": true,
+        "preview_at": "2026-10-30T14:27:00.071439+00:00",
+        "preview_boats": 6,
+        "entry_preview_at": "2026-10-30T11:27:00.239351+00:00"
+      }
+    ],
+    "live_sync": "2026-10-30T14:27:00.071439+00:00"
+  },
+  "program_writers": null
+}

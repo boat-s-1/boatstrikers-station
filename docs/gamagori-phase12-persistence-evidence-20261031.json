@@ -1,0 +1,115 @@
+{
+  "mode": "offline_replay_of_real_responses_into_isolated_local_postgres",
+  "capture_completed_at": "2026-10-31T05:18:19.819Z",
+  "first": {
+    "id": "11724149-b8a6-4ba8-af51-c2ab637c3a8c",
+    "inserted": true,
+    "checked_at": null,
+    "collection_permitted": false
+  },
+  "retry": {
+    "id": "11724149-b8a6-4ba8-af51-c2ab637c3a8c",
+    "inserted": false,
+    "checked_at": null,
+    "collection_permitted": false
+  },
+  "persisted": [
+    {
+      "id": "11724149-b8a6-4ba8-af51-c2ab637c3a8c",
+      "race_date": "2026-10-31T00:00:00.000Z",
+      "race_no": 1,
+      "source": "gamagori_official_crosscheck_v1",
+      "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610310701.htm",
+      "html_sha256": "8e3e7417bb3fc2ffd4e16ae47811b7abee10d7ab91104b7c2fd0e53de49df873",
+      "sources": [
+        {
+          "age": 0,
+          "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/syusso/syusso202610310701.htm",
+          "kind": "program",
+          "error": null,
+          "http_date": "Sat, 31 Oct 2026 05:17:57 GMT",
+          "html_sha256": "a58063d1d3c387ba353aa8d063107c76d2d1aaa91b5f1e27bb47bb902aacc920",
+          "http_status": 200,
+          "received_at": "2026-10-31T05:17:58.101978+00:00"
+        },
+        {
+          "age": 0,
+          "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2026103107.htm",
+          "kind": "index",
+          "error": null,
+          "http_date": "Sat, 31 Oct 2026 05:18:05 GMT",
+          "html_sha256": "2f478993daf48d52757d271348036894ebb54adde782ec6f03c86755f7672e73",
+          "http_status": 200,
+          "received_at": "2026-10-31T05:18:05.291169+00:00"
+        },
+        {
+          "age": 0,
+          "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610310701.htm",
+          "kind": "choku",
+          "error": null,
+          "http_date": "Sat, 31 Oct 2026 05:18:13 GMT",
+          "html_sha256": "8e3e7417bb3fc2ffd4e16ae47811b7abee10d7ab91104b7c2fd0e53de49df873",
+          "http_status": 200,
+          "received_at": "2026-10-31T05:18:13.638883+00:00"
+        },
+        {
+          "age": 0,
+          "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+          "kind": "openapi",
+          "error": null,
+          "http_date": "Sat, 31 Oct 2026 05:18:19 GMT",
+          "html_sha256": "99b26716a03d6058358ce5b720101ae5e6aaa840fe633d2a68bcf5c93feb8e62",
+          "http_status": 200,
+          "received_at": "2026-10-31T05:18:19.819310+00:00"
+        }
+      ],
+      "boats": [
+        {
+          "course": null,
+          "boat_no": 1,
+          "registration": 5321,
+          "exhibition_time": null
+        },
+        {
+          "course": null,
+          "boat_no": 2,
+          "registration": 3747,
+          "exhibition_time": null
+        },
+        {
+          "course": null,
+          "boat_no": 3,
+          "registration": 3905,
+          "exhibition_time": null
+        },
+        {
+          "course": null,
+          "boat_no": 4,
+          "registration": 3696,
+          "exhibition_time": null
+        },
+        {
+          "course": null,
+          "boat_no": 5,
+          "registration": 4094,
+          "exhibition_time": null
+        },
+        {
+          "course": null,
+          "boat_no": 6,
+          "registration": 3303,
+          "exhibition_time": null
+        }
+      ],
+      "validation_result": "rejected",
+      "reason": "six_boat_preview_unverified",
+      "sale_state": "unknown",
+      "fetched_at": "2026-10-31T05:18:19.819Z",
+      "recorded_at": "2026-10-31T05:25:43.692Z",
+      "checked_at": null,
+      "collection_permitted": false
+    }
+  ],
+  "chart_writes": 0,
+  "production_writes": 0
+}
