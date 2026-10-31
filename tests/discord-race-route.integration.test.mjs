@@ -26,7 +26,8 @@ function fixture({timeoutKey=null}={}){
       if(table!=="bs_discord_race_thread_deliveries"){
         return {select(){return this},eq(){return this},order(){return this},limit:async()=>({data:table==="bs_exhibition_alerts"?[alert]:[],error:null})};
       }
-      return {update(value){this.value=value;return this},match(identity){this.identity=identity;return this},eq(){return this},\n        maybeSingle:async function(){return {data:state.get(keyOf(this.identity))||null,error:null}},
+      return {update(value){this.value=value;return this},match(identity){this.identity=identity;return this},eq(){return this},
+        maybeSingle:async function(){return {data:state.get(keyOf(this.identity))||null,error:null}},
         async select(){const k=keyOf(this.identity),previous=state.get(k);
           if(previous?.state!=="sending")return {data:[],error:null};
           state.set(k,{...previous,...this.value});return {data:[{id:1}],error:null};},
@@ -38,7 +39,8 @@ function fixture({timeoutKey=null}={}){
     if(endpoint.includes("/channels")&&endpoint.endsWith("/threads")&&opts?.method==="POST"){
       calls.push("thread");const t={id:"t"+(++sequence),name:opts.body.name,parent_id:"channel",type:11};threads.push(t);return t;
     }
-    if(endpoint.endsWith("/threads/active"))return {threads:[...threads]};\n    if(endpoint.startsWith("/channels/t"))return threads.find(t=>"/channels/"+t.id===endpoint)||null;
+    if(endpoint.endsWith("/threads/active"))return {threads:[...threads]};
+    if(endpoint.startsWith("/channels/t"))return threads.find(t=>"/channels/"+t.id===endpoint)||null;
     if(endpoint.endsWith("/channels"))return [{id:"channel",name:"レース実況",type:0}];
     if(endpoint.endsWith("/webhooks"))return ["一果","初音","キイナ"].map((name,i)=>({id:"webhook-"+i,token:"mock",avatar:"avatar",name:"BSC 実況 "+name}));
     return [];
