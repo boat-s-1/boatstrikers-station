@@ -217,7 +217,13 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
       p_race_no:identity.race_no,p_message_key:"thread",
     });
     if(claimError)throw claimError;
-    if(!claimed)return {thread:null,created:false,deferred:true};
+    if(!claimed){
+      // A persisted sent/unknown/sending claim must never trigger another POST.
+      // An archived or deleted thread is not listed among active threads.
+      // Stop safely until a separate reconciliation verifies the Discord thread ID.
+      console.warn(JSON.stringify({level:"warn",message:"discord thread history requires reconciliation",race:raceKey(alert)}));
+      return {thread:null,created:false,deferred:true};
+    }
     try{
       existing=await discordApi(`/channels/${channel.id}/threads`,{
         method:"POST",
