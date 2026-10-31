@@ -176,34 +176,37 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
 async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
-  const existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
-  if(existing){
-    await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
-    return {thread:existing,created:false};
+  const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:"thread"};
+  let existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
+  const wasExisting=Boolean(existing);
+  if(!existing){
+    const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+      p_race_date:identity.race_date,p_course_code:identity.course_code,
+      p_race_no:identity.race_no,p_message_key:"thread",
+    });
+    if(claimError)throw claimError;
+    if(!claimed)return {thread:null,created:false,deferred:true};
+    try{
+      existing=await discordApi(`/channels/${channel.id}/threads`,{
+        method:"POST",
+        body:{name,type:11,auto_archive_duration:1440,rate_limit_per_user:0},
+      });
+      if(!existing?.id)throw new Error("Discord thread creation returned no ID");
+      const {data:rows,error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"sent",discord_thread_id:existing.id,updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending").select("id");
+      if(saveError||rows?.length!==1)throw saveError||new Error("Thread state confirmation failed");
+      activeThreads.push(existing);
+    }catch(error){
+      await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"unknown",last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending");
+      throw error;
+    }
   }
-
-  const thread=await discordApi(`/channels/${channel.id}/threads`,{
-    method:"POST",
-    body:{
-      name,
-      type:11,
-      auto_archive_duration:1440,
-      rate_limit_per_user:0,
-    },
-  });
-  if(!thread?.id)throw new Error(`実況スレッドを作成できませんでした: ${name}`);
-
-  const starter=[
-    `🏁 **BoatStrikers 注目レース実況**`,
-    `${alert.course_name} ${alert.race_no}R｜〆切 ${closeText(alert)}`,
-    `このスレッドで一果・初音・キイナと一緒にレースを追います。`,
-    `予想・展示後の変化・実況・結果振り返りをここにまとめていきます。`,
-    `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`,
-  ].join("\n");
-  await sendDiscordMessage(thread.id,starter);
-  await postOpeningCharacters(channel.id,thread,alert,signalRoles,admin);
-  activeThreads.push(thread);
-  return {thread,created:true};
+  // Existing thread is safe to reuse. Pending character messages are claimed individually.
+  await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
+  return {thread:existing,created:!wasExisting,deferred:false};
 }
 
 export async function GET(request){
@@ -243,7 +246,7 @@ export async function GET(request){
       if(summary.created>=MAX_RACES_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
         const result=await ensureRaceThread(channel,record,activeThreads,admin);
-        if(result.created){
+        if(result.deferred){summary.deferred+=1;}else if(result.created){
           summary.created+=1;
           summary.characterPosts+=3;
         }else summary.existing+=1;
