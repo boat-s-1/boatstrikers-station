@@ -20,13 +20,15 @@ if(!token||!guildId){
   };
   try{
     const channels=await get(`/guilds/${encodeURIComponent(guildId)}/channels`);
+    if(!Array.isArray(channels))throw new Error("Unexpected Discord channels response");
     const matches=channels.filter(c=>c.type===0&&c.name==="レース実況");
     console.log(JSON.stringify({check:"race_chat_channel",count:matches.length,ok:matches.length===1}));
     if(matches.length!==1)process.exitCode=1;
     else{
       const parent=matches[0];
       const active=await get(`/guilds/${encodeURIComponent(guildId)}/threads/active`);
-      const threads=Array.isArray(active?.threads)?active.threads:[];
+      if(!Array.isArray(active?.threads))throw new Error("Unexpected Discord active threads response");
+      const threads=active.threads;
       const owned=threads.filter(t=>String(t.parent_id)===String(parent.id));
       console.log(JSON.stringify({check:"active_threads",count:owned.length,ok:true}));
       const threadId=process.env.DISCORD_DIAGNOSTIC_THREAD_ID;
