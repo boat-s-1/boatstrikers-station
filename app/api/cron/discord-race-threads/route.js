@@ -226,7 +226,7 @@ async function ensureRaceThread(channel,record,activeThreads,admin){
       if(String(verified?.id)!==String(history.discord_thread_id)||
          String(verified?.parent_id)!==String(channel.id)||
          verified?.name!==name||verified?.type!==11||
-         verified?.thread_metadata?.archived===true){
+         verified?.thread_metadata?.archived!==false){
         console.warn(JSON.stringify({level:"warn",message:"discord thread requires manual reconciliation",race:raceKey(alert)}));
         return {thread:null,created:false,deferred:true};
       }
