@@ -145,3 +145,41 @@ test("unavailable persisted thread: no automatic post",async()=>{
   assert.equal(result.body.deferred,1);
   assert.equal(f.calls.length,before);
 });
+
+test("verified persisted thread can be reused without duplicate messages",async()=>{
+  const f=fixture();
+  await f.GET({});
+  const before=f.calls.length;
+  const result=await f.GET({});
+  assert.equal(result.body.failed,0);
+  assert.equal(result.body.deferred,0);
+  assert.equal(f.calls.length,before);
+});
+test("saved ID mismatch cannot fall back to matching active thread name",async()=>{
+  const f=fixture();
+  await f.GET({});
+  const key=[date,"01",1,"thread"].join(":");
+  f.state.set(key,{state:"sent",discord_thread_id:"different-id"});
+  const before=f.calls.length;
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(f.calls.length,before);
+});
+test("thread metadata with wrong name cannot be reused",async()=>{
+  const f=fixture();
+  await f.GET({});
+  f.threads[0].name="other-race";
+  const before=f.calls.length;
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(f.calls.length,before);
+});
+test("untracked same-name active thread blocks new creation",async()=>{
+  const f=fixture();
+  await f.GET({});
+  f.state.delete([date,"01",1,"thread"].join(":"));
+  const before=f.calls.length;
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(f.calls.length,before);
+});
