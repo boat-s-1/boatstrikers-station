@@ -2,6 +2,8 @@ import {createClient} from '@supabase/supabase-js';
 import {gamagoriAuthorized,gamagoriDatabaseOptions} from '../../../../lib/gamagori-chart-http.mjs';
 import {jstDate} from '../../../../lib/gamagori-date.mjs';
 import {databaseMeetingEvidence} from '../../../../lib/gamagori-meeting-policy.mjs';
+import {probeGamagoriPublication} from '../../../../lib/gamagori-chart-publication.mjs';
+import {parseGamagoriChart} from '../../../../lib/gamagori-chart-parser';
 import {loadGamagoriProgram} from '../../../../lib/gamagori-program-safety.mjs';
 export const runtime='nodejs';export const dynamic='force-dynamic';export const maxDuration=30;
 export async function GET(request){
@@ -19,7 +21,9 @@ export async function GET(request){
    try{if(!row)throw Error('program_event_missing');program=await loadGamagoriProgram({date,race,deadline:row.deadline,entries:row.entries,deadlineAt:Date.now()+10000});}
    catch(e){program={error:/^program_[a-z_0-9]+$/.test(e.message)?e.message:'program_check_failed'};}
   }
-  const result={date,proof,program_probe_only:program??null,collection_executed:false,races:(data?.races??[]).map(r=>({race_no:r.race_no,boats:r.boats,preview_boats:r.preview_boats,preview_at:r.preview_at,entry_preview_at:r.entry_preview_at,deadline:r.deadline,cancel:r.cancel,status:r.status})),live_sync:data?.live_sync};
+  let publication;
+  if(query.get('probe_chart')==='1'){if(program)await new Promise(r=>setTimeout(r,1500));publication=await probeGamagoriPublication({date,race,parse:parseGamagoriChart});}
+  const result={date,proof,chart_publication_probe_only:publication??null,program_probe_only:program??null,collection_executed:false,races:(data?.races??[]).map(r=>({race_no:r.race_no,boats:r.boats,preview_boats:r.preview_boats,preview_at:r.preview_at,entry_preview_at:r.entry_preview_at,deadline:r.deadline,cancel:r.cancel,status:r.status})),live_sync:data?.live_sync};
   console.info('gamagori_readiness',JSON.stringify(result));
   return Response.json(result,{headers:{'Cache-Control':'private, no-store'}});
  }catch{console.error('gamagori_readiness','evidence_unavailable');return Response.json({error:'evidence_unavailable'},{status:503});}
