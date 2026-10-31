@@ -194,3 +194,12 @@ test("missing archive metadata on persisted thread: safe defer",async()=>{
   assert.equal(result.body.failed,0);
   assert.equal(f.calls.length,before);
 });
+
+test("summary counts only newly confirmed character posts",async()=>{
+  const f=fixture();
+  const first=await f.GET({});
+  assert.equal(first.body.characterPosts,3);
+  const second=await f.GET({});
+  assert.equal(second.body.characterPosts,0);
+  assert.equal(second.body.existing,1);
+});
