@@ -1,0 +1,624 @@
+{
+  "phase": 11,
+  "date_jst": "2026-10-31",
+  "measurement_path": "workspace outbound proxy; not Vercel runtime",
+  "upstream_snapshot": {
+    "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+    "headers": {
+      "Date": "Sat, 31 Oct 2026 04:38:00 GMT",
+      "Last-Modified": "Sat, 31 Oct 2026 04:33:34 GMT",
+      "Age": "34",
+      "ETag": "\"6ae56f9e-1566e2\""
+    },
+    "bytes": 1402594,
+    "sha256": "56a990114683629fe99a46725ef72f2c928a128598d81a31eb33ef50e28efab6",
+    "gamagori": {
+      "1": {
+        "date": "2026-10-31",
+        "race": 1,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 1,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 5321
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 3747
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 3905
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 3696
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4094
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 3303
+          }
+        }
+      },
+      "2": {
+        "date": "2026-10-31",
+        "race": 2,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 2,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 3550
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 4411
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4857
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 5382
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4417
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 4518
+          }
+        }
+      },
+      "3": {
+        "date": "2026-10-31",
+        "race": 3,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 3,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 3463
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 3854
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4327
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4700
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 3957
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 4504
+          }
+        }
+      },
+      "4": {
+        "date": "2026-10-31",
+        "race": 4,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 4,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4424
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 4677
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4302
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4813
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4336
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 5371
+          }
+        }
+      },
+      "5": {
+        "date": "2026-10-31",
+        "race": 5,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 5,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4656
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 4094
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4148
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4271
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 5084
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 5294
+          }
+        }
+      },
+      "6": {
+        "date": "2026-10-31",
+        "race": 6,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 6,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4743
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 5382
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4430
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4422
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 5421
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 3960
+          }
+        }
+      },
+      "7": {
+        "date": "2026-10-31",
+        "race": 7,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 7,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4538
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 3303
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 5289
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4228
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4327
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 5449
+          }
+        }
+      },
+      "8": {
+        "date": "2026-10-31",
+        "race": 8,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 8,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4411
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 5338
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4106
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4757
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 3463
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 3696
+          }
+        }
+      },
+      "9": {
+        "date": "2026-10-31",
+        "race": 9,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 9,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4504
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 5084
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4700
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 5321
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4302
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 4857
+          }
+        }
+      },
+      "10": {
+        "date": "2026-10-31",
+        "race": 10,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 10,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4518
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 4743
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4677
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4656
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 3854
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 3747
+          }
+        }
+      },
+      "11": {
+        "date": "2026-10-31",
+        "race": 11,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 11,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 3960
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 3550
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 4228
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 4148
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 4424
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 4538
+          }
+        }
+      },
+      "12": {
+        "date": "2026-10-31",
+        "race": 12,
+        "preview_date": "2026-10-31",
+        "preview_stadium": 7,
+        "preview_race": 12,
+        "preview_slots": 6,
+        "sync_input_rows": 0,
+        "roster": {
+          "1": {
+            "entry_number": 1,
+            "number": 4757
+          },
+          "2": {
+            "entry_number": 2,
+            "number": 4813
+          },
+          "3": {
+            "entry_number": 3,
+            "number": 3957
+          },
+          "4": {
+            "entry_number": 4,
+            "number": 3905
+          },
+          "5": {
+            "entry_number": 5,
+            "number": 5289
+          },
+          "6": {
+            "entry_number": 6,
+            "number": 4430
+          }
+        }
+      }
+    }
+  },
+  "official_http_manifests": {
+    "manifest-odds.json": [
+      {
+        "name": "odds",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/odds/odds202610310701.htm",
+        "status": 200,
+        "bytes": 123839,
+        "date": "Sat, 31 Oct 2026 04:39:32 GMT",
+        "last_modified": null,
+        "sha256": "03a68973bdfd24e38bac7ade2e5d863bc75db4c4ca89d83565f1f8db9fe3f9a3"
+      },
+      {
+        "name": "historical-choku",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610300701.htm",
+        "status": 200,
+        "bytes": 92824,
+        "date": "Sat, 31 Oct 2026 04:39:39 GMT",
+        "last_modified": null,
+        "sha256": "f96374859ccd5b472983883da2bbb387157fdd5177683dbab97c3988b88cd268"
+      }
+    ],
+    "manifest.json": [
+      {
+        "name": "index",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2026103107.htm",
+        "status": 200,
+        "bytes": 164831,
+        "date": "Sat, 31 Oct 2026 04:36:58 GMT",
+        "last_modified": null,
+        "age": null,
+        "sha256": "124f46f57ecaa4e641cc6d0fb4d7ffb67d4eb0641a5436edfcdf5fa4b462a49f"
+      },
+      {
+        "name": "date",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/date/date2026103107.js",
+        "status": 200,
+        "bytes": 1835,
+        "date": "Sat, 31 Oct 2026 04:37:05 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:36:57 GMT",
+        "age": null,
+        "sha256": "8b067cf4b29f51d22f08b6089f47b9c70c440aca911a74f7729130545ac070dc"
+      },
+      {
+        "name": "choku",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610310701.htm",
+        "status": 200,
+        "bytes": 87690,
+        "date": "Sat, 31 Oct 2026 04:37:12 GMT",
+        "last_modified": null,
+        "age": null,
+        "sha256": "f250a2fdbdd60abc19ac790b98b5d907b5500362a28ef8166f630b9e565290d2"
+      },
+      {
+        "name": "client",
+        "url": "https://www.gamagori-kyotei.com/js/kyogi_index.js",
+        "status": 200,
+        "bytes": 4274,
+        "date": "Sat, 31 Oct 2026 04:37:19 GMT",
+        "last_modified": "Wed, 10 Mar 2021 17:35:37 GMT",
+        "age": null,
+        "sha256": "f98a49b050a7c22ba680c3c7a8e8202077ca68c3026c9db0c59e60ff88f11f28"
+      },
+      {
+        "name": "api",
+        "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+        "status": 200,
+        "bytes": 1000001,
+        "date": "Sat, 31 Oct 2026 04:37:26 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:33:34 GMT",
+        "age": "0",
+        "sha256": "fae9e73ad5e0cb36bbd0d0e3a5713afbb215f58088e477f6c7015e514d5caedd"
+      }
+    ],
+    "manifest-ticker.json": {
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/js/ticker07.js",
+      "status": 200,
+      "bytes": 0,
+      "date": "Sat, 31 Oct 2026 04:52:11 GMT",
+      "last_modified": "Sat, 31 Oct 2026 04:52:06 GMT",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "manifest-repeat.json": [
+      {
+        "name": "today-date",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/date/date.js",
+        "status": 200,
+        "date": "Sat, 31 Oct 2026 04:47:59 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:47:44 GMT",
+        "bytes": 209,
+        "sha256": "ddfc662f94da54b19749aae951688fb8e4784925ee2d64e2d7d8096b00818bd6"
+      },
+      {
+        "name": "result-race",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/js/KekkaRaceNum2026103107.js",
+        "status": 200,
+        "date": "Sat, 31 Oct 2026 04:48:06 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:47:48 GMT",
+        "bytes": 252,
+        "sha256": "4b9b77002bc3ddc2fc28d34a0e40cc53ffe0f091d17fbdf5c8424a61254b3042"
+      }
+    ],
+    "manifest-client.json": [
+      {
+        "name": "live-time",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/js/funcLiveTime.js",
+        "status": 200,
+        "bytes": 1166,
+        "date": "Sat, 31 Oct 2026 04:38:24 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:37:22 GMT",
+        "sha256": "709c3244bb3816b185586aba63de62580fb5cf659bc7bcc9a22e0a8c72d6ed5b"
+      },
+      {
+        "name": "result-race",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/js/KekkaRaceNum2026103107.js",
+        "status": 200,
+        "bytes": 252,
+        "date": "Sat, 31 Oct 2026 04:38:30 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:38:22 GMT",
+        "sha256": "4b9b77002bc3ddc2fc28d34a0e40cc53ffe0f091d17fbdf5c8424a61254b3042"
+      },
+      {
+        "name": "today-date",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/date/date.js",
+        "status": 200,
+        "bytes": 209,
+        "date": "Sat, 31 Oct 2026 04:38:37 GMT",
+        "last_modified": "Sat, 31 Oct 2026 04:38:29 GMT",
+        "sha256": "ddfc662f94da54b19749aae951688fb8e4784925ee2d64e2d7d8096b00818bd6"
+      },
+      {
+        "name": "sp-client",
+        "url": "https://www.gamagori-kyotei.com/js/sp_kyogi_index.js",
+        "status": 200,
+        "bytes": 129,
+        "date": "Sat, 31 Oct 2026 04:38:43 GMT",
+        "last_modified": "Wed, 10 Mar 2021 17:35:38 GMT",
+        "sha256": "02551fd3354c64e2dcd945f01b26d554d5106419222382409ffc6d725f7856c7"
+      }
+    ],
+    "manifest-cases.json": [
+      {
+        "name": "withdrawn-choku",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610070707.htm",
+        "response_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610070707.htm",
+        "status": 200,
+        "bytes": 92987,
+        "date": "Sat, 31 Oct 2026 04:42:03 GMT",
+        "last_modified": null,
+        "sha256": "cd4561db078411b50569f39ee5204860010fd229752e162fa9a9a10d6a4a7b0b"
+      },
+      {
+        "name": "withdrawn-result",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/kekka/kekka202610070707.htm",
+        "response_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/kekka/kekka202610070707.htm",
+        "status": 200,
+        "bytes": 67169,
+        "date": "Sat, 31 Oct 2026 04:42:10 GMT",
+        "last_modified": null,
+        "sha256": "1a1a7997be78a359bb62d40d05c7f143971b2f012f27ba3a1d62747064395f0d"
+      },
+      {
+        "name": "postponed-index",
+        "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2024083107.htm",
+        "response_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2024083107.htm",
+        "status": 200,
+        "bytes": 80541,
+        "date": "Sat, 31 Oct 2026 04:42:18 GMT",
+        "last_modified": null,
+        "sha256": "f89661cc40996c79eda99215b2e7a4d5836a7225db304a8b99694b2321e181ac"
+      }
+    ]
+  },
+  "initial_openapi_probe": {
+    "complete": false,
+    "reason": "1MB research read cap truncated response; superseded by full 1402594-byte JSON"
+  },
+  "tests": {
+    "pass": 84,
+    "fail": 0,
+    "skipped": 0
+  },
+  "collection_invoked": false,
+  "new_chart_rows": 0,
+  "new_bypass_keys": 0,
+  "protected_preview_api": "not run; no approved credentials available in this phase",
+  "production_actions": []
+}
