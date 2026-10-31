@@ -14,3 +14,8 @@ test("diagnostic validates channel parent and archived status",()=>{
   assert.match(source,/thread\?\.parent_id/);
   assert.match(source,/thread\?\.type===11/);
 });
+
+test("diagnostic fails closed on malformed Discord list responses",()=>{
+  assert.match(source,/if\(!Array\.isArray\(channels\)\)throw new Error/);
+  assert.match(source,/if\(!Array\.isArray\(active\?\.threads\)\)throw new Error/);
+});
