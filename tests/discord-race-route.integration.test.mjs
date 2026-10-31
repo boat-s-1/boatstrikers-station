@@ -39,7 +39,7 @@ function fixture({timeoutKey=null}={}){
   };
   const mockDiscordApi=async (endpoint,opts)=>{
     if(endpoint.includes("/channels")&&endpoint.endsWith("/threads")&&opts?.method==="POST"){
-      calls.push("thread");const t={id:"t"+(++sequence),name:opts.body.name,parent_id:"channel",type:11};threads.push(t);return t;
+      calls.push("thread");const t={id:"t"+(++sequence),name:opts.body.name,parent_id:"channel",type:11,thread_metadata:{archived:false}};threads.push(t);return t;
     }
     if(endpoint.endsWith("/threads/active"))return {threads:[...threads]};
     if(endpoint.startsWith("/channels/t"))return threads.find(t=>"/channels/"+t.id===endpoint)||null;
@@ -181,5 +181,16 @@ test("untracked same-name active thread blocks new creation",async()=>{
   const before=f.calls.length;
   const result=await f.GET({});
   assert.equal(result.body.deferred,1);
+  assert.equal(f.calls.length,before);
+});
+
+test("missing archive metadata on persisted thread: safe defer",async()=>{
+  const f=fixture();
+  await f.GET({});
+  delete f.threads[0].thread_metadata;
+  const before=f.calls.length;
+  const result=await f.GET({});
+  assert.equal(result.body.deferred,1);
+  assert.equal(result.body.failed,0);
   assert.equal(f.calls.length,before);
 });
