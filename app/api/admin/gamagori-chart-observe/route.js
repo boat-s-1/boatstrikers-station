@@ -1,3 +1,4 @@
+import {createIsolatedGamagoriClient} from '../../../../lib/gamagori-environment.mjs';
 import {createClient} from '@supabase/supabase-js';
 import {gamagoriAuthorized,gamagoriDatabaseOptions} from '../../../../lib/gamagori-chart-http.mjs';
 import {jstDate} from '../../../../lib/gamagori-date.mjs';
@@ -16,9 +17,8 @@ export async function POST(request){
  }catch{return Response.json({error:'invalid_request'},{status:400});}
  const race=body.race,date=jstDate(Date.now());
  if(!Number.isInteger(race)||race<1||race>12||Object.keys(body).some(k=>k!=='race'))return Response.json({error:'invalid_race'},{status:400});
- if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)return Response.json({error:'database_configuration_missing'},{status:503});
- const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,gamagoriDatabaseOptions());
  try{
+  const db=await createIsolatedGamagoriClient(createClient);
   // Fail before upstream traffic if the reviewed schema has not been installed.
   const schema=await db.from('bsc_gamagori_observations').select('id').limit(0);if(schema.error)return Response.json({error:'observation_schema_unavailable'},{status:503});
   const {data,error}=await db.rpc('bsc_gamagori_meeting_evidence',{p_date:date});if(error)throw Error();
@@ -37,9 +37,8 @@ export async function GET(request){
  if(!gamagoriAuthorized(request))return Response.json({error:'unauthorized'},{status:401});
  const query=new URL(request.url).searchParams,race=Number(query.get('race')??1);
  if(!Number.isInteger(race)||race<1||race>12||[...query.keys()].some(k=>k!=='race'))return Response.json({error:'invalid_race'},{status:400});
- if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)return Response.json({error:'database_configuration_missing'},{status:503});
  try{
-  const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,gamagoriDatabaseOptions()),date=jstDate(Date.now());
+  const db=await createIsolatedGamagoriClient(createClient),date=jstDate(Date.now());
   const base=()=>db.from('bsc_gamagori_observations').select('id,recorded_at,checked_at,validation_result,reason,sale_state').eq('race_date',date).eq('race_no',race).order('recorded_at',{ascending:false}).limit(1);
   const [latest,verified]=await Promise.all([db.rpc('bsc_gamagori_latest_observation',{p_date:date,p_race:race}),base().not('checked_at','is',null)]);
   if(latest.error||verified.error)return Response.json({error:'observation_schema_unavailable'},{status:503});

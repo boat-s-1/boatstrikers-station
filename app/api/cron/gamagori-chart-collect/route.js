@@ -1,3 +1,4 @@
+import {createIsolatedGamagoriClient} from '../../../../lib/gamagori-environment.mjs';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { collectCharts } from '../../../../lib/gamagori-chart-collector.mjs';
@@ -22,14 +23,8 @@ export async function GET(request) {
       !Number.isInteger(limit) || limit < 1 || limit > 3 || !Number.isInteger(first) || first < 1 || first > 12) {
     return NextResponse.json({ error: 'valid date (YYYY-MM-DD) and race (1-12) required' }, { status: 400 });
   }
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json({ error: 'database configuration missing' }, { status: 503 });
-  }
-  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY,
-    { auth: { persistSession: false, autoRefreshToken: false },
-      global: { fetch: (input, init) => fetch(input, { ...init,
-        signal: AbortSignal.any([AbortSignal.timeout(3000), ...(init?.signal ? [init.signal] : [])]) }) } });
   try {
+    const db=await createIsolatedGamagoriClient(createClient);
     const leased = await withGamagoriLease(db, () => collectCharts({ db, parse: parseGamagoriChart, date, first, limit }));
     if (leased.busy) {
       console.info('gamagori_chart_collect', JSON.stringify({ date, status: 'collector_busy' }));

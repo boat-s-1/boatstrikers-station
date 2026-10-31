@@ -1,3 +1,4 @@
+import {createIsolatedGamagoriClient} from '../../../../lib/gamagori-environment.mjs';
 import {createClient} from '@supabase/supabase-js';
 import {gamagoriAuthorized,gamagoriDatabaseOptions} from '../../../../lib/gamagori-chart-http.mjs';
 import {jstDate,validDate,orchestrateGamagori,gamagoriRepository} from '../../../../lib/gamagori-chart-orchestrator.mjs';
@@ -13,9 +14,8 @@ export async function GET(request) {
  if(process.env.GAMAGORI_ORCHESTRATOR_ENABLED!=='true')return Response.json({status:'disabled'});
  const date=new URL(request.url).searchParams.get('date')??jstDate(Date.now());
  if(!validDate(date)||date>jstDate(Date.now()))return Response.json({error:'invalid_date'},{status:400});
- if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)return Response.json({error:'database_configuration_missing'},{status:503});
- const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,gamagoriDatabaseOptions());
  try{
+  const db=await createIsolatedGamagoriClient(createClient);
   const leased=await withGamagoriLease(db,owner=>orchestrateGamagori({repo:gamagoriRepository(db),date,owner,
    collect:options=>collectCharts({db,parse:parseGamagoriChart,...options})}));
   if(leased.busy)return Response.json({error:'collector_busy'},{status:409,headers:{'Retry-After':'120'}});

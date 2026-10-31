@@ -1,3 +1,4 @@
+import {createIsolatedGamagoriClient} from '../../../../lib/gamagori-environment.mjs';
 import {describeGamagoriDatabasePreview} from '../../../../lib/gamagori-source-audit.mjs';
 import {createClient} from '@supabase/supabase-js';
 import {gamagoriAuthorized,gamagoriDatabaseOptions} from '../../../../lib/gamagori-chart-http.mjs';
@@ -14,7 +15,7 @@ export async function GET(request){
  if(!Number.isInteger(race)||race<1||race>12)return Response.json({error:'invalid_race'},{status:400});
  const date=jstDate(Date.now());
  try{
-  const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,gamagoriDatabaseOptions());
+  const db=await createIsolatedGamagoriClient(createClient);
   const {data,error}=await db.rpc('bsc_gamagori_meeting_evidence',{p_date:date});if(error)throw Error('evidence_unavailable');
   const proof=databaseMeetingEvidence(data,date,Date.now());let program;
   if(query.get('probe_program')==='1'){
