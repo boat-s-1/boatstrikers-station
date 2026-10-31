@@ -1,0 +1,228 @@
+{
+  "project_ref": "rdqnqvafsponsoetnezv",
+  "parent_project_ref": "rzosrbkyniyedolhkgxo",
+  "branch_id": "211efa11-aacd-45f7-b581-db24d4669509",
+  "with_data": false,
+  "branch_bootstrap_status": "MIGRATIONS_FAILED",
+  "database_status": "ACTIVE_HEALTHY",
+  "scope": "Only Gamagori migrations and minimal synthetic evidence test bootstrap applied; not a full application clone",
+  "contract": {
+    "mode": "SYNTHETIC_ISOLATION_CONTRACT_ONLY",
+    "charts": 6,
+    "checks": [
+      {
+        "name": "anon_actual_denial",
+        "detail": "permission_denied",
+        "passed": true
+      },
+      {
+        "name": "authenticated_actual_denial",
+        "detail": "permission_denied",
+        "passed": true
+      },
+      {
+        "name": "latest_failure_supersedes_success",
+        "detail": "observed_latest_not_verified",
+        "passed": true
+      },
+      {
+        "name": "late_old_success_does_not_revive_failure",
+        "detail": "observed_latest_not_verified",
+        "passed": true
+      },
+      {
+        "name": "same_capture_failure_wins_tie",
+        "detail": "observed_latest_not_verified",
+        "passed": true
+      },
+      {
+        "name": "sale_state",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_current_race",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_checked_race",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_deadline",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_source_url",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_age",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_race_from",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "sale_update_stale",
+        "detail": "observed_sale_unverified",
+        "passed": true
+      },
+      {
+        "name": "chart_date",
+        "detail": "observed_chart_unverified",
+        "passed": true
+      },
+      {
+        "name": "chart_source_url",
+        "detail": "observed_chart_unverified",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,registration",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,course",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,exhibition_time",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,slit_rating",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,turn_rating",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,0,arrow_direction",
+        "detail": "observed_chart_conflict",
+        "passed": true
+      },
+      {
+        "name": "chart_boats,5,boat_no",
+        "detail": "observed_chart_unverified",
+        "passed": true
+      },
+      {
+        "name": "chart_receipt_stale",
+        "detail": "observed_chart_unverified",
+        "passed": true
+      },
+      {
+        "name": "chart_missing_boat",
+        "detail": "observed_chart_unverified",
+        "passed": true
+      },
+      {
+        "name": "event_cancel",
+        "detail": "observed_event_unverified",
+        "passed": true
+      },
+      {
+        "name": "event_status",
+        "detail": "observed_event_unverified",
+        "passed": true
+      },
+      {
+        "name": "event_deadline",
+        "detail": "observed_deadline_closed",
+        "passed": true
+      },
+      {
+        "name": "event_entries,3,result_code",
+        "detail": "observed_roster_or_absence",
+        "passed": true
+      },
+      {
+        "name": "event_entries,3,registration",
+        "detail": "observed_roster_or_absence",
+        "passed": true
+      },
+      {
+        "name": "missing_checked_at",
+        "detail": "observed_latest_not_verified",
+        "passed": true
+      },
+      {
+        "name": "synthetic_normal_atomic_six",
+        "detail": "{\"status\": \"saved\", \"inserted\": 6}",
+        "passed": true
+      },
+      {
+        "name": "repeat_no_additional_rows",
+        "detail": "{\"status\": \"skipped_existing\", \"inserted\": 0}",
+        "passed": true
+      },
+      {
+        "name": "stable_value_change_clock_ignored",
+        "detail": "entry timestamps 2000; verified observation current",
+        "passed": true
+      },
+      {
+        "name": "owner_immutable_receipt",
+        "detail": "update_denied",
+        "passed": true
+      },
+      {
+        "name": "owner_immutable_observation",
+        "detail": "update_denied",
+        "passed": true
+      },
+      {
+        "name": "minimal_role_privileges",
+        "detail": "service append only; anon execute denied",
+        "passed": true
+      }
+    ],
+    "receipts": 1
+  },
+  "persisted_next_connection": [
+    {
+      "checked_at": "2026-10-31 13:39:43.396266+00",
+      "observations": 35,
+      "verified_content": 31,
+      "synthetic_chart_boats": 6,
+      "synthetic_receipts": 1,
+      "synthetic_digest": "95c7115681faa90bb8a6f8e06694b27a",
+      "partial": 0,
+      "duplicates": 0,
+      "functions": [
+        {
+          "name": "bsc_gamagori_latest_observation",
+          "definer": false,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "name": "bsc_gamagori_record_observation",
+          "definer": false,
+          "anon_execute": false,
+          "authenticated_execute": false
+        },
+        {
+          "name": "bsc_gamagori_save_observed_chart",
+          "definer": false,
+          "anon_execute": false,
+          "authenticated_execute": false
+        }
+      ]
+    }
+  ]
+}

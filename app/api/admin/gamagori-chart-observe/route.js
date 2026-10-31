@@ -41,8 +41,8 @@ export async function GET(request){
  try{
   const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,gamagoriDatabaseOptions()),date=jstDate(Date.now());
   const base=()=>db.from('bsc_gamagori_observations').select('id,recorded_at,checked_at,validation_result,reason,sale_state').eq('race_date',date).eq('race_no',race).order('recorded_at',{ascending:false}).limit(1);
-  const [latest,verified]=await Promise.all([base(),base().not('checked_at','is',null)]);
+  const [latest,verified]=await Promise.all([db.rpc('bsc_gamagori_latest_observation',{p_date:date,p_race:race}),base().not('checked_at','is',null)]);
   if(latest.error||verified.error)return Response.json({error:'observation_schema_unavailable'},{status:503});
-  return Response.json({date,race,...gamagoriObservationSummary([...(latest.data??[]),...(verified.data??[])])},{headers:{'Cache-Control':'private, no-store'}});
+  return Response.json({date,race,latest:latest.data??null,last_content_checked_at:verified.data?.[0]?.checked_at??null,collection_permitted:false,sale_contract:'requires_fresh_exact_race_proof'},{headers:{'Cache-Control':'private, no-store'}});
  }catch{return Response.json({error:'observation_failed',collection_permitted:false},{status:503});}
 }

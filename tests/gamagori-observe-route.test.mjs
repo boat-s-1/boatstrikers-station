@@ -30,7 +30,7 @@ test('persistence error is redacted and stops handler',async()=>preview(async()=
 }));
 test('GET monitor preserves latest negative alongside separate last content confirmation',async()=>preview(async()=>{
  let reads=0;const old={id:'old',recorded_at:'2026-10-31T05:00:00Z',checked_at:'2026-10-31T05:00:00Z'},latest={id:'latest',recorded_at:'2026-10-31T05:01:00Z',checked_at:null};
- const route=load({gamagoriAuthorized:()=>true,gamagoriDatabaseOptions:()=>({}),jstDate:()=> '2026-10-31',gamagoriObservationSummary,createClient:()=>({from(name){reads++;assert.equal(name,'bsc_gamagori_observations');let verified=false;const q={select:()=>q,eq:()=>q,order:()=>q,limit:()=>q,not:()=>{verified=true;return q},then(resolve){resolve({data:verified?[old]:[latest]});}};return q;}})},'GET');
+ const route=load({gamagoriAuthorized:()=>true,gamagoriDatabaseOptions:()=>({}),jstDate:()=> '2026-10-31',gamagoriObservationSummary,createClient:()=>({rpc:async name=>{reads++;assert.equal(name,'bsc_gamagori_latest_observation');return {data:latest}},from(name){reads++;assert.equal(name,'bsc_gamagori_observations');let verified=false;const q={select:()=>q,eq:()=>q,order:()=>q,limit:()=>q,not:()=>{verified=true;return q},then(resolve){resolve({data:verified?[old]:[latest]});}};return q;}})},'GET');
  const r=await route(new Request('https://example.test?race=1')),v=await r.json();assert.equal(r.status,200);assert.equal(v.latest.id,'latest');assert.equal(v.last_content_checked_at,old.checked_at);assert.equal(v.collection_permitted,false);assert.equal(reads,2);
 }));
 test('GET monitor also enforces Preview and API authorization before database reads',async()=>preview(async()=>{
