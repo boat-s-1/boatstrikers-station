@@ -55,7 +55,8 @@ function fixture({timeoutKey=null}={}){
     sendDiscordMessage:async()=>{calls.push("starter");if(timeoutKey==="starter")throw Error("timeout");return {id:"starter-id"}},
     fetch:async(url,opts)=>{
       if(opts?.method==="PATCH")return {ok:false};
-      const role=({ "webhook-0":"ichika", "webhook-1":"hatsune", "webhook-2":"kiina" })[/webhooks\\/(webhook-\\d+)/.exec(url)?.[1]];
+      const hookId=String(url).split("/webhooks/")[1]?.split("/")[0];
+      const role=({ "webhook-0":"ichika", "webhook-1":"hatsune", "webhook-2":"kiina" })[hookId];
       calls.push("character:"+role);
       if(timeoutKey===role)throw Error("timeout");
       return {ok:true,json:async()=>({id:"msg-"+role})};
