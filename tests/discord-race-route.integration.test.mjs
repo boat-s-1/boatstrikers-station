@@ -27,7 +27,7 @@ function fixture({timeoutKey=null}={}){
         return {select(){return this},eq(){return this},order(){return this},limit:async()=>({data:table==="bs_exhibition_alerts"?[alert]:[],error:null})};
       }
       return {update(value){this.value=value;return this},match(identity){this.identity=identity;return this},eq(){return this},
-        select:async()=>{const k=keyOf(this.identity),previous=state.get(k);
+        async select(){const k=keyOf(this.identity),previous=state.get(k);
           if(previous?.state!=="sending")return {data:[],error:null};
           state.set(k,{...previous,...this.value});return {data:[{id:1}],error:null};},
         then(resolve){const k=keyOf(this.identity),previous=state.get(k);if(previous?.state==="sending")state.set(k,{...previous,...this.value});return Promise.resolve({error:null}).then(resolve);}
