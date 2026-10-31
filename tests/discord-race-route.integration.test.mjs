@@ -203,3 +203,19 @@ test("summary counts only newly confirmed character posts",async()=>{
   assert.equal(second.body.characterPosts,0);
   assert.equal(second.body.existing,1);
 });
+
+test("partial character failure reports confirmed posts, not zero or three",async()=>{
+  const f=fixture({timeoutKey:"hatsune"});
+  const result=await f.GET({});
+  assert.equal(result.body.failed,1);
+  assert.equal(result.body.characterPosts,1);
+  assert.equal(f.calls.filter(x=>x==="character:ichika").length,1);
+  assert.equal(f.calls.filter(x=>x==="character:hatsune").length,1);
+  assert.equal(f.calls.filter(x=>x==="character:kiina").length,0);
+});
+test("first character failure reports zero confirmed character posts",async()=>{
+  const f=fixture({timeoutKey:"ichika"});
+  const result=await f.GET({});
+  assert.equal(result.body.failed,1);
+  assert.equal(result.body.characterPosts,0);
+});
