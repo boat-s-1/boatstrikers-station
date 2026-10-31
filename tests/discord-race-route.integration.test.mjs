@@ -40,7 +40,7 @@ function fixture({timeoutKey=null}={}){
     }
     if(endpoint.endsWith("/threads/active"))return {threads:[...threads]};
     if(endpoint.endsWith("/channels"))return [{id:"channel",name:"レース実況",type:0}];
-    if(endpoint.endsWith("/webhooks"))return [{id:"webhook",token:"mock",name:"BSC 実況 一果"}];
+    if(endpoint.endsWith("/webhooks"))return ["一果","初音","キイナ"].map((name,i)=>({id:"webhook-"+i,token:"mock",avatar:"avatar",name:"BSC 実況 "+name}));
     return [];
   };
   const sandbox={
@@ -55,7 +55,7 @@ function fixture({timeoutKey=null}={}){
     sendDiscordMessage:async()=>{calls.push("starter");if(timeoutKey==="starter")throw Error("timeout");return {id:"starter-id"}},
     fetch:async(url,opts)=>{
       if(opts?.method==="PATCH")return {ok:false};
-      const role=["ichika","hatsune","kiina"][calls.filter(x=>x.startsWith("character")).length];
+      const role=({ "webhook-0":"ichika", "webhook-1":"hatsune", "webhook-2":"kiina" })[/webhooks\\/(webhook-\\d+)/.exec(url)?.[1]];
       calls.push("character:"+role);
       if(timeoutKey===role)throw Error("timeout");
       return {ok:true,json:async()=>({id:"msg-"+role})};
@@ -76,6 +76,12 @@ test("full route: concurrent runs do not duplicate thread/starter/characters",as
 test("full route: rerun does not duplicate posts",async()=>{
   const f=fixture();await f.GET({});await f.GET({});
   assert.equal(f.calls.length,5);
+  for(const stage of ["thread","starter","ichika","hatsune","kiina"]){
+    const entry=f.state.get([date,"01",1,stage].join(":"));
+    assert.equal(entry?.state,"sent",stage);
+    assert.ok(entry?.discord_thread_id,stage);
+    if(stage!=="thread")assert.ok(entry?.discord_message_id,stage);
+  }
 });
 test("full route: starter timeout is not automatically retried",async()=>{
   const f=fixture({timeoutKey:"starter"});await f.GET({});await f.GET({});
