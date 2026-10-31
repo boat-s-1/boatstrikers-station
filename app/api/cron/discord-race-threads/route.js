@@ -170,6 +170,8 @@ async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,ad
         .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
         .match(identity).eq("state","sending");
       if(markError)console.error("discord delivery unknown-state update failed",String(markError.message).slice(0,300));
+      // Preserve confirmed posts from earlier characters when a later send fails.
+      error.confirmedCharacterPosts=posted;
       throw error;
     }
   }
@@ -318,6 +320,7 @@ export async function GET(request){
         }else summary.existing+=1;
       }catch(error){
         summary.failed+=1;
+        summary.characterPosts+=Number.isInteger(error?.confirmedCharacterPosts)?error.confirmedCharacterPosts:0;
         console.error(JSON.stringify({
           level:"error",
           message:"discord race thread create failed",
