@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export PGHOST=127.0.0.1 PGPORT=5432 PGUSER=postgres PGPASSWORD=postgres PGDATABASE=postgres
+psql -v ON_ERROR_STOP=1 -q <<'SQL'
+CREATE ROLE anon NOLOGIN;
+CREATE ROLE authenticated NOLOGIN;
+CREATE ROLE service_role NOLOGIN;
+SQL
 psql -v ON_ERROR_STOP=1 -q -f supabase/migrations/20261031004500_discord_race_thread_deliveries.sql
 psql -v ON_ERROR_STOP=1 -q <<'SQL'
 DO $$
