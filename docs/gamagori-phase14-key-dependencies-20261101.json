@@ -1,0 +1,191 @@
+{
+  "as_of_jst": "2026-11-01",
+  "baseline_commit": "6948b508ea423175747f4f1294e9d7bb5648178f",
+  "verdict": "HOLD",
+  "key_change_executed": false,
+  "function_invocation_executed": false,
+  "functions": [
+    {
+      "slug": "collect-boatstrikers-news",
+      "id": "b7589701-6cbe-4359-a9c6-8eba1339448c",
+      "version": 13,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "3754d0d199bab8ac757c07427836678ee481c5ffb3650026bc088cc16c94bf3e",
+      "source_equal_to_production": true,
+      "source_lines": 195,
+      "environment_variables": [
+        "SUPABASE_URL",
+        "GEMINI_API_KEY",
+        "GEMINI_MODEL",
+        "SUPABASE_SECRET_KEYS"
+      ],
+      "reads_legacy_service_key": false,
+      "explicit_request_auth_check": false,
+      "hardcoded_production_ref": false,
+      "hardcoded_isolated_ref": false,
+      "db_target_is_environment_supabase_url": true,
+      "methods": [
+        "POST",
+        "POST"
+      ],
+      "line_anchors": [
+        {
+          "line": 3,
+          "label": "const SUPABASE_URL = Deno.env.get(\"SUPABASE_URL\")!;"
+        },
+        {
+          "line": 4,
+          "label": "const GEMINI_API_KEY = Deno.env.get(\"GEMINI_API_KEY\");"
+        },
+        {
+          "line": 5,
+          "label": "const GEMINI_MODEL = Deno.env.get(\"GEMINI_MODEL\") ?? \"gemini-3.5-flash-lite\";"
+        },
+        {
+          "line": 7,
+          "label": "function getSecretKey(): string {"
+        },
+        {
+          "line": 8,
+          "label": "const raw = Deno.env.get(\"SUPABASE_SECRET_KEYS\");"
+        },
+        {
+          "line": 100,
+          "label": "if (req.method !== \"POST\") return Response.json({ error: \"POST only\" }, { status: 405 });"
+        },
+        {
+          "line": 109,
+          "label": "const geminiRes = await fetch(\"https://generativelanguage.googleapis.com/v1beta/interactions\", {"
+        },
+        {
+          "line": 172,
+          "label": "const secret = getSecretKey();"
+        },
+        {
+          "line": 179,
+          "label": "const check = await fetch(`${SUPABASE_URL}/rest/v1/bs_news_candidates?source_url=eq.${encodeURIComponent(row.source_url)}&select=id&limit=1`, { headers: { apikey: secret, Authorization: `Bearer ${secret}` } });"
+        },
+        {
+          "line": 182,
+          "label": "const ins = await fetch(`${SUPABASE_URL}/rest/v1/bs_news_candidates`, {"
+        }
+      ]
+    },
+    {
+      "slug": "collect-boatstrikers-media",
+      "id": "8da36d81-7f60-409f-97a7-62a8bf0a85e3",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "9d7d1acfd18f974e3f9eeb8895ca164e9335591e8fc7d198b6db5d220473623b",
+      "source_equal_to_production": true,
+      "source_lines": 140,
+      "environment_variables": [
+        "SUPABASE_URL",
+        "SUPABASE_SECRET_KEYS"
+      ],
+      "reads_legacy_service_key": false,
+      "explicit_request_auth_check": false,
+      "hardcoded_production_ref": false,
+      "hardcoded_isolated_ref": false,
+      "db_target_is_environment_supabase_url": true,
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "line_anchors": [
+        {
+          "line": 3,
+          "label": "const SUPABASE_URL = Deno.env.get(\"SUPABASE_URL\")!;"
+        },
+        {
+          "line": 5,
+          "label": "function getSecretKey(): string {"
+        },
+        {
+          "line": 6,
+          "label": "const raw = Deno.env.get(\"SUPABASE_SECRET_KEYS\");"
+        },
+        {
+          "line": 87,
+          "label": "async function fetchChannel(channel: typeof CHANNELS[number]) {"
+        },
+        {
+          "line": 96,
+          "label": "if (req.method !== \"POST\") return Response.json({ error: \"POST only\" }, { status: 405 });"
+        },
+        {
+          "line": 105,
+          "label": "const settled = await Promise.allSettled(targets.slice(i, i + batchSize).map(fetchChannel));"
+        },
+        {
+          "line": 113,
+          "label": "const secret = getSecretKey();"
+        },
+        {
+          "line": 114,
+          "label": "const res = await fetch(`${SUPABASE_URL}/rest/v1/bs_media_videos?on_conflict=video_id`, {"
+        },
+        {
+          "line": 128,
+          "label": "const secret = getSecretKey();"
+        },
+        {
+          "line": 130,
+          "label": "await fetch(`${SUPABASE_URL}/rest/v1/bs_media_videos?published_at=lt.${encodeURIComponent(cutoff)}`, {"
+        },
+        {
+          "line": 131,
+          "label": "method: \"DELETE\","
+        }
+      ]
+    }
+  ],
+  "log_window": {
+    "start": "2026-10-31T06:00:00Z",
+    "end": "2026-10-31T20:39:08.465Z"
+  },
+  "isolated": {
+    "cron_catalog": false,
+    "vault_secrets": 0,
+    "database_hooks": 0,
+    "webhook_triggers": 0,
+    "news_table_exists": false,
+    "media_table_exists": false,
+    "function_logs_in_window": 0,
+    "function_edge_logs_in_window": 0,
+    "charts": 0,
+    "observations": 0,
+    "auth_users": 0,
+    "live_runtime_env_values_verified": false
+  },
+  "production": {
+    "cron_timezone": "GMT",
+    "all_cron_jobs": 24,
+    "jobs_with_literal_isolated_reference": 0,
+    "function_edge_records": {
+      "news": {
+        "status": 200,
+        "records": 3,
+        "caller_role": "anon"
+      },
+      "media": {
+        "status": 200,
+        "records": 3,
+        "caller_role": "anon"
+      }
+    },
+    "chart_races": 198,
+    "chart_boats": 1188,
+    "duplicates": 0,
+    "incomplete": 0
+  },
+  "old_preview_deleted_confirmed": true,
+  "vercel": {
+    "count": 75,
+    "metadataUnchanged": true,
+    "temporaryVariables": 0
+  },
+  "pr_draft": true
+}
