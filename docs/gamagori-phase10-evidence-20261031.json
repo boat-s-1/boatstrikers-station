@@ -1,6 +1,6 @@
 {
   "verified_at": "2026-10-31 12:56:23 JST",
-  "code_commit": "22bd1212f693a85a98aeb6e83d786df6732167fd",
+  "code_commit": "1004d0a47397b567a11af94e4cc6511de3a4e029",
   "tests": {
     "pass": 69,
     "fail": 0,
@@ -1015,11 +1015,9 @@
     "decision": "program_status_unknown; absence is not negative proof"
   },
   "preview_build": {
+    "id": "dpl_8AZBfeYDDJ3Fv8VHhv42h3Kh6512",
     "state": "READY",
-    "id": "dpl_EyMHwa9hQPsN5u175ukrxX5TPWiC",
-    "region": [
-      "iad1"
-    ]
+    "sha": "1004d0a47397b567a11af94e4cc6511de3a4e029"
   },
   "preview_authenticated_execution": {
     "status": "not_executed",
@@ -1035,5 +1033,6 @@
     "proposed_invocations_daily": 108,
     "production_cron_registered": false
   },
-  "verdict": "HOLD"
+  "verdict": "HOLD",
+  "current_day_calendar_cache": "not used for either authorization or veto"
 }
