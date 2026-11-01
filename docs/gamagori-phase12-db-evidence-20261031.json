@@ -1,0 +1,157 @@
+{
+  "before": [
+    {
+      "checked_at": "2026-10-31 05:10:21.685804+00",
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238",
+      "existing_tables": [
+        {
+          "rls": true,
+          "name": "bsc_gamagori_chart_ratings"
+        },
+        {
+          "rls": true,
+          "name": "bsc_gamagori_collection_days"
+        },
+        {
+          "rls": true,
+          "name": "bsc_gamagori_collection_runs"
+        },
+        {
+          "rls": true,
+          "name": "bsc_gamagori_collection_tasks"
+        },
+        {
+          "rls": true,
+          "name": "bsc_gamagori_collector_lease"
+        }
+      ],
+      "chart_columns": [
+        {
+          "type": "date",
+          "column": "race_date"
+        },
+        {
+          "type": "smallint",
+          "column": "race_no"
+        },
+        {
+          "type": "smallint",
+          "column": "boat_no"
+        },
+        {
+          "type": "smallint",
+          "column": "slit_rating"
+        },
+        {
+          "type": "smallint",
+          "column": "turn_rating"
+        },
+        {
+          "type": "text",
+          "column": "source_url"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "captured_at"
+        },
+        {
+          "type": "text",
+          "column": "arrow_direction"
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "checked_at": "2026-10-31 05:24:20.178718+00",
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238",
+      "duplicates": 0,
+      "partial": 0,
+      "observation_table": null
+    }
+  ],
+  "current_read_only": {
+    "measured_at": "2026-10-31 05:18:32.374438+00",
+    "races": [
+      {
+        "race_no": 1,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 2,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 3,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 4,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 5,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 6,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 7,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 8,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 9,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 10,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 11,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      },
+      {
+        "race_no": 12,
+        "boats": 6,
+        "preview_boats": 0,
+        "entry_preview_at": null
+      }
+    ]
+  },
+  "production_ddl_applied": false,
+  "chart_writes": 0,
+  "shared_sync_changes": 0
+}

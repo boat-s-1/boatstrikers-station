@@ -1,0 +1,414 @@
+{
+  "phase": "7",
+  "date_jst": "2026-10-31",
+  "repository": "boat-s-1/boatstrikers-station",
+  "pr": 294,
+  "tested_code_commit": "52df63a47140b59f4c5ebd329311afee17c0a08e",
+  "tested_deployment": {
+    "id": "dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT",
+    "url": "https://boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app",
+    "state": "READY",
+    "target": "preview"
+  },
+  "baseline": {
+    "rows": 1152,
+    "races": 192,
+    "digest": "b168337fdc6b2dd7b6e9b0eeeaac33d1",
+    "max_captured_at": "2026-10-30T16:09:59.878031+00:00"
+  },
+  "http_responses": [
+    {
+      "label": "old-app-401",
+      "status": 401,
+      "content_type": "application/json",
+      "elapsed_ms": 9259,
+      "request_id": "cle1::iad1::kxtnl-1793378567768-bc40a712642c",
+      "body": {
+        "error": "unauthorized"
+      }
+    },
+    {
+      "label": "specified-existing-1",
+      "status": 200,
+      "content_type": "application/json",
+      "elapsed_ms": 7942,
+      "request_id": "cle1::iad1::sqq9m-1793378602591-392ecd0740bd",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 1,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          }
+        ],
+        "nextRace": 2
+      }
+    },
+    {
+      "label": "new-2-concurrent-A",
+      "status": 409,
+      "content_type": "application/json",
+      "elapsed_ms": 8220,
+      "request_id": "cle1::iad1::v99lz-1793378637071-8b12e00e7d6f",
+      "vercel_error": null,
+      "retry_after": "120",
+      "body": {
+        "error": "collector_busy"
+      }
+    },
+    {
+      "label": "new-2-concurrent-B",
+      "status": 200,
+      "content_type": "application/json",
+      "elapsed_ms": 9440,
+      "request_id": "cle1::iad1::hccq2-1793378637071-475e24d82bc7",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 2,
+            "status": "saved",
+            "inserted": 6,
+            "upstream_attempts": 1
+          }
+        ],
+        "nextRace": 3
+      }
+    },
+    {
+      "label": "new-2-replay",
+      "status": 200,
+      "content_type": "application/json",
+      "elapsed_ms": 6756,
+      "request_id": "cle1::iad1::2cbpd-1793378686430-11700f9fbc7e",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 2,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          }
+        ],
+        "nextRace": 3
+      }
+    },
+    {
+      "label": "unavailable-chart",
+      "status": 207,
+      "content_type": "application/json",
+      "elapsed_ms": 7901,
+      "request_id": "cle1::iad1::tcxzp-1793378693196-404a93e3a8cd",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2026-10-31",
+        "results": [
+          {
+            "race": 1,
+            "status": "failed",
+            "reason": "invalid_chart",
+            "upstream_attempts": 1
+          }
+        ],
+        "nextRace": 2
+      }
+    },
+    {
+      "label": "small-backfill-3-4",
+      "status": 200,
+      "content_type": "application/json",
+      "elapsed_ms": 24850,
+      "request_id": "cle1::iad1::cvbpx-1793378740093-5414e57eee99",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 3,
+            "status": "saved",
+            "inserted": 6,
+            "upstream_attempts": 1
+          },
+          {
+            "race": 4,
+            "status": "saved",
+            "inserted": 6,
+            "upstream_attempts": 1
+          }
+        ],
+        "nextRace": 5
+      }
+    },
+    {
+      "label": "new-api-no-bearer",
+      "status": 401,
+      "content_type": "application/json",
+      "elapsed_ms": 9839,
+      "request_id": "cle1::iad1::w6wqt-1793378849479-ede069776bf9",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "error": "unauthorized"
+      }
+    },
+    {
+      "label": "api-reject-limit-4",
+      "status": 400,
+      "content_type": "application/json",
+      "elapsed_ms": 7063,
+      "request_id": "cle1::iad1::cnf95-1793378856590-8a8ade023361",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "error": "valid date (YYYY-MM-DD) and race (1-12) required"
+      }
+    },
+    {
+      "label": "api-max-three-existing",
+      "status": 200,
+      "content_type": "application/json",
+      "elapsed_ms": 9547,
+      "request_id": "cle1::iad1::7cgzt-1793378864480-6c950de848e1",
+      "vercel_error": null,
+      "retry_after": null,
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 1,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          },
+          {
+            "race": 2,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          },
+          {
+            "race": 3,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          }
+        ],
+        "nextRace": 4
+      }
+    },
+    {
+      "label": "revoked-bypass-protection-check",
+      "status": 302,
+      "content_type": "text/plain",
+      "elapsed_ms": 6815,
+      "request_id": "cle1::kcxwp-1793379030370-3d4420cacb87",
+      "vercel_error": null,
+      "retry_after": null,
+      "html_protection_page": true
+    }
+  ],
+  "database_after": {
+    "rows": 1170,
+    "races": 195,
+    "all_digest": "538760bc13bd7e7e11f6d08ec5be7dbe",
+    "lease_idle": true,
+    "null_arrows": 1020,
+    "original_rows": 1152,
+    "duplicate_keys": 0,
+    "original_digest": "b168337fdc6b2dd7b6e9b0eeeaac33d1",
+    "incomplete_races": 0
+  },
+  "preservation_checks": {
+    "originalDigestPreserved": true,
+    "originalCountPreserved": true,
+    "target1Unchanged": true,
+    "race2UnchangedAfterReplay": true
+  },
+  "independent_official_checks": [
+    {
+      "date": "2025-08-09",
+      "race": 2,
+      "http_status": 200,
+      "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+      "html_sha256": "bbf001cc226bf8c9ed569db44e073bb6779a2b3c3883f59bea18582ffeabc06d",
+      "independent_parser": "Python HTMLParser, not application regex parser",
+      "actual": [
+        {
+          "boat_no": 1,
+          "slit_rating": 5,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 2,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 3,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 4,
+          "slit_rating": 3,
+          "turn_rating": 3,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 5,
+          "slit_rating": 4,
+          "turn_rating": 3,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 6,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        }
+      ],
+      "matches_database": true
+    },
+    {
+      "date": "2025-08-09",
+      "race": 3,
+      "http_status": 200,
+      "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+      "html_sha256": "42cf7088c0a0477a68c1e9b1c92cf45989e0d7ff33e4688fd7fe0fa5fe4159bb",
+      "independent_parser": "Python HTMLParser, not application regex parser",
+      "actual": [
+        {
+          "boat_no": 1,
+          "slit_rating": 4,
+          "turn_rating": 3,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 2,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 3,
+          "slit_rating": 5,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 4,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 5,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 6,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        }
+      ],
+      "matches_database": true
+    },
+    {
+      "date": "2025-08-09",
+      "race": 4,
+      "http_status": 200,
+      "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+      "html_sha256": "fb583ea60929a6c41510b29a073e569f3be1a66b2605aabd65d96920bbc15e01",
+      "independent_parser": "Python HTMLParser, not application regex parser",
+      "actual": [
+        {
+          "boat_no": 1,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 2,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 3,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 4,
+          "slit_rating": 5,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 5,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 6,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        }
+      ],
+      "matches_database": true
+    }
+  ],
+  "migration": {
+    "version": "20261030164104",
+    "name": "gamagori_collector_global_lease",
+    "new_table": "bsc_gamagori_collector_lease",
+    "functions_security": "invoker; service_role only; RLS enabled; anon/authenticated denied"
+  },
+  "cleanup": {
+    "revoked": true,
+    "remainingBypassEntries": 0,
+    "protectionRedirect": true,
+    "ssoProtection": {
+      "enabled": true,
+      "deploymentType": "all_except_custom_domains"
+    },
+    "previewScopedApiSecret": "Vercel sensitive variable on feature/gamagori-chart-collector only; value not exported"
+  },
+  "local_fault_tests": {
+    "pass": 15,
+    "fail": 0,
+    "http503_retry_attempts": 2,
+    "http503_case_duration_ms": 1514,
+    "asserted_min_http_request_interval_ms": 1450,
+    "default_timeout_ms": 8000,
+    "timeout_attempts": 2,
+    "total_timeout_test_ms": 16006,
+    "db_rows_inserted_on_timeout": 0,
+    "scope": "local real HTTP + actual collector + mock DB; NOT fault injection into official site or deployed Vercel"
+  },
+  "unobserved": [
+    "Official upstream 5xx/timeout inside a deployed Vercel invocation",
+    "Physical Vercel process termination at maxDuration; expired lease recovery was asserted by SQL transaction",
+    "Production cron scheduling and production deployment (awaiting approval)"
+  ],
+  "cli_runner": {
+    "exit_code": 0,
+    "stdout": "{\"date\":\"2025-08-09\",\"results\":[{\"race\":1,\"status\":\"skipped_existing\"},{\"race\":2,\"status\":\"skipped_existing\"},{\"race\":3,\"status\":\"skipped_existing\"}]}"
+  },
+  "decision": "GO for merge technical readiness and bounded manual collection; production actions await user approval"
+}

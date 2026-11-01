@@ -1,0 +1,182 @@
+[
+  {
+    "boat_no": 1,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 5,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 2,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 3,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 4,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 3,
+    "turn_rating": 3,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 5,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 4,
+    "turn_rating": 3,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 6,
+    "race_no": 2,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090702.htm",
+    "captured_at": "2026-10-30T16:43:59.418304+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 1,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 4,
+    "turn_rating": 3,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 2,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 3,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 3,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 5,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 4,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 5,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 3,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 6,
+    "race_no": 3,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090703.htm",
+    "captured_at": "2026-10-30T16:45:42.363182+00:00",
+    "slit_rating": 3,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 1,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 3,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 2,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 3,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 4,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 5,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 5,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 3,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  },
+  {
+    "boat_no": 6,
+    "race_no": 4,
+    "race_date": "2025-08-09",
+    "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202508090704.htm",
+    "captured_at": "2026-10-30T16:45:43.242921+00:00",
+    "slit_rating": 4,
+    "turn_rating": 4,
+    "arrow_direction": "none"
+  }
+]

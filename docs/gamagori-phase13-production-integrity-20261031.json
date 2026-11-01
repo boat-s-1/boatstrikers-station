@@ -1,0 +1,22 @@
+{
+  "before": {
+    "checked_at": "2026-10-31 06:27:52.543878+00",
+    "boats": 1188,
+    "races": 198,
+    "digest": "c22b73061091abe02167d6b0f22ae238",
+    "observation_table": null
+  },
+  "after": [
+    {
+      "checked_at": "2026-10-31 13:39:51.698589+00",
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238",
+      "observations": null,
+      "receipts": null
+    }
+  ],
+  "production_ddl": 0,
+  "production_chart_writes": 0,
+  "new_automation_bypass_keys": 0
+}

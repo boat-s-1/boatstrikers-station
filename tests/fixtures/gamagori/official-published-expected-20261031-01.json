@@ -1,0 +1,59 @@
+{
+  "provenance": "Actual public 2026-10-31 1R chart/preview, captured 15:28 JST; not live sale permission",
+  "boats": [
+    {
+      "boat_no": 1,
+      "registration": 5321,
+      "course": 1,
+      "exhibition_time": 6.82,
+      "slit_rating": 4,
+      "turn_rating": 5,
+      "arrow_direction": "none"
+    },
+    {
+      "boat_no": 2,
+      "registration": 3747,
+      "course": 2,
+      "exhibition_time": 6.83,
+      "slit_rating": 5,
+      "turn_rating": 3,
+      "arrow_direction": "none"
+    },
+    {
+      "boat_no": 3,
+      "registration": 3905,
+      "course": 3,
+      "exhibition_time": 6.86,
+      "slit_rating": 3,
+      "turn_rating": 4,
+      "arrow_direction": "none"
+    },
+    {
+      "boat_no": 4,
+      "registration": 3696,
+      "course": 4,
+      "exhibition_time": 6.92,
+      "slit_rating": 4,
+      "turn_rating": 4,
+      "arrow_direction": "none"
+    },
+    {
+      "boat_no": 5,
+      "registration": 4094,
+      "course": 5,
+      "exhibition_time": 6.93,
+      "slit_rating": 3,
+      "turn_rating": 3,
+      "arrow_direction": "none"
+    },
+    {
+      "boat_no": 6,
+      "registration": 3303,
+      "course": 6,
+      "exhibition_time": 6.93,
+      "slit_rating": 4,
+      "turn_rating": 3,
+      "arrow_direction": "none"
+    }
+  ]
+}

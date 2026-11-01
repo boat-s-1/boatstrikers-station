@@ -1,0 +1,82 @@
+✔ three races max, serial spacing, six-row inserts (5.43982ms)
+✔ existing and partial races never fetched or written (0.49004ms)
+✔ no event never fetched (0.398982ms)
+✔ invalid chart never saved (1.505282ms)
+✔ temporary failure retried once (0.769101ms)
+✔ 403 and 429 stop entire batch without retry (0.865726ms)
+✔ 404 not retried; network retried once; oversized body rejected (2.168052ms)
+✔ Cron auth accepts either configured secret, rejects empty/wrong credentials without DB work (4.149242ms)
+✔ lease blocks concurrent work and releases only the matching owner (4.623498ms)
+✔ work error still releases; acquire error never starts work (0.977135ms)
+✔ JST day boundary and official held/non-meeting fixtures; malformed calendars fail closed (3.437694ms)
+✔ one invocation selects max 3, shared deadline and durable claims before fetch (2.054881ms)
+✔ official non-meeting and unknown calendar never fetch charts even with DB events (0.610842ms)
+✔ unpublished/future/unknown-deadline/cancellation and retry backoff are excluded from due set (0.490951ms)
+✔ invalid chart stays retryable and never prevents later ready races from progressing (1.747628ms)
+✔ save followed by checkpoint crash resumes from saved chart without overwriting (1.121412ms)
+✔ 403/429 halt the batch and future invocations observe cooldown (0.65561ms)
+✔ calendar held but event sync missing is distinct from non-meeting (0.388045ms)
+✔ past-day backfill can proceed when historical deadline time is missing (1.015693ms)
+✔ fresh DB evidence authorizes only fresh races without requesting the official index (1.100391ms)
+✔ expired DB-derived cache cannot authorize fetching without new evidence (0.432203ms)
+✔ conflicting fresh non-meeting cache and DB evidence stop collection (0.297309ms)
+✔ known cancelled race stays excluded when official cache confirms the meeting (0.327915ms)
+(node:21) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ parser contract: full chart, up/down arrows, and invalid input (3.805404ms)
+✔ official HTML: 2025-08-09 1R matches six stored ratings (0.588599ms)
+✔ official HTML: arrows 2026-10-29 5R (0.541708ms)
+✔ reject missing, duplicate boats, missing chart, extra chart and malformed grid (1.734889ms)
+✔ filenames in text/comments do not count as boats; conflicting image alt is rejected (0.833758ms)
+(node:27) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP 503 retries once and parses official fixture before six-row insert (1515.788463ms)
+✔ real HTTP default 8s timeout aborts twice and writes zero rows (16004.411149ms)
+✔ current day requires fresh event + all six entries + successful live log (1.534487ms)
+✔ stale/future timestamps cannot refresh a meeting decision (0.236958ms)
+✔ explicit cancellation always denies the affected race (0.716291ms)
+✔ historical completed results confirm meeting; absence never proves non-meeting (0.173572ms)
+(node:68) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/app/lib/trinityShadowCoverage.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ counts launch period separately and requires both models with matching contemporaneous input (2.017876ms)
+(node:69) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/app/lib/discordAlertDelivery.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 締切前の当日分だけ送る。締切後・別の日は送らない。締切が無いものは検出15分以内だけ (18.146399ms)
+✔ 停止中に溜まった過去の未送信114件は、1件も送らない (8.048639ms)
+✔ 1回目は送って記録する。2回目以降は送らない (13.416089ms)
+✔ 同時に5本動いても1回だけ送る（初回・再送の両方） (42.816055ms)
+✔ 失敗は最大3回まで。それ以降は送らない (2.695609ms)
+✔ 変更前の形式の失敗は1回失敗として扱い、残り2回まで再送する (2.399031ms)
+✔ 処理中の印は期限内なら他の実行は触らない。期限切れは「結果不明」として二度と送らない (1.389827ms)
+✔ 送信済みの行は、失敗の記録で上書きしない（処理中の印が一致する場合だけ更新） (1.147581ms)
+✔ discord-alerts route：送信前に判定と配信の権利の取得を行い、当日分だけを読む。キャラ別通知先とロールを維持する (0.528968ms)
+✔ 送信の失敗の分類：429・5xx は再送、4xx は恒久的な拒否、応答なし（通信断・タイムアウト）は結果不明 (0.252361ms)
+✔ 応答が無い失敗（届いた可能性がある）は再送しない (0.870895ms)
+✔ 恒久的な拒否（403 など）は1回で打ち切る (0.434025ms)
+✔ 送信は成功したが記録に失敗した場合：その後は期限内も期限後も再送しない（重複より取りこぼしを選ぶ） (1.124427ms)
+✔ 権利の取得で DB エラー：送らず、例外も投げず、回数にも数えない（次の実行で取り直す） (0.731995ms)
+✔ 判定後、送る直前に締切を過ぎていたら送らず、以後も送らない (0.931155ms)
+✔ 先読み：送信済み・確定・結果不明・上限到達だけを「完了」とし、取得に失敗したら空集合 (0.762691ms)
+✔ discord-alerts route：送信直前の再判定・時間の予算・Webhook のタイムアウト (0.242026ms)
+✔ 管理者向けデータ欠損通知：Bot のメッセージで管理者チャンネルへ送る。明示された管理者チャンネルが無ければ送らない (0.273503ms)
+✔ 管理者向けデータ欠損通知：翌日に前日の日付で作られるため、前日分と当日分だけを読む（それより古いものは読まない） (0.161103ms)
+✔ DiscordがメッセージIDを返さない場合は成功扱いせず再送もしない (1.673096ms)
+✔ 全体通知は送信対象から除外しキャラ別Webhook送信は維持する (0.392182ms)
+✔ 一果の生成買い目は1号艇1着固定で、1号艇が最上位でない場合は見送る (7.114779ms)
+✔ 公式買い目凍結にも一果1アタマのDBガードがある (3.767616ms)
+ℹ tests 58
+ℹ suites 0
+ℹ pass 58
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17698.987802

@@ -1,0 +1,726 @@
+{
+  "phase": 8,
+  "date_jst": "2026-10-31",
+  "repository": "boat-s-1/boatstrikers-station",
+  "pr": 294,
+  "decision": "HOLD: native official meeting calendar fetch times out from Vercel",
+  "new_state_tables_security": {"rls_enabled":true,"anon_select":false,"authenticated_update":false,"scope":"bsc_gamagori_collection_days/tasks/runs"},
+  "implementation_commit": "c670b726a94a614731518abfe695976cb9e7c681",
+  "diagnostic_commit": "52e2dce9cc1ff8bb3148c79267e5823760bdc804",
+  "tested_deployment": "dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn",
+  "baseline": {
+    "rows": 1170,
+    "races": 195,
+    "digest": "538760bc13bd7e7e11f6d08ec5be7dbe"
+  },
+  "final_database": {
+    "integrity": {
+      "rows": 1176,
+      "races": 196,
+      "digest": "90007bfa6db5c1ff495b2bfce5b6df4b",
+      "baseline_rows": 1170,
+      "duplicate_keys": 0,
+      "baseline_digest": "538760bc13bd7e7e11f6d08ec5be7dbe",
+      "last_captured_at": "2026-10-30T17:37:47.370125+00:00"
+    },
+    "migrations": [
+      {
+        "name": "gamagori_monitor_historical_due",
+        "version": "20261030172904"
+      },
+      {
+        "name": "gamagori_collection_orchestrator_state",
+        "version": "20261030172615"
+      },
+      {
+        "name": "gamagori_monitor_flagged_races",
+        "version": "20261030174052"
+      }
+    ],
+    "privileges": [
+      {
+        "function": "bsc_gamagori_chart_monitor",
+        "anon_execute": false,
+        "service_execute": true,
+        "security_definer": false,
+        "authenticated_execute": false
+      },
+      {
+        "function": "bsc_gamagori_claim_task",
+        "anon_execute": false,
+        "service_execute": true,
+        "security_definer": false,
+        "authenticated_execute": false
+      },
+      {
+        "function": "bsc_gamagori_orchestrator_prepare",
+        "anon_execute": false,
+        "service_execute": true,
+        "security_definer": false,
+        "authenticated_execute": false
+      }
+    ],
+    "partial_races": 0
+  },
+  "http_responses": [
+    {
+      "label": "today-auto-before-publication",
+      "status": 200,
+      "elapsed_ms": 14277,
+      "request_id": "cle1::iad1::j5v5t-1793381550716-55426ff24fa3",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-31",
+        "run": "5faf01e7-f60b-4444-be1b-fa14a31760c4",
+        "outcome": "calendar_unknown",
+        "results": []
+      },
+      "calendar_source_mode": "native_Vercel_fetch"
+    },
+    {
+      "label": "official-non-meeting",
+      "status": 200,
+      "elapsed_ms": 14000,
+      "request_id": "cle1::iad1::xhlnq-1793381564889-35682fedb103",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-26",
+        "run": "e970d2f3-25d5-441b-b35b-473b4a60ad24",
+        "outcome": "calendar_unknown",
+        "results": []
+      },
+      "calendar_source_mode": "native_Vercel_fetch"
+    },
+    {
+      "label": "already-complete-date",
+      "status": 200,
+      "elapsed_ms": 14580,
+      "request_id": "cle1::iad1::cvbpx-1793381578718-ff368293d64d",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-27",
+        "run": "0b5b99a5-3133-4d94-b824-bafc770e9910",
+        "outcome": "calendar_unknown",
+        "results": []
+      },
+      "calendar_source_mode": "native_Vercel_fetch"
+    },
+    {
+      "label": "historical-missing-race",
+      "status": 200,
+      "elapsed_ms": 14106,
+      "request_id": "cle1::iad1::4xn6s-1793381593301-cf8467f95739",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-30",
+        "run": "0dfcbad1-c1d3-44f3-8b26-41b14142d0b8",
+        "outcome": "calendar_unknown",
+        "results": []
+      },
+      "calendar_source_mode": "native_Vercel_fetch"
+    },
+    {
+      "label": "calendar-diagnostic-autodate",
+      "status": 503,
+      "elapsed_ms": 16170,
+      "request_id": "cle1::iad1::ghksk-1793381812848-096b217b46ed",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-31",
+        "run": "46183d41-a84d-4478-aa73-dd1cef69e187",
+        "outcome": "calendar_unknown",
+        "results": [],
+        "calendar_error": "calendar_timeout"
+      },
+      "calendar_source_mode": "native_Vercel_fetch"
+    },
+    {
+      "label": "verified-cache-non-meeting",
+      "status": 200,
+      "elapsed_ms": 7252,
+      "request_id": "cle1::iad1::fn9ts-1793381848589-6d76fcafb781",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-26",
+        "run": "abcf3384-90e9-4ac6-8478-829389553987",
+        "outcome": "non_meeting",
+        "results": []
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "verified-cache-already-complete",
+      "status": 200,
+      "elapsed_ms": 8283,
+      "request_id": "cle1::iad1::5ssc5-1793381856879-9eedc8af689c",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-27",
+        "run": "b6a2f781-f8f8-4a44-bbfb-5ce3bac416f4",
+        "outcome": "waiting_or_complete",
+        "results": []
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "verified-cache-historical-missing",
+      "status": 200,
+      "elapsed_ms": 12178,
+      "request_id": "cle1::iad1::f67zc-1793381863947-f83d63a8a527",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-30",
+        "run": "5cc74ae5-fadd-4a1d-ab84-a9ff08944938",
+        "outcome": "collected",
+        "results": [
+          {
+            "race": 3,
+            "status": "saved",
+            "inserted": 6,
+            "upstream_attempts": 1
+          }
+        ]
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "verified-cache-immediate-replay",
+      "status": 200,
+      "elapsed_ms": 9971,
+      "request_id": "cle1::iad1::fn9ts-1793381878146-8e0d33fb3b8a",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-30",
+        "run": "8eb2d1ad-6167-4004-92a1-0a4463f22ef7",
+        "outcome": "waiting_or_complete",
+        "results": []
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "monitor-http-private",
+      "status": 200,
+      "elapsed_ms": 6444,
+      "request_id": "cle1::iad1::n6j58-1793381886033-694b2ef8458f",
+      "content_type": "application/json",
+      "body": {
+        "tasks": [
+          {
+            "status": "complete",
+            "race_no": 1,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 2,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 3,
+            "attempts": 1,
+            "race_date": "2026-10-30",
+            "last_reason": "saved",
+            "last_attempt_at": "2026-10-30T17:37:44.615461+00:00",
+            "next_attempt_at": null,
+            "upstream_attempts": 1
+          },
+          {
+            "status": "complete",
+            "race_no": 4,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 5,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 6,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 7,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 8,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 9,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 10,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 11,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 12,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          }
+        ],
+        "calendar": {
+          "race_date": "2026-10-30",
+          "checked_at": "2026-10-30T17:37:17.206404+00:00",
+          "blocked_until": null,
+          "calendar_status": "held"
+        },
+        "race_date": "2026-10-30",
+        "recent_runs": [
+          {
+            "id": "8eb2d1ad-6167-4004-92a1-0a4463f22ef7",
+            "status": "completed",
+            "outcome": "waiting_or_complete",
+            "results": [],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:37:58.984017+00:00",
+            "finished_at": "2026-10-30T17:37:59.125+00:00"
+          },
+          {
+            "id": "5cc74ae5-fadd-4a1d-ab84-a9ff08944938",
+            "status": "completed",
+            "outcome": "collected",
+            "results": [
+              {
+                "race": 3,
+                "status": "saved",
+                "inserted": 6,
+                "upstream_attempts": 1
+              }
+            ],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:37:44.373385+00:00",
+            "finished_at": "2026-10-30T17:37:49.672+00:00"
+          },
+          {
+            "id": "0dfcbad1-c1d3-44f3-8b26-41b14142d0b8",
+            "status": "completed",
+            "outcome": "calendar_unknown",
+            "results": [],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:33:14.184358+00:00",
+            "finished_at": "2026-10-30T17:33:20.567+00:00"
+          }
+        ],
+        "saved_boats": 72,
+        "partial_races": 0,
+        "complete_races": 12,
+        "expected_races": 12,
+        "last_captured_at": "2026-10-30T17:37:47.370125+00:00",
+        "missing_due_races": 0,
+        "global_saved_boats": 1176,
+        "global_saved_races": 196,
+        "stale_running_runs": 0,
+        "scheduled_races_in_db": 12,
+        "unknown_deadline_races": 0,
+        "last_captured_at_global": "2026-10-30T17:37:47.370125+00:00"
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "monitor-no-auth",
+      "status": 401,
+      "elapsed_ms": 6110,
+      "request_id": "cle1::iad1::8lbtb-1793381892621-3209a76ed63c",
+      "content_type": "application/json",
+      "body": {
+        "error": "unauthorized"
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "verified-cache-today-future-races",
+      "status": 200,
+      "elapsed_ms": 7470,
+      "request_id": "cle1::iad1::4mdxh-1793381934184-29a4177b2aa7",
+      "content_type": "application/json",
+      "body": {
+        "date": "2026-10-31",
+        "run": "07f80e6c-6212-4e00-9fa5-b101f0bbb179",
+        "outcome": "waiting_or_complete",
+        "results": []
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "monitor-after-final-sql",
+      "status": 200,
+      "elapsed_ms": 6939,
+      "request_id": "cle1::iad1::5pdwc-1793382113731-6c3767f4ef8f",
+      "content_type": "application/json",
+      "body": {
+        "tasks": [
+          {
+            "status": "complete",
+            "race_no": 1,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 2,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 3,
+            "attempts": 1,
+            "race_date": "2026-10-30",
+            "last_reason": "saved",
+            "last_attempt_at": "2026-10-30T17:37:44.615461+00:00",
+            "next_attempt_at": null,
+            "upstream_attempts": 1
+          },
+          {
+            "status": "complete",
+            "race_no": 4,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 5,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 6,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 7,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 8,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 9,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 10,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 11,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "complete",
+            "race_no": 12,
+            "attempts": 0,
+            "race_date": "2026-10-30",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          }
+        ],
+        "calendar": {
+          "race_date": "2026-10-30",
+          "checked_at": "2026-10-30T17:37:17.206404+00:00",
+          "blocked_until": null,
+          "calendar_status": "held"
+        },
+        "race_date": "2026-10-30",
+        "recent_runs": [
+          {
+            "id": "8eb2d1ad-6167-4004-92a1-0a4463f22ef7",
+            "status": "completed",
+            "outcome": "waiting_or_complete",
+            "results": [],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:37:58.984017+00:00",
+            "finished_at": "2026-10-30T17:37:59.125+00:00"
+          },
+          {
+            "id": "5cc74ae5-fadd-4a1d-ab84-a9ff08944938",
+            "status": "completed",
+            "outcome": "collected",
+            "results": [
+              {
+                "race": 3,
+                "status": "saved",
+                "inserted": 6,
+                "upstream_attempts": 1
+              }
+            ],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:37:44.373385+00:00",
+            "finished_at": "2026-10-30T17:37:49.672+00:00"
+          },
+          {
+            "id": "0dfcbad1-c1d3-44f3-8b26-41b14142d0b8",
+            "status": "completed",
+            "outcome": "calendar_unknown",
+            "results": [],
+            "race_date": "2026-10-30",
+            "started_at": "2026-10-30T17:33:14.184358+00:00",
+            "finished_at": "2026-10-30T17:33:20.567+00:00"
+          }
+        ],
+        "saved_boats": 72,
+        "flagged_races": 0,
+        "partial_races": 0,
+        "complete_races": 12,
+        "expected_races": 12,
+        "last_captured_at": "2026-10-30T17:37:47.370125+00:00",
+        "missing_due_races": 0,
+        "global_saved_boats": 1176,
+        "global_saved_races": 196,
+        "stale_running_runs": 0,
+        "scheduled_races_in_db": 12,
+        "unknown_deadline_races": 0,
+        "last_captured_at_global": "2026-10-30T17:37:47.370125+00:00"
+      },
+      "calendar_source_mode": "manually_verified_official_cache"
+    },
+    {
+      "label": "protection-after-revocation",
+      "status": 302,
+      "elapsed_ms": 6071,
+      "request_id": "cle1::sf46z-1793382143786-b3f171ca73ad",
+      "content_type": "text/plain",
+      "protection_redirect_or_html": true,
+      "calendar_source_mode": "protection_check"
+    }
+  ],
+  "calendar_pages_verified_outside_Vercel": {
+    "2026-10-31": {
+      "sha256": "087f93b4c7be0cf57bd1448fb038861c34610fe3e6e30feb0fe73c2744caa99a",
+      "source": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261031",
+      "verified_status": "held"
+    },
+    "2026-10-26": {
+      "sha256": "6c1a05fbcac02067492e35bc486bfb89896033cb2f569ace6c10256404899682",
+      "source": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261026",
+      "verified_status": "no_meeting"
+    },
+    "2026-10-27": {
+      "sha256": "947cd8f6112bff751a59ee29e08f7930fd577ebc75c69e380a5b059fc8159294",
+      "source": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261027",
+      "verified_status": "held"
+    },
+    "2026-10-30": {
+      "sha256": "21c7706f5858b8ab4ed954e802ff2b18d77efa76b1b077b89e10a1f62ac753df",
+      "source": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261030",
+      "verified_status": "held"
+    }
+  },
+  "independent_new_chart": [
+    {
+      "date": "2026-10-30",
+      "race": 3,
+      "http_status": 200,
+      "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202610300703.htm",
+      "html_sha256": "4d50f539d3f81bfe1a9378652fe6356c816a63b698a7e33a9dfa46ae156abd77",
+      "independent_parser": "Python HTMLParser, not application regex parser",
+      "actual": [
+        {
+          "boat_no": 1,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 2,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 3,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "up"
+        },
+        {
+          "boat_no": 4,
+          "slit_rating": 4,
+          "turn_rating": 4,
+          "arrow_direction": "up"
+        },
+        {
+          "boat_no": 5,
+          "slit_rating": 3,
+          "turn_rating": 4,
+          "arrow_direction": "none"
+        },
+        {
+          "boat_no": 6,
+          "slit_rating": 4,
+          "turn_rating": 3,
+          "arrow_direction": "down"
+        }
+      ],
+      "matches_database": true
+    }
+  ],
+  "tests": {
+    "total": 50,
+    "pass": 50,
+    "fail": 0,
+    "gamagori": 26,
+    "unchanged_systems_regression": 24
+  },
+  "sql_assertions": "Real PostgreSQL service_role assertions of reconciliation, interrupted recovery, claim owner/exclusivity and max six attempts passed and rolled back; no chart writes",
+  "feature_flag_scope": [
+    {
+      "key": "GAMAGORI_ORCHESTRATOR_ENABLED",
+      "gitBranch": "feature/gamagori-chart-collector",
+      "target": [
+        "preview"
+      ]
+    }
+  ],
+  "production_cron_registered": false,
+  "vercel_json_changed": false,
+  "protection": {
+    "enabled": true,
+    "deploymentType": "all_except_custom_domains"
+  },
+  "cleanup": {
+    "bypassRevoked": true,
+    "revoked_bypass_returns_302": true
+  },
+  "unverified": [
+    "Native held/non-meeting determination success in Vercel (calendar_timeout observed)",
+    "Actual Vercel scheduled Cron invocation and long-term operation (not enabled)",
+    "Physical Vercel process kill at 60s (recovery tested by SQL and unit fault injection)",
+    "Account plan for two-minute Cron cannot be read via available team tools"
+  ],
+  "cron_proposal": {
+    "utc": "*/2 22-23,0-13 * * *",
+    "jst": "07:00-22:59 every two minutes",
+    "invocations_max_per_day": 480,
+    "max_races_per_invocation": 3,
+    "max_attempts_per_race": 6,
+    "max_gamagori_requests_per_target_date": 144,
+    "normal_gamagori_requests_per_12race_day": 12,
+    "calendar_success_cache_hours": 6,
+    "calendar_unknown_cache_minutes": 30
+  },
+  "calendar_cache_test_note": "Verified public official pages were manually seeded into dedicated cache only to test downstream orchestration. This is not counted as native automatic calendar success. Initial partial-page reading was corrected before tests passed."
+}

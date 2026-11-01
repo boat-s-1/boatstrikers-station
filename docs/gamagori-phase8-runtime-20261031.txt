@@ -1,0 +1,30 @@
+## Runtime Logs
+
+**Project:** prj_iKWrqS29BRLCIWKHoDe1SFOTH8Y2
+**Deployment:** dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn
+**Time range:** 2026-10-30T17:10:53.654Z → 2026-10-30T17:40:53.654Z
+
+### 2026-10-30T17:38:55.617Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=4mdxh-1793381934184-29a4177b2aa7 domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-31","run":"07f80e6c-6212-4e00-9fa5-b101f0bbb179","outcome":"waiting_or_complete","results":[]}
+
+### 2026-10-30T17:38:00.080Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=fn9ts-1793381878146-8e0d33fb3b8a domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-30","run":"8eb2d1ad-6167-4004-92a1-0a4463f22ef7","outcome":"waiting_or_complete","results":[]}
+
+### 2026-10-30T17:37:50.153Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=f67zc-1793381863947-f83d63a8a527 domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-30","run":"5cc74ae5-fadd-4a1d-ab84-a9ff08944938","outcome":"collected","results":[{"race":3,"status":"saved","inserted":6,"upstream_attempts":1}]}
+
+### 2026-10-30T17:37:37.975Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=5ssc5-1793381856879-9eedc8af689c domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-27","run":"b6a2f781-f8f8-4a44-bbfb-5ce3bac416f4","outcome":"waiting_or_complete","results":[]}
+
+### 2026-10-30T17:37:29.690Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=fn9ts-1793381848589-6d76fcafb781 domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-26","run":"abcf3384-90e9-4ac6-8478-829389553987","outcome":"non_meeting","results":[]}
+
+### 2026-10-30T17:37:02.876Z GET /api/cron/gamagori-chart-orchestrate [info/function]
+dep=dpl_DM5HrNa4KXygAZWWFjcbLi39tDNn branch=feature/gamagori-chart-collector request=ghksk-1793381812848-096b217b46ed domain=boatstrikers-station-5zgqdq1uh-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_orchestrate {"date":"2026-10-31","run":"46183d41-a84d-4478-aa73-dd1cef69e187","outcome":"calendar_unknown","results":[],"calendar_error":"calendar_timeout"}
+

@@ -1,0 +1,16 @@
+{
+  "mode": "SYNTHETIC_ISOLATION_CONTRACT_ONLY",
+  "project_ref": "rdqnqvafsponsoetnezv",
+  "separate_connection_reexecute": [
+    {
+      "checked_at": "2026-10-31 13:45:12.867524+00",
+      "reexecute": {
+        "status": "skipped_existing",
+        "inserted": 0
+      },
+      "synthetic_chart_boats": 6,
+      "synthetic_digest": "95c7115681faa90bb8a6f8e06694b27a",
+      "receipts": 1
+    }
+  ]
+}

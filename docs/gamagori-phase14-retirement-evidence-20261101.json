@@ -1,0 +1,56 @@
+{
+  "date_jst": "2026-11-01",
+  "baseline_commit": "6055f0995670eeba25aab251896afcc62b0531f2",
+  "verdict": "HOLD",
+  "destructive_actions_executed": false,
+  "candidate": {
+    "id": "dpl_2gLUhD5r39bDkzb1D7Lerk8p8buX",
+    "environment": "preview",
+    "branch": "feature/gamagori-chart-collector",
+    "commit": "65e134cd937d7dd37e5f95acd547dfe86f7a8d03",
+    "url": "https://boatstrikers-station-7dajpkr6q-boat-s-1s-projects.vercel.app",
+    "state": "READY/stale",
+    "live_alias_count": 0
+  },
+  "unauthenticated_probe": {
+    "status": 302,
+    "redirect_origin_path": "https://vercel.com/sso-api",
+    "authentication_required": true
+  },
+  "current_branch_deployment": "dpl_2Axda6Gh5GyNJ4NA6eQjqAUpKvNv",
+  "production_custom_domain_deployment": "dpl_KEiMTsfy7emuXmdpfK5tsby3GhA5",
+  "usage": {
+    "window_start": "2026-10-31T14:57:34Z",
+    "root_log_records": 2,
+    "collector_paths_in_returned_aggregate": 0,
+    "exhaustive_access_audit": false
+  },
+  "env": {
+    "count": 75,
+    "remainingTemporary": 0,
+    "metadataUnchangedDuringAudit": true
+  },
+  "production": {
+    "races": 198,
+    "boats": 1188,
+    "duplicates": 0,
+    "incomplete": 0
+  },
+  "isolated": {
+    "project": "rdqnqvafsponsoetnezv",
+    "charts": 0,
+    "observations": 0,
+    "auth_users": 0,
+    "source_events": 0,
+    "source_entries": 0,
+    "source_results": 0,
+    "cron_catalog": false,
+    "edge_functions": 2,
+    "current_jwt_type": "ECC P-256",
+    "previous_jwt_type": "HS256",
+    "legacy_disable_control_visible": true,
+    "legacy_credentials_retired": false
+  },
+  "app_authentication_route_verified": false,
+  "pr_draft": true
+}

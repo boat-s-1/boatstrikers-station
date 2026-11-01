@@ -1,0 +1,523 @@
+{
+  "verified_date_jst": "2026-10-31",
+  "window_jst": "13:12–13:15",
+  "code_commit": "1936e2fc061409aedeca2372efd1aba3ab3ae043",
+  "build": {
+    "id": "dpl_DZHGRvAvVoeXJHd5nknVLUvZaNea",
+    "state": "READY",
+    "sha": "1936e2fc061409aedeca2372efd1aba3ab3ae043"
+  },
+  "before_totals": {
+    "boats": 1188,
+    "races": 198,
+    "digest": "c22b73061091abe02167d6b0f22ae238"
+  },
+  "after_checks": {
+    "totals": {
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238",
+      "partial": 0,
+      "duplicates": 0,
+      "current_attempted_races": 0
+    }
+  },
+  "final_totals": {
+    "boats": 1188,
+    "races": 198,
+    "digest": "c22b73061091abe02167d6b0f22ae238"
+  },
+  "http": [
+    {
+      "path": "/api/admin/gamagori-chart-readiness?race=1&probe_program=1&probe_chart=1",
+      "status": 200,
+      "elapsed_ms": 11844,
+      "request_id": "cle1::iad1::f4wbj-1793419926531-28776cd5cbf7",
+      "body": {
+        "date": "2026-10-31",
+        "proof": {
+          "status": "unknown"
+        },
+        "chart_publication_probe_only": {
+          "source_url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202610310701.htm",
+          "http_status": 200,
+          "html_sha256": "5433663266bac78021f52b21b33bf2bffbf7db9ddc9452faeec0a9cc2a8e70cb",
+          "state": "unpublished_or_invalid",
+          "marker_count": 0
+        },
+        "program_probe_only": {
+          "error": "program_status_unknown"
+        },
+        "collection_executed": false,
+        "races": [
+          {
+            "race_no": 1,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "15:21:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 2,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "15:48:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 3,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "16:16:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 4,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "16:43:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 5,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "17:10:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 6,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "17:37:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 7,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "18:04:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 8,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "18:33:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 9,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "19:04:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 10,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "19:36:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 11,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "20:07:00",
+            "cancel": null,
+            "status": "scheduled"
+          },
+          {
+            "race_no": 12,
+            "boats": 6,
+            "preview_boats": 0,
+            "preview_at": "2026-10-31T04:12:00.306365+00:00",
+            "entry_preview_at": null,
+            "deadline": "20:38:00",
+            "cancel": null,
+            "status": "scheduled"
+          }
+        ],
+        "live_sync": "2026-10-31T04:12:00.306365+00:00"
+      }
+    },
+    {
+      "path": "/api/admin/gamagori-chart-readiness?race=1",
+      "status": 401,
+      "elapsed_ms": 6324,
+      "request_id": "cle1::iad1::htxsw-1793419939797-8e5086740449",
+      "body": {
+        "error": "unauthorized"
+      }
+    },
+    {
+      "path": "/api/cron/gamagori-chart-orchestrate?date=2026-10-31",
+      "status": 200,
+      "elapsed_ms": 7769,
+      "request_id": "cle1::iad1::k68pg-1793419958014-2dd1902e55d3",
+      "body": {
+        "date": "2026-10-31",
+        "run": "61e9e1dd-9f74-450d-a70b-2ad96415f305",
+        "outcome": "waiting_fresh_evidence",
+        "meeting_source": "db_safety_gate",
+        "results": [],
+        "safety_reason": "fresh_six_boat_evidence_required"
+      }
+    },
+    {
+      "path": "/api/admin/gamagori-network-diagnostic-japan",
+      "status": 200,
+      "elapsed_ms": 14531,
+      "request_id": "cle1::iad1::wrf98-1793419964982-cfa3bb1eb63e",
+      "body": {
+        "region": "iad1",
+        "environment": "preview",
+        "results": [
+          {
+            "host": "www.boatrace.jp",
+            "path": "/owpc/pc/race/index?hd=20261031",
+            "dns": {
+              "addresses": [
+                {
+                  "address": "23.1.63.111",
+                  "family": 4
+                }
+              ],
+              "ms": 13
+            },
+            "tls4": {
+              "ok": true,
+              "protocol": "TLSv1.3",
+              "ms": 8
+            },
+            "https4": {
+              "code": "HTTP_TIMEOUT",
+              "ms": 4004
+            }
+          },
+          {
+            "host": "www.gamagori-kyotei.com",
+            "path": "/",
+            "dns": {
+              "addresses": [
+                {
+                  "address": "35.74.203.17",
+                  "family": 4
+                },
+                {
+                  "address": "13.114.46.24",
+                  "family": 4
+                }
+              ],
+              "ms": 3
+            },
+            "tls4": {
+              "ok": true,
+              "protocol": "TLSv1.2",
+              "ms": 449
+            },
+            "https4": {
+              "status": 200,
+              "ms": 607
+            }
+          },
+          {
+            "host": "www.boatrace.jp",
+            "path": "/owsp/sp/race/index?hd=20261031",
+            "dns": {
+              "addresses": [
+                {
+                  "address": "23.1.63.111",
+                  "family": 4
+                }
+              ],
+              "ms": 1
+            },
+            "tls4": {
+              "ok": true,
+              "protocol": "TLSv1.3",
+              "ms": 7
+            },
+            "https4": {
+              "code": "HTTP_TIMEOUT",
+              "ms": 4003
+            }
+          }
+        ]
+      }
+    },
+    {
+      "path": "/api/admin/gamagori-chart-monitor?date=2026-10-31",
+      "status": 200,
+      "elapsed_ms": 6585,
+      "request_id": "cle1::iad1::wrf98-1793420060050-825655365205",
+      "body": {
+        "tasks": [
+          {
+            "status": "pending",
+            "race_no": 1,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 2,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 3,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 4,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 5,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 6,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 7,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 8,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 9,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 10,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 11,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          },
+          {
+            "status": "pending",
+            "race_no": 12,
+            "attempts": 0,
+            "race_date": "2026-10-31",
+            "last_reason": null,
+            "last_attempt_at": null,
+            "next_attempt_at": null,
+            "upstream_attempts": 0
+          }
+        ],
+        "calendar": {
+          "race_date": "2026-10-31",
+          "checked_at": "2026-10-30T17:38:47.841605+00:00",
+          "blocked_until": null,
+          "calendar_status": "held",
+          "evidence_source": "legacy_official_cache",
+          "evidence_expires_at": null
+        },
+        "race_date": "2026-10-31",
+        "recent_runs": [
+          {
+            "id": "61e9e1dd-9f74-450d-a70b-2ad96415f305",
+            "status": "completed",
+            "outcome": "waiting_fresh_evidence",
+            "results": [],
+            "race_date": "2026-10-31",
+            "started_at": "2026-10-31T04:12:38.737029+00:00",
+            "finished_at": "2026-10-31T04:12:39.134+00:00"
+          },
+          {
+            "id": "07f80e6c-6212-4e00-9fa5-b101f0bbb179",
+            "status": "completed",
+            "outcome": "waiting_or_complete",
+            "results": [],
+            "race_date": "2026-10-31",
+            "started_at": "2026-10-30T17:38:54.59787+00:00",
+            "finished_at": "2026-10-30T17:38:54.728+00:00"
+          },
+          {
+            "id": "46183d41-a84d-4478-aa73-dd1cef69e187",
+            "status": "completed",
+            "outcome": "calendar_unknown",
+            "results": [],
+            "race_date": "2026-10-31",
+            "started_at": "2026-10-30T17:36:53.589476+00:00",
+            "finished_at": "2026-10-30T17:37:01.996+00:00"
+          },
+          {
+            "id": "5faf01e7-f60b-4444-be1b-fa14a31760c4",
+            "status": "completed",
+            "outcome": "calendar_unknown",
+            "results": [],
+            "race_date": "2026-10-31",
+            "started_at": "2026-10-30T17:32:31.464463+00:00",
+            "finished_at": "2026-10-30T17:32:38.229+00:00"
+          }
+        ],
+        "saved_boats": 0,
+        "flagged_races": 0,
+        "partial_races": 0,
+        "complete_races": 0,
+        "expected_races": 12,
+        "last_captured_at": null,
+        "missing_due_races": 0,
+        "global_saved_boats": 1188,
+        "global_saved_races": 198,
+        "stale_running_runs": 0,
+        "scheduled_races_in_db": 12,
+        "unknown_deadline_races": 0,
+        "last_captured_at_global": "2026-10-30T19:16:18.609612+00:00"
+      }
+    },
+    {
+      "path": "/api/cron/gamagori-chart-collect?date=2025-08-09&race=1&limit=1",
+      "status": 200,
+      "elapsed_ms": 8971,
+      "request_id": "cle1::iad1::wrf98-1793420084245-4450f8c24693",
+      "body": {
+        "date": "2025-08-09",
+        "results": [
+          {
+            "race": 1,
+            "status": "skipped_existing",
+            "upstream_attempts": 0
+          }
+        ],
+        "nextRace": 2
+      }
+    }
+  ],
+  "temporary_key_lifecycle": {
+    "generated_count": 1,
+    "active_count_after_creation": 1,
+    "created_at": "2026-10-31T04:11:35.325Z"
+  },
+  "revocation": {
+    "success": true,
+    "remaining_keys": 0,
+    "revoked_at": "2026-10-31T04:15:17.235Z"
+  },
+  "revoked_key_probe": {
+    "path": "/api/admin/gamagori-chart-readiness?race=1",
+    "status": 302,
+    "request_id": "cle1::j6gk6-1793420123511-1335266ef93b",
+    "elapsed_ms": 6123,
+    "authentication_page": true
+  },
+  "tests": {
+    "scope": "local unit and regression",
+    "pass": 71,
+    "fail": 0,
+    "skipped": 0
+  },
+  "runtime_region_comparison": {
+    "expected": "hnd1",
+    "observed": "iad1",
+    "result": "FAIL: Tokyo execution preference was not applied; Tokyo comparison remains unverified"
+  },
+  "newly_saved_races": 0,
+  "production_merge": false,
+  "production_deploy": false,
+  "production_cron_enable": false,
+  "verdict": "HOLD"
+}
