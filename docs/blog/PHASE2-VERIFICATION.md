@@ -141,6 +141,33 @@ PHASE 1 の時点で残っていた迂回経路と対策：
 ### 5-7-3. ステージングの動作テスト（3 回目）
 2026-11-03 13:16 UTC に実行前の状態を記録（1-3-2 の値と同じ）し、実行したが、**Supabase の実行確認に 60 秒以内の回答が無く、3 回目もタイムアウトした**。前の 2 回と同じく DB には届いていないと考えられる（次回、実行前後の状態の照合で確認する）。SQL Editor での実行（1-3-2 の 1）が確実。
 
+## 5-8. 実 AI を安全に実行できる環境の調査（2026-11-03 13:45〜 UTC、読み取りのみ）
+
+| 候補 | 調べた結果 | 使うために必要なこと |
+|---|---|---|
+| この作業環境（クラウドのセッション） | `OPENAI_API_KEY` なし。`api.openai.com` への通信は環境のネットワーク設定で拒否 | 環境の Network access に `api.openai.com` を追加し、上限付きのキーを登録（利用者の操作。新しいセッションで有効） |
+| Vercel（本番） | NEWS・初音ニュース・社説などの route が `OPENAI_API_KEY` を使っている＝本番には設定がある。設定の中身はこの環境から見られない | 本番で BLOG の検証はしない（指示により対象外） |
+| Vercel（Preview） | 2026-10-09〜10-20 にステージングで AI 下書き 18 本が生成されている（`blog_ai_drafts`、モデル gpt-5.6-luna）＝当時の `feature/blog-ai-drafts` の Preview では OpenAI が動いていた | この PR のブランチに限定した Preview の環境変数の追加（下記 A）。**環境変数の変更のため、実施前に承認が必要** |
+| Supabase Edge Functions（本番） | `collect-boatstrikers-news`・`collect-boatstrikers-media` の 2 つのみ。BLOG 用・OpenAI 用は無い | 新しい関数の配置が必要。本番への変更なので対象外 |
+| GitHub Actions | OpenAI を使うワークフローは無い。`SUPABASE_ACCESS_TOKEN`（Supabase 管理 API）を使う読み取り専用のワークフローが 1 つある。リポジトリの秘密情報の一覧は、この環境から確認できない | OpenAI のキーを GitHub の秘密情報に登録し、PR で動くワークフローを追加（下記 C）。秘密情報を PR のコードに渡すため推奨しない |
+| 利用者のパソコン（Remote Control） | このセッションで使えるフォルダーの登録なし | 利用者がリポジトリのあるパソコンで 1 コマンド実行（下記 B） |
+
+### 実 AI 検証の実行方法（いずれも承認・利用者の操作が必要）
+- **B（推奨。設定変更なし）**：利用者のパソコンで、PR のブランチを取得して `npm ci --prefix scripts/blog` のあと、
+  `OPENAI_API_KEY=<上限付きのキー> node scripts/blog/openai-smoke.mjs` で疎通を確かめ（1 回）、
+  `OPENAI_API_KEY=… node scripts/blog/verify-real-articles.mjs tests/blog/fixtures/real-data/cases.json --ai --max-calls 3` を実行する。
+  一果・初音・キイナを各 1 回（合計 3 回まで、再試行なし）生成し、実データの集計との照合・7 ゲート・トークン数・時間を JSON で出力する。
+  単価を `BLOG_AI_PRICE_INPUT_PER_1M`・`BLOG_AI_PRICE_OUTPUT_PER_1M` で渡すと推定料金も出る。キーはコマンドの環境変数だけで使い、ファイル・ログには出さない。
+  実データは本番から読み取りで書き出したもの（`tests/blog/fixtures/real-data/`。コードの集計が SQL と一致することをテストで常に確認）。
+- **A（日次処理まで通す）**：Vercel でこの PR のブランチに限定した Preview の環境変数として、`BLOG_SUPABASE_*`（ステージング）、`BLOG_PRIVATE_MEDIA_BUCKET`、`OPENAI_API_KEY`、`BLOG_AI_DRAFTS_ENABLED=true`、`BLOG_AI_MAX_CALLS_PER_DAY=3`、`BLOG_RACE_DATA_SUPABASE_URL`・`BLOG_RACE_DATA_SUPABASE_KEY`（レース DB を読み取りだけできるキー）を設定し、管理画面の AI 下書きから生成する。**本番とほかのブランチには影響させない**。
+  注意：日次処理のテーマは決まった期間（365 日・90 日）で集計するため、現在は**一果の 2 テーマと初音のテーマがデータの欠損で HOLD になり、AI を呼ばずに止まる**（3-1-2）。A で実 AI まで通るのは今はキイナのテーマだけ。
+- **C（推奨しない）**：GitHub の秘密情報に OpenAI のキーを登録し、PR で動く検証用ワークフローを追加する。
+
+### ステージングの動作テスト（14 項目）の安全な実行方法
+- SQL 実行ツールは、確認の質問に 60 秒以内の回答が無いと打ち切る（4 回とも同じ。DB には届いていない）。質問を避けるための文の書き換えや設定の緩和はしない。
+- **推奨**：利用者が Supabase の SQL Editor（ステージング `boatstrikers-blog-staging`）で `ops/blog/ai-quality-gates-behavior-test.sql` を実行する。期待する結果は `ERROR: BLOG_AI_GATES_BEHAVIOR_TEST_OK: 14 checks passed`。実行の前後に 1-3-2 の照合用 SQL（読み取りのみ）が同じ値になることを確かめる（前後の照合はこちらで実行できる）。
+- 代わりの方法（推奨しない）：GitHub Actions で `SUPABASE_ACCESS_TOKEN` から Supabase 管理 API の SQL 実行を呼ぶ。強い権限のトークンを使う CI を追加することになるため。
+
 ## 6. PHASE 2 の判定
 
 **判定：HOLD（条件付き）**。コードと DB 側の安全設計は完了し、実データでの数値の整合性も確認できた。ただし、次の 2 点が未完了のため、7 日間の試験には進まない。
@@ -151,7 +178,7 @@ PHASE 1 の時点で残っていた迂回経路と対策：
 | 2. 3 キャラクターの研究記事生成の検証 | **模擬応答で確認済み**（3 キャラすべて PASS、改ざんは HOLD）。**実 AI では未検証** |
 | 3. PASS 以外の記事を公開できない | **PGlite で確認済み**（DB の制約・関数・トリガー）。ホストされたステージングでの動作テストは**未実行** |
 | 4. 既存の予約公開からの迂回防止 | 同上（PGlite で確認済み、ステージングで未実行） |
-| 5. 既存 BLOG テストの維持 | **370 合格・0 失敗**（364 件・337 件を含む） |
+| 5. 既存 BLOG テストの維持 | **373 合格・0 失敗**（364 件・337 件を含む） |
 | 6. 追加テスト | 合格 |
 | 7. 本番環境に変更なし | **確認済み**（本番は SELECT のみ。DB・Cron・環境変数・main は変更なし） |
 
