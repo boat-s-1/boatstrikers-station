@@ -3,6 +3,8 @@
 // NO retry. Prints status, model, tokens, time and estimated cost (when prices are configured). The key is never printed.
 //   OPENAI_API_KEY=… [BLOG_AI_MODEL=…] [BLOG_AI_PRICE_INPUT_PER_1M=… BLOG_AI_PRICE_OUTPUT_PER_1M=…] node scripts/blog/openai-smoke.mjs
 // Exit codes: 0 ok, 2 no key, 3 network not allowed / timeout, 4 auth, 5 billing/quota, 6 other.
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { aiConfig } from "../../lib/blog/ai/config.mjs";
 import { callOpenAIJson, estimateCostUsd } from "../../lib/blog/ai/openai.mjs";
 
@@ -24,7 +26,7 @@ export async function smoke({ env = process.env, fetchImpl = fetch } = {}) {
   }
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop())) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const result = await smoke();
   console.log(JSON.stringify(result));
   process.exit(result.exit);

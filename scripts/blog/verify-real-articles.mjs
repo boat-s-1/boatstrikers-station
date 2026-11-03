@@ -6,6 +6,7 @@
 // "mock" is a path to a mock AI answer (tests/blog/fixtures/mock-ai/*.json). Results are printed as JSON lines.
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { computeDataset } from "../../lib/blog/ai/data/datasets.mjs";
 import { buildResearchPack } from "../../lib/blog/ai/data/researchPack.mjs";
 import { composeDocument } from "../../lib/blog/ai/compose.mjs";
@@ -37,14 +38,14 @@ const summary = r => Object.fromEntries(Object.entries(r.result?.gates || {}).ma
 
 // --ai: the answer comes from the real OpenAI API instead of the mock file. ONE call per case, no retry, at most
 // --max-calls calls in total (default 3), BLOG_AI_MAX_OUTPUT_TOKENS per call. Tokens, time and estimated cost are printed.
-async function realAnswer({ c, rows, config, calls }) {
+async function realAnswer({ c, rows, config, calls, fetchImpl = fetch }) {
   const evidence = computeDataset({ definition: c.definition, rows, period: c.period, params: c.params, now: new Date(`${c.period.to}T20:00:00Z`) });
   if (evidence.status !== "ok") return { skipped: "data_hold", evidence };
   const pack = buildResearchPack({ topic: c.topic, evidence, now: new Date() });
   let info = null;
   calls.count++;
   try {
-    const { data } = await callOpenAIJson({ apiKey: config.apiKey, model: config.model, maxOutputTokens: config.maxOutputTokens, instructions: buildInstructions(pack),
+    const { data } = await callOpenAIJson({ fetchImpl, apiKey: config.apiKey, model: config.model, maxOutputTokens: config.maxOutputTokens, instructions: buildInstructions(pack),
       input: buildInput(pack), schema: ARTICLE_SCHEMA, schemaName: "boatstrikers_blog_article", onUsage: i => { info = i; } });
     return { ai: data, info };
   } catch (error) {
@@ -52,46 +53,58 @@ async function realAnswer({ c, rows, config, calls }) {
   }
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop())) {
-  const file = resolve(process.argv[2]);
-  const useAi = process.argv.includes("--ai");
-  const maxCalls = Number(process.argv[process.argv.indexOf("--max-calls") + 1]) || 3;
-  const config = aiConfig();
-  if (useAi && !config.apiKey) { console.error("OPENAI_API_KEY が設定されていません。"); process.exit(2); }
+// Runs every case and returns one result object per case. log(line) is called for each (no key is ever in a line).
+export async function runVerification({ casesFile, useAi = false, maxCalls = 3, config = aiConfig(), log = () => {}, fetchImpl = fetch }) {
+  if (useAi && !config.apiKey) throw Object.assign(new Error("OPENAI_API_KEY が設定されていません。"), { exit: 2 });
   const calls = { count: 0 };
-  const cases = JSON.parse(readFileSync(file, "utf8"));
-  const base = dirname(file);
-  const done = [];
+  const cases = JSON.parse(readFileSync(casesFile, "utf8"));
+  const base = dirname(casesFile);
+  const done = [], lines = [];
   let ok = true;
+  const emit = line => { lines.push(line); log(line); };
   for (const c of cases) {
     const rows = decodeExport(JSON.parse(readFileSync(resolve(base, c.export), "utf8")));
     let ai, generation = null;
     if (useAi) {
-      if (calls.count >= maxCalls) { console.log(JSON.stringify({ name: c.name, skipped: "max_calls_reached" })); ok = false; continue; }
-      const r = await realAnswer({ c, rows, config, calls });
+      if (calls.count >= maxCalls) { emit({ name: c.name, character: c.character, skipped: "max_calls_reached" }); ok = false; continue; }
+      const r = await realAnswer({ c, rows, config, calls, fetchImpl });
       generation = r.info ? { model: r.info.model, usage: r.info.usage, duration_ms: r.info.duration_ms, estimated_cost_usd: estimateCostUsd(r.info.usage, config.prices) } : null;
-      if (!r.ai) { console.log(JSON.stringify({ name: c.name, real_ai: true, error: r.error, skipped: r.skipped, generation })); ok = false; continue; }
+      if (r.skipped === "data_hold") { emit({ name: c.name, character: c.character, real_ai: true, verdict: "HOLD", reason: "data_quality", ai_called: false, dataset: { status: r.evidence.status, issues: r.evidence.issues.map(i => i.code) } }); continue; }
+      if (!r.ai) { emit({ name: c.name, character: c.character, real_ai: true, ai_called: true, error: r.error, generation }); ok = false; continue; }
       ai = r.ai;
     } else ai = JSON.parse(readFileSync(resolve(base, c.mock), "utf8"));
     const others = done.map(d => ({ post_id: d.name, title: d.document.title, text: articleText(d.document) }));
     const r = evaluate({ c, rows, ai, others });
-    // Tampered: the first figure of the dataset written one higher somewhere in the body.
-    const tampered = structuredClone(ai);
+    if (!r.result) { emit({ name: c.name, character: c.character, verdict: "HOLD", reason: "data_quality", ai_called: false }); continue; }
+    // Tampered: the dataset's rate written one higher; when the text does not state the rate, the race count instead.
     const fact = r.pack.facts.find(f => /率$/.test(f.label));
-    const json = JSON.stringify(tampered.sections).replace(`${fact.value}%`, `${(Number(fact.value) + 1).toFixed(1)}%`);
-    tampered.sections = JSON.parse(json);
-    const t = evaluate({ c, rows, ai: tampered, others });
+    let json = JSON.stringify(ai.sections).replace(`${fact.value}%`, `${(Number(fact.value) + 1).toFixed(1)}%`);
+    if (json === JSON.stringify(ai.sections)) json = JSON.stringify(ai.sections).replace(`${r.evidence.usable}レース`, `${r.evidence.usable + 1}レース`);
+    const t = evaluate({ c, rows, ai: { ...ai, sections: JSON.parse(json) }, others });
     // Period removed from the text.
     const noPeriod = JSON.parse(JSON.stringify(ai).replaceAll(r.pack.sources[0].period, "この期間"));
     const p = evaluate({ c, rows, ai: noPeriod, others });
-    const line = { name: c.name, character: c.character, mock_ai: !useAi, real_ai: useAi, generation, title: r.document.title, dataset: { definition: c.definition, period: c.period, population: r.evidence.population, usable: r.evidence.usable, coverage: r.evidence.coverage, excluded: r.evidence.excluded, metrics: r.evidence.metrics },
-      verdict: r.result.verdict, gates: summary(r), scorecard: r.result.scorecard,
+    const line = { name: c.name, character: c.character, mock_ai: !useAi, real_ai: useAi, ai_called: useAi, generation, title: r.document.title,
+      dataset: { definition: c.definition, period: c.period, population: r.evidence.population, usable: r.evidence.usable, coverage: r.evidence.coverage, excluded: r.evidence.excluded, metrics: r.evidence.metrics },
+      verdict: r.result.verdict, reason: r.result.reason, gates: summary(r), scorecard: r.result.scorecard,
       tampered: { changed: json !== JSON.stringify(ai.sections), verdict: t.result.verdict, data_integrity: t.result.gates.data_integrity.verdict },
-      period_removed: { verdict: p.result.verdict, usefulness: p.result.gates.usefulness.verdict } };
-    console.log(JSON.stringify(line));
+      period_removed: { verdict: p.result.verdict, usefulness: p.result.gates.usefulness.verdict },
+      document: useAi ? r.document : undefined };
+    emit(line);
     // With a real AI answer, RETRY/HOLD are results to report, not script failures; the safety checks must still hold.
     if ((!useAi && r.result.verdict !== "PASS") || (line.tampered.changed && t.result.verdict !== "HOLD") || p.result.verdict === "PASS") ok = false;
     done.push({ name: c.name, document: r.document });
   }
-  process.exit(ok ? 0 : 1);
+  return { ok, calls: calls.count, lines };
+}
+
+// Run directly (works with Windows paths too).
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  const useAi = process.argv.includes("--ai");
+  const maxCalls = Number(process.argv[process.argv.indexOf("--max-calls") + 1]) || 3;
+  try {
+    const { ok } = await runVerification({ casesFile: resolve(process.argv[2]), useAi, maxCalls,
+      log: line => console.log(JSON.stringify({ ...line, document: undefined })) });
+    process.exit(ok ? 0 : 1);
+  } catch (error) { console.error(error.message); process.exit(error.exit ?? 1); }
 }

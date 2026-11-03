@@ -2,6 +2,8 @@
 // ops/blog/ai-real-data-verification.sql for the same period/scope, runs computeDataset() on the exported rows and
 // compares population, usable races, exclusions and metrics. Exit code 1 on any difference.
 //   node scripts/blog/verify-real-data.mjs <export.json> <sql-output.json> <from> <to> <course_code|all> <definition>[,<definition>...]
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
 import { computeDataset } from "../../lib/blog/ai/data/datasets.mjs";
 
@@ -37,7 +39,7 @@ export function compare({ evidence, sqlRow }) {
   return diffs;
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop())) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const [exportFile, sqlFile, from, to, course, definitions] = process.argv.slice(2);
   const rows = decodeExport(JSON.parse(readFileSync(exportFile, "utf8")));
   const sql = Object.fromEntries(JSON.parse(readFileSync(sqlFile, "utf8")).map(r => [r.definition, r]));
