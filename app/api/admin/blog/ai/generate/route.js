@@ -1,5 +1,5 @@
 import { blogBody, blogResponse, requireBlogAdmin } from "../../../../../../lib/blog/server";
-import { aiServerDeps, aiCaller, dataLabTitles } from "../../../../../../lib/blog/ai/server";
+import { aiServerDeps, aiCaller, dataLabTitles, raceDataReader } from "../../../../../../lib/blog/ai/server";
 import { requireAiEnabled } from "../../../../../../lib/blog/ai/config.mjs";
 import { runDraftPipeline } from "../../../../../../lib/blog/ai/pipeline.mjs";
 import { runLoggedDraft } from "../../../../../../lib/blog/ai/schedule.mjs";
@@ -19,6 +19,6 @@ export async function POST(request) {
     const { repo, store } = aiServerDeps();
     return runLoggedDraft({ store, topicId: body.topic_id, run: () => runDraftPipeline({ topicId: body.topic_id, store, repo, callAi: aiCaller(config), renderCover: renderCoverPng, fetchImpl: fetch, config, extraTitles: dataLabTitles(),
       // "comparison": a second draft of an already drafted theme under its own slug; never approvable or publishable.
-      comparison: body.mode === "comparison" }) });
+      comparison: body.mode === "comparison", readRaceRows: raceDataReader() }) });
   });
 }
