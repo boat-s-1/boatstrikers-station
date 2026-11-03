@@ -1,0 +1,557 @@
+{
+ "post_id": "44935152-9fdd-4be2-85f8-6bcf4a00def3",
+ "slug": "stadium-basics-toda-course-v13",
+ "revision_id": "6ff55da5-406b-4c89-b194-0e10f25b1e8f",
+ "prompt_version": "blog-ai-v13",
+ "model": "gpt-5.6-luna",
+ "generated_at": "2026-10-18 13:24:02.701531+00",
+ "edit_version": 1,
+ "preview_commit": "a98c75553f782b534753d6a9f03c04985395e7b8",
+ "md5": {
+  "source_pack": "1f57ae9a65b27c4c849360fea97a938a",
+  "validation": "b81e2037302ade7e1e1dc0256731aed6",
+  "seo": "0ede710313e2f0351bb7d7cd6396bb52",
+  "blocks": [
+   "d900e47bc52e6ecf442068797b12ce81",
+   "1311d5e04ed4dba6547936bc0da22c4d",
+   "30b58731ed03c5b0fba5a4025f29289d",
+   "94f4aebbe110cffe9ea0b3844df702f2",
+   "ce2d7d94a80ad54e2fd4d722cce49f91",
+   "5d811ca207fd2be21454aacbe9444339",
+   "52330fecb8e004300d9803542a05dc5a",
+   "88e06c76eb916496536443142d953118",
+   "912fae093cf39171410f70ceaa2d2b26",
+   "3cd8644d4bd17b50b285c73b2c1bf51a",
+   "bce6a3004d69f2807cbd67dc6fa760a8",
+   "fa87c43ff610d7adc45c87c0f843079c",
+   "712c0f5529e1164b7dc324d01b5f1773",
+   "32e18cf9d516d0a61119d874cd329c68",
+   "7746eb0c20f0fa0f54453e44e0ba0ebb",
+   "a31eb4888e1196ddc0b2d7baa6375a0e"
+  ]
+ },
+ "title": "戸田の1コースは最も高いのに半分未満？6コースの順位と割合を読む",
+ "excerpt": "戸田のコース別1着率を、号艇と進入コースの違いから確認。1コースの位置づけと、6つのコースに並ぶ数字の特徴を初心者向けに解説します。",
+ "seo": {
+  "title": "戸田のコース別1着率を読む｜1コースと順位",
+  "og_alt": "一果のイラストと記事タイトル「戸田の1コースは最も高いのに半分未満？6コースの順位と割合を読む」",
+  "description": "戸田のコース別1着率を確認します。号艇と進入コースの違い、1コースの数字の位置づけ、6コースまでの並び方を初心者向けに解説します。",
+  "og_media_id": "e37ee008-33a4-4d4e-ad51-f80c1fb3d521",
+  "stadium_slug": "toda"
+ },
+ "blocks": [
+  {
+   "id": "889f01cf-66f4-42f0-a42a-550d5333461c",
+   "data": {
+    "items": [
+     "コース別1着率の定義と表の見方",
+     "1コースの数字が示す位置づけ",
+     "6つのコースの1着率の並び方"
+    ],
+    "placement": "takeaways"
+   },
+   "type": "LIST"
+  },
+  {
+   "id": "22f5354a-b7c7-414f-82ff-c447392e3dab",
+   "data": {
+    "text": "戸田の6つのコース別1着率は、どんな順番で並んでいるでしょうか。表の数字を見ながら、1コースの位置づけとコース間の違いを確認します。",
+    "placement": "lead"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "e55a8543-0515-4949-a768-35f7ce67d453",
+   "data": {
+    "text": "号艇と進入コースを分けてコース別1着率を見る",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "1b72656d-5b9c-4862-95f6-fd8c16d6601e",
+   "data": {
+    "text": "出走表の号艇はレースごとの艇の番号で、コースはスタートのときに実際に入った位置です。この表は進入したコースで数えています。コース別1着率は、集計期間の中で、そのコースから進入した艇が1着になった割合です。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "a136a6da-f4e3-495a-b509-c60db866bc27",
+   "data": {
+    "rows": [
+     [
+      "コース",
+      "1着率"
+     ],
+     [
+      "1コース",
+      "42.8%"
+     ],
+     [
+      "2コース",
+      "17.0%"
+     ],
+     [
+      "3コース",
+      "14.9%"
+     ],
+     [
+      "4コース",
+      "14.2%"
+     ],
+     [
+      "5コース",
+      "9.3%"
+     ],
+     [
+      "6コース",
+      "2.8%"
+     ]
+    ],
+    "header": true,
+    "caption": "戸田のコース別1着率（集計期間 2026/07/01〜2026/09/30）",
+    "generated": "rate_table",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "TABLE"
+  },
+  {
+   "id": "56b34103-11a1-41c8-938b-9ec8010088e3",
+   "data": {
+    "text": "表の中で最も高い数字でも、半分以上とは限らない",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "923c00ea-2dca-42ed-ac71-f9b2b8ef869f",
+   "data": {
+    "label": "",
+    "turns": [
+     {
+      "id": "7201eaf4-9b74-4cc7-8705-975416faca12",
+      "pose": "pose3",
+      "text": "1コースの1着率は42.8%で、表の中では最も高い数字ですね。ただ、数字の高さと、全体の半分を超えているかどうかは、どう分けて見ればよいのでしょうか。",
+      "alignment": "auto",
+      "character": "hatsune"
+     },
+     {
+      "id": "2ef39bfb-3f7e-4c19-9237-d33dfe7525f3",
+      "pose": "pose1",
+      "text": "この集計期間では、1コースは6つのコースの中で最も高い一方、半分以上のレースで1着になったわけではないんだよ。表の中で一番高いことと、半分以上で1着になったことは別なんだ。",
+      "alignment": "auto",
+      "character": "ichika"
+     }
+    ],
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "DIALOGUE_SCENE"
+  },
+  {
+   "id": "d6611259-884d-4743-ba5e-d664cee16b60",
+   "data": {
+    "text": "外側のコースほど1着率が順に低く並ぶ",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "f9d78749-7918-45ac-8b2a-52099bbcf10c",
+   "data": {
+    "text": "この集計期間（2026/07/01〜2026/09/30）では、外側のコースほど、1着率が順に低く並んでいます。1コースから6コースまで、表の順位に入れ替わりはありません。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "c168b5f4-e68d-470e-9c5a-05efceb53b9b",
+   "data": {
+    "text": "3コースは14.9%、4コースは14.2%です。この集計期間の数字では、順位が違っても差は小さいことがあります。順位だけで差の大きさを判断しません。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "cf3a46b1-335a-4433-b152-470baa8d0a7e",
+   "data": {
+    "text": "当日の出走表と展示後の情報を確認する",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "80988bfd-5fcb-4023-be2c-20fa9bd728cd",
+   "data": {
+    "text": "・出走表の号艇と選手 ― 号艇と進入コースは同じとは限らないので、まず出走表で各号艇の選手を知る\n・スタート展示の進入コース ― 本番の進入を考えるときの参考になる（本番で変わることもある）\n・展示後の直前情報 ― 展示のあとに公開される情報も合わせて見る\n・当日の水面と天候 ― 集計期間の数字には当日の条件が含まれないので、別に確かめる",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "DATA_CHECK"
+  },
+  {
+   "id": "117685ee-93df-48f3-be7d-b406d0b59d8d",
+   "data": {
+    "text": "コース別1着率は過去の集計期間の数字で、これからのレースで勝つ確率ではありません。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "WARNING"
+  },
+  {
+   "id": "b776e25a-14c1-458e-8aa4-77e7be1c562a",
+   "data": {
+    "text": "戸田の今回の集計では、1コースは表の中で最も高い位置にありながら、全体の半分以上を占める数字ではありませんでした。また、内側から外側へ進むにつれて、1着率は順番どおりに並んでいました。",
+    "placement": "summary",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "00e80a28-f4d0-4c6f-a575-3ffd9dd2943a",
+   "data": {
+    "text": "この記事は、出典欄の公式情報・収録データをもとに作成しています。開催・施設・メニューなどの最新情報は各公式サイトでご確認ください。舟券の購入はご自身の判断でお願いします。",
+    "system": true,
+    "placement": "notes"
+   },
+   "type": "WARNING"
+  },
+  {
+   "id": "9a686e61-ad0b-412c-962f-834abeb7b318",
+   "data": {
+    "text": "BOAT RACE公式 ボートレース場データ（戸田）｜集計期間 2026/07/01〜2026/09/30｜取得日時 2026/10/12 15:36",
+    "system": true,
+    "placement": "sources",
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "source_label": "BOAT RACE公式 ボートレース場データ（戸田）"
+   },
+   "type": "QUOTE"
+  }
+ ],
+ "validation": [
+  {
+   "code": "auto_cited",
+   "level": "warning",
+   "message": "ブロック14（TEXT）：比較・事実の出典を自動で設定しました（S2）。内容と出典が合っているか確認してください。"
+  },
+  {
+   "code": "comparison_draft",
+   "level": "blocking",
+   "message": "比較用に再生成した下書きです。承認・公開・予約公開はできません（正式に採用するには、別途の採用操作が必要です）。元記事：/stadium-basics-toda-course（blog-ai-v10）。"
+  },
+  {
+   "code": "summary_without_finding",
+   "level": "warning",
+   "message": "ブロック14（TEXT）：まとめに、この記事で分かったデータ上の発見がありません。重要な発見を1〜2個取り上げてください。"
+  }
+ ],
+ "source_pack": {
+  "gaps": [],
+  "topic": {
+   "angle": "course",
+   "topic_key": "stadium-basics:toda:course",
+   "title_hint": "戸田のコース別1着率を確認する",
+   "stadium_slug": "toda",
+   "category_slug": "stadium-basics",
+   "character_key": "ichika"
+  },
+  "sources": [
+   {
+    "id": "S2",
+    "url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=02",
+    "kind": "official_data",
+    "label": "BOAT RACE公式 ボートレース場データ（戸田）",
+    "tables": [
+     {
+      "label": "最近3ヶ月",
+      "period": "2026/07/01〜2026/09/30"
+     },
+     {
+      "label": "春季",
+      "period": "2026/03/01〜2026/05/31"
+     },
+     {
+      "label": "夏季",
+      "period": "2026/06/01〜2026/08/31"
+     },
+     {
+      "label": "秋季",
+      "period": "2025/09/01〜2025/11/30"
+     },
+     {
+      "label": "冬季",
+      "period": "2025/12/01〜2026/02/28"
+     }
+    ],
+    "fetched_at": "2026-10-12T06:36:02.919+00:00",
+    "page_title": "ボートレース場データ｜BOAT RACE オフィシャルウェブサイト",
+    "content_sha256": "45f8f3c05091b15df7e9fc360eebdddf0aa039e22ad2e6ae7ecc918d4f8491f4"
+   }
+  ],
+  "stadium": {
+   "name": "戸田",
+   "slug": "toda",
+   "course_code": 2
+  },
+  "version": 5,
+  "built_at": "2026-10-18T13:23:46.483Z",
+  "comparison": {
+   "of_slug": "stadium-basics-toda-course",
+   "topic_key": "stadium-basics:toda:course",
+   "created_at": "2026-10-18T13:23:46.484Z",
+   "of_post_id": "a29e1892-0cb3-45ed-a917-6aa8916f5508",
+   "prompt_version": "blog-ai-v13",
+   "of_prompt_version": "blog-ai-v10"
+  },
+  "stadium_count": 1,
+  "facts": [
+   {
+    "id": "F1",
+    "unit": "%",
+    "label": "戸田の1コース1着率",
+    "value": "42.8",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F2",
+    "unit": "%",
+    "label": "戸田の2コース1着率",
+    "value": "17.0",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F3",
+    "unit": "%",
+    "label": "戸田の3コース1着率",
+    "value": "14.9",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F4",
+    "unit": "%",
+    "label": "戸田の4コース1着率",
+    "value": "14.2",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F5",
+    "unit": "%",
+    "label": "戸田の5コース1着率",
+    "value": "9.3",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F6",
+    "unit": "%",
+    "label": "戸田の6コース1着率",
+    "value": "2.8",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F7",
+    "unit": "",
+    "label": "戸田の水質",
+    "value": "淡水",
+    "source_id": "S2"
+   },
+   {
+    "id": "F8",
+    "unit": "",
+    "label": "戸田の干満差",
+    "value": "なし",
+    "source_id": "S2"
+   }
+  ],
+  "readings": [
+   {
+    "id": "R1",
+    "key": "top:1:高",
+    "kind": "top",
+    "text": "1コースの1着率（42.8%）が6つのコースの中で最も高い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R2",
+    "key": "under_half:1",
+    "kind": "under_half",
+    "text": "1コースの1着率（42.8%）は半分に届いていない",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R3",
+    "key": "contrast:1",
+    "kind": "top_not_majority",
+    "text": "1コースの1着率（42.8%）は6つのコースの中で最も高いが、半分には届いていない",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   },
+   {
+    "id": "R4",
+    "key": "top:6:低",
+    "kind": "bottom",
+    "text": "6コースの1着率（2.8%）が最も低い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R5",
+    "key": "except:2:高",
+    "kind": "except_top",
+    "text": "2コースの1着率（17.0%）は1コース以外で最も高い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R6",
+    "key": "close:3:4",
+    "kind": "close",
+    "text": "3コース（14.9%）と4コース（14.2%）は、順位は違うが差は小さい",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   },
+   {
+    "id": "R7",
+    "key": "order",
+    "kind": "order",
+    "text": "1着率の高い順：1コース→2コース→3コース→4コース→5コース→6コース",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R8",
+    "key": "sequence:in",
+    "kind": "in_order",
+    "text": "1着率は外側のコースほど順に低い（1コースから6コースまで、順番の入れ替わりがない）",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   }
+  ],
+  "official": {
+   "period": "2026/07/01〜2026/09/30",
+   "status": "parsed",
+   "skipped": [],
+   "source_id": "S2",
+   "placements": [
+    {
+     "rates": [
+      "42.8",
+      "18.4",
+      "9.8",
+      "11.5",
+      "9.1",
+      "8.2"
+     ],
+     "course": 1
+    },
+    {
+     "rates": [
+      "17.0",
+      "24.6",
+      "17.9",
+      "15.6",
+      "13.8",
+      "10.8"
+     ],
+     "course": 2
+    },
+    {
+     "rates": [
+      "14.9",
+      "17.4",
+      "18.6",
+      "17.9",
+      "17.4",
+      "13.4"
+     ],
+     "course": 3
+    },
+    {
+     "rates": [
+      "14.2",
+      "15.9",
+      "20.5",
+      "18.8",
+      "15.8",
+      "14.5"
+     ],
+     "course": 4
+    },
+    {
+     "rates": [
+      "9.3",
+      "15.3",
+      "19.4",
+      "19.6",
+      "19.6",
+      "16.4"
+     ],
+     "course": 5
+    },
+    {
+     "rates": [
+      "2.8",
+      "9.5",
+      "14.6",
+      "17.1",
+      "24.2",
+      "31.5"
+     ],
+     "course": 6
+    }
+   ]
+  },
+  "documents": [
+   {
+    "title": "ボートレース場データ｜BOAT RACE オフィシャルウェブサイト",
+    "excerpt": "ボートレース場データ|BOAT RACE オフィシャルウェブサイト\nネット投票会員登録\nログイン\n知る楽しむ レーサー検索\nEnglish\n中文简体\n中文繁體\n한국어\nメインメニュー\n本日のレース\n本日の払戻金一覧\nレーサー検索\nライブ\nリプレイ\nメディア情報\nレーススケジュール\n月間スケジュール\nSG・PG1\nG1・G2\nG3\nヴィーナスシリーズ\nルーキーシリーズ\nマスターズリーグ\nデータファイル\nレース場データ\nSG・PG1・G1記録集\n高配当ベスト10\n優勝レーサー一覧\nダウンロード・他\nレース場・\nチケットショップ\nボートレース場\nチケットショップ\nテレボート\n(ネット投票)\nネット投票会員登録\n各種サービス\nマイページ\n投票結果\nログイン情報をお忘れの方\nお客様情報の照会・変更\nFAQ・お問い合わせ\n会員限定キャンペーン\nテレボートリンク\n投票\nHOME\nデータファイル\nボートレース場データ\n戸 田ボートレース場\n戸 田ボートレース場\n最近3ヶ月のデータ\nコース別入着率&決まり手\nコース\n1着\n2着\n3着\n4着\n5着\n6着\nコース別決まり手\n逃げ\n捲り\n差し\n捲り差し\n抜き\n恵まれ\n枠番別コース取得率\n枠\n1コース\n2コース\n3コース\n4コース\n5コース\n6コース\nMEMO\n所在地\n埼玉県\nモーター\n減音\n水質\n淡水\n干満差\nなし\nレコード\n1.43.8 横山 節明 2000/04/09\n(2026/06/30現在)\n季節別データ\n春季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n秋季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n夏季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n冬季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n水面図\n(2023/01/01現在)\n情報につきましては主催者発表のものとご照合ください。\n関連リンク\nレース場・チケットショップに行く(戸 田ボートレース場)\nボートレース場データ\n関東地区\n桐 生(群馬県)\n戸 田(埼玉県)\n江戸川(東京都)\n平和島(東京都)\n多摩川(東京都)\n東海地区\n浜名湖(静岡県)\n蒲 郡(愛知県)\n常 滑(愛知県)\n津 (三重県)\n近畿地区\n三 国(福井県)\nびわこ(滋賀県)\n住之江(大阪府)\n尼 崎(兵庫県)\n四国地区\n鳴 門(徳島県)\n丸 亀(香川県)\n中国地区\n児 島(岡山県)\n宮 島(広島県)\n徳 山(山口県)\n下 関(山口県)\n九州地区\n若 松(福岡県)\n芦 屋(福岡県)\n福 岡(福岡県)\n唐 津(佐賀県)\n大 村(長崎県)\nスマートフォン版へ\nPAGE TOP\n■ボートレースを知る楽しむ\n■レーススケジュール\n本日のレース\n本日の払戻金一覧\n月間スケジュール\nSG・PG1スケジュール\nG1・G2スケジュール\nG3スケジュール\nヴィーナスシリーズ\nルーキーシリーズ\nマスターズリーグ\nメディア情報\n■データファイル\nボートレーサー検索\nボートレース場データ\nSG・PG1・G1記録集\n高配当ベスト10\n優勝レーサー一覧\nダウンロード・他\n■レース場・チケットショップ\nボートレース場\nチケットショップ\n■テレボート\nネット投票会員登録\n各種サービス\nマイページ\n投票結果\nログイン情報をお忘れの方\nお客様情報の照会・変更\nFAQ・お問い合わせ\nテレボート会員限定キャンペーン\nテレボートリンク\n本サイトについて\nサイトポリシー\nプライバシーポリシー\nサイトマップ\nご意見・ご要望\nボートレース関係団体\nメールマガジン購読\nテレボートリンク\nCOPYRIGHT © BOAT RACE OFFICIAL WEB ALL\nRIGHTS RESERVED.",
+    "source_id": "S2"
+   }
+  ]
+ }
+}
