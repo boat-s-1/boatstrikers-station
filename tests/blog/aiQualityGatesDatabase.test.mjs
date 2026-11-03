@@ -199,10 +199,14 @@ test('rollback script: refuses while a system approval exists, otherwise restore
     for (const name of MIGRATIONS.slice(0, 4)) await clean.exec(migration(name));
     const original = (await cq("select md5(prosrc) as h from pg_proc where proname='blog_ai_current_approval'"))[0].h;
     const releaseBefore = (await cq("select md5(prosrc) as h from pg_proc where proname='blog_release'"))[0].h;
+    const dueBefore = (await cq("select md5(prosrc) as h from pg_proc where proname='blog_publish_due'"))[0].h;
     await clean.exec(migration(MIGRATIONS[4]));
     await clean.exec(rollback);
     assert.equal((await cq("select md5(prosrc) as h from pg_proc where proname='blog_ai_current_approval'"))[0].h, original);
     assert.equal((await cq("select md5(prosrc) as h from pg_proc where proname='blog_release'"))[0].h, releaseBefore);
+    assert.equal((await cq("select md5(prosrc) as h from pg_proc where proname='blog_publish_due'"))[0].h, dueBefore);
+    assert.equal((await cq("select count(*)::int as n from pg_trigger where tgname='blog_ai_guard_publication'"))[0].n, 0);
+    assert.equal((await cq("select to_regclass('blog_ai_gates_archive.blog_ai_jobs') is not null and to_regclass('blog_ai_gates_archive.blog_ai_auto_publications') is not null as kept"))[0].kept, true);
     assert.deepEqual((await cq("select column_name from information_schema.columns where table_name='blog_ai_approvals' and column_name in ('approver_kind','gate_result_id')")), []);
     assert.equal((await cq("select to_regclass('public.blog_ai_gate_results') is null as gone, to_regclass('blog_ai_gates_archive.blog_ai_gate_results') is not null as kept"))[0].gone, true);
     assert.equal((await cq("select to_regclass('blog_ai_gates_archive.blog_ai_settings') is not null as kept"))[0].kept, true);
