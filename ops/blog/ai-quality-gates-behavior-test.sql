@@ -15,6 +15,10 @@ declare
     from unnest(array['data_integrity','sources','duplicates','usefulness','seo','copyright','safety']) k);
   hold_gates jsonb;
 begin
+  -- Safety: never on a database with race tables (production), never while real articles are reserved (the test calls
+  -- blog_publish_due, which must not touch them even inside this rolled-back transaction).
+  if to_regclass('public.bs_race_results') is not null then raise exception 'BLOG_AI_GATES_BEHAVIOR_TEST_REFUSED: race tables present (production?)'; end if;
+  if exists (select 1 from public.blog_posts where scheduled_revision_id is not null) then raise exception 'BLOG_AI_GATES_BEHAVIOR_TEST_REFUSED: existing reservations'; end if;
   hold_gates := jsonb_set(pass_gates, '{data_integrity,verdict}', '"HOLD"');
   select string_agg(p.id::text || ':' || p.state || ':' || p.edit_version || ':' || coalesce(p.published_revision_id::text, '') || ':' || coalesce(p.scheduled_revision_id::text, ''), ',' order by p.id)
     into existing_before from public.blog_posts p;
