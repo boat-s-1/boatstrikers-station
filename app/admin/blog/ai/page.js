@@ -5,6 +5,7 @@ import { AI_CATEGORIES } from '../../../../lib/blog/ai/topics.mjs';
 import { scheduleConfig } from '../../../../lib/blog/ai/schedule.mjs';
 import { STADIUMS } from '../../../../lib/stadiums.js';
 import AiDraftsClient from './AiDraftsClient';
+import AiOperationsPanel from './AiOperationsPanel';
 import s from '../blogAdmin.module.css';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'AI下書き | BOATSTRIKERS BLOG', robots: { index: false, follow: false } };
@@ -18,6 +19,7 @@ export default function AiDraftsPage() {
     {!ready ? <div className={s.notice}>BLOG検証DBが接続されていません。画面構成のみ確認できます。</div>
       : !writes ? <div className={s.notice}>BLOG書き込みは停止中です。閲覧のみ可能です。</div>
       : !enabled ? <div className={s.notice}>AI下書き機能は無効です（BLOG_AI_DRAFTS_ENABLED）。一覧の閲覧のみ可能です。</div> : null}
+    <AiOperationsPanel ready={ready} writable={ready && writes} />
     <AiDraftsClient ready={ready} writable={ready && writes && enabled} stadiums={STADIUMS.map(x => ({ slug: x.slug, name: x.name }))}
       schedule={{ enabled: schedule.enabled, autoTopics: schedule.autoTopics, maxPerRun: schedule.maxPerRun, categories: schedule.categories }}
       categories={Object.entries(AI_CATEGORIES).map(([slug, c]) => ({ slug, name: c.name, perStadium: c.perStadium }))} />
