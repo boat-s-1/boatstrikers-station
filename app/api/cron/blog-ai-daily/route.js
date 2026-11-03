@@ -19,7 +19,8 @@ export async function GET(request) {
   if (!config.enabled) return NextResponse.json({ ok: true, status: "disabled" });
   try {
     const { repo, store } = aiServerDeps();
-    const result = await runDailyCycle({ store, repo, callAi: aiCaller(config), renderCover: renderCoverPng, readRaceRows: raceDataReader(), owner: `cron-${randomUUID()}` });
+    const result = await runDailyCycle({ store, repo, callAi: aiCaller(config), renderCover: renderCoverPng, readRaceRows: raceDataReader(), owner: `cron-${randomUUID()}`,
+      maxCallsPerDay: config.maxCallsPerDay, prices: config.prices });
     return NextResponse.json({ ok: !["failed"].includes(result.status), ...result });
   } catch {
     // Details stay in blog_ai_runs / blog_ai_jobs; the response never carries database or API error text.

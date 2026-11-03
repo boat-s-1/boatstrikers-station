@@ -194,6 +194,24 @@ test("automatic mode on: publishes only through blog_ai_auto_publish after the p
   assert.equal(h.repo.calls.release, 0, "never through the plain release path");
 });
 
+test("spending limit: when the day's AI calls are used up, nothing is generated and the job waits", async () => {
+  const h = harness();
+  const r = await runDailyCycle({ store: h.store, repo: h.repo, callAi: async () => assert.fail("no AI call over the limit"), renderCover: fakeCover,
+    readRaceRows: async () => GOOD_ROWS, fetchImpl: fakeFetch({}), owner: "run-1", now: NOW, maxCallsPerDay: 0 });
+  assert.equal(r.status, "budget_exhausted");
+  assert.equal(h.job().state, "GENERATING");
+  assert.equal(h.repo.posts.size, 0);
+  // The next call with allowance continues the same job; tokens and time are written to the run record.
+  const h2 = harness();
+  h2.store.recentRuns = async () => [];
+  const ok = await runDailyCycle({ store: h2.store, repo: h2.repo, renderCover: fakeCover, readRaceRows: async () => GOOD_ROWS, fetchImpl: fakeFetch({}), owner: "run-1", now: NOW, maxCallsPerDay: 1,
+    callAi: async args => { args.onUsage?.({ model: "m", usage: { input_tokens: 5000, output_tokens: 3000 }, duration_ms: 42000, ok: true }); return { data: kiinaAi(), model: "m" }; } });
+  assert.equal(ok.status, "approved_draft");
+  assert.match(h2.store.state.runs.at(-1).message, /入力5000／出力3000トークン・42000ms/);
+  const draft = [...h2.store.state.drafts.values()][0];
+  assert.deepEqual(draft.source_pack.generation.usage, { input_tokens: 5000, output_tokens: 3000 });
+});
+
 test("emergency stop between approval and publication: the database refusal leaves the job FAILED, nothing published", async () => {
   const h = harness({ settings: { approval_mode: "auto", auto_publish_enabled: true, publish_time: "00:00:00" } });
   h.store.autoPublish = async () => { throw new Error("BLOG_AI_AUTO_PUBLISH_DISABLED"); };
