@@ -29,6 +29,18 @@ Each stage requires a separate exact phrase. Cancel/EOF/Ctrl+C stops. A transpor
 
 Native Node.js 24 runs the worker with `--use-env-proxy`, inherited proxy and CA trust, TLS verification, and redirects rejected. Only the child receives `BOATSTRIKERS_OPENAI_HTTP_KEY` as `OPENAI_API_KEY`. No key or placeholder is placed in argv or files. Unrelated credentials and NODE_OPTIONS are excluded from the child. The source variable is not forwarded.
 
+The dedicated transport now explicitly sends `service_tier: "default"` on every stage and refuses caller-supplied auto/priority/fast/flex/ultrafast modes. It includes that added field in the pre-dispatch byte bound. Actual response service_tier must be exactly default, including on smoke; missing/unexpected values stop the run before any standard-rate cost record. Usage records include the verified serviceTier. The user-supplied standard price plan is $1 input/$5 output per million, 170 JPY/USD, 20% margin: 119.34 JPY reserved. Cached input is quoted at $0.05 but the estimator conservatively uses the full input rate. The historical actualYen field is a configured-rate upper estimate, not a provider invoice or proof of exact billing.
+
+Official specification evidence: [OpenAI's Responses SDK source](https://github.com/openai/openai-node/blob/master/src/resources/responses/responses.ts) documents that omission defaults to auto, auto follows Project settings (default unless configured otherwise), explicit default uses standard pricing/performance, and the returned mode can differ from the requested mode. Public developer/reference pages returned proxy 403 here; only the official SDK source was directly retrieved. Actual project/model access, balance, credit expiry, budget settings and enforcement cannot be proven by this offline work. A mismatched response can already have incurred cost; detection stops further calls and keeps reservations but cannot retroactively guarantee its price.
+
+For a task that prohibits even local approval issuance/consumption, run only the new transport-tier subset (all fetches are injected mocks; no approval/state files are created):
+
+```sh
+node --require ./scripts/blog/verification-offline.cjs --test --test-name-pattern='^tier:' tests/blog/aiVerificationBudget.test.mjs
+```
+
+Validation for the initial standard-tier-only task: all 19 tier tests passed without approval issuance/consumption or persistent budget writes; the broader approval regression tests were intentionally not run in that task. In the subsequent save task, dummy-only approval regression testing was explicitly authorized: all 72 tests passed (53 prior tests plus 19 tier tests), zero failures/skips. The standalone three mock articles also pass all seven gates. The committed-snapshot check executes the 63 safety/cost/tier tests in those three files (44 prior tests plus 19 tier tests). No real approval or OpenAI API request is used by these tests.
+
 Output and state paths must be absolute, outside every Git checkout, and not symlink aliases. Reports use new files with mode 0600 in a directory created with mode 0700. They contain only allowlisted metadata and validated article results; raw upstream errors, headers and environment dumps are never saved. Literal, JSON-escaped, URL/base64-encoded supplied credentials and recognizable key/Bearer content are refused before output. This cannot identify every possible encoding of an unknown credential; never insert secrets into plans, source fixtures or articles.
 
 ## Free checks

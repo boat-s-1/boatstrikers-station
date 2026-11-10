@@ -31,18 +31,18 @@ after(()=>{if(root)rmSync(root,{recursive:true,force:true});});
 test('fixed baseline HEAD itself passes on the verification branch',()=>{
   reset();assert.deepEqual(verifySource(repo),{base:BASE,head:BASE,branch});assert.match(codeDigest(repo),/^[a-f0-9]{64}$/);
 });
-test('committed complete safety addition passes; all existing 44 tests also pass AFTER the commit',()=>{
+test('committed complete safety addition passes; all 63 safety/cost/tier tests also pass AFTER the commit',()=>{
   reset();git('sparse-checkout','disable');
   const changed=execFileSync('git',['-C',REPO,'diff','--name-only',BASE],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
   const added=execFileSync('git',['-C',REPO,'ls-files','--others','--exclude-standard'],{encoding:'utf8'}).trim().split('\n').filter(p=>p&&p!=='node_modules');
   for(const p of [...changed,...added]){mkdirSync(dirname(join(repo,p)),{recursive:true});copyFileSync(join(REPO,p),join(repo,p));git('add','--',p);}
   commit('Offline fixture: approved safety additions');
   assert.notEqual(git('rev-parse','HEAD'),BASE);assert.equal(verifySource(repo).base,BASE);assert.match(codeDigest(repo),/^[a-f0-9]{64}$/);
-  // Dependency reuse is local only; no install/network. The 44-test suite runs against committed source.
+  // Dependency reuse is local only; no install/network. The 63-test suite runs against committed source.
   execFileSync(process.execPath,['-e',`require('node:fs').symlinkSync(process.argv[1],process.argv[2]);`,join(REPO,'node_modules'),join(repo,'node_modules')]);
   const env={...process.env};delete env.NODE_TEST_CONTEXT;
   const out=execFileSync(process.execPath,['--require',join(repo,'scripts/blog/verification-offline.cjs'),'--test','--test-reporter=tap','tests/blog/aiVerificationBudget.test.mjs','tests/blog/aiLocalVerification.test.mjs','tests/blog/aiCostLimits.test.mjs'],{cwd:repo,env,encoding:'utf8',maxBuffer:1024*1024,stdio:['ignore','pipe','pipe']});
-  assert.match(out,/(?:tests|# tests) 44/);assert.match(out,/(?:pass|# pass) 44/);assert.match(out,/(?:fail|# fail) 0/);
+  assert.match(out,/(?:tests|# tests) 63/);assert.match(out,/(?:pass|# pass) 63/);assert.match(out,/(?:fail|# fail) 0/);
 });
 test('unrelated branch is HOLD even with identical baseline contents and ancestry',()=>{
   reset();git('switch','-C','unrelated',BASE);assert.throws(()=>verifySource(repo),/SOURCE_BRANCH/);git('switch',branch);

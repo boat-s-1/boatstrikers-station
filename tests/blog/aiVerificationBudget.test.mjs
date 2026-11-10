@@ -28,7 +28,7 @@ async function approve(p, extra = {}) { return issueApproval({ plan: p, sourceDi
 function response(index, patch = {}) {
   const names = ['ichika-kiryu-inside-escape','hatsune-women-inside-escape','kiina-kiryu-boat5'];
   const text = index === 0 ? '{"ok":true}' : readFileSync(join(REPO, `tests/blog/fixtures/mock-ai/${names[index - 1]}.json`), 'utf8');
-  return new Response(JSON.stringify({ status: 'completed', model: MODEL, usage: { input_tokens: 3000, output_tokens: index === 0 ? 20 : 1500, total_tokens: index === 0 ? 3020 : 4500 }, output: [{ content: [{ type: 'output_text', text }] }], ...patch }), { status: 200 });
+  return new Response(JSON.stringify({ status: 'completed', model: MODEL, service_tier: 'default', usage: { input_tokens: 3000, output_tokens: index === 0 ? 20 : 1500, total_tokens: index === 0 ? 3020 : 4500 }, output: [{ content: [{ type: 'output_text', text }] }], ...patch }), { status: 200 });
 }
 async function run(p, { failAt, patch = {}, cancelAt, secret = false, id } = {}) {
   let calls = 0, confirmations = 0;
@@ -165,4 +165,55 @@ test('Node24 env proxy routes dummy HTTP request only through loopback mock CONN
     const c=spawn(process.execPath,['--use-env-proxy','--require',join(REPO,'scripts/blog/verification-offline.cjs'),'-e',`fetch('http://verification.invalid/mock',{signal:AbortSignal.timeout(3000)}).then(async r=>{if(await r.text()!=='OK')process.exitCode=1;}).catch(()=>{process.exitCode=1;});`],{env:{HTTP_PROXY:proxy,HTTPS_PROXY:proxy,NO_PROXY:''},stdio:'ignore'});
     const timer=setTimeout(()=>c.kill(),5000);const code=await new Promise(res=>c.on('exit',res));clearTimeout(timer);assert.equal(code,0);assert.equal(calls,1);
   }finally{for(const s of sockets)s.destroy();await new Promise(res=>server.close(res));}
+});
+
+// This subset never issues/consumes approval records or reserves a persistent budget.
+// Run with --test-name-pattern='^tier:' when approval creation/use is prohibited.
+test('tier: omitted request mode is explicitly default; original request is not mutated',async()=>{
+  const p=plan({inputUsdPerMillion:1,outputUsdPerMillion:5,usdJpy:170});const args=request(p,0),original=args[1].body;let n=0;const records=[];
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK-RUN-NOT-AN-APPROVAL',confirm:yes,onRecord:r=>records.push(r),fetchImpl:async(_url,init)=>{
+    n++;const body=JSON.parse(init.body);assert.equal(body.service_tier,'default');assert.equal(body.model,MODEL);assert.equal(body.max_output_tokens,1000);assert.equal(init.redirect,'error');return response(0);
+  }});
+  await t.fetch(...args);assert.equal(n,1);assert.equal(args[1].body,original);assert.equal(records[0].serviceTier,'default');
+});
+test('tier: explicit default is accepted',async()=>{
+  const p=plan(),args=request(p,0);args[1].body=JSON.stringify({...JSON.parse(args[1].body),service_tier:'default'});
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,fetchImpl:async(_u,init)=>{assert.equal(JSON.parse(init.body).service_tier,'default');return response(0);}});
+  await t.fetch(...args);assert.equal(t.calls,1);
+});
+for(const tier of ['auto','priority','fast','flex','ultrafast',null])test(`tier: request ${tier} is refused before any transport`,async()=>{
+  const p=plan(),args=request(p,0);let n=0;args[1].body=JSON.stringify({...JSON.parse(args[1].body),service_tier:tier});
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,fetchImpl:async()=>{n++;return response(0);}});
+  await assert.rejects(t.fetch(...args),/TRANSPORT_STOPPED/);assert.equal(n,0);assert.equal(t.stopped,true);
+});
+for(const tier of [undefined,null,'auto','priority','fast','flex','ultrafast'])test(`tier: actual response ${tier} stops without another call or standard-cost record`,async()=>{
+  const p=plan();let n=0,recorded=0;
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,onRecord:()=>recorded++,fetchImpl:async()=>{n++;return response(0,{service_tier:tier});}});
+  await assert.rejects(t.fetch(...request(p,0)),/TRANSPORT_STOPPED/);await assert.rejects(t.fetch(...request(p,0)),/RUN_STOPPED/);assert.equal(n,1);assert.equal(recorded,0);
+});
+test('tier: four standard calls match user-supplied rates and reserve 119.34 JPY',async()=>{
+  const p=plan({inputUsdPerMillion:1,outputUsdPerMillion:5,usdJpy:170});const records=[];let n=0;
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,onRecord:r=>records.push(r),fetchImpl:async(_u,init)=>{
+    const i=n++,body=JSON.parse(init.body),output=i===0?1000:12000;
+    assert.equal(body.service_tier,'default');assert.equal(body.max_output_tokens,output);
+    return response(i,{usage:{input_tokens:100000,output_tokens:output,total_tokens:100000+output,output_tokens_details:{reasoning_tokens:Math.floor(output/2)}}});
+  }});
+  for(let i=0;i<4;i++)await t.fetch(...request(p,i));
+  assert.deepEqual(records.map(r=>r.reservedYen),[21.42,32.64,32.64,32.64]);assert.equal(estimateTotal(p),119.34);
+  assert.ok(Math.abs(records.reduce((s,r)=>s+r.actualYen,0)-99.45)<1e-9);assert.ok(records.every(r=>r.serviceTier==='default'));
+  await assert.rejects(t.fetch(...request(p,4)),/CALL_LIMIT/);assert.equal(n,4);
+});
+test('tier: cached input never reduces the conservative reservation or estimated upper cost',async()=>{
+  const p=plan({inputUsdPerMillion:1,outputUsdPerMillion:5,usdJpy:170});const records=[];
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,onRecord:r=>records.push(r),fetchImpl:async()=>response(0,{usage:{input_tokens:100000,output_tokens:1000,total_tokens:101000,input_tokens_details:{cached_tokens:100000}}})});
+  await t.fetch(...request(p,0));assert.equal(records[0].reservedYen,21.42);assert.ok(Math.abs(records[0].actualYen-17.85)<1e-9);assert.equal(estimateTotal(p),119.34);
+});
+test('tier: usage missing on a standard response still stops',async()=>{
+  const p=plan();let n=0;const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,fetchImpl:async()=>{n++;return response(0,{usage:null});}});
+  await assert.rejects(t.fetch(...request(p,0)),/TRANSPORT_STOPPED/);await assert.rejects(t.fetch(...request(p,0)),/RUN_STOPPED/);assert.equal(n,1);
+});
+test('tier: service_tier bytes are included in the input reservation check',async()=>{
+  const p=plan(),args=request(p,0);p.inputTokens=Buffer.byteLength(args[1].body,'utf8')+4096;let n=0;
+  const t=createGuardedTransport({plan:p,apiKey:KEY,runId:'MOCK',confirm:yes,fetchImpl:async()=>{n++;return response(0);}});
+  await assert.rejects(t.fetch(...args),/TRANSPORT_STOPPED/);assert.equal(n,0);
 });

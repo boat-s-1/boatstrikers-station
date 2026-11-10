@@ -15,10 +15,14 @@ export function createGuardedTransport({ plan, apiKey, runId, confirm, fetchImpl
       const body = JSON.parse(init.body), stage = STAGES[calls];
       const outputLimit = stage === 'smoke' ? 1000 : plan.articleOutputTokens;
       if (body.model !== MODEL || body.max_output_tokens !== outputLimit || body.text?.format?.name !== (stage === 'smoke' ? 'smoke' : 'boatstrikers_blog_article')) hold('REQUEST_PLAN');
-      assertSafe(init.body, secrets);
+      // Omission means auto in the API; force standard pricing, never the project default.
+      if (body.service_tier !== undefined && body.service_tier !== 'default') hold('REQUEST_SERVICE_TIER');
+      body.service_tier = 'default';
+      const requestBody = JSON.stringify(body);
+      assertSafe(requestBody, secrets);
       // Conservative upper bound: UTF-8 bytes of the WHOLE request plus framing allowance.
       // API-reported input above this approved cap freezes the run; no cheaper guessed tokenizer is used.
-      if (Buffer.byteLength(init.body, 'utf8') + 4096 > plan.inputTokens) hold('INPUT_RESERVATION');
+      if (Buffer.byteLength(requestBody, 'utf8') + 4096 > plan.inputTokens) hold('INPUT_RESERVATION');
       const phrase = `CONFIRM ${runId} ${stage} MODEL=${MODEL} RESERVED=${estimate(plan, stage)}JPY`;
       if (typeof confirm !== 'function' || await confirm(phrase) !== phrase) hold('STAGE_CANCELLED');
       if (stopped || now() >= approvalExpiresAt) hold('APPROVAL_EXPIRED_OR_STOPPED');
@@ -32,17 +36,19 @@ export function createGuardedTransport({ plan, apiKey, runId, confirm, fetchImpl
           listener = () => reject(new Error('HOLD:TIMEOUT_OR_ABORT'));
           if (signal.aborted) listener(); else signal.addEventListener('abort', listener, { once: true });
         });
-        const response = await Promise.race([fetchImpl(url, { ...init, signal, redirect: 'error' }), aborted]);
+        const response = await Promise.race([fetchImpl(url, { ...init, body: requestBody, signal, redirect: 'error' }), aborted]);
         if (!response.ok) hold('API_ERROR');
         const payload = await Promise.race([response.json(), aborted]);
         assertSafe(payload, secrets);
         if (payload.status !== 'completed' || payload.model !== MODEL) hold('INCOMPLETE_OR_MODEL_MISMATCH');
+        // The response reports actual routing, which may differ from the request.
+        if (payload.service_tier !== 'default') hold('RESPONSE_SERVICE_TIER');
         const u = payload.usage;
         if (!u || !['input_tokens','output_tokens','total_tokens'].every(k => Number.isSafeInteger(u[k]) && u[k] > 0) || u.total_tokens !== u.input_tokens + u.output_tokens) hold('USAGE_UNKNOWN');
         if (u.input_tokens > plan.inputTokens || u.output_tokens > outputLimit) hold('USAGE_OVER_RESERVATION');
         const actualYen = (u.input_tokens * plan.inputUsdPerMillion + u.output_tokens * plan.outputUsdPerMillion) / 1e6 * plan.usdJpy;
         if (!Number.isFinite(actualYen) || actualYen > estimate(plan, stage)) hold('COST_OVER_RESERVATION');
-        onRecord({ stage, inputTokens: u.input_tokens, outputTokens: u.output_tokens, totalTokens: u.total_tokens, durationMs: Date.now() - start, actualYen, reservedYen: estimate(plan, stage) });
+        onRecord({ stage, serviceTier: payload.service_tier, inputTokens: u.input_tokens, outputTokens: u.output_tokens, totalTokens: u.total_tokens, durationMs: Date.now() - start, actualYen, reservedYen: estimate(plan, stage) });
         return new Response(JSON.stringify(payload), { status: 200, headers: { 'content-type': 'application/json' } });
       } finally { if (listener) signal.removeEventListener('abort', listener); }
     } catch { stopped = true; hold('TRANSPORT_STOPPED'); }
