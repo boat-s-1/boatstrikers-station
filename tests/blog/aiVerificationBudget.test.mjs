@@ -114,7 +114,7 @@ test('secret-bearing upstream content is rejected and never saved',async()=>{
 test('secret scanner rejects literal, encoded and credential-labelled content',()=>{
   for(const value of [KEY,Buffer.from(KEY).toString('base64'),encodeURIComponent(KEY),'Bearer mock-value','sk-test-12345678901234567890','{"apiKey":"value"}'])assert.throws(()=>assertSafe(value,[KEY]),/SECRET_CONTENT/);
 });
-function request(p,index){return ['https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${KEY}`},body:JSON.stringify({model:MODEL,max_output_tokens:index===0?1000:p.articleOutputTokens,text:{format:{name:index===0?'smoke':'boatstrikers_blog_article'}}})}];}
+function request(p,index){return ['https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${KEY}`},body:JSON.stringify({model:MODEL,store:false,max_output_tokens:index===0?1000:p.articleOutputTokens,text:{format:{name:index===0?'smoke':'boatstrikers_blog_article'}}})}];}
 test('fifth transport call is refused, including when the caller asks again',async()=>{
   const p=plan();let n=0;const t=createGuardedTransport({plan:p,apiKey:KEY,runId:randomUUID(),confirm:yes,fetchImpl:async()=>response(n++)});
   for(let i=0;i<4;i++)await t.fetch(...request(p,i));

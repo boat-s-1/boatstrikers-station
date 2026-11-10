@@ -14,7 +14,8 @@ const WRAPPERS = new Map([
 const ADDED = new Set([
   ...['approval','budget','cli','offline','source','transport','worker'].map(n => `scripts/blog/verification-${n}.${n === 'offline' ? 'cjs' : 'mjs'}`),
   'tests/blog/aiVerificationBudget.test.mjs', 'tests/blog/aiVerificationSource.test.mjs',
-  ...['VERIFICATION-BUDGET-SAFETY','REAL-AI-THREE-ARTICLE-PLAN','REAL-AI-ARTICLE-EVALUATION','REAL-AI-FINAL-PREFLIGHT','REAL-AI-EXECUTION-CHECKLIST'].map(n => `docs/blog/${n}.md`),
+  'tests/blog/aiVerificationSmokeOnly.test.mjs',
+  ...['VERIFICATION-BUDGET-SAFETY','REAL-AI-THREE-ARTICLE-PLAN','REAL-AI-ARTICLE-EVALUATION','REAL-AI-FINAL-PREFLIGHT','REAL-AI-EXECUTION-CHECKLIST','REAL-AI-SMOKE-ONLY-PLAN'].map(n => `docs/blog/${n}.md`),
 ]);
 const SCOPES = ['lib', 'scripts/blog', 'tests/blog/fixtures', 'package.json'];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');

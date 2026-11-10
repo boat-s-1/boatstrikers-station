@@ -1,19 +1,21 @@
-import { MODEL, STAGES, estimate, assertSafe, hold } from './verification-budget.mjs';
+import { MODEL, stagesFor, executionMode, estimate, assertSafe, hold } from './verification-budget.mjs';
 
 export function createGuardedTransport({ plan, apiKey, runId, confirm, fetchImpl, onRecord = () => {}, timeoutMs = 90000, approvalExpiresAt = Infinity, now = Date.now }) {
   let calls = 0, stopped = false, inFlight = false;
+  const stages = stagesFor(plan);
   const secrets = [apiKey];
   const request = async (url, init) => {
     if (stopped) hold('RUN_STOPPED');
-    if (calls >= 4) { stopped = true; hold('CALL_LIMIT'); }
+    if (calls >= stages.length) { stopped = true; hold('CALL_LIMIT'); }
     if (inFlight) { stopped = true; hold('CONCURRENT_CALL'); }
     inFlight = true;
     try {
       if (!apiKey || typeof fetchImpl !== 'function') hold('TRANSPORT_REQUIRED');
       if (now() >= approvalExpiresAt) hold('APPROVAL_EXPIRED');
       if (url !== 'https://api.openai.com/v1/responses' || init.method !== 'POST' || init.headers.Authorization !== `Bearer ${apiKey}`) hold('DESTINATION');
-      const body = JSON.parse(init.body), stage = STAGES[calls];
+      const body = JSON.parse(init.body), stage = stages[calls];
       const outputLimit = stage === 'smoke' ? 1000 : plan.articleOutputTokens;
+      if (body.store !== false) hold('STORE_FALSE_REQUIRED');
       if (body.model !== MODEL || body.max_output_tokens !== outputLimit || body.text?.format?.name !== (stage === 'smoke' ? 'smoke' : 'boatstrikers_blog_article')) hold('REQUEST_PLAN');
       // Omission means auto in the API; force standard pricing, never the project default.
       if (body.service_tier !== undefined && body.service_tier !== 'default') hold('REQUEST_SERVICE_TIER');
@@ -23,7 +25,7 @@ export function createGuardedTransport({ plan, apiKey, runId, confirm, fetchImpl
       // Conservative upper bound: UTF-8 bytes of the WHOLE request plus framing allowance.
       // API-reported input above this approved cap freezes the run; no cheaper guessed tokenizer is used.
       if (Buffer.byteLength(requestBody, 'utf8') + 4096 > plan.inputTokens) hold('INPUT_RESERVATION');
-      const phrase = `CONFIRM ${runId} ${stage} MODEL=${MODEL} RESERVED=${estimate(plan, stage)}JPY`;
+      const phrase = `CONFIRM ${runId} MODE=${executionMode(plan)} ${stage} MODEL=${MODEL} STORE=false RESERVED=${estimate(plan, stage)}JPY`;
       if (typeof confirm !== 'function' || await confirm(phrase) !== phrase) hold('STAGE_CANCELLED');
       if (stopped || now() >= approvalExpiresAt) hold('APPROVAL_EXPIRED_OR_STOPPED');
       calls++;

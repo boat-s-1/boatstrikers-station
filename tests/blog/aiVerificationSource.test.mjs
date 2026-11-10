@@ -73,8 +73,8 @@ test('plan and approval cannot override source policy or fixed baseline',async()
   const plan={model:'gpt-6.1-terra',budgetYen:1000,limitYen:700,margin:0.2,inputTokens:100000,articleOutputTokens:12000,inputUsdPerMillion:1,outputUsdPerMillion:4,usdJpy:150,pricingSource:'https://example.invalid/mock',fxSource:'https://example.invalid/mock',ratesVerifiedAt:new Date().toISOString(),output:join(root,'output'),stateDir:join(root,'state'),maxCalls:4};
   assert.throws(()=>validatePlan({...plan,skipBaseCheck:true}),/PLAN_FIELDS/);
   assert.throws(()=>validatePlan({...plan,base:'0'.repeat(40)}),/PLAN_FIELDS/);
-  const digest=codeDigest(repo),id=await issueApproval({plan,sourceDigest:digest,confirm:async s=>s});
+  const digest=codeDigest(repo),id=await issueApproval({plan,sourceDigest:digest,confirm:async s=>s,repo});
   add('docs/blog/REAL-AI-FINAL-PREFLIGHT.md','offline safety documentation\n');commit('Allowed safety documentation');
   assert.notEqual(codeDigest(repo),digest);
-  assert.throws(()=>consumeApproval({plan,id,sourceDigest:codeDigest(repo)}),/INVALID_APPROVAL/);
+  assert.throws(()=>consumeApproval({plan,id,sourceDigest:codeDigest(repo),repo}),/INVALID_APPROVAL/);
 });

@@ -4,6 +4,12 @@ import { resolve, dirname, join, isAbsolute } from 'node:path';
 export const MODEL = 'gpt-6.1-terra';
 export const BASE = '94677eedebfffb7cfef3f857e3d2a87a0f42a61d';
 export const STAGES = ['smoke', 'ichika', 'hatsune', 'kiina'];
+export function executionMode(p) {
+  if (p.mode === undefined || p.mode === 'four-stage') return 'four-stage';
+  if (p.mode === 'smoke-only') return 'smoke-only';
+  hold('EXECUTION_MODE');
+}
+export function stagesFor(p) { return executionMode(p) === 'smoke-only' ? ['smoke'] : [...STAGES]; }
 export function hold(code) { throw new Error(`HOLD:${code}`); }
 export function assertSafe(value, secrets = []) {
   const text = typeof value === 'string' ? value : JSON.stringify(value);
@@ -36,12 +42,15 @@ function keys(object, expected) {
 }
 export function validatePlan(p, now = Date.now()) {
   assertSafe(p);
-  keys(p, ['model','budgetYen','limitYen','margin','inputTokens','articleOutputTokens','inputUsdPerMillion','outputUsdPerMillion','usdJpy','pricingSource','fxSource','ratesVerifiedAt','output','stateDir','maxCalls']);
-  if (p.model !== MODEL || p.budgetYen !== 1000 || p.limitYen !== 700 || p.maxCalls !== 4) hold('FIXED_LIMITS');
+  const mode = executionMode(p);
+  const common = ['model','budgetYen','limitYen','margin','inputTokens','inputUsdPerMillion','outputUsdPerMillion','usdJpy','pricingSource','fxSource','ratesVerifiedAt','output','stateDir','maxCalls'];
+  keys(p, [...common, ...(mode === 'smoke-only' ? ['mode','serviceTier','store','outputTokens'] : ['articleOutputTokens', ...(Object.hasOwn(p, 'mode') ? ['mode'] : [])])]);
+  if (p.model !== MODEL || p.budgetYen !== 1000 || p.limitYen !== 700 || p.maxCalls !== stagesFor(p).length) hold('FIXED_LIMITS');
+  if (mode === 'smoke-only' && (p.serviceTier !== 'default' || p.store !== false || p.inputTokens !== 100000 || p.outputTokens !== 1000 || p.inputUsdPerMillion !== 1 || p.outputUsdPerMillion !== 5 || p.usdJpy !== 170 || p.margin !== 0.2)) hold('SMOKE_FIXED_LIMITS');
   for (const k of ['inputUsdPerMillion','outputUsdPerMillion','usdJpy']) if (!Number.isFinite(p[k]) || p[k] <= 0) hold('RATES_REQUIRED');
   if (!Number.isFinite(p.margin) || p.margin < 0.1 || p.margin > 1) hold('MARGIN');
   if (!Number.isSafeInteger(p.inputTokens) || p.inputTokens < 4096 || p.inputTokens > 1000000) hold('INPUT_LIMIT');
-  if (!Number.isSafeInteger(p.articleOutputTokens) || p.articleOutputTokens < 1000 || p.articleOutputTokens > 12000) hold('OUTPUT_LIMIT');
+  if (mode === 'four-stage' && (!Number.isSafeInteger(p.articleOutputTokens) || p.articleOutputTokens < 1000 || p.articleOutputTokens > 12000)) hold('OUTPUT_LIMIT');
   const age = now - Date.parse(p.ratesVerifiedAt);
   if (!Number.isFinite(age) || age < 0 || age > 7 * 86400000) hold('STALE_RATES');
   for (const k of ['pricingSource','fxSource']) {
@@ -53,11 +62,11 @@ export function validatePlan(p, now = Date.now()) {
   return p;
 }
 export function estimate(p, stage) {
-  if (!STAGES.includes(stage)) hold('STAGE');
+  if (!stagesFor(p).includes(stage)) hold('STAGE');
   const output = stage === 'smoke' ? 1000 : p.articleOutputTokens;
   return Math.ceil(((p.inputTokens * p.inputUsdPerMillion + output * p.outputUsdPerMillion) / 1e6) * p.usdJpy * (1 + p.margin) * 100) / 100;
 }
-export function estimateTotal(p) { return Math.ceil(STAGES.reduce((sum, s) => sum + estimate(p, s), 0) * 100) / 100; }
+export function estimateTotal(p) { return Math.ceil(stagesFor(p).reduce((sum, s) => sum + estimate(p, s), 0) * 100) / 100; }
 export function reserveBudget(p, id, now = Date.now()) {
   validatePlan(p, now);
   if (typeof id !== 'string' || !/^[a-f0-9-]{36}$/.test(id)) hold('RESERVATION_ID');
@@ -74,7 +83,7 @@ export function reserveBudget(p, id, now = Date.now()) {
     const spent = ledger.reservations.reduce((sum, r) => sum + r.amountYen, 0);
     if (ledger.reservations.some(r => r.id === id)) hold('BUDGET_REPLAY');
     if (Math.ceil((spent + amountYen) * 100) > 70000) hold('BUDGET_EXCEEDED');
-    ledger.reservations.push({ id, amountYen });
+    ledger.reservations.push({ id, amountYen, mode: executionMode(p) });
     const tmp = join(p.stateDir, `budget-${id}.tmp`);
     writeFileSync(tmp, assertSafe(ledger), { flag: 'wx', mode: 0o600 });
     renameSync(tmp, file);

@@ -2,6 +2,8 @@
 
 These commands describe a later, separately authorized run. This implementation task permits only offline tests.
 
+For an approval restricted to one smoke call, use REAL-AI-SMOKE-ONLY-PLAN.md. Its mode is smoke-only, it reserves 21.42 JPY, explicitly sends store:false, and exits after smoke. Never use the four-stage plan below for smoke-only authorization. Approval formats from before the mode-bound version-2 record are invalid.
+
 1. Use the dedicated checkout on `verification/pr295-safety` or `verification/pr295-ai-safety-guards`. Confirm fixed base `94677eedebfffb7cfef3f857e3d2a87a0f42a61d` is an ancestor of HEAD. The source guard checks every descendant commit, index and working-tree changes: only named safety additions and exact reviewed legacy-CLI wrappers are allowed; existing application/verification dependencies must match the base. Review the safety source fingerprint. Do not change the original work checkout.
 2. Run the free checks in VERIFICATION-BUDGET-SAFETY.md. Confirm current official model prices/FX and genuine availability of `gpt-6.1-terra` through approved sources; never guess. No API probe is permitted during offline preparation.
 3. Confirm Cloud status has current observations, the HTTP secret ready, api.openai.com enforced, and inherited proxy/CA trust. Never display the variable value. Actual model access, credential replacement and billing remain unverified until separately authorized real execution.

@@ -4,6 +4,8 @@ This is a new implementation, not a restoration of the missing files. Base commi
 
 ## Defaults and trust boundary
 
+An additional explicit smoke-only mode is documented in REAL-AI-SMOKE-ONLY-PLAN.md. It allows one smoke request only, reserves exactly 21.42 JPY in the SAME cumulative 700 JPY ledger, and exits successfully without entering the article verifier. Version-2 approvals explicitly bind mode, current HEAD and source digest as well as the full plan fingerprint. Four-stage remains the default for legacy plans without a mode field; smoke-only must be explicit and cannot reuse a four-stage approval (or vice versa).
+
 Real AI stays HOLD. The only supported real CLI is `scripts/blog/verification-cli.mjs`; the three old real CLI entry points now stop with HOLD. Exported legacy functions remain available to existing mocked tests, so running arbitrary JavaScript or deliberately editing safety files is outside this local operator guard's threat model. This is not an OS sandbox or an OpenAI account billing limit.
 
 A human must verify current official model pricing and USD/JPY, fill a secret-free plan outside Git, then approve the exact displayed phrase. The phrase binds model, budget, number of calls, output path, full plan fingerprint and source digest. Sources, fixed fixture files, prompts and safety scripts are hashed; changes invalidate approvals. Approval expires after one hour, including while waiting for a stage confirmation.
@@ -15,11 +17,11 @@ Approval records and atomic `.used` markers persist outside Git. Every run consu
 ## Reservation
 
 - Model fixed: `gpt-6.1-terra`; budget reference: 1,000 JPY; operating limit: 700 JPY.
-- Stages fixed: smoke, ichika, hatsune, kiina. One call each, maximum four, no automatic retry.
+- Four-stage stages are fixed: smoke, ichika, hatsune, kiina, one call each, maximum four. Smoke-only has only smoke, maximum one. Neither mode automatically retries.
 - Output bound: smoke 1,000 tokens; each article 1,000–12,000 tokens, approved in the plan.
 - A per-call input-token cap is mandatory. Before dispatch, the complete request's UTF-8 byte length plus 4,096 framing allowance must fit that cap. This intentionally overestimates input rather than using a cheaper guessed token count. Model/tokenizer and provider billing changes can invalidate this assumption; provider account limits remain separate.
 - Per-call reserved JPY = ceil-to-cent((input cap × input USD/1M + output cap × output USD/1M) / 1M × USD/JPY × (1 + margin)). Margin must be 10–100%.
-- The sum of all four reservations must fit 700 JPY before any API call. Persistent reservations from prior approvals count too. A lock serializes ledger updates; a stale lock is HOLD.
+- The sum of the approved mode's reservations (one smoke-only reservation or all four full-mode reservations) must fit 700 JPY before any API call. Persistent reservations from prior approvals in either mode count too. A lock serializes ledger updates; a stale lock is HOLD.
 - Reservations are never automatically refunded, even on error, unknown usage, timeout, cancellation or process death. Actual usage and costs are recorded when known; they do not free budget for extra calls.
 - Prices and FX must be positive, with HTTPS sources and a verification timestamp within seven days. The program validates metadata; it does not independently establish the accuracy of operator-supplied rates. Tests use explicitly fictional rates.
 
@@ -30,6 +32,8 @@ Each stage requires a separate exact phrase. Cancel/EOF/Ctrl+C stops. A transpor
 Native Node.js 24 runs the worker with `--use-env-proxy`, inherited proxy and CA trust, TLS verification, and redirects rejected. Only the child receives `BOATSTRIKERS_OPENAI_HTTP_KEY` as `OPENAI_API_KEY`. No key or placeholder is placed in argv or files. Unrelated credentials and NODE_OPTIONS are excluded from the child. The source variable is not forwarded.
 
 The dedicated transport now explicitly sends `service_tier: "default"` on every stage and refuses caller-supplied auto/priority/fast/flex/ultrafast modes. It includes that added field in the pre-dispatch byte bound. Actual response service_tier must be exactly default, including on smoke; missing/unexpected values stop the run before any standard-rate cost record. Usage records include the verified serviceTier. The user-supplied standard price plan is $1 input/$5 output per million, 170 JPY/USD, 20% margin: 119.34 JPY reserved. Cached input is quoted at $0.05 but the estimator conservatively uses the full input rate. The historical actualYen field is a configured-rate upper estimate, not a provider invoice or proof of exact billing.
+
+Both modes also require store:false at the transport boundary: omission, true, null and non-boolean values stop before dispatch. The worker constructs explicit private requests from the immutable legacy builders; it never silently corrects an explicit unsafe value. Storage flags do not remove provider safety/abuse-retention obligations. In smoke-only the call guard itself caps requests at one, independently of the worker's early end. Errors/cancellation keep the reservation and consumed approval marker, even when no request was sent.
 
 Official specification evidence: [OpenAI's Responses SDK source](https://github.com/openai/openai-node/blob/master/src/resources/responses/responses.ts) documents that omission defaults to auto, auto follows Project settings (default unless configured otherwise), explicit default uses standard pricing/performance, and the returned mode can differ from the requested mode. Public developer/reference pages returned proxy 403 here; only the official SDK source was directly retrieved. Actual project/model access, balance, credit expiry, budget settings and enforcement cannot be proven by this offline work. A mismatched response can already have incurred cost; detection stops further calls and keeps reservations but cannot retroactively guarantee its price.
 
@@ -47,7 +51,7 @@ Output and state paths must be absolute, outside every Git checkout, and not sym
 
 ```sh
 cd /workspace/boatstrikers-pr295-verification
-node --require ./scripts/blog/verification-offline.cjs --test tests/blog/aiVerificationBudget.test.mjs tests/blog/aiLocalVerification.test.mjs tests/blog/aiCostLimits.test.mjs tests/blog/aiVerificationSource.test.mjs
+node --require ./scripts/blog/verification-offline.cjs --test tests/blog/aiVerificationBudget.test.mjs tests/blog/aiLocalVerification.test.mjs tests/blog/aiCostLimits.test.mjs tests/blog/aiVerificationSource.test.mjs tests/blog/aiVerificationSmokeOnly.test.mjs
 node --require ./scripts/blog/verification-offline.cjs scripts/blog/verify-real-articles.mjs tests/blog/fixtures/real-data/cases.json
 ```
 
