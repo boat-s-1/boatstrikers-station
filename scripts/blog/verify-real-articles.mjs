@@ -54,7 +54,7 @@ async function realAnswer({ c, rows, config, calls, fetchImpl = fetch }) {
 }
 
 // Runs every case and returns one result object per case. log(line) is called for each (no key is ever in a line).
-export async function runVerification({ casesFile, useAi = false, maxCalls = 3, config = aiConfig(), log = () => {}, fetchImpl = fetch }) {
+export async function runVerification({ casesFile, useAi = false, maxCalls = 3, config = aiConfig(), log = () => {}, fetchImpl = fetch, stopOnFailure = false }) {
   if (useAi && !config.apiKey) throw Object.assign(new Error("OPENAI_API_KEY が設定されていません。"), { exit: 2 });
   const calls = { count: 0 };
   const cases = JSON.parse(readFileSync(casesFile, "utf8"));
@@ -69,8 +69,8 @@ export async function runVerification({ casesFile, useAi = false, maxCalls = 3, 
       if (calls.count >= maxCalls) { emit({ name: c.name, character: c.character, skipped: "max_calls_reached" }); ok = false; continue; }
       const r = await realAnswer({ c, rows, config, calls, fetchImpl });
       generation = r.info ? { model: r.info.model, usage: r.info.usage, duration_ms: r.info.duration_ms, estimated_cost_usd: estimateCostUsd(r.info.usage, config.prices) } : null;
-      if (r.skipped === "data_hold") { emit({ name: c.name, character: c.character, real_ai: true, verdict: "HOLD", reason: "data_quality", ai_called: false, dataset: { status: r.evidence.status, issues: r.evidence.issues.map(i => i.code) } }); continue; }
-      if (!r.ai) { emit({ name: c.name, character: c.character, real_ai: true, ai_called: true, error: r.error, generation }); ok = false; continue; }
+      if (r.skipped === "data_hold") { emit({ name: c.name, character: c.character, real_ai: true, verdict: "HOLD", reason: "data_quality", ai_called: false, dataset: { status: r.evidence.status, issues: r.evidence.issues.map(i => i.code) } }); if (stopOnFailure) throw new Error('HOLD:DATA_QUALITY'); continue; }
+      if (!r.ai) { if (stopOnFailure) throw new Error('HOLD:GENERATION_FAILED'); emit({ name: c.name, character: c.character, real_ai: true, ai_called: true, error: r.error, generation }); ok = false; continue; }
       ai = r.ai;
     } else ai = JSON.parse(readFileSync(resolve(base, c.mock), "utf8"));
     const others = done.map(d => ({ post_id: d.name, title: d.document.title, text: articleText(d.document) }));
@@ -91,6 +91,7 @@ export async function runVerification({ casesFile, useAi = false, maxCalls = 3, 
       period_removed: { verdict: p.result.verdict, usefulness: p.result.gates.usefulness.verdict },
       document: useAi ? r.document : undefined };
     emit(line);
+    if (stopOnFailure && (line.verdict !== 'PASS' || line.tampered.verdict !== 'HOLD' || line.period_removed.verdict === 'PASS')) throw new Error('HOLD:QUALITY_GATES');
     // With a real AI answer, RETRY/HOLD are results to report, not script failures; the safety checks must still hold.
     if ((!useAi && r.result.verdict !== "PASS") || (line.tampered.changed && t.result.verdict !== "HOLD") || p.result.verdict === "PASS") ok = false;
     done.push({ name: c.name, document: r.document });
@@ -101,6 +102,7 @@ export async function runVerification({ casesFile, useAi = false, maxCalls = 3, 
 // Run directly (works with Windows paths too).
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const useAi = process.argv.includes("--ai");
+  if (useAi) { console.error('HOLD: use verification-cli.mjs with one-use approval'); process.exit(1); }
   const maxCalls = Number(process.argv[process.argv.indexOf("--max-calls") + 1]) || 3;
   try {
     const { ok } = await runVerification({ casesFile: resolve(process.argv[2]), useAi, maxCalls,

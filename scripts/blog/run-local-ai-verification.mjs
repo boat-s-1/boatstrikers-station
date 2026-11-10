@@ -121,5 +121,6 @@ export async function main({ argv = process.argv.slice(2), env = process.env, io
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  main().then(r => process.exit(r.status === "done" || r.status === "cancelled" ? 0 : 1), e => { console.error(e.message); process.exit(1); });
+  console.error('HOLD: use verification-cli.mjs with one-use approval');
+  process.exitCode = 1;
 }
