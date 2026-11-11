@@ -27,7 +27,6 @@ export async function smoke({ env = process.env, fetchImpl = fetch } = {}) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  const result = await smoke();
-  console.log(JSON.stringify(result));
-  process.exit(result.exit);
+  console.error('HOLD: use verification-cli.mjs with one-use approval');
+  process.exitCode = 1;
 }
