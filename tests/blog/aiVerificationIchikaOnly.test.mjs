@@ -9,14 +9,14 @@ import { validatePlan, reserveBudget, estimateTotal, assertSafe } from '../../sc
 import { execute, privateRequests, REPO } from '../../scripts/blog/verification-worker.mjs';
 import { createGuardedTransport } from '../../scripts/blog/verification-transport.mjs';
 import { ichikaInput, prepareIchika } from '../../scripts/blog/verification-ichika.mjs';
-import { sealSnapshot, sha256, loadSnapshot, capturePublishedSnapshot, SNAPSHOT_MAX_AGE_MS, writeSnapshot } from '../../scripts/blog/verification-snapshot.mjs';
+import { sealSnapshot, sha256, loadSnapshot, capturePublishedSnapshot, SNAPSHOT_MAX_AGE_MS, writeSnapshot, validateSnapshot, canonical, BLOG_ORIGIN, assertAnonCredential } from '../../scripts/blog/verification-snapshot.mjs';
 import { composeDocument } from '../../lib/blog/ai/compose.mjs';
 import { articleText } from '../../lib/blog/ai/duplicates.mjs';
 
 const KEY='ICHIKA_ONLY_MOCK_NEVER_REAL_CREDENTIAL_123456789';
 const roots=[];after(()=>{for(const root of roots)rmSync(root,{recursive:true,force:true});});
 const yes=async s=>s;
-const source={kind:'blog-anon-readonly-select',url:'https://blog-snapshot-mock.supabase.co',scope:'all-publicly-readable-published-sealed',queryVersion:1};
+const source={kind:'blog-anon-readonly-select',url:'https://rzosrbkyniyedolhkgxo.supabase.co',scope:'all-publicly-readable-published-sealed',queryVersion:1};
 const fixture=()=>JSON.parse(readFileSync(join(REPO,'tests/blog/fixtures/mock-ai/ichika-kiryu-inside-escape.json'),'utf8'));
 function snapshot(articles=[{id:'MOCK-PUBLISHED',revisionId:'MOCK-SEALED',slug:'mock-existing',state:'published',publishedAt:'2026-10-01T00:00:00Z',title:'別の既存記事：サイト利用方法',text:'検証専用の既存公開記事本文です。端末の表示や画面操作について説明しています。'}],retrievedAt=new Date().toISOString()){
   return sealSnapshot({source,retrievedAt,articles});
@@ -140,7 +140,7 @@ function mockClient({size=1,failCount=false,changeInventory=false,missingRevisio
       if(table==='blog_posts'&&changeInventory&&inventories++>0&&rows[0])rows[0].last_published_at='2026-10-02T00:00:00Z';
       if(table==='blog_post_revisions'&&missingRevision)rows=[];
       const count=failCount?null:rows.length,range=ops.find(x=>x[0]==='range');rows=rows.slice(range[1],range[2]+1);if(truncate)rows=rows.slice(0,199);
-      return Promise.resolve({data:rows,error:null,count}).then(yes,no);};
+      return Promise.resolve({data:rows,error:null,count,status:200}).then(yes,no);};
     if(!['select','eq','not','lte','order','range'].includes(name))throw new Error('MUTATION_METHOD_FORBIDDEN');
     return (...args)=>{ops.push([name,...args]);return new Proxy({},this);};
   }});}};
@@ -152,7 +152,84 @@ for(const problem of ['failCount','changeInventory','missingRevision','truncate'
   await assert.rejects(capturePublishedSnapshot({client:mockClient({size:problem==='truncate'?201:1,[problem]:true}),databaseOrigin:source.url}),/HOLD/);
 });
 test('snapshot capture: empty inventory, credential-shaped content, Git output and overwrite are rejected',async()=>{
-  await assert.rejects(capturePublishedSnapshot({client:mockClient({size:0}),databaseOrigin:source.url}),/SNAPSHOT_EMPTY/);
+  assert.throws(()=>snapshot([]),/SNAPSHOT_EMPTY/);
   const p=plan();assert.throws(()=>writeSnapshot(snapshot(),join(REPO,'snapshot.json')),/PATH_INSIDE_GIT/);assert.throws(()=>writeSnapshot(snapshot(),p.snapshotPath),/SNAPSHOT_EXISTS/);
   assert.throws(()=>snapshot([{...snapshot().articles[0],text:'Bearer fake-secret'}]),/SECRET_CONTENT/);
+});
+
+// All completion receipts below come from disposable SELECT mocks, never production.
+const emptyCapture=()=>capturePublishedSnapshot({client:mockClient({size:0}),databaseOrigin:BLOG_ORIGIN});
+const rehash=s=>{const {contentHash,...payload}=s;return {...payload,contentHash:sha256(canonical(payload))};};
+function fixedResultClient(result){return {from(){const query=new Proxy({}, {get(_t,k){if(k==='then')return (ok,no)=>Promise.resolve(result).then(ok,no);if(!['select','eq','not','lte','order','range'].includes(k))throw Error('SELECT only');return ()=>query;}});return query;}};}
+test('empty snapshot: completed two-inventory anon capture passes and records public conditions',async()=>{
+  const client=mockClient({size:0}),s=await capturePublishedSnapshot({client,databaseOrigin:BLOG_ORIGIN});
+  validateSnapshot(s);assert.equal(s.version,2);assert.equal(s.count,0);assert.deepEqual(s.articles,[]);assert.equal(client.calls.length,2);
+  assert.equal(s.completion.role,'anon');assert.equal(s.completion.projectId,'rzosrbkyniyedolhkgxo');assert.equal(s.completion.query.state,'published');assert.equal(s.completion.query.publishedRevision,'not-null');assert.equal(s.completion.query.firstPublishedAtLte,s.retrievedAt);
+  assert.deepEqual(s.completion.before,[{status:200,start:0,end:199,total:0,rows:0}]);assert.deepEqual(s.completion.after,s.completion.before);
+  const p=plan();rmSync(p.snapshotPath);writeSnapshot(s,p.snapshotPath);p.snapshotHash=sha256(readFileSync(p.snapshotPath));assert.equal(loadSnapshot(p).metadata.count,0);
+});
+test('empty snapshot: unacquired legacy empty data and absent completion are HOLD',async()=>{
+  assert.throws(()=>snapshot([]),/SNAPSHOT_EMPTY_UNVERIFIED/);
+  const s=await emptyCapture();delete s.completion;assert.throws(()=>validateSnapshot(rehash(s)),/SNAPSHOT_SCHEMA/);
+});
+for(const status of [401,403,500,undefined,206])test(`empty snapshot: HTTP ${status} cannot be substituted with zero rows`,async()=>{
+  await assert.rejects(capturePublishedSnapshot({client:fixedResultClient({status,data:[],count:0,error:null}),databaseOrigin:BLOG_ORIGIN}),/SNAPSHOT_READ_FAILED/);
+});
+test('empty snapshot: permission error remains HOLD even with status 200 and zero rows',async()=>{
+  await assert.rejects(capturePublishedSnapshot({client:fixedResultClient({status:200,data:[],count:0,error:{code:'42501'}}),databaseOrigin:BLOG_ORIGIN}),/SNAPSHOT_READ_FAILED/);
+});
+test('empty snapshot: real mock timeout stops without a snapshot or retry',async()=>{
+  let calls=0;const client={from(){calls++;const q=new Proxy({}, {get(_t,k){if(k==='then')return ()=>{};return ()=>q;}});return q;}};
+  await assert.rejects(capturePublishedSnapshot({client,databaseOrigin:BLOG_ORIGIN,timeoutMs:10}),/SNAPSHOT_READ_FAILED/);assert.equal(calls,1);
+});
+for(const patch of [{count:null},{count:1},{count:0,data:[{}]}])test(`empty snapshot: incomplete exact count ${JSON.stringify(patch)} is HOLD`,async()=>{
+  await assert.rejects(capturePublishedSnapshot({client:fixedResultClient({status:200,data:[],count:0,error:null,...patch}),databaseOrigin:BLOG_ORIGIN}),/HOLD/);
+});
+for(const mutation of ['missing-page','wrong-range','wrong-count','403-receipt','unfinished','wrong-query','wrong-role','wrong-project'])test(`empty snapshot: ${mutation} completion evidence is HOLD even after rehash`,async()=>{
+  const s=await emptyCapture();
+  if(mutation==='missing-page')s.completion.after=[];
+  if(mutation==='wrong-range')s.completion.before[0].start=200;
+  if(mutation==='wrong-count')s.completion.before[0].total=1;
+  if(mutation==='403-receipt')s.completion.before[0].status=403;
+  if(mutation==='unfinished')s.complete=false;
+  if(mutation==='wrong-query')s.completion.query.state='draft';
+  if(mutation==='wrong-role')s.completion.role='service_role';
+  if(mutation==='wrong-project')s.completion.projectId='another-project';
+  assert.throws(()=>validateSnapshot(rehash(s)),/HOLD/);
+});
+test('empty snapshot: content and file hash changes are HOLD',async()=>{
+  const s=await emptyCapture();s.completion.before[0].status=206;assert.throws(()=>validateSnapshot(s),/HOLD/);
+  const p=plan();rewriteSnapshot(p,await emptyCapture());writeFileSync(p.snapshotPath,readFileSync(p.snapshotPath,'utf8')+' ');assert.throws(()=>loadSnapshot(p),/SNAPSHOT_FILE_HASH/);
+  const h=await emptyCapture();h.contentHash='0'.repeat(64);assert.throws(()=>validateSnapshot(h),/SNAPSHOT_CONTENT_HASH/);
+});
+test('empty snapshot: 24-hour boundary passes, expired and future captures are HOLD',async()=>{
+  const s=await emptyCapture(),at=Date.parse(s.retrievedAt);validateSnapshot(s,at+SNAPSHOT_MAX_AGE_MS);
+  assert.throws(()=>validateSnapshot(s,at+SNAPSHOT_MAX_AGE_MS+1),/SNAPSHOT_STALE/);assert.throws(()=>validateSnapshot(s,at-1),/SNAPSHOT_STALE/);
+});
+test('empty snapshot: wrong project is rejected before SELECT and cannot be rehashed into acceptance',async()=>{
+  let calls=0;await assert.rejects(capturePublishedSnapshot({client:{from(){calls++;}},databaseOrigin:'https://another-project.supabase.co'}),/SNAPSHOT_SOURCE/);assert.equal(calls,0);
+  const s=await emptyCapture();s.source.url='https://another-project.supabase.co';assert.throws(()=>validateSnapshot(rehash(s)),/SNAPSHOT_SOURCE/);
+});
+test('empty snapshot: second inventory failure never produces completion evidence',async()=>{
+  let n=0;const client={from(){return fixedResultClient(++n===1?{status:200,data:[],count:0,error:null}:{status:403,data:[],count:0,error:null}).from();}};
+  await assert.rejects(capturePublishedSnapshot({client,databaseOrigin:BLOG_ORIGIN}),/SNAPSHOT_READ_FAILED/);assert.equal(n,2);
+});
+test('empty snapshot: anon credential guard rejects service credentials and wrong project claims',()=>{
+  const fake=claims=>['MOCK',Buffer.from(JSON.stringify(claims)).toString('base64url'),'NOT_A_SIGNATURE'].join('.');
+  assertAnonCredential(fake({role:'anon',ref:'rzosrbkyniyedolhkgxo'}));
+  for(const key of [fake({role:'service_role'}),fake({role:'anon',ref:'another-project'}),'sb_secret_MOCK','opaque-unverifiable-placeholder'])assert.throws(()=>assertAnonCredential(key),/BLOG_ANON_REQUIRED/);
+});
+test('empty snapshot: nonempty v1 remains compatible; new v2 capture also passes',async()=>{
+  validateSnapshot(snapshot());const s=await capturePublishedSnapshot({client:mockClient(),databaseOrigin:BLOG_ORIGIN});validateSnapshot(s);assert.equal(s.version,2);assert.equal(s.count,1);
+});
+test('empty snapshot: mock approval binds empty inventory and rejects a replacement',async()=>{
+  const p=plan();rewriteSnapshot(p,await emptyCapture());const id=await approve(p);
+  const record=JSON.parse(readFileSync(join(p.stateDir,'approvals',id+'.json'),'utf8'));assert.equal(record.artifacts.snapshot.count,0);assert.equal(record.artifacts.snapshot.hash,p.snapshotHash);
+  rewriteSnapshot(p,snapshot());await assert.rejects(execute(opts(p,id,()=>{throw Error('no dispatch');})),/INVALID_APPROVAL/);assert.equal(used(p,id),false);
+});
+test('empty snapshot: one mock Ichika call retains 21.42, reserves only 32.64, seven gates and no publication',async()=>{
+  const p=plan();rewriteSnapshot(p,await emptyCapture());reserveBudget(smoke(p),randomUUID());const old=ledger(p).reservations[0];const id=await approve(p);let calls=0;
+  const result=await execute(opts(p,id,async()=>{calls++;return response(p);}));assert.deepEqual(result,{status:'PASS',calls:1});assert.equal(calls,1);
+  const l=ledger(p);assert.deepEqual(l.reservations[0],old);assert.equal(l.reservations[1].amountYen,32.64);assert.equal(Math.round(l.reservations.reduce((a,r)=>a+r.amountYen,0)*100),5406);
+  const report=JSON.parse(readFileSync(join(p.output,'report.json'),'utf8'));assert.equal(report.publishAllowed,false);assert.equal(report.results.length,1);assert.equal(Object.keys(report.results[0].gates).length,7);assert.equal(report.artifacts.snapshot.count,0);assert.equal(used(p,id),true);
 });
