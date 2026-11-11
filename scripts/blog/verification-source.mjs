@@ -12,10 +12,11 @@ const WRAPPERS = new Map([
   ['scripts/blog/verify-real-articles.mjs', '3927befcc86c1647bfeb5cd7b8a18108ff8a6b2bbb6c73242c3f96331661bc93'],
 ]);
 const ADDED = new Set([
-  ...['approval','budget','cli','offline','source','transport','worker'].map(n => `scripts/blog/verification-${n}.${n === 'offline' ? 'cjs' : 'mjs'}`),
+  ...['approval','budget','cli','offline','source','transport','worker','snapshot','ichika'].map(n => `scripts/blog/verification-${n}.${n === 'offline' ? 'cjs' : 'mjs'}`),
   'tests/blog/aiVerificationBudget.test.mjs', 'tests/blog/aiVerificationSource.test.mjs',
   'tests/blog/aiVerificationSmokeOnly.test.mjs',
-  ...['VERIFICATION-BUDGET-SAFETY','REAL-AI-THREE-ARTICLE-PLAN','REAL-AI-ARTICLE-EVALUATION','REAL-AI-FINAL-PREFLIGHT','REAL-AI-EXECUTION-CHECKLIST','REAL-AI-SMOKE-ONLY-PLAN'].map(n => `docs/blog/${n}.md`),
+  'tests/blog/aiVerificationIchikaOnly.test.mjs',
+  ...['VERIFICATION-BUDGET-SAFETY','REAL-AI-THREE-ARTICLE-PLAN','REAL-AI-ARTICLE-EVALUATION','REAL-AI-FINAL-PREFLIGHT','REAL-AI-EXECUTION-CHECKLIST','REAL-AI-SMOKE-ONLY-PLAN','REAL-AI-ICHIKA-ONLY-PLAN'].map(n => `docs/blog/${n}.md`),
 ]);
 const SCOPES = ['lib', 'scripts/blog', 'tests/blog/fixtures', 'package.json'];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');

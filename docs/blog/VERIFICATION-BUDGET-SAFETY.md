@@ -6,6 +6,8 @@ This is a new implementation, not a restoration of the missing files. Base commi
 
 An additional explicit smoke-only mode is documented in REAL-AI-SMOKE-ONLY-PLAN.md. It allows one smoke request only, reserves exactly 21.42 JPY in the SAME cumulative 700 JPY ledger, and exits successfully without entering the article verifier. Version-2 approvals explicitly bind mode, current HEAD and source digest as well as the full plan fingerprint. Four-stage remains the default for legacy plans without a mode field; smoke-only must be explicit and cannot reuse a four-stage approval (or vice versa).
 
+The explicit ichika-only mode is documented in REAL-AI-ICHIKA-ONLY-PLAN.md. It requires a version-3 approval bound to the fixed Ichika input bytes and a genuine published-title/body snapshot with provenance, count, freshness and file/content hashes. Only 32.64 JPY is reserved, and it never calls smoke or other article cases. Existing numeric/quality/source gates are reused unchanged; duplicate findings from the bound snapshot feed the existing duplicates gate. Any quality RETRY/HOLD ends locally without regeneration; even PASS has publishAllowed:false. Missing real snapshot/access remains HOLD, regardless of mocked test success.
+
 Real AI stays HOLD. The only supported real CLI is `scripts/blog/verification-cli.mjs`; the three old real CLI entry points now stop with HOLD. Exported legacy functions remain available to existing mocked tests, so running arbitrary JavaScript or deliberately editing safety files is outside this local operator guard's threat model. This is not an OS sandbox or an OpenAI account billing limit.
 
 A human must verify current official model pricing and USD/JPY, fill a secret-free plan outside Git, then approve the exact displayed phrase. The phrase binds model, budget, number of calls, output path, full plan fingerprint and source digest. Sources, fixed fixture files, prompts and safety scripts are hashed; changes invalidate approvals. Approval expires after one hour, including while waiting for a stage confirmation.
@@ -51,7 +53,7 @@ Output and state paths must be absolute, outside every Git checkout, and not sym
 
 ```sh
 cd /workspace/boatstrikers-pr295-verification
-node --require ./scripts/blog/verification-offline.cjs --test tests/blog/aiVerificationBudget.test.mjs tests/blog/aiLocalVerification.test.mjs tests/blog/aiCostLimits.test.mjs tests/blog/aiVerificationSource.test.mjs tests/blog/aiVerificationSmokeOnly.test.mjs
+node --require ./scripts/blog/verification-offline.cjs --test tests/blog/aiVerificationBudget.test.mjs tests/blog/aiLocalVerification.test.mjs tests/blog/aiCostLimits.test.mjs tests/blog/aiVerificationSource.test.mjs tests/blog/aiVerificationSmokeOnly.test.mjs tests/blog/aiVerificationIchikaOnly.test.mjs
 node --require ./scripts/blog/verification-offline.cjs scripts/blog/verify-real-articles.mjs tests/blog/fixtures/real-data/cases.json
 ```
 

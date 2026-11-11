@@ -7,9 +7,11 @@ export const STAGES = ['smoke', 'ichika', 'hatsune', 'kiina'];
 export function executionMode(p) {
   if (p.mode === undefined || p.mode === 'four-stage') return 'four-stage';
   if (p.mode === 'smoke-only') return 'smoke-only';
+  if (p.mode === 'ichika-only') return 'ichika-only';
   hold('EXECUTION_MODE');
 }
-export function stagesFor(p) { return executionMode(p) === 'smoke-only' ? ['smoke'] : [...STAGES]; }
+export function stagesFor(p) { const mode=executionMode(p);return mode==='smoke-only'?['smoke']:mode==='ichika-only'?['ichika']:[...STAGES]; }
+export function outputCap(p,stage){return stage==='smoke'?1000:executionMode(p)==='ichika-only'?p.outputTokens:p.articleOutputTokens;}
 export function hold(code) { throw new Error(`HOLD:${code}`); }
 export function assertSafe(value, secrets = []) {
   const text = typeof value === 'string' ? value : JSON.stringify(value);
@@ -44,9 +46,15 @@ export function validatePlan(p, now = Date.now()) {
   assertSafe(p);
   const mode = executionMode(p);
   const common = ['model','budgetYen','limitYen','margin','inputTokens','inputUsdPerMillion','outputUsdPerMillion','usdJpy','pricingSource','fxSource','ratesVerifiedAt','output','stateDir','maxCalls'];
-  keys(p, [...common, ...(mode === 'smoke-only' ? ['mode','serviceTier','store','outputTokens'] : ['articleOutputTokens', ...(Object.hasOwn(p, 'mode') ? ['mode'] : [])])]);
+  const single=mode==='smoke-only'||mode==='ichika-only';
+  keys(p, [...common, ...(single ? ['mode','serviceTier','store','outputTokens',...(mode==='ichika-only'?['caseKey','inputDataHash','snapshotPath','snapshotHash']:[])] : ['articleOutputTokens', ...(Object.hasOwn(p, 'mode') ? ['mode'] : [])])]);
   if (p.model !== MODEL || p.budgetYen !== 1000 || p.limitYen !== 700 || p.maxCalls !== stagesFor(p).length) hold('FIXED_LIMITS');
-  if (mode === 'smoke-only' && (p.serviceTier !== 'default' || p.store !== false || p.inputTokens !== 100000 || p.outputTokens !== 1000 || p.inputUsdPerMillion !== 1 || p.outputUsdPerMillion !== 5 || p.usdJpy !== 170 || p.margin !== 0.2)) hold('SMOKE_FIXED_LIMITS');
+  if (single && (p.serviceTier !== 'default' || p.store !== false || p.inputTokens !== 100000 || p.outputTokens !== (mode==='ichika-only'?12000:1000) || p.inputUsdPerMillion !== 1 || p.outputUsdPerMillion !== 5 || p.usdJpy !== 170 || p.margin !== 0.2)) hold('SINGLE_FIXED_LIMITS');
+  if(mode==='ichika-only'){
+    if(p.caseKey!=='ichika-kiryu-inside'||!(/^[a-f0-9]{64}$/).test(p.inputDataHash)||!(/^[a-f0-9]{64}$/).test(p.snapshotHash))hold('ICHIKA_BINDING');
+    const path=externalPath(p.snapshotPath);
+    if(path===p.output||path.startsWith(p.output+'/')||path===p.stateDir||path.startsWith(p.stateDir+'/'))hold('SNAPSHOT_SEPARATE_PATH');
+  }
   for (const k of ['inputUsdPerMillion','outputUsdPerMillion','usdJpy']) if (!Number.isFinite(p[k]) || p[k] <= 0) hold('RATES_REQUIRED');
   if (!Number.isFinite(p.margin) || p.margin < 0.1 || p.margin > 1) hold('MARGIN');
   if (!Number.isSafeInteger(p.inputTokens) || p.inputTokens < 4096 || p.inputTokens > 1000000) hold('INPUT_LIMIT');
@@ -63,7 +71,7 @@ export function validatePlan(p, now = Date.now()) {
 }
 export function estimate(p, stage) {
   if (!stagesFor(p).includes(stage)) hold('STAGE');
-  const output = stage === 'smoke' ? 1000 : p.articleOutputTokens;
+  const output = outputCap(p,stage);
   return Math.ceil(((p.inputTokens * p.inputUsdPerMillion + output * p.outputUsdPerMillion) / 1e6) * p.usdJpy * (1 + p.margin) * 100) / 100;
 }
 export function estimateTotal(p) { return Math.ceil(stagesFor(p).reduce((sum, s) => sum + estimate(p, s), 0) * 100) / 100; }

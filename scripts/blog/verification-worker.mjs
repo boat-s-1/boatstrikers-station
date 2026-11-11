@@ -7,6 +7,7 @@ import { codeDigest, consumeApproval } from './verification-approval.mjs';
 import { createGuardedTransport } from './verification-transport.mjs';
 import { smoke } from './openai-smoke.mjs';
 import { runVerification } from './verify-real-articles.mjs';
+import { prepareIchika, generateIchika } from './verification-ichika.mjs';
 
 export const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export async function terminalConfirm(phrase) {
@@ -36,29 +37,39 @@ export async function execute({ plan, approvalId, repo = REPO, env = process.env
   const key = env.OPENAI_API_KEY;
   assertSafe(plan, [key]);
   const digest = codeDigest(repo);
+  const prepared=prepareIchika(plan,repo,now);
   if (existsSync(plan.output)) hold('OUTPUT_ALREADY_EXISTS');
   const approval = consumeApproval({ plan, id: approvalId, sourceDigest: digest, now, repo });
   const reservedYen = reserveBudget(plan, approvalId, now);
   mkdirSync(plan.output, { recursive: true, mode: 0o700 });
   const usage = [];
-  const transport = createGuardedTransport({ plan, runId: approvalId, apiKey: key, confirm, fetchImpl, approvalExpiresAt: approval.expiresAt, onRecord: row => usage.push(row) });
+  const transport = createGuardedTransport({ plan, runId: approvalId, apiKey: key, confirm, fetchImpl, approvalExpiresAt: approval.expiresAt, onRecord: row => usage.push(row),beforeDispatch:()=>{
+    if(prepared){if(codeDigest(repo)!==digest)hold('SOURCE_CHANGED');prepareIchika(plan,repo);}
+  } });
   const guardedFetch = privateRequests(transport.fetch);
   const mode = executionMode(plan);
   let status = 'HOLD', results = [];
   try {
-    const config = { apiKey: key, model: plan.model, maxOutputTokens: plan.articleOutputTokens, prices: { input: plan.inputUsdPerMillion, output: plan.outputUsdPerMillion } };
-    const smokeResult = await smoke({ env: { OPENAI_API_KEY: key, BLOG_AI_MODEL: plan.model }, fetchImpl: guardedFetch });
-    if (!smokeResult.ok || transport.stopped) hold('SMOKE_FAILED');
-    if (mode === 'four-stage') {
-      const verification = await runVerification({ casesFile: join(repo, 'tests/blog/fixtures/real-data/cases.json'), useAi: true, maxCalls: 3, config, fetchImpl: guardedFetch, stopOnFailure: true, log: line => {
-        assertSafe(line, [key]); results.push(line);
-      } });
-      if (transport.stopped || !verification.ok || verification.lines.length !== 3 || verification.lines.some(l => l.verdict !== 'PASS' || l.tampered?.verdict !== 'HOLD' || l.period_removed?.verdict === 'PASS')) hold('QUALITY_GATES');
+    if(mode==='ichika-only'){
+      const result=await generateIchika({prepared,plan,apiKey:key,fetchImpl:guardedFetch});
+      if(codeDigest(repo)!==digest)hold('SOURCE_CHANGED');
+      assertSafe(result,[key]);results.push(result);
+      status=result.verdict==='PASS'&&result.safetyChecks?'PASS':'HOLD';
+    } else {
+      const config = { apiKey: key, model: plan.model, maxOutputTokens: plan.articleOutputTokens, prices: { input: plan.inputUsdPerMillion, output: plan.outputUsdPerMillion } };
+      const smokeResult = await smoke({ env: { OPENAI_API_KEY: key, BLOG_AI_MODEL: plan.model }, fetchImpl: guardedFetch });
+      if (!smokeResult.ok || transport.stopped) hold('SMOKE_FAILED');
+      if (mode === 'four-stage') {
+        const verification = await runVerification({ casesFile: join(repo, 'tests/blog/fixtures/real-data/cases.json'), useAi: true, maxCalls: 3, config, fetchImpl: guardedFetch, stopOnFailure: true, log: line => {
+          assertSafe(line, [key]); results.push(line);
+        } });
+        if (transport.stopped || !verification.ok || verification.lines.length !== 3 || verification.lines.some(l => l.verdict !== 'PASS' || l.tampered?.verdict !== 'HOLD' || l.period_removed?.verdict === 'PASS')) hold('QUALITY_GATES');
+      }
+      status = 'PASS';
     }
-    status = 'PASS';
   } catch { status = 'HOLD'; }
   // Never serialize upstream errors, request headers, credentials, or arbitrary runtime environment.
-  const report = { status, mode, head: approval.head, approvalId, model: plan.model, sourceDigest: digest, reservedYen, limitYen: 700, calls: transport.calls, usage, results };
+  const report = { status, mode, head: approval.head, approvalId, model: plan.model, sourceDigest: digest, reservedYen, limitYen: 700, calls: transport.calls, usage, results,publishAllowed:false,...(prepared?{artifacts:prepared.binding}:{}) };
   let text;
   try { text = assertSafe(report, [key]); } catch { hold('REPORT_SECRET_REJECTED'); }
   writeFileSync(join(plan.output, 'report.json'), text + '\n', { flag: 'wx', mode: 0o600 });
