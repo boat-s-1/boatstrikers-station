@@ -1,0 +1,46 @@
+name: TRINITY shadow isolated build and regression
+
+on:
+  push:
+    branches:
+      - chore/trinity-shadow-internal-runner-review-20261112
+    paths:
+      - 'app/api/cron/trinity-shadow/route.js'
+      - 'app/lib/trinityShadowRunner.js'
+      - 'app/lib/trinityCoreV0.js'
+      - 'app/lib/trinityCoreV2.js'
+      - 'app/lib/trinitySelectiveV3.js'
+      - 'app/lib/trinitySnapshotV1.js'
+      - 'tests/trinity/**'
+      - '.github/workflows/trinity-shadow-isolated-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      CRON_SECRET: ''
+      NEXT_PUBLIC_SUPABASE_URL: ''
+      SUPABASE_SERVICE_ROLE_KEY: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check app/lib/trinityShadowRunner.js
+          node --check app/api/cron/trinity-shadow/route.js
+      - name: TRINITY offline regression
+        run: node --test tests/trinity/*.test.mjs scripts/trinity/*.test.mjs
+      - name: Install without lifecycle scripts (no secrets)
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+      - name: Next.js build (no credentials)
+        run: npm run build
