@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { buildTrinityCoreV2 } from './trinityCoreV2.js';
 import { selectTrinityV3 } from './trinitySelectiveV3.js';
@@ -179,9 +178,9 @@ export async function runTrinityShadow({ db: injectedDb } = {}) {
       ...outcomes, settled };
     console.log(JSON.stringify({ level: outcomes.errors.length ? 'error' : 'info',
       message: 'trinity shadow cron complete', ...response }));
-    return NextResponse.json(response, { status: outcomes.errors.length ? 500 : 200 });
+    return Response.json(response, { status: outcomes.errors.length ? 500 : 200 });
   } catch (error) {
     console.error(JSON.stringify({ level: 'error', message: 'trinity shadow cron failed', error: error.message }));
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return Response.json({ ok: false, error: error.message }, { status: 500 });
   }
 }
