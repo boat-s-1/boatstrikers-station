@@ -1,6 +1,7 @@
 name: TRINITY shadow isolated build and regression
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - chore/trinity-shadow-internal-runner-review-20261112
