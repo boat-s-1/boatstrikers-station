@@ -35,13 +35,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install without lifecycle scripts (no secrets)
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
       - name: Syntax checks
         run: |
           node --check app/lib/trinityShadowRunner.js
           node --check app/api/cron/trinity-shadow/route.js
       - name: TRINITY offline regression
         run: node --test tests/trinity/*.test.mjs scripts/trinity/*.test.mjs
-      - name: Install without lifecycle scripts (no secrets)
-        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
       - name: Next.js build (no credentials)
         run: npm run build
