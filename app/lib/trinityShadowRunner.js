@@ -76,7 +76,7 @@ async function settle(db, snapshots) {
   if (error) throw error;
   return inserts.length;
 }
-async function captureRace(db, event, timing, existing, diagnostics = {}) {
+export async function captureRace(db, event, timing, existing, diagnostics = {}) {
   const raceKey = `${event.race_date}:${event.course_code}:${event.race_no}:${timing}`;
   const savedVersions = existing.get(raceKey);
   if (savedVersions?.size === versions.length) return 'exists';
