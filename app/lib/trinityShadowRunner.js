@@ -120,9 +120,9 @@ async function captureRace(db, event, timing, existing, diagnostics = {}) {
   existing.set(raceKey, new Set(versions));
   return 'saved';
 }
-export async function runTrinityShadow() {
+export async function runTrinityShadow({ db: injectedDb } = {}) {
   try {
-    const db = client();
+    const db = injectedDb ?? client();
     const today = jstDate();
     const tomorrow = jstDate(new Date(Date.now() + 86_400_000));
     const yesterday = jstDate(new Date(Date.now() - 86_400_000));
