@@ -5,7 +5,7 @@ import styles from './shimonosekiSeo.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'ボートレース下関の特徴・水面・風・コース傾向｜BoatStrikers',
+  title: 'ボートレース下関の特徴・水面・風・コース傾向',
   description: 'ボートレース下関の特徴を初心者向けに解説。海水面、風や潮位の見方、イン逃げ・コース別傾向、展示で確認したいポイントをBoatStrikersのデータブックとあわせて紹介します。',
   alternates: { canonical: '/library/stadium/shimonoseki' },
   openGraph: {
