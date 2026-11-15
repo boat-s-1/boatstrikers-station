@@ -1,0 +1,22 @@
+name: BATCH1 isolated offline review
+on:
+  pull_request:
+    types: [opened]
+permissions:
+  contents: read
+jobs:
+  offline:
+    if: github.head_ref == 'codex/batch1-reconstructed-20261115' || github.head_ref == 'codex/boatstrikers-completion-batch1-20261115'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Require OS isolation; never fall back or install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          node_bin=$(command -v node)
+          "$node_bin" -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)'
+          sudo env -i PATH=/usr/bin:/bin BATCH1_NETWORK_NAMESPACE=required unshare --net -- "$node_bin" scripts/batch1/offline-ci.mjs

@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-15",
+  "main": "bfe285759b8f819669e920875495c642039b21a0",
+  "previousLostHeads": [
+    "c091c2e135c950c610ae6e2e7d13c4a196b5abb8",
+    "c73e02dd140517b0ca3424904b75b4385b234a83"
+  ],
+  "reports": [
+    "libfile_e49ca95cb1f481918cd763367bca5591",
+    "libfile_0e1287f80214819188bff614723fc2aa",
+    "libfile_c79d24b213e88191bdc22d527ef7c108",
+    "libfile_ed3493b746f081919c5e872224828699"
+  ],
+  "openPrs": [
+    {
+      "number": 296,
+      "branch": "verification/pr295-ai-safety-guards",
+      "sha": "e083a8654ef5792ac004722b9cc57f31ba794575",
+      "title": "検証専用：実AI検証に一度限りの承認と700円予算停止を追加"
+    },
+    {
+      "number": 295,
+      "branch": "claude/boatstrikers-blog-audit-krge6t",
+      "sha": "94677eedebfffb7cfef3f857e3d2a87a0f42a61d",
+      "title": "BLOG PHASE 1〜2：データ品質ゲート・研究テーマ・7段の品質検証・全公開経路のゲート強制・自動公開（初期OFF）"
+    },
+    {
+      "number": 294,
+      "branch": "feature/gamagori-chart-collector",
+      "sha": "02590945a3c174feaaaa8372dffdb4d3c1706bec",
+      "title": "feat: 蒲郡チャート収集・PHASE13 観測と原子的保存の統合（HOLD）"
+    },
+    {
+      "number": 293,
+      "branch": "fix/discord-membership-sync-guardrails",
+      "sha": "1e0fe84300d6b9d46e99f55e446cf3257797f5f7",
+      "title": "fix(discord): bound membership sync and verify database updates"
+    },
+    {
+      "number": 292,
+      "branch": "fix/discord-race-threads-guardrails",
+      "sha": "9b0fcfa60cf133e19a2b6548da16398983a9d55e",
+      "title": "fix(discord): add race-thread execution safeguards before reactivation"
+    },
+    {
+      "number": 291,
+      "branch": "fix/discord-race-threads-safety",
+      "sha": "5562eb19c67e5cad835b630e5605b9bb59b38945",
+      "title": "fix(discord): bound race-thread cron workload before safe reactivation"
+    },
+    {
+      "number": 278,
+      "branch": "claude/admin-dls-view-only",
+      "sha": "24825994ebdcb3a621aff592462b043a5b43e24d",
+      "title": "DATA LAB 管理画面：表示を読み取り専用にし、生成をボタン操作と排他に限定"
+    },
+    {
+      "number": 277,
+      "branch": "claude/gitignore-next-build",
+      "sha": "9e54e3c8b69c41e791432a62d5e916ee6cc7a0de",
+      "title": ".gitignore を追加し、.next/ と node_modules/ を除外"
+    },
+    {
+      "number": 274,
+      "branch": "feature/seo-title-deduplication",
+      "sha": "970ef8846d5e33613151645aca4f563d7dd5679b",
+      "title": "fix(seo): prevent duplicate BoatStrikers page titles"
+    },
+    {
+      "number": 264,
+      "branch": "feature/ai-partners-diagnosis",
+      "sha": "95318aa50ac0525210fbd84691fd86ace518de79",
+      "title": "相棒AIの診断とキャラ予想を紹介し、AI公開買い目成績を整理する"
+    },
+    {
+      "number": 258,
+      "branch": "feature/boatstrikers-guide",
+      "sha": "04a6125c2405d52ec80e7e0a7fce7eab5573b778",
+      "title": "Add conversational BoatStrikers how-to-use page"
+    },
+    {
+      "number": 255,
+      "branch": "feature/daily-12r-newspaper",
+      "sha": "b758e07d638934e308510833f74b5e0c33b31a5b",
+      "title": "Add DAILY 12R NEWSPAPER prompt builder"
+    },
+    {
+      "number": 254,
+      "branch": "feature/today-daily-home-v2",
+      "sha": "8f6359e73487684dff80fea575beb2533a8ca880",
+      "title": "TODAYをデイリーホーム化"
+    },
+    {
+      "number": 249,
+      "branch": "feature/x-post-center",
+      "sha": "bc335c0c541bf6bcbd74ba57ccd499c739cde4a0",
+      "title": "feat: add BoatStrikers X post center phase 1"
+    },
+    {
+      "number": 113,
+      "branch": "feat/grade-builder-layout",
+      "sha": "e754b3665677d5ba930950ac420e832ac5216cef",
+      "title": "DATA LABグレード戦画像ビルダーの配置を整理"
+    },
+    {
+      "number": 95,
+      "branch": "feat/member-dashboard-usage",
+      "sha": "94eb6423ce6385f168c0ed9799758dbe3703cffc",
+      "title": "会員ページに本日の利用状況を表示"
+    },
+    {
+      "number": 86,
+      "branch": "audit/vercel-usage-20260914",
+      "sha": "35aa6ffbb545dde5def6cc0da87ba54b20f09464",
+      "title": "Audit Vercel usage and reduce redundant polling, rendering and maintenance runs"
+    },
+    {
+      "number": 85,
+      "branch": "fix/member-session-token-sync-20260914",
+      "sha": "be9104d95a622ec6687773101816f3d1d758018b",
+      "title": "Fix remaining member session POST duplication and preserve token refresh"
+    },
+    {
+      "number": 3,
+      "branch": "feat/shorts-local-companion",
+      "sha": "a1ba53879d31f20acc532ad0d2cfa4659f4deae6",
+      "title": "管理画面からAivisSpeechショート動画を生成"
+    },
+    {
+      "number": 1,
+      "branch": "feature/ai-v2-phase1",
+      "sha": "c70f7fbbb0d6638b6d6711ab06281d3875e6d13b",
+      "title": "AI v2 shadow development"
+    }
+  ]
+}

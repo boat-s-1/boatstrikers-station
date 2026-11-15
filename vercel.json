@@ -81,5 +81,11 @@
       "path": "/api/cron/hatsune-kiina-ai-analysis",
       "schedule": "45 21 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "codex/boatstrikers-completion-batch1-20261115": false,
+      "codex/batch1-reconstructed-20261115": false
+    }
+  }
 }

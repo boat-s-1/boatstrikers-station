@@ -1,0 +1,16 @@
+# S01 適用・復旧条件（未適用）
+
+対象はbsc_resultsのACLと3件の無条件write policyだけ。行・schema・関数・sequenceを変更しない。
+管理API POST/PATCH/DELETEはgetAdminScheduleSupabaseのservice_roleを利用。同期SECURITY DEFINERはpostgres所有、service_role限定を事前に再確認する。
+
+本番バックアップと復元可能性が未確認のためHOLD。SQLは自動migration対象外。
+readonly-check.sqlでACL/列ACL/全policy/関数定義hashを採取し、正確なmanifestをレビューする。
+policy manifestはpolicyname順のJSON配列。権限不足・列ACL・継承権限・想定外policy・関数driftは停止する。
+applyはpsql変数なしで実行できない。backup=yesだけでバックアップが証明されるわけではなく、実際の証跡照合を必須とする。
+
+通常復旧：正当なwriterが止まった場合はservice_role利用を確認し、一般roleの無条件writeを戻さない。
+transaction中のエラーはROLLBACK。本番適用後の緊急復旧は別承認し、保存済みcatalogのGRANT/CREATE POLICYを正確に復元する。
+未確認のpolicy名・role・grant optionを推測する固定rollback SQLは作らない。適用前にcatalogから作ったrollback SQLをレビュー・保管するまでHOLD。
+既存値を再grantする復旧は脆弱性を再開するため通常手順にしない。
+
+本再構築ではPostgreSQL実行環境がないためSQLの構造・停止条件を静的検証するだけで、実SQL/API権限試験の合格とはしない。

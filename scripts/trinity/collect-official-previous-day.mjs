@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Run from a network where the public official race list is available.
 // Never backdate a capture: only the server's receipt time is recorded.
+import { collectorDiagnostic } from './collector-diagnostics.mjs';
 import { setTimeout as delay } from 'node:timers/promises';
 import { officialCourses, parseOfficialRacelist } from '../../app/lib/trinityOfficialRacelist.js';
 
@@ -38,7 +39,7 @@ if (!/^https:\/\/[a-z0-9.-]+(?::443)?$/.test(target) ||
 async function getHtml(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(20000), redirect: 'error' });
   if (!response.ok || !/text\/html/i.test(response.headers.get('content-type') || '')) {
-    throw new Error(`Official HTML unavailable: HTTP ${response.status}`);
+    throw Object.assign(new Error(`Official HTML unavailable: HTTP ${response.status}`), { status: response.status });
   }
   const content = await response.text();
   if (content.length > 500000) throw new Error('Official HTML exceeds limit');
@@ -50,6 +51,9 @@ const index = await getHtml(`${root}/owpc/pc/race/index?hd=${compact}`).catch(as
   if (error.name !== 'TimeoutError') throw error;
   await delay(3000);
   return getHtml(`${root}/owpc/pc/race/index?hd=${compact}`);
+}).catch(error => {
+  console.error(JSON.stringify(collectorDiagnostic('official_index', error)));
+  throw error;
 });
 const allCourses = officialCourses(index, compact);
 const courses = allCourses.filter(course => course >= courseMin && course <= courseMax);
@@ -63,20 +67,27 @@ for (const course of courses) {
   for (let no = 1; no <= 12 && report.examined < maxRaces; no++) {
     const url = `${root}/owpc/pc/race/racelist?hd=${compact}&jcd=${String(course).padStart(2, '0')}&rno=${no}`;
     report.examined++;
+    let stage = 'official_race';
+    let intakeStatus;
     try {
       const html = await getHtml(url);
       if (html.length > 250000) throw new Error('Race page exceeds intake size limit');
       // Validate before submission. The server parses and validates independently.
+      stage = 'parse';
       parseOfficialRacelist(html, { raceDate, courseCode: course, raceNo: no });
       report.valid++;
       if (!dryRun) {
+        stage = 'intake_fetch';
         const response = await fetch(`${target}/api/cron/trinity-official-previous-day`, {
           method: 'POST', signal: AbortSignal.timeout(15000),
           headers: { authorization: `Bearer ${process.env.TRINITY_CRON_SECRET}`,
             'content-type': 'application/json' },
           body: JSON.stringify({ race_date: raceDate, course_code: course, race_no: no, html }),
         });
+        intakeStatus = response.status;
+        stage = 'intake_decode';
         const outcome = await response.json();
+        stage = 'intake_status';
         if (response.status === 409 && outcome.error === 'immutable_source_differs') {
           report.source_changed.push({ course_code: course, race_no: no });
         } else {
@@ -87,7 +98,8 @@ for (const course of courses) {
         }
       }
     } catch (error) {
-      const item = { course_code: course, race_no: no, error: error.message };
+      const item = { course_code: course, race_no: no, error: error.message,
+        diagnostic: collectorDiagnostic(stage, error, intakeStatus ?? error.status) };
       if (error.code === 'OFFICIAL_RACELIST_INCOMPLETE') {
         report.incomplete.push({ ...item, boat_no: error.boat_no,
           missing_fields: error.missing_fields });

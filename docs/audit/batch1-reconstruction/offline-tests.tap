@@ -1,0 +1,826 @@
+TAP version 13
+# Subtest: only the previous evening in JST can dispatch
+ok 1 - only the previous evening in JST can dispatch
+  ---
+  duration_ms: 27.536512
+  type: 'test'
+  ...
+# Subtest: a late call makes no network request
+ok 2 - a late call makes no network request
+  ---
+  duration_ms: 0.467573
+  type: 'test'
+  ...
+# Subtest: dispatches the fixed workflow on main as a live shadow run
+ok 3 - dispatches the fixed workflow on main as a live shadow run
+  ---
+  duration_ms: 1.589207
+  type: 'test'
+  ...
+# Subtest: rejects absent credentials and failed dispatch
+ok 4 - rejects absent credentials and failed dispatch
+  ---
+  duration_ms: 1.047313
+  type: 'test'
+  ...
+# Subtest: extracts six official entry vectors and closing time without exhibition data
+ok 5 - extracts six official entry vectors and closing time without exhibition data
+  ---
+  duration_ms: 9.96469
+  type: 'test'
+  ...
+# Subtest: rejects missing, wrong date, and incorrectly keyed entry lists
+ok 6 - rejects missing, wrong date, and incorrectly keyed entry lists
+  ---
+  duration_ms: 1.237005
+  type: 'test'
+  ...
+# Subtest: reports the exact missing average ST cell without accepting an incomplete boat
+ok 7 - reports the exact missing average ST cell without accepting an incomplete boat
+  ---
+  duration_ms: 0.439542
+  type: 'test'
+  ...
+# (node:12) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/app/lib/trinityOfficialRacelist.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: counts launch period separately and requires both models with matching contemporaneous input
+ok 8 - counts launch period separately and requires both models with matching contemporaneous input
+  ---
+  duration_ms: 2.099354
+  type: 'test'
+  ...
+# (node:13) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/app/lib/trinityShadowCoverage.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: unauthenticated action redirects before DB access
+ok 9 - unauthenticated action redirects before DB access
+  ---
+  duration_ms: 1.108635
+  type: 'test'
+  ...
+# Subtest: unconfirmed action never generates
+ok 10 - unconfirmed action never generates
+  ---
+  duration_ms: 1.521457
+  type: 'test'
+  ...
+# Subtest: impossible date rejected before DB access
+ok 11 - impossible date rejected before DB access
+  ---
+  duration_ms: 0.281708
+  type: 'test'
+  ...
+# Subtest: incomplete digest prevents generation
+ok 12 - incomplete digest prevents generation
+  ---
+  duration_ms: 0.46499
+  type: 'test'
+  ...
+# Subtest: confirmed action uses nonpublishing manual generation
+ok 13 - confirmed action uses nonpublishing manual generation
+  ---
+  duration_ms: 0.327737
+  type: 'test'
+  ...
+# Subtest: action error does not reflect raw generator secrets
+ok 14 - action error does not reflect raw generator secrets
+  ---
+  duration_ms: 0.278223
+  type: 'test'
+  ...
+# Subtest: render loader performs SELECTs only
+ok 15 - render loader performs SELECTs only
+  ---
+  duration_ms: 0.731585
+  type: 'test'
+  ...
+# (node:19) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/dataLabSocialClaim.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: new date: 20 concurrent manual/Cron requests acquire exactly once
+ok 16 - new date: 20 concurrent manual/Cron requests acquire exactly once
+  ---
+  duration_ms: 2.772823
+  type: 'test'
+  ...
+# Subtest: existing draft: concurrent conditional update has one owner
+ok 17 - existing draft: concurrent conditional update has one owner
+  ---
+  duration_ms: 1.975009
+  type: 'test'
+  ...
+# Subtest: Cron preserves existing draft
+ok 18 - Cron preserves existing draft
+  ---
+  duration_ms: 0.265144
+  type: 'test'
+  ...
+# Subtest: preserve posted
+ok 19 - preserve posted
+  ---
+  duration_ms: 0.233286
+  type: 'test'
+  ...
+# Subtest: preserve approved
+ok 20 - preserve approved
+  ---
+  duration_ms: 0.166477
+  type: 'test'
+  ...
+# Subtest: preserve unknown
+ok 21 - preserve unknown
+  ---
+  duration_ms: 0.167288
+  type: 'test'
+  ...
+# Subtest: cooldown and stale lease boundaries reject and recover
+ok 22 - cooldown and stale lease boundaries reject and recover
+  ---
+  duration_ms: 0.475336
+  type: 'test'
+  ...
+# Subtest: invalid timestamp fails closed
+ok 23 - invalid timestamp fails closed
+  ---
+  duration_ms: 0.284653
+  type: 'test'
+  ...
+# Subtest: save and cleanup use exact DB microsecond timestamp
+ok 24 - save and cleanup use exact DB microsecond timestamp
+  ---
+  duration_ms: 0.627801
+  type: 'test'
+  ...
+# Subtest: old owner cannot overwrite or delete replacement lease
+ok 25 - old owner cannot overwrite or delete replacement lease
+  ---
+  duration_ms: 1.486956
+  type: 'test'
+  ...
+# Subtest: failed new generation removes placeholder
+ok 26 - failed new generation removes placeholder
+  ---
+  duration_ms: 0.406102
+  type: 'test'
+  ...
+# Subtest: failed regeneration retains draft content
+ok 27 - failed regeneration retains draft content
+  ---
+  duration_ms: 1.167512
+  type: 'test'
+  ...
+# Subtest: conditional claim loses if intervening writer posts draft
+ok 28 - conditional claim loses if intervening writer posts draft
+  ---
+  duration_ms: 0.678446
+  type: 'test'
+  ...
+# Subtest: DB read error aborts without generating or writing
+ok 29 - DB read error aborts without generating or writing
+  ---
+  duration_ms: 0.546651
+  type: 'test'
+  ...
+# Subtest: cleanup failure is reported instead of silently claiming recovery
+ok 30 - cleanup failure is reported instead of silently claiming recovery
+  ---
+  duration_ms: 1.335451
+  type: 'test'
+  ...
+# Subtest: failed regeneration preserves even an empty pre-existing draft
+ok 31 - failed regeneration preserves even an empty pre-existing draft
+  ---
+  duration_ms: 0.3916
+  type: 'test'
+  ...
+# Subtest: reject date 2026-02-30
+ok 32 - reject date 2026-02-30
+  ---
+  duration_ms: 0.193286
+  type: 'test'
+  ...
+# Subtest: reject date 2026-13-01
+ok 33 - reject date 2026-13-01
+  ---
+  duration_ms: 0.191164
+  type: 'test'
+  ...
+# Subtest: reject date not-a-date
+ok 34 - reject date not-a-date
+  ---
+  duration_ms: 0.279545
+  type: 'test'
+  ...
+# Subtest: reject date 2026-1-01
+ok 35 - reject date 2026-1-01
+  ---
+  duration_ms: 0.162802
+  type: 'test'
+  ...
+# (node:20) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/dataLabSocialClaim.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: manual without digest never generates/publishes NEWS
+ok 36 - manual without digest never generates/publishes NEWS
+  ---
+  duration_ms: 2.371046
+  type: 'test'
+  ...
+# Subtest: manual complete digest builds and CAS-saves once
+ok 37 - manual complete digest builds and CAS-saves once
+  ---
+  duration_ms: 2.133204
+  type: 'test'
+  ...
+# Subtest: Cron and manual share one claim while running concurrently
+ok 38 - Cron and manual share one claim while running concurrently
+  ---
+  duration_ms: 0.714289
+  type: 'test'
+  ...
+# Subtest: Cron leaves existing draft intact
+ok 39 - Cron leaves existing draft intact
+  ---
+  duration_ms: 0.201548
+  type: 'test'
+  ...
+# Subtest: generator cannot save after lease takeover
+ok 40 - generator cannot save after lease takeover
+  ---
+  duration_ms: 0.437599
+  type: 'test'
+  ...
+# (node:21) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/dataLabSocialGenerator.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: 20 original Cron entries unchanged; branch deployment guard has no true wildcard
+ok 41 - 20 original Cron entries unchanged; branch deployment guard has no true wildcard
+  ---
+  duration_ms: 1.927789
+  type: 'test'
+  ...
+# Subtest: normal CI unchanged: discord-pr289-checks.yml
+ok 42 - normal CI unchanged: discord-pr289-checks.yml
+  ---
+  duration_ms: 0.313525
+  type: 'test'
+  ...
+# Subtest: normal CI unchanged: today-birthday-build-check.yml
+ok 43 - normal CI unchanged: today-birthday-build-check.yml
+  ---
+  duration_ms: 0.153778
+  type: 'test'
+  ...
+# Subtest: official GET disabled only for exact BATCH1 branches; schedules and collect unchanged
+ok 44 - official GET disabled only for exact BATCH1 branches; schedules and collect unchanged
+  ---
+  duration_ms: 0.247617
+  type: 'test'
+  ...
+# Subtest: auth/scheduler route unchanged: app/admin/sync/_lib/adminAuth.js
+ok 45 - auth/scheduler route unchanged: app/admin/sync/_lib/adminAuth.js
+  ---
+  duration_ms: 0.187919
+  type: 'test'
+  ...
+# Subtest: auth/scheduler route unchanged: app/api/cron/data-lab-social/route.js
+ok 46 - auth/scheduler route unchanged: app/api/cron/data-lab-social/route.js
+  ---
+  duration_ms: 0.120649
+  type: 'test'
+  ...
+# Subtest: dedicated CI: pinned runner, 10-minute cap, opened only, no install/credentials
+ok 47 - dedicated CI: pinned runner, 10-minute cap, opened only, no install/credentials
+  ---
+  duration_ms: 0.265073
+  type: 'test'
+  ...
+# Subtest: namespace checker fails before running tests when isolation absent
+ok 48 - namespace checker fails before running tests when isolation absent
+  ---
+  duration_ms: 39.115336
+  type: 'test'
+  ...
+# Subtest: network shim blocks fetch and native sockets before connection
+ok 49 - network shim blocks fetch and native sockets before connection
+  ---
+  duration_ms: 60.293439
+  type: 'test'
+  ...
+# Subtest: static review has exactly three files, no scripts/API/URLs
+ok 50 - static review has exactly three files, no scripts/API/URLs
+  ---
+  duration_ms: 49.276208
+  type: 'test'
+  ...
+# Subtest: static review refuses SUPABASE_SERVICE_ROLE_KEY before output
+ok 51 - static review refuses SUPABASE_SERVICE_ROLE_KEY before output
+  ---
+  duration_ms: 72.220679
+  type: 'test'
+  ...
+# Subtest: static review refuses NEXT_PUBLIC_SUPABASE_URL before output
+ok 52 - static review refuses NEXT_PUBLIC_SUPABASE_URL before output
+  ---
+  duration_ms: 34.515634
+  type: 'test'
+  ...
+# Subtest: static review refuses GEMINI_API_KEY before output
+ok 53 - static review refuses GEMINI_API_KEY before output
+  ---
+  duration_ms: 28.641231
+  type: 'test'
+  ...
+# Subtest: static review refuses VERCEL_ENV before output
+ok 54 - static review refuses VERCEL_ENV before output
+  ---
+  duration_ms: 28.363728
+  type: 'test'
+  ...
+# Subtest: static review refuses BATCH1_SOURCE_REF before output
+ok 55 - static review refuses BATCH1_SOURCE_REF before output
+  ---
+  duration_ms: 27.706835
+  type: 'test'
+  ...
+# Subtest: static review refuses BATCH1_REVIEW_ONLY before output
+ok 56 - static review refuses BATCH1_REVIEW_ONLY before output
+  ---
+  duration_ms: 26.67548
+  type: 'test'
+  ...
+# Subtest: static review refuses VERCEL_GIT_COMMIT_REF before output
+ok 57 - static review refuses VERCEL_GIT_COMMIT_REF before output
+  ---
+  duration_ms: 29.325786
+  type: 'test'
+  ...
+# Subtest: static review refuses VERCEL_OIDC_TOKEN before output
+ok 58 - static review refuses VERCEL_OIDC_TOKEN before output
+  ---
+  duration_ms: 26.597274
+  type: 'test'
+  ...
+# Subtest: static Vercel config has no functions/crons/rewrites and denies connections
+ok 59 - static Vercel config has no functions/crons/rewrites and denies connections
+  ---
+  duration_ms: 0.31026
+  type: 'test'
+  ...
+# Subtest: S01 is a gated transaction proposal outside migrations
+ok 60 - S01 is a gated transaction proposal outside migrations
+  ---
+  duration_ms: 0.315488
+  type: 'test'
+  ...
+# Subtest: RSS 503 is unavailable, not a build exception
+ok 61 - RSS 503 is unavailable, not a build exception
+  ---
+  duration_ms: 1.98599
+  type: 'test'
+  ...
+# Subtest: RSS successful empty feed remains distinguishable
+ok 62 - RSS successful empty feed remains distinguishable
+  ---
+  duration_ms: 0.153208
+  type: 'test'
+  ...
+# Subtest: malformed RSS fails gracefully
+ok 63 - malformed RSS fails gracefully
+  ---
+  duration_ms: 0.178635
+  type: 'test'
+  ...
+# Subtest: RSS filters, limits and preserves image/fallback
+ok 64 - RSS filters, limits and preserves image/fallback
+  ---
+  duration_ms: 0.304341
+  type: 'test'
+  ...
+# Subtest: diagnostic stage official_index excludes raw secrets
+ok 65 - diagnostic stage official_index excludes raw secrets
+  ---
+  duration_ms: 0.288087
+  type: 'test'
+  ...
+# Subtest: diagnostic stage official_race excludes raw secrets
+ok 66 - diagnostic stage official_race excludes raw secrets
+  ---
+  duration_ms: 0.111255
+  type: 'test'
+  ...
+# Subtest: diagnostic stage parse excludes raw secrets
+ok 67 - diagnostic stage parse excludes raw secrets
+  ---
+  duration_ms: 0.116844
+  type: 'test'
+  ...
+# Subtest: diagnostic stage intake_fetch excludes raw secrets
+ok 68 - diagnostic stage intake_fetch excludes raw secrets
+  ---
+  duration_ms: 0.084035
+  type: 'test'
+  ...
+# Subtest: diagnostic stage intake_decode excludes raw secrets
+ok 69 - diagnostic stage intake_decode excludes raw secrets
+  ---
+  duration_ms: 0.073429
+  type: 'test'
+  ...
+# Subtest: diagnostic stage intake_status excludes raw secrets
+ok 70 - diagnostic stage intake_status excludes raw secrets
+  ---
+  duration_ms: 0.123092
+  type: 'test'
+  ...
+# Subtest: timeout and incomplete classification
+ok 71 - timeout and incomplete classification
+  ---
+  duration_ms: 0.123483
+  type: 'test'
+  ...
+# Subtest: collector CLI diagnostic with mocked fetch: official_index
+ok 72 - collector CLI diagnostic with mocked fetch: official_index
+  ---
+  duration_ms: 91.423075
+  type: 'test'
+  ...
+# Subtest: collector CLI diagnostic with mocked fetch: official_race
+ok 73 - collector CLI diagnostic with mocked fetch: official_race
+  ---
+  duration_ms: 470.932989
+  type: 'test'
+  ...
+# Subtest: collector CLI diagnostic with mocked fetch: parse
+ok 74 - collector CLI diagnostic with mocked fetch: parse
+  ---
+  duration_ms: 425.472758
+  type: 'test'
+  ...
+# Subtest: 決まり手が未確定なら、逃げ関連は「該当なし」ではなく「集計確認中」
+ok 75 - 決まり手が未確定なら、逃げ関連は「該当なし」ではなく「集計確認中」
+  ---
+  duration_ms: 2.014067
+  type: 'test'
+  ...
+# Subtest: 「集計確認中」のカードも、従来の「該当なし」と同じく画像から省く指示になっている
+ok 76 - 「集計確認中」のカードも、従来の「該当なし」と同じく画像から省く指示になっている
+  ---
+  duration_ms: 0.170923
+  type: 'test'
+  ...
+# Subtest: 確定済みの日は数値を出し、本当に無い項目は従来どおり「該当なし」
+ok 77 - 確定済みの日は数値を出し、本当に無い項目は従来どおり「該当なし」
+  ---
+  duration_ms: 0.486011
+  type: 'test'
+  ...
+# Subtest: 新規日付：従来どおり公開状態で作成する
+ok 78 - 新規日付：従来どおり公開状態で作成する
+  ---
+  duration_ms: 1.829423
+  type: 'test'
+  ...
+# Subtest: 既存の公開記事：内容は更新するが published_at と公開状態は維持する
+ok 79 - 既存の公開記事：内容は更新するが published_at と公開状態は維持する
+  ---
+  duration_ms: 0.434805
+  type: 'test'
+  ...
+# Subtest: manual 記事：再生成で上書きせず、article_body_source も変えない
+ok 80 - manual 記事：再生成で上書きせず、article_body_source も変えない
+  ---
+  duration_ms: 1.040022
+  type: 'test'
+  ...
+# Subtest: 非公開記事：再生成で再公開せず、内容も変えない（記事1967）
+ok 81 - 非公開記事：再生成で再公開せず、内容も変えない（記事1967）
+  ---
+  duration_ms: 0.268969
+  type: 'test'
+  ...
+# Subtest: 非公開かつ manual の記事も書き換えない
+ok 82 - 非公開かつ manual の記事も書き換えない
+  ---
+  duration_ms: 0.180748
+  type: 'test'
+  ...
+# Subtest: B：AI 本文の日次まとめ（公開中）は再生成で上書きせず、公開状態・公開日時も変えない
+ok 83 - B：AI 本文の日次まとめ（公開中）は再生成で上書きせず、公開状態・公開日時も変えない
+  ---
+  duration_ms: 0.274798
+  type: 'test'
+  ...
+# Subtest: B：未知の article_body_source の記事も保護側に倒す
+ok 84 - B：未知の article_body_source の記事も保護側に倒す
+  ---
+  duration_ms: 0.287586
+  type: 'test'
+  ...
+# Subtest: B：公開中の template 記事は従来どおり更新でき、article_body_source が NULL の記事は保護側に倒す
+ok 85 - B：公開中の template 記事は従来どおり更新でき、article_body_source が NULL の記事は保護側に倒す
+  ---
+  duration_ms: 0.341827
+  type: 'test'
+  ...
+# Subtest: B 競合：読み取り後に AI 本文へ変わったら、更新の条件で弾いて上書きしない
+ok 86 - B 競合：読み取り後に AI 本文へ変わったら、更新の条件で弾いて上書きしない
+  ---
+  duration_ms: 0.358381
+  type: 'test'
+  ...
+# Subtest: 競合：読み取り後に manual 化されたら、更新の条件で弾いて上書きしない
+ok 87 - 競合：読み取り後に manual 化されたら、更新の条件で弾いて上書きしない
+  ---
+  duration_ms: 0.437539
+  type: 'test'
+  ...
+# Subtest: 競合：読み取り後に非公開化されたら、再公開も上書きもしない
+ok 88 - 競合：読み取り後に非公開化されたら、再公開も上書きもしない
+  ---
+  duration_ms: 0.336669
+  type: 'test'
+  ...
+# Subtest: 競合：同じ日付の記事が同時に作られたら、一意制約エラーから既存記事として扱い直す
+ok 89 - 競合：同じ日付の記事が同時に作られたら、一意制約エラーから既存記事として扱い直す
+  ---
+  duration_ms: 0.286565
+  type: 'test'
+  ...
+# Subtest: 競合：同時に作られた記事が非公開なら、そのまま残す
+ok 90 - 競合：同時に作られた記事が非公開なら、そのまま残す
+  ---
+  duration_ms: 0.345522
+  type: 'test'
+  ...
+# Subtest: 保護判定と AI リライト対象の判定
+ok 91 - 保護判定と AI リライト対象の判定
+  ---
+  duration_ms: 0.251783
+  type: 'test'
+  ...
+# Subtest: 日付指定の再生成：manual の記事1967は上書き・再公開されず、digest は更新される
+ok 92 - 日付指定の再生成：manual の記事1967は上書き・再公開されず、digest は更新される
+  ---
+  duration_ms: 2.807273
+  type: 'test'
+  ...
+# Subtest: 日付指定の再生成：既存の公開記事は本文だけ更新し、公開日時と公開状態を維持する
+ok 93 - 日付指定の再生成：既存の公開記事は本文だけ更新し、公開日時と公開状態を維持する
+  ---
+  duration_ms: 0.656454
+  type: 'test'
+  ...
+# Subtest: 新規日付の生成：従来どおり公開記事を作る
+ok 94 - 新規日付の生成：従来どおり公開記事を作る
+  ---
+  duration_ms: 0.512911
+  type: 'test'
+  ...
+# Subtest: B 日付指定の再生成：AI 本文の公開記事は上書きされず、digest は既存記事を参照する
+ok 95 - B 日付指定の再生成：AI 本文の公開記事は上書きされず、digest は既存記事を参照する
+  ---
+  duration_ms: 0.555454
+  type: 'test'
+  ...
+# Subtest: A：記事IDが取れたときは従来どおり upsert し、news_id を設定する
+ok 96 - A：記事IDが取れたときは従来どおり upsert し、news_id を設定する
+  ---
+  duration_ms: 0.230232
+  type: 'test'
+  ...
+# Subtest: A 競合：記事IDが取れなくても既存 digest の news_id を null で上書きしない
+ok 97 - A 競合：記事IDが取れなくても既存 digest の news_id を null で上書きしない
+  ---
+  duration_ms: 0.227548
+  type: 'test'
+  ...
+# Subtest: A 新規：記事IDが取れず digest もまだ無い日は、news_id なしで新規作成する
+ok 98 - A 新規：記事IDが取れず digest もまだ無い日は、news_id なしで新規作成する
+  ---
+  duration_ms: 0.167989
+  type: 'test'
+  ...
+# Subtest: A 競合：digest が同時に作られたら、一意制約エラーから UPDATE し直し news_id を残す
+ok 99 - A 競合：digest が同時に作られたら、一意制約エラーから UPDATE し直し news_id を残す
+  ---
+  duration_ms: 0.293095
+  type: 'test'
+  ...
+# Subtest: A 日付指定の再生成：記事の更新が競合し続けても、digest の既存参照（news_id）を維持する
+ok 100 - A 日付指定の再生成：記事の更新が競合し続けても、digest の既存参照（news_id）を維持する
+  ---
+  duration_ms: 0.776452
+  type: 'test'
+  ...
+# Subtest: A 日付指定の再生成：digest の既存参照は、記事を保護した場合も同じ記事IDのまま
+ok 101 - A 日付指定の再生成：digest の既存参照は、記事を保護した場合も同じ記事IDのまま
+  ---
+  duration_ms: 1.344024
+  type: 'test'
+  ...
+# Subtest: AI リライト：日次結果まとめは対象外、通常 NEWS は従来どおり AI 生成される
+ok 102 - AI リライト：日次結果まとめは対象外、通常 NEWS は従来どおり AI 生成される
+  ---
+  duration_ms: 1.675455
+  type: 'test'
+  ...
+# Subtest: AI リライト：日次結果まとめの単独指定も force なしでは書き換えない（管理画面の明示的な再生成は可能）
+ok 103 - AI リライト：日次結果まとめの単独指定も force なしでは書き換えない（管理画面の明示的な再生成は可能）
+  ---
+  duration_ms: 0.324701
+  type: 'test'
+  ...
+# Subtest: AI リライト：生成中に manual 化された通常 NEWS は上書きしない
+ok 104 - AI リライト：生成中に manual 化された通常 NEWS は上書きしない
+  ---
+  duration_ms: 0.250482
+  type: 'test'
+  ...
+# (node:84) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/dailyResultArticleWriter.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: 事故あり：異常コードのあるレース数を数え、ラベルを付ける
+ok 105 - 事故あり：異常コードのあるレース数を数え、ラベルを付ける
+  ---
+  duration_ms: 2.579185
+  type: 'test'
+  ...
+# Subtest: 事故なし：全レース同期済みで異常なしなら 0 件を確定表示する
+ok 106 - 事故なし：全レース同期済みで異常なしなら 0 件を確定表示する
+  ---
+  duration_ms: 3.549915
+  type: 'test'
+  ...
+# Subtest: 未同期：異常コードが空なら「集計確認中」で、0 件とは書かない
+ok 107 - 未同期：異常コードが空なら「集計確認中」で、0 件とは書かない
+  ---
+  duration_ms: 0.445861
+  type: 'test'
+  ...
+# Subtest: 一部同期：1レースでも未同期なら途中の件数は出さない
+ok 108 - 一部同期：1レースでも未同期なら途中の件数は出さない
+  ---
+  duration_ms: 0.45807
+  type: 'test'
+  ...
+# Subtest: 出走表が無いレースは未同期扱い、中止レースは対象外
+ok 109 - 出走表が無いレースは未同期扱い、中止レースは対象外
+  ---
+  duration_ms: 0.257031
+  type: 'test'
+  ...
+# Subtest: 返還あり：出遅れ・欠場のレースも事故レースとして数える
+ok 110 - 返還あり：出遅れ・欠場のレースも事故レースとして数える
+  ---
+  duration_ms: 0.227127
+  type: 'test'
+  ...
+# Subtest: 結果行欠損：決まり手は保留、事故は出走表から数え、他の集計は変えない
+ok 111 - 結果行欠損：決まり手は保留、事故は出走表から数え、他の集計は変えない
+  ---
+  duration_ms: 23.49615
+  type: 'test'
+  ...
+# Subtest: 同期の有無でレース数・万舟・最高配当・艇番別勝利数は変わらない
+ok 112 - 同期の有無でレース数・万舟・最高配当・艇番別勝利数は変わらない
+  ---
+  duration_ms: 0.732126
+  type: 'test'
+  ...
+# Subtest: DATA LAB：実行時点の同期状況で事故レース数を出す。確認できなければ「集計確認中」
+ok 113 - DATA LAB：実行時点の同期状況で事故レース数を出す。確認できなければ「集計確認中」
+  ---
+  duration_ms: 0.736492
+  type: 'test'
+  ...
+# Subtest: 公式記号の読み替え：転・F・落・沈・エ・不・妨・欠・L・失。責任区分は付けない
+ok 114 - 公式記号の読み替え：転・F・落・沈・エ・不・妨・欠・L・失。責任区分は付けない
+  ---
+  duration_ms: 0.473342
+  type: 'test'
+  ...
+# Subtest: 表記は finish_place から作り、result_code の責任区分（S0/S1/K1/L1/S2）は使わない
+ok 115 - 表記は finish_place から作り、result_code の責任区分（S0/S1/K1/L1/S2）は使わない
+  ---
+  duration_ms: 0.343129
+  type: 'test'
+  ...
+# Subtest: 件数の数え方は従来どおり result_code で判定する（記号だけあっても未同期は未同期）
+ok 116 - 件数の数え方は従来どおり result_code で判定する（記号だけあっても未同期は未同期）
+  ---
+  duration_ms: 0.227207
+  type: 'test'
+  ...
+# Subtest: 記事：事故があれば注記を付け、責任区分の語は注記以外に出さない
+ok 117 - 記事：事故があれば注記を付け、責任区分の語は注記以外に出さない
+  ---
+  duration_ms: 0.514342
+  type: 'test'
+  ...
+# Subtest: 中止レースの注記：中止がある日だけ「全○Rのうち…が中止となったため、○Rを集計対象」
+ok 118 - 中止レースの注記：中止がある日だけ「全○Rのうち…が中止となったため、○Rを集計対象」
+  ---
+  duration_ms: 1.023088
+  type: 'test'
+  ...
+# Subtest: 中止レースの書き方：場ごとにまとめ、連続するレースは範囲で書く
+ok 119 - 中止レースの書き方：場ごとにまとめ、連続するレースは範囲で書く
+  ---
+  duration_ms: 0.517207
+  type: 'test'
+  ...
+# (node:91) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/raceIncidents.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: previous_day input drops all exhibition and normalizes legacy scales
+ok 120 - previous_day input drops all exhibition and normalizes legacy scales
+  ---
+  duration_ms: 5.192702
+  type: 'test'
+  ...
+# Subtest: rejects postclose predictions and future odds
+ok 121 - rejects postclose predictions and future odds
+  ---
+  duration_ms: 1.664409
+  type: 'test'
+  ...
+# Subtest: result metrics use settled rows and exclude the biggest payout
+ok 122 - result metrics use settled rows and exclude the biggest payout
+  ---
+  duration_ms: 1.389011
+  type: 'test'
+  ...
+# (node:102) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/app/lib/trinitySnapshotV1.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: six official technique labels are recognised and nothing else
+ok 123 - six official technique labels are recognised and nothing else
+  ---
+  duration_ms: 2.762618
+  type: 'test'
+  ...
+# Subtest: only confirmed finished results feed the technique map; winning_method is the fallback
+ok 124 - only confirmed finished results feed the technique map; winning_method is the fallback
+  ---
+  duration_ms: 0.389918
+  type: 'test'
+  ...
+# Subtest: counts are published only when every race has a confirmed technique
+ok 125 - counts are published only when every race has a confirmed technique
+  ---
+  duration_ms: 0.513602
+  type: 'test'
+  ...
+# Subtest: digest ignores winning_technique_code entirely
+ok 126 - digest ignores winning_technique_code entirely
+  ---
+  duration_ms: 21.861415
+  type: 'test'
+  ...
+# Subtest: digest with a race missing its result row keeps other stats and withholds escape counts
+ok 127 - digest with a race missing its result row keeps other stats and withholds escape counts
+  ---
+  duration_ms: 0.617015
+  type: 'test'
+  ...
+# Subtest: digest still refuses to publish while any race lacks result_available
+ok 128 - digest still refuses to publish while any race lacks result_available
+  ---
+  duration_ms: 0.360555
+  type: 'test'
+  ...
+# Subtest: DATA LAB recounts escapes from confirmed techniques instead of the stored digest value
+ok 129 - DATA LAB recounts escapes from confirmed techniques instead of the stored digest value
+  ---
+  duration_ms: 0.947275
+  type: 'test'
+  ...
+# Subtest: DATA LAB omits escape figures when a technique is missing
+ok 130 - DATA LAB omits escape figures when a technique is missing
+  ---
+  duration_ms: 0.336389
+  type: 'test'
+  ...
+# (node:108) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/7b001e6fad96/rebuilt/lib/winningTechnique.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /workspace/scratch/7b001e6fad96/rebuilt/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+1..130
+# tests 130
+# suites 0
+# pass 130
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1302.878482
