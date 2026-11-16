@@ -91,6 +91,7 @@ END
 $fn$;
 REVOKE ALL ON FUNCTION public.bs_record_race_data_completeness_v3_candidate(date)
   FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.bs_record_race_data_completeness_v3_candidate(date) TO service_role;
 -- Isolated integration must test no duplicate alert rows on replay,
 -- first_detected_at preservation, correct resolution, and notifications.
 -- Note: v2 recorder must not run concurrently on the same date during candidate tests:
