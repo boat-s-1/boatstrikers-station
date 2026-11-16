@@ -33,6 +33,24 @@ BEGIN
  ) THEN
    RAISE EXCEPTION 'V3 source race key disappeared for %, refusing alert resolution',p_date;
  END IF;
+ -- V3 currently anchors events and results, not entry-only keys. If such
+ -- a key exists, refuse any alert mutation until coverage is extended.
+ IF EXISTS (
+   SELECT 1 FROM public.bs_race_entries en
+   WHERE en.race_date=p_date
+     AND NOT EXISTS (
+       SELECT 1 FROM public.bs_race_events ev
+       WHERE ev.race_date=en.race_date AND ev.course_code=en.course_code
+         AND ev.race_no=en.race_no
+     )
+     AND NOT EXISTS (
+       SELECT 1 FROM public.bs_race_results r
+       WHERE r.race_date=en.race_date AND r.course_code=en.course_code
+         AND r.race_no=en.race_no
+     )
+ ) THEN
+   RAISE EXCEPTION 'V3 uncovered entry-only race key for %, refusing alert mutation',p_date;
+ END IF;
  v_status := CASE WHEN coalesce((v_detail->>'is_complete')::boolean,false)
                   THEN 'success' ELSE 'partial' END;
 
