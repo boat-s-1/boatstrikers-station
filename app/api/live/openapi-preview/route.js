@@ -218,6 +218,12 @@ async function syncPreview(date) {
           || Array.isArray(racers) || Object.keys(racers).length !== 6) {
           throw new Error("invalid or incomplete OpenAPI program race");
         }
+        for (const [boatKey, racer] of Object.entries(racers)) {
+          const boatNo = Number(racer?.entry_number ?? boatKey);
+          if (!/^[1-6]$/.test(boatKey) || Number(boatKey) !== boatNo) {
+            throw new Error("OpenAPI program boat identity mismatch");
+          }
+        }
       }
     }
   }
