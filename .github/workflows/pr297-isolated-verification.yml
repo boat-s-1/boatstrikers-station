@@ -182,10 +182,10 @@ jobs:
           await m.releaseDataLabClaim(client,takeover);
           const {data:after,error:readError}=await client.from(m.DATA_LAB_TABLE).select('status,x_post_text').eq('race_date',date2).single();
           if(readError) throw readError;
-          assert.equal(after.status,'draft');
+          assert.equal(after.status,'generating','failed stale takeover remains retryable after lease timeout');
           assert.equal(after.x_post_text,null);
           console.log('S02 PostgREST PASS: concurrent claim, save, stale reclaim, stale save rejected');
-          console.log('KNOWN ISSUE: stale generating cleanup leaves empty draft; automated retry blocked');
+          console.log('S02 FIXED: failed stale takeover preserves generating status for later retry');
           JS
       - name: Compare S02 baseline and candidate against real isolated PostgREST
         shell: bash
