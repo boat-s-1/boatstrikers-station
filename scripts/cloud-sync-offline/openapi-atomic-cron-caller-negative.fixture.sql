@@ -36,7 +36,8 @@ BEGIN
  SELECT doc INTO original FROM pr298_document;
  FOREACH scenario IN ARRAY ARRAY[
   'valid','missing_boat','non_numeric_registration','duplicate_registration',
-  'wrong_date','preview_wrong_boat','result_duplicate_places'
+  'wrong_date','preview_wrong_boat','result_duplicate_places',
+  'preview_racers_array','result_racers_array'
  ] LOOP
   invalid:=original;
   IF scenario='missing_boat' THEN
@@ -53,6 +54,12 @@ BEGIN
   ELSIF scenario='result_duplicate_places' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
     '{"racers":{"1":{"entry_number":1,"place_number":1},"2":{"entry_number":2,"place_number":1}}}'::jsonb);
+  ELSIF scenario='preview_racers_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"racers":[{"entry_number":1}]}'::jsonb);
+  ELSIF scenario='result_racers_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":[{"entry_number":1,"place_number":1}]}'::jsonb);
   END IF;
   UPDATE pr298_document SET doc=invalid;
   UPDATE pr298_atomic_calls SET n=0;
