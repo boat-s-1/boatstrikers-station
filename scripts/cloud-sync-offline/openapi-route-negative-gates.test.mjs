@@ -92,3 +92,10 @@ test("noncanonical racer key is rejected before database client", async () => {
   } });
   assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
 });
+
+test("all-zero racer registration number is rejected before DB client", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].racers[1].number = "0000";
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
