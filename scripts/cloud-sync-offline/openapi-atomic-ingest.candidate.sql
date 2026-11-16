@@ -66,6 +66,43 @@ BEGIN
  ) THEN
    RAISE EXCEPTION 'invalid OpenAPI program keys/boat identities';
  END IF;
+ -- Every dependent payload key must belong to the validated program.
+ -- Reject duplicate race or boat keys, wrong dates and out-of-range boat numbers.
+ IF EXISTS (
+   WITH ev AS (
+     SELECT x.race_date,x.course_code,x.race_no
+     FROM jsonb_to_recordset(p_events) AS x(race_date date,course_code int,race_no int)
+   ), en AS (
+     SELECT x.race_date,x.course_code,x.race_no,x.boat_no
+     FROM jsonb_to_recordset(p_entries) AS x(race_date date,course_code int,race_no int,boat_no int)
+   ), dependent AS (
+     SELECT 'preview_event' AS kind,x.race_date,x.course_code,x.race_no,NULL::int AS boat_no
+     FROM jsonb_to_recordset(p_preview_events) AS x(race_date date,course_code int,race_no int)
+     UNION ALL
+     SELECT 'result',x.race_date,x.course_code,x.race_no,NULL::int
+     FROM jsonb_to_recordset(p_results) AS x(race_date date,course_code int,race_no int)
+     UNION ALL
+     SELECT 'preview_entry',x.race_date,x.course_code,x.race_no,x.boat_no
+     FROM jsonb_to_recordset(p_preview_entries) AS x(race_date date,course_code int,race_no int,boat_no int)
+     UNION ALL
+     SELECT 'result_entry',x.race_date,x.course_code,x.race_no,x.boat_no
+     FROM jsonb_to_recordset(p_result_entries) AS x(race_date date,course_code int,race_no int,boat_no int)
+   )
+   SELECT 1 WHERE
+      EXISTS (SELECT 1 FROM dependent x WHERE x.race_date IS DISTINCT FROM p_date
+        OR x.course_code IS NULL OR x.race_no IS NULL
+        OR NOT EXISTS (SELECT 1 FROM ev v WHERE v.race_date=x.race_date
+          AND v.course_code=x.course_code AND v.race_no=x.race_no)
+        OR (x.kind IN ('preview_entry','result_entry') AND (
+          x.boat_no IS NULL OR NOT EXISTS (
+            SELECT 1 FROM en e WHERE e.race_date=x.race_date
+              AND e.course_code=x.course_code AND e.race_no=x.race_no
+              AND e.boat_no=x.boat_no))))
+   OR EXISTS (SELECT 1 FROM dependent
+      GROUP BY kind,race_date,course_code,race_no,boat_no HAVING count(*)>1)
+ ) THEN
+   RAISE EXCEPTION 'invalid OpenAPI dependent payload race/boat keys';
+ END IF;
  -- Same-date writers serialize; use try-lock to avoid piling up Cron calls.
  IF NOT pg_try_advisory_xact_lock(298, (p_date - DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'OpenAPI atomic ingestion already running for %',p_date;
