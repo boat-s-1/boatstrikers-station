@@ -77,6 +77,9 @@ jobs:
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "pr297-isolated-only.invalid"
       NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
       NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:0000000000000000000000"
+      # Syntactically valid, non-routable build-only Supabase placeholders.
+      NEXT_PUBLIC_SUPABASE_URL: "https://pr297-isolated.invalid"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "pr297-isolated-build-only-not-a-real-key"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
