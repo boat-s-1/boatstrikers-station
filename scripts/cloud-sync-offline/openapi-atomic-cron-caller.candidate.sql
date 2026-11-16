@@ -61,13 +61,15 @@ BEGIN
       OR bv->>'entry_number' IS DISTINCT FROM bk
       OR bv->>'number' IS NULL
       OR length(bv->>'number') NOT IN (4,5)
-      OR bv->>'number' !~ '^[0-9]{4,5}
+      OR translate(bv->>'number','0123456789','') <> ''
       OR bv->>'number' IN ('0000','00000'))
    OR EXISTS(SELECT 1 FROM boats GROUP BY sk,rk,bv->>'number' HAVING count(*)>1)
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
       CASE WHEN jsonb_typeof(r.rv #> '{result,racers}')='object'
        THEN r.rv #> '{result,racers}' ELSE '{}'::jsonb END) p
-      WHERE p.value->>'place_number' ~ '^[1-6]
+      WHERE p.value->>'place_number' IN ('1','2','3','4','5','6')
+      GROUP BY r.sk,r.rk,p.value->>'place_number' HAVING count(*)>1)
+   OR EXISTS(SELECT 1 FROM race WHERE rv->'preview' IS NOT NULL
       AND jsonb_typeof(rv->'preview') NOT IN ('object','null'))
    OR EXISTS(SELECT 1 FROM race WHERE rv->'result' IS NOT NULL
       AND jsonb_typeof(rv->'result') NOT IN ('object','null'))
