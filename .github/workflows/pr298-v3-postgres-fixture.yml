@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
+      - 'scripts/cloud-sync-offline/openapi-atomic-*.sql'
       - '.github/workflows/pr298-v3-postgres-fixture.yml'
   workflow_dispatch:
 permissions:
@@ -49,3 +50,9 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-load.test.sql
       - name: Verify four simultaneous recorder sessions
         run: bash scripts/cloud-sync-offline/completeness-v3-postgres-concurrency.sh
+      - name: Install atomic OpenAPI RPC stubs and candidate
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.test.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
+      - name: Verify atomic rollback and input validation
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.assert.sql
