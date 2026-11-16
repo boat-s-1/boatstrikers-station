@@ -39,7 +39,8 @@ BEGIN
   'wrong_date','preview_wrong_boat','result_duplicate_places',
   'preview_racers_array','result_racers_array',
   'boat_scalar','race_scalar','stadium_scalar',
-  'payout_without_result_racers','preview_boat_scalar','result_boat_scalar'
+  'payout_without_result_racers','preview_boat_scalar','result_boat_scalar',
+  'five_digit_nonzero_registration'
  ] LOOP
   invalid:=original;
   IF scenario='missing_boat' THEN
@@ -77,6 +78,8 @@ BEGIN
   ELSIF scenario='result_boat_scalar' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
     '{"racers":{"1":42}}'::jsonb);
+  ELSIF scenario='five_digit_nonzero_registration' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,number}','"12345"'::jsonb);
   END IF;
   UPDATE pr298_document SET doc=invalid;
   UPDATE pr298_atomic_calls SET n=0;
