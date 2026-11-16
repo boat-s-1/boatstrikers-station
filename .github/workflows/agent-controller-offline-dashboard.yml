@@ -8,23 +8,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Verify Node and generate synthetic offline report
-        shell: bash
-        run: |
-          node --version
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const assert = require('node:assert/strict');
-          const state = {trinity:'planned_pause', source:'synthetic', network_requests:0, production_writes:0};
-          assert.equal(state.trinity,'planned_pause');
-          assert.equal(state.network_requests,0);
-          assert.equal(state.production_writes,0);
-          fs.mkdirSync('offline-report',{recursive:true});
-          fs.writeFileSync('offline-report/smoke.json',JSON.stringify(state,null,2)+'\n');
-          NODE
-      - name: Upload synthetic report
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify isolated offline diagnostic
+        run: node --test tools/agent-controller/offline-smoke.test.mjs
+      - name: Generate synthetic report
+        run: node tools/agent-controller/offline-smoke.mjs
+      - name: Upload synthetic diagnostic
         uses: actions/upload-artifact@v4
         with:
           name: agent-controller-offline-smoke
-          path: offline-report/smoke.json
+          path: offline-report/diagnostic.json
           retention-days: 3
