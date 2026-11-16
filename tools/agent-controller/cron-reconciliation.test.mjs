@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reconcileCronEvidence} from './cron-reconciliation.mjs';
+const sample={scheduler:{succeeded:21,failed:0},application:{running:35,partial:28}};
+test('scheduler success does not imply app success',()=>{const r=reconcileCronEvidence(sample);assert.equal(r.scheduler_status,'executions_succeeded');assert.equal(r.end_to_end_status,'unknown')});
+test('app partial errors trigger review',()=>{const r=reconcileCronEvidence(sample);assert.equal(r.application_status,'partial_errors_reported');assert.equal(r.requires_manual_review,true)});
+test('no automatic repairs',()=>assert.equal(reconcileCronEvidence(sample).automatic_repairs,false));
+test('scheduler failure is preserved',()=>assert.equal(reconcileCronEvidence({...sample,scheduler:{succeeded:20,failed:1}}).scheduler_status,'failures_reported'));
+test('running-only logs need review',()=>assert.equal(reconcileCronEvidence({...sample,application:{running:2,partial:0}}).application_status,'unfinished_records_reported'));
+test('empty evidence remains unknown',()=>assert.equal(reconcileCronEvidence({scheduler:{succeeded:0,failed:0},application:{running:0,partial:0}}).end_to_end_status,'unknown'));
+test('invalid counts fail closed',()=>assert.throws(()=>reconcileCronEvidence({...sample,application:{running:-1,partial:0}})));
