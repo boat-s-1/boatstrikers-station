@@ -30,4 +30,5 @@ SELECT jsonb_build_object(
 ) FROM summary
 $fn$;
 REVOKE ALL ON FUNCTION public.bs_race_data_completeness_v3_candidate(date) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.bs_race_data_completeness_v3_candidate(date) TO service_role;
 -- Grant to the dedicated test role only when executing isolated integration tests.
