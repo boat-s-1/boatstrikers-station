@@ -37,6 +37,25 @@ BEGIN
    IF SQLERRM='invalid boats accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%program count invalid%' THEN RAISE; END IF;
  END;
+ -- NULL and malformed registration IDs must fail before any RPC.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,
+     jsonb_set(en,'{0,racer_registration_no}','null'::jsonb),
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now());
+   RAISE EXCEPTION 'NULL registration accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='NULL registration accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,
+     jsonb_set(en,'{0,racer_registration_no}','"00000"'::jsonb),
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now());
+   RAISE EXCEPTION 'all-zero registration accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='all-zero registration accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
+ END;
  -- Wrong race and duplicate dependent payload keys must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
