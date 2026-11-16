@@ -9,7 +9,7 @@ test('single transaction and no duplicate SQL tail',()=>{
 });
 test('exact numeric racer registration and duplicate placing fail-closed',()=>{
  assert.match(sql,/length\(bv->>'number'\) NOT IN \(4,5\)/);
- assert.match(sql,/bv->>'number' !~ '\^\[0-9\]\{4,5\}\$'/);
+ assert.match(sql,/translate\(bv->>'number','0123456789',''\) <> ''/);
  assert.match(sql,/GROUP BY r\.sk,r\.rk,p\.value->>'place_number' HAVING count\(\*\)>1/);
 });
 test('Cron caller never changes active Cron job',()=>{
