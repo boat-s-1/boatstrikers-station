@@ -4,7 +4,7 @@ import {buildAtomicResultPayload} from '../../lib/openapi-atomic-results.mjs';
 const date='2026-11-17';
 function fixture(result) {
  return {programs:{stadiums:{9:{stadium_number:9,races:{1:{race_number:1,date,
- racers:{1:{entry_number:1}},result}}}}}};
+ racers:Object.fromEntries(Array.from({length:6},(_,i)=>[i+1,{entry_number:i+1}])),result}}}}}};
 }
 test('normal result maps all fields to existing SQL RPC schema',()=>{
  const src=fixture({technique_number_source:'逃げ',technique_number:1,
@@ -35,4 +35,19 @@ test('invalid result racer collection rejected',()=>{
 });
 test('invalid result boat rejected',()=>{
  assert.throws(()=>buildAtomicResultPayload(fixture({racers:{7:{entry_number:7}}}),date),/boat/);
+});
+
+test('result boat key must agree with entry number and program boat',()=>{
+ const src=fixture({racers:{1:{entry_number:2}}});
+ assert.throws(()=>buildAtomicResultPayload(src,date),/boat/);
+});
+test('stadium and race key aliases cannot silently change identity',()=>{
+ const src=fixture({racers:{}});
+ src.programs.stadiums['9'].stadium_number=10;
+ assert.throws(()=>buildAtomicResultPayload(src,date),/course/);
+});
+test('missing program boat rejects result ingestion',()=>{
+ const src=fixture({racers:{}});
+ delete src.programs.stadiums['9'].races['1'].racers['6'];
+ assert.throws(()=>buildAtomicResultPayload(src,date),/six program boats/);
 });
