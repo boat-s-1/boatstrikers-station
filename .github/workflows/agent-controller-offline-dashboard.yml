@@ -16,7 +16,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Verify isolated offline diagnostic
-        run: node --test tools/agent-controller/offline-smoke.test.mjs
+        run: node --test tools/agent-controller/*.test.mjs
       - name: Generate synthetic report
         run: node tools/agent-controller/offline-smoke.mjs
       - name: Upload synthetic diagnostic
