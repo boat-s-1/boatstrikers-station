@@ -2,7 +2,7 @@
 
 This isolated module validates race keys in memory only. It has **no database client, network calls, credentials, scheduler, or write operations**.
 
-Run with Node.js 18+: `node --test scripts/cloud-sync-offline/race-key-gate.test.mjs`.
+Run with Node.js 18+: `node --test scripts/cloud-sync-offline/*.test.mjs`. This now includes 7 race-key tests and 9 six-boat tests. These tests are committed but have not yet been executed in GitHub Actions.
 
 The returned `PASS_OFFLINE_ONLY` is **not** permission to write to Supabase. It checks race-key structure and duplicates, not 6-boat completeness, archival source authenticity, BRDB field parity, or official schedule completeness.
 
