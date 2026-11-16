@@ -248,6 +248,11 @@ async function syncPreview(date) {
 }
 
 async function handler(request) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const date = normalizeDate(searchParams.get("date") || undefined);
