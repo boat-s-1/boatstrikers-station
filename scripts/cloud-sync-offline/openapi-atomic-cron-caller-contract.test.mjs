@@ -16,3 +16,15 @@ test('Cron caller never changes active Cron job',()=>{
  assert.doesNotMatch(sql,/cron\.schedule\s*\(|cron\.unschedule\s*\(|UPDATE\s+cron\.job/i);
  assert.match(sql,/REVOKE ALL ON FUNCTION public\.bs_sync_openapi_today_atomic_candidate/);
 });
+
+test('database Cron bootstrap includes all fields emitted by Next.js bootstrap mapper',()=>{
+ const route=readFileSync(new URL('../../app/api/live/openapi-preview/route.js',import.meta.url),'utf8');
+ const section=route.slice(route.indexOf('function buildPayload('),route.indexOf('async function syncPreview('));
+ const eventBlock=section.slice(section.indexOf('bootstrapEventRows.push({'),section.indexOf('});',section.indexOf('bootstrapEventRows.push({')));
+ const entryBlock=section.slice(section.indexOf('bootstrapEntryRows.push({'),section.indexOf('});',section.indexOf('bootstrapEntryRows.push({')));
+ for(const [name,block] of [['event',eventBlock],['entry',entryBlock]]){
+  const keys=[...block.matchAll(/^\s{10}(\w+):/gm)].map(m=>m[1]);
+  assert.ok(keys.length >= (name==='event'?7:14),name+' mapper keys extracted');
+  for(const key of keys) assert.ok(sql.includes("'"+key+"'"),name+' field missing: '+key);
+ }
+});
