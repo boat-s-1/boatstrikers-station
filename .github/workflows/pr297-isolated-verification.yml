@@ -40,6 +40,9 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - name: Check isolated PostgreSQL 17 and RLS semantics
         shell: bash
         env:
@@ -64,6 +67,15 @@ jobs:
                  NOT has_table_privilege('pr297_reader','public.pr297_fixture','UPDATE') AS no_update,
                  NOT has_table_privilege('pr297_reader','public.pr297_fixture','DELETE') AS no_delete;
           SQL
+      - name: Execute actual S01 SQL against disposable PostgreSQL fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          container="$(docker ps -q --filter ancestor=postgres:17 | head -n 1)"
+          test -n "$container"
+          docker cp ops/security/s01-bsc-results-apply.sql "$container:/tmp/pr297-apply.sql"
+          docker cp tests/pr297/s01-isolated-apply.psql "$container:/tmp/pr297-fixture.psql"
+          docker exec "$container" psql -U postgres -d pr297_isolated -v ON_ERROR_STOP=1 -f /tmp/pr297-fixture.psql
   next-build:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
