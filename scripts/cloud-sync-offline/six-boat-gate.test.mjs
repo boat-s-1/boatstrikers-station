@@ -12,3 +12,4 @@ test("invalid calendar date rejected",()=>assert.equal(inspectSixBoatEntries(goo
 test("non-array rejected",()=>assert.equal(inspectSixBoatEntries(null,day).status,"HOLD"));
 test("bad boat rejected",()=>assert.equal(inspectSixBoatEntries([{...good[0],boat_no:7},...good.slice(1)],day).status,"HOLD"));
 test("invalid entry rejected",()=>assert.equal(inspectSixBoatEntries([null,...good],day).status,"HOLD"));
+test("empty entries rejected",()=>assert.equal(inspectSixBoatEntries([],day).status,"HOLD"));
