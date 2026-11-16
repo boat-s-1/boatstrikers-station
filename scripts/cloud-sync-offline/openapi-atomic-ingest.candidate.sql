@@ -56,7 +56,7 @@ BEGIN
    OR EXISTS(SELECT 1 FROM en WHERE race_date IS DISTINCT FROM p_date
          OR course_code NOT BETWEEN 1 AND 24 OR race_no NOT BETWEEN 1 AND 12
          OR boat_no NOT BETWEEN 1 AND 6 OR boat_no IS NULL
-         OR racer_registration_no IS NULL OR racer_registration_no !~ '^(0[0-9]{4}|[0-9]{4})$' OR racer_registration_no IN ('0000','00000')
+         OR racer_registration_no IS NULL OR racer_registration_no !~ '^(0[0-9]{4}|[0-9]{4})$' OR racer_registration_no IN ('0000','00000'))
    OR EXISTS(SELECT 1 FROM en GROUP BY race_date,course_code,race_no,boat_no HAVING count(*)<>1)
    OR EXISTS(SELECT 1 FROM en GROUP BY race_date,course_code,race_no,racer_registration_no HAVING count(*)<>1)
    OR EXISTS(SELECT 1 FROM en e WHERE NOT EXISTS(
