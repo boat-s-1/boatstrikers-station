@@ -23,7 +23,7 @@ test('database Cron bootstrap includes all fields emitted by Next.js bootstrap m
  const eventBlock=section.slice(section.indexOf('bootstrapEventRows.push({'),section.indexOf('});',section.indexOf('bootstrapEventRows.push({')));
  const entryBlock=section.slice(section.indexOf('bootstrapEntryRows.push({'),section.indexOf('});',section.indexOf('bootstrapEntryRows.push({')));
  for(const [name,block] of [['event',eventBlock],['entry',entryBlock]]){
-  const keys=[...block.matchAll(/^\s{10}(\w+):/gm)].map(m=>m[1]);
+  const keys=[...block.matchAll(/^\s{8,10}(\w+):/gm)].map(m=>m[1]);
   assert.ok(keys.length >= (name==='event'?7:14),name+' mapper keys extracted');
   for(const key of keys) assert.ok(sql.includes("'"+key+"'"),name+' field missing: '+key);
  }
