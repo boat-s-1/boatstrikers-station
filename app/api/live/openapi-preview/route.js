@@ -203,7 +203,8 @@ async function syncPreview(date) {
     for (const [stadiumKey, stadium] of Object.entries(stadiums)) {
       const courseCode = Number(stadium?.stadium_number ?? stadiumKey);
       const races = stadium?.races;
-      if (!Number.isInteger(courseCode) || courseCode < 1 || courseCode > 24
+      if (!/^(?:[1-9]|1[0-9]|2[0-4])$/.test(stadiumKey) || Number(stadiumKey) !== courseCode
+        || !Number.isInteger(courseCode) || courseCode < 1 || courseCode > 24
         || !races || typeof races !== "object" || Array.isArray(races)
         || Object.keys(races).length === 0) {
         throw new Error("invalid OpenAPI program stadium");
@@ -211,7 +212,8 @@ async function syncPreview(date) {
       for (const [raceKey, race] of Object.entries(races)) {
         const raceNo = Number(race?.race_number ?? raceKey);
         const racers = race?.racers;
-        if (!Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12
+        if (!/^(?:[1-9]|1[0-2])$/.test(raceKey) || Number(raceKey) !== raceNo
+          || !Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12
           || race?.date !== date || !racers || typeof racers !== "object"
           || Array.isArray(racers) || Object.keys(racers).length !== 6) {
           throw new Error("invalid or incomplete OpenAPI program race");
