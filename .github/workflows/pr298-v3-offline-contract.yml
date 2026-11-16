@@ -1,0 +1,22 @@
+name: PR298 V3 offline contract
+on:
+  pull_request:
+    paths:
+      - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
+      - 'scripts/cloud-sync-offline/completeness-v3-contract.test.mjs'
+      - '.github/workflows/pr298-v3-offline-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check Node version
+        run: node --version
+      - name: Validate V3 structural contracts without external services
+        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs
