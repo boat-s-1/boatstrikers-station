@@ -13,6 +13,12 @@ Read-only production inspection on 2026-11-16.
 ## Diagnosis
 The migration history appears to start **after** initial BoatStrikers tables were created. Therefore replaying the recorded migrations cannot be assumed to reconstruct the pre-existing baseline schema. This is a **likely root cause**, not a fully proven causal chain: migration replay logs and repository migration coverage must still be checked.
 
+## Baseline schema size confirmed by read-only catalog query
+- `bs_race_events`: **56 columns**.
+- `bs_race_entries`: **107 columns**.
+- `bs_race_results`: **18 columns**.
+- A simplified two-table mock would not reproduce production trigger, column, and FK behavior. Schema fidelity must be explicit.
+
 ## Remediation proposal — not executed
 1. Export a **schema-only** baseline of the production database, excluding data, auth secrets, roles, storage objects, credentials, and user content. Treat definitions of functions, triggers and RLS policies as sensitive code and review before committing.
 2. Reconcile the baseline with all 133 recorded migrations, avoiding duplicate CREATEs and destructive ALTERs.
