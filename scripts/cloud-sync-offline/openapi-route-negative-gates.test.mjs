@@ -60,3 +60,10 @@ test("invalid payload also fails closed on POST", async () => {
   const r = await run({ method: "POST", mutate: d => { d.programs.stadiums[2].races[1].racers = {}; } });
   assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
 });
+
+for (const badDate of ["2026-02-30", "2026-13-01", "2026-00-10", "2026-11-31"]) {
+  test(`nonexistent calendar date ${badDate} stops before fetch and DB`, async () => {
+    const r = await run({ query: `?date=${badDate}` });
+    assert.deepEqual(r, { status: 500, fetches: 0, clients: 0 });
+  });
+}
