@@ -318,6 +318,11 @@ async function handler(request) {
   try {
     const { searchParams } = new URL(request.url);
     const date = normalizeDate(searchParams.get("date") || undefined);
+    // Current-day bootstrap has row-level alert side effects. Explicitly opt in only
+    // after isolated trigger/load verification and official schedule parity review.
+    if (date === jstDate() && process.env.BS_OPENAPI_TODAY_SYNC_ENABLED !== "true") {
+      return NextResponse.json({ ok: false, error: "current-day OpenAPI sync disabled" }, { status: 503 });
+    }
     const result = await syncPreview(date);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
