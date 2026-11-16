@@ -10,8 +10,8 @@ clock = "(((now() AT TIME ZONE 'Asia/Tokyo')::date + time '12:00') AT TIME ZONE 
 count = src.count("now()")
 if count != 3:
     raise SystemExit(f"Unexpected candidate now() count: {count}; refuse fixture rewrite")
-dst = src.replace("now()", clock)
-if dst == src or dst.count(clock) != count:
+dst = src.replace("now()", clock, 2)
+if dst == src or dst.count(clock) != 2 or dst.count('now()') != 1:
     raise SystemExit("Midday fixture clock injection failed")
 Path("/tmp/pr298-openapi-atomic-cron-midday.sql").write_text(dst)
 print("Generated /tmp/pr298-openapi-atomic-cron-midday.sql (CI-only; clock=12:00 JST)")
