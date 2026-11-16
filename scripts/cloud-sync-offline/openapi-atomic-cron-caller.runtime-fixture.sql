@@ -45,9 +45,11 @@ DECLARE response jsonb;
 BEGIN
  response:=public.bs_sync_openapi_today_atomic_candidate();
  IF (now() AT TIME ZONE 'Asia/Tokyo')::time BETWEEN time '07:00' AND time '23:30' THEN
+  RAISE NOTICE 'CRON_FIXTURE_BRANCH=ACTIVE_PAYLOAD_VALIDATED';
   IF response->>'fixture' IS DISTINCT FROM 'true' THEN
    RAISE EXCEPTION 'runtime candidate failed: %',response; END IF;
  ELSE
+  RAISE NOTICE 'CRON_FIXTURE_BRANCH=TIME_WINDOW_SKIP_ONLY';
   IF response->>'skipped' IS DISTINCT FROM 'true' THEN
    RAISE EXCEPTION 'out-of-window guard failed: %',response; END IF;
  END IF;
