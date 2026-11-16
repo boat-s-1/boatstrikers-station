@@ -2,7 +2,7 @@
 
 This isolated module validates race keys in memory only. It has **no database client, network calls, credentials, scheduler, or write operations**.
 
-Run with Node.js 18+: `node --test scripts/cloud-sync-offline/*.test.mjs`. This includes 7 race-key tests, 9 six-boat tests, and 10 cross-source batch tests (26 total). These tests are committed but have not yet been executed in GitHub Actions. The batch gate requires an independent expected-race manifest and fails closed for empty data or mismatched event/entry race sets. The manifest itself must be authenticated and checked against official scheduling before any production use.
+Run with Node.js 18+: `node --test scripts/cloud-sync-offline/*.test.mjs`. This includes 9 race-key tests, 10 six-boat tests, and 10 cross-source batch tests (29 total). A local Node.js 22.16.0 reproduction of these files passed all 29 tests on 2026-11-16 (29 pass, 0 fail, 0 skip). GitHub Actions has not been run. The batch gate requires an independent expected-race manifest and fails closed for empty data or mismatched event/entry race sets. The manifest itself must be authenticated and checked against official scheduling before any production use.
 
 The returned `PASS_OFFLINE_ONLY` is **not** permission to write to Supabase. It checks race-key structure and duplicates, not 6-boat completeness, archival source authenticity, BRDB field parity, or official schedule completeness.
 
