@@ -13,7 +13,7 @@ END $$;
 DO $$
 DECLARE d jsonb; r jsonb; e jsonb; program jsonb; response jsonb;
 BEGIN
- SELECT doc INTO d FROM pg_temp.pr298_document;
+ SELECT doc INTO d FROM public.pr298_document;
  -- Negative fixture ends with malformed stadium. Restore a known-good program.
  d:=jsonb_build_object('programs',jsonb_build_object('stadiums',
   jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
@@ -38,7 +38,7 @@ BEGIN
        '3',jsonb_build_object('entry_number',3,'place_number',3,'place_number_source','3着','course_number',3,'start_timing',0.15)
       ))
    ))))));
- UPDATE pg_temp.pr298_document SET doc=d;
+ UPDATE public.pr298_document SET doc=d;
  response:=public.bs_sync_openapi_today_atomic_candidate();
  IF response->>'captured' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'settled capture not invoked'; END IF;
  SELECT results,entries,program INTO r,e,program FROM pg_temp.pr298_settled_capture LIMIT 1;
