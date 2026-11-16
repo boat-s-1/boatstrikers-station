@@ -122,6 +122,7 @@ BEGIN
  SELECT
   (SELECT coalesce(jsonb_agg(jsonb_build_object(
     'race_date',v_date,'course_code',course_code,'race_no',race_no,
+    'course_name',(ARRAY['桐生','戸田','江戸川','平和島','多摩川','浜名湖','蒲郡','常滑','津','三国','びわこ','住之江','尼崎','鳴門','丸亀','児島','宮島','徳山','下関','若松','芦屋','福岡','唐津','大村'])[course_code],
     'race_name',nullif(coalesce(rv->>'subtitle',rv->>'title'), ''),
     'closing_time',substring(rv->>'closed_at' from '[0-9]{2}:[0-9]{2}(:[0-9]{2})?'),
     'distance',nullif(rv->>'distance','')::numeric,
@@ -133,6 +134,13 @@ BEGIN
     'racer_class',bv->>'rank_number_source',
     'national_win_rate',nullif(bv->>'national_win_rate','')::numeric,
     'local_win_rate',nullif(bv->>'local_win_rate','')::numeric,
+    'national_2_rate',nullif(bv->>'national_top_2_percent','')::numeric,
+    'local_2_rate',nullif(bv->>'local_top_2_percent','')::numeric,
+    'flying_count',nullif(bv->>'flying_count','')::integer,
+    'late_count',nullif(bv->>'late_count','')::integer,
+    'motor_2_rate',nullif(bv->>'motor_top_2_percent','')::numeric,
+    'boat_2_rate',nullif(bv->>'boat_top_2_percent','')::numeric,
+    'racer_weight',nullif(bv->>'weight','')::numeric,
     'average_st',nullif(bv->>'average_start_timing','')::numeric,
     'motor_no',nullif(bv->>'motor_number','')::integer,
     'boat_machine_no',nullif(bv->>'boat_number','')::integer
