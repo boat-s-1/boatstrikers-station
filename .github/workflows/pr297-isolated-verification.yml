@@ -149,11 +149,24 @@ jobs:
           const head = b64({alg:'HS256',typ:'JWT'});
           const body = head+'.'+payload;
           const token = body+'.'+createHmac('sha256','pr297-local-only-jwt-secret-at-least-32-characters').update(body).digest('base64url');
-          const client = createClient('http://127.0.0.1:3000',token,{auth:{persistSession:false,autoRefreshToken:false}});
+          // supabase-js uses /rest/v1, while standalone PostgREST serves / directly.
+          const localFetch = (input,init) => {
+            const url = new URL(typeof input === 'string' ? input : input.url);
+            if (url.origin !== 'http://127.0.0.1:3000' || !url.pathname.startsWith('/rest/v1/'))
+              throw new Error('Blocked unexpected network request: '+url.origin+url.pathname);
+            url.pathname = url.pathname.slice('/rest/v1'.length);
+            return fetch(url,init);
+          };
+          const client = createClient('http://127.0.0.1:3000',token,{
+            auth:{persistSession:false,autoRefreshToken:false},global:{fetch:localFetch}
+          });
           const date1='2026-11-16';
+          console.log('S02 stage: concurrent claim');
           const [a,b] = await Promise.all([m.claimDataLabGeneration(client,date1),m.claimDataLabGeneration(client,date1)]);
           assert.equal([a,b].filter(x=>x.ok).length,1,'concurrent insert must have exactly one owner');
+          console.log('S02 concurrent outcomes:',JSON.stringify([a,b]));
           const winner=[a,b].find(x=>x.ok);
+          console.log('S02 stage: save draft');
           const saved=await m.saveDataLabClaim(client,winner,{x_post_text:'isolated draft',updated_at:new Date().toISOString()});
           assert.equal(saved.status,'draft');
           assert.equal((await m.claimDataLabGeneration(client,date1)).ok,false);
@@ -161,6 +174,7 @@ jobs:
           const old=new Date(Date.now()-600000).toISOString();
           const {error:seedError}=await client.from(m.DATA_LAB_TABLE).insert({race_date:date2,status:'generating',updated_at:old,x_post_text:null});
           if(seedError) throw seedError;
+          console.log('S02 stage: stale takeover');
           const takeover=await m.claimDataLabGeneration(client,date2);
           assert.equal(takeover.ok,true,'stale lease must be reclaimable');
           const staleSave=await m.saveDataLabClaim(client,{...takeover,updatedAt:old},{x_post_text:'stale writer'}).then(()=>false,()=>true);
