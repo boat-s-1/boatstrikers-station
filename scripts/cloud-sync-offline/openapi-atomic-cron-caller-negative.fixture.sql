@@ -13,7 +13,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true);
 END $$;
 -- The HTTP mock reads a session-local document; no real network is possible.
-CREATE TEMP TABLE pr298_document (doc jsonb NOT NULL);
+CREATE TABLE public.pr298_document (doc jsonb NOT NULL);
 INSERT INTO pr298_document
 SELECT jsonb_build_object('programs',jsonb_build_object('stadiums',
  jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION extensions.http_get(url text)
 RETURNS extensions.http_response LANGUAGE plpgsql AS $$
 DECLARE d jsonb;
 BEGIN
- SELECT doc INTO d FROM pg_temp.pr298_document LIMIT 1;
+ SELECT doc INTO d FROM public.pr298_document LIMIT 1;
  RETURN ROW(200,'application/json','{}'::jsonb,d::text)::extensions.http_response;
 END $$;
 DO $$
