@@ -1,0 +1,17 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { inspectBatch } from "./batch-gate.mjs";
+const day = "2026-11-13";
+const a = {race_date:day,course_code:2,race_no:1};
+const b = {race_date:day,course_code:3,race_no:1};
+const entries = key => Array.from({length:6},(_,i)=>({...key,boat_no:i+1,racer_registration_no:String(4001+i)}));
+test("complete one-race batch",()=>assert.equal(inspectBatch([a],entries(a),[a],day).status,"PASS_OFFLINE_ONLY"));
+test("empty manifest fails closed",()=>assert.equal(inspectBatch([a],entries(a),[],day).status,"HOLD"));
+test("empty events fail closed",()=>assert.equal(inspectBatch([],entries(a),[a],day).status,"HOLD"));
+test("empty entries fail closed",()=>assert.equal(inspectBatch([a],[],[a],day).status,"HOLD"));
+test("missing expected event fails",()=>assert.ok(inspectBatch([a],entries(a),[a,b],day).issues.includes("event_manifest_mismatch")));
+test("missing expected six-boat group fails",()=>assert.ok(inspectBatch([a,b],entries(a),[a,b],day).issues.includes("entry_manifest_mismatch")));
+test("unexpected event fails",()=>assert.ok(inspectBatch([a,b],entries(a),[a],day).issues.includes("event_manifest_mismatch")));
+test("unexpected entry group fails",()=>assert.ok(inspectBatch([a],[...entries(a),...entries(b)],[a],day).issues.includes("entry_manifest_mismatch")));
+test("complete two-race batch",()=>assert.equal(inspectBatch([a,b],[...entries(a),...entries(b)],[a,b],day).status,"PASS_OFFLINE_ONLY"));
+test("duplicate manifest fails",()=>assert.ok(inspectBatch([a],entries(a),[a,a],day).issues.includes("invalid_manifest")));
