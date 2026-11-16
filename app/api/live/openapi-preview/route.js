@@ -224,6 +224,26 @@ async function syncPreview(date) {
             throw new Error("OpenAPI program boat identity mismatch");
           }
         }
+        // Preview boat identities must match the program boats before preview RPCs.
+        const preview = race?.preview;
+        if (preview !== null && preview !== undefined) {
+          if (typeof preview !== "object" || Array.isArray(preview)
+            || (preview.date !== null && preview.date !== undefined && preview.date !== date)) {
+            throw new Error("invalid OpenAPI preview date or shape");
+          }
+          if (preview.racers !== null && preview.racers !== undefined) {
+            if (typeof preview.racers !== "object" || Array.isArray(preview.racers)) {
+              throw new Error("invalid OpenAPI preview racers");
+            }
+            for (const [boatKey, racer] of Object.entries(preview.racers)) {
+              const boatNo = Number(racer?.entry_number ?? boatKey);
+              if (!/^[1-6]$/.test(boatKey) || Number(boatKey) !== boatNo
+                || !Object.prototype.hasOwnProperty.call(racers, boatKey)) {
+                throw new Error("OpenAPI preview boat identity mismatch");
+              }
+            }
+          }
+        }
       }
     }
   }
