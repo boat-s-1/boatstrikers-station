@@ -192,6 +192,31 @@ async function syncPreview(date) {
   }
 
   const apiJson = await response.json();
+  if (date === jstDate()) {
+    const stadiums = apiJson?.programs?.stadiums;
+    if (!stadiums || typeof stadiums !== "object" || Array.isArray(stadiums)
+      || Object.keys(stadiums).length === 0) {
+      throw new Error("missing OpenAPI program stadiums");
+    }
+    for (const [stadiumKey, stadium] of Object.entries(stadiums)) {
+      const courseCode = Number(stadium?.stadium_number ?? stadiumKey);
+      const races = stadium?.races;
+      if (!Number.isInteger(courseCode) || courseCode < 1 || courseCode > 24
+        || !races || typeof races !== "object" || Array.isArray(races)
+        || Object.keys(races).length === 0) {
+        throw new Error("invalid OpenAPI program stadium");
+      }
+      for (const [raceKey, race] of Object.entries(races)) {
+        const raceNo = Number(race?.race_number ?? raceKey);
+        const racers = race?.racers;
+        if (!Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12
+          || race?.date !== date || !racers || typeof racers !== "object"
+          || Array.isArray(racers) || Object.keys(racers).length !== 6) {
+          throw new Error("invalid or incomplete OpenAPI program race");
+        }
+      }
+    }
+  }
   const {
     bootstrapEntryRows,
     bootstrapEventRows,
