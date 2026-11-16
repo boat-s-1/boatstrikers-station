@@ -2,7 +2,7 @@
 -- This does NOT repair missing source data; it only creates V3 quality alerts/logs.
 -- Prerequisites: V3 candidates deployed/verified; V2 recorder cut over and
 -- guaranteed not running concurrently; backup/rollback and notification plan.
--- One date per transaction avoids unexpectedly broad changes.
+-- All four dates are checked first, then recorded in one transaction.
 -- Confirm date/expected result-only count from fresh READ-ONLY preflight.
 BEGIN;
 SET LOCAL statement_timeout='30s';
