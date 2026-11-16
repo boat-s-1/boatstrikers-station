@@ -67,3 +67,18 @@ test('settled payout without racer details fails closed',()=>{
   racers:{},payouts:{trifecta:[{combination:'1-2-3',amount:1000}]}
  }),date),/missing racer details/);
 });
+
+test('duplicate official finish place fails closed',()=>{
+ const src=fixture({racers:{
+  1:{entry_number:1,place_number:1},
+  2:{entry_number:2,place_number:1}}});
+ assert.throws(()=>buildAtomicResultPayload(src,date),/duplicate result placing/);
+});
+test('unique official finish places remain accepted',()=>{
+ const src=fixture({racers:{
+  1:{entry_number:1,place_number:1},
+  2:{entry_number:2,place_number:2}}});
+ const p=buildAtomicResultPayload(src,date);
+ assert.equal(p.results[0].first_boat,1);
+ assert.equal(p.results[0].second_boat,2);
+});
