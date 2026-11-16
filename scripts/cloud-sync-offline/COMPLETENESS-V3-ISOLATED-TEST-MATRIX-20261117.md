@@ -32,7 +32,7 @@ Never run the recorder on production or on a shared PR #294 branch. The recorder
 - Current V2 recorder and candidate V3 recorder share `bs_race_data_quality_alerts`. Do not schedule both against the same day until cutover logic is designed.
 - Existing alert `first_detected_at` is preserved by the UPSERT; verify actual PostgreSQL behavior.
 - Alert `pg_notify` is a database notification, not proof of an external message delivery.
-- Validate schema types, check constraints, function compilation, and idempotency in an isolated DB; none of these have yet been executed against a candidate installation.
+- Candidate functions compiled and basic idempotency/repair lifecycle were tested on an isolated **minimal fixture schema**. Full production-schema trigger effects, concurrency, pg_notify consumer delivery and end-to-end source ingestion remain unverified.
 - Before any production rollout, prepare transactionally coordinated V3 summary+recorder cutover, rollback plan, monitoring, and explicit approval.
 
-**Status: candidate code committed; no DB installation or side-effect test performed.**
+**Status (2026-11-17):** Three candidate functions successfully installed and invoked in isolated Supabase PostgreSQL branch `ojdkrmfsujojkozrnuwc`, using two synthetic race keys. Result-only issue detection, first alert insert, repeated recorder without duplicate alert, partial repair retaining alert, full repair resolving alert, and function EXECUTE privileges passed. The disposable branch was deleted and absence verified. **Not yet tested:** real source bootstrap trigger side effects, high-volume/concurrent writes, pg_notify consumer delivery, complete production-schema parity, production cutover. PR remains Draft/HOLD.
