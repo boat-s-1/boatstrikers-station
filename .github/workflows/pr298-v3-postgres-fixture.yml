@@ -70,5 +70,9 @@ jobs:
           python3 scripts/cloud-sync-offline/openapi-atomic-cron-caller-midday-fixture.py
           psql -X -v ON_ERROR_STOP=1 -f /tmp/pr298-openapi-atomic-cron-midday.sql
           psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller-midday.assert.sql
+      - name: Verify mocked Cron through real atomic validation and four transactional writers
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-real-rpc.assert.sql
       - name: Reject malformed Cron program before atomic write
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller-negative.fixture.sql
