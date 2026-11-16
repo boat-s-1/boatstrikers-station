@@ -56,3 +56,5 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
       - name: Verify atomic rollback and input validation
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.assert.sql
+      - name: Verify production Ichika trigger fan-out in isolated fixture
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-trigger-fanout.test.sql
