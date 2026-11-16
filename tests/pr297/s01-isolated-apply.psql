@@ -27,7 +27,7 @@ FROM pg_proc WHERE oid='public.bsc_sync_official_results_to_legacy()'::regproced
 SELECT coalesce(jsonb_agg(to_jsonb(x) ORDER BY policyname),'[]'::jsonb)::text AS s01_policy_manifest
 FROM (SELECT policyname,permissive,roles,cmd,qual,with_check FROM pg_policies
       WHERE schemaname='public' AND tablename='bsc_results') x \gset
-\i ops/security/s01-bsc-results-apply.sql
+\i /tmp/pr297-apply.sql
 DO $verify$
 BEGIN
  IF (SELECT count(*) FROM pg_policies WHERE schemaname='public' AND tablename='bsc_results'
