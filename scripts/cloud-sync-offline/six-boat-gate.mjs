@@ -2,6 +2,7 @@
 export function inspectSixBoatEntries(entries, expectedDate) {
   const issues = [];
   if (!Array.isArray(entries)) return {status:"HOLD",issues:["entries_not_array"],races:0};
+  if (entries.length === 0) return {status:"HOLD",issues:["empty_entries"],races:0};
   if (typeof expectedDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(expectedDate) || Number.isNaN(Date.parse(expectedDate+"T00:00:00Z")) || new Date(expectedDate+"T00:00:00Z").toISOString().slice(0,10)!==expectedDate) return {status:"HOLD",issues:["invalid_expected_date"],races:0};
   const groups = new Map();
   for (const row of entries) {
