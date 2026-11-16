@@ -6,6 +6,8 @@ on:
       - 'scripts/cloud-sync-offline/completeness-v3-contract.test.mjs'
       - 'scripts/cloud-sync-offline/openapi-atomic-results.test.mjs'
       - 'scripts/cloud-sync-offline/openapi-atomic-route-contract.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-cron-caller.candidate.sql'
+      - 'scripts/cloud-sync-offline/openapi-atomic-cron-caller-contract.test.mjs'
       - 'app/api/live/openapi-preview/route.js'
       - 'lib/openapi-atomic-results.mjs'
       - '.github/workflows/pr298-v3-offline-contract.yml'
@@ -23,4 +25,4 @@ jobs:
       - name: Check Node version
         run: node --version
       - name: Validate V3 and OpenAPI parser contracts without external services
-        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-results.test.mjs scripts/cloud-sync-offline/openapi-atomic-route-contract.test.mjs
+        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-results.test.mjs scripts/cloud-sync-offline/openapi-atomic-route-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-cron-caller-contract.test.mjs
