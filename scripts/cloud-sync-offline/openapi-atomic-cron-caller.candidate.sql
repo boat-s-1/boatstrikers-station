@@ -63,6 +63,9 @@ BEGIN
       OR length(bv->>'number') NOT IN (4,5)
       OR translate(bv->>'number','0123456789','') <> ''
       OR bv->>'number' IN ('0000','00000'))
+   OR EXISTS(SELECT 1 FROM boats WHERE jsonb_typeof(bv) IS DISTINCT FROM 'object')
+   OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv) IS DISTINCT FROM 'object')
+   OR EXISTS(SELECT 1 FROM stadium WHERE jsonb_typeof(sv) IS DISTINCT FROM 'object')
    OR EXISTS(SELECT 1 FROM boats GROUP BY sk,rk,bv->>'number' HAVING count(*)>1)
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
       CASE WHEN jsonb_typeof(r.rv #> '{result,racers}')='object'
