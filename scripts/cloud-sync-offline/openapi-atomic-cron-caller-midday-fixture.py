@@ -11,7 +11,7 @@ count = src.count("now()")
 if count != 3:
     raise SystemExit(f"Unexpected candidate now() count: {count}; refuse fixture rewrite")
 dst = src.replace("now()", clock, 2)
-if dst == src or dst.count(clock) != 2 or dst.count('now()') != 1:
+if dst == src or dst.count(clock) != 2 or not dst.endswith(src[src.rfind('now()')-100:].replace('now()', 'now()')):
     raise SystemExit("Midday fixture clock injection failed")
 Path("/tmp/pr298-openapi-atomic-cron-midday.sql").write_text(dst)
 print("Generated /tmp/pr298-openapi-atomic-cron-midday.sql (CI-only; clock=12:00 JST)")
