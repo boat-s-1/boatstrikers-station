@@ -78,3 +78,5 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-rollback.assert.sql
       - name: Reject malformed Cron program before atomic write
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller-negative.fixture.sql
+      - name: Assert settled result and program numeric value parity
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-settled.fixture.sql
