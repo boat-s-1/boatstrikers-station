@@ -47,3 +47,5 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.test.sql
       - name: Verify 240-race load, replay and complete repair
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-load.test.sql
+      - name: Verify four simultaneous recorder sessions
+        run: bash scripts/cloud-sync-offline/completeness-v3-postgres-concurrency.sh
