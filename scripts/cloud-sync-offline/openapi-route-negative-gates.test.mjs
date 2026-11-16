@@ -118,3 +118,25 @@ test("current-day sync is disabled by default before fetch or database client", 
   assert.equal(response.status, 503);
   assert.equal(response.body.ok, false);
 });
+
+test("current-day route stays disabled without explicit sync opt-in", async () => {
+  let fetched = false;
+  let connected = false;
+  const env = { CRON_SECRET: "test-secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+    SUPABASE_SERVICE_ROLE_KEY: "dummy" };
+  const context = {
+    process: { env },
+    NextResponse: { json: (body, opts = {}) => ({ body, status: opts.status ?? 200 }) },
+    createClient: () => { connected = true; throw Error("database reached"); },
+    fetch: async () => { fetched = true; throw Error("network reached"); },
+    URL, Date, console: { error: () => {} }
+  };
+  runInNewContext(source, context, { filename: path });
+  const response = await context.handlers.GET({
+    url: `https://example.test/api/live/openapi-preview?date=${date}`,
+    headers: { get: () => "Bearer test-secret" }
+  });
+  assert.equal(response.status, 503);
+  assert.equal(fetched, false);
+  assert.equal(connected, false);
+});
