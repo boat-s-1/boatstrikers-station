@@ -56,7 +56,7 @@ BEGIN
       OR rv->>'race_number' IS DISTINCT FROM rk
       OR rv->>'date' IS DISTINCT FROM v_date::text
       OR jsonb_typeof(rv->'racers') IS DISTINCT FROM 'object'
-      OR jsonb_object_length(rv->'racers') <> 6)
+      OR (SELECT count(*) FROM jsonb_each(CASE WHEN jsonb_typeof(rv->'racers')='object' THEN rv->'racers' ELSE '{}'::jsonb END)) <> 6)
    OR EXISTS(SELECT 1 FROM boats WHERE bk !~ '^[1-6]$'
       OR bv->>'entry_number' IS DISTINCT FROM bk
       OR bv->>'number' !~ '^(0[0-9]{4}|[0-9]{4})$'
