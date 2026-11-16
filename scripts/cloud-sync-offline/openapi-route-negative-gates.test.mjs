@@ -76,3 +76,19 @@ test("mismatched race key and race_number fails before database client", async (
   const r = await run({ mutate: d => { d.programs.stadiums[2].races[1].race_number = 2; } });
   assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
 });
+
+test("swapped racer entry numbers are rejected despite six unique boats", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].racers[1].entry_number = 2;
+    d.programs.stadiums[2].races[1].racers[2].entry_number = 1;
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
+test("noncanonical racer key is rejected before database client", async () => {
+  const r = await run({ mutate: d => {
+    const racers = d.programs.stadiums[2].races[1].racers;
+    racers["01"] = racers[1];
+    delete racers[1];
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
