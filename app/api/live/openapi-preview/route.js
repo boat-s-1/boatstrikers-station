@@ -270,7 +270,7 @@ async function syncPreview(date) {
       const key = `${entry.race_date}/${entry.course_code}/${entry.race_no}`;
       const boats = grouped.get(key);
       if (!boats || !Number.isInteger(entry.boat_no) || entry.boat_no < 1 || entry.boat_no > 6
-        || boats.has(entry.boat_no) || !/^[0-9]{4}$/.test(String(entry.racer_registration_no ?? ""))
+        || boats.has(entry.boat_no) || !/^(?:[0-9]{4}|0[0-9]{4})$/.test(String(entry.racer_registration_no ?? ""))
         || Number(entry.racer_registration_no) === 0) {
         throw new Error("invalid or duplicate OpenAPI program boat");
       }
