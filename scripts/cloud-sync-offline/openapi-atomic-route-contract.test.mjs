@@ -24,3 +24,8 @@ test('atomic RPC receives all program, preview and result phases',()=>{
   assert.match(route,new RegExp('\\b'+field+':'));
  }
 });
+
+test('handler accepts production-compatible zero-prefixed five-digit racer IDs',()=>{
+ assert.match(route,/\^\(\?:\[0-9\]\{4\}\|0\[0-9\]\{4\}\)\$/);
+ assert.doesNotMatch(route,/\/\^\[0-9\]\{4\}\$\/\.test\(String\(entry\.racer_registration_no/);
+});
