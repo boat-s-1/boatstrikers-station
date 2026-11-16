@@ -1,0 +1,11 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { inspectRaceKeys } from "./race-key-gate.mjs";
+const good = [{race_date:"2026-11-13",course_code:2,race_no:1}];
+test("valid race key",()=>assert.equal(inspectRaceKeys(good,"2026-11-13").status,"PASS_OFFLINE_ONLY"));
+test("duplicate rejected",()=>assert.equal(inspectRaceKeys([...good,...good],"2026-11-13").status,"HOLD"));
+test("date mismatch rejected",()=>assert.equal(inspectRaceKeys(good,"2026-11-14").status,"HOLD"));
+test("invalid course rejected",()=>assert.equal(inspectRaceKeys([{...good[0],course_code:25}],"2026-11-13").status,"HOLD"));
+test("invalid race rejected",()=>assert.equal(inspectRaceKeys([{...good[0],race_no:13}],"2026-11-13").status,"HOLD"));
+test("nonarray rejected",()=>assert.equal(inspectRaceKeys(null,"2026-11-13").status,"HOLD"));
+test("malformed row rejected",()=>assert.equal(inspectRaceKeys([null],"2026-11-13").status,"HOLD"));
