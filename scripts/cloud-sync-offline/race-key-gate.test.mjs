@@ -9,3 +9,5 @@ test("invalid course rejected",()=>assert.equal(inspectRaceKeys([{...good[0],cou
 test("invalid race rejected",()=>assert.equal(inspectRaceKeys([{...good[0],race_no:13}],"2026-11-13").status,"HOLD"));
 test("nonarray rejected",()=>assert.equal(inspectRaceKeys(null,"2026-11-13").status,"HOLD"));
 test("malformed row rejected",()=>assert.equal(inspectRaceKeys([null],"2026-11-13").status,"HOLD"));
+test("impossible calendar date rejected",()=>assert.equal(inspectRaceKeys(good,"2026-02-30").status,"HOLD"));
+test("empty race list rejected",()=>assert.equal(inspectRaceKeys([],"2026-11-13").status,"HOLD"));
