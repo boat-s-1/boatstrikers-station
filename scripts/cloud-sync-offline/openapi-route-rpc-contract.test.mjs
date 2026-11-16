@@ -25,7 +25,7 @@ async function invoke({ errorAt = null } = {}) {
   const date = today();
   const calls = [];
   const context = {
-    process: { env: { CRON_SECRET: "secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+    process: { env: { BS_OPENAPI_TODAY_SYNC_ENABLED: "true", CRON_SECRET: "secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
       SUPABASE_SERVICE_ROLE_KEY: "dummy" } },
     NextResponse: { json: (body, options = {}) => ({ body, status: options.status ?? 200 }) },
     createClient: () => ({ rpc: async (name, args) => {
