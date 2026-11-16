@@ -1,0 +1,14 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {inspectSixBoatEntries} from "./six-boat-gate.mjs";
+const day="2026-11-13";
+const good=Array.from({length:6},(_,i)=>({race_date:day,course_code:2,race_no:1,boat_no:i+1,racer_registration_no:String(4001+i)}));
+test("six boats accepted",()=>assert.equal(inspectSixBoatEntries(good,day).status,"PASS_OFFLINE_ONLY"));
+test("missing boat rejected",()=>assert.ok(inspectSixBoatEntries(good.slice(1),day).issues.includes("incomplete_race")));
+test("duplicate boat rejected",()=>assert.ok(inspectSixBoatEntries([...good,good[0]],day).issues.includes("duplicate_boat")));
+test("bad registration rejected",()=>assert.equal(inspectSixBoatEntries([{...good[0],racer_registration_no:null},...good.slice(1)],day).status,"HOLD"));
+test("date mismatch rejected",()=>assert.equal(inspectSixBoatEntries(good,"2026-11-14").status,"HOLD"));
+test("invalid calendar date rejected",()=>assert.equal(inspectSixBoatEntries(good,"2026-02-30").status,"HOLD"));
+test("non-array rejected",()=>assert.equal(inspectSixBoatEntries(null,day).status,"HOLD"));
+test("bad boat rejected",()=>assert.equal(inspectSixBoatEntries([{...good[0],boat_no:7},...good.slice(1)],day).status,"HOLD"));
+test("invalid entry rejected",()=>assert.equal(inspectSixBoatEntries([null,...good],day).status,"HOLD"));
