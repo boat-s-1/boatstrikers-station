@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assertLogUpdateSucceeded} from './cron-log-update-guard.mjs';
+test('confirms a single updated row',async()=>assert.deepEqual(await assertLogUpdateSucceeded(async()=>({data:[{id:42}],error:null})),{confirmed:true,run_id:42}));
+test('Supabase error is not silently ignored',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>({data:null,error:{code:'42501',message:'permission denied'}})),/cron log update failed: 42501/));
+test('zero updated rows fail closed',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>({data:[],error:null})),/not confirmed/));
+test('missing result fails closed',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>null),/missing log update result/));
+test('multiple updated rows fail closed',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>({data:[{id:1},{id:2}],error:null})),/not confirmed/));
+test('missing row id fails closed',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>({data:[{}],error:null})),/not confirmed/));
+test('operation exceptions propagate',async()=>await assert.rejects(assertLogUpdateSucceeded(async()=>{throw Error('network down')}),/network down/));
+test('no sensitive error message is echoed',async()=>{await assert.rejects(assertLogUpdateSucceeded(async()=>({error:{code:'PGRST',message:'SECRET_DATA'}})),e=>!e.message.includes('SECRET_DATA'))});
