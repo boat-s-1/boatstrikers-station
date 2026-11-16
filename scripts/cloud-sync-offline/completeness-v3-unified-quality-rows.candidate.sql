@@ -52,6 +52,7 @@ AS $fn$
 $fn$;
 
 REVOKE ALL ON FUNCTION public.bs_race_data_quality_rows_v3_candidate(date) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.bs_race_data_quality_rows_v3_candidate(date) TO service_role;
 
 -- After isolated tests: implement completeness summary AND recorder against this unified
 -- function in the same release. In particular, recorder's resolution NOT EXISTS
