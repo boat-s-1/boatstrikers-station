@@ -21,16 +21,16 @@ const fixture = (date) => ({
       }])) }
   } } } }
 });
-async function invoke({ errorAt = null } = {}) {
+async function invoke({ errorAt = null, rpcHandler = null } = {}) {
   const date = today();
   const calls = [];
   const context = {
-    process: { env: { BS_OPENAPI_TODAY_SYNC_ENABLED: "true", BS_OPENAPI_TODAY_SYNC_ENABLED: "true", CRON_SECRET: "secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+    process: { env: { BS_OPENAPI_TODAY_SYNC_ENABLED: "true", CRON_SECRET: "secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
       SUPABASE_SERVICE_ROLE_KEY: "dummy" } },
     NextResponse: { json: (body, options = {}) => ({ body, status: options.status ?? 200 }) },
     createClient: () => ({ rpc: async (name, args) => {
       calls.push({ name, args });
-      return { data: name, error: name === errorAt ? { message: "injected failure" } : null };
+      return rpcHandler ? rpcHandler(name, args) : { data: name, error: name === errorAt ? { message: "injected failure" } : null };
     } }),
     fetch: async () => ({ ok: true, json: async () => fixture(date) }),
     URL, Date, console: { error: () => {} }
@@ -77,4 +77,29 @@ test("event preview RPC error occurs only after successful entry preview RPC", a
     "bs_apply_openapi_preview",
     "bs_apply_openapi_preview_events"
   ]);
+});
+
+test("retry after event-preview failure replays all three RPC phases in order", async () => {
+  const state = { attempt: 0, successful: [] };
+  const rpcHandler = async (name) => {
+    if (name === "bs_apply_openapi_preview_events" && state.attempt === 0) {
+      return { data: null, error: { message: "transient event-preview failure" } };
+    }
+    state.successful.push(name);
+    return { data: name, error: null };
+  };
+  const first = await invoke({ rpcHandler });
+  assert.equal(first.response.status, 500);
+  assert.deepEqual(first.calls.map(c => c.name), [
+    "bs_apply_openapi_bootstrap", "bs_apply_openapi_preview",
+    "bs_apply_openapi_preview_events"
+  ]);
+  state.attempt = 1;
+  const second = await invoke({ rpcHandler });
+  assert.equal(second.response.status, 200);
+  assert.deepEqual(second.calls.map(c => c.name), [
+    "bs_apply_openapi_bootstrap", "bs_apply_openapi_preview",
+    "bs_apply_openapi_preview_events"
+  ]);
+  assert.equal(state.successful.length, 5);
 });
