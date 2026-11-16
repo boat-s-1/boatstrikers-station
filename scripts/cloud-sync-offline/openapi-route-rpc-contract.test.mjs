@@ -64,5 +64,17 @@ test("bootstrap RPC error prevents preview writes", async () => {
 test("preview RPC error returns failure, not false success", async () => {
   const { response, calls } = await invoke({ errorAt: "bs_apply_openapi_preview" });
   assert.equal(response.status, 500);
-  assert.equal(calls.length, 3);
+  assert.deepEqual(calls.map(c => c.name), [
+    "bs_apply_openapi_bootstrap", "bs_apply_openapi_preview"
+  ]);
+});
+
+test("event preview RPC error occurs only after successful entry preview RPC", async () => {
+  const { response, calls } = await invoke({ errorAt: "bs_apply_openapi_preview_events" });
+  assert.equal(response.status, 500);
+  assert.deepEqual(calls.map(c => c.name), [
+    "bs_apply_openapi_bootstrap",
+    "bs_apply_openapi_preview",
+    "bs_apply_openapi_preview_events"
+  ]);
 });
