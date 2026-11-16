@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
-import * as baseline from '../../lib/dataLabSocialClaim.js';
+import * as baseline from './dataLabSocialClaim.baseline.mjs';
 import * as candidate from './dataLabSocialClaim.candidate.mjs';
 
 const base = 'http://127.0.0.1:3000';
