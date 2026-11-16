@@ -7,6 +7,11 @@ BEGIN
  SELECT jsonb_agg(jsonb_build_object('race_date',d,'course_code',9,'race_no',1,
  'boat_no',b,'racer_registration_no',lpad((1000+b)::text,4,'0')))
  INTO en FROM generate_series(1,6) b;
+ -- Production read-only catalog: Nov 11-12 registration IDs are 5-digit
+ -- numeric strings with leading zero; ensure this valid form is accepted.
+ SELECT jsonb_agg(jsonb_build_object('race_date',d,'course_code',9,'race_no',1,
+ 'boat_no',b,'racer_registration_no',lpad((1000+b)::text,5,'0')))
+ INTO en FROM generate_series(1,6) b;
  PERFORM set_config('bs_fixture.fail_results','yes',true);
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,'[]'::jsonb,
