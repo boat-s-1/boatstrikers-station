@@ -67,3 +67,12 @@ for (const badDate of ["2026-02-30", "2026-13-01", "2026-00-10", "2026-11-31"]) 
     assert.deepEqual(r, { status: 500, fetches: 0, clients: 0 });
   });
 }
+
+test("mismatched stadium key and stadium_number fails before database client", async () => {
+  const r = await run({ mutate: d => { d.programs.stadiums[2].stadium_number = 3; } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
+test("mismatched race key and race_number fails before database client", async () => {
+  const r = await run({ mutate: d => { d.programs.stadiums[2].races[1].race_number = 2; } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
