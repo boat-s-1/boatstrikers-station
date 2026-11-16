@@ -1,6 +1,8 @@
 -- CANDIDATE ONLY. DO NOT INSTALL ON PRODUCTION WITHOUT APPROVAL.
+-- Wrap CREATE/REVOKE/GRANT in one transaction: no transient PUBLIC EXECUTE.
 -- Single RPC = one PostgreSQL transaction for bootstrap, preview, results.
 -- Input comes from independently validated OpenAPI payload, not direct client input.
+BEGIN;
 CREATE OR REPLACE FUNCTION public.bs_apply_openapi_atomic_candidate(
  p_date date,p_events jsonb,p_entries jsonb,p_preview_entries jsonb,
  p_preview_events jsonb,p_results jsonb,p_result_entries jsonb,
@@ -120,5 +122,6 @@ REVOKE ALL ON FUNCTION public.bs_apply_openapi_atomic_candidate(
  date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.bs_apply_openapi_atomic_candidate(
  date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz) TO service_role;
+COMMIT;
 -- Still gated: production source priorities, trigger fan-out, official schedule
 -- parity, same-transaction rollback and live caller integration are unverified.
