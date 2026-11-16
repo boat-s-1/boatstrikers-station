@@ -32,6 +32,28 @@ BEGIN
    IF SQLERRM='invalid boats accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%program count invalid%' THEN RAISE; END IF;
  END;
+ -- Wrong race and duplicate dependent payload keys must fail before any RPC.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object('race_date',d,
+       'course_code',9,'race_no',2)),'[]'::jsonb,now());
+   RAISE EXCEPTION 'wrong result race accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='wrong result race accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%dependent payload%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,
+     jsonb_build_array(
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',1,'boat_no',1),
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',1,'boat_no',1)),
+     now());
+   RAISE EXCEPTION 'duplicate result boat accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='duplicate result boat accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%dependent payload%' THEN RAISE; END IF;
+ END;
  IF (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
    RAISE EXCEPTION 'invalid payload caused writes';
  END IF;
