@@ -70,4 +70,48 @@ assert.equal(saved.ok,true);
 assert.equal((await row(d5)).status,'draft');
 assert.equal((await row(d5)).x_post_text,'real PostgREST candidate draft');
 assert.equal((await candidate.claimDataLabGeneration(db,d5)).reason,'exists');
-console.log('S02 candidate integration PASS: 5 scenarios; baseline and candidate compared');
+console.log('S02 candidate integration: 12 concurrent contenders on one empty date');
+const d6='2026-11-25';
+const contenders=await Promise.all(Array.from({length:12},()=>candidate.claimDataLabGeneration(db,d6)));
+assert.equal(contenders.filter(x=>x.ok).length,1,'exactly one concurrent contender must win');
+assert.equal(contenders.filter(x=>!x.ok && x.reason==='busy').length,11,'all losers must report busy');
+await candidate.releaseDataLabClaim(db,contenders.find(x=>x.ok));
+assert.equal(await row(d6),null,'winning new lease must be removable');
+
+console.log('S02 candidate integration: stale writer cannot overwrite new owner');
+const d7='2026-11-26';
+await seed(d7,'generating',600000);
+const newOwner=await candidate.claimDataLabGeneration(db,d7);
+assert.equal(newOwner.ok,true);
+const priorLease={...newOwner,updatedAt:new Date(Date.now()-600000).toISOString()};
+await expectFailure(candidate.saveDataLabClaim(db,priorLease,{x_post_text:'stale overwrite'}),/lease lost/);
+await expectFailure(candidate.releaseDataLabClaim(db,priorLease),/lease cleanup lost/);
+assert.equal((await row(d7)).status,'generating','prior owner cannot alter current lease');
+await candidate.releaseDataLabClaim(db,newOwner);
+
+console.log('S02 candidate integration: AggregateError preserves build and cleanup errors');
+const d8='2026-11-27';
+let caught;
+try {
+  await candidate.withDataLabClaim(db,d8,{},async()=>{
+    const existing=await row(d8);
+    const {error}=await db.from(table).update({updated_at:new Date(Date.now()+10000).toISOString()}).eq('id',existing.id);
+    if(error)throw error;
+    throw new Error('original build failure');
+  });
+} catch(e) { caught=e; }
+assert.ok(caught instanceof AggregateError,'both failures must be aggregated');
+assert.equal(caught.errors.length,2);
+assert.match(caught.errors[0].message,/original build failure/);
+assert.match(caught.errors[1].message,/lease cleanup lost/);
+
+console.log('S02 candidate integration: old draft with allowDraft is reclaimable');
+const d9='2026-11-28';
+await seed(d9,'draft',120000,'old content');
+const draftClaim=await candidate.claimDataLabGeneration(db,d9,{allowDraft:true});
+assert.equal(draftClaim.ok,true);
+await candidate.releaseDataLabClaim(db,draftClaim);
+assert.equal((await row(d9)).status,'draft');
+assert.equal((await row(d9)).x_post_text,'old content');
+
+console.log('S02 candidate integration PASS: 9 scenarios; baseline and candidate compared');
