@@ -57,10 +57,11 @@ BEGIN
       OR rv->>'date' IS DISTINCT FROM v_date::text
       OR jsonb_typeof(rv->'racers') IS DISTINCT FROM 'object'
       OR (SELECT count(*) FROM jsonb_each(CASE WHEN jsonb_typeof(rv->'racers')='object' THEN rv->'racers' ELSE '{}'::jsonb END)) <> 6)
-   OR EXISTS(SELECT 1 FROM boats WHERE bk !~ '^[1-6]$'
+   OR EXISTS(SELECT 1 FROM boats WHERE bk NOT IN ('1','2','3','4','5','6')
       OR bv->>'entry_number' IS DISTINCT FROM bk
       OR bv->>'number' IS NULL
-      OR bv->>'number' !~ '^(0[0-9]{4}|[0-9]{4})
+      OR length(bv->>'number') NOT IN (4,5)
+      OR bv->>'number' !~ '^[0-9]+'
       OR bv->>'number' IN ('0000','00000'))
    OR EXISTS(SELECT 1 FROM boats GROUP BY sk,rk,bv->>'number' HAVING count(*)>1)
    OR EXISTS(SELECT 1 FROM race WHERE rv->'preview' IS NOT NULL
@@ -73,7 +74,13 @@ BEGIN
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
       CASE WHEN jsonb_typeof(r.rv #> '{preview,racers}')='object'
        THEN r.rv #> '{preview,racers}' ELSE '{}'::jsonb END) p
-      WHERE p.key !~ '^[1-6]
+      WHERE p.key NOT IN ('1','2','3','4','5','6')
+         OR p.value->>'entry_number' IS DISTINCT FROM p.key)
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
+      CASE WHEN jsonb_typeof(r.rv #> '{result,racers}')='object'
+       THEN r.rv #> '{result,racers}' ELSE '{}'::jsonb END) p
+      WHERE p.key NOT IN ('1','2','3','4','5','6')
+         OR p.value->>'entry_number' IS DISTINCT FROM p.key)
  ) THEN RAISE EXCEPTION 'invalid official OpenAPI program'; END IF;
  -- Shared flattened CTE ensures all six payloads use the same snapshot.
  WITH stadium AS (
