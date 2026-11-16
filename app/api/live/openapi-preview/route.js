@@ -258,6 +258,17 @@ async function syncPreview(date) {
     if ([...grouped.values()].some((boats) => boats.size !== 6)) {
       throw new Error("incomplete OpenAPI program race");
     }
+    // A single racer cannot occupy two boats in the same race.
+    const racersByRace = new Map();
+    for (const entry of bootstrapEntryRows) {
+      const key = `${entry.race_date}/${entry.course_code}/${entry.race_no}`;
+      if (!racersByRace.has(key)) racersByRace.set(key, new Set());
+      const seen = racersByRace.get(key);
+      if (seen.has(entry.racer_registration_no)) {
+        throw new Error("duplicate racer registration in OpenAPI program race");
+      }
+      seen.add(entry.racer_registration_no);
+    }
   }
 
   const syncedAt = new Date().toISOString();
