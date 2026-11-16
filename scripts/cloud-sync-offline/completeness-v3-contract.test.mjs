@@ -22,3 +22,4 @@ test('empty-day summary is incomplete',()=>assert.match(summary,/races>0 AND iss
 test('Cron verifies execution username',()=>assert.match(cron,/v_username<>'postgres'/));
 test('Cron checks all three function privileges',()=>assert.equal((cron.match(/has_function_privilege\('postgres'/g)||[]).length,3));
 test('backfill checks drift before recorder write',()=>before(backfill,'Source drift on','bs_record_race_data_completeness_v3_candidate(d)'));
+test('entry-only race key fails closed before alert mutation',()=>before(recorder,'V3 uncovered entry-only race key','INSERT INTO public.bs_race_data_quality_alerts'));
