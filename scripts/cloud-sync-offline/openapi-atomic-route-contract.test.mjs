@@ -5,7 +5,10 @@ const route=readFileSync(new URL('../../app/api/live/openapi-preview/route.js',i
 test('atomic route requires both existing and independent feature flags',()=>{
  const outer=route.indexOf('process.env.BS_OPENAPI_TODAY_SYNC_ENABLED !== "true"');
  const inner=route.indexOf('process.env.BS_OPENAPI_ATOMIC_SYNC_ENABLED === "true"');
- assert.ok(outer>=0 && inner>outer,'atomic branch must be after existing current-day gate');
+ assert.ok(outer>=route.indexOf('async function handler(request)') && inner>=0,
+  'handler must retain current-day gate and syncPreview must retain atomic opt-in');
+ assert.ok(route.indexOf('const result = await syncPreview(date);')>outer,
+  'handler must reject disabled current-day calls before invoking syncPreview');
  assert.match(route,/if \(date === jstDate\(\) &&\s*process\.env\.BS_OPENAPI_ATOMIC_SYNC_ENABLED === "true"\)/);
 });
 test('atomic route calls one RPC before legacy multi-RPC sequence',()=>{
