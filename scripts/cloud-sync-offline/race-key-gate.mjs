@@ -3,7 +3,8 @@ export function inspectRaceKeys(rows, expectedDate) {
   const issues = [];
   const seen = new Set();
   if (!Array.isArray(rows)) return { status: "HOLD", issues: ["rows_not_array"], count: 0 };
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(expectedDate || "")) return { status: "HOLD", issues: ["invalid_expected_date"], count: 0 };
+  if (typeof expectedDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(expectedDate) || Number.isNaN(Date.parse(expectedDate+"T00:00:00Z")) || new Date(expectedDate+"T00:00:00Z").toISOString().slice(0,10) !== expectedDate) return { status: "HOLD", issues: ["invalid_expected_date"], count: 0 };
+  if (rows.length === 0) return { status: "HOLD", issues: ["empty_races"], count: 0 };
   for (const row of rows) {
     if (!row || typeof row !== "object" || Array.isArray(row)) { issues.push("invalid_row"); continue; }
     const { race_date, course_code, race_no } = row;
