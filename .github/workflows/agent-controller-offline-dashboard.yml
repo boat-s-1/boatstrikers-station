@@ -1,5 +1,9 @@
 name: BoatStrikers Agent Controller Offline Smoke
 on:
+  pull_request:
+    paths:
+      - 'tools/agent-controller/**'
+      - '.github/workflows/agent-controller-offline-dashboard.yml'
   workflow_dispatch:
 permissions:
   contents: read
