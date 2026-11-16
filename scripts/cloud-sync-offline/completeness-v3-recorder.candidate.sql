@@ -16,6 +16,23 @@ BEGIN
  END IF;
 
  v_detail := public.bs_race_data_completeness_v3_candidate(p_date);
+ -- Fail closed on empty source data. An empty day is not proof that prior
+ -- missing races were repaired; never resolve alerts by vacuous NOT EXISTS.
+ IF coalesce((v_detail->>'races')::bigint,0)=0 THEN
+   RAISE EXCEPTION 'V3 quality has no race keys for %, refusing alert mutation',p_date;
+ END IF;
+ -- A previously alerted race disappearing from BOTH source anchors is not a
+ -- recovery. Require manual reconciliation instead of silently resolving it.
+ IF EXISTS (
+   SELECT 1 FROM public.bs_race_data_quality_alerts a
+   WHERE a.race_date=p_date AND a.status='active'
+     AND NOT EXISTS (
+       SELECT 1 FROM public.bs_race_data_quality_rows_v3_candidate(p_date) q
+       WHERE q.course_code=a.course_code AND q.race_no=a.race_no
+     )
+ ) THEN
+   RAISE EXCEPTION 'V3 source race key disappeared for %, refusing alert resolution',p_date;
+ END IF;
  v_status := CASE WHEN coalesce((v_detail->>'is_complete')::boolean,false)
                   THEN 'success' ELSE 'partial' END;
 
