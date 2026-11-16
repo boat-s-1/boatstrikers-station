@@ -198,6 +198,32 @@ async function syncPreview(date) {
     previewEntryRows,
     previewEventRows,
   } = buildPayload(apiJson, date);
+  if (date === jstDate()) {
+    if (bootstrapEventRows.length === 0 || bootstrapEntryRows.length !== bootstrapEventRows.length * 6) {
+      throw new Error("incomplete OpenAPI program: event/boat count mismatch");
+    }
+    const grouped = new Map();
+    for (const event of bootstrapEventRows) {
+      const key = `${event.race_date}/${event.course_code}/${event.race_no}`;
+      if (event.race_date !== date || grouped.has(key)) {
+        throw new Error("invalid or duplicate OpenAPI program race");
+      }
+      grouped.set(key, new Set());
+    }
+    for (const entry of bootstrapEntryRows) {
+      const key = `${entry.race_date}/${entry.course_code}/${entry.race_no}`;
+      const boats = grouped.get(key);
+      if (!boats || !Number.isInteger(entry.boat_no) || entry.boat_no < 1 || entry.boat_no > 6
+        || boats.has(entry.boat_no) || !/^[0-9]{4}$/.test(String(entry.racer_registration_no ?? ""))) {
+        throw new Error("invalid or duplicate OpenAPI program boat");
+      }
+      boats.add(entry.boat_no);
+    }
+    if ([...grouped.values()].some((boats) => boats.size !== 6)) {
+      throw new Error("incomplete OpenAPI program race");
+    }
+  }
+
   const syncedAt = new Date().toISOString();
   const supabase = getSupabase();
 
