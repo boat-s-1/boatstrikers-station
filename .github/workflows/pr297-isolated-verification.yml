@@ -1,0 +1,83 @@
+name: PR297 isolated verification (no production access)
+on:
+  push:
+    branches:
+      - codex/pr297-phase3-isolated-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pr297-isolated-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Offline regression with isolated network
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo env -i PATH=/usr/bin:/bin BATCH1_NETWORK_NAMESPACE=required unshare --net -- "$(command -v node)" scripts/batch1/offline-ci.mjs
+  postgres17-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local_test_only
+          POSTGRES_DB: pr297_isolated
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pr297_isolated"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check isolated PostgreSQL 17 and RLS semantics
+        shell: bash
+        env:
+          PGPASSWORD: local_test_only
+        run: |
+          set -euo pipefail
+          docker exec "$(docker ps -q --filter ancestor=postgres:17 | head -n 1)" psql -U postgres -d pr297_isolated -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT current_setting('server_version_num')::int >= 170000 AS pg17_or_newer;
+          CREATE ROLE pr297_reader NOLOGIN;
+          CREATE TABLE public.pr297_fixture(id integer PRIMARY KEY, value text);
+          INSERT INTO public.pr297_fixture VALUES (1,'original');
+          ALTER TABLE public.pr297_fixture ENABLE ROW LEVEL SECURITY;
+          CREATE POLICY fixture_read ON public.pr297_fixture FOR SELECT TO pr297_reader USING (true);
+          GRANT SELECT ON public.pr297_fixture TO pr297_reader;
+          SET ROLE pr297_reader;
+          SELECT * FROM public.pr297_fixture;
+          RESET ROLE;
+          BEGIN;
+          REVOKE INSERT, UPDATE, DELETE ON public.pr297_fixture FROM pr297_reader;
+          COMMIT;
+          SELECT NOT has_table_privilege('pr297_reader','public.pr297_fixture','INSERT') AS no_insert,
+                 NOT has_table_privilege('pr297_reader','public.pr297_fixture','UPDATE') AS no_update,
+                 NOT has_table_privilege('pr297_reader','public.pr297_fixture','DELETE') AS no_delete;
+          SQL
+  next-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Use runner Node 22+
+        shell: bash
+        run: node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)'
+      - name: Install dependencies in isolated runner (no credentials)
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Build Next.js without deployment
+        run: npm run build
