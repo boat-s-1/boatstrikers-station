@@ -70,7 +70,7 @@ BEGIN
    END;
   END IF;
   SELECT n INTO calls FROM pr298_atomic_calls;
-  IF calls <> CASE WHEN scenario='valid' THEN 1 ELSE 0 END THEN
+  IF calls <> (CASE WHEN scenario='valid' THEN 1 ELSE 0 END) THEN
    RAISE EXCEPTION 'atomic call count mismatch in %: %',scenario,calls;
   END IF;
   RAISE NOTICE 'CRON_NEGATIVE_CASE=% PASS',scenario;
