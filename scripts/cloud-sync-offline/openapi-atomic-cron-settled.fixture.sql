@@ -41,7 +41,7 @@ BEGIN
  UPDATE public.pr298_document SET doc=d;
  response:=public.bs_sync_openapi_today_atomic_candidate();
  IF response->>'captured' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'settled capture not invoked'; END IF;
- SELECT results,entries,program INTO r,e,program FROM pg_temp.pr298_settled_capture LIMIT 1;
+ SELECT t.results,t.entries,t.program INTO r,e,program FROM pg_temp.pr298_settled_capture t LIMIT 1;
  IF jsonb_array_length(r) <> 1 OR jsonb_array_length(e) <> 3
  OR r->0->>'first_boat' IS DISTINCT FROM '2'
  OR r->0->>'second_boat' IS DISTINCT FROM '1'
