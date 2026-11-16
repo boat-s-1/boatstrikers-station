@@ -1,0 +1,47 @@
+name: PR298 V3 PostgreSQL fixture
+on:
+  pull_request:
+    paths:
+      - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
+      - '.github/workflows/pr298-v3-postgres-fixture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fixture"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGDATABASE: fixture
+      PGUSER: postgres
+      PGPASSWORD: fixture-only
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check PostgreSQL client
+        run: psql --version
+      - name: Install disposable fixture schema
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
+      - name: Install candidate functions in isolated PostgreSQL
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-unified-quality-rows.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-summary.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-recorder.candidate.sql
+      - name: Verify runtime alert lifecycle and guards
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.test.sql
