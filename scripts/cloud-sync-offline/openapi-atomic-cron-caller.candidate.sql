@@ -94,6 +94,14 @@ BEGIN
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
       CASE WHEN jsonb_typeof(r.rv #> '{preview,racers}')='object'
        THEN r.rv #> '{preview,racers}' ELSE '{}'::jsonb END) p
+      WHERE jsonb_typeof(p.value) IS DISTINCT FROM 'object')
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
+      CASE WHEN jsonb_typeof(r.rv #> '{result,racers}')='object'
+       THEN r.rv #> '{result,racers}' ELSE '{}'::jsonb END) p
+      WHERE jsonb_typeof(p.value) IS DISTINCT FROM 'object')
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
+      CASE WHEN jsonb_typeof(r.rv #> '{preview,racers}')='object'
+       THEN r.rv #> '{preview,racers}' ELSE '{}'::jsonb END) p
       WHERE p.key NOT IN ('1','2','3','4','5','6')
          OR p.value->>'entry_number' IS DISTINCT FROM p.key)
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
