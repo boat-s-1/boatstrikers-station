@@ -140,3 +140,11 @@ test("current-day route stays disabled without explicit sync opt-in", async () =
   assert.equal(fetched, false);
   assert.equal(connected, false);
 });
+
+test("duplicate racer registration across different boats fails before database client", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].racers[2].number =
+      d.programs.stadiums[2].races[1].racers[1].number;
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
