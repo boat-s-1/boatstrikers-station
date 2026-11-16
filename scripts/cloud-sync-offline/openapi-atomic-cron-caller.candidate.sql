@@ -74,6 +74,12 @@ BEGIN
    OR EXISTS(SELECT 1 FROM race WHERE rv->'result' IS NOT NULL
       AND jsonb_typeof(rv->'result') NOT IN ('object','null'))
    OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'preview')='object'
+      AND rv #> '{preview,racers}' IS NOT NULL
+      AND jsonb_typeof(rv #> '{preview,racers}') NOT IN ('object','null'))
+   OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'result')='object'
+      AND rv #> '{result,racers}' IS NOT NULL
+      AND jsonb_typeof(rv #> '{result,racers}') NOT IN ('object','null'))
+   OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'preview')='object'
       AND rv #>> '{preview,date}' IS NOT NULL
       AND rv #>> '{preview,date}' IS DISTINCT FROM v_date::text)
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
