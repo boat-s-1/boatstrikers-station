@@ -148,3 +148,28 @@ test("duplicate racer registration across different boats fails before database 
   } });
   assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
 });
+
+test("preview racer boat identity mismatch fails before database client", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].preview = {
+      date, racers: { 1: { entry_number: 2, exhibition_time: 6.7 } }
+    };
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
+test("preview date mismatch fails before database client", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].preview = {
+      date: "2020-01-01", racers: { 1: { entry_number: 1, exhibition_time: 6.7 } }
+    };
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
+test("noncanonical preview racer boat key fails before database client", async () => {
+  const r = await run({ mutate: d => {
+    d.programs.stadiums[2].races[1].preview = {
+      date, racers: { "01": { entry_number: 1, exhibition_time: 6.7 } }
+    };
+  } });
+  assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
+});
