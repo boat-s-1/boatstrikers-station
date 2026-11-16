@@ -1,6 +1,6 @@
 -- CANDIDATE ONLY: install on an isolated database, never directly on production.
 -- SECURITY INVOKER avoids introducing a new privileged public RPC.
--- Do not grant EXECUTE to anon/authenticated; check default PUBLIC privileges in isolation.
+-- Restrict default PUBLIC execution within the same deployment transaction.
 -- The existing quality function is kept intact; this function extends it with result-only keys.
 CREATE OR REPLACE FUNCTION public.bs_race_data_quality_rows_v3_candidate(p_date date)
 RETURNS TABLE (
@@ -50,6 +50,8 @@ AS $fn$
         false AS is_complete
  FROM result_only x
 $fn$;
+
+REVOKE ALL ON FUNCTION public.bs_race_data_quality_rows_v3_candidate(date) FROM PUBLIC, anon, authenticated;
 
 -- After isolated tests: implement completeness summary AND recorder against this unified
 -- function in the same release. In particular, recorder's resolution NOT EXISTS
