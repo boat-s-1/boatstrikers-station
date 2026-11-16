@@ -187,6 +187,11 @@ jobs:
           console.log('S02 PostgREST PASS: concurrent claim, save, stale reclaim, stale save rejected');
           console.log('KNOWN ISSUE: stale generating cleanup leaves empty draft; automated retry blocked');
           JS
+      - name: Compare S02 baseline and candidate against real isolated PostgREST
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/pr297/s02-candidate-integration.mjs
       - name: Diagnostics on failure
         if: failure()
         run: docker logs pr297-postgrest || true
