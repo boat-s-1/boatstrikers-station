@@ -307,19 +307,20 @@ async function syncPreview(date) {
     bootstrapResult = data;
   }
 
-  const [{ data: entryResult, error: entryError }, { data: eventResult, error: eventError }] =
-    await Promise.all([
-      supabase.rpc("bs_apply_openapi_preview", {
-        p_rows: previewEntryRows,
-        p_synced_at: syncedAt,
-      }),
-      supabase.rpc("bs_apply_openapi_preview_events", {
-        p_rows: previewEventRows,
-        p_synced_at: syncedAt,
-      }),
-    ]);
-
+  // Run dependent write phases in order. A failed entry-preview RPC must not
+  // start the event-preview RPC. These RPCs are still separate DB transactions.
+  const { data: entryResult, error: entryError } =
+    await supabase.rpc("bs_apply_openapi_preview", {
+      p_rows: previewEntryRows,
+      p_synced_at: syncedAt,
+    });
   if (entryError) throw entryError;
+
+  const { data: eventResult, error: eventError } =
+    await supabase.rpc("bs_apply_openapi_preview_events", {
+      p_rows: previewEventRows,
+      p_synced_at: syncedAt,
+    });
   if (eventError) throw eventError;
 
   return {
