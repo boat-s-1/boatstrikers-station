@@ -51,3 +51,19 @@ test('missing program boat rejects result ingestion',()=>{
  delete src.programs.stadiums['9'].races['1'].racers['6'];
  assert.throws(()=>buildAtomicResultPayload(src,date),/six program boats/);
 });
+
+test('pre-settlement empty result object never creates a result-only race',()=>{
+ assert.deepEqual(buildAtomicResultPayload(fixture({racers:{},payouts:{}}),date),
+   {results:[],entries:[]});
+});
+test('pre-settlement start timing without placings never creates results',()=>{
+ const p=buildAtomicResultPayload(fixture({racers:{
+  1:{entry_number:1,start_timing:0.13},
+  2:{entry_number:2,start_timing:0.15}}}),date);
+ assert.deepEqual(p,{results:[],entries:[]});
+});
+test('settled payout without racer details fails closed',()=>{
+ assert.throws(()=>buildAtomicResultPayload(fixture({
+  racers:{},payouts:{trifecta:[{combination:'1-2-3',amount:1000}]}
+ }),date),/missing racer details/);
+});
