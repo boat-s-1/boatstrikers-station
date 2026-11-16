@@ -99,3 +99,22 @@ test("all-zero racer registration number is rejected before DB client", async ()
   } });
   assert.deepEqual(r, { status: 500, fetches: 1, clients: 0 });
 });
+
+test("current-day sync is disabled by default before fetch or database client", async () => {
+  const dateNow = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const context = {
+    process: { env: { CRON_SECRET: "test-secret",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "dummy" } },
+    NextResponse: { json: (body, opts = {}) => ({ body, status: opts.status ?? 200 }) },
+    createClient: () => { throw Error("database must not be reached"); },
+    fetch: async () => { throw Error("network must not be reached"); },
+    URL, Date, console: { error: () => {} }
+  };
+  runInNewContext(source, context, { filename: path });
+  const response = await context.handlers.GET({
+    url: `https://example.test/api/live/openapi-preview?date=${dateNow}`,
+    headers: { get: () => "Bearer test-secret" }
+  });
+  assert.equal(response.status, 503);
+  assert.equal(response.body.ok, false);
+});
