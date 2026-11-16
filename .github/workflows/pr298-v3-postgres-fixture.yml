@@ -58,3 +58,8 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.assert.sql
       - name: Verify production Ichika trigger fan-out in isolated fixture
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-trigger-fanout.test.sql
+      - name: Compile database-side atomic Cron caller with network-free HTTP stub
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT has_function_privilege('service_role','public.bs_sync_openapi_today_atomic_candidate()','EXECUTE') AS service_role_only"
