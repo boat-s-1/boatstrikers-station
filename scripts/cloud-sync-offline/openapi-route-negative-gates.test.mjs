@@ -20,7 +20,7 @@ const valid = () => ({ programs: { stadiums: { 2: { stadium_number: 2,
 async function run({ mutate = () => {}, query = `?date=${date}`, method = "GET" } = {}) {
   let fetches = 0, clients = 0;
   const context = {
-    process: { env: { BS_OPENAPI_TODAY_SYNC_ENABLED: "true", CRON_SECRET: "test-secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+    process: { env: { BS_OPENAPI_TODAY_SYNC_ENABLED: "true", BS_OPENAPI_TODAY_SYNC_ENABLED: "true", CRON_SECRET: "test-secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
       SUPABASE_SERVICE_ROLE_KEY: "dummy" } },
     NextResponse: { json: (body, opts = {}) => ({ body, status: opts.status ?? 200 }) },
     createClient: () => { clients++; throw Error("database reached"); },
