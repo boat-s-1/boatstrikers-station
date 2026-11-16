@@ -59,3 +59,15 @@ BEGIN
  END IF;
  RAISE NOTICE 'Atomic OpenAPI transaction, rollback, ordering, validation PASS';
 END $t$;
+
+-- Candidate RPC is service-role-only even though dependent RPCs are stubs.
+DO $security$
+DECLARE fn regprocedure := 'public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamp with time zone)'::regprocedure;
+BEGIN
+ IF has_function_privilege('anon',fn,'EXECUTE')
+ OR has_function_privilege('authenticated',fn,'EXECUTE')
+ OR NOT has_function_privilege('service_role',fn,'EXECUTE') THEN
+   RAISE EXCEPTION 'atomic RPC EXECUTE grants violate service-role-only policy';
+ END IF;
+ RAISE NOTICE 'Atomic OpenAPI RPC role grant fixture PASS';
+END $security$;
