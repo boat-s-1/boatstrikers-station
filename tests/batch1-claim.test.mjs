@@ -33,13 +33,13 @@ test('save and cleanup use exact DB microsecond timestamp',async()=>{
   const db=fakeDb();db.before((t,q)=>{if(q.op==='upsert')q.row.updated_at='2026-11-15T01:00:00.123456+00:00';});
   const c=await claim(db.client,date,opts);assert.match(c.updatedAt,/123456/);
   const saved=await save(db.client,c,{x_post_text:'new'});assert.equal(saved.status,'draft');
-  await release(db.client,c);assert.equal(db.tables[T].length,1);
+  await assert.rejects(release(db.client,c),/lease cleanup lost/);assert.equal(db.tables[T].length,1);
 });
 test('old owner cannot overwrite or delete replacement lease',async()=>{
   const db=fakeDb();const c=await claim(db.client,date,opts);
   db.tables[T][0].updated_at='2026-11-15T01:05:01.456789+00:00';
   await assert.rejects(save(db.client,c,{x_post_text:'stale'}),/lease lost/);
-  await release(db.client,c);assert.equal(db.tables[T].length,1);assert.notEqual(db.tables[T][0].x_post_text,'stale');
+  await assert.rejects(release(db.client,c),/lease cleanup lost/);assert.equal(db.tables[T].length,1);assert.notEqual(db.tables[T][0].x_post_text,'stale');
 });
 test('failed new generation removes placeholder',async()=>{
   const db=fakeDb();await assert.rejects(withDataLabClaim(db.client,date,opts,async()=>{throw Error('fixture');}));assert.equal(db.tables[T].length,0);
