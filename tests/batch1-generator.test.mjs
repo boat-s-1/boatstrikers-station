@@ -29,6 +29,6 @@ test('Cron leaves existing draft intact',async()=>{
 });
 test('generator cannot save after lease takeover',async()=>{
   const db=reset();db.before((t,q,ts)=>{if(t===T&&q.op==='update')ts[T][0].updated_at='2099-01-01T00:00:00.123456Z';});
-  await assert.rejects(generate({date,generateDigestIfMissing:false}),/lease lost/);
+  await assert.rejects(generate({date,generateDigestIfMissing:false}),error => error instanceof AggregateError && error.errors.length===2 && /lease lost/.test(error.errors[0].message) && /lease cleanup lost/.test(error.errors[1].message));
   assert.equal(db.tables[T][0].status,'generating');assert.equal(db.tables[T][0].x_post_text,undefined);
 });
