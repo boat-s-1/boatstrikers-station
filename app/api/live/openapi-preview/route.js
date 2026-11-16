@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { buildAtomicResultPayload } from "../../../../lib/openapi-atomic-results.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -293,6 +294,35 @@ async function syncPreview(date) {
 
   const syncedAt = new Date().toISOString();
   const supabase = getSupabase();
+
+  // PR #298 candidate: disabled unless BOTH independent switches are enabled.
+  // Single RPC call makes bootstrap/preview/results one database transaction.
+  // Do not enable before production trigger and official schedule parity gates.
+  if (date === jstDate() &&
+      process.env.BS_OPENAPI_ATOMIC_SYNC_ENABLED === "true") {
+    const { results, entries: resultEntries } = buildAtomicResultPayload(apiJson, date);
+    const { data, error } = await supabase.rpc("bs_apply_openapi_atomic_candidate", {
+      p_date: date,
+      p_events: bootstrapEventRows,
+      p_entries: bootstrapEntryRows,
+      p_preview_entries: previewEntryRows,
+      p_preview_events: previewEventRows,
+      p_results: results,
+      p_result_entries: resultEntries,
+      p_synced_at: syncedAt,
+    });
+    if (error) throw error;
+    return {
+      date, endpoint, mode: "atomic_candidate",
+      fetched_program_entry_rows: bootstrapEntryRows.length,
+      fetched_program_event_rows: bootstrapEventRows.length,
+      fetched_entry_rows: previewEntryRows.length,
+      fetched_event_rows: previewEventRows.length,
+      fetched_result_rows: results.length,
+      fetched_result_entry_rows: resultEntries.length,
+      atomic: data,
+    };
+  }
 
   // Emergency bootstrap is current-day only. The RPC inserts missing rows only,
   // so existing BRDB/PC-KYOTEI rows are never overwritten.
