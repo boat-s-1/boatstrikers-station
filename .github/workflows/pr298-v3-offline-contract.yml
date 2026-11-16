@@ -4,6 +4,8 @@ on:
     paths:
       - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
       - 'scripts/cloud-sync-offline/completeness-v3-contract.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-results.test.mjs'
+      - 'lib/openapi-atomic-results.mjs'
       - '.github/workflows/pr298-v3-offline-contract.yml'
   workflow_dispatch:
 permissions:
@@ -18,5 +20,5 @@ jobs:
           persist-credentials: false
       - name: Check Node version
         run: node --version
-      - name: Validate V3 structural contracts without external services
-        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs
+      - name: Validate V3 and OpenAPI parser contracts without external services
+        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-results.test.mjs
