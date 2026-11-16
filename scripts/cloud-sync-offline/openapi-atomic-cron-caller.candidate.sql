@@ -60,7 +60,9 @@ BEGIN
    OR EXISTS(SELECT 1 FROM boats WHERE bk NOT IN ('1','2','3','4','5','6')
       OR bv->>'entry_number' IS DISTINCT FROM bk
       OR bv->>'number' IS NULL
-      OR (bv->>'number') !~ '^(0[0-9]{4}|[0-9]{4})
+      OR length(bv->>'number') NOT IN (4,5)
+      OR translate(bv->>'number','0123456789','') <> ''
+      OR (length(bv->>'number')=5 AND left(bv->>'number',1)<>'0')
       OR bv->>'number' IN ('0000','00000'))
    OR EXISTS(SELECT 1 FROM boats WHERE jsonb_typeof(bv) IS DISTINCT FROM 'object')
    OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv) IS DISTINCT FROM 'object')
