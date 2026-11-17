@@ -8,7 +8,10 @@ test('valid active member returns boolean only, no PII and no caching',async()=>
  const r=await notificationAuthProbe('Bearer abc.def',async()=>member);
  assert.equal(r.status,200);
  assert.deepEqual(r.body,{authenticated:true});
- assert.equal(r.headers['Cache-Control'],'no-store, private');
+ assert.equal(r.headers['Cache-Control'],'private, no-store, max-age=0');
+ assert.equal(r.headers.Vary,'Authorization');
+ assert.equal(r.headers['X-Content-Type-Options'],'nosniff');
+ assert.equal(r.headers['Referrer-Policy'],'no-referrer');
  assert.equal(JSON.stringify(r).includes(userId),false);
  assert.equal(JSON.stringify(r).includes('premium'),false);
 });
@@ -35,4 +38,16 @@ test('backend failure returns generic unavailable without secrets',async()=>{
  assert.equal(r.status,503);
  assert.deepEqual(r.body,{available:false});
  assert.equal(JSON.stringify(r).includes('private-secret'),false);
+});
+
+test('every failure response prevents credential-specific caching',async()=>{
+ for (const r of [
+  await notificationAuthProbe(null,async()=>member),
+  await notificationAuthProbe('Bearer token',async()=>null),
+  await notificationAuthProbe('Bearer token',async()=>{throw Error('down');}),
+ ]) {
+  assert.equal(r.headers.Vary,'Authorization');
+  assert.match(r.headers['Cache-Control'],/no-store/);
+  assert.equal(r.headers['Referrer-Policy'],'no-referrer');
+ }
 });
