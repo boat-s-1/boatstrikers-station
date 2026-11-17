@@ -7,6 +7,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-claim-ci.sh'
       - 'tools/agent-controller/isolated-postgres-lease-ci.sh'
       - 'tools/agent-controller/isolated-postgres-atomic-outbox-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-receipt-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -54,3 +55,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-lease-ci.sh
       - name: Verify atomic incident and outbox transaction
         run: bash tools/agent-controller/isolated-postgres-atomic-outbox-ci.sh
+      - name: Verify synthetic receipt and outbox state atomicity
+        run: bash tools/agent-controller/isolated-postgres-receipt-ci.sh
