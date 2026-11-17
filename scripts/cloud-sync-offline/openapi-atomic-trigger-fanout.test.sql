@@ -132,7 +132,8 @@ BEGIN
  ON CONFLICT DO NOTHING;
  GET DIAGNOSTICS inserted = ROW_COUNT;
  SELECT count(*) INTO after_calls FROM public.atomic_ichika_evaluation_calls;
- IF inserted <> 1440 OR after_calls-before_calls <> 1440 THEN
+ -- Two current-day races (9/1 and 9/4) already exist from prior assertions.
+ IF inserted <> 1428 OR after_calls-before_calls <> 1428 THEN
    RAISE EXCEPTION 'full-day insert trigger fan-out mismatch: inserted %, evaluations %',
       inserted,after_calls-before_calls;
  END IF;
