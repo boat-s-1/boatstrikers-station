@@ -144,6 +144,41 @@ BEGIN
     OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
    RAISE EXCEPTION 'boat result conflict mutated data or called writer';
  END IF;
+ -- Event-side conflict must also be rejected, even when results table
+ -- has no corresponding scalar value.
+ UPDATE public.bs_race_events SET quinella='1-2',quinella_payout=420
+ WHERE race_date=d AND course_code=9 AND race_no=1;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,
+       'quinella','1-3','quinella_payout',420)),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'event-side quinella conflict accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='event-side quinella conflict accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT quinella FROM public.bs_race_events WHERE race_date=d
+     AND course_code=9 AND race_no=1)<>'1-2'
+    OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+   RAISE EXCEPTION 'event-side conflict mutated data or called writer';
+ END IF;
+ -- Identical already-persisted values must remain acceptable for
+ -- idempotent retries; the fixture writers are deliberately stubbed.
+ PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+   '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+      'race_date',d,'course_code',9,'race_no',1,
+      'trifecta_result','1-2-3','trifecta_payout',1200,
+      'exacta','1-2','exacta_payout',550,
+      'quinella','1-2','quinella_payout',420,
+      'first_boat',1,'winning_method','escape','technique_code','1')),
+   jsonb_build_array(jsonb_build_object(
+      'race_date',d,'course_code',9,'race_no',1,'boat_no',1,
+      'arrival_order',1,'actual_st',0.12)),now());
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
+   RAISE EXCEPTION 'identical result retry unexpectedly rejected';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
@@ -234,7 +269,7 @@ BEGIN
    IF SQLERRM='duplicate result boat accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%dependent payload%' THEN RAISE; END IF;
  END;
- IF (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
    RAISE EXCEPTION 'invalid payload caused writes';
  END IF;
  RAISE NOTICE 'Atomic OpenAPI transaction, rollback, ordering, validation PASS';
