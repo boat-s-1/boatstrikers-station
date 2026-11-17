@@ -5,7 +5,7 @@ DECLARE d date:=DATE '2026-11-14'; ev jsonb; en jsonb; failed boolean:=false;
 BEGIN
  INSERT INTO public.bs_race_results
   (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
- VALUES(d,12,1,'1-2-3',1200,'settled',now()),
+ VALUES(d,12,1,'1-2-3',1200,'confirmed',now()),
        (d,12,2,NULL,NULL,'pending',now());
  ev:=jsonb_build_array(
   jsonb_build_object('race_date',d,'course_code',12,'race_no',1),
