@@ -74,3 +74,14 @@ This workstream goal is a documented synthesis of the user's supplied first-chat
 - Reported PR #294/#295/#296/#297/#298/#299/#300, SEO #274 and cross-PR overlaps need independent current status verification before release; not completed by preserving this record.
 - Native iOS/Android release, exact payment scope and all acceptance thresholds remain unverified as v1.0 initial release commitments; preserve future-facing intent without asserting those are shipped or mandatory for initial milestone.
 - No production, database, deployment or merge modifications made for this audit. Documentation-only correction on existing PR #304 working branch.
+
+## 2026-11-18 third submitted chat report — migration audit
+
+- Third chat URL: https://chatgpt.com/c/6afca913-537c-83ee-ad65-a3be8026ef4a. User supplied `BoatStrikers開発 最終目標・引き継ぎ整理報告書` (384 lines), which focuses on PR #297 and migration recovery while retaining platform v1.0 and three-pillars integration as goals.
+- This is **another report concerning the same overall platform/workstream**, not evidence that three distinct goals exist. The user's three submitted chats may be sequential or overlapping; lineage still needs explicit confirmation.
+- Distinct technical thread: `codex/migration-recovery-audit-20261118` reportedly HEAD `fbf8ad5a`; separate from PR #300. PR #297 verified live via GitHub as open/Draft, branch `codex/batch1-reconstructed-20261115`, HEAD `37c2d388f37a7b11328f674d4b26062fa04841ee` at check.
+- Report says 133 migration SQL statements recovered, but first-time isolated migration fails at 12th migration due to missing baseline `bs_race_results`; shared DB bootstrap remains BLOCKED. Recovery artifacts are not proof of executable complete schema.
+- Report says earlier approximate 70% completion estimate lacks test/production acceptance denominator; do not reuse as official completion percentage.
+- **Critical conflict in third report:** its section on public visibility lists old `public_all|public_post_members_replies|members_only`. Superseding verified design is `audience=public|members|paid` and `reply_policy=paid|disabled`. Do not propagate old model into implementation.
+- Migration repair is a shared prerequisite across PR #297/#298/#300, not a separate substitute for the platform or community final goal. Assign a single owner/branch for canonical baseline after audit to prevent conflicting fixes.
+- Keep all changes on documentation branch; no DB, billing, Cron, merge or deployment changes made in this update.
