@@ -11,7 +11,7 @@ export default function PostComposer() {
   const [excerpt, setExcerpt] = useState('');
   const [character_key, setCharacter] = useState('ichika');
   const [audience, setAudience] = useState('public');
-  const [reply_policy, setReplyPolicy] = useState('paid');
+  const [reply_policy, setReplyPolicy] = useState('disabled');
   const [preview, setPreview] = useState(false);
   const validation = validateOfficialPost({ title, body, excerpt, character_key, audience, reply_policy });
   const audiences = { public: '全ユーザー公開', members: '会員限定（無料・有料）', paid: '有料会員限定' };
