@@ -13,7 +13,7 @@ const cases=[
  ['singular matched response is not an object','bad-singular',1,['POST','PATCH','PATCH','PATCH','DELETE']],
  ['singular missing response is not 406','bad-singular-zero',1,['POST','PATCH','PATCH','PATCH','PATCH','DELETE']],
  ['anonymous update unexpectedly permitted','bad-anon',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
- ['cleanup HTTP failure is fatal','bad-delete',1,['POST','PATCH','PATCH','PATCH','DELETE']],
+ ['cleanup HTTP failure is fatal','bad-delete',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
 ];
 for(const [name,mode,expectedExit,methods] of cases){
  test(name,()=>{
