@@ -22,7 +22,7 @@ test('rejects unknown attempt',()=>assert.throws(()=>run([proposed]),/invalid al
 test('rejects future event',()=>assert.throws(()=>run([{...attempt,at:'2026-11-17T11:00:00Z'}]),/future event/));
 test('rejects secret fields',()=>assert.throws(()=>run([{...attempt,api_key:'secret'}]),/unexpected event field/));
 test('rejects success alert',()=>assert.throws(()=>run([{...attempt,outcome:'success'},proposed]),/alert without incident/));
-test('rejects alert before attempt',()=>assert.throws(()=>run([attempt,{...proposed,at:'2026-11-17T08:00:00Z'}]),/alert without incident/));
+test('rejects alert before attempt',()=>assert.throws(()=>run([attempt,{...proposed,at:'2026-11-17T08:00:00Z'}]),/out of order event/));
 test('rejects excessive events',()=>assert.throws(()=>project([attempt,proposed],{...ref,maxEvents:1}),/invalid events/));
 test('rejects invalid event type',()=>assert.throws(()=>run([{...attempt,kind:'write'}]),/invalid event kind/));
 
