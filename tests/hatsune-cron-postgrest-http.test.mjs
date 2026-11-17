@@ -34,7 +34,7 @@ globalThis.fetch=async(url,opts)=>{
   else if(patch===4){status=process.env.MOCK_MODE==='bad-singular-zero'?200:406;data={code:'PGRST116'};}
   else{status=process.env.MOCK_MODE==='bad-anon'?200:403;}
  }
- if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:204;data=null;}
+ if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:200;data=process.env.MOCK_MODE==='bad-delete'?{code:'42501'}:[{id:42}];}
  return {status,text:async()=>data===null?'':JSON.stringify(data)};
 };`);
   try{
