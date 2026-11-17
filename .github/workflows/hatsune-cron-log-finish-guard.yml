@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
       - lib/hatsuneCronLog.js
+      - app/api/cron/hatsune-news-pipeline/route.js
+      - tests/hatsune-cron-log-route-error-preservation.test.mjs
       - tests/hatsune-cron-log-finish-contract.test.mjs
       - tests/hatsune-cron-log-finish-behavior.test.mjs
       - tests/hatsune-cron-log-finish-stateful.test.mjs
@@ -22,7 +24,7 @@ jobs:
         with:
           node-version: '22'
       - name: Offline source contract (no secrets or network fetch)
-        run: node --test tests/hatsune-cron-log-finish-*.test.mjs
+        run: node --test tests/hatsune-cron-log-*.test.mjs
   isolated-postgres:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
