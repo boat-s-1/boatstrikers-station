@@ -42,3 +42,10 @@ test('Q-classifier: input is not mutated', () => {
   classify(x);
   assert.deepEqual(x,before);
 });
+
+test('Q-classifier: valid race remains eligible alongside quarantined result', () => {
+  const good=valid(), bad=valid(); bad.result.payouts.trifecta.push({ combination:'1-3-2', amount:900 });
+  const statuses=[good,bad].map(classify);
+  assert.deepEqual(statuses.map(x=>x.status), ['ACCEPT','QUARANTINE']);
+  assert.equal(statuses[1].reason,'MULTIPLE_PAYOUTS');
+});
