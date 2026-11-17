@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessCronReplaySafety as assess} from './cron-replay-safety.mjs';
+test('running record is never auto replayed',()=>{const x=assess({runStatus:'running'});assert.equal(x.reason,'completion_unknown');assert.equal(x.automatic_replay_allowed,false)});
+test('missing record does not prove no work',()=>{const x=assess({runStatus:'not_found'});assert.equal(x.completion_evidence,'missing');assert.equal(x.automatic_republish_allowed,false)});
+test('published records block replay',()=>{const x=assess({runStatus:'running',publicationEvidence:'records_present'});assert.equal(x.automatic_replay_allowed,false)});
+test('none observed still blocks replay',()=>assert.equal(assess({runStatus:'running',publicationEvidence:'none_observed'}).automatic_replay_allowed,false));
+test('partial with reported output blocks republish',()=>assert.equal(assess({runStatus:'partial',publicationEvidence:'records_present'}).automatic_republish_allowed,false));
+test('success never implies safe replay',()=>assert.equal(assess({runStatus:'success'}).automatic_replay_allowed,false));
+test('error never implies safe replay',()=>assert.equal(assess({runStatus:'error'}).automatic_replay_allowed,false));
+test('verified idempotency alone cannot trigger replay',()=>assert.equal(assess({runStatus:'running',idempotencyVerified:true}).automatic_replay_allowed,false));
+test('operator review always required',()=>assert.equal(assess({runStatus:'success'}).operator_review_required,true));
+test('reject unknown status',()=>assert.throws(()=>assess({runStatus:'timed_out'}),/invalid run status/));
+test('reject raw publication data',()=>assert.throws(()=>assess({runStatus:'running',publicationEvidence:'secret payload'}),/invalid publication evidence/));
+test('reject nonboolean idempotency',()=>assert.throws(()=>assess({runStatus:'running',idempotencyVerified:'yes'}),/invalid idempotency evidence/));
