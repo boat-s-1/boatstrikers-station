@@ -34,3 +34,15 @@ test('ambiguous local-time or trailing-garbage expiry is denied', () => {
     assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt},now),false);
   }
 });
+
+test('invalid calendar dates cannot be normalized into paid access', () => {
+  for (const expiresAt of [
+    '2026-02-30T12:00:00.000Z',
+    '2026-04-31T12:00:00Z',
+    '2026-13-01T12:00:00Z',
+  ]) assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt},now),false);
+});
+test('canonical UTC dates with optional milliseconds remain supported', () => {
+  assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt:'2026-12-17T12:00:00Z'},now),true);
+  assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt:'2026-12-17T12:00:00.1Z'},now),true);
+});
