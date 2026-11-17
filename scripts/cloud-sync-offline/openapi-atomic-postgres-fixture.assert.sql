@@ -56,6 +56,28 @@ BEGIN
    IF SQLERRM='all-zero registration accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
  END;
+ -- Captured production bootstrap silently filters boat 7. The atomic
+ -- wrapper must reject that payload BEFORE invoking any of its four RPCs.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,
+     jsonb_set(en,'{5,boat_no}','7'::jsonb),
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now());
+   RAISE EXCEPTION 'boat 7 accepted by atomic guard';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='boat 7 accepted by atomic guard' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
+ END;
+ -- Duplicating a racer across two boats is invalid even when six
+ -- distinct boat numbers are present.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,
+     jsonb_set(en,'{5,racer_registration_no}',en->0->'racer_registration_no'),
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now());
+   RAISE EXCEPTION 'duplicate racer accepted by atomic guard';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='duplicate racer accepted by atomic guard' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
+ END;
  -- Wrong race and duplicate dependent payload keys must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
