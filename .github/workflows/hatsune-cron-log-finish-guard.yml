@@ -7,6 +7,7 @@ on:
     paths:
       - lib/hatsuneCronLog.js
       - tests/hatsune-cron-log-finish-contract.test.mjs
+      - tests/hatsune-cron-log-finish-behavior.test.mjs
       - .github/workflows/hatsune-cron-log-finish-guard.yml
 permissions:
   contents: read
@@ -20,4 +21,4 @@ jobs:
         with:
           node-version: '22'
       - name: Offline source contract (no secrets or network fetch)
-        run: node --test tests/hatsune-cron-log-finish-contract.test.mjs
+        run: node --test tests/hatsune-cron-log-finish-*.test.mjs
