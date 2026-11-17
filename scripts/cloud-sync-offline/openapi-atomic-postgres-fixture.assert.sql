@@ -78,6 +78,33 @@ BEGIN
    IF SQLERRM='duplicate racer accepted by atomic guard' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%program keys/boat identities%' THEN RAISE; END IF;
  END;
+ -- Reject a stale capture timestamp and a future capture timestamp before
+ -- calling any of the four writers.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now()-interval '16 minutes');
+   RAISE EXCEPTION 'stale capture timestamp accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='stale capture timestamp accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%invalid OpenAPI capture timestamp%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now()+interval '6 minutes');
+   RAISE EXCEPTION 'future capture timestamp accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='future capture timestamp accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%invalid OpenAPI capture timestamp%' THEN RAISE; END IF;
+ END;
+ -- A wrong JST date must not write even when all six boats are present.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d-1,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,'[]'::jsonb,now());
+   RAISE EXCEPTION 'past date accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='past date accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%current JST date only%' THEN RAISE; END IF;
+ END;
  -- Wrong race and duplicate dependent payload keys must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
