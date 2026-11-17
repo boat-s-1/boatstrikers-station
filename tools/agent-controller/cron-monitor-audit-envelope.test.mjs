@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeCronMonitorAuditEnvelope as norm} from './cron-monitor-audit-envelope.mjs';
+const base={eventId:'event_0001',correlationId:'attempt_01',at:'2026-11-17T09:00:00Z',kind:'fetch_attempt',state:'hold',code:'policy_hold'};
+test('maps safe fields',()=>assert.equal(norm(base).code,'policy_hold'));
+test('does not persist',()=>assert.equal(norm(base).persisted,false));
+test('does not authenticate delivery',()=>assert.equal(norm(base).delivery_authenticated,false));
+test('no credentials',()=>assert.equal(norm(base).contains_credentials,false));
+test('no raw article data',()=>assert.equal(norm(base).contains_raw_article_data,false));
+test('rejects secret field',()=>assert.throws(()=>norm({...base,token:'secret'}),/unexpected audit field/));
+test('rejects article field',()=>assert.throws(()=>norm({...base,article_body:'body'}),/unexpected audit field/));
+test('rejects SQL field',()=>assert.throws(()=>norm({...base,query:'SELECT 1'}),/unexpected audit field/));
+test('rejects invalid id',()=>assert.throws(()=>norm({...base,eventId:'bad'}),/invalid audit id/));
+test('rejects invalid time',()=>assert.throws(()=>norm({...base,at:'today'}),/invalid audit time/));
+test('rejects invalid kind',()=>assert.throws(()=>norm({...base,kind:'send_news'}),/invalid audit status/));
+test('rejects invalid state',()=>assert.throws(()=>norm({...base,state:'done'}),/invalid audit status/));
+test('rejects arbitrary code',()=>assert.throws(()=>norm({...base,code:'secret value'}),/invalid audit status/));
+test('accepts delivery receipt kind without proving delivery',()=>assert.equal(norm({...base,kind:'delivery_receipt'}).delivery_authenticated,false));
