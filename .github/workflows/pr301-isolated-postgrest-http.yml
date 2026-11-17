@@ -13,9 +13,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   isolated-http:
-    # This environment currently allows only the PR branch, NOT main.
-    # This workflow MUST NOT be merged/executed until environment protection
-    # is reviewed and deliberately reconfigured for the trusted main workflow.
+    # The environment must allow main only; confirm the rule is saved before merge.
+    # Never register credentials before verifying a disposable branch.
     environment: pr301-isolated-http
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -32,7 +31,7 @@ jobs:
             exit 1
           fi
       - name: Checkout reviewed immutable PR301 test commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: boat-s-1/boatstrikers-station
           ref: 56516e59e8664cbdce33b7105c9cbd168dab3119
