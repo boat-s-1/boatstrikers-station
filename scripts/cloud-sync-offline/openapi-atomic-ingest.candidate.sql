@@ -109,6 +109,33 @@ BEGIN
  IF NOT pg_try_advisory_xact_lock(298, (p_date - DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'OpenAPI atomic ingestion already running for %',p_date;
  END IF;
+ -- Fail closed if the provider contradicts a previously stored result.
+ -- Check BOTH result and event surfaces before any of the four writers run.
+ -- Null incoming values do not authorize clearing existing results.
+ IF EXISTS (
+   WITH incoming AS (
+    SELECT x.race_date,x.course_code,x.race_no,x.trifecta_result,
+           x.trifecta_payout
+    FROM jsonb_to_recordset(p_results) AS x(
+     race_date date,course_code smallint,race_no smallint,
+     trifecta_result text,trifecta_payout integer)
+   )
+   SELECT 1 FROM incoming i
+   LEFT JOIN public.bs_race_results r ON
+    r.race_date=i.race_date AND r.course_code=i.course_code
+    AND r.race_no=i.race_no
+   LEFT JOIN public.bs_race_events e ON
+    e.race_date=i.race_date AND e.course_code=i.course_code
+    AND e.race_no=i.race_no
+   WHERE (i.trifecta_result IS NOT NULL AND (
+     (r.trifecta_result IS NOT NULL AND r.trifecta_result<>i.trifecta_result)
+     OR (e.trifecta IS NOT NULL AND e.trifecta<>i.trifecta_result)))
+     OR (i.trifecta_payout IS NOT NULL AND (
+     (r.trifecta_payout IS NOT NULL AND r.trifecta_payout<>i.trifecta_payout)
+     OR (e.trifecta_payout IS NOT NULL AND e.trifecta_payout<>i.trifecta_payout)))
+ ) THEN
+   RAISE EXCEPTION 'OpenAPI result conflicts with persisted result: no writes';
+ END IF;
  v_bootstrap:=public.bs_apply_openapi_bootstrap(p_events,p_entries,p_synced_at);
  v_preview_entries:=public.bs_apply_openapi_preview(p_preview_entries,p_synced_at);
  v_preview_events:=public.bs_apply_openapi_preview_events(p_preview_events,p_synced_at);
