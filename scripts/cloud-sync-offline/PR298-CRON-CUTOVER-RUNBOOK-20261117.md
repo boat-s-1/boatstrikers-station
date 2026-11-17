@@ -52,3 +52,11 @@ Stop and revert if incomplete six-boat programs, new duplicate keys, unbounded I
 - Current verified CI at 7da461ec: offline contract run 44123384529 SUCCESS and disposable PostgreSQL fixture run 44123384823 SUCCESS. These do not establish upstream data rights or live Supabase persistence safety.
 
 **Compliance gate: HOLD.** This document does not authorize stopping the existing Cron or creating another polling job.
+
+## 2026-11-18 provider scope and refreshed CI evidence
+
+The user supplied the original provider email screenshot. It explicitly names **team-nave BRDB-API**, cites Q011 SQL query optimization, describes morning/evening data refreshes, and requests stopping five-minute high-volume BRDB polling. The active jobid 1 uses the distinct **boatraceopenapi.github.io** endpoint. Therefore the earlier uncertainty about whether the BRDB email names the OpenAPI Cron source is resolved: **it does not**. The OpenAPI source's own rate limits and data-use rights remain a separate, unresolved gate. Do not infer OpenAPI permission or a three-minute polling entitlement from this distinction.
+
+The latest verified PR HEAD at this checkpoint is `030cb6111144764f6808a6410bb395ef45b99c48`. GitHub Actions: V3 offline contract run `44127641018` SUCCESS; V3 PostgreSQL fixture run `44127640944` SUCCESS. The read-only production readiness SQL was also executed successfully, detecting orphan results for Nov 14-17. These results do **not** authorize production write deployment, Cron repointing or new paid resources.
+
+Operational HOLD remains: independent OpenAPI permission/rate assessment, isolated live-schema and trigger parity, actual writer integration, safe cutover/rollback approval, and historical recovery provenance.
