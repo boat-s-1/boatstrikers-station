@@ -17,3 +17,9 @@ Status: HOLD. No production installation, Cron cutover, or PR merge authorized.
 5. Review rollback and monitoring, then obtain explicit production-change approval.
 
 No production DB, Cron, Vercel, paid branch or merge was changed.
+
+## Confirmed legacy Cron bootstrap gap (read-only function definition)
+- The deployed bs_sync_openapi_today() calls bs_apply_openapi_preview(), bs_apply_openapi_preview_events(), and bs_apply_openapi_results(), but does NOT call bs_apply_openapi_bootstrap().
+- Read-only cross-table comparison for 2026-11-13 through 2026-11-16: 156, 168, 156, and 120 result rows respectively; every one of these 600 results lacks a corresponding bs_race_events row.
+- This provides a concrete mechanism for result-only records, but historical attribution still requires logs and other ingestion-path checks.
+- Do NOT backfill blindly or switch Cron before trigger fan-out, payload completeness, and safe rollback have been verified.
