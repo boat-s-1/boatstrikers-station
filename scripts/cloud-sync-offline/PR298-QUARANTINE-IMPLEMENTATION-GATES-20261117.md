@@ -68,3 +68,9 @@ Files `openapi-result-quarantine.prototype.mjs` and `openapi-result-quarantine.p
 ## Classifier hardening (2026-11-17)
 
 Pure prototype now rejects payout values outside JavaScript's safe integer range and finish racer keys/positions outside 1–6. Commits `b1a4c7a2` and `19e3a340` add implementation and tests. This remains an **offline prototype**. It is not the SQL caller's canonical validator, is not integrated with an atomic quarantine ledger, and does not validate every possible provider field. Its ACCEPT result is not a standalone production-write permission.
+
+## Offline snapshot planner prototype (2026-11-18)
+
+Commits `3063b298` and `578d94be` add `openapi-quarantine-plan.prototype.mjs` and an offline test file. The prototype requires explicit capture date/hash/timestamp, validates race identity and all six registration identities for each race, then partitions **result-layer metadata only** into ACCEPT/PENDING/QUARANTINE while preserving a list of validated program keys. Synthetic tests cover mixed valid/invalid results, missing racer, incomplete payout, absent result, wrong date, duplicate racer and malformed source hash. Check latest CI before treating tests as passing.
+
+**Important limitations:** no actual race payload persistence, no quarantine ledger, no SQL transaction, no complete provider schema validation, no preview-layer partition, no source freshness proof, no official data licensing verification and no trigger isolation. The planner deliberately does not filter program arrays for writing and is **not connected to production**. Its input must undergo complete canonical validation before any future integration. Q01–Q12 are not satisfied end-to-end by this prototype.
