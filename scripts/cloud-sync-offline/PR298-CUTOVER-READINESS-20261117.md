@@ -73,3 +73,29 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - On 11/17, 0 of 214 successful calls at the observation time reported full six-boat counts; max 726 entries for 132 events. This day is intraday.
 - The change is temporally between 11/12 and 11/13; no root cause proven. In particular, source-reported counts do not establish that the *same race* has six valid racer identities. Do not infer cause from aggregate numbers.
 - The current candidate's strict six-boat requirement would reject incomplete snapshots, which is safer than silently claiming success, but may leave all races unavailable until the upstream payload is complete. Determine source completeness behavior and fallback strategy before any cutover.
+
+## 2026-11-18 follow-up: live read-only production recheck
+
+This is evidence only; no production installation, backfill, Cron change or merge is authorized.
+
+- Existing active Cron: jobid 1, boatstrikers-openapi-live-3m, schedule */3 23,0-14 * * *, calling public.bs_sync_openapi_today(). Never activate a second writer concurrently.
+- Five existing OpenAPI SECURITY DEFINER RPCs are owned by postgres; four set search_path=public and Cron sets search_path=public,extensions. PUBLIC EXECUTE is false; service_role EXECUTE is observed.
+- Six inspected public race/result tables have RLS enabled. Table-level INSERT grants exist for anon/authenticated/service_role, but zero INSERT/ALL RLS policies were found. This is not proof of safety of all indirect write paths.
+
+| Race date | Events | Entries | Results |
+|---|---:|---:|---:|
+| 2026-11-13 | 0 | 0 | 156 |
+| 2026-11-14 | 0 | 0 | 168 |
+| 2026-11-15 | 0 | 0 | 156 |
+| 2026-11-16 | 0 | 0 | 120 |
+| 2026-11-17 | 0 | 0 | 132 |
+| 2026-11-18 | 0 | 0 | 0 |
+
+The 2026-11-18 row is intraday, not a final completeness judgment. Across Nov 13-17, 732 result rows coexist with zero program/event and entry rows. Never synthesize official programs from results.
+
+- At GitHub HEAD 257bb8c71247da85392effba7ad17e1b6089adfe, offline contract run 44121784474 and disposable PostgreSQL fixture run 44121784773 both completed SUCCESS, including atomic rollback and retry steps.
+- Existing development branch gamagori-pr294-phase13 reports MIGRATIONS_FAILED; do not treat it as clean PR298 integration environment.
+
+Remaining HOLD gates: live upstream six-boat payload completeness and provider rights; approved clean isolated environment with migration/trigger parity; actual DB rollback and competing writer tests; privately captured exact legacy Cron rollback command; exclusive cutover and persisted six-boat assertions; separate approval for production changes and historical repairs.
+
+No production writes, paid resources, Cron changes or merge performed.
