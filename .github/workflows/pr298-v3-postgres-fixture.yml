@@ -46,6 +46,8 @@ jobs:
         run: python3 scripts/cloud-sync-offline/check-isolation-trigger-parity.py
       - name: Check PostgreSQL client
         run: psql --version
+      - name: Install disposable fixture schema
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
       - name: Verify captured production bootstrap RPC in separate disposable database
         run: |
           python3 scripts/cloud-sync-offline/extract-isolation-bootstrap.py
@@ -57,11 +59,8 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results-function.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results.assert.sql
-          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -c 'CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN;'
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql
-      - name: Install disposable fixture schema
-        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
       - name: Install candidate functions in isolated PostgreSQL
         run: |
           psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-unified-quality-rows.candidate.sql
