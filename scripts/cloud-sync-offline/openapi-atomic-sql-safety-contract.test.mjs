@@ -43,12 +43,7 @@ test('production readiness probe is read-only and checks persisted key/identity 
  assert.match(readiness,/events_without_six_entries/);
  assert.match(readiness,/count\(DISTINCT en\.boat_no\)<>6/);
  assert.match(readiness,/count\(DISTINCT en\.racer_registration_no\)<>6/);
- assert.match(readiness,/racer_registration_no !~ '\^\(0\[0-9\]\{4\}\|\[0-9\]\{4\}\)\
- assert.match(readiness,/LOCAL-IDENTITY PASS ONLY/);
- assert.doesNotMatch(readiness,/\b(?:INSERT|UPDATE|DELETE|TRUNCATE|CREATE|ALTER|DROP|GRANT|REVOKE|CALL|DO)\s+(?:INTO\s+|FROM\s+|TABLE\s+|FUNCTION\s+)?(?:public\.|cron\.|\w+\s*\()/i);
- assert.equal((readiness.match(/\bSELECT\s+p\.race_date/g)||[]).length,1);
-});
-/);
+ assert.ok(readiness.includes("racer_registration_no !~ '^(0[0-9]{4}|[0-9]{4})$'"));
  assert.match(readiness,/HOLD: no persisted events/);
  assert.match(readiness,/LOCAL-IDENTITY PASS ONLY/);
  assert.doesNotMatch(readiness,/\b(?:INSERT|UPDATE|DELETE|TRUNCATE|CREATE|ALTER|DROP|GRANT|REVOKE|CALL|DO)\s+(?:INTO\s+|FROM\s+|TABLE\s+|FUNCTION\s+)?(?:public\.|cron\.|\w+\s*\()/i);
