@@ -42,12 +42,25 @@ try {
     { status: 'success' }, { Prefer: 'return=representation' });
   assert.equal(missing.status, 200);
   assert.deepEqual(missing.data, []);
+  // PostgREST singular representation is the wire contract used by supabase-js .single().
+  const singularHeaders = {
+    Prefer: 'return=representation',
+    Accept: 'application/vnd.pgrst.object+json',
+  };
+  const singular = await request('PATCH', `?id=eq.${id}&select=id`, serviceKey,
+    { status: 'success' }, singularHeaders);
+  assert.equal(singular.status, 200, 'singular update must succeed');
+  assert.deepEqual(singular.data, { id });
+  const singularMissing = await request('PATCH', '?id=eq.-1&select=id', serviceKey,
+    { status: 'success' }, singularHeaders);
+  assert.equal(singularMissing.status, 406, 'singular zero-row update must reject');
+  assert.equal(singularMissing.data?.code, 'PGRST116');
   if (anonKey) {
     const denied = await request('PATCH', `?id=eq.${id}&select=id`, anonKey,
       { status: 'error' }, { Prefer: 'return=representation' });
     assert.ok(denied.status === 401 || denied.status === 403, 'anon update must be denied');
   }
-  console.log('PASS: isolated HTTP insert, update representation, zero-match' +
+  console.log('PASS: isolated HTTP insert, update representation, zero-match, singular update, singular zero-match' +
     (anonKey ? ', anon denied' : ' (anon test skipped: no key)'));
 } finally {
   if (id !== undefined) {
