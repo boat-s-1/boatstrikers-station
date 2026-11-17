@@ -1,7 +1,7 @@
 import RacesSeoIntro from './RacesSeoIntro';
 
 export const metadata = {
-  title: '本日のボートレース出走表・レース情報｜BoatStrikers',
+  title: '本日のボートレース出走表・レース情報',
   description: '今日のボートレース開催場、出走表、締切時刻、選手・モーター・展示情報、AI注目レースをBoatStrikersでまとめて確認できます。',
   alternates: { canonical: '/races' },
   openGraph: {

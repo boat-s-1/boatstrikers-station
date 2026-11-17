@@ -48,7 +48,7 @@ async function getLatestStadiumArticles() {
 }
 
 export const metadata = {
-  title: '全国24場 DATA BOOK｜BoatStrikers',
+  title: '全国24場 DATA BOOK',
   description:
     '全国24場の直近1年データ、出目、季節、風、展示AI、今日の出走表と直前評価を場別に確認できます。',
 };

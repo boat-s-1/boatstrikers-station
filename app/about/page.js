@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./about.module.css";
 
 export const metadata = {
-  title: "BoatStrikersについて｜BoatStrikers",
+  title: "BoatStrikersについて",
   description:
     "BoatStrikersは、出走表、展示情報、初心者講座、全国24場攻略、DATA LABによる独自データ検証などを発信するボートレース情報サイトです。",
   alternates: {

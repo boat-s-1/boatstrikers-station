@@ -8,7 +8,7 @@ import styles from "./schedule.module.css";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "ボートレース番組表・今週の配信予定｜BoatStrikers",
+  title: "ボートレース番組表・今週の配信予定",
   description: "BoatStrikersの週間番組表。今週のボートレース関連動画、ラジオ、記事などの公開予定を曜日別に確認できます。今日の出走表や初心者ガイドにもつながります。",
   alternates: { canonical: "/schedule" },
   openGraph: {
