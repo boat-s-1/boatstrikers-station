@@ -1,0 +1,72 @@
+name: Hatsune Cron Log Finish Guard Offline
+on:
+  push:
+    branches:
+      - codex/hatsune-cron-log-finish-guard-20261117
+  pull_request:
+    paths:
+      - lib/hatsuneCronLog.js
+      - app/api/cron/hatsune-news-pipeline/route.js
+      - tests/hatsune-cron-log-*.test.mjs
+      - tests/hatsune-cron-postgrest-http.mjs
+      - tests/hatsune-cron-postgrest-http.test.mjs
+      - tests/hatsune-cron-supabase-client.test.mjs
+      - tests/sql/hatsune-cron-log-*.sql
+      - .github/workflows/hatsune-cron-log-finish-guard.yml
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Offline source contract (no secrets or network fetch)
+        run: node --test tests/hatsune-cron-log-*.test.mjs
+      - name: Syntax check of isolated HTTP verification (no HTTP performed)
+        run: node --check tests/hatsune-cron-postgrest-http.mjs
+      - name: Offline mocked HTTP runner regressions (no HTTP performed)
+        run: node --test tests/hatsune-cron-postgrest-http.test.mjs
+  isolated-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-only
+          POSTGRES_DB: hatsune_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hatsune_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run rollback-only SQL assertions in disposable PostgreSQL
+        env:
+          PGPASSWORD: isolated-only
+        run: |
+          psql -h localhost -U postgres -d hatsune_test -v ON_ERROR_STOP=1 -f tests/sql/hatsune-cron-log-finish-isolated.sql
+          test "$(psql -h localhost -U postgres -d hatsune_test -Atc "select count(*) from information_schema.schemata where schema_name='hatsune_finish_test'")" = "0"
+  supabase-client-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned supabase-js in isolated temp directory
+        run: |
+          mkdir -p /tmp/pr301-client
+          npm install --prefix /tmp/pr301-client --ignore-scripts --no-audit --no-fund --no-package-lock --save-exact @supabase/supabase-js@2.53.0
+      - name: Exercise actual supabase-js client with offline fetch
+        env:
+          PR301_CLIENT_DIR: /tmp/pr301-client
+        run: node --test tests/hatsune-cron-supabase-client.test.mjs

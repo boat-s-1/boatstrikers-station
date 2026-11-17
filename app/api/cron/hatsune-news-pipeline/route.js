@@ -49,6 +49,11 @@ async function isAuthorized(request) {
   }
 }
 
+function diagnosticCode(error, fallback) {
+  const code = error?.code;
+  return typeof code === "string" && /^[A-Z0-9_]{1,40}$/.test(code) ? code : fallback;
+}
+
 function countValue(value) {
   if (Array.isArray(value)) return value.length;
   const n = Number(value);
@@ -64,7 +69,7 @@ export async function GET(request) {
   try {
     logContext = await startHatsuneCronRun("pipeline");
   } catch (error) {
-    console.error("Hatsune cron log start failed", error);
+    console.error("Hatsune cron log start failed", { code: diagnosticCode(error, "START_FAILURE") });
   }
 
   try {
@@ -144,7 +149,8 @@ export async function GET(request) {
     const ok = errorCount === 0;
 
     if (logContext) {
-      await finishHatsuneCronRun({
+      try {
+        await finishHatsuneCronRun({
         ...logContext,
         status: ok ? "success" : "partial",
         metrics: {
@@ -163,7 +169,14 @@ export async function GET(request) {
           [...collectionErrors, ...mediaErrors, ...generalErrors].map((x) => x?.message || String(x)).join(" | ") ||
           null,
         details: { collection, media, mediaError, general, generalError, fallback, fallbackError, aiErrors },
-      });
+        });
+      } catch (finishError) {
+        // Publishing may already have committed: do not convert a completed run
+        // into an HTTP 500 merely because its diagnostic log could not be saved.
+        console.error("Hatsune cron log finish transport failed", {
+          code: diagnosticCode(finishError, "TRANSPORT_FAILURE"),
+        });
+      }
     }
 
     return NextResponse.json({
@@ -185,12 +198,19 @@ export async function GET(request) {
   } catch (error) {
     const message = error?.message || String(error);
     if (logContext) {
-      await finishHatsuneCronRun({
-        ...logContext,
-        status: "error",
-        metrics: { errorCount: 1 },
-        errorMessage: message,
-      });
+      try {
+        await finishHatsuneCronRun({
+          ...logContext,
+          status: "error",
+          metrics: { errorCount: 1 },
+          errorMessage: message,
+        });
+      } catch (finishError) {
+        // Preserve the original pipeline error and response when log transport fails.
+        console.error("Hatsune cron log finish transport failed", {
+          code: diagnosticCode(finishError, "TRANSPORT_FAILURE"),
+        });
+      }
     }
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
