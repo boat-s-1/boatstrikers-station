@@ -31,3 +31,7 @@
 - `touch_bs_member_profiles_updated_at()` は updated_at を更新するだけで特権列を保護しない。
 - したがって、通常会員に対する INSERT/UPDATE 権限を絞る場合も、SECURITY DEFINER の登録経路を維持できるかを隔離で検証する。新規登録を停止させないことが必須。
 - 現行の新規登録処理は全員を beta_premium / active / beta_member に初期化する。掲示板の「有料会員」をこれらの値だけで判定すると、課金済みユーザーと区別できない可能性がある。課金の正本とベータ特典の取り扱いは**未確定**。
+
+## 課金正本の確認状況
+
+本番 `public` スキーマでテーブル名に `member`、`subscription`、`payment`、`billing`、`stripe` を含むテーブルを列挙した。該当したのは `bs_member_profiles`、`bs_member_plan_events`、Discord/LINE連携、通知設定、利用状況、選手お気に入りなどの8件で、名前から明確に識別できる課金・サブスクリプション専用テーブルは確認できなかった。**これは外部課金サービスや別スキーマに正本がないことを証明しない**。実際の課金ソースは未確認。
