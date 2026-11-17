@@ -20,7 +20,7 @@ CREATE TABLE agent_monitor.incident_reservations (
 CREATE TABLE agent_monitor.notification_outbox (
  outbox_id text PRIMARY KEY,
  incident_key text NOT NULL REFERENCES agent_monitor.incident_reservations(incident_key),
- delivery_state text NOT NULL CHECK (delivery_state IN ('pending_review','approved','delivered','failed'))
+ delivery_state text NOT NULL CHECK (delivery_state IN ('pending_review','approved','in_flight','delivered','failed','delivery_unknown'))
 );
 CREATE UNIQUE INDEX notification_outbox_one_per_incident ON agent_monitor.notification_outbox(incident_key);
 SQL
