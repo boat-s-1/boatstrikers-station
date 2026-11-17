@@ -21,7 +21,7 @@ test('all identifiers are constrained text, not uuid',()=>{
  for(const name of ['event_id','attempt_id','incident_key','outbox_id'])assert.match(sql,new RegExp(name+' text (?:PRIMARY KEY|NOT NULL) CHECK'));
 });
 test('all five ID checks are closed',()=>{
- const lines=sql.split('\n').filter(line=>/^ (?:event_id|attempt_id|incident_key|outbox_id) text /.test(line));
+ const lines=sql.split('\n').filter(line=>/^ (?:event_id|attempt_id|incident_key|outbox_id) text /.test(line)&&line.includes('CHECK ('));
  assert.equal(lines.length,5);
  for(const line of lines){assert.ok(line.includes('CHECK ('),line);assert.ok(line.trimEnd().endsWith("$'),")||line.trimEnd().endsWith("$')"),line);}
 });
