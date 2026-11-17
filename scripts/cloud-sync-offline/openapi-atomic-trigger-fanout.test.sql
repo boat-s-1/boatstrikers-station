@@ -18,7 +18,7 @@ BEGIN
    RAISE EXCEPTION 'fixture injected Ichika evaluator failure';
  END IF;
  INSERT INTO public.atomic_ichika_evaluation_calls DEFAULT VALUES;
-END $;
+END; $$;
 CREATE OR REPLACE FUNCTION public.trigger_evaluate_ichika_escape_surge_alerts()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public'
 AS $$
