@@ -96,6 +96,19 @@ BEGIN
    OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'result')='object'
       AND rv #> '{result,racers}' IS NOT NULL
       AND jsonb_typeof(rv #> '{result,racers}') NOT IN ('object','null'))
+   -- Optional preview/result identity fields must agree with the parent race.
+   OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'preview')='object'
+      AND ((rv #>> '{preview,stadium_number}' IS NOT NULL
+         AND rv #>> '{preview,stadium_number}' IS DISTINCT FROM sk)
+        OR (rv #>> '{preview,race_number}' IS NOT NULL
+         AND rv #>> '{preview,race_number}' IS DISTINCT FROM rk)))
+   OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'result')='object'
+      AND ((rv #>> '{result,date}' IS NOT NULL
+         AND rv #>> '{result,date}' IS DISTINCT FROM v_date::text)
+        OR (rv #>> '{result,stadium_number}' IS NOT NULL
+         AND rv #>> '{result,stadium_number}' IS DISTINCT FROM sk)
+        OR (rv #>> '{result,race_number}' IS NOT NULL
+         AND rv #>> '{result,race_number}' IS DISTINCT FROM rk)))
    OR EXISTS(SELECT 1 FROM race WHERE jsonb_typeof(rv->'preview')='object'
       AND rv #>> '{preview,date}' IS NOT NULL
       AND rv #>> '{preview,date}' IS DISTINCT FROM v_date::text)
