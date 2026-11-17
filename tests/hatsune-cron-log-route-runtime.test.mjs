@@ -18,6 +18,7 @@ function harness({ collection = { inserted: 1, errors: [] }, finishError = null,
     console: { error: (...args) => logs.push(args) },
     NextResponse: { json: (body, options = {}) => ({ status: options.status ?? 200, body }) },
     isAuthorized: async () => true,
+    diagnosticCode: (error, fallback) => typeof error?.code === "string" && /^[A-Z0-9_]{1,40}$/.test(error.code) ? error.code : fallback,
     startHatsuneCronRun: async () => { if (startError) throw startError; return { supabase: {}, run: { id: 7 } }; },
     finishHatsuneCronRun: async (payload) => {
       calls.push(payload);
