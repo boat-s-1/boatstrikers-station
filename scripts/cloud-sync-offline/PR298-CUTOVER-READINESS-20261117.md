@@ -64,3 +64,12 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - The probe's `incomplete_six_boat_races=0` for all five dates is vacuous because no entry rows exist; it is **not** a completeness PASS.
 - CI at `3e4aa803`: both PostgreSQL fixture (44054935827) and offline contract (44054935875) completed SUCCESS.
 - No production changes. Full-schema trigger benchmark, live official payload parity, and safe canary still HOLD.
+
+## Source cardinality transition investigation (read-only, 2026-11-17)
+- New read-only audit: `PR298-PRODUCTION-READONLY-SOURCE-CARDINALITY.sql`; executed against production.
+- 11/11 persisted 144 events / 864 entries; 11/12 persisted 156 / 936. From 11/13 onward, both tables have zero daily rows despite results being present.
+- On 11/11 and 11/12, **62 of 310** successful `live_all` calls per day reported the full six-boat count; 248 calls per day reported incomplete/zero entry counts. The successful log count by itself is not a validity metric.
+- On 11/13, 11/14, 11/15 and 11/16, **0 of 310** successful calls per day reported `entry_rows = 6*event_rows` (max entries 935/1003/935/718 for 156/168/156/120 events).
+- On 11/17, 0 of 214 successful calls at the observation time reported full six-boat counts; max 726 entries for 132 events. This day is intraday.
+- The change is temporally between 11/12 and 11/13; no root cause proven. In particular, source-reported counts do not establish that the *same race* has six valid racer identities. Do not infer cause from aggregate numbers.
+- The current candidate's strict six-boat requirement would reject incomplete snapshots, which is safer than silently claiming success, but may leave all races unavailable until the upstream payload is complete. Determine source completeness behavior and fallback strategy before any cutover.
