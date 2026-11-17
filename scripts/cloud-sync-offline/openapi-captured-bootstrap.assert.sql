@@ -65,5 +65,36 @@ BEGIN
  IF EXISTS (SELECT 1 FROM public.bs_race_entries WHERE race_date=d AND race_no=5) THEN
    RAISE EXCEPTION 'orphan entry persisted despite foreign key';
  END IF;
- RAISE NOTICE 'Captured production bootstrap PASS: 1+6, replay 0+0, malformed rollback, partial repair, metadata preservation, FK guard';
+ -- An invalid entry in a later race must undo earlier race inserts
+ -- from the same captured bootstrap invocation (cross-race atomicity).
+ BEGIN
+   PERFORM public.bs_apply_openapi_bootstrap(
+     jsonb_build_array(
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',6),
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',7)),
+     jsonb_build_array(
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',6,
+         'boat_no',1,'racer_registration_no','02001'),
+       jsonb_build_object('race_date',d,'course_code',9,'race_no',7,
+         'boat_no',1,'national_win_rate','not-a-number')),now());
+   RAISE EXCEPTION 'cross-race malformed entry unexpectedly accepted';
+ EXCEPTION WHEN invalid_text_representation THEN NULL;
+ END;
+ IF EXISTS (SELECT 1 FROM public.bs_race_events
+            WHERE race_date=d AND course_code=9 AND race_no IN (6,7))
+    OR EXISTS (SELECT 1 FROM public.bs_race_entries
+               WHERE race_date=d AND course_code=9 AND race_no IN (6,7)) THEN
+   RAISE EXCEPTION 'cross-race rollback failed: partial event or entry persisted';
+ END IF;
+ -- Invalid boat numbers are filtered by the captured bootstrap RPC, not
+ -- inserted into the destination table. Record this behavior explicitly.
+ result := public.bs_apply_openapi_bootstrap(
+   jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,'race_no',8)),
+   jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,'race_no',8,
+      'boat_no',7,'racer_registration_no','02007')),now());
+ IF (result->>'event_inserted')::int <> 1 OR (result->>'entry_inserted')::int <> 0 THEN
+   RAISE EXCEPTION 'unexpected invalid boat filtering behavior: %',result;
+ END IF;
+ RAISE NOTICE 'Captured production bootstrap PASS: 1+6, replay, malformed rollback, partial repair, metadata preservation, FK guard, cross-race rollback, invalid boat filtering';
+
 END $test$;
