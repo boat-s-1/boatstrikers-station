@@ -4,6 +4,8 @@ on:
     paths:
       - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
       - 'scripts/cloud-sync-offline/openapi-atomic-*.sql'
+      - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
+      - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
       - '.github/workflows/pr298-v3-postgres-fixture.yml'
   workflow_dispatch:
 permissions:
@@ -35,6 +37,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify isolation trigger inventory against production read-only catalog
+        run: python3 scripts/cloud-sync-offline/check-isolation-trigger-parity.py
       - name: Check PostgreSQL client
         run: psql --version
       - name: Install disposable fixture schema
