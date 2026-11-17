@@ -206,6 +206,21 @@ BEGIN
  IF (SELECT count(*) FROM atomic_fixture_writes)<>12 THEN
    RAISE EXCEPTION 'equivalent compact/hyphenated trifecta rejected';
  END IF;
+ -- Normalization must not hide a genuinely different combination.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,
+       'trifecta_result','1-3-2','trifecta_payout',1200)),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'different compact trifecta accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='different compact trifecta accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>12 THEN
+   RAISE EXCEPTION 'different compact trifecta called writer';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
