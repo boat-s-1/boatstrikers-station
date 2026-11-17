@@ -37,3 +37,12 @@ masquerade as pre-race evidence for TRINITY.
 4. Independently resolve data rights and production parity before cutover.
 
 **HOLD**. No production writes, Cron changes, deployments or paid branch.
+
+## Follow-up: correction and CI evidence (2026-11-17)
+
+- Candidate SQL now checks `stadium_number` at race level: `943d7498`.
+- Negative and settled synthetic fixtures updated: `d7bb5105`, `7a485293`.
+- Runtime fixture was initially overlooked, causing isolated PostgreSQL CI failure. Corrected in `131cf3d9`.
+- At `131cf3d9`, GitHub Actions **both passed**: offline contract run `44098788170`, isolated PostgreSQL run `44098787958`.
+- An attempt to retrieve live `today.json` using the GitHub connector was rejected because the URL is outside the connected GitHub host. A separate public web fetch returned a **stale cached response** (crawled months earlier), not proof of the current payload. Real-time compatibility remains **UNVERIFIED**.
+- Documentation-derived fixture compatibility is not equivalent to a real provider response; data rights and production parity remain HOLD.
