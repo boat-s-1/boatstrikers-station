@@ -194,6 +194,18 @@ BEGIN
  IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
    RAISE EXCEPTION 'incomplete trifecta called writer';
  END IF;
+ -- The production event uses compact trifecta (123) while results
+ -- often use hyphenated (1-2-3). Equivalent values are not conflicts.
+ UPDATE public.bs_race_events SET trifecta='123' WHERE race_date=d
+   AND course_code=9 AND race_no=1;
+ PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+   '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+      'race_date',d,'course_code',9,'race_no',1,
+      'trifecta_result','1-2-3','trifecta_payout',1200)),
+   '[]'::jsonb,now());
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>12 THEN
+   RAISE EXCEPTION 'equivalent compact/hyphenated trifecta rejected';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
@@ -284,7 +296,7 @@ BEGIN
    IF SQLERRM='duplicate result boat accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%dependent payload%' THEN RAISE; END IF;
  END;
- IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>12 THEN
    RAISE EXCEPTION 'invalid payload caused writes';
  END IF;
  RAISE NOTICE 'Atomic OpenAPI transaction, rollback, ordering, validation PASS';
