@@ -164,6 +164,10 @@ BEGIN
     OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
    RAISE EXCEPTION 'event-side conflict mutated data or called writer';
  END IF;
+ -- Compact event-side exacta/quinella must compare equal to hyphenated
+ -- incoming combinations, just like the trifecta normalization.
+ UPDATE public.bs_race_events SET exacta='12',quinella='12'
+ WHERE race_date=d AND course_code=9 AND race_no=1;
  -- Identical already-persisted values must remain acceptable for
  -- idempotent retries; the fixture writers are deliberately stubbed.
  PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
