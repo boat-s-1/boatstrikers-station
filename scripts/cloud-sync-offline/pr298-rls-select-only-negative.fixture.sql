@@ -47,6 +47,7 @@ BEGIN
     IF FOUND THEN
       RAISE EXCEPTION 'PR298_FAIL: anon UPDATE changed a row';
     END IF;
+    RAISE NOTICE 'PR298_PASS: anon UPDATE affected zero rows under RLS';
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: anon UPDATE rejected by RLS';
   END;
@@ -55,6 +56,7 @@ BEGIN
     IF FOUND THEN
       RAISE EXCEPTION 'PR298_FAIL: anon DELETE changed a row';
     END IF;
+    RAISE NOTICE 'PR298_PASS: anon DELETE affected zero rows under RLS';
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: anon DELETE rejected by RLS';
   END;
@@ -69,6 +71,7 @@ BEGIN
     IF FOUND THEN
       RAISE EXCEPTION 'PR298_FAIL: authenticated UPDATE changed a row';
     END IF;
+    RAISE NOTICE 'PR298_PASS: authenticated UPDATE affected zero rows under RLS';
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: authenticated UPDATE rejected by RLS';
   END;
@@ -77,6 +80,7 @@ BEGIN
     IF FOUND THEN
       RAISE EXCEPTION 'PR298_FAIL: authenticated DELETE changed a row';
     END IF;
+    RAISE NOTICE 'PR298_PASS: authenticated DELETE affected zero rows under RLS';
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: authenticated DELETE rejected by RLS';
   END;
