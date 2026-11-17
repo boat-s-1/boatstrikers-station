@@ -13,7 +13,7 @@ create table public.community_threads (
   body text not null check (char_length(body) between 1 and 20000),
   character_key text not null check (character_key in ('ichika','hatsune','kiina')),
   audience text not null check (audience in ('public','members','paid')),
-  reply_policy text not null default 'paid' check (reply_policy in ('paid','disabled')),
+  reply_policy text not null default 'disabled' check (reply_policy in ('paid','disabled')),
   status text not null default 'draft' check (status in ('draft','published','archived')),
   locked boolean not null default false,
   published_at timestamptz,
@@ -35,7 +35,7 @@ create policy community_threads_public_read
   using (status = 'published' and audience = 'public' and published_at <= now());
 ```
 
-上記は**一般公開投稿だけ**を対象とする初期防御。一般会員/有料会員への非公開投稿のSELECT権限は追加していない。管理者投稿も `anon` / `authenticated` からのINSERT/UPDATE/DELETEを許可しない。認証済み会員向けポリシーは既存会員権限の安全確認後に別レビューする。
+返信はデフォルトで `disabled` とし、運営が明示的に `paid` を指定するまで返信可能にならない。これはアプリ側の fail-closed 方針と一致させるための設計上の重要条件。\n\n上記は**一般公開投稿だけ**を対象とする初期防御。一般会員/有料会員への非公開投稿のSELECT権限は追加していない。管理者投稿も `anon` / `authenticated` からのINSERT/UPDATE/DELETEを許可しない。認証済み会員向けポリシーは既存会員権限の安全確認後に別レビューする。
 
 ## 次段階のレビュー項目
 
