@@ -185,12 +185,19 @@ export async function GET(request) {
   } catch (error) {
     const message = error?.message || String(error);
     if (logContext) {
-      await finishHatsuneCronRun({
-        ...logContext,
-        status: "error",
-        metrics: { errorCount: 1 },
-        errorMessage: message,
-      });
+      try {
+        await finishHatsuneCronRun({
+          ...logContext,
+          status: "error",
+          metrics: { errorCount: 1 },
+          errorMessage: message,
+        });
+      } catch (finishError) {
+        // Preserve the original pipeline error and response when log transport fails.
+        console.error("Hatsune cron log finish transport failed", {
+          code: finishError?.code || "TRANSPORT_FAILURE",
+        });
+      }
     }
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
