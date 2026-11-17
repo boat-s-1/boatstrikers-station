@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../lib/hatsuneCronLog.js',import.meta.url),'utf8');
 test('finish checks PostgREST update result, not just rejected promise',()=>{
- assert.match(source,/const \{ data, error \} = await supabase[\s\S]*?\.update\(payload\)[\s\S]*?\.eq\("id", run\.id\)[\s\S]*?\.select\("id"\)[\s\S]*?\.maybeSingle\(\)/);
+ assert.match(source,/const \{ data, error \} = await supabase[\s\S]*?\.update\(payload\)[\s\S]*?\.eq\("id", run\.id\)[\s\S]*?\.select\("id"\)[\s\S]*?\.single\(\)/);
  assert.match(source,/if \(error \|\| !data\?\.id\)/);
 });
 test('completion failure logs bounded metadata without error message or credential',()=>{
