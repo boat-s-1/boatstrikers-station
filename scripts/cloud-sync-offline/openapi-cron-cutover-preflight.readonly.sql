@@ -11,9 +11,9 @@ WITH live_job AS (
  SELECT pg_get_functiondef(legacy) AS body FROM funcs
 ), checks AS (
  SELECT 'single_active_live_cron' AS name,
-  (SELECT count(*)=1 AND bool_and(active) FROM live_job) AS passed
+  (SELECT count(*)=1 AND coalesce(bool_and(active AND jobid=1),false) FROM live_job) AS passed
  UNION ALL SELECT 'legacy_job_not_modified',
-  (SELECT bool_and(command ~* 'bs_sync_openapi_today') FROM live_job)
+  (SELECT count(*)=1 AND coalesce(bool_and(btrim(command)='select public.bs_sync_openapi_today();' AND schedule='*/3 23,0-14 * * *'),false) FROM live_job)
  UNION ALL SELECT 'atomic_candidate_installed', (SELECT atomic IS NOT NULL FROM funcs)
  UNION ALL SELECT 'atomic_service_role_only',
   (SELECT CASE WHEN atomic IS NULL THEN false ELSE
