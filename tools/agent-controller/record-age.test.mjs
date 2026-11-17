@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessRecordAge} from './record-age.mjs';
+const sample={as_of:'2026-11-17T00:00:00Z',records:{discord_deliveries:{rows_total:3921,latest_observed_at:'2026-11-12T11:25:04.857Z'},race_events:{rows_total:70776,latest_observed_at:'2026-11-12T14:27:00.101Z'},hatsune_news_cron_runs:{rows_total:243,latest_observed_at:'2026-11-16T13:00:06.921Z'}}};
+test('ages are computed from explicit UTC time',()=>assert.ok(assessRecordAge(sample).records.discord_deliveries.age_hours>100));
+test('no health verdict inferred from old data',()=>{const r=assessRecordAge(sample);assert.equal(r.records.discord_deliveries.health,'unknown');assert.equal(r.thresholds_applied,false);});
+test('cron record does not imply all crons are healthy',()=>assert.equal(assessRecordAge(sample).records.hatsune_news_cron_runs.health,'unknown'));
+test('missing source is not checked',()=>assert.equal(assessRecordAge({...sample,records:{}}).records.race_events.freshness,'not_checked'));
+test('empty source is not a failure',()=>assert.equal(assessRecordAge({...sample,records:{race_events:{rows_total:0,latest_observed_at:null}}}).records.race_events.freshness,'no_records'));
+test('future timestamps fail closed',()=>assert.throws(()=>assessRecordAge({...sample,records:{race_events:{rows_total:1,latest_observed_at:'2026-11-18T00:00:00Z'}}})));
+test('negative counts fail closed',()=>assert.throws(()=>assessRecordAge({...sample,records:{race_events:{rows_total:-1,latest_observed_at:'2026-11-12T00:00:00Z'}}})));
+test('invalid timestamps fail closed',()=>assert.throws(()=>assessRecordAge({...sample,records:{race_events:{rows_total:1,latest_observed_at:'yesterday'}}})));
+test('as_of must be UTC',()=>assert.throws(()=>assessRecordAge({...sample,as_of:'2026-11-17'})));

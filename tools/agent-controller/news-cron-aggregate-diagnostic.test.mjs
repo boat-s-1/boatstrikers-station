@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {buildNewsCronDiagnostic as build} from './news-cron-aggregate-diagnostic.mjs';
+const running={status:'running',runs:34,no_completion_timestamp:34,windows_with_articles:32,articles_in_windows:295,published_flag_in_windows:291,reported_inserted_total:0,runs_with_reported_errors:0};
+const partial={status:'partial',runs:29,no_completion_timestamp:0,windows_with_articles:26,articles_in_windows:133,published_flag_in_windows:131,reported_inserted_total:133,runs_with_reported_errors:29};
+test('diagnostic aggregates without claiming health',()=>{const x=build([running,partial]);assert.equal(x.total_runs,63);assert.equal(x.production_health,'未確認')});
+test('running remains review',()=>assert.equal(build([running]).running.display,'要確認'));
+test('partial reports issue',()=>assert.equal(build([partial]).partial.display,'一部問題あり'));
+test('missing completion counted',()=>assert.equal(build([running,partial]).missing_completion_runs,34));
+test('article counts labeled temporal only',()=>assert.equal(build([running]).temporal_article_matches,295));
+test('never automatically replay',()=>assert.equal(build([running,partial]).automatic_replay_allowed,false));
+test('accept zero count aggregates',()=>assert.equal(build([{...running,runs:0,no_completion_timestamp:0,windows_with_articles:0,articles_in_windows:0,published_flag_in_windows:0}]).total_runs,0));
+test('reject duplicate statuses',()=>assert.throws(()=>build([running,running]),/invalid aggregate status/));
+test('reject negative count',()=>assert.throws(()=>build([{...running,runs:-1}]),/invalid aggregate runs/));
+test('reject windows above runs',()=>assert.throws(()=>build([{...running,windows_with_articles:35}]),/inconsistent aggregate/));
+test('reject published above created',()=>assert.throws(()=>build([{...running,published_flag_in_windows:296}]),/inconsistent aggregate/));
+test('reject missing data',()=>assert.throws(()=>build([]),/aggregate rows required/));

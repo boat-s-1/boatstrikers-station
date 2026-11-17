@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {planCronMonitorPipeline as plan} from './cron-monitor-offline-pipeline.mjs';
+const referenceAt=2000000;
+const snapshot={capturedAt:1999000,source:'cron_aggregate_readonly',readonlyVerified:true,queryFingerprint:'a'.repeat(64),records:[{attemptId:'a1',status:'unfinished',startedAt:1998000}]};
+const run=(overrides={})=>plan({snapshot,referenceAt,incidentKey:'cron:window:01',steps:[],...overrides});
+test('abnormal valid snapshot yields offline review only',()=>{const r=run();assert.equal(r.decision,'offline_review_only');assert.equal(r.writeAllowed,false);assert.equal(r.sendAllowed,false)});
+test('stale snapshot blocks entire pipeline',()=>{const r=run({snapshot:{...snapshot,capturedAt:1}});assert.equal(r.stage,'snapshot');assert.equal(r.decision,'hold')});
+test('unverified source blocks entire pipeline',()=>assert.equal(run({snapshot:{...snapshot,readonlyVerified:false}}).stage,'snapshot'));
+test('invalid incident key blocks pipeline',()=>assert.equal(run({incidentKey:'bad key'}).stage,'incident'));
+test('empty records block incident proposal',()=>assert.equal(run({snapshot:{...snapshot,records:[]}}).reason,'no_records_to_review'));
+test('healthy records do not create incident',()=>assert.equal(run({snapshot:{...snapshot,records:[{...snapshot.records[0],status:'completed'}]}}).reason,'no_abnormal_record'));
+test('unapproved transition blocks pipeline',()=>assert.equal(run({steps:[{event:'approve'}]}).stage,'outbox'));
+test('synthetic lifecycle is still not allowed to send',()=>{const r=run({steps:[{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'receipt_confirmed',authenticatedReceipt:true}]});assert.equal(r.proposedState,'delivered');assert.equal(r.decision,'offline_review_only');assert.equal(r.sendAllowed,false)});
+test('crashed worker cannot automatically replay',()=>{const r=run({steps:[{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'worker_lost'},{event:'retry_requested',operatorReviewed:true}]});assert.equal(r.stage,'outbox');assert.equal(r.sendAllowed,false)});

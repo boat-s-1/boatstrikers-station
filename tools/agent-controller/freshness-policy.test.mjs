@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluateFreshnessPolicy} from './freshness-policy.mjs';
+const assessment={schema:'boatstrikers-record-age-v1',records:{discord_deliveries:{freshness:'age_only',age_hours:120},race_events:{freshness:'age_only',age_hours:2},hatsune_news_cron_runs:{freshness:'not_checked'}}};
+const policy={schema:'boatstrikers-freshness-policy-v1',services:{discord_deliveries:{enabled:true,expected_max_age_hours:24},race_events:{enabled:true,expected_max_age_hours:24}}};
+test('overdue is review suggested not broken',()=>{const x=evaluateFreshnessPolicy({assessment,policy});assert.equal(x.services.discord_deliveries.status,'review_suggested');assert.equal(x.services.discord_deliveries.health,'unknown')});
+test('within window does not claim healthy',()=>{const x=evaluateFreshnessPolicy({assessment,policy});assert.equal(x.services.race_events.status,'within_configured_window');assert.equal(x.services.race_events.health,'unknown')});
+test('missing records are not checked',()=>assert.equal(evaluateFreshnessPolicy({assessment,policy}).services.hatsune_news_cron_runs.status,'not_checked'));
+test('disabled policy is not assessed',()=>assert.equal(evaluateFreshnessPolicy({assessment,policy:{...policy,services:{discord_deliveries:{enabled:false}}}}).services.discord_deliveries.status,'no_policy'));
+test('invalid thresholds fail closed',()=>assert.throws(()=>evaluateFreshnessPolicy({assessment,policy:{...policy,services:{discord_deliveries:{enabled:true,expected_max_age_hours:0}}}})));
+test('no automatic alerts or repairs',()=>{const x=evaluateFreshnessPolicy({assessment,policy});assert.equal(x.automatic_alerts,false);assert.equal(x.automatic_repairs,false)});
+test('invalid assessment rejected',()=>assert.throws(()=>evaluateFreshnessPolicy({assessment:{},policy})));
+test('missing policy rejected',()=>assert.throws(()=>evaluateFreshnessPolicy({assessment,policy:{}})));

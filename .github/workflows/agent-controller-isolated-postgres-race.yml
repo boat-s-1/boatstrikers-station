@@ -1,0 +1,92 @@
+name: BoatStrikers Agent Controller Isolated PostgreSQL Race
+on:
+  pull_request:
+    paths:
+      - 'tools/agent-controller/isolated-postgres-race-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-crash-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-claim-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-lease-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-atomic-outbox-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-receipt-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-lifecycle-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-transition-ci.sh'
+      - 'tools/agent-controller/isolated-node-db-adapter-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-receipt-guard-ci.sh'
+      - 'tools/agent-controller/isolated-node-signed-receipt-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-receipt-replay-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-replay-classifier-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-replay-audit-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-audit-append-only-ci.sh'
+      - 'tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-concurrent-replay-ci.sh'
+      - '.github/workflows/agent-controller-isolated-postgres-race.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres-race:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: agent_ci
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: agent_controller_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agent_ci -d agent_controller_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: agent_controller_ci
+      PGUSER: agent_ci
+      PGPASSWORD: disposable-ci-only
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify local PostgreSQL target
+        run: |
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "agent_controller_ci"
+          psql -X -v ON_ERROR_STOP=1 -qAt -c 'SELECT version();'
+      - name: Exercise two-session unique constraints
+        run: bash tools/agent-controller/isolated-postgres-race-ci.sh
+      - name: Inject crash and verify rollback and retry
+        run: bash tools/agent-controller/isolated-postgres-crash-ci.sh
+      - name: Exercise competing claim and stale-token fencing
+        run: bash tools/agent-controller/isolated-postgres-claim-ci.sh
+      - name: Exercise lease expiry and monotonic fencing
+        run: bash tools/agent-controller/isolated-postgres-lease-ci.sh
+      - name: Verify atomic incident and outbox transaction
+        run: bash tools/agent-controller/isolated-postgres-atomic-outbox-ci.sh
+      - name: Verify synthetic receipt and outbox state atomicity
+        run: bash tools/agent-controller/isolated-postgres-receipt-ci.sh
+      - name: Verify DB-only synthetic incident to receipt lifecycle
+        run: bash tools/agent-controller/isolated-postgres-lifecycle-ci.sh
+      - name: Reject invalid outbox transitions in PostgreSQL
+        run: bash tools/agent-controller/isolated-postgres-transition-ci.sh
+      - name: Exercise Node worker to disposable PostgreSQL integration
+        run: node tools/agent-controller/isolated-node-db-adapter-ci.mjs
+      - name: Enforce receipt requirement at database transition boundary
+        run: bash tools/agent-controller/isolated-postgres-receipt-guard-ci.sh
+      - name: Verify synthetic signature before isolated DB receipt commit
+        run: node tools/agent-controller/isolated-node-signed-receipt-ci.mjs
+      - name: Reject duplicate and conflicting receipt replay identities
+        run: bash tools/agent-controller/isolated-postgres-receipt-replay-ci.sh
+      - name: Distinguish identical receipt replay from conflicting payload
+        run: bash tools/agent-controller/isolated-postgres-replay-classifier-ci.sh
+      - name: Persist conflicting receipt replay audit rows in isolated database
+        run: bash tools/agent-controller/isolated-postgres-replay-audit-ci.sh
+      - name: Reject mutation of isolated receipt conflict audit records
+        run: bash tools/agent-controller/isolated-postgres-audit-append-only-ci.sh
+      - name: Detect synthetic audit alteration with Node SHA256 chain
+        run: node tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs
+      - name: Race conflicting receipt identities across two PostgreSQL sessions
+        run: bash tools/agent-controller/isolated-postgres-concurrent-replay-ci.sh

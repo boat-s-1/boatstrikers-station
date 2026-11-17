@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {importObservation} from './observation-import.mjs';
+const data={schema:'boatstrikers-observation-v1',trinity_mode:'migration',services:{discord:{result:'ok',observed_at:'2026-11-17T00:00:00Z'}}};
+test('safe input maps to unverified observation',()=>{const x=importObservation(JSON.stringify(data));assert.equal(x.services.discord.status,'reported_ok');assert.equal(x.live_checks_performed,false)});
+test('reject secret-like unexpected top-level keys',()=>assert.throws(()=>importObservation(JSON.stringify({...data,service_role:'secret'}))));
+test('reject unexpected nested data',()=>assert.throws(()=>importObservation(JSON.stringify({...data,services:{discord:{...data.services.discord,token:'secret'}}}))));
+test('reject unknown services',()=>assert.throws(()=>importObservation(JSON.stringify({...data,services:{collector:{result:'ok',observed_at:'2026-11-17T00:00:00Z'}}}))));
+test('reject oversized inputs',()=>assert.throws(()=>importObservation(' '.repeat(16385))));
+test('reject invalid JSON',()=>assert.throws(()=>importObservation('{')));
+test('reject arrays as top level',()=>assert.throws(()=>importObservation('[]')));
+test('reject arrays as services',()=>assert.throws(()=>importObservation(JSON.stringify({...data,services:[]}))));

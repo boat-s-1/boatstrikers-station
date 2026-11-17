@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessCronRuntimeBudget as assess} from './cron-runtime-budget.mjs';
+test('59.2 seconds near 60-second cap suggests limited headroom',()=>{const r=assess({maxDurationMs:60000,completedDurationMs:59203,finishedAtRecorded:true});assert.equal(r.assessment,'limited_headroom');assert.equal(r.remaining_ms,797);assert.equal(r.runtime_health,'unknown')});
+test('45 seconds is recorded without claiming health',()=>assert.equal(assess({maxDurationMs:60000,completedDurationMs:45000,finishedAtRecorded:true}).assessment,'duration_recorded'));
+test('missing completion does not prove timeout',()=>{const r=assess({maxDurationMs:60000});assert.equal(r.assessment,'missing_completion_evidence');assert.equal(r.runtime_health,'unknown')});
+test('never retries',()=>assert.equal(assess({maxDurationMs:60000}).automatic_retry,false));
+test('reject invalid duration',()=>assert.throws(()=>assess({maxDurationMs:60000,completedDurationMs:-1,finishedAtRecorded:true}),/invalid duration/));
+test('reject finished flag without duration',()=>assert.throws(()=>assess({maxDurationMs:60000,finishedAtRecorded:true}),/inconsistent/));
+test('reject duration without finished flag',()=>assert.throws(()=>assess({maxDurationMs:60000,completedDurationMs:200}),/invalid duration/));
+test('reject invalid cap',()=>assert.throws(()=>assess({maxDurationMs:0}),/invalid max duration/));

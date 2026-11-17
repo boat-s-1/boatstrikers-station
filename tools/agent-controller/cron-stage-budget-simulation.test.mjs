@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {simulateCronStageBudget as simulate} from './cron-stage-budget-simulation.mjs';
+const durationsMs={collection:12000,media:8000,general:12000,fallback:4000,ai:15000,finish_log:2000};
+test('all stages fit normal hypothetical budget',()=>{const x=simulate({durationsMs});assert.equal(x.stages.every(s=>s.decision==='admit'),true);assert.equal(x.finish_log_fits_simulated,true)});
+test('late AI stage skipped to reserve log time',()=>{const x=simulate({durationsMs:{...durationsMs,ai:25000}});assert.equal(x.stages.at(-1).decision,'skip_for_deadline');assert.equal(x.finish_log_fits_simulated,true)});
+test('no later stage admitted after skip',()=>{const x=simulate({durationsMs:{...durationsMs,media:49000}});assert.equal(x.stages[1].decision,'skip_for_deadline');assert.equal(x.stages[2].decision,'skip_for_deadline')});
+test('fallback inserted only when needed',()=>assert.equal(simulate({durationsMs,fallbackNeeded:true}).stages.some(s=>s.stage==='fallback'),true));
+test('AI stage omitted when disabled',()=>assert.equal(simulate({durationsMs,aiEnabled:false}).stages.some(s=>s.stage==='ai'),false));
+test('slow log may exceed cap despite reserve',()=>{const x=simulate({durationsMs:{...durationsMs,finish_log:60000}});assert.equal(x.finish_log_fits_simulated,false)});
+test('no automatic retries',()=>assert.equal(simulate({durationsMs}).automatic_retry,false));
+test('health remains unknown',()=>assert.equal(simulate({durationsMs}).production_health,'unknown'));
+test('reject negative duration',()=>assert.throws(()=>simulate({durationsMs:{...durationsMs,media:-1}}),/invalid stage duration media/));
+test('reject missing stage',()=>{const {general,...rest}=durationsMs;assert.throws(()=>simulate({durationsMs:rest}),/missing stage duration general/)});
+test('reject unknown stage',()=>assert.throws(()=>simulate({durationsMs:{...durationsMs,secret:2}}),/invalid stage durations/));
+test('reject reserve equal to limit',()=>assert.throws(()=>simulate({durationsMs,completionReserveMs:60000}),/invalid runtime budget/));
+test('reject invalid options',()=>assert.throws(()=>simulate({durationsMs,aiEnabled:'yes'}),/invalid stage options/));

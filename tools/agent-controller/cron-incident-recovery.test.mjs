@@ -1,0 +1,24 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessCronIncidentRecovery as assessBase} from './cron-incident-recovery.mjs';
+const assess=(input)=>assessBase({referenceAt:'2026-11-17T10:05:00Z',...input});
+const a={at:'2026-11-17T08:00:00Z',healthy:true,authenticated:true},b={...a,at:'2026-11-17T09:00:00Z'},c={...a,at:'2026-11-17T10:00:00Z'};
+test('empty stays open',()=>assert.equal(assess({observations:[]}).recovery_proposal,'keep_open'));
+test('one healthy stays open',()=>assert.equal(assess({observations:[a]}).recovery_proposal,'keep_open'));
+test('three healthy proposes manual close review',()=>assert.equal(assess({observations:[a,b,c]}).recovery_proposal,'manual_close_review'));
+test('does not close incident',()=>assert.equal(assess({observations:[a,b,c]}).incident_closed,false));
+test('does not verify recovery',()=>assert.equal(assess({observations:[a,b,c]}).recovery_verified,false));
+test('does not retry',()=>assert.equal(assess({observations:[a,b,c]}).automatic_retry_allowed,false));
+test('does not republish',()=>assert.equal(assess({observations:[a,b,c]}).automatic_republish_allowed,false));
+test('unauthenticated observation resets',()=>assert.equal(assess({observations:[a,{...b,authenticated:false},c]}).healthy_streak,1));
+test('unhealthy observation resets',()=>assert.equal(assess({observations:[a,{...b,healthy:false},c]}).healthy_streak,1));
+test('out of order rejected',()=>assert.throws(()=>assess({observations:[b,a]}),/order or gap/));
+test('duplicate time rejected',()=>assert.throws(()=>assess({observations:[a,a]}),/order or gap/));
+test('large gap rejected',()=>assert.throws(()=>assess({observations:[a,{...b,at:'2026-11-17T12:00:00Z'}]}),/order or gap/));
+test('invalid time rejected',()=>assert.throws(()=>assess({observations:[{...a,at:'today'}]}),/invalid observation/));
+test('invalid auth rejected',()=>assert.throws(()=>assess({observations:[{...a,authenticated:'yes'}]}),/invalid observation/));
+test('invalid threshold rejected',()=>assert.throws(()=>assess({observations:[a],requiredHealthy:1}),/invalid recovery input/));
+
+test('missing reference cannot propose recovery',()=>assert.equal(assessBase({observations:[a,b,c]}).recovery_proposal,'keep_open'));
+test('stale reference cannot propose recovery',()=>assert.equal(assess({observations:[a,b,c],referenceAt:'2026-11-17T11:00:00Z'}).recovery_proposal,'keep_open'));
+test('fresh reference is reported',()=>assert.equal(assess({observations:[a,b,c]}).evidence_fresh,true));
+test('future observation rejected',()=>assert.throws(()=>assess({observations:[a,b,c],referenceAt:'2026-11-17T09:30:00Z'}),/future observation/));
+test('invalid reference rejected',()=>assert.throws(()=>assess({observations:[a,b,c],referenceAt:'today'}),/invalid recovery input/));

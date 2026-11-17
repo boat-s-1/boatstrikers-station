@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessCronMonitorSnapshot as assess} from './cron-monitor-snapshot-gate.mjs';
+const referenceAt=2000000;
+const snapshot={capturedAt:1999000,source:'cron_aggregate_readonly',readonlyVerified:true,queryFingerprint:'a'.repeat(64),records:[{attemptId:'a1',status:'partial',startedAt:1998000}]};
+const run=(s=snapshot,options={})=>assess({snapshot:s,referenceAt,...options});
+test('well-shaped snapshot only eligible for offline review',()=>{const r=run();assert.equal(r.decision,'eligible_for_offline_review');assert.equal(r.notificationAllowed,false);assert.equal(r.writeAllowed,false)});
+test('missing snapshot holds',()=>assert.equal(run(null).decision,'hold'));
+test('future capture holds',()=>assert.equal(run({...snapshot,capturedAt:referenceAt+1}).reason,'invalid_capture_time'));
+test('stale snapshot holds',()=>assert.equal(run({...snapshot,capturedAt:referenceAt-300001}).reason,'stale_snapshot'));
+test('source must be read-only',()=>assert.equal(run({...snapshot,readonlyVerified:false}).reason,'unverified_readonly_source'));
+test('fingerprint required',()=>assert.equal(run({...snapshot,queryFingerprint:'wrong'}).reason,'missing_query_fingerprint'));
+test('duplicate attempt holds',()=>assert.equal(run({...snapshot,records:[snapshot.records[0],snapshot.records[0]]}).reason,'invalid_or_duplicate_attempt'));
+test('invalid status holds',()=>assert.equal(run({...snapshot,records:[{...snapshot.records[0],status:'delivered'}]}).reason,'invalid_status'));
+test('future start time holds',()=>assert.equal(run({...snapshot,records:[{...snapshot.records[0],startedAt:referenceAt}]}).reason,'invalid_start_time'));
+test('invalid age policy holds',()=>assert.equal(run(snapshot,{maxAgeMs:0}).reason,'invalid_age_policy'));
+test('empty records allowed only for review',()=>{const r=run({...snapshot,records:[]});assert.equal(r.recordCount,0);assert.equal(r.notificationAllowed,false)});

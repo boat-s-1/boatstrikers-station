@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {simulateOutboxRecovery as simulate} from './cron-monitor-outbox-recovery-simulator.mjs';
+const id='outbox_000001';
+test('pending approval cannot send',()=>{const r=simulate({outboxId:id});assert.equal(r.state,'pending_review');assert.equal(r.attempts,0);assert.equal(r.automatic_retry_allowed,false)});
+test('approved accepted is delivered only in simulation',()=>{const r=simulate({outboxId:id,events:['approve','begin_delivery','provider_accepted']});assert.equal(r.state,'delivered');assert.equal(r.network_call_executed,false);assert.equal(r.delivery_receipt_persisted,false)});
+test('crash during send becomes ambiguous and blocks replay',()=>{const r=simulate({outboxId:id,events:['approve','begin_delivery','worker_crashed']});assert.equal(r.state,'delivery_unknown');assert.equal(r.requires_manual_reconciliation,true);assert.equal(r.automatic_retry_allowed,false)});
+test('unknown delivery cannot be retried automatically',()=>{const r=simulate({outboxId:id,events:['approve','begin_delivery','worker_crashed','retry_requested']});assert.equal(r.state,'delivery_unknown');assert.equal(r.attempts,1)});
+test('rejected provider response requires renewed approval',()=>{const r=simulate({outboxId:id,events:['approve','begin_delivery','provider_rejected','retry_requested']});assert.equal(r.state,'pending_review');assert.equal(r.attempts,1)});
+test('duplicate send after delivered is forbidden',()=>assert.throws(()=>simulate({outboxId:id,events:['approve','begin_delivery','provider_accepted','begin_delivery']}),/invalid state transition/));
+test('begin delivery before approval forbidden',()=>assert.throws(()=>simulate({outboxId:id,events:['begin_delivery']}),/invalid state transition/));
+test('accepted after crash cannot silently resolve unknown',()=>assert.throws(()=>simulate({outboxId:id,events:['approve','begin_delivery','worker_crashed','provider_accepted']}),/invalid state transition/));
+test('bad input rejected',()=>{for(const x of [{outboxId:'bad'},{outboxId:id,initialState:'sent'},{outboxId:id,events:['approve','hack']},{outboxId:id,events:new Array(101).fill('approve')}])assert.throws(()=>simulate(x))});

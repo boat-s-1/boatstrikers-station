@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {summarizeNewsPipelineEvidence as summarize} from './news-pipeline-evidence-summary.mjs';
+const base={runStatus:'running',articleCount:10,markedPublishedCount:9,attemptedInsertCount:10};
+test('running with articles stays review',()=>{const x=summarize(base);assert.equal(x.display,'要確認');assert.equal(x.article_attribution,'unproven')});
+test('partial with articles is partial issue',()=>assert.equal(summarize({...base,runStatus:'partial'}).display,'一部問題あり'));
+test('success with full reported insert is recorded success only',()=>{const x=summarize({...base,runStatus:'success',insertedCount:10});assert.equal(x.display,'記録上の成功');assert.equal(x.pipeline_health,'未確認')});
+test('success without insert confirmation stays review',()=>assert.equal(summarize({...base,runStatus:'success'}).display,'要確認'));
+test('unique violation is partial issue',()=>assert.equal(summarize({...base,insertErrorCode:'23505'}).display,'一部問題あり'));
+test('other DB error is partial issue',()=>assert.equal(summarize({...base,insertErrorCode:'42501'}).display,'一部問題あり'));
+test('partial count is partial issue',()=>assert.equal(summarize({...base,runStatus:'success',insertedCount:3}).display,'一部問題あり'));
+test('zero article window still review',()=>assert.equal(summarize({...base,articleCount:0,markedPublishedCount:0}).display,'要確認'));
+test('error run without insert evidence is review not healthy',()=>assert.equal(summarize({...base,runStatus:'error'}).pipeline_health,'未確認'));
+test('all outputs prohibit automatic replay',()=>assert.equal(summarize({...base,runStatus:'success',insertedCount:10}).automatic_replay_allowed,false));
+test('all outputs prohibit republishing',()=>assert.equal(summarize({...base,runStatus:'partial'}).automatic_republish_allowed,false));
+test('reject inconsistent article counts',()=>assert.throws(()=>summarize({...base,articleCount:2,markedPublishedCount:3}),/invalid published count/));
+test('reject conflicting insert evidence',()=>assert.throws(()=>summarize({...base,insertedCount:2,insertErrorCode:'23505'}),/conflicting outcome evidence/));

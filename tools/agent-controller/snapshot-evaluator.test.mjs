@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluateSnapshot} from './snapshot-evaluator.mjs';
+const sample={schema:'boatstrikers-observation-v1',trinity_mode:'migration',services:{discord:{result:'ok',observed_at:'2026-11-17T00:00:00Z'},cron:{result:'error',observed_at:'2026-11-17T00:00:00Z'}}};
+test('migration is a planned pause regardless of other services',()=>{const x=evaluateSnapshot(sample);assert.equal(x.trinity.status,'planned_pause');assert.equal(x.services.cron.status,'reported_error');});
+test('missing service stays not checked',()=>assert.equal(evaluateSnapshot(sample).services.race_db.status,'not_checked'));
+test('external success is never presented as live verified',()=>{const x=evaluateSnapshot(sample);assert.equal(x.services.discord.status,'reported_ok');assert.equal(x.live_checks_performed,false);});
+test('no automatic recovery or production actions',()=>{const x=evaluateSnapshot(sample);assert.equal(x.automatic_repairs,false);assert.equal(x.api_requests,0);assert.equal(x.production_writes,0);});
+test('invalid observation fails closed',()=>assert.throws(()=>evaluateSnapshot({...sample,services:{discord:{result:'healthy',observed_at:'2026-11-17T00:00:00Z'}}})));
+test('invalid schema fails closed',()=>assert.throws(()=>evaluateSnapshot({...sample,schema:'unknown'})));
+test('provider restricted remains planned pause',()=>assert.equal(evaluateSnapshot({...sample,trinity_mode:'provider_restricted'}).trinity.status,'planned_pause'));
+test('production mode needs evidence',()=>assert.equal(evaluateSnapshot({...sample,trinity_mode:'production'}).trinity.status,'requires_evidence'));

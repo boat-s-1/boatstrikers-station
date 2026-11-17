@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {decideStageAdmission as decide} from './cron-stage-admission.mjs';
+test('admit stage with enough headroom',()=>{const x=decide({elapsedMs:10000,stageBudgetMs:3500});assert.equal(x.decision,'admit');assert.equal(x.completion_reserve_ms,8000)});
+test('skip stage near deadline',()=>{const x=decide({elapsedMs:55000,stageBudgetMs:3500});assert.equal(x.decision,'skip_for_deadline');assert.equal(x.must_record_skip,true)});
+test('exact stage budget boundary allowed',()=>assert.equal(decide({elapsedMs:48500,stageBudgetMs:3500}).decision,'admit'));
+test('stage exceeding budget denied',()=>assert.equal(decide({elapsedMs:48501,stageBudgetMs:3500}).decision,'skip_for_deadline'));
+test('no retry on denied stage',()=>assert.equal(decide({elapsedMs:59000,stageBudgetMs:3500}).automatic_retry,false));
+test('elapsed past deadline is safe',()=>{const x=decide({elapsedMs:62000,stageBudgetMs:1});assert.equal(x.remaining_ms,0);assert.equal(x.decision,'skip_for_deadline')});
+test('zero duration stage denied',()=>assert.equal(decide({elapsedMs:0,stageBudgetMs:0}).decision,'skip_for_deadline'));
+test('negative elapsed rejected',()=>assert.throws(()=>decide({elapsedMs:-1,stageBudgetMs:1}),/invalid elapsedMs/));
+test('fractional stage rejected',()=>assert.throws(()=>decide({elapsedMs:0,stageBudgetMs:2.5}),/invalid stageBudgetMs/));
+test('reserve equal limit rejected',()=>assert.throws(()=>decide({elapsedMs:0,limitMs:8000,reserveMs:8000,stageBudgetMs:1}),/invalid runtime budget/));
+test('oversized reserve rejected',()=>assert.throws(()=>decide({elapsedMs:0,limitMs:8000,reserveMs:9000,stageBudgetMs:1}),/invalid runtime budget/));
+test('never claims pipeline health',()=>assert.equal(decide({elapsedMs:0,stageBudgetMs:1}).runtime_health,'unknown'));

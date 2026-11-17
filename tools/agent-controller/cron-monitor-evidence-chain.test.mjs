@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {buildCronMonitorEvidenceChain as build,verifyCronMonitorEvidenceChain as verify} from './cron-monitor-evidence-chain.mjs';
+const a={event_id:'event_0001',at:'2026-11-17T09:00:00Z',kind:'attempt',code:'timeout'},b={event_id:'event_0002',at:'2026-11-17T09:01:00Z',kind:'incident',code:'review'};
+test('empty deterministic head',()=>assert.equal(build([]).head_hash,'0'.repeat(64)));
+test('chain contains records',()=>assert.equal(build([a,b]).chain.length,2));
+test('chain verifies unchanged',()=>assert.equal(verify([a,b],build([a,b]).head_hash).matches,true));
+test('tampered record fails verification',()=>assert.equal(verify([{...a,code:'ok'},b],build([a,b]).head_hash).matches,false));
+test('reordered records are rejected',()=>assert.throws(()=>verify([b,a],build([a,b]).head_hash),/out of order evidence/));
+test('removed record fails verification',()=>assert.equal(verify([a],build([a,b]).head_hash).matches,false));
+test('origin not authenticated',()=>assert.equal(build([a]).origin_authenticated,false));
+test('storage not proven immutable',()=>assert.equal(build([a]).immutable_storage_verified,false));
+test('local integrity only',()=>assert.equal(build([a]).local_integrity_only,true));
+test('reject secret field',()=>assert.throws(()=>build([{...a,token:'secret'}]),/invalid record/));
+test('reject article body',()=>assert.throws(()=>build([{...a,article_body:'body'}]),/invalid record/));
+test('reject invalid id',()=>assert.throws(()=>build([{...a,event_id:'bad'}]),/invalid record/));
+test('reject invalid timestamp',()=>assert.throws(()=>build([{...a,at:'now'}]),/invalid record/));
+test('reject invalid hash',()=>assert.throws(()=>verify([a],'bad'),/invalid expected hash/));
+
+test('duplicate evidence IDs rejected',()=>assert.throws(()=>build([a,{...b,event_id:a.event_id}]),/duplicate evidence id/));

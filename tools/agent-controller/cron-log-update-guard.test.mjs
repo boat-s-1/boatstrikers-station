@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assertLogUpdateSucceeded} from './cron-log-update-guard.mjs';
+const check=(fn,id=42)=>assertLogUpdateSucceeded(fn,id);
+test('confirms exact expected row',async()=>assert.deepEqual(await check(async()=>({data:[{id:42}],error:null})),{confirmed:true,run_id:42}));
+test('Supabase error is not silently ignored',async()=>await assert.rejects(check(async()=>({data:null,error:{code:'42501',message:'permission denied'}})),/cron log update failed: 42501/));
+test('zero updated rows fail closed',async()=>await assert.rejects(check(async()=>({data:[],error:null})),/not confirmed/));
+test('missing result fails closed',async()=>await assert.rejects(check(async()=>null),/missing log update result/));
+test('multiple updated rows fail closed',async()=>await assert.rejects(check(async()=>({data:[{id:42},{id:43}],error:null})),/not confirmed/));
+test('missing row id fails closed',async()=>await assert.rejects(check(async()=>({data:[{}],error:null})),/not confirmed/));
+test('operation exceptions propagate',async()=>await assert.rejects(check(async()=>{throw Error('network down')}),/network down/));
+test('no sensitive error message is echoed',async()=>{await assert.rejects(check(async()=>({error:{code:'PGRST',message:'SECRET_DATA'}})),e=>!e.message.includes('SECRET_DATA'))});
+test('wrong updated row is rejected',async()=>await assert.rejects(check(async()=>({data:[{id:43}],error:null})),/not confirmed/));
+test('invalid expected ID is rejected before call',async()=>{let called=false;await assert.rejects(check(async()=>{called=true;return {data:[{id:42}]};},0),/expected run ID/);assert.equal(called,false)});
+test('error code cannot contain secret text',async()=>await assert.rejects(check(async()=>({error:{code:'BAD SECRET',message:'private'}})),/cron log update failed: unknown/));

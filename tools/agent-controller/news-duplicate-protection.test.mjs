@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessNewsDuplicateProtection as assess} from './news-duplicate-protection.mjs';
+const base={sourceKeyPresent:true,sourceKeyUniqueConstraint:true,concurrentWritersPossible:true};
+test('same source key protected by unique index',()=>assert.equal(assess(base).same_source_key_protected,true));
+test('title dedupe is not DB guaranteed by lookup',()=>assert.equal(assess(base).title_only_duplicate_protected,false));
+test('concurrent writers may conflict instead of duplicating key',()=>assert.equal(assess(base).concurrent_insert_conflict_possible,true));
+test('missing key cannot rely on unique index',()=>{const x=assess({...base,sourceKeyPresent:false});assert.equal(x.missing_key_risk,true);assert.equal(x.same_source_key_protected,false)});
+test('absent unique index removes key guarantee',()=>assert.equal(assess({...base,sourceKeyUniqueConstraint:false}).same_source_key_protected,false));
+test('no concurrent writers no concurrent conflict',()=>assert.equal(assess({...base,concurrentWritersPossible:false}).concurrent_insert_conflict_possible,false));
+test('explicit title uniqueness is separate evidence',()=>assert.equal(assess({...base,titleUniqueConstraint:true}).title_only_duplicate_protected,true));
+test('automatic replay always denied',()=>assert.equal(assess(base).automatic_replay_allowed,false));
+test('automatic republish always denied',()=>assert.equal(assess(base).automatic_republish_allowed,false));
+test('reject missing boolean evidence',()=>assert.throws(()=>assess({sourceKeyPresent:'yes',sourceKeyUniqueConstraint:true,concurrentWritersPossible:true}),/invalid sourceKeyPresent/));

@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessCronMonitorGoNoGo as assess} from './cron-monitor-go-no-go.mjs';
+const flags=['isolatedProjectVerified','billingCeilingVerified','testWriteAuthorization','leastPrivilegeVerified','atomicRacePassed','crashRecoveryPassed','receiptSandboxPassed','queryLatencyMeasured','retentionApproved','rollbackRehearsed','productionChangeApproved'];
+test('defaults to hold',()=>assert.equal(assess().decision,'hold'));
+test('all flags missing by default',()=>assert.equal(assess().missing.length,flags.length));
+for(const field of flags)test(field+' is required',()=>{const input=Object.fromEntries(flags.map(k=>[k,true]));input[field]=false;assert.ok(assess(input).missing.includes(field))});
+test('all flags only advances to independent review',()=>{const result=assess(Object.fromEntries(flags.map(k=>[k,true])));assert.equal(result.decision,'hold');assert.equal(result.next_step,'independent_operator_and_security_review')});
+test('no automatic production deployment',()=>assert.equal(assess().actual_production_deployment,false));
+test('no notification send',()=>assert.equal(assess().actual_notification_sent,false));
+test('no replay',()=>assert.equal(assess().automatic_replay_allowed,false));
+test('operator claims are not attested',()=>assert.equal(assess().production_approval_independently_verified,false));
+test('rejects unknown fields',()=>assert.throws(()=>assess({apiKey:'secret'}),/unexpected approval field/));
+test('rejects invalid types',()=>assert.throws(()=>assess({retentionApproved:'yes'}),/invalid approval field/));
+test('rejects arrays',()=>assert.throws(()=>assess([]),/unexpected approval field/));

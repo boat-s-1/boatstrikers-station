@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {simulateCronLogging} from './cron-logging-simulation.mjs';
+const run=(pipelineResult,updateOperation)=>simulateCronLogging({pipelineResult,expectedRunId:77,updateOperation});
+test('business success with Supabase error does not retry',async()=>{let calls=0;const r=await run('success',async()=>{calls++;return {error:{code:'42501',message:'secret'}}});assert.equal(calls,1);assert.equal(r.log_persistence,'unconfirmed');assert.equal(r.retry_pipeline,false);assert.equal(r.republish_news,false);assert.equal(r.end_to_end_health,'unknown')});
+test('business success with zero updated rows remains unconfirmed',async()=>assert.equal((await run('success',async()=>({data:[],error:null}))).log_persistence,'unconfirmed'));
+test('business success with wrong ID remains unconfirmed',async()=>assert.equal((await run('success',async()=>({data:[{id:78}],error:null}))).log_persistence,'unconfirmed'));
+test('business success and exact log update can be reported',async()=>{const r=await run('success',async()=>({data:[{id:77}],error:null}));assert.equal(r.log_persistence,'confirmed');assert.equal(r.end_to_end_health,'reported_success')});
+test('partial business result remains unknown even when logged',async()=>assert.equal((await run('partial',async()=>({data:[{id:77}],error:null}))).end_to_end_health,'unknown'));
+test('logging transport exception never causes replay',async()=>{const r=await run('success',async()=>{throw Error('transport failed')});assert.equal(r.retry_pipeline,false);assert.equal(r.operator_review,true)});
+test('invalid business status fails closed',async()=>await assert.rejects(run('running',async()=>({data:[{id:77}]})),/invalid pipeline result/));

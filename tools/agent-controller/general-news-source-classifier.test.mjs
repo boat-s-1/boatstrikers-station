@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {classifyGeneralNewsSources as classify} from './general-news-source-classifier.mjs';
+test('boatrace timeout does not mark pipeline down',()=>{const x=classify({nikkan:'ok',macour:'ok',boatrace:'timeout'});assert.equal(x.assessment,'source_review_suggested');assert.equal(x.pipeline_health,'unknown');assert.equal(x.known_successes,2);assert.equal(x.known_failures,1)});
+test('all source reports ok are not end-to-end proof',()=>{const x=classify({nikkan:'ok',macour:'ok',boatrace:'ok'});assert.equal(x.assessment,'sources_reported_ok');assert.equal(x.pipeline_health,'unknown')});
+test('unknown sources remain unknown',()=>{const x=classify({boatrace:'timeout'});assert.equal(x.unknown_sources,2);assert.equal(x.assessment,'source_review_suggested')});
+test('empty observation is insufficient evidence',()=>assert.equal(classify({}).assessment,'insufficient_evidence'));
+test('no auto retry or repair',()=>{const x=classify({boatrace:'timeout'});assert.equal(x.automatic_retries,false);assert.equal(x.automatic_repairs,false)});
+test('reject unknown source',()=>assert.throws(()=>classify({secret:'ok'}),/invalid source observations/));
+test('reject raw error messages',()=>assert.throws(()=>classify({boatrace:'AbortError: secret'}),/invalid source state/));
+test('reject array',()=>assert.throws(()=>classify([]),/invalid source observations/));
+test('reject null',()=>assert.throws(()=>classify(null),/invalid source observations/));
+test('multiple failed sources counted separately',()=>{const x=classify({nikkan:'error',macour:'timeout',boatrace:'ok'});assert.equal(x.known_failures,2);assert.equal(x.known_successes,1)});

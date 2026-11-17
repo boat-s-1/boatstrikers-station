@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessCronMonitorKillSwitch as assess} from './cron-monitor-kill-switch.mjs';
+const ok={operatorStop:false,credentialsHealthy:true,budgetHealthy:true,ledgerHealthy:true,deliveryHealthy:true,productionApproval:true};
+test('default holds',()=>assert.equal(assess().decision,'hold'));
+test('operator stop holds',()=>assert.ok(assess({...ok,operatorStop:true}).reasons.includes('operator_stop')));
+test('credential issue holds',()=>assert.ok(assess({...ok,credentialsHealthy:false}).reasons.includes('credential_gate')));
+test('budget issue holds',()=>assert.ok(assess({...ok,budgetHealthy:false}).reasons.includes('budget_gate')));
+test('ledger issue holds',()=>assert.ok(assess({...ok,ledgerHealthy:false}).reasons.includes('ledger_gate')));
+test('delivery issue holds',()=>assert.ok(assess({...ok,deliveryHealthy:false}).reasons.includes('delivery_gate')));
+test('approval issue holds',()=>assert.ok(assess({...ok,productionApproval:false}).reasons.includes('approval_gate')));
+test('all supplied healthy only eligible for review',()=>assert.equal(assess(ok).decision,'eligible_for_separate_operator_review'));
+test('never enables',()=>assert.equal(assess(ok).actual_monitor_enabled,false));
+test('never actually disables',()=>assert.equal(assess().actual_monitor_disabled,false));
+test('never replays',()=>assert.equal(assess(ok).automatic_replay_allowed,false));
+test('no production mutation',()=>assert.equal(assess(ok).production_mutation_performed,false));
+test('invalid flag rejected',()=>assert.throws(()=>assess({...ok,operatorStop:'false'}),/invalid switch flag/));

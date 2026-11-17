@@ -1,0 +1,31 @@
+name: BoatStrikers Agent Controller Offline Smoke
+on:
+  pull_request:
+    paths:
+      - 'tools/agent-controller/**'
+      - '.github/workflows/agent-controller-offline-dashboard.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify isolated offline diagnostic
+        run: node --test tools/agent-controller/*.test.mjs
+      - name: Generate synthetic report
+        run: node tools/agent-controller/offline-smoke.mjs
+      - name: Generate synthetic integrated pipeline report
+        run: node tools/agent-controller/offline-pipeline-report.mjs
+      - name: Upload synthetic diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-controller-offline-smoke
+          path: |
+            offline-report/diagnostic.json
+            offline-report/pipeline-validation.json
+          retention-days: 3

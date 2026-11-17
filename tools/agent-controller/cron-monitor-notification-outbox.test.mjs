@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {buildCronNotificationOutboxProposal as build} from './cron-monitor-notification-outbox.mjs';
+const base={incidentKey:'incident_01',attemptId:'attempt_01',reason:'timeout'};
+const run=change=>build({...base,...change});
+test('default hold',()=>assert.equal(run().readiness,'hold'));
+test('missing destination holds',()=>assert.ok(run().blockers.includes('destination_unapproved')));
+test('missing reservation holds',()=>assert.ok(run().blockers.includes('atomic_reservation_unverified')));
+test('missing approval holds',()=>assert.ok(run().blockers.includes('operator_approval_missing')));
+test('all flags only separate review',()=>assert.equal(run({approvedDestination:true,atomicReservationConfirmed:true,operatorApproval:true}).readiness,'eligible_for_separate_operator_review'));
+test('no recipient',()=>assert.equal(run().recipient_included,false));
+test('no credentials',()=>assert.equal(run().credentials_included,false));
+test('no article data',()=>assert.equal(run().article_data_included,false));
+test('not persisted',()=>assert.equal(run().outbox_persisted,false));
+test('not sent',()=>assert.equal(run().notification_sent,false));
+test('not delivered',()=>assert.equal(run().delivery_verified,false));
+test('no retries',()=>assert.equal(run().automatic_retry_allowed,false));
+test('no republish',()=>assert.equal(run().automatic_republish_allowed,false));
+test('unknown reason rejected',()=>assert.throws(()=>run({reason:'send_news'}),/invalid outbox proposal/));
+test('invalid approval rejected',()=>assert.throws(()=>run({operatorApproval:'yes'}),/invalid approval flag/));

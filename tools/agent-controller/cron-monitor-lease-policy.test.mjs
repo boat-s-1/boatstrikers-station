@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessCronMonitorLease as assess} from './cron-monitor-lease-policy.mjs';
+const now='2026-11-17T09:00:00Z',lease={state:'reserved',owner_id:'worker_0001',at:'2026-11-17T08:59:00Z'};
+const run=x=>assess({now,...x});
+test('empty proposes claim',()=>assert.equal(run({}).decision,'propose_atomic_claim'));
+test('empty never actually claims',()=>assert.equal(run({}).actual_claim_created,false));
+test('empty never authorizes send',()=>assert.equal(run({}).automatic_send_allowed,false));
+test('active lease holds',()=>assert.equal(run({lease}).reason,'active_lease'));
+test('delivered holds',()=>assert.equal(run({lease:{...lease,state:'delivered'}}).reason,'already_delivered'));
+test('failed holds',()=>assert.equal(run({lease:{...lease,state:'failed'}}).reason,'manual_failure_review'));
+test('expired lease holds by default',()=>assert.equal(run({lease:{...lease,at:'2026-11-17T08:50:00Z'}}).decision,'hold'));
+test('expired lease reason uncertain delivery',()=>assert.equal(run({lease:{...lease,at:'2026-11-17T08:50:00Z'}}).reason,'expired_lease_uncertain_delivery'));
+test('operator override only requests review',()=>assert.equal(run({lease:{...lease,at:'2026-11-17T08:50:00Z'},operatorOverride:true}).decision,'manual_takeover_review'));
+test('override still cannot send',()=>assert.equal(run({lease:{...lease,at:'2026-11-17T08:50:00Z'},operatorOverride:true}).automatic_send_allowed,false));
+test('future lease rejected',()=>assert.throws(()=>run({lease:{...lease,at:'2026-11-17T10:00:00Z'}}),/future lease/));
+test('invalid owner rejected',()=>assert.throws(()=>run({lease:{...lease,owner_id:'x'}}),/invalid lease/));
+test('short lease rejected',()=>assert.throws(()=>run({leaseDurationMs:1000}),/invalid lease configuration/));
+test('invalid override rejected',()=>assert.throws(()=>run({operatorOverride:'yes'}),/invalid lease configuration/));
