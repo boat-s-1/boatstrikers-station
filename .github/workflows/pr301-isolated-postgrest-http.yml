@@ -1,0 +1,50 @@
+name: PR301 Isolated PostgREST HTTP (REVIEW REQUIRED)
+on:
+  workflow_dispatch:
+    inputs:
+      branch_ref:
+        description: 'Verified disposable Supabase branch project ref (never production)'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: pr301-isolated-http
+  cancel-in-progress: false
+jobs:
+  isolated-http:
+    # This environment currently allows only the PR branch, NOT main.
+    # This workflow MUST NOT be merged/executed until environment protection
+    # is reviewed and deliberately reconfigured for the trusted main workflow.
+    environment: pr301-isolated-http
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      PR301_BRANCH_REF: ${{ inputs.branch_ref }}
+      PR301_BRANCH_SERVICE_KEY: ${{ secrets.PR301_BRANCH_SERVICE_KEY }}
+      PR301_BRANCH_ANON_KEY: ${{ secrets.PR301_BRANCH_ANON_KEY }}
+    steps:
+      - name: Fail closed before checkout or network access
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$PR301_BRANCH_REF" =~ ^[a-z]{20}$ ]] || [[ "$PR301_BRANCH_REF" == "rzosrbkyniyedolhkgxo" ]]; then
+            echo "::error::Invalid or production Supabase project ref"
+            exit 1
+          fi
+          if [[ -z "$PR301_BRANCH_SERVICE_KEY" ]]; then
+            echo "::error::Missing isolated-branch credential"
+            exit 1
+          fi
+      - name: Checkout reviewed immutable PR301 test commit
+        uses: actions/checkout@v4
+        with:
+          repository: boat-s-1/boatstrikers-station
+          ref: 56516e59e8664cbdce33b7105c9cbd168dab3119
+          persist-credentials: false
+      - name: Execute isolated PostgREST wire contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tests/hatsune-cron-postgrest-http.mjs
+          node tests/hatsune-cron-postgrest-http.mjs
