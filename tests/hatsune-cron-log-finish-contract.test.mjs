@@ -15,3 +15,8 @@ test('completion logging remains nonthrowing to preserve existing pipeline respo
  const part=source.split('if (error || !data?.id) {')[1];
  assert.ok(part);assert.doesNotMatch(part,/throw /);
 });
+
+test('start returns job name for safe completion diagnostics',()=>{
+ assert.match(source,/\.insert\(\{ job_name: jobName, status: "running", started_at: new Date\(\)\.toISOString\(\) \}\)[\s\S]*?\.select\("id,started_at,job_name"\)\.single\(\)/);
+ assert.match(source,/jobName: run\.job_name \|\| "unknown"/);
+});
