@@ -24,3 +24,9 @@ This proposal adds a **manual-only** workflow. It is NOT authorization to run it
 - This PR is a **design/implementation proposal**, not merged.
 - No workflow run, paid branch, key registration, HTTP request, production database/Cron change, or PR301 merge is authorized.
 - Keep PR301 Draft/HOLD until real HTTP status evidence and independent cleanup are confirmed.
+
+## Hardening added after initial review
+- Environment variable `PR301_ALLOWED_BRANCH_REF` is mandatory and must equal the manually supplied branch ref. Set it **only after** verifying the exact disposable branch ref in Supabase; do not copy a production ref. The variable is not a secret.
+- Branch service and optional anon credentials are now injected **only into the HTTP execution step**, not into checkout or the preliminary guard step. The preliminary step checks the allowlist before checkout.
+- The credential presence check is in the HTTP step. This does not solve credential provenance; an operator must still confirm the branch-scoped key and configure the environment before execution.
+- Remaining blocker: environment must allow a trusted `main` workflow and must be reviewed before any merge or secret registration. No action performed to change GitHub environment settings.
