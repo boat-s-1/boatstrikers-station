@@ -2,7 +2,7 @@
 -- Stub existing RPCs so we can prove transaction ordering and rollback.
 CREATE TABLE public.atomic_fixture_writes(phase text NOT NULL, marker text);
 CREATE OR REPLACE FUNCTION public.bs_apply_openapi_bootstrap(p_events jsonb,p_entries jsonb,p_synced_at timestamptz)
-RETURNS jsonb LANGUAGE plpgsql AS $$
+RETURNS jsonb LANGUAGE plpgsql AS $bootstrap$
 BEGIN
  INSERT INTO public.atomic_fixture_writes VALUES('bootstrap','ok');
  INSERT INTO public.bs_race_events(race_date,course_code,race_no)
@@ -16,7 +16,7 @@ BEGIN
  ON CONFLICT (race_date,course_code,race_no,boat_no) DO UPDATE
  SET racer_registration_no=EXCLUDED.racer_registration_no;
  RETURN '{"ok":true}'::jsonb;
-END $;
+END $bootstrap$;
 CREATE OR REPLACE FUNCTION public.bs_apply_openapi_preview(jsonb,timestamptz)
 RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN INSERT INTO public.atomic_fixture_writes VALUES('preview_entries','ok'); RETURN '{"ok":true}'::jsonb; END $$;
