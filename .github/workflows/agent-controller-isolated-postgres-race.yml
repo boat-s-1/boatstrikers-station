@@ -12,6 +12,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-transition-ci.sh'
       - 'tools/agent-controller/isolated-node-db-adapter-ci.mjs'
       - 'tools/agent-controller/isolated-postgres-receipt-guard-ci.sh'
+      - 'tools/agent-controller/isolated-node-signed-receipt-ci.mjs'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -69,3 +70,5 @@ jobs:
         run: node tools/agent-controller/isolated-node-db-adapter-ci.mjs
       - name: Enforce receipt requirement at database transition boundary
         run: bash tools/agent-controller/isolated-postgres-receipt-guard-ci.sh
+      - name: Verify synthetic signature before isolated DB receipt commit
+        run: node tools/agent-controller/isolated-node-signed-receipt-ci.mjs
