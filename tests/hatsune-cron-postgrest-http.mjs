@@ -64,7 +64,9 @@ try {
     (anonKey ? ', anon denied' : ' (anon test skipped: no key)'));
 } finally {
   if (id !== undefined) {
-    const deleted = await request('DELETE', `?id=eq.${id}`, serviceKey);
-    assert.ok(deleted.status === 204 || deleted.status === 200, 'test row cleanup failed');
+    const deleted = await request('DELETE', `?id=eq.${id}&select=id`, serviceKey,
+      undefined, { Prefer: 'return=representation' });
+    assert.equal(deleted.status, 200, 'test row cleanup failed');
+    assert.deepEqual(deleted.data, [{ id }], 'exactly one test row must be deleted');
   }
 }
