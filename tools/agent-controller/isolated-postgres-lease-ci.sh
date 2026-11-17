@@ -32,3 +32,19 @@ owner=$("${PSQL[@]}" -c "SELECT owner_token||':'||epoch FROM agent_monitor.lease
 owner=$("${PSQL[@]}" -c "SELECT coalesce(owner_token,'released')||':'||epoch FROM agent_monitor.lease_fencing_ci WHERE incident_key='lease_incident_01'")
 [[ "$owner" == "released:2" ]] || { echo "Owner release failed: $owner" >&2; exit 1; }
 echo 'PASS: expired lease takeover increments epoch; stale owner cannot release'
+
+# Two workers racing to take an expired lease: only one must acquire it.
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.lease_fencing_ci VALUES ('lease_incident_02','expired_owner',5,clock_timestamp()-interval '1 minute')"
+"${PSQL[@]}" -c "BEGIN; UPDATE agent_monitor.lease_fencing_ci SET owner_token='racer_a',epoch=epoch+1,expires_at=clock_timestamp()+interval '30 seconds' WHERE incident_key='lease_incident_02' AND expires_at<clock_timestamp(); SELECT pg_sleep(2); COMMIT;" >/dev/null &
+first=$!
+sleep 0.2
+"${PSQL[@]}" -c "UPDATE agent_monitor.lease_fencing_ci SET owner_token='racer_b',epoch=epoch+1,expires_at=clock_timestamp()+interval '30 seconds' WHERE incident_key='lease_incident_02' AND expires_at<clock_timestamp();" >/dev/null &
+second=$!
+wait "$first"; wait "$second"
+owner=$("${PSQL[@]}" -c "SELECT owner_token||':'||epoch FROM agent_monitor.lease_fencing_ci WHERE incident_key='lease_incident_02'")
+[[ "$owner" == "racer_a:6" ]] || { echo "Competing takeover was not serialized: $owner" >&2; exit 1; }
+# The previous epoch cannot renew or release after takeover.
+"${PSQL[@]}" -c "UPDATE agent_monitor.lease_fencing_ci SET expires_at=clock_timestamp()+interval '1 hour' WHERE incident_key='lease_incident_02' AND owner_token='expired_owner' AND epoch=5"
+owner=$("${PSQL[@]}" -c "SELECT owner_token||':'||epoch FROM agent_monitor.lease_fencing_ci WHERE incident_key='lease_incident_02'")
+[[ "$owner" == "racer_a:6" ]] || { echo 'Stale epoch renewed lease' >&2; exit 1; }
+echo 'PASS: simultaneous expired-lease takeover selects one owner with one epoch increment'
