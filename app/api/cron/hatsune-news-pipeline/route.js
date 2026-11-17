@@ -49,6 +49,11 @@ async function isAuthorized(request) {
   }
 }
 
+function diagnosticCode(error, fallback) {
+  const code = error?.code;
+  return typeof code === "string" && /^[A-Z0-9_]{1,40}$/.test(code) ? code : fallback;
+}
+
 function countValue(value) {
   if (Array.isArray(value)) return value.length;
   const n = Number(value);
@@ -64,7 +69,7 @@ export async function GET(request) {
   try {
     logContext = await startHatsuneCronRun("pipeline");
   } catch (error) {
-    console.error("Hatsune cron log start failed", { code: error?.code || "START_FAILURE" });
+    console.error("Hatsune cron log start failed", { code: diagnosticCode(error, "START_FAILURE") });
   }
 
   try {
@@ -169,7 +174,7 @@ export async function GET(request) {
         // Publishing may already have committed: do not convert a completed run
         // into an HTTP 500 merely because its diagnostic log could not be saved.
         console.error("Hatsune cron log finish transport failed", {
-          code: finishError?.code || "TRANSPORT_FAILURE",
+          code: diagnosticCode(finishError, "TRANSPORT_FAILURE"),
         });
       }
     }
@@ -203,7 +208,7 @@ export async function GET(request) {
       } catch (finishError) {
         // Preserve the original pipeline error and response when log transport fails.
         console.error("Hatsune cron log finish transport failed", {
-          code: finishError?.code || "TRANSPORT_FAILURE",
+          code: diagnosticCode(finishError, "TRANSPORT_FAILURE"),
         });
       }
     }
