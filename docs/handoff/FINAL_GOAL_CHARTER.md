@@ -1,51 +1,60 @@
-# BoatStrikers — Goal Charter (draft, pending owner confirmation)
+# BoatStrikers — FINAL GOAL CHARTER
 
-Version: 0.1 | Date: 2026-11-18 JST | Authority: PROVISIONAL
+Version: 1.0 | Approved: 2026-11-18 JST | Authority: APPROVED BY PROJECT OWNER
+Status: Authoritative goal for all BoatStrikers development chats once this document is consulted. Stored on branch `docs/chat-handoff-20261118`; not yet merged to main.
 
-## North Star (proposed, not yet approved)
-Build a reliable BoatStrikers web/app platform that integrates accurate boat-racing data, explainable AI predictions (including TRINITY V2/V3), editorial and educational content, notifications, and membership offerings, while maintaining safe operations and verifiable data provenance.
+## Approved final goal (owner's wording)
 
-This is a candidate synthesis of known workstreams. The owner must confirm scope and success criteria before it becomes a fixed goal.
+ボートレースのデータ収集、AI予想、TRINITY、キャラクターによる研究記事・教育コンテンツ、会員機能、通知機能を統合したWebサイト・アプリを完成させる。
 
-## Invariants
-- No chat, agent, or PR may silently rewrite the approved final goal or remove a requirement.
-- Distinguish product outcome, implementation plan, and temporary experiments.
-- Keep all major workstreams aligned to the approved goal, with explicit acceptance criteria and evidence.
-- Production changes, deployment, merge, billable resources and secrets require scoped approval.
-- A test passing is not equivalent to a feature being deployed or accepted.
-- Never infer percent completion from PR counts.
+すべての機能を安全かつ安定して運用でき、将来的な有料会員サービスにも対応する。
 
-## Workstreams to reconcile with owner
-1. Data ingestion and integrity, race schedules, entries, results and historical validation.
-2. TRINITY V2/V3 predictions, snapshot audit, outcome measurement and quality gates.
-3. Public site and app/PWA, authentication, user experience.
-4. Free/paid content, editorial workflow, characters, educational series.
-5. Notifications, community, account model and staged transition from external channels.
-6. Reliability, security, schema reproducibility, monitoring, CI/CD, operations.
+## Goal invariants
 
-## Goal change control
-1. Propose a numbered goal-change request with rationale, affected workstreams, acceptance criteria, risk, and cost.
-2. Obtain explicit owner approval.
-3. Update this charter in a reviewed PR and record version/date.
-4. Update each workstream's status and dependencies. Until approved, retain the previous accepted goal.
+1. All BoatStrikers development chats must use the above approved goal as the common North Star.
+2. No chat, agent, or PR may silently rewrite, narrow, or remove the approved goal. Scope changes require explicit owner approval and a recorded charter revision.
+3. Implementation phases and prioritization may evolve without changing the final goal; separate MVP criteria from final completion.
+4. Evidence-based completion: PR created != merged; tests passing != deployed; deployed != accepted. Verify real state.
+5. Never invent a percent completion. Calculate only from explicit, agreed acceptance criteria.
+6. Keep production DB, ACL/RLS, Cron, Vercel, integrations, billing, and secrets safe; request operation-specific approval before high-impact actions.
+7. Record conflicts, blockers and source freshness rather than assume prior chat context is current.
 
-## Every new chat must
-1. Read this charter AND `docs/handoff/CHATGPT_HANDOFF.md` from a verified Git ref.
-2. Say whether the charter is still PROVISIONAL or APPROVED.
-3. Compare the task against the North Star and identify its workstream.
-4. Verify actual GitHub/Supabase/Vercel state as applicable, and state unknowns.
-5. Report what advances the goal, what is blocked, and what requires approval.
-6. Never claim completion without measurable evidence.
+## Workstream map
 
-## Definition of Done template (per workstream)
-- User-facing outcome and acceptance tests documented.
-- Code merged and deployed to intended environment where required.
-- Functional, security, regression and data-quality tests passed with evidence.
-- Monitoring, rollback and operations documented.
-- Owner acceptance recorded for release-sensitive changes.
+- W1: Race data collection, accuracy, entries, schedules, results, historical data integrity.
+- W2: AI predictions and TRINITY, V2/V3 snapshots, validation and performance measurement.
+- W3: Public web experience, mobile/PWA app, authentication and UX.
+- W4: Character-based research, education, editorial workflow, free/premium content.
+- W5: Membership, notifications, community, staged migration from external channels.
+- W6: Security, migration reproducibility, monitoring, CI/CD, operations and reliability.
 
-## Open decisions requiring owner confirmation
-- Is the North Star wording accurate?
-- Which features are required for initial launch versus later phases?
-- What are the concrete acceptance criteria for the whole platform?
-- Is this charter authoritative across all BoatStrikers development chats?
+Workstreams are organizational categories, not a claim that every subfeature is approved for immediate release.
+
+## Cross-chat protocol
+
+At the beginning of each chat:
+1. Fetch this charter and `docs/handoff/CHATGPT_HANDOFF.md` from a verified Git ref; prefer merged main once available.
+2. State the exact charter version and Git ref/commit.
+3. Identify the current workstream and how it contributes to the approved goal.
+4. Inspect current relevant GitHub PRs, commits, CI and (when applicable) read-only Supabase/Vercel status.
+5. Separate VERIFIED DONE, IN PROGRESS, BLOCKED, UNKNOWN and NOT STARTED.
+6. Propose or execute the next safe batch; obtain scoped approval for production/billable/high-impact actions.
+7. At handoff, update evidence, blockers, next steps and timestamps. Do not overwrite the approved goal.
+
+## Change-control process
+
+A goal change requires: (a) explicit owner request or approval; (b) documented rationale and scope impact; (c) version increment; (d) a reviewed GitHub change; (e) reconciliation of all workstreams. Until then v1.0 remains binding.
+
+## Completion evidence
+
+Each workstream must have documented user-facing acceptance criteria, functional/regression/security tests, verified data quality, intended deployment evidence where applicable, operations/monitoring/rollback, and explicit owner acceptance for release-sensitive steps.
+
+## Pending planning decisions (do not block the approved goal)
+
+- MVP vs later release scope and priorities.
+- Quantified whole-platform acceptance criteria and operating targets.
+- Exact rollout sequence and membership pricing.
+
+## Related handoff
+
+`docs/handoff/CHATGPT_HANDOFF.md` contains the current cross-chat startup and safety checklist. The charter governs the goal; the handoff describes evolving implementation status.
