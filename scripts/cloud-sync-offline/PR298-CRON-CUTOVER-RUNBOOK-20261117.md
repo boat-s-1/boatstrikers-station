@@ -60,3 +60,15 @@ The user supplied the original provider email screenshot. It explicitly names **
 The latest verified PR HEAD at this checkpoint is `030cb6111144764f6808a6410bb395ef45b99c48`. GitHub Actions: V3 offline contract run `44127641018` SUCCESS; V3 PostgreSQL fixture run `44127640944` SUCCESS. The read-only production readiness SQL was also executed successfully, detecting orphan results for Nov 14-17. These results do **not** authorize production write deployment, Cron repointing or new paid resources.
 
 Operational HOLD remains: independent OpenAPI permission/rate assessment, isolated live-schema and trigger parity, actual writer integration, safe cutover/rollback approval, and historical recovery provenance.
+
+## 2026-11-18 live release preflight results (read-only)
+
+Executed `openapi-cron-cutover-preflight.readonly.sql` on production, without writes. Six results:
+- `single_active_live_cron`: true
+- `legacy_job_not_modified`: true
+- `legacy_function_still_without_bootstrap`: true (diagnostic)
+- `legacy_function_still_without_atomic`: true (diagnostic)
+- `atomic_candidate_installed`: false (release gate)
+- `atomic_service_role_only`: false (release gate, because candidate is absent)
+
+This is an expected pre-deployment HOLD, not evidence of a broken installed atomic function. No production function installation, Cron modification or API fetch was performed.
