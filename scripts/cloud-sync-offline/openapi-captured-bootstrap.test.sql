@@ -9,6 +9,10 @@ CREATE TABLE public.bs_race_events (
  race_no smallint NOT NULL, course_name text, race_name text,
  deadline_time time, closing_time time, distance integer, race_day_no integer,
  race_status text, program_available boolean, api_synced_at timestamptz,
+ api_preview_synced_at timestamptz, api_wind_speed numeric, api_wind_direction_code text,
+ api_wave_height numeric, api_weather_code text, api_air_temperature numeric,
+ api_water_temperature numeric, wind_speed numeric, wind_direction_code text,
+ wave_height numeric, weather_code text, air_temperature numeric, water_temperature numeric,
  data_source text, synced_at timestamptz, created_at timestamptz, updated_at timestamptz,
  UNIQUE(race_date,course_code,race_no));
 CREATE TABLE public.bs_race_entries (
@@ -21,6 +25,10 @@ CREATE TABLE public.bs_race_entries (
  boat_machine_no smallint, race_boat_number smallint, boat_2_rate numeric,
  race_boat_top2_rate numeric, racer_weight numeric, weight numeric,
  data_source text, api_synced_at timestamptz, synced_at timestamptz,
+ api_preview_synced_at timestamptz, api_exhibition_time numeric, api_exhibition_st numeric,
+ api_exhibition_course smallint, api_tilt numeric, api_preview_source text,
+ exhibition_time numeric, exhibition_st numeric, exhibition_course smallint, tilt numeric,
+ exhibition_source text, live_synced_at timestamptz,
  created_at timestamptz, updated_at timestamptz,
  UNIQUE(race_date,course_code,race_no,boat_no),
  FOREIGN KEY(race_date,course_code,race_no)
