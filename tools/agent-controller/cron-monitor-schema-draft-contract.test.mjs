@@ -14,3 +14,6 @@ test('no automatic scheduler',()=>assert.doesNotMatch(sql,/cron\.schedule\s*\(/i
 test('no data deletion',()=>assert.doesNotMatch(sql,/^DELETE\s+FROM\s+/im));
 test('no public API view',()=>assert.doesNotMatch(sql,/CREATE\s+(OR\s+REPLACE\s+)?VIEW\s+public\./i));
 test('no secret or raw article columns',()=>assert.doesNotMatch(sql,/\b(api_key|webhook_url|article_body|secret_value)\s+text\b/i));
+
+test('schema event and attempt identifiers match safe string IDs',()=>{assert.match(sql,/event_id text PRIMARY KEY CHECK/);assert.match(sql,/attempt_id text NOT NULL CHECK/);assert.doesNotMatch(sql,/\b(event_id|attempt_id|outbox_id) uuid\b/)});
+test('outbox identifier matches safe string ID',()=>assert.match(sql,/outbox_id text PRIMARY KEY CHECK/));
