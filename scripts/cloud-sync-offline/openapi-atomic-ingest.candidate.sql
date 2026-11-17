@@ -115,10 +115,16 @@ BEGIN
  IF EXISTS (
    WITH incoming AS (
     SELECT x.race_date,x.course_code,x.race_no,x.trifecta_result,
-           x.trifecta_payout
+           x.trifecta_payout,x.exacta,x.exacta_payout,
+           x.quinella,x.quinella_payout,x.trio,x.trio_payout,
+           x.first_boat,x.second_boat,x.third_boat,
+           x.winning_method,x.technique_code
     FROM jsonb_to_recordset(p_results) AS x(
      race_date date,course_code smallint,race_no smallint,
-     trifecta_result text,trifecta_payout integer)
+     trifecta_result text,trifecta_payout integer,
+     exacta text,exacta_payout integer,quinella text,quinella_payout integer,
+     trio text,trio_payout integer,first_boat integer,second_boat integer,
+     third_boat integer,winning_method text,technique_code text)
    )
    SELECT 1 FROM incoming i
    LEFT JOIN public.bs_race_results r ON
@@ -133,6 +139,17 @@ BEGIN
      OR (i.trifecta_payout IS NOT NULL AND (
      (r.trifecta_payout IS NOT NULL AND r.trifecta_payout<>i.trifecta_payout)
      OR (e.trifecta_payout IS NOT NULL AND e.trifecta_payout<>i.trifecta_payout)))
+     OR (i.exacta IS NOT NULL AND e.exacta IS NOT NULL AND e.exacta<>i.exacta)
+     OR (i.exacta_payout IS NOT NULL AND e.exacta_payout IS NOT NULL AND e.exacta_payout<>i.exacta_payout)
+     OR (i.quinella IS NOT NULL AND e.quinella IS NOT NULL AND e.quinella<>i.quinella)
+     OR (i.quinella_payout IS NOT NULL AND e.quinella_payout IS NOT NULL AND e.quinella_payout<>i.quinella_payout)
+     OR (i.trio IS NOT NULL AND e.trio IS NOT NULL AND e.trio<>i.trio)
+     OR (i.trio_payout IS NOT NULL AND e.trio_payout IS NOT NULL AND e.trio_payout<>i.trio_payout)
+     OR (i.first_boat IS NOT NULL AND r.first_boat IS NOT NULL AND r.first_boat<>i.first_boat)
+     OR (i.second_boat IS NOT NULL AND r.second_boat IS NOT NULL AND r.second_boat<>i.second_boat)
+     OR (i.third_boat IS NOT NULL AND r.third_boat IS NOT NULL AND r.third_boat<>i.third_boat)
+     OR (i.winning_method IS NOT NULL AND r.winning_method IS NOT NULL AND r.winning_method<>i.winning_method)
+     OR (i.technique_code IS NOT NULL AND e.winning_technique_code IS NOT NULL AND e.winning_technique_code<>i.technique_code)
  ) THEN
    RAISE EXCEPTION 'OpenAPI result conflicts with persisted result: no writes';
  END IF;
