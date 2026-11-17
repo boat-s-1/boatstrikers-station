@@ -5,7 +5,7 @@
 - RLS有効。SELECTとUPDATEはauthenticatedの自己行に限定。ただしUPDATE列制限なし。
 - `handle_boatstrikers_member_signup` はpostgres所有、SECURITY DEFINER。プラン変更監査関数もpostgres所有、SECURITY DEFINER。
 
-## 隔離環境でのみ適用する候補SQL
+## 追加確認\n- 本番の `pg_attribute.attacl` に明示的な列単位GRANTは0件。現在の全列UPDATE権限はテーブルGRANTに由来する。\n- プロフィールを直接参照するビューのカタログ依存検索は0件。ただしアプリケーションやEdge Functionsの参照がないことは意味しない。\n- 修正後の権限検証SQLを `docs/community/sql/member-profile-post-remediation-assertions.sql` に追加（読み取り専用、現行本番では不合格になる想定）。\n\n## 隔離環境でのみ適用する候補SQL
 以下は**本番実行禁止**。実運用コードの書き込み列を洗い出すまで、`display_name` 以外のUPDATEは意図的に付与しない。匿名ロールのGRANTを撤去し、authenticatedには自己行SELECTと表示名UPDATEだけを付与する。RLS自己行条件は維持。
 
 ```sql
