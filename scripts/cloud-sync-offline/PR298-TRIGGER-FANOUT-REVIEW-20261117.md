@@ -26,4 +26,6 @@ Status: HOLD. This is a catalog inspection and a release decision aid, not a pro
 4. Verify all side-effect tables roll back after a late failure, and that retry is idempotent.
 5. Recheck privileges and the production Cron command. Explicit production-change approval remains mandatory.
 
+Read-only index inventory: `bs_race_entries` has a date/course/race/boat btree index and multiple overlapping unique indexes; `bs_ichika_escape_surge_alerts` has a unique `(race_date,course_code,race_no)` index. These support lookups/conflict avoidance, but do not eliminate the 6R full-day evaluator invocations. No query-plan or latency measurement yet.
+
 No production DDL, DML, Cron, Vercel, or merge action authorized.
