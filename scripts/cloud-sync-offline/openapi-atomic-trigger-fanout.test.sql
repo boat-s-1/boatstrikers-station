@@ -93,5 +93,23 @@ BEGIN
     OR (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>12 THEN
    RAISE EXCEPTION 'evaluator failure leaked event, entries or side effects';
  END IF;
- RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts 6, unrelated update 0, monitored replay +6, rollback, evaluator failure atomic, historical no-call';
+ -- Clear the injected failure and retry the identical six-boat race.
+ -- The prior failed transaction must not poison a clean retry.
+ PERFORM set_config('bs_fixture.fail_ichika','no',true);
+ INSERT INTO atomic_trigger_events VALUES (d,9,4);
+ INSERT INTO atomic_trigger_entries(race_date,course_code,race_no,boat_no)
+ SELECT d,9,4,b FROM generate_series(1,6) b;
+ IF (SELECT count(*) FROM atomic_trigger_entries WHERE race_date=d AND race_no=4)<>6
+    OR (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>18 THEN
+   RAISE EXCEPTION 'clean retry after evaluator failure did not save six entries and six calls';
+ END IF;
+ -- Conflict-safe replay should neither add entries nor evaluate the alert.
+ INSERT INTO atomic_trigger_entries(race_date,course_code,race_no,boat_no)
+ SELECT d,9,4,b FROM generate_series(1,6) b
+ ON CONFLICT DO NOTHING;
+ IF (SELECT count(*) FROM atomic_trigger_entries WHERE race_date=d AND race_no=4)<>6
+    OR (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>18 THEN
+   RAISE EXCEPTION 'conflict-safe replay unexpectedly triggered Ichika evaluator';
+ END IF;
+ RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts, unrelated updates, monitored replay, failure rollback, clean retry and conflict-safe replay';
 END $t$;
