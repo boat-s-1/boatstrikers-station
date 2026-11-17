@@ -41,8 +41,10 @@ BEGIN
   'boat_scalar','race_scalar','stadium_scalar',
   'payout_without_result_racers','preview_boat_scalar','result_boat_scalar',
   'five_digit_nonzero_registration','unknown_stadium_25',
-  'invalid_race_13','empty_races','wrong_preview_date',
-  'invalid_preview_numeric'
+  'invalid_race_13','empty_races','empty_stadiums','wrong_preview_date',
+  'invalid_preview_numeric','invalid_bootstrap_numeric',
+  'invalid_result_payout_numeric','missing_registration',
+  'wrong_stadium_number','wrong_race_number'
  ] LOOP
   invalid:=original;
   IF scenario='missing_boat' THEN
@@ -88,6 +90,19 @@ BEGIN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,13}',invalid #> '{programs,stadiums,1,races,1}');
   ELSIF scenario='empty_races' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races}','{}'::jsonb);
+  ELSIF scenario='empty_stadiums' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums}','{}'::jsonb);
+  ELSIF scenario='invalid_bootstrap_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,weight}','"not-a-number"'::jsonb);
+  ELSIF scenario='invalid_result_payout_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":[{"combination":"1-2-3","amount":"not-a-number"}]},"racers":{"1":{"entry_number":1,"place_number":1}}}'::jsonb);
+  ELSIF scenario='missing_registration' THEN
+   invalid:=invalid #- '{programs,stadiums,1,races,1,racers,1,number}';
+  ELSIF scenario='wrong_stadium_number' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,stadium_number}','2'::jsonb);
+  ELSIF scenario='wrong_race_number' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,race_number}','2'::jsonb);
   ELSIF scenario='wrong_preview_date' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
     '{"date":"1999-01-01"}'::jsonb);
