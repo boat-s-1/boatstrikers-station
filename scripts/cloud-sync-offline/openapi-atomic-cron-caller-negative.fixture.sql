@@ -48,7 +48,9 @@ BEGIN
   'wrong_stadium_number','wrong_race_number','http_503','http_429','http_500','invalid_json_body',
   'invalid_program_win_rate','invalid_preview_exhibition_st',
   'invalid_result_actual_course','missing_programs','stadiums_array',
-  'empty_document','null_document','second_race_invalid_boat'
+  'empty_document','null_document','second_race_invalid_boat',
+  'preview_wrong_stadium','preview_wrong_race','result_wrong_date',
+  'result_wrong_stadium','result_wrong_race'
  ] LOOP
   invalid:=original;
   IF scenario='missing_programs' THEN
@@ -66,6 +68,21 @@ BEGIN
      '{race_number}','2'::jsonb));
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,2,racers,1,number}',
     '"not-a-registration"'::jsonb);
+  ELSIF scenario='preview_wrong_stadium' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"stadium_number":2}'::jsonb);
+  ELSIF scenario='preview_wrong_race' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"race_number":2}'::jsonb);
+  ELSIF scenario='result_wrong_date' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"date":"1999-01-01"}'::jsonb);
+  ELSIF scenario='result_wrong_stadium' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"stadium_number":2}'::jsonb);
+  ELSIF scenario='result_wrong_race' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"race_number":2}'::jsonb);
   ELSIF scenario='missing_boat' THEN
    invalid:=invalid #- '{programs,stadiums,1,races,1,racers,6}';
   ELSIF scenario='non_numeric_registration' THEN
