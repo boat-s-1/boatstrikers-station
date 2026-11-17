@@ -47,10 +47,19 @@ BEGIN
   'invalid_quinella_payout_numeric','invalid_trio_payout_numeric','missing_registration',
   'wrong_stadium_number','wrong_race_number','http_503','http_429','http_500','invalid_json_body',
   'invalid_program_win_rate','invalid_preview_exhibition_st',
-  'invalid_result_actual_course'
+  'invalid_result_actual_course','missing_programs','stadiums_array',
+  'empty_document','null_document'
  ] LOOP
   invalid:=original;
-  IF scenario='missing_boat' THEN
+  IF scenario='missing_programs' THEN
+   invalid:=invalid - 'programs';
+  ELSIF scenario='stadiums_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums}','[]'::jsonb);
+  ELSIF scenario='empty_document' THEN
+   invalid:='{}'::jsonb;
+  ELSIF scenario='null_document' THEN
+   invalid:='null'::jsonb;
+  ELSIF scenario='missing_boat' THEN
    invalid:=invalid #- '{programs,stadiums,1,races,1,racers,6}';
   ELSIF scenario='non_numeric_registration' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,number}','"40A1"'::jsonb);
