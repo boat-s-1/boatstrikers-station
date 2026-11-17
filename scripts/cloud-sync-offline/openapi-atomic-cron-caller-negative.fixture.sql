@@ -48,7 +48,7 @@ BEGIN
   'wrong_stadium_number','wrong_race_number','http_503','http_429','http_500','invalid_json_body',
   'invalid_program_win_rate','invalid_preview_exhibition_st',
   'invalid_result_actual_course','missing_programs','stadiums_array',
-  'empty_document','null_document'
+  'empty_document','null_document','second_race_invalid_boat'
  ] LOOP
   invalid:=original;
   IF scenario='missing_programs' THEN
@@ -59,6 +59,13 @@ BEGIN
    invalid:='{}'::jsonb;
   ELSIF scenario='null_document' THEN
    invalid:='null'::jsonb;
+  ELSIF scenario='second_race_invalid_boat' THEN
+   -- A valid first race must not be partially written when a later race fails.
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,2}',
+    jsonb_set(original #> '{programs,stadiums,1,races,1}',
+     '{race_number}','2'::jsonb));
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,2,racers,1,number}',
+    '"not-a-registration"'::jsonb);
   ELSIF scenario='missing_boat' THEN
    invalid:=invalid #- '{programs,stadiums,1,races,1,racers,6}';
   ELSIF scenario='non_numeric_registration' THEN
