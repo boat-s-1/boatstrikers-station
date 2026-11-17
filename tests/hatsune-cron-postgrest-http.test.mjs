@@ -7,10 +7,12 @@ import {join} from 'node:path';
 // Real runner, mocked fetch. No outbound network, no credentials, no DB writes.
 const runner=new URL('./hatsune-cron-postgrest-http.mjs',import.meta.url).pathname;
 const cases=[
- ['success','success',0,['POST','PATCH','PATCH','PATCH','DELETE']],
+ ['success','success',0,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
  ['matched update rejected','bad-patch',1,['POST','PATCH','DELETE']],
  ['zero-match returns unexpected row','bad-zero',1,['POST','PATCH','PATCH','DELETE']],
- ['anonymous update unexpectedly permitted','bad-anon',1,['POST','PATCH','PATCH','PATCH','DELETE']],
+ ['singular matched response is not an object','bad-singular',1,['POST','PATCH','PATCH','PATCH','DELETE']],
+ ['singular missing response is not 406','bad-singular-zero',1,['POST','PATCH','PATCH','PATCH','PATCH','DELETE']],
+ ['anonymous update unexpectedly permitted','bad-anon',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
  ['cleanup HTTP failure is fatal','bad-delete',1,['POST','PATCH','PATCH','PATCH','DELETE']],
 ];
 for(const [name,mode,expectedExit,methods] of cases){
@@ -28,6 +30,8 @@ globalThis.fetch=async(url,opts)=>{
   patch++;
   if(patch===1){status=process.env.MOCK_MODE==='bad-patch'?403:200;data=[{id:42,status:'success',inserted_count:2}];}
   else if(patch===2){data=process.env.MOCK_MODE==='bad-zero'?[{id:42}]:[];}
+  else if(patch===3){status=200;data=process.env.MOCK_MODE==='bad-singular'?[{id:42}]:{id:42};}
+  else if(patch===4){status=process.env.MOCK_MODE==='bad-singular-zero'?200:406;data={code:'PGRST116'};}
   else{status=process.env.MOCK_MODE==='bad-anon'?200:403;}
  }
  if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:204;data=null;}
