@@ -59,8 +59,26 @@ BEGIN
    WHERE race_date=DATE '2026-11-14' AND course_code=10 AND race_no=12) THEN
    RAISE EXCEPTION 'historical candidate accepted duplicate racer';
  END IF;
+ -- An otherwise valid six-boat race without an existing result must fail closed.
+ failure:=false;
+ BEGIN
+  PERFORM public.bs_apply_openapi_historical_program_candidate(
+   DATE '2026-11-13',
+   jsonb_build_array(jsonb_build_object('race_date','2026-11-13','course_code',12,'race_no',8)),
+   (SELECT jsonb_agg(jsonb_build_object('race_date','2026-11-13','course_code',12,
+     'race_no',8,'boat_no',b,'racer_registration_no',lpad((8000+b)::text,5,'0')))
+    FROM generate_series(1,6) b),now());
+ EXCEPTION WHEN OTHERS THEN failure:=true;
+ END;
+ IF NOT failure OR EXISTS (SELECT 1 FROM public.bs_race_events
+   WHERE race_date=DATE '2026-11-13' AND course_code=12 AND race_no=8) THEN
+  RAISE EXCEPTION 'historical candidate accepted a race without existing result';
+ END IF;
  -- A pre-existing extra boat must fail the persisted six-boat assertion and
  -- roll back attempted changes to this race.
+ INSERT INTO public.bs_race_results
+  (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
+ VALUES (DATE '2026-11-13',10,9,'1-2-3',1000,'settled',now());
  INSERT INTO public.bs_race_events(id,race_date,course_code,race_no)
  VALUES (991101,DATE '2026-11-13',10,9);
  INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
@@ -94,5 +112,5 @@ BEGIN
  EXCEPTION WHEN OTHERS THEN failure:=true;
  END;
  IF NOT failure THEN RAISE EXCEPTION 'historical candidate accepted out-of-window date'; END IF;
- RAISE NOTICE 'Historical candidate PASS: settled payout preserved, replay, five-boat, duplicate racer, persisted extra-boat rollback, date gates';
+ RAISE NOTICE 'Historical candidate PASS: settled payout preserved, replay, five-boat, duplicate racer, missing-result gate, persisted extra-boat rollback, date gates';
 END $test$;
