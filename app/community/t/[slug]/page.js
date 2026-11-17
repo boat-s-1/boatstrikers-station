@@ -6,7 +6,6 @@ import styles from '../../community.module.css';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { robots: { index: false, follow: true } };
-
 async function loadThread(slug) {
   if (!/^[a-z0-9][a-z0-9-]{0,119}$/.test(slug)) return null;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -14,9 +13,8 @@ async function loadThread(slug) {
   if (!url || !key) return null;
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data, error } = await client.from('community_threads')
-    .select('slug,title,excerpt,body,status,visibility,published_at,character_key')
-    .eq('slug', slug).eq('status', 'published')
-    .in('visibility', ['public_all','public_post_members_replies'])
+    .select('slug,title,excerpt,body,status,audience,published_at,character_key')
+    .eq('slug', slug).eq('status', 'published').eq('audience', 'public')
     .lte('published_at', new Date().toISOString()).maybeSingle();
   if (error || !isPublicThread(data)) return null;
   return data;
