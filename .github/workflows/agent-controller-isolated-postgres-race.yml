@@ -17,6 +17,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-replay-classifier-ci.sh'
       - 'tools/agent-controller/isolated-postgres-replay-audit-ci.sh'
       - 'tools/agent-controller/isolated-postgres-audit-append-only-ci.sh'
+      - 'tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -84,3 +85,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-replay-audit-ci.sh
       - name: Reject mutation of isolated receipt conflict audit records
         run: bash tools/agent-controller/isolated-postgres-audit-append-only-ci.sh
+      - name: Detect synthetic audit alteration with Node SHA256 chain
+        run: node tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs
