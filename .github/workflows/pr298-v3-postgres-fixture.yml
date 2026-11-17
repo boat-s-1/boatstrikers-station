@@ -62,6 +62,7 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-silent-trigger.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-atomic-privileges.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -c "SELECT has_function_privilege('service_role','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS service_role_execute, has_function_privilege('anon','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS anon_execute, has_function_privilege('authenticated','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS authenticated_execute;"
       - name: Install candidate functions in isolated PostgreSQL
