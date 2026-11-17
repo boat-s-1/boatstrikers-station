@@ -144,16 +144,16 @@ BEGIN
     e.race_date=i.race_date AND e.course_code=i.course_code
     AND e.race_no=i.race_no
    WHERE (i.trifecta_result IS NOT NULL AND (
-     (r.trifecta_result IS NOT NULL AND r.trifecta_result<>i.trifecta_result)
-     OR (e.trifecta IS NOT NULL AND e.trifecta<>i.trifecta_result)))
+     (r.trifecta_result IS NOT NULL AND replace(trim(r.trifecta_result),'-','')<>replace(trim(i.trifecta_result),'-',''))
+     OR (e.trifecta IS NOT NULL AND replace(trim(e.trifecta),'-','')<>replace(trim(i.trifecta_result),'-',''))))
      OR (i.trifecta_payout IS NOT NULL AND (
      (r.trifecta_payout IS NOT NULL AND r.trifecta_payout<>i.trifecta_payout)
      OR (e.trifecta_payout IS NOT NULL AND e.trifecta_payout<>i.trifecta_payout)))
-     OR (i.exacta IS NOT NULL AND e.exacta IS NOT NULL AND e.exacta<>i.exacta)
+     OR (i.exacta IS NOT NULL AND e.exacta IS NOT NULL AND replace(trim(e.exacta),'-','')<>replace(trim(i.exacta),'-',''))
      OR (i.exacta_payout IS NOT NULL AND e.exacta_payout IS NOT NULL AND e.exacta_payout<>i.exacta_payout)
-     OR (i.quinella IS NOT NULL AND e.quinella IS NOT NULL AND e.quinella<>i.quinella)
+     OR (i.quinella IS NOT NULL AND e.quinella IS NOT NULL AND replace(trim(e.quinella),'-','')<>replace(trim(i.quinella),'-',''))
      OR (i.quinella_payout IS NOT NULL AND e.quinella_payout IS NOT NULL AND e.quinella_payout<>i.quinella_payout)
-     OR (i.trio IS NOT NULL AND e.trio IS NOT NULL AND e.trio<>i.trio)
+     OR (i.trio IS NOT NULL AND e.trio IS NOT NULL AND replace(trim(e.trio),'-','')<>replace(trim(i.trio),'-',''))
      OR (i.trio_payout IS NOT NULL AND e.trio_payout IS NOT NULL AND e.trio_payout<>i.trio_payout)
      OR (i.first_boat IS NOT NULL AND r.first_boat IS NOT NULL AND r.first_boat<>i.first_boat)
      OR (i.second_boat IS NOT NULL AND r.second_boat IS NOT NULL AND r.second_boat<>i.second_boat)
