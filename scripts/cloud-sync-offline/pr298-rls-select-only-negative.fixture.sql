@@ -44,13 +44,17 @@ DO $probe$
 BEGIN
   BEGIN
     UPDATE public.pr298_rls_write_probe SET note='forbidden-update' WHERE id=1;
-    RAISE EXCEPTION 'PR298_FAIL: anon UPDATE unexpectedly succeeded';
+    IF FOUND THEN
+      RAISE EXCEPTION 'PR298_FAIL: anon UPDATE changed a row';
+    END IF;
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: anon UPDATE rejected by RLS';
   END;
   BEGIN
     DELETE FROM public.pr298_rls_write_probe WHERE id=1;
-    RAISE EXCEPTION 'PR298_FAIL: anon DELETE unexpectedly succeeded';
+    IF FOUND THEN
+      RAISE EXCEPTION 'PR298_FAIL: anon DELETE changed a row';
+    END IF;
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: anon DELETE rejected by RLS';
   END;
@@ -62,13 +66,17 @@ DO $probe$
 BEGIN
   BEGIN
     UPDATE public.pr298_rls_write_probe SET note='forbidden-update' WHERE id=1;
-    RAISE EXCEPTION 'PR298_FAIL: authenticated UPDATE unexpectedly succeeded';
+    IF FOUND THEN
+      RAISE EXCEPTION 'PR298_FAIL: authenticated UPDATE changed a row';
+    END IF;
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: authenticated UPDATE rejected by RLS';
   END;
   BEGIN
     DELETE FROM public.pr298_rls_write_probe WHERE id=1;
-    RAISE EXCEPTION 'PR298_FAIL: authenticated DELETE unexpectedly succeeded';
+    IF FOUND THEN
+      RAISE EXCEPTION 'PR298_FAIL: authenticated DELETE changed a row';
+    END IF;
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PR298_PASS: authenticated DELETE rejected by RLS';
   END;
@@ -77,6 +85,9 @@ $probe$;
 RESET ROLE;
 DO $probe$
 BEGIN
+  IF (SELECT count(*) FROM public.pr298_rls_write_probe WHERE id=1 AND note='seed') <> 1 THEN
+    RAISE EXCEPTION 'PR298_FAIL: protected seed row was modified or deleted';
+  END IF;
   IF EXISTS (SELECT 1 FROM public.pr298_rls_write_probe WHERE id IN (2,3)) THEN
     RAISE EXCEPTION 'PR298_FAIL: RLS-denied rows persisted';
   END IF;
