@@ -179,6 +179,21 @@ BEGIN
  IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
    RAISE EXCEPTION 'identical result retry unexpectedly rejected';
  END IF;
+ -- A trifecta without payout must not trigger premature settlement.
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,
+       'trifecta_result','1-2-3')),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'trifecta without payout accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='trifecta without payout accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%trifecta without payout risks premature settlement%' THEN RAISE; END IF;
+ END;
+ IF (SELECT count(*) FROM atomic_fixture_writes)<>8 THEN
+   RAISE EXCEPTION 'incomplete trifecta called writer';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
