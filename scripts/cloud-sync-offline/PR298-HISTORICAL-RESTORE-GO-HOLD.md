@@ -9,7 +9,7 @@
 - [ ] Verify the complete six boats and registration numbers against the archived original, per race. Record any absent, ambiguous or conflicting source and exclude it.
 
 ## Production preflight — read-only
-- [ ] Recompute exact race-key allowlist at execution time using `PR298-HISTORICAL-RECOVERY-EXACT-ALLOWLIST-READONLY.sql`; do not assume the earlier 732-race count is still current.
+- [ ] Recompute exact race-key allowlist at execution time using `PR298-HISTORICAL-REPAIR-PREFLIGHT-READONLY.sql` and `PR298-HISTORICAL-RECOVERY-EXACT-ALLOWLIST-READONLY.sql`; do not assume the earlier 732-race count is still current.
 - [ ] For each requested key require one `bs_race_results` row, `result_status='confirmed'`, nonblank `trifecta_result`, and no partial existing program. Treat missing or non-confirmed results as HOLD.
 - [ ] Compare source race keys with the allowlist; exclude extras and all current/future JST dates. Candidate hard limit: 2026-11-13 through 2026-11-17.
 - [ ] Confirm no unexpected existing events/entries and verify the production schema, triggers, dependent consumers and role permissions.
