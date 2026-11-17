@@ -4,13 +4,25 @@ import { classifyResultLayer } from './openapi-result-quarantine.prototype.mjs';
 
 const KEY=/^(?:[1-9]|1[0-9]|2[0-4])$/;
 const RACE=/^(?:[1-9]|1[0-2])$/;
+// Validate the actual UTC calendar day, not just its textual shape.
+function validCalendarDay(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(value + 'T00:00:00.000Z');
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+// Require an explicit offset so capture provenance cannot depend on host timezone.
+function validCaptureTimestamp(value) {
+  return typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+    Number.isFinite(Date.parse(value));
+}
 function fail(reason) { throw new Error('snapshot program invalid: '+reason); }
 
 export function planQuarantinedResults(snapshot, capture) {
   if (!capture || typeof capture !== 'object' ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(capture.raceDate ?? '') ||
+      !validCalendarDay(capture.raceDate) ||
       !/^[a-f0-9]{64}$/.test(capture.sourceSha256 ?? '') ||
-      !Number.isFinite(Date.parse(capture.capturedAt ?? ''))) fail('capture metadata');
+      !validCaptureTimestamp(capture.capturedAt)) fail('capture metadata');
   const stadiums=snapshot?.programs?.stadiums;
   if (!stadiums || typeof stadiums !== 'object' || Array.isArray(stadiums)) fail('stadiums');
   const accepted=[], quarantine=[], pending=[], programs=[];
