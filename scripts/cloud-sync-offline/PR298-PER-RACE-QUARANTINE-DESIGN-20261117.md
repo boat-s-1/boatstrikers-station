@@ -54,3 +54,9 @@ Inspected `pg_get_functiondef` for `public.bs_apply_openapi_results` and `public
 - A quarantined result omitted from `p_results` will not directly invoke result updates for that race in this function, but consumers may still see an older confirmed result; **quarantine cannot be represented merely by absence**.
 
 **New mandatory gate:** implement and test an explicit immutable-confirmed-result conflict policy, including comparison of existing confirmed values and provider capture timestamp. Reject conflicts without rewriting historical outcomes; record an observable conflict. Test one existing confirmed result with contradictory incoming non-null result and verify no change, including downstream settlement. Do not deploy until this is resolved.
+
+## Candidate preflight guard (2026-11-17)
+
+Commits `ef34b8ca`, `8a45e9e7`, `9b6c9af5` add a pre-writer conflict check in `bs_apply_openapi_atomic_candidate` against both `bs_race_results` and `bs_race_events` for **non-null trifecta combination and trifecta payout**. An isolated fixture asserts that contradictory values raise an error before any dependent writer is called and preserve existing rows. **CI verification pending at documentation time.**
+
+This is deliberately a narrow safeguard, **not complete result immutability**. Remaining risks include first/second/third boats, other payout types, technique fields, result-entry positions, existing source priority, and concurrent writers that do not use the same advisory lock. The check runs after the candidate advisory lock, but it cannot protect against independent legacy writers. These must be resolved before cutover. The quarantine design remains unimplemented.
