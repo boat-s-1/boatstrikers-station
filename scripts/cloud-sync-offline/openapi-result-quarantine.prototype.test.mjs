@@ -49,3 +49,14 @@ test('Q-classifier: valid race remains eligible alongside quarantined result', (
   assert.deepEqual(statuses.map(x=>x.status), ['ACCEPT','QUARANTINE']);
   assert.equal(statuses[1].reason,'MULTIPLE_PAYOUTS');
 });
+
+test('Q-classifier: unsafe payout amount is quarantined', () => {
+  const x=valid(); x.result.payouts.trifecta[0].amount='9007199254740993';
+  assert.equal(classify(x).reason,'PAYOUT_AMOUNT_INVALID');
+});
+test('Q-classifier: malformed finish boat key and place are quarantined', () => {
+  const x=valid(); x.result.racers[7]={place_number:4};
+  assert.equal(classify(x).reason,'FINISH_BOAT_KEY_INVALID');
+  delete x.result.racers[7]; x.result.racers[1].place_number=7;
+  assert.equal(classify(x).reason,'FINISH_PLACE_INVALID');
+});
