@@ -11,6 +11,7 @@ const cases=[
  ['matched update rejected','bad-patch',1,['POST','PATCH','DELETE']],
  ['zero-match returns unexpected row','bad-zero',1,['POST','PATCH','PATCH','DELETE']],
  ['anonymous update unexpectedly permitted','bad-anon',1,['POST','PATCH','PATCH','PATCH','DELETE']],
+ ['cleanup HTTP failure is fatal','bad-delete',1,['POST','PATCH','PATCH','PATCH','DELETE']],
 ];
 for(const [name,mode,expectedExit,methods] of cases){
  test(name,()=>{
@@ -29,7 +30,7 @@ globalThis.fetch=async(url,opts)=>{
   else if(patch===2){data=process.env.MOCK_MODE==='bad-zero'?[{id:42}]:[];}
   else{status=process.env.MOCK_MODE==='bad-anon'?200:403;}
  }
- if(method==='DELETE'){status=204;data=null;}
+ if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:204;data=null;}
  return {status,text:async()=>data===null?'':JSON.stringify(data)};
 };`);
   try{
@@ -46,3 +47,18 @@ globalThis.fetch=async(url,opts)=>{
   }finally{rmSync(dir,{recursive:true,force:true});}
  });
 }
+
+test('production ref is rejected before any HTTP request',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'pr301-prod-'));
+ const preloader=join(dir,'forbid-fetch.mjs');
+ writeFileSync(preloader,"globalThis.fetch=()=>{throw Error('HTTP MUST NOT RUN')};");
+ try{
+  const result=spawnSync(process.execPath,['--import',preloader,runner],{
+   encoding:'utf8',timeout:10000,
+   env:{...process.env,PR301_BRANCH_REF:'rzosrbkyniyedolhkgxo',PR301_BRANCH_SERVICE_KEY:'mock-service-only'}
+  });
+  assert.notEqual(result.status,0);
+  assert.match(result.stderr,/nonproduction branch ref is required/);
+  assert.ok(!result.stderr.includes('HTTP MUST NOT RUN'));
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
