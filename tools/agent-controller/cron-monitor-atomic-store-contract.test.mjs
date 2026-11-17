@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {simulateAtomicIncidentReservations as sim} from './cron-monitor-atomic-store-contract.mjs';
+test('empty',()=>assert.equal(sim({incidentKeys:[]}).unique_incidents,0));
+test('one accepted',()=>assert.deepEqual(sim({incidentKeys:['incident_01']}).accepted,['incident_01']));
+test('duplicate rejected',()=>assert.deepEqual(sim({incidentKeys:['incident_01','incident_01']}).rejected,['incident_01']));
+test('preexisting rejected',()=>assert.deepEqual(sim({incidentKeys:['incident_01'],existingKeys:['incident_01']}).rejected,['incident_01']));
+test('different keys accepted',()=>assert.equal(sim({incidentKeys:['incident_01','incident_02']}).accepted.length,2));
+test('simulation only',()=>assert.equal(sim({incidentKeys:[]}).simulation_only,true));
+test('no transaction',()=>assert.equal(sim({incidentKeys:[]}).database_transaction_executed,false));
+test('no storage',()=>assert.equal(sim({incidentKeys:[]}).durable_storage_created,false));
+test('no notifications',()=>assert.equal(sim({incidentKeys:[]}).notifications_sent,false));
+test('no retry',()=>assert.equal(sim({incidentKeys:[]}).automatic_retry_allowed,false));
+test('invalid key rejected',()=>assert.throws(()=>sim({incidentKeys:['x']}),/invalid keys/));
+test('invalid list rejected',()=>assert.throws(()=>sim({incidentKeys:'x'}),/invalid keys/));
