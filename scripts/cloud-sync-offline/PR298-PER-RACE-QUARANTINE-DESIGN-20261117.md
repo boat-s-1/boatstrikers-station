@@ -82,3 +82,9 @@ Full definition of `public.bs_settle_theory_recommendation(bigint)` inspected. I
 **New hazard:** it uses `coalesce(ev.trifecta_payout,0)` when calculating a winning ticket's payout. If an event has a trifecta but payout is still NULL, a recommendation can settle with **zero payout**. The upstream event trigger checks only `new.trifecta IS NOT NULL`, not payout presence. A later payout arrival may not automatically recalculate because the event trigger selects recommendations with `status <> 'settled'`.
 
 **Required safety gate:** before any candidate writes a trifecta to an event, ensure corresponding payout is present and trustworthy or ensure the settlement trigger cannot settle incomplete results. Build a disposable trigger fixture for (1) trifecta before payout, (2) payout after a premature settlement, and (3) conflicting official correction. Do not change the production trigger without a separate approved migration and impact analysis.
+
+## Combination normalization guard (2026-11-17)
+
+Read-only production settlement audit of 1,701 rows showed the same trifecta can be stored as compact `123` in events and hyphenated `1-2-3` in results. Naive string comparison would falsely block a valid same-result retry. Commit `184f93e8` updates candidate preflight comparisons for trifecta/exacta/quinella/trio to normalize hyphens and whitespace before deciding whether combinations conflict. Commit `612a80da` adds a disposable PostgreSQL fixture with compact persisted event trifecta and matching hyphenated incoming result. **Check both CI workflows before accepting this change.**
+
+This normalization is a conflict-comparison policy only. The downstream writer's canonical storage format, ticket matching, valid ordering for unordered bet types, and provider schema still need independent verification. Do not interpret equivalent display formatting as permission to overwrite confirmed values.
