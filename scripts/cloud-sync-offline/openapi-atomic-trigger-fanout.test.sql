@@ -8,7 +8,7 @@ CREATE TABLE public.atomic_trigger_events(
 CREATE TABLE public.atomic_trigger_entries(
  race_date date NOT NULL, course_code smallint NOT NULL, race_no smallint NOT NULL,
  boat_no smallint NOT NULL, official_exhibition_time numeric, exhibition_time numeric,
- official_lap numeric, lap_time numeric,
+ official_lap numeric, lap_time numeric, note text,
  PRIMARY KEY(race_date,course_code,race_no,boat_no));
 CREATE TABLE public.atomic_ichika_evaluation_calls(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
 CREATE OR REPLACE FUNCTION public.evaluate_ichika_escape_surge_alerts()
@@ -54,5 +54,23 @@ BEGIN
  IF (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>6 THEN
    RAISE EXCEPTION 'historical entry triggered current-day evaluator';
  END IF;
- RAISE NOTICE 'Production Ichika trigger body fixture PASS: 6 per race, transactional rollback, historical no-call';
+ -- Updates to unrelated fields must not invoke the column-filtered trigger.
+ UPDATE atomic_trigger_entries SET note='non-exhibition' WHERE race_date=d AND race_no=1;
+ IF (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>6 THEN
+   RAISE EXCEPTION 'unrelated update unexpectedly invoked Ichika evaluator';
+ END IF;
+ -- Updating a monitored field invokes the trigger once per row, even when
+ -- the supplied value is unchanged. This is a potential replay fan-out.
+ UPDATE atomic_trigger_entries SET exhibition_time=exhibition_time
+ WHERE race_date=d AND race_no=1;
+ IF (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>12 THEN
+   RAISE EXCEPTION 'expected six more evaluations on monitored-field replay update';
+ END IF;
+ -- Historical monitored-field updates must still skip today's evaluator.
+ UPDATE atomic_trigger_entries SET exhibition_time=exhibition_time
+ WHERE race_date=d-1 AND race_no=3;
+ IF (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>12 THEN
+   RAISE EXCEPTION 'historical exhibition update invoked current-day evaluator';
+ END IF;
+ RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts 6, unrelated update 0, monitored replay +6, rollback, historical no-call';
 END $t$;
