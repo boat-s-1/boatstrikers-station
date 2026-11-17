@@ -7,10 +7,8 @@ on:
     paths:
       - lib/hatsuneCronLog.js
       - app/api/cron/hatsune-news-pipeline/route.js
-      - tests/hatsune-cron-log-route-error-preservation.test.mjs
-      - tests/hatsune-cron-log-finish-contract.test.mjs
-      - tests/hatsune-cron-log-finish-behavior.test.mjs
-      - tests/hatsune-cron-log-finish-stateful.test.mjs
+      - tests/hatsune-cron-log-*.test.mjs
+      - tests/sql/hatsune-cron-log-*.sql
       - .github/workflows/hatsune-cron-log-finish-guard.yml
 permissions:
   contents: read
