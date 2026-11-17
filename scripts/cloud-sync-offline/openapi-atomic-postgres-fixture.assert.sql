@@ -114,6 +114,36 @@ BEGIN
    OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
    RAISE EXCEPTION 'extended result conflict mutated data or called writer';
  END IF;
+ -- Existing boat result must not be overwritten by contradictory finish
+ -- placement or actual start timing.
+ UPDATE public.bs_race_entries SET arrival_order=1,actual_st=0.12,
+   actual_start_timing=0.12 WHERE race_date=d AND course_code=9
+   AND race_no=1 AND boat_no=1;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,
+     jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,
+       'race_no',1,'boat_no',1,'arrival_order',2)),now());
+   RAISE EXCEPTION 'contradictory boat placement accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory boat placement accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%boat result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,'[]'::jsonb,
+     jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,
+       'race_no',1,'boat_no',1,'actual_st',0.25)),now());
+   RAISE EXCEPTION 'contradictory boat timing accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory boat timing accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%boat result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT arrival_order FROM public.bs_race_entries WHERE race_date=d
+    AND course_code=9 AND race_no=1 AND boat_no=1)<>1
+    OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+   RAISE EXCEPTION 'boat result conflict mutated data or called writer';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
