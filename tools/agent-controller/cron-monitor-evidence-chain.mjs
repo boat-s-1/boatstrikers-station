@@ -4,9 +4,10 @@ const sha=s=>createHash('sha256').update(s).digest('hex');
 const validId=s=>typeof s==='string'&&/^[A-Za-z0-9_-]{8,80}$/.test(s);
 export function buildCronMonitorEvidenceChain(records){
  if(!Array.isArray(records)||records.length>1000)throw Error('invalid records');
- let previous='0'.repeat(64);const chain=[];
+ let previous='0'.repeat(64);const chain=[];const ids=new Set();let previousAt=null;
  for(const r of records){
   if(!r||typeof r!=='object'||Object.keys(r).some(k=>!['event_id','at','kind','code'].includes(k))||!validId(r.event_id)||typeof r.at!=='string'||!/^\d{4}-\d\d-\d\dT/.test(r.at)||!/(Z|[+-]\d\d:\d\d)$/.test(r.at)||!Number.isFinite(Date.parse(r.at))||typeof r.kind!=='string'||!/^[a-z_]{2,32}$/.test(r.kind)||typeof r.code!=='string'||!/^[a-z_]{2,48}$/.test(r.code))throw Error('invalid record');
+  if(ids.has(r.event_id))throw Error('duplicate evidence id');ids.add(r.event_id);const at=Date.parse(r.at);if(previousAt!==null&&at<previousAt)throw Error('out of order evidence');previousAt=at;
   const current=sha(JSON.stringify([previous,r.event_id,r.at,r.kind,r.code]));
   chain.push({event_id:r.event_id,previous_hash:previous,hash:current});previous=current;
  }
