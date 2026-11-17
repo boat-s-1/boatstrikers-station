@@ -6,11 +6,14 @@ CREATE ROLE service_role NOLOGIN;
 CREATE TABLE public.bs_race_events (
  race_date date NOT NULL,course_code smallint NOT NULL,race_no smallint NOT NULL,
  course_name text,race_cancel_code text,trifecta text,trifecta_payout integer,
+ exacta text,exacta_payout integer,quinella text,quinella_payout integer,
+ trio text,trio_payout integer,winning_technique_code text,
  PRIMARY KEY(race_date,course_code,race_no));
 CREATE TABLE public.bs_race_results (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  race_date date NOT NULL,course_code smallint NOT NULL,race_no smallint NOT NULL,
- trifecta_payout integer,trifecta_result text,winning_trifecta text);
+ trifecta_payout integer,trifecta_result text,winning_trifecta text,
+ first_boat integer,second_boat integer,third_boat integer,winning_method text);
 CREATE TABLE public.bs_race_entries (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  race_date date NOT NULL,course_code smallint NOT NULL,race_no smallint NOT NULL,
