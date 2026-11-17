@@ -4,7 +4,7 @@
 
 - `pg_proc.prosrc ILIKE '%bs_member_profiles%'` をpublic/authスキーマで検索したところ、明示的にテーブル名を含む関数は `public.handle_boatstrikers_member_signup` のみ。**動的SQL、ビュー、Edge Functions、アプリケーションコード、他スキーマの依存はこの検索で除外できない。**
 - `handle_boatstrikers_member_signup` と `bs_log_member_plan_change` はともに `postgres` 所有、SECURITY DEFINER、関数設定 `search_path=public`。
-- `search_path=public` の安全性はスキーマのCREATE権限、関数内の非修飾識別子、呼び出し経路を合わせて評価する必要がある。現時点で安全と断定しない。
+- `has_schema_privilege` で anon/authenticated のpublicスキーマCREATE実効権限はともにfalse。PUBLIC全体の権限は別途ACLで確認が必要。\n- `search_path=public` の安全性はスキーマのCREATE権限、関数内の非修飾識別子、呼び出し経路を合わせて評価する必要がある。現時点で安全と断定しない。
 - 会員テーブルはRLS有効で、anon/authenticatedのTRUNCATE実効権限true。PostgREST経由のTRUNCATE可否は未検証。
 
 ## 隔離検証前に追加で必要
