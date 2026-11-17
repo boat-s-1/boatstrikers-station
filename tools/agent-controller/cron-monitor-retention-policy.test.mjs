@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessCronAuditRetention as assess} from './cron-monitor-retention-policy.mjs';
+const now='2026-11-17T09:00:00Z',old={event_id:'event_0001',at:'2026-10-01T09:00:00Z'},fresh={event_id:'event_0002',at:'2026-11-16T09:00:00Z'};
+const run=changes=>assess({now,records:[old,fresh],...changes});
+test('old eligible for review',()=>assert.deepEqual(run().eligible_for_operator_review,['event_0001']));
+test('fresh retained',()=>assert.deepEqual(run().retained,['event_0002']));
+test('legal hold retains all',()=>assert.equal(run({legalHold:true}).retained.length,2));
+test('legal hold no eligible',()=>assert.equal(run({legalHold:true}).eligible_for_operator_review.length,0));
+test('never deletes',()=>assert.equal(run().actual_deletion_performed,false));
+test('never accesses storage',()=>assert.equal(run().storage_accessed,false));
+test('never retries',()=>assert.equal(run().automatic_retry_allowed,false));
+test('empty records',()=>assert.equal(run({records:[]}).retained.length,0));
+test('invalid retention rejected',()=>assert.throws(()=>run({retentionDays:1}),/invalid retention input/));
+test('invalid legal hold rejected',()=>assert.throws(()=>run({legalHold:'yes'}),/invalid retention input/));
+test('future record rejected',()=>assert.throws(()=>run({records:[{...fresh,at:'2026-11-18T09:00:00Z'}]}),/future record/));
+test('unexpected field rejected',()=>assert.throws(()=>run({records:[{...fresh,token:'secret'}]}),/invalid record/));
+test('invalid now rejected',()=>assert.throws(()=>run({now:'today'}),/invalid date/));
