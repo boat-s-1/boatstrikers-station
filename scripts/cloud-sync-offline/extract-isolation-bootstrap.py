@@ -8,7 +8,7 @@ source = (root / "SIX-TABLE-ISOLATION-CANDIDATE.sql").read_text()
 pattern = re.compile(
     r"(CREATE OR REPLACE FUNCTION public\.bs_apply_openapi_bootstrap\("
     r"p_events jsonb, p_entries jsonb, p_synced_at timestamp with time zone DEFAULT now\(\)\)"
-    r".*?\$function\$;?)",
+    r".*?AS \$function\$.*?\$function\$;?)",
     re.DOTALL,
 )
 matches = pattern.findall(source)
