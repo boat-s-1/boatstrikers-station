@@ -21,11 +21,6 @@ BEGIN
  IF p_synced_at IS NULL OR p_synced_at > now() + interval '5 minutes' THEN
    RAISE EXCEPTION 'invalid historical source capture timestamp';
  END IF;
- -- Archived source must have been captured no later than the repair run.
- -- Reject future timestamps and timestamps preceding the requested race date.
- IF p_synced_at < (p_date::timestamp AT TIME ZONE 'Asia/Tokyo') THEN
-   RAISE EXCEPTION 'historical source capture predates requested race';
- END IF;
  IF jsonb_typeof(p_events) IS DISTINCT FROM 'array'
     OR jsonb_typeof(p_entries) IS DISTINCT FROM 'array' THEN
    RAISE EXCEPTION 'historical program arrays required';
