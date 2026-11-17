@@ -1,0 +1,25 @@
+name: Community security checks
+on:
+  pull_request:
+    paths:
+      - 'app/community/**'
+      - 'app/components/CommunityLatest.js'
+      - 'app/components/MediaSwitch.js'
+      - 'lib/community/**'
+      - 'tests/community-*.test.mjs'
+      - 'package.json'
+      - '.github/workflows/community-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  community-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run community access, filtering and regression tests
+        run: npm run test:community

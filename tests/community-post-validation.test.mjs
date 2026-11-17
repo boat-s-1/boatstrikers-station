@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateOfficialPost } from '../lib/community/postValidation.mjs';
+const sample = { title:'今日の注目レース',body:'レースの見どころ',excerpt:'展示の注目点',character_key:'ichika',audience:'public',reply_policy:'paid' };
+test('valid official post',()=>assert.equal(validateOfficialPost(sample).valid,true));
+test('all three audience levels',()=>{for(const audience of ['public','members','paid']) assert.equal(validateOfficialPost({...sample,audience}).valid,true);});
+test('unknown audience rejected',()=>assert.equal(validateOfficialPost({...sample,audience:'admin'}).valid,false));
+test('unknown character rejected',()=>assert.equal(validateOfficialPost({...sample,character_key:'unknown'}).valid,false));
+test('empty body rejected',()=>assert.equal(validateOfficialPost({...sample,body:'  '}).valid,false));
+test('overlong title rejected',()=>assert.equal(validateOfficialPost({...sample,title:'a'.repeat(121)}).valid,false));
+test('reply disabled accepted',()=>assert.equal(validateOfficialPost({...sample,reply_policy:'disabled'}).valid,true));
+test('unknown reply policy rejected',()=>assert.equal(validateOfficialPost({...sample,reply_policy:'free'}).valid,false));

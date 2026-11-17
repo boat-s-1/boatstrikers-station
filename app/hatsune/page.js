@@ -1,3 +1,4 @@
+import CommunityLatest from "../components/CommunityLatest";
 import ResponsiblePlayNotice from "../components/ResponsiblePlayNotice";
 import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
@@ -134,6 +135,7 @@ export default async function HatsunePage() {
         <p>ニュースや選手情報は背景を知る材料として使い、実際の予想では公式の出走表・展示・気象情報を優先します。</p>
         <div style={{ display: "grid", gap: 9 }}><a style={guideStyle} href="/guide/race-card"><span>出走表の見方</span><b>→</b></a><a style={guideStyle} href="/guide/series-performance"><span>今節成績の見方</span><b>→</b></a><a style={guideStyle} href="/news?category=women"><span>女子戦ニュースを見る</span><b>→</b></a></div>
       </section>
+    <CommunityLatest characterKey="hatsune" heading="初音の公式掲示板" />
     <BlogReadingBridge character="hatsune"/>
 </main>
   );
