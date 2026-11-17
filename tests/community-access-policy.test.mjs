@@ -38,3 +38,9 @@ test('prototype property names are not roles or audiences', () => {
   assert.equal(canReadAudience('public','toString'),false);
   assert.equal(canReadAudience('__proto__','paid'),false);
 });
+
+test('reply rejects null thread and ambiguous lock state', () => {
+  assert.equal(canReply(null,'paid'),false);
+  assert.equal(canReply(undefined,'paid'),false);
+  assert.equal(canReply({audience:'public',locked:'false'},'paid'),false);
+});
