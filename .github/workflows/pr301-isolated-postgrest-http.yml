@@ -21,19 +21,14 @@ jobs:
     timeout-minutes: 5
     env:
       PR301_BRANCH_REF: ${{ inputs.branch_ref }}
-      PR301_BRANCH_SERVICE_KEY: ${{ secrets.PR301_BRANCH_SERVICE_KEY }}
-      PR301_BRANCH_ANON_KEY: ${{ secrets.PR301_BRANCH_ANON_KEY }}
+      PR301_ALLOWED_BRANCH_REF: ${{ vars.PR301_ALLOWED_BRANCH_REF }}
     steps:
       - name: Fail closed before checkout or network access
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! "$PR301_BRANCH_REF" =~ ^[a-z]{20}$ ]] || [[ "$PR301_BRANCH_REF" == "rzosrbkyniyedolhkgxo" ]]; then
+          if [[ ! "$PR301_BRANCH_REF" =~ ^[a-z]{20}$ ]] || [[ "$PR301_BRANCH_REF" == "rzosrbkyniyedolhkgxo" ]] || [[ -z "$PR301_ALLOWED_BRANCH_REF" ]] || [[ "$PR301_BRANCH_REF" != "$PR301_ALLOWED_BRANCH_REF" ]]; then
             echo "::error::Invalid or production Supabase project ref"
-            exit 1
-          fi
-          if [[ -z "$PR301_BRANCH_SERVICE_KEY" ]]; then
-            echo "::error::Missing isolated-branch credential"
             exit 1
           fi
       - name: Checkout reviewed immutable PR301 test commit
@@ -44,7 +39,14 @@ jobs:
           persist-credentials: false
       - name: Execute isolated PostgREST wire contract
         shell: bash
+        env:
+          PR301_BRANCH_SERVICE_KEY: ${{ secrets.PR301_BRANCH_SERVICE_KEY }}
+          PR301_BRANCH_ANON_KEY: ${{ secrets.PR301_BRANCH_ANON_KEY }}
         run: |
           set -euo pipefail
+          if [[ -z "$PR301_BRANCH_SERVICE_KEY" ]]; then
+            echo "::error::Missing isolated-branch credential"
+            exit 1
+          fi
           node --check tests/hatsune-cron-postgrest-http.mjs
           node tests/hatsune-cron-postgrest-http.mjs
