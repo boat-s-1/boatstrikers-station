@@ -17,6 +17,6 @@ test('completion logging remains nonthrowing to preserve existing pipeline respo
 });
 
 test('start returns job name for safe completion diagnostics',()=>{
- assert.match(source,/\.insert\(\{ job_name: jobName, status: "running", started_at: new Date\(\)\.toISOString\(\) \}\)[\s\S]*?\.select\("id,started_at,job_name"\)\.single\(\)/);
+ assert.match(source,/\.insert\(\{ job_name: jobName, status: "running", started_at: new Date\(\)\.toISOString\(\) \}\)[\s\S]*?\.select\("id,started_at,job_name"\)\s*\.single\(\)/);
  assert.match(source,/jobName: run\.job_name \|\| "unknown"/);
 });
