@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
       - 'scripts/cloud-sync-offline/openapi-atomic-*.sql'
+      - 'scripts/cloud-sync-offline/openapi-real-ichika-evaluator.fixture.sql'
       - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
       - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
       - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
@@ -98,6 +99,8 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.assert.sql
       - name: Verify production Ichika trigger fan-out in isolated fixture
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-trigger-fanout.test.sql
+      - name: Verify real-query Ichika evaluator under 144-race isolated load
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-real-ichika-evaluator.fixture.sql
       - name: Compile database-side atomic Cron caller with network-free HTTP stub
         run: |
           psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.fixture.sql
