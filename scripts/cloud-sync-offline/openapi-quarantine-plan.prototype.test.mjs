@@ -39,3 +39,13 @@ test('source identity/date/registration gates reject entire snapshot',()=>{
  assert.throws(()=>plan(y,capture),/duplicate racer/);
  assert.throws(()=>plan(fixture(),{...capture,sourceSha256:'invalid'}),/capture metadata/);
 });
+
+test('capture metadata rejects impossible dates and timezone-ambiguous timestamps',()=>{
+ for(const raceDate of ['2026-02-30','2026-13-01','2026-00-10','2026-11-31']){
+   assert.throws(()=>plan(fixture(),{...capture,raceDate}),/capture metadata/);
+ }
+ for(const capturedAt of ['2026-11-18T00:00:00','not-a-date','2026-11-18T25:00:00Z']){
+   assert.throws(()=>plan(fixture(),{...capture,capturedAt}),/capture metadata/);
+ }
+ assert.equal(plan(fixture(),{...capture,capturedAt:'2026-11-18T09:00:00+09:00'}).accepted.length,2);
+});
