@@ -21,10 +21,10 @@ Status: **HOLD until a real HTTP test passes**. Offline CI and isolated SQL test
 - If the script fails before cleanup, remove test data **only on the disposable branch**, then delete the branch.
 - Do not invoke the Hatsune cron route, change production tables or policies, merge the PR, or deploy.
 - Record the branch creation/deletion, HTTP status outcomes (without secrets or raw sensitive responses), and CI result in PR #301.
-- A successful raw REST PATCH confirms PostgREST wire behavior; it is **not by itself** proof that the application `supabase-js` `.maybeSingle()` call behaves correctly. For that, run a separate client-level integration test or capture a safe application-client trace in the same isolated environment.
+- A successful raw REST PATCH confirms PostgREST wire behavior; it is **not by itself** proof that the application `supabase-js` `.single()` call behaves correctly against live PostgREST. Offline real-library integration now passes, but live authenticated HTTP remains a separate required gate.
 
 ## Current evidence
 
-- PR #301 HEAD `f31ade4`: Hatsune and Discord CI SUCCESS, including HTTP script syntax check.
+- PR #301 HEAD `8119a2e6`: Hatsune CI run `44128792916` SUCCESS and Discord/Next.js run `44128792771` SUCCESS. Actual pinned `@supabase/supabase-js@2.53.0` client test passed matched, zero-row and denied scenarios with offline mocked fetch. This detected that `.maybeSingle()` returned arrays for the PATCH response; production completion code was changed to `.single()` and associated tests updated.
 - Previous disposable Supabase branch: SQL transaction insert/update returned a row; anon/authenticated lacked UPDATE table privileges; rollback left zero rows; branch deleted.
 - **No actual PostgREST HTTP integration test has yet been executed.**
