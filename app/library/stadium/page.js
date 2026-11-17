@@ -1,26 +1,10 @@
 import Parser from "rss-parser";
+import { loadStadiumArticles } from "../../../lib/stadiumArticles.mjs";
 
 export default async function StadiumPage({ searchParams }) {
-  const place = searchParams?.place || "住之江";
-
-  const parser = new Parser();
-  const feed = await parser.parseURL("https://note.com/boat_strikers/rss");
-
-  const articles = feed.items
-    .filter((item) => item.title.includes(place))
-    .slice(0, 20)
-    .map((item) => {
-      const image =
-        item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1] ||
-        "/book-24-stadiums.jpg";
-
-      return {
-        title: item.title,
-        link: item.link,
-        date: item.pubDate,
-        image,
-      };
-    });
+  const params = await searchParams;
+  const place = typeof params?.place === "string" ? params.place : "住之江";
+  const { articles, unavailable } = await loadStadiumArticles(new Parser(), place);
 
   return (
     <main className="libraryPage">
@@ -47,6 +31,7 @@ export default async function StadiumPage({ searchParams }) {
           <a href="/library/stadiums">24場本棚へ戻る ›</a>
         </div>
 
+        {unavailable ? <p role="status">記事を取得できませんでした。しばらくしてからお試しください。</p> : articles.length === 0 ? <p>該当する記事はありません。</p> : null}
         <div className="stadiumArticleList">
           {articles.map((article) => (
             <a

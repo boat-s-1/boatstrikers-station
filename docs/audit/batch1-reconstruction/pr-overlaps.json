@@ -1,0 +1,21 @@
+[
+  {
+    "pr": 278,
+    "head": "24825994ebdcb3a621aff592462b043a5b43e24d",
+    "overlapping_paths": [
+      "app/admin/data-lab-social/GenerateButton.js",
+      "app/admin/data-lab-social/page.js",
+      "lib/dataLabSocialClaim.js",
+      "lib/dataLabSocialGenerator.js"
+    ],
+    "note": "path overlap only; not a merge-conflict or merge approval"
+  },
+  {
+    "pr": 86,
+    "head": "35aa6ffbb545dde5def6cc0da87ba54b20f09464",
+    "overlapping_paths": [
+      "vercel.json"
+    ],
+    "note": "path overlap only; not a merge-conflict or merge approval"
+  }
+]
