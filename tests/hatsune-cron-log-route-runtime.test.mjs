@@ -10,7 +10,7 @@ const start = source.indexOf('export async function GET(request) {');
 assert.ok(start >= 0, 'GET handler exists');
 const handlerSource = source.slice(start).replace(/^export /, '');
 
-function harness({ collection = { inserted: 1, errors: [] }, finishError = null, aiKey = true } = {}) {
+function harness({ collection = { inserted: 1, errors: [] }, finishError = null, startError = null, aiKey = true } = {}) {
   const calls = [];
   const logs = [];
   const context = vm.createContext({
@@ -18,7 +18,7 @@ function harness({ collection = { inserted: 1, errors: [] }, finishError = null,
     console: { error: (...args) => logs.push(args) },
     NextResponse: { json: (body, options = {}) => ({ status: options.status ?? 200, body }) },
     isAuthorized: async () => true,
-    startHatsuneCronRun: async () => ({ supabase: {}, run: { id: 7 } }),
+    startHatsuneCronRun: async () => { if (startError) throw startError; return { supabase: {}, run: { id: 7 } }; },
     finishHatsuneCronRun: async (payload) => {
       calls.push(payload);
       if (finishError) throw finishError;
@@ -65,4 +65,15 @@ test('original pipeline failure remains HTTP 500 when completion log transport t
   assert.equal(response.body.error, 'collector failure');
   assert.equal(h.calls[0].status, 'error');
   assert.ok(!JSON.stringify(response.body).includes('log network down'));
+});
+
+
+test('start-log failure cannot disclose raw exception and pipeline still succeeds', async () => {
+  const h = harness({ startError: Object.assign(new Error('private credentials'), { code: 'START_UNAVAILABLE' }) });
+  const response = await h.run();
+  assert.equal(response.status, 200);
+  assert.equal(response.body.ok, true);
+  assert.equal(h.calls.length, 0);
+  assert.equal(h.logs[0][1].code, 'START_UNAVAILABLE');
+  assert.ok(!JSON.stringify(h.logs).includes('private credentials'));
 });
