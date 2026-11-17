@@ -34,3 +34,31 @@ During read-only inspection, some unrelated `cron.job.command` definitions conta
 ## Current decision
 
 **HOLD**: the candidate advisory lock is not shared by the inspected legacy writer definitions. No disabling jobs, changing Cron, DB migrations, Vercel, Windows or paid resources without explicit separate approval. The existing strict fail-closed design remains in force.
+
+## Function-level write-path audit (read-only, 2026-11-17)
+
+This is a limited, **direct function-definition** audit using `pg_get_functiondef` and regex-derived identifiers; it does not execute any functions or reveal Cron command bodies.
+
+| Entry point | Verified direct calls / referenced tables | Cutover implication |
+|---|---|---|
+| `bs_sync_openapi_today` (job 1) | Calls `bs_apply_openapi_results`, `bs_apply_openapi_preview`, `bs_apply_openapi_preview_events`; no textual call to `bs_apply_openapi_bootstrap` | Existing live sync does not visibly bootstrap programs |
+| `bs_apply_openapi_bootstrap` | Writes `bs_race_events`, `bs_race_entries` | New candidate program bootstrap may trigger additional downstream behavior |
+| `bs_apply_openapi_results` | Writes `bs_race_results`, `bs_race_entries`, `bs_race_events` | Shares tables with result backfill |
+| `bs_backfill_missing_results` (jobs 21–23) | Directly references and writes `bs_race_results`, `bs_race_entries`, `bs_race_events` | **Confirmed same-table writer**, requires source-priority and concurrency plan |
+| `bsc_refresh_official_performance` (job 20) | Calls `bsc_capture_official_rankings`, `bsc_settle_official_predictions`, `bsc_sync_official_results_to_legacy` | Mostly separate result/forecast flow, but settlement reads `bs_race_results`; do not disable without dependency analysis |
+| `bsc_sync_official_results_to_legacy` | Writes `bsc_results` (and references `bsc_official_predictions`/`bsc_official_results`) | Not established as a direct `bs_race_*` writer |
+| `bsc_settle_official_predictions` | Reads `bs_race_results`, writes settlement tables | Consumer dependency; ensure cutover does not change results unexpectedly |
+| `refresh_ichika_validation_history` (job 19) | Reads `bs_race_results` and updates its own validation state | Consumer; not a candidate for indiscriminate shutdown |
+| `bs_record_race_data_completeness` (job 24) | Updates quality/completeness tables and logs | Consumer/monitor; preserve where safe |
+
+The result backfill's direct definition has no textual `pg_advisory` call. The proposed atomic candidate's lock alone **cannot** coordinate with this independently scheduled backfill.
+
+### Required next checks
+
+1. Inspect the exact update predicates and source precedence of `bs_backfill_missing_results`, including whether it can overwrite an already confirmed race and whether it processes only the prior JST date.
+2. Trace nested functions and triggers for indirect writes; catalog external writers (Windows, Vercel, manual API) separately.
+3. Determine whether the new **current-JST-date-only** candidate and previous-day backfill can operate on disjoint dates without touching shared derived tables or notifications. Do not assume safety from different nominal schedules.
+4. Test a same-race conflicting result with legacy backfill in a disposable clone, plus two concurrent transactions, before any real cutover.
+5. Keep jobs 19, 20 and 24 active unless a specific, tested dependency requires a narrowly scoped pause.
+
+**Decision: HOLD.** These findings refine the writer inventory but do not authorize pausing production Cron.
