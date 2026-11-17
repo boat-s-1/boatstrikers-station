@@ -32,3 +32,9 @@ test('public search visibility excludes member-only', () => {
   assert.equal(isPublicAudience('members'),false);
   assert.equal(isPublicAudience('paid'),false);
 });
+
+test('prototype property names are not roles or audiences', () => {
+  assert.equal(canReadAudience('constructor','paid'),false);
+  assert.equal(canReadAudience('public','toString'),false);
+  assert.equal(canReadAudience('__proto__','paid'),false);
+});
