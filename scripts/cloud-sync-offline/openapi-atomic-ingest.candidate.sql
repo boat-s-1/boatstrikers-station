@@ -113,6 +113,37 @@ BEGIN
  v_preview_entries:=public.bs_apply_openapi_preview(p_preview_entries,p_synced_at);
  v_preview_events:=public.bs_apply_openapi_preview_events(p_preview_events,p_synced_at);
  v_results:=public.bs_apply_openapi_results(p_results,p_result_entries,p_synced_at);
+ -- The old Cron reported success with no persisted events/entries.
+ -- Verify the database state, not just writer return counts.
+ IF EXISTS (
+   WITH expected AS (
+     SELECT x.race_date,x.course_code,x.race_no
+     FROM jsonb_to_recordset(p_events)
+       AS x(race_date date,course_code int,race_no int)
+   )
+   SELECT 1 FROM expected x
+   WHERE NOT EXISTS (
+     SELECT 1 FROM public.bs_race_events e
+     WHERE e.race_date=x.race_date AND e.course_code=x.course_code
+       AND e.race_no=x.race_no)
+   OR (SELECT count(*) FROM public.bs_race_entries en
+       WHERE en.race_date=x.race_date AND en.course_code=x.course_code
+         AND en.race_no=x.race_no) <> 6
+   OR EXISTS (
+     SELECT 1 FROM jsonb_to_recordset(p_entries)
+       AS want(race_date date,course_code int,race_no int,boat_no int,racer_registration_no text)
+     WHERE want.race_date=x.race_date AND want.course_code=x.course_code
+       AND want.race_no=x.race_no
+       AND NOT EXISTS (
+         SELECT 1 FROM public.bs_race_entries actual
+         WHERE actual.race_date=want.race_date
+           AND actual.course_code=want.course_code
+           AND actual.race_no=want.race_no
+           AND actual.boat_no=want.boat_no
+           AND actual.racer_registration_no=want.racer_registration_no))
+ ) THEN
+   RAISE EXCEPTION 'OpenAPI persisted program incomplete: transaction rolled back';
+ END IF;
  RETURN jsonb_build_object('date',p_date,'event_count',v_events,'entry_count',v_entries,
    'bootstrap',v_bootstrap,'preview_entries',v_preview_entries,
    'preview_events',v_preview_events,'results',v_results);
