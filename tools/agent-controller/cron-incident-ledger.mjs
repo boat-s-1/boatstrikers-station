@@ -5,13 +5,13 @@ const safeId=s=>typeof s==='string'&&/^[a-zA-Z0-9_-]{8,80}$/.test(s);
 export function projectCronIncidentLedger(events,{referenceAt,maxEvents=1000}={}){
  const ref=parse(referenceAt);
  if(!Array.isArray(events)||events.length>maxEvents||!Number.isSafeInteger(maxEvents)||maxEvents<1)throw Error('invalid events');
- const ids=new Set(),attempts=new Map(),alerts=new Map(),projection=[];
+ const ids=new Set(),attempts=new Map(),alerts=new Map(),projection=[];let previousTime=null;
  for(const event of events){
   if(!event||typeof event!=='object'||Array.isArray(event))throw Error('invalid event');
   const keys=Object.keys(event);
   if(keys.some(k=>!['event_id','attempt_id','kind','at','outcome','incident_key'].includes(k)))throw Error('unexpected event field');
   if(!safeId(event.event_id)||!safeId(event.attempt_id)||ids.has(event.event_id))throw Error('invalid or duplicate event id');
-  const time=parse(event.at);if(time>ref)throw Error('future event');
+  const time=parse(event.at);if(time>ref)throw Error('future event');if(previousTime!==null&&time<previousTime)throw Error('out of order event');previousTime=time;
   if(!['attempt','alert_proposed','alert_delivered','alert_failed'].includes(event.kind))throw Error('invalid event kind');
   if(event.kind==='attempt'){
    if(!OUTCOMES.has(event.outcome)||event.incident_key!==undefined||attempts.has(event.attempt_id))throw Error('invalid attempt');
@@ -25,7 +25,7 @@ export function projectCronIncidentLedger(events,{referenceAt,maxEvents=1000}={}
     if(existing)throw Error('duplicate incident proposal');
     alerts.set(event.incident_key,{state:'proposed',at:event.at,attempt_id:event.attempt_id});
    }else{
-    if(!existing||existing.state!=='proposed'||existing.attempt_id!==event.attempt_id)throw Error('invalid alert transition');
+    if(!existing||existing.state!=='proposed'||existing.attempt_id!==event.attempt_id||time<parse(existing.at))throw Error('invalid alert transition');
     existing.state=event.kind==='alert_delivered'?'delivered':'failed';
     existing.at=event.at;
    }
