@@ -41,3 +41,14 @@ Stop and revert if incomplete six-boat programs, new duplicate keys, unbounded I
 
 ## Release decision
 **HOLD** until real OpenAPI parity, actual Cron caller integration, full trigger impact, safe canary and explicit approvals are all complete.
+
+## Mandatory provider-compliance decision before any cutover (2026-11-18)
+
+- Existing PR298 provider-compliance review records the user's report that an API provider requested stopping five-minute Windows polling, and the user stopped the Windows scheduler. It remains unproven whether the request also covers the production Cron source.
+- The currently active production jobid 1 polls the public OpenAPI today.json endpoint on a three-minute schedule. Do not assume cloud polling is exempt from a provider request, and do not test this question by sending additional live requests.
+- Before changing or resuming any fetcher, obtain the original provider communication and identify the exact service, endpoint, prohibited operations, permitted request frequency, caching/redistribution rules and effective date. If it covers jobid 1, seek an explicit operator decision on promptly pausing or reconfiguring that job.
+- A software repository MIT license does not establish rights to the underlying race-program data. Require data-use and commercial publication authorization separately.
+- Cutover requires exactly one approved compliant fetcher; no dual Cron overlap, frequency escalation, or fallback that bypasses a restriction. Keep the existing writer unchanged until the operator decides on the current compliance risk.
+- Current verified CI at 7da461ec: offline contract run 44123384529 SUCCESS and disposable PostgreSQL fixture run 44123384823 SUCCESS. These do not establish upstream data rights or live Supabase persistence safety.
+
+**Compliance gate: HOLD.** This document does not authorize stopping the existing Cron or creating another polling job.
