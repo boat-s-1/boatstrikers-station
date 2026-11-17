@@ -46,3 +46,9 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - Current-day read-only spot check (intraday): bs_race_events=0, bs_race_entries=0, bs_race_results=113. The 113 result count is not final.
 - Added PR298-PRODUCTION-READONLY-READINESS.sql to compare persisted counts with sync logs; it is a diagnostic artifact, not a migration.
 - Gate 1 (CI) is now satisfied. Gates 2-5 remain HOLD. No production writes.
+
+## Final intraday read-only comparison (2026-11-17)
+- Latest verified head 48990726: PR298 V3 PostgreSQL fixture SUCCESS (run 44052684765); PR298 V3 offline contract SUCCESS (run 44052684771).
+- Read-only production query at inspection: 204 successful `live_all` sync log rows for 2026-11-17, but persisted `bs_race_events=0`, `bs_race_entries=0`, `bs_race_results=113`. These intraday counts can change.
+- Decision: **HOLD**. Log success must not be used as the cutover success criterion. Require persisted six-boat identity parity, result association, representative production trigger graph test, safe rollback, and explicit change approval.
+- PR298-PRODUCTION-READONLY-READINESS.sql is a preflight probe, not an authorized production change. Its count-only PASS must not substitute for payload/identity and trigger verification.
