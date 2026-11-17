@@ -38,3 +38,12 @@ test('invalid missing context is a no-op',async()=>{
  const fn=vm.runInContext('('+match[0].replace(/^export /,'')+')',context);
  await fn({supabase:null,run:null,status:'success'});
 });
+
+test('malformed PostgREST error code cannot leak diagnostic text',async()=>{
+ const h=makeHarness({data:null,error:{code:'credential=SECRET',message:'private credentials'}});
+ await h.invoke();
+ assert.equal(h.logs.length,1);
+ assert.equal(h.logs[0][1].code,'NO_MATCHING_ROW');
+ assert.ok(!JSON.stringify(h.logs).includes('SECRET'));
+ assert.ok(!JSON.stringify(h.logs).includes('private credentials'));
+});
