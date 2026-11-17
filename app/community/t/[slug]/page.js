@@ -12,12 +12,17 @@ async function loadThread(slug) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
   const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { data, error } = await client.from('community_threads')
+  try {
+    const { data, error } = await client.from('community_threads')
     .select('slug,title,excerpt,body,status,audience,published_at,character_key')
     .eq('slug', slug).eq('status', 'published').eq('audience', 'public')
     .lte('published_at', new Date().toISOString()).maybeSingle();
-  if (error || !isPublicThread(data)) return null;
-  return data;
+    if (error || !isPublicThread(data)) return null;
+    return data;
+  } catch {
+    // An unavailable database must never expose a partially resolved thread.
+    return null;
+  }
 }
 export default async function CommunityThreadPage({ params }) {
   const { slug } = await params;
