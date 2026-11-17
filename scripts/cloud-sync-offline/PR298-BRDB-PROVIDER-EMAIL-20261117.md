@@ -23,3 +23,21 @@ Date: 2026-11-17. Screenshot shows a message from team-nave support (dated Nov 1
 5. Keep PR Draft/HOLD pending isolated full-data validation, trigger side-effects testing, and explicit approval for any production changes.
 
 No production mutations authorized or performed.
+
+## 2026-11-18 production log cross-check (read-only)
+
+Queried production bs_live_source_sync_logs grouped by race_date, source, sync_kind and status. For each of Nov 13-17, source boatraceopenapi/v1 reported 310 successful live_all calls. Reported maximum event/entry/result payload counts were:
+
+| Date | Calls | Max event payload | Max entry payload | Max result payload |
+|---|---:|---:|---:|---:|
+| Nov 13 | 310 | 156 | 935 | 156 |
+| Nov 14 | 310 | 168 | 1003 | 168 |
+| Nov 15 | 310 | 156 | 935 | 156 |
+| Nov 16 | 310 | 120 | 718 | 120 |
+| Nov 17 | 310 | 132 | 792 | 132 |
+
+Persisted bs_race_events and bs_race_entries were zero for all five dates, while bs_race_results contained 156, 168, 156, 120 and 132 rows respectively. This proves reported payload success is not a persisted bootstrap guarantee. Nov 17's aggregate 792/132 ratio does not establish per-race identity validity.
+
+The BRDB provider email concerns a separate named API. Temporal coincidence with Windows task cessation does not prove that the stopped task was the only missing bootstrap writer. Review Windows task SQL and writer logs offline before attributing root cause. Do not restart high-frequency BRDB polling.
+
+Current source restrictions and production cutover remain HOLD. No production writes or external API probes performed.
