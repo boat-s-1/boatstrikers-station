@@ -60,3 +60,9 @@ Inspected `pg_get_functiondef` for `public.bs_apply_openapi_results` and `public
 Commits `ef34b8ca`, `8a45e9e7`, `9b6c9af5` add a pre-writer conflict check in `bs_apply_openapi_atomic_candidate` against both `bs_race_results` and `bs_race_events` for **non-null trifecta combination and trifecta payout**. An isolated fixture asserts that contradictory values raise an error before any dependent writer is called and preserve existing rows. **CI verification pending at documentation time.**
 
 This is deliberately a narrow safeguard, **not complete result immutability**. Remaining risks include first/second/third boats, other payout types, technique fields, result-entry positions, existing source priority, and concurrent writers that do not use the same advisory lock. The check runs after the candidate advisory lock, but it cannot protect against independent legacy writers. These must be resolved before cutover. The quarantine design remains unimplemented.
+
+## Expanded persisted-result preflight (2026-11-17)
+
+At `9e787919`, both CI workflows passed after adding comparisons for scalar exacta/quinella/trio combinations and payouts, first/second/third boat, winning method and technique. At `1863c837` and `c761e208`, the candidate additionally checks existing `bs_race_entries` arrival order, finish place, actual course, actual ST (including `actual_start_timing`) and result note before the four writers, with two synthetic conflict fixtures. **The boat-level CI was still pending at this document update.**
+
+These guards are **preflight only** and do not guarantee serializability against independent legacy writers, which may write after the check. Also verify non-null value normalization, result source priority, and how a legitimate official correction should be handled. Do not infer authorization to change production from fixture success.
