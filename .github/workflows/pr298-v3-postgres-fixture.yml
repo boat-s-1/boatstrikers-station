@@ -13,6 +13,7 @@ on:
       - 'scripts/cloud-sync-offline/openapi-historical-program.candidate.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-program.runtime.assert.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-program.batch-rollback.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.privileges.assert.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-preview*.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-results*.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql'
@@ -66,6 +67,7 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.candidate.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.runtime.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.batch-rollback.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.privileges.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview-functions.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results-function.sql
