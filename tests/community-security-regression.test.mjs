@@ -35,3 +35,10 @@ test('unknown access level cannot reply', () => {
   }
   assert.equal(canReadAudience('paid','paid'),true);
 });
+
+test('RLS design defaults to disabled replies and limits anonymous reads', () => {
+  const code = read('docs/community/community-rls-review-2026-11-17.md');
+  assert.match(code, /reply_policy text not null default 'disabled'/);
+  assert.match(code, /using \(status = 'published' and audience = 'public' and published_at <= now\(\)\)/);
+  assert.match(code, /revoke all on public\.community_threads from anon, authenticated/);
+});
