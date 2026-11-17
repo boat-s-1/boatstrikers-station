@@ -63,3 +63,13 @@ Before the protected secret is registered, confirm that users able to modify the
 The test itself must remain bounded to the branch-only table: verify the fixture's table identity and zero-row baseline before testing; record only HTTP status codes and schema-safe assertions; verify final zero rows; delete the disposable branch even on test failure. Keep branch credentials out of stdout, artifacts, PR comments, and version control. The environment `pr301-isolated-http` is **not yet approved for secret registration**.
 
 **Release evidence still missing:** actual branch-only service-role credential injection, successful singular PATCH HTTP 200/object and 406/PGRST116 responses, cleanup and deletion confirmation. Until all are observed, retain Draft/HOLD.
+
+## Credential isolation verification (mandatory before future paid branch)
+
+A Supabase *branch URL* being different from production is not, by itself, proof that its service-role credential is isolated from production. Before any credential is injected into a runner, use the Supabase dashboard's branch-scoped API key controls to confirm the credential belongs exclusively to the disposable branch and cannot authorize against the production project. If this cannot be verified without exposing a key, **HOLD**. Do not substitute a production/parent project's legacy JWT or service_role key. Never perform a production API request as a credential-isolation experiment.
+
+The single-account GitHub environment is not an approval boundary. A secret-bearing job should be defined and reviewed on a protected, trusted execution ref; its workflow and test script must be immutable for that run. The proposed trusted-runner change to the default branch is a **separate explicit authorization decision**. Until authorized, no secret-bearing workflow is to be committed to the default branch and no secret is to be registered in `pr301-isolated-http`.
+
+### Required operator decision
+
+Authorize **only** the addition of a manually dispatched, no-production-access, pinned-code verification workflow to the default branch after reviewing its exact diff. This is *not* authorization to create a paid branch, register a key, run live HTTP, merge PR #301, or deploy. If default-branch changes are not approved, use an independently trusted interactive execution environment instead.
