@@ -4,6 +4,7 @@ on:
     paths:
       - 'tools/agent-controller/isolated-postgres-race-ci.sh'
       - 'tools/agent-controller/isolated-postgres-crash-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-claim-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -45,3 +46,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-race-ci.sh
       - name: Inject crash and verify rollback and retry
         run: bash tools/agent-controller/isolated-postgres-crash-ci.sh
+      - name: Exercise competing claim and stale-token fencing
+        run: bash tools/agent-controller/isolated-postgres-claim-ci.sh
