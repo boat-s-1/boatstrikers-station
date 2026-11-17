@@ -52,3 +52,15 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - Read-only production query at inspection: 204 successful `live_all` sync log rows for 2026-11-17, but persisted `bs_race_events=0`, `bs_race_entries=0`, `bs_race_results=113`. These intraday counts can change.
 - Decision: **HOLD**. Log success must not be used as the cutover success criterion. Require persisted six-boat identity parity, result association, representative production trigger graph test, safe rollback, and explicit change approval.
 - PR298-PRODUCTION-READONLY-READINESS.sql is a preflight probe, not an authorized production change. Its count-only PASS must not substitute for payload/identity and trigger verification.
+
+## Executed read-only readiness probe (2026-11-17, intraday)
+- Verified `bs_live_source_sync_logs` schema in `information_schema.columns`: `race_date`, `sync_kind`, `status`, `event_rows`, `entry_rows` all exist with expected types.
+- Ran the exact `PR298-PRODUCTION-READONLY-READINESS.sql` query against production (read-only). It executed successfully and returned five **HOLD** rows.
+- 11/13: 310 success logs, 0 events, 0 entries, 156 results, max payload 156 events/935 entries.
+- 11/14: 310 success logs, 0 events, 0 entries, 168 results, max payload 168 events/1003 entries.
+- 11/15: 310 success logs, 0 events, 0 entries, 156 results, max payload 156 events/935 entries.
+- 11/16: 310 success logs, 0 events, 0 entries, 120 results, max payload 120 events/718 entries.
+- 11/17: 209 success logs, 0 events, 0 entries, 116 results, max payload 132 events/720 entries **at query time only**.
+- The probe's `incomplete_six_boat_races=0` for all five dates is vacuous because no entry rows exist; it is **not** a completeness PASS.
+- CI at `3e4aa803`: both PostgreSQL fixture (44054935827) and offline contract (44054935875) completed SUCCESS.
+- No production changes. Full-schema trigger benchmark, live official payload parity, and safe canary still HOLD.
