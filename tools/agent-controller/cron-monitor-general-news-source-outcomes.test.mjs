@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {planGeneralNewsSourceOutcomes as plan} from './cron-monitor-general-news-source-outcomes.mjs';
+const good=[{source:'nikkan',status:'fulfilled',found:4},{source:'macour',status:'fulfilled',found:2},{source:'boatrace',status:'fulfilled',found:1}];
+test('all sources healthy but publication still blocked',()=>{const r=plan({outcomes:good});assert.equal(r.decision,'HEALTHY');assert.equal(r.publicationAllowed,false)});
+test('official source timeout preserves successful results as evidence only',()=>{const r=plan({outcomes:[...good.slice(0,2),{source:'boatrace',status:'rejected',errorCategory:'timeout'}]});assert.equal(r.decision,'DEGRADED');assert.equal(r.healthySources.length,2);assert.equal(r.failedSources[0].source,'boatrace');assert.equal(r.retryAllowed,false)});
+test('all sources failed remains degraded without publishing',()=>{const r=plan({outcomes:good.map(x=>({source:x.source,status:'rejected',errorCategory:'timeout'}))});assert.equal(r.decision,'DEGRADED');assert.equal(r.healthySources.length,0);assert.equal(r.publicationAllowed,false)});
+test('missing source holds',()=>assert.equal(plan({outcomes:good.slice(0,2)}).decision,'HOLD'));
+test('duplicate source holds',()=>assert.equal(plan({outcomes:[good[0],good[0],good[2]]}).decision,'HOLD'));
+test('unknown source holds',()=>assert.equal(plan({outcomes:[...good.slice(0,2),{source:'other',status:'fulfilled',found:1}]}).decision,'HOLD'));
+test('invalid count holds',()=>assert.equal(plan({outcomes:[{...good[0],found:-1},...good.slice(1)]}).decision,'HOLD'));
+test('invalid category holds',()=>assert.equal(plan({outcomes:[...good.slice(0,2),{source:'boatrace',status:'rejected',errorCategory:'secret-text'}]}).decision,'HOLD'));
+test('empty input holds',()=>assert.equal(plan().decision,'HOLD'));
+test('no mutable publication or retry output',()=>{const r=plan({outcomes:good});assert.equal(r.sendAllowed,false);assert.equal(r.retryAllowed,false)});
