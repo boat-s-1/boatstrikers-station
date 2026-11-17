@@ -115,6 +115,28 @@ BEGIN
    WHERE race_date=DATE '2026-11-13' AND course_code=10 AND race_no=9)<>1 THEN
    RAISE EXCEPTION 'historical candidate failed extra-boat rollback';
  END IF;
+ -- A one-boat partial existing program must never be silently completed.
+ INSERT INTO public.bs_race_results
+  (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
+ VALUES (DATE '2026-11-13',10,8,'1-2-3',1000,'settled',now());
+ INSERT INTO public.bs_race_events(id,race_date,course_code,race_no)
+ VALUES (991103,DATE '2026-11-13',10,8);
+ INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
+ VALUES (991104,DATE '2026-11-13',10,8,1,'08001');
+ failure:=false;
+ BEGIN
+  PERFORM public.bs_apply_openapi_historical_program_candidate(
+   DATE '2026-11-13',
+   jsonb_build_array(jsonb_build_object('race_date','2026-11-13','course_code',10,'race_no',8)),
+   (SELECT jsonb_agg(jsonb_build_object('race_date','2026-11-13','course_code',10,
+     'race_no',8,'boat_no',b,'racer_registration_no',lpad((8000+b)::text,5,'0')))
+    FROM generate_series(1,6) b),now());
+ EXCEPTION WHEN OTHERS THEN failure:=true;
+ END;
+ IF NOT failure OR (SELECT count(*) FROM public.bs_race_entries
+   WHERE race_date=DATE '2026-11-13' AND course_code=10 AND race_no=8)<>1 THEN
+   RAISE EXCEPTION 'historical candidate silently repaired partial program';
+ END IF;
  -- Current-day and out-of-scope historical dates must not be accepted.
  failure:=false;
  BEGIN
@@ -130,5 +152,5 @@ BEGIN
  EXCEPTION WHEN OTHERS THEN failure:=true;
  END;
  IF NOT failure THEN RAISE EXCEPTION 'historical candidate accepted out-of-window date'; END IF;
- RAISE NOTICE 'Historical candidate PASS: settled payout preserved, replay, five-boat, duplicate racer, missing/unsettled-result gates, persisted extra-boat rollback, date gates';
+ RAISE NOTICE 'Historical candidate PASS: settled payout preserved, replay, five-boat, duplicate racer, missing/unsettled-result gates, persisted extra-boat/partial-program rejection, date gates';
 END $test$;
