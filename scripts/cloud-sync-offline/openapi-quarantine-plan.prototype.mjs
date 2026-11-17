@@ -13,7 +13,7 @@ function validCalendarDay(value) {
 // Require an explicit offset so capture provenance cannot depend on host timezone.
 function validCaptureTimestamp(value) {
   return typeof value === 'string' &&
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
     Number.isFinite(Date.parse(value));
 }
 function fail(reason) { throw new Error('snapshot program invalid: '+reason); }
