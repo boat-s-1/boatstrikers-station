@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {planOutboxWorkerCycle} from './cron-monitor-worker-cycle-planner.mjs';
+const run=(steps)=>planOutboxWorkerCycle({steps});
+test('empty cycle stays pending and never sends',()=>{const r=run([]);assert.equal(r.state,'pending_review');assert.equal(r.sendAllowed,false)});
+test('valid synthetic lifecycle yields proposal only',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'receipt_confirmed',authenticatedReceipt:true}]);assert.equal(r.state,'delivered');assert.equal(r.decision,'proposal_only');assert.equal(r.sendAllowed,false);assert.equal(r.persistenceAllowed,false)});
+test('missing approval holds before delivery',()=>{const r=run([{event:'approve'},{event:'start_delivery'}]);assert.equal(r.decision,'hold');assert.equal(r.audit.length,1);assert.equal(r.state,'pending_review')});
+test('missing receipt holds in flight',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'receipt_confirmed'}]);assert.equal(r.decision,'hold');assert.equal(r.state,'in_flight')});
+test('worker crash blocks automatic replay',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'worker_lost'},{event:'retry_requested',operatorReviewed:true}]);assert.equal(r.decision,'hold');assert.equal(r.state,'delivery_unknown')});
+test('reconciled unknown requires operator and receipt',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'worker_lost'},{event:'reconciled_delivered',operatorReviewed:true}]);assert.equal(r.decision,'hold');assert.equal(r.state,'delivery_unknown')});
+test('reconciled unknown with both proofs only proposes delivered',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'worker_lost'},{event:'reconciled_delivered',operatorReviewed:true,authenticatedReceipt:true}]);assert.equal(r.decision,'proposal_only');assert.equal(r.state,'delivered')});
+test('delivered cannot be replayed',()=>{const r=run([{event:'approve',operatorReviewed:true},{event:'start_delivery'},{event:'receipt_confirmed',authenticatedReceipt:true},{event:'retry_requested',operatorReviewed:true}]);assert.equal(r.decision,'hold');assert.equal(r.state,'delivered')});
+test('malformed steps fail closed',()=>assert.throws(()=>run([null])));
+test('excessive steps fail closed',()=>assert.throws(()=>run(Array.from({length:51},()=>({event:'approve'})))));
