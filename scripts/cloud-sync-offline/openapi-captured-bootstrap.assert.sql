@@ -30,5 +30,40 @@ BEGIN
  IF EXISTS (SELECT 1 FROM public.bs_race_events WHERE race_date=d AND race_no=2) THEN
    RAISE EXCEPTION 'captured bootstrap failed to roll back malformed payload';
  END IF;
- RAISE NOTICE 'Captured production bootstrap PASS: 1+6, replay 0+0, malformed rollback';
+ -- A pre-existing event with only two entries must be repaired by bootstrap
+ -- without replacing its authoritative event metadata.
+ INSERT INTO public.bs_race_events(id,race_date,course_code,race_no,course_name)
+ VALUES (999001,d,9,3,'EXISTING_AUTHORITATIVE');
+ INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
+ VALUES (999002,d,9,3,1,'00999'),(999003,d,9,3,2,'00998');
+ result := public.bs_apply_openapi_bootstrap(
+   jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,'race_no',3,'course_name','OVERWRITE_ATTEMPT')),
+   (SELECT jsonb_agg(jsonb_build_object('race_date',d,'course_code',9,'race_no',3,
+     'boat_no',b,'racer_registration_no',lpad((2000+b)::text,5,'0')))
+    FROM generate_series(1,6) b),now());
+ IF (result->>'event_inserted')::int <> 0 OR (result->>'entry_inserted')::int <> 4 THEN
+   RAISE EXCEPTION 'captured bootstrap partial repair count unexpected: %',result;
+ END IF;
+ IF (SELECT course_name FROM public.bs_race_events WHERE race_date=d AND race_no=3)
+    IS DISTINCT FROM 'EXISTING_AUTHORITATIVE' THEN
+   RAISE EXCEPTION 'captured bootstrap overwrote authoritative event';
+ END IF;
+ IF (SELECT count(*) FROM public.bs_race_entries WHERE race_date=d AND race_no=3)<>6
+    OR (SELECT racer_registration_no FROM public.bs_race_entries
+        WHERE race_date=d AND race_no=3 AND boat_no=1)<>'00999' THEN
+   RAISE EXCEPTION 'captured bootstrap damaged existing entries during partial repair';
+ END IF;
+ -- A missing parent race is not silently invented by entry payload.
+ BEGIN
+   PERFORM public.bs_apply_openapi_bootstrap(
+     '[]'::jsonb,
+     jsonb_build_array(jsonb_build_object('race_date',d,'course_code',9,
+       'race_no',5,'boat_no',1,'racer_registration_no','02001')),now());
+   RAISE EXCEPTION 'orphan entry accepted';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+ IF EXISTS (SELECT 1 FROM public.bs_race_entries WHERE race_date=d AND race_no=5) THEN
+   RAISE EXCEPTION 'orphan entry persisted despite foreign key';
+ END IF;
+ RAISE NOTICE 'Captured production bootstrap PASS: 1+6, replay 0+0, malformed rollback, partial repair, metadata preservation, FK guard';
 END $test$;
