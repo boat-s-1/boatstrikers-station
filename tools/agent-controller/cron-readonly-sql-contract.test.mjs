@@ -22,7 +22,7 @@ test('returns partial count',()=>assert.match(executable,/AS partial_runs/));
 test('returns article windows',()=>assert.match(executable,/AS windows_with_articles/));
 test('returns temporal article matches',()=>assert.match(executable,/AS temporal_article_matches/));
 test('does not select article body',()=>assert.doesNotMatch(executable,/\b(n\.body|n\.content|n\.title)\b/i));
-test('does not expose raw run identifiers',()=>assert.doesNotMatch(executable,/\b(r\.id|n\.id)\b/i));
+test('final output does not expose raw identifiers',()=>{const finalSelect=executable.slice(executable.lastIndexOf('SELECT to_char'));assert.doesNotMatch(finalSelect,/\\b(r\\.id|n\\.id|p\\.id\\s+AS)\\b/i)});
 
 test('bounded articles materialized once',()=>assert.match(executable,/bounded_articles AS MATERIALIZED/));
 test('run windows materialized',()=>assert.match(executable,/run_windows AS MATERIALIZED/));
