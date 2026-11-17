@@ -8,6 +8,7 @@ on:
       - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
       - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
       - 'scripts/cloud-sync-offline/audit-repository-schema-genesis.py'
+      - 'scripts/cloud-sync-offline/pr298-rls-select-only-negative.fixture.sql'
       - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
       - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql'
@@ -59,6 +60,8 @@ jobs:
         run: psql --version
       - name: Install disposable fixture schema
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
+      - name: Verify SELECT-only RLS rejects anonymous and authenticated inserts
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/pr298-rls-select-only-negative.fixture.sql
       - name: Verify captured production bootstrap RPC in separate disposable database
         run: |
           python3 scripts/cloud-sync-offline/extract-isolation-bootstrap.py
