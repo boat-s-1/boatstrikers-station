@@ -77,3 +77,20 @@ test('start-log failure cannot disclose raw exception and pipeline still succeed
   assert.equal(h.logs[0][1].code, 'START_UNAVAILABLE');
   assert.ok(!JSON.stringify(h.logs).includes('private credentials'));
 });
+
+
+test('malformed diagnostic code is replaced without logging sensitive text', async () => {
+  const h = harness({ startError: Object.assign(new Error('private credentials'), { code: 'secret=private credentials' }) });
+  const response = await h.run();
+  assert.equal(response.status, 200);
+  assert.equal(h.logs[0][1].code, 'START_FAILURE');
+  assert.ok(!JSON.stringify(h.logs).includes('private credentials'));
+});
+
+test('malformed finish diagnostic code is replaced without leaking raw text', async () => {
+  const h = harness({ finishError: Object.assign(new Error('private credentials'), { code: 'secret=private credentials' }) });
+  const response = await h.run();
+  assert.equal(response.status, 200);
+  assert.equal(h.logs[0][1].code, 'TRANSPORT_FAILURE');
+  assert.ok(!JSON.stringify(h.logs).includes('private credentials'));
+});
