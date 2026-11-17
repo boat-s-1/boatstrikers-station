@@ -30,3 +30,17 @@ This proposal adds a **manual-only** workflow. It is NOT authorization to run it
 - Branch service and optional anon credentials are now injected **only into the HTTP execution step**, not into checkout or the preliminary guard step. The preliminary step checks the allowlist before checkout.
 - The credential presence check is in the HTTP step. This does not solve credential provenance; an operator must still confirm the branch-scoped key and configure the environment before execution.
 - Screenshot review indicates the environment now selects only `main`, and administrator bypass is unchecked. Verify the settings were saved. No secrets were added.
+
+## Final review finding — fixture prerequisite and execution order
+
+**Important:** The proposed workflow does not create the `hatsune_news_cron_runs` fixture. The branch must first be created and confirmed disposable, and `tests/sql/hatsune-cron-log-branch-fixture.sql` must be applied **only to that branch** after checking that the table is absent. Otherwise the HTTP test will fail with a missing table; this is not evidence of an application defect. Never add automatic schema creation to the secret-bearing runner without separate review.
+
+Execution sequence (each step separately gated):
+1. Review and explicitly approve PR303 merge to `main` (the workflow will exist but is not automatically run).
+2. Confirm the environment's `main`-only restriction was saved and no unrelated workflow can access its future secrets; review all trusted workflows on `main` before secret registration.
+3. Obtain fresh paid-branch cost authorization, create disposable branch, verify its ref/health, and apply branch-only fixture using the Supabase connector.
+4. Register environment variable `PR301_ALLOWED_BRANCH_REF` with exact branch ref; register **branch-only** credentials as environment secrets. Do not paste credentials into chat.
+5. Manually dispatch the workflow on `main` using that ref. Inspect only redacted status results, independently query the disposable branch for zero fixture rows, remove environment secrets and variable, then delete the paid branch even if tests fail.
+6. Review HTTP evidence and only then consider PR301 merge and production deployment as separate decisions.
+
+A green PR301 offline CI does not replace these checks. No current tool can independently inspect GitHub environment rules or register/remove its secrets, so steps 2 and 4 require operator confirmation.
