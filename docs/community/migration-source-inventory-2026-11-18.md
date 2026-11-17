@@ -25,3 +25,13 @@
 - https://supabase.com/docs/guides/deployment/branching
 - https://supabase.com/docs/guides/deployment/branching/github-integration
 - https://supabase.com/docs/guides/deployment/branching/troubleshooting
+
+
+## 2026-11-18 subsequent verification branch update
+
+This section records a distinct, later branch attempt and supersedes any inference that the 11-row observation below was necessarily only an early CREATING_PROJECT snapshot.
+
+- Earlier branch `community-acl-isolation-20261118` (`qcggydjyxdsfwqnxshyb`, id `dcc21b22-2505-4bd7-9435-8b2560c7d321`) was observed while `CREATING_PROJECT`; its early 11-row snapshot alone was inconclusive, and its logs were not retained.
+- A separate later user-approved branch `community-acl-verification-20261118` (`bvjybdnwahywxolynkjl`, id `51c931bd-9ddf-4ae9-bdbd-22630ec77cd8`) reached `FUNCTIONS_DEPLOYED` / preview `ACTIVE_HEALTHY`. Its migration history remained at 11/133 (latest `20260820194818`). Postgres logs captured SQLSTATE `42P01` at `2026-11-17T16:16:55.578Z` while applying `20260820210127` / `ai_v2_public_character_stats`: `public.bs_race_results` was absent.
+- Therefore the earlier CREATING_PROJECT caveat remains valid for the older branch, but it does not explain away the later branch's logged migration failure. The later branch was deleted after evidence capture; current branch listing confirms it is absent.
+- The later log-backed failure, migration-source reconciliation, and broader baseline dependency inventory are documented in `docs/community/fresh-supabase-bootstrap-baseline-audit-2026-11-18.md`.
