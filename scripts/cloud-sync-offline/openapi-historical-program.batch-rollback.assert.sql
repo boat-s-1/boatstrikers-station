@@ -6,8 +6,8 @@ DECLARE d date:=DATE '2026-11-16'; ev jsonb; en jsonb;
 BEGIN
  INSERT INTO public.bs_race_results
   (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
- VALUES (d,11,1,'1-2-3',1000,'settled',now()),
-        (d,11,2,'1-2-3',1000,'settled',now());
+ VALUES (d,11,1,'1-2-3',1000,'confirmed',now()),
+        (d,11,2,'1-2-3',1000,'confirmed',now());
  INSERT INTO public.bs_race_events(id,race_date,course_code,race_no)
  VALUES(991201,d,11,2);
  INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
