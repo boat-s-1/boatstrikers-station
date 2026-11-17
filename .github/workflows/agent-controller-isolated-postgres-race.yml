@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'tools/agent-controller/isolated-postgres-race-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-crash-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -42,3 +43,5 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -qAt -c 'SELECT version();'
       - name: Exercise two-session unique constraints
         run: bash tools/agent-controller/isolated-postgres-race-ci.sh
+      - name: Inject crash and verify rollback and retry
+        run: bash tools/agent-controller/isolated-postgres-crash-ci.sh
