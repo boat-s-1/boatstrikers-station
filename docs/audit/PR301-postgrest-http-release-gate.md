@@ -73,3 +73,9 @@ The single-account GitHub environment is not an approval boundary. A secret-bear
 ### Required operator decision
 
 Authorize **only** the addition of a manually dispatched, no-production-access, pinned-code verification workflow to the default branch after reviewing its exact diff. This is *not* authorization to create a paid branch, register a key, run live HTTP, merge PR #301, or deploy. If default-branch changes are not approved, use an independently trusted interactive execution environment instead.
+
+## Official branching documentation verified 2026-11-18
+
+Supabase's [Branching guide](https://supabase.com/docs/guides/deployment/branching) explicitly states that each branch has its own Supabase instance and API credentials. This supports the intended use of branch-specific keys, but **does not establish that any particular supplied credential is from the disposable branch**. At execution time, verify the branch in the authoritative branch listing, retrieve its credential only through the branch-scoped dashboard, and never use a production key. The current connector supports branch listing but has no service-role/secret-key retrieval action.
+
+Supabase branch listing was successfully read after reconnection: production main `rzosrbkyniyedolhkgxo` and existing unrelated `gamagori-pr294-phase13` (`MIGRATIONS_FAILED`); no PR301 disposable branch exists. Do not alter the unrelated branch. The no-secret preflight merged through PR #302 is visible in the GitHub Actions UI, but has not been executed. Live HTTP remains HOLD.
