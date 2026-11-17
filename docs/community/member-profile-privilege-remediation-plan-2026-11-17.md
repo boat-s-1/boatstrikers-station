@@ -2,7 +2,7 @@
 
 2026-11-17 に本番DBへ読み取り専用SQLを実施した結果、`public.bs_member_profiles` の `authenticated` ロールには、`is_admin` / `plan` / `membership_status` / `premium_until` / `beta_member` / `user_id` について UPDATE 権限があることを再確認した。UPDATE RLS は `auth.uid() = user_id` の自己行制限のみ。これは**自己行の特権列変更を阻止しない**。実際の認証済みHTTPリクエストによる権限昇格は未実証。
 
-## 提案する安全な是正方針
+## 追加の読み取り専用検証\n\n2026-11-17に `has_column_privilege('authenticated', 'public.bs_member_profiles', column_name, 'UPDATE')` および INSERT で全16列を照合した結果、**16列すべてで UPDATE=true / INSERT=true**。特権列だけでなく `created_at`、`withdrawn_at`、`line_linked_at` 等も実効権限あり。これは列単位の実効GRANTであり、認証済みHTTP APIでの攻撃成功を直接実証したものではない。\n\n## 提案する安全な是正方針
 
 - `authenticated` のテーブル全体 UPDATE 権限を取り消し、ユーザーが編集してよい列にのみ列単位 UPDATE を付与する。
 - `user_id`、`is_admin`、`plan`、`membership_status`、`premium_until`、`beta_member` は自己編集を禁止する。
