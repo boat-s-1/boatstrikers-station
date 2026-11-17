@@ -49,3 +49,12 @@ test('production readiness probe is read-only and checks persisted key/identity 
  assert.doesNotMatch(readiness,/\b(?:INSERT|UPDATE|DELETE|TRUNCATE|CREATE|ALTER|DROP|GRANT|REVOKE|CALL|DO)\s+(?:INTO\s+|FROM\s+|TABLE\s+|FUNCTION\s+)?(?:public\.|cron\.|\w+\s*\()/i);
  assert.equal((readiness.match(/\bSELECT\s+p\.race_date/g)||[]).length,1);
 });
+
+const preflight = readFileSync(new URL('./openapi-cron-cutover-preflight.readonly.sql',import.meta.url),'utf8');
+test('Cron cutover preflight fails closed on changed job identity, schedule or command',()=>{
+ assert.ok(preflight.includes("jobid=1"));
+ assert.ok(preflight.includes("btrim(command)='select public.bs_sync_openapi_today();'"));
+ assert.ok(preflight.includes("schedule='*/3 23,0-14 * * *'"));
+ assert.doesNotMatch(preflight,/command\s*~\*/);
+ assert.doesNotMatch(preflight,/\b(?:UPDATE|INSERT|DELETE|ALTER|DROP|TRUNCATE)\s+(?:cron\.|public\.|\w+)/i);
+});
