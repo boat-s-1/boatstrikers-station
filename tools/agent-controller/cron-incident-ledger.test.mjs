@@ -25,3 +25,5 @@ test('rejects success alert',()=>assert.throws(()=>run([{...attempt,outcome:'suc
 test('rejects alert before attempt',()=>assert.throws(()=>run([attempt,{...proposed,at:'2026-11-17T08:00:00Z'}]),/alert without incident/));
 test('rejects excessive events',()=>assert.throws(()=>project([attempt,proposed],{...ref,maxEvents:1}),/invalid events/));
 test('rejects invalid event type',()=>assert.throws(()=>run([{...attempt,kind:'write'}]),/invalid event kind/));
+
+test('chronologically reversed events rejected',()=>assert.throws(()=>run([attempt,{...proposed,at:'2026-11-17T08:00:00Z'}]),/out of order event/));
