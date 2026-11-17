@@ -75,6 +75,19 @@ BEGIN
       GROUP BY r.sk,r.rk,p.value->>'place_number' HAVING count(*)>1)
    OR EXISTS(SELECT 1 FROM boats WHERE bv->>'weight' IS NOT NULL
       AND bv->>'weight' !~ '^[0-9]+([.][0-9]+)?$')
+   -- A present payout collection must be an array. A non-array would
+   -- otherwise be silently ignored by the index-zero mapping.
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL
+      (VALUES ('trifecta'),('exacta'),('quinella'),('trio')) kinds(kind)
+      WHERE r.rv #> ARRAY['result','payouts',kinds.kind] IS NOT NULL
+        AND jsonb_typeof(r.rv #> ARRAY['result','payouts',kinds.kind])
+          IS DISTINCT FROM 'array')
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL
+      (VALUES ('trifecta'),('exacta'),('quinella'),('trio')) kinds(kind)
+      WHERE jsonb_typeof(r.rv #> ARRAY['result','payouts',kinds.kind])='array'
+        AND EXISTS (SELECT 1 FROM jsonb_array_elements(
+          r.rv #> ARRAY['result','payouts',kinds.kind]) p
+          WHERE jsonb_typeof(p.value) IS DISTINCT FROM 'object'))
    -- Existing single-value result columns cannot represent dead-heat
    -- multi-combination payouts. Reject rather than silently truncate.
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL
