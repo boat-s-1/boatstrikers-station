@@ -35,7 +35,7 @@ expected_events = {
     "trg_bs_track_result_first_seen": "AFTER INSERT OR UPDATE",
 }
 pattern = re.compile(
-    r"CREATE\s+TRIGGER\s+(\w+)\s+.*?\s+ON\s+(?:public\.)?(\w+)\s+"
+    r"CREATE\s+TRIGGER\s+(\w+)\s+(.*?)\s+ON\s+(?:public\.)?(\w+)\s+"
     r"FOR\s+EACH\s+ROW\s+EXECUTE\s+FUNCTION\s+(\w+)\s*\(",
     re.IGNORECASE | re.DOTALL,
 )
