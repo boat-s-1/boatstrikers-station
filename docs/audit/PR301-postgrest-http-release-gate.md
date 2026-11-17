@@ -28,3 +28,17 @@ Status: **HOLD until a real HTTP test passes**. Offline CI and isolated SQL test
 - PR #301 HEAD `8119a2e6`: Hatsune CI run `44128792916` SUCCESS and Discord/Next.js run `44128792771` SUCCESS. Actual pinned `@supabase/supabase-js@2.53.0` client test passed matched, zero-row and denied scenarios with offline mocked fetch. This detected that `.maybeSingle()` returned arrays for the PATCH response; production completion code was changed to `.single()` and associated tests updated.
 - Previous disposable Supabase branch: SQL transaction insert/update returned a row; anon/authenticated lacked UPDATE table privileges; rollback left zero rows; branch deleted.
 - **No actual PostgREST HTTP integration test has yet been executed.**
+
+## No-cost prerequisite before another paid branch
+
+The previous approved paid branch attempt was deleted without HTTP execution because the available Supabase connector cannot retrieve a branch-only service-role key or perform authenticated PostgREST requests. **Do not create another paid branch until the following route is ready.**
+
+1. Prepare a trusted, manually triggered execution environment (for example, a protected GitHub Actions environment with required reviewers, restricted deployment branches, and repository administrators controlling access). Do not attach branch credentials to PR-triggered workflows, untrusted fork code, logs, comments, or committed files.
+2. Confirm a way to inject **only the newly created disposable branch's** service-role key into that environment as a masked, short-lived secret, without displaying it in chat or PR comments. A production service-role key is never an acceptable substitute. The branch ref must be passed independently and checked against the known production ref before any network request.
+3. Confirm outbound HTTPS to the disposable branch and availability of Node.js 22. Use the existing `tests/hatsune-cron-postgrest-http.mjs` runner; its test row cleanup is best effort, so always independently verify the table has zero rows before deleting the branch.
+4. Only after the secure route is proven without a paid branch, seek fresh approval of the hourly rate, create the branch without data, check health, apply the branch-only fixture, execute HTTP tests, and delete the branch in a finally-style cleanup process even if tests fail.
+5. Treat HTTP success as a separate gate from the already green offline supabase-js client tests. Keep the PR Draft/HOLD until both are evidenced and reviewed.
+
+### Attempt log — 2026-11-18 JST
+
+User approved US$0.01344/hour. Created `pr301-http-isolated-20261118-b` (ref `oomwtipsfpevfdxaazlw`, no production data). Confirmed `ACTIVE_HEALTHY`; no branch credential injection route was available, so **no fixture or HTTP test was run**. Deleted branch ID `6116af99-0988-4217-a023-6b3b47f5509e` and verified absence in branch list. Production untouched.
