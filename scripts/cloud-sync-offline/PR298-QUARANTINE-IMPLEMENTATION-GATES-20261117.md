@@ -54,3 +54,7 @@ Allow a snapshot with one valid race and one race whose **program is valid but r
 - Owner explicitly authorizes each production migration, Cron cutover and any paid resource.
 
 **Current decision: HOLD.** This document creates no quarantine table and does not claim implementation.
+
+## Live RLS baseline (read-only)
+
+A SELECT-only query of `pg_tables` confirms `rowsecurity=true` on all four related public tables: `bs_race_events`, `bs_race_entries`, `bs_race_results`, and `bs_theory_recommendations`. This is only an RLS-enable flag; **it does not prove the policies or grants are safe**. A quarantine ledger must receive explicit, independently reviewed policies and grants rather than assuming it inherits protection.
