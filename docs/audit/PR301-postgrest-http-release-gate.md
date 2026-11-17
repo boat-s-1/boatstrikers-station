@@ -12,7 +12,7 @@ Status: **HOLD until a real HTTP test passes**. Offline CI and isolated SQL test
    - `PR301_BRANCH_REF`: disposable branch project ref
    - `PR301_BRANCH_SERVICE_KEY`: branch-only service-role credential
    - `PR301_BRANCH_ANON_KEY`: optional branch anon key (required to exercise the anon-denied test)
-6. Verify successful HTTP POST, plural PATCH with `Prefer: return=representation`, no-matching-row plural PATCH, singular PATCH with `Accept: application/vnd.pgrst.object+json` returning an object, singular zero-match returning HTTP 406 / `PGRST116`, and (when supplied) denied anon PATCH. Confirm the test row was removed; query the branch table to ensure zero rows.
+6. Verify successful HTTP POST, plural PATCH with `Prefer: return=representation`, no-matching-row plural PATCH, singular PATCH with `Accept: application/vnd.pgrst.object+json` returning an object, singular zero-match returning HTTP 406 / `PGRST116`, and (when supplied) denied anon PATCH. Confirm DELETE returned exactly the inserted row ID (using `Prefer: return=representation`); independently query the branch table to ensure zero rows.
 7. Delete the paid branch immediately and verify it is absent from the branch listing, **including on test failure**.
 
 ## Failure handling
