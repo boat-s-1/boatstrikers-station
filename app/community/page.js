@@ -19,6 +19,7 @@ export default async function CommunityPage() {
     <nav className={styles.pillars} aria-label="サイトの主要カテゴリ">
       <Link href="/races">レース</Link><Link href="/blog">ブログ</Link><span aria-current="page">掲示板</span>
     </nav>
+    <p className={styles.note}><Link href="/community/notifications">通知センター（準備中）</Link> — LINE・Discordへの追加登録は不要です。</p>
     <h2>キャラクター別</h2>
     <div className={styles.grid}>{COMMUNITY_CHARACTERS.map(c =>
       <Link key={c.key} className={styles.card} href={c.href}>
