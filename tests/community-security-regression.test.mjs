@@ -42,3 +42,11 @@ test('RLS design defaults to disabled replies and limits anonymous reads', () =>
   assert.match(code, /using \(status = 'published' and audience = 'public' and published_at <= now\(\)\)/);
   assert.match(code, /revoke all on public\.community_threads from anon, authenticated/);
 });
+
+test('public thread detail handles failed database requests without rendering content', () => {
+  const code = read('app/community/t/[slug]/page.js');
+  assert.match(code, /try\s*\{/);
+  assert.match(code, /catch\s*\{/);
+  assert.match(code, /if \(error \|\| !isPublicThread\(data\)\) return null/);
+  assert.match(code, /if \(!thread\) notFound\(\)/);
+});
