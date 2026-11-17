@@ -40,6 +40,8 @@ const readiness = readFileSync(new URL('./PR298-PRODUCTION-READONLY-READINESS.sq
 test('production readiness probe is read-only and checks persisted key/identity integrity',()=>{
  assert.match(readiness,/WITH days AS \(/);
  assert.match(readiness,/orphan_result_races/);
+ assert.match(readiness,/AS orphan_entry_races/);
+ assert.match(readiness,/HOLD: orphan entry keys/);
  assert.match(readiness,/events_without_six_entries/);
  assert.match(readiness,/count\(DISTINCT en\.boat_no\)<>6/);
  assert.match(readiness,/count\(DISTINCT en\.racer_registration_no\)<>6/);
