@@ -79,6 +79,18 @@ BEGIN
  IF NOT pg_try_advisory_xact_lock(299,(p_date-DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'historical program repair already running';
  END IF;
+ -- Fail closed when a confirmed result has no usable trifecta evidence.
+ -- A status flag alone is insufficient proof that a race was settled.
+ IF EXISTS (
+   SELECT 1 FROM jsonb_to_recordset(p_events)
+     AS requested(race_date date,course_code int,race_no int)
+   JOIN public.bs_race_results r
+     ON (r.race_date,r.course_code,r.race_no)=
+        (requested.race_date,requested.course_code,requested.race_no)
+   WHERE r.trifecta_result IS NULL OR btrim(r.trifecta_result)=''
+ ) THEN
+   RAISE EXCEPTION 'historical repair requires confirmed trifecta result';
+ END IF;
  -- Reject partial pre-existing programs. Only a completely empty target or
  -- an already complete six-boat replay is eligible; never silently repair
  -- a partially populated historical race without separate investigation.
