@@ -9,6 +9,7 @@ on:
       - app/api/cron/hatsune-news-pipeline/route.js
       - tests/hatsune-cron-log-*.test.mjs
       - tests/hatsune-cron-postgrest-http.mjs
+      - tests/hatsune-cron-postgrest-http.test.mjs
       - tests/hatsune-cron-supabase-client.test.mjs
       - tests/sql/hatsune-cron-log-*.sql
       - .github/workflows/hatsune-cron-log-finish-guard.yml
@@ -27,6 +28,8 @@ jobs:
         run: node --test tests/hatsune-cron-log-*.test.mjs
       - name: Syntax check of isolated HTTP verification (no HTTP performed)
         run: node --check tests/hatsune-cron-postgrest-http.mjs
+      - name: Offline mocked HTTP runner regressions (no HTTP performed)
+        run: node --test tests/hatsune-cron-postgrest-http.test.mjs
   isolated-postgres:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
