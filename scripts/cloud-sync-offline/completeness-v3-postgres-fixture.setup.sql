@@ -5,7 +5,7 @@ CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE service_role NOLOGIN;
 CREATE TABLE public.bs_race_events (
  race_date date NOT NULL,course_code smallint NOT NULL,race_no smallint NOT NULL,
- course_name text,race_cancel_code text,
+ course_name text,race_cancel_code text,trifecta text,trifecta_payout integer,
  PRIMARY KEY(race_date,course_code,race_no));
 CREATE TABLE public.bs_race_results (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
