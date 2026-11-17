@@ -38,6 +38,43 @@ BEGIN
 END
 $probe$;
 RESET ROLE;
+-- UPDATE/DELETE also require a write policy, even with broad table grants.
+SET LOCAL ROLE anon;
+DO $probe$
+BEGIN
+  BEGIN
+    UPDATE public.pr298_rls_write_probe SET note='forbidden-update' WHERE id=1;
+    RAISE EXCEPTION 'PR298_FAIL: anon UPDATE unexpectedly succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    RAISE NOTICE 'PR298_PASS: anon UPDATE rejected by RLS';
+  END;
+  BEGIN
+    DELETE FROM public.pr298_rls_write_probe WHERE id=1;
+    RAISE EXCEPTION 'PR298_FAIL: anon DELETE unexpectedly succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    RAISE NOTICE 'PR298_PASS: anon DELETE rejected by RLS';
+  END;
+END
+$probe$;
+RESET ROLE;
+SET LOCAL ROLE authenticated;
+DO $probe$
+BEGIN
+  BEGIN
+    UPDATE public.pr298_rls_write_probe SET note='forbidden-update' WHERE id=1;
+    RAISE EXCEPTION 'PR298_FAIL: authenticated UPDATE unexpectedly succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    RAISE NOTICE 'PR298_PASS: authenticated UPDATE rejected by RLS';
+  END;
+  BEGIN
+    DELETE FROM public.pr298_rls_write_probe WHERE id=1;
+    RAISE EXCEPTION 'PR298_FAIL: authenticated DELETE unexpectedly succeeded';
+  EXCEPTION WHEN insufficient_privilege THEN
+    RAISE NOTICE 'PR298_PASS: authenticated DELETE rejected by RLS';
+  END;
+END
+$probe$;
+RESET ROLE;
 DO $probe$
 BEGIN
   IF EXISTS (SELECT 1 FROM public.pr298_rls_write_probe WHERE id IN (2,3)) THEN
