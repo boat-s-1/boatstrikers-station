@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canReadAudience, canReply, isPublicAudience } from '../lib/community/accessPolicy.mjs';
+import { canReadAudience, canReply, canReplyToPublishedThread, isPublicAudience } from '../lib/community/accessPolicy.mjs';
 
 test('public posts readable by everyone', () => {
   for (const level of ['guest','free','paid']) assert.equal(canReadAudience('public',level),true);
@@ -54,4 +54,16 @@ test('database reply_policy accepted; conflicting alias rejected', () => {
   assert.equal(canReply({audience:'public',reply_policy:'paid'},'paid'),true);
   assert.equal(canReply({audience:'public',reply_policy:'disabled'},'paid'),false);
   assert.equal(canReply({audience:'public',reply_policy:'disabled',replyPolicy:'paid'},'paid'),false);
+});
+
+test('write-path guard rejects draft, future, invalid date and nonpaid reply', () => {
+  const now = new Date('2026-11-17T12:00:00.000Z');
+  const thread = {audience:'public', reply_policy:'paid', status:'published', published_at:'2026-11-16T12:00:00.000Z'};
+  assert.equal(canReplyToPublishedThread(thread,'paid',now),true);
+  assert.equal(canReplyToPublishedThread({...thread,status:'draft'},'paid',now),false);
+  assert.equal(canReplyToPublishedThread({...thread,published_at:'2026-11-18T12:00:00.000Z'},'paid',now),false);
+  assert.equal(canReplyToPublishedThread({...thread,published_at:'invalid'},'paid',now),false);
+  assert.equal(canReplyToPublishedThread({...thread,published_at:null},'paid',now),false);
+  assert.equal(canReplyToPublishedThread(thread,'free',now),false);
+  assert.equal(canReplyToPublishedThread({...thread,locked:true},'paid',now),false);
 });
