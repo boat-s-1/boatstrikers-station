@@ -1,0 +1,44 @@
+name: BoatStrikers Agent Controller Isolated PostgreSQL Race
+on:
+  pull_request:
+    paths:
+      - 'tools/agent-controller/isolated-postgres-race-ci.sh'
+      - '.github/workflows/agent-controller-isolated-postgres-race.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres-race:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: agent_ci
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: agent_controller_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agent_ci -d agent_controller_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: agent_controller_ci
+      PGUSER: agent_ci
+      PGPASSWORD: disposable-ci-only
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify local PostgreSQL target
+        run: |
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "agent_controller_ci"
+          psql -X -v ON_ERROR_STOP=1 -qAt -c 'SELECT current_setting('"'server_version'"');'
+      - name: Exercise two-session unique constraints
+        run: bash tools/agent-controller/isolated-postgres-race-ci.sh
