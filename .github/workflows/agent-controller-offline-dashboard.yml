@@ -19,9 +19,13 @@ jobs:
         run: node --test tools/agent-controller/*.test.mjs
       - name: Generate synthetic report
         run: node tools/agent-controller/offline-smoke.mjs
+      - name: Generate synthetic integrated pipeline report
+        run: node tools/agent-controller/offline-pipeline-report.mjs
       - name: Upload synthetic diagnostic
         uses: actions/upload-artifact@v4
         with:
           name: agent-controller-offline-smoke
-          path: offline-report/diagnostic.json
+          path: |
+            offline-report/diagnostic.json
+            offline-report/pipeline-validation.json
           retention-days: 3
