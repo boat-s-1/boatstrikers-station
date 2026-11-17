@@ -24,3 +24,10 @@ test('read marking only permitted for own active server-authorized item',()=>{
  assert.equal(canMarkInboxItemRead({...base,deleted_at:'2026-11-17T02:00:00Z'},'u1'),false);
  assert.equal(canMarkInboxItemRead(null,'u1'),false);
 });
+
+test('presentation projection strips unexpected DB secrets and internal metadata',()=>{
+ const rows=visibleInboxItems([{...base,private_token:'secret',recipient_user_id:'u1',safe_summary:'unreviewed sensitive content',can_recipient_read_thread:true}],'u1');
+ assert.deepEqual(rows,[{id:'n1',type:'thread_reply',created_at:'2026-11-17T01:00:00Z',read_at:null}]);
+ assert.equal(JSON.stringify(rows).includes('secret'),false);
+ assert.equal(JSON.stringify(rows).includes('unreviewed'),false);
+});
