@@ -39,3 +39,10 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - Nov 17 (intraday snapshot, incomplete day): events 0 / entries 0 / results 111.
 - Current-day results count is time-dependent; do not treat 111 as final.
 - Confirm six entries per race with an actual persisted join after any eventual cutover, and stop/rollback on a mismatch.
+
+## 2026-11-17 subsequent validation
+- Commit 9d56e632: both PR298 V3 offline contract and PostgreSQL fixture CI completed SUCCESS. The isolated fixture now includes persisted six-boat identity checking and silent trigger-discard rollback.
+- Read-only production catalog rechecked all nine triggers. Of particular note, the exhibition-column INSERT trigger calls the Ichika evaluator for each current-day entry; a six-boat bootstrap can cause six evaluations per race. An isolated stub test confirms fan-out, but production evaluator latency/side effects remain unverified.
+- Current-day read-only spot check (intraday): bs_race_events=0, bs_race_entries=0, bs_race_results=113. The 113 result count is not final.
+- Added PR298-PRODUCTION-READONLY-READINESS.sql to compare persisted counts with sync logs; it is a diagnostic artifact, not a migration.
+- Gate 1 (CI) is now satisfied. Gates 2-5 remain HOLD. No production writes.
