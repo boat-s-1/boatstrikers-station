@@ -1,0 +1,1 @@
+alter table public.bsc_gamagori_chart_ratings add column if not exists arrow_direction text check (arrow_direction in ('up','down','none')); comment on column public.bsc_gamagori_chart_ratings.arrow_direction is 'Raw image marker suffix: up, down or none. NULL means not yet extracted.';
