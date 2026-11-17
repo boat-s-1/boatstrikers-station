@@ -58,3 +58,9 @@ Allow a snapshot with one valid race and one race whose **program is valid but r
 ## Live RLS baseline (read-only)
 
 A SELECT-only query of `pg_tables` confirms `rowsecurity=true` on all four related public tables: `bs_race_events`, `bs_race_entries`, `bs_race_results`, and `bs_theory_recommendations`. This is only an RLS-enable flag; **it does not prove the policies or grants are safe**. A quarantine ledger must receive explicit, independently reviewed policies and grants rather than assuming it inherits protection.
+
+## First pure classifier prototype (2026-11-17)
+
+Files `openapi-result-quarantine.prototype.mjs` and `openapi-result-quarantine.prototype.test.mjs` were added on the Draft PR branch (commits `9de474ca`, `5293b92a`, `58557069`). They implement a **pure, offline result-layer classifier** and synthetic tests for pending, accepted, multi-payout, malformed payout, missing finish, tied finish, mixed good/bad results and non-mutation. The test workflow is configured to run `scripts/cloud-sync-offline/*.test.mjs`; verify CI status before claiming PASS.
+
+**Not implemented:** full race/program gate, strict source identity/date validation, canonical payout combination validation, quarantine ledger/DDL/RLS, transactional writer integration, triggers/settlement suppression, replay, concurrency control and real provider data. The classifier must **not** be used to bypass the existing fail-closed caller. A returned `ACCEPT` is not authorization to write without the other gates. Q01–Q12 remain unproven end-to-end.
