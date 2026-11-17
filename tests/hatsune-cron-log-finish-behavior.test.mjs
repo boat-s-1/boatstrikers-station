@@ -10,7 +10,7 @@ const match=source.match(/export async function finishHatsuneCronRun\([\s\S]*$/)
 assert.ok(match,'completion function must exist');
 function makeHarness({data,error,throws}={}){
  const calls=[],logs=[];
- const supabase={from(table){calls.push(['from',table]);return {update(payload){calls.push(['update',payload]);return {eq(field,value){calls.push(['eq',field,value]);return {select(columns){calls.push(['select',columns]);return {async maybeSingle(){calls.push(['maybeSingle']);if(throws)throw throws;return {data,error}}}}}}}}}}};
+ const supabase={from(table){calls.push(['from',table]);return {update(payload){calls.push(['update',payload]);return {eq(field,value){calls.push(['eq',field,value]);return {select(columns){calls.push(['select',columns]);return {async single(){calls.push(['single']);if(throws)throw throws;return {data,error}}}}}}}}}}};
  const context=vm.createContext({Date,Number,String,Math,console:{error:(...args)=>logs.push(args)}});
  const fn=vm.runInContext('('+match[0].replace(/^export /,'')+')',context);
  return {calls,logs,invoke:()=>fn({supabase,run:{id:123,started_at:'2026-11-17T00:00:00Z'},status:'success',metrics:{inserted:2,errorCount:0}})};
