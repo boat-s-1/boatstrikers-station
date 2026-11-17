@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { filterPublicThreads } from '../lib/community/catalogue.mjs';
-
-const base = {status:'published', visibility:'public_all', published_at:'2026-11-17T00:00:00Z'};
-test('public list excludes member-only, drafts and future posts', () => {
+const base = {status:'published', audience:'public', published_at:'2026-11-17T00:00:00Z'};
+test('public list excludes member-only, paid, drafts and future posts', () => {
   const rows = [
     {...base,id:1,character_key:'ichika'},
-    {...base,id:2,visibility:'members_only',character_key:'ichika'},
-    {...base,id:3,status:'draft',character_key:'ichika'},
-    {...base,id:4,published_at:'2999-01-01T00:00:00Z',character_key:'ichika'},
-    {...base,id:5,character_key:'hatsune'}
+    {...base,id:2,audience:'members',character_key:'ichika'},
+    {...base,id:3,audience:'paid',character_key:'ichika'},
+    {...base,id:4,status:'draft',character_key:'ichika'},
+    {...base,id:5,published_at:'2999-01-01T00:00:00Z',character_key:'ichika'},
+    {...base,id:6,character_key:'hatsune'}
   ];
   assert.deepEqual(filterPublicThreads(rows,'ichika').map(r=>r.id),[1]);
 });
