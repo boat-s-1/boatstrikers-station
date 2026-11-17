@@ -1,0 +1,2 @@
+alter table public.hatsune_news drop constraint if exists hatsune_news_article_body_source_check;
+alter table public.hatsune_news add constraint hatsune_news_article_body_source_check check (article_body_source is null or article_body_source in ('ai','manual','template','bs_data_template'));
