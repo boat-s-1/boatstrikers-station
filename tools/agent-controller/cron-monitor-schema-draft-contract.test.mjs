@@ -26,5 +26,7 @@ test('draft has exactly one transaction and three table declarations',()=>{
 test('identifier checks have closed regex strings and parentheses',()=>{
  const idChecks=sql.match(/(?:event_id|attempt_id|incident_key|outbox_id) (?:text PRIMARY KEY|text NOT NULL) CHECK \([^\n]+/g)||[];
  assert.equal(idChecks.length,5);
- for(const line of idChecks)assert.ok(line.endsWith(String.raw`{8,80}$')`),'invalid ID check: '+line);
+ for(const line of idChecks)assert.ok(line.replace(/,\s*$/,'').endsWith(String.raw`{8,80},'invalid ID check: '+line);
+});
+)`),'invalid ID check: '+line);
 });
