@@ -71,6 +71,7 @@ const GROUPS = [
     title: "学ぶ・楽しむ",
     links: [
       { label: "BOATSTRIKERS BLOG", href: "/blog" },
+      { label: "公式掲示板", href: "/community" },
       { label: "図書館", href: "/library" },
       { label: "教えて！一果センセー！", href: "/ichika-sensei" },
       { label: "私立みなも学園〜ふなけん研究部〜", href: "/comic" },
@@ -179,7 +180,7 @@ export default function PublicSiteHeader() {
         </div>
       </header>
       <div className={`${styles.headerSpacer} ${compact ? styles.headerSpacerCompact : ""}`} aria-hidden="true" />
-      <div className={navigationStyles.raceSwitch}><MediaSwitch active="race"/></div>
+      <div className={navigationStyles.raceSwitch}><MediaSwitch active={pathname.startsWith("/community") ? "community" : "race"} /></div>
       <div className={`${styles.overlay} ${open ? styles.overlayOpen : ""}`} onClick={() => setOpen(false)} aria-hidden={!open} />
       <aside id="boatstrikers-global-menu" className={`${styles.drawer} ${open ? styles.drawerOpen : ""}`} aria-hidden={!open}>
         <div className={styles.drawerTop}>
