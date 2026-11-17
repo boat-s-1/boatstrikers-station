@@ -19,7 +19,7 @@ const fakeFetch=async (url,options)=>{
   assert.equal(method,'PATCH');
   assert.equal(u.searchParams.get('id'),'eq.42');
   assert.equal(u.searchParams.get('select'),'id');
-  assert.equal(options.headers.get('prefer'),'return=representation');
+  assert.equal(new Headers(options.headers).get('prefer'),'return=representation');
   calls.push({method,mode});
   const status=mode==='denied'?403:200;
   const payload=mode==='matched'?[{id:42}]:mode==='missing'?[]:{code:'42501',message:'permission denied'};
