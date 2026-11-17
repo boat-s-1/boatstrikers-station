@@ -74,6 +74,46 @@ BEGIN
     OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
    RAISE EXCEPTION 'confirmed-payout conflict mutated database or called writer';
  END IF;
+ -- Additional immutable result surfaces: exacta, placements, technique.
+ UPDATE public.bs_race_events SET exacta='1-2',exacta_payout=550,
+   winning_technique_code='1' WHERE race_date=d AND course_code=9 AND race_no=1;
+ UPDATE public.bs_race_results SET first_boat=1,winning_method='escape'
+   WHERE race_date=d AND course_code=9 AND race_no=1;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,'exacta','1-3')),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'contradictory exacta accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory exacta accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,'first_boat',2)),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'contradictory first boat accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory first boat accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,'technique_code','2')),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'contradictory technique accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory technique accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT exacta FROM public.bs_race_events WHERE race_date=d AND course_code=9 AND race_no=1)<>'1-2'
+   OR (SELECT first_boat FROM public.bs_race_results WHERE race_date=d AND course_code=9 AND race_no=1)<>1
+   OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+   RAISE EXCEPTION 'extended result conflict mutated data or called writer';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
