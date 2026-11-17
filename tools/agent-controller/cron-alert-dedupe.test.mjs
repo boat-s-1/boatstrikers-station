@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {decideCronAlertReservation as decide} from './cron-alert-dedupe.mjs';
+const now='2026-11-17T10:00:00Z',incidentKey='incident_01';
+const run=changes=>decide({now,incidentKey,...changes});
+test('new alert requires atomic reservation',()=>assert.equal(run().decision,'propose_atomic_reservation'));
+test('does not actually reserve',()=>assert.equal(run().actual_reservation_created,false));
+test('does not send',()=>assert.equal(run().actual_alert_sent,false));
+test('reserved holds',()=>assert.equal(run({existing:{incident_key:incidentKey,state:'reserved',at:'2026-11-17T08:00:00Z'}}).reason,'already_reserved'));
+test('recent delivery cooldown',()=>assert.equal(run({existing:{incident_key:incidentKey,state:'delivered',at:'2026-11-17T09:30:00Z'}}).reason,'cooldown'));
+test('recent failure cooldown',()=>assert.equal(run({existing:{incident_key:incidentKey,state:'failed',at:'2026-11-17T09:30:00Z'}}).reason,'cooldown'));
+test('old delivery can be proposed for review',()=>assert.equal(run({existing:{incident_key:incidentKey,state:'delivered',at:'2026-11-17T08:00:00Z'}}).decision,'propose_atomic_reservation'));
+test('exact cooldown boundary',()=>assert.equal(run({existing:{incident_key:incidentKey,state:'failed',at:'2026-11-17T09:00:00Z'}}).decision,'propose_atomic_reservation'));
+test('future reservation rejected',()=>assert.throws(()=>run({existing:{incident_key:incidentKey,state:'failed',at:'2026-11-17T11:00:00Z'}}),/future reservation/));
+test('wrong incident rejected',()=>assert.throws(()=>run({existing:{incident_key:'incident_02',state:'failed',at:now}}),/invalid existing/));
+test('invalid key rejected',()=>assert.throws(()=>run({incidentKey:'bad'}),/invalid incident key/));
+test('invalid cooldown rejected',()=>assert.throws(()=>run({cooldownMs:1000}),/invalid cooldown/));
+test('invalid time rejected',()=>assert.throws(()=>run({now:'today'}),/invalid timestamp/));
