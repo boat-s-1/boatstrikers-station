@@ -8,7 +8,8 @@ test('finish checks PostgREST update result, not just rejected promise',()=>{
 });
 test('completion failure logs bounded metadata without error message or credential',()=>{
  assert.match(source,/console\.error\("Hatsune cron log finish not confirmed"/);
- assert.match(source,/code: error\?\.code \|\| "NO_MATCHING_ROW"/);
+ assert.match(source,/code: typeof error\?\.code === "string" && \/\^\[A-Z0-9_\]\{1,40\}\$\/.test\(error\.code\)/);
+ assert.match(source,/\? error\.code : "NO_MATCHING_ROW"/);
  assert.doesNotMatch(source,/console\.error\("Hatsune cron log finish not confirmed", error\)/);
 });
 test('completion logging remains nonthrowing to preserve existing pipeline response',()=>{
