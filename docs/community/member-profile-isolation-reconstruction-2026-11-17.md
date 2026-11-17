@@ -7,7 +7,7 @@
 - 隔離開発ブランチには同テーブルが存在しなかった。これは本番に存在しないという意味ではない。
 - 本番 `supabase_migrations.schema_migrations` は133件。**どのマイグレーションがこのテーブルを作成したかは未確定**。
 
-## 再現前の調査手順（すべて読み取り）
+## 追加確認済みの制約・トリガー\n- PK: `user_id`、FK: `auth.users(id) ON DELETE CASCADE`。\n- `plan` は `free / beta_premium / plus / premium`、`membership_status` は `active / inactive / cancelled / expired` のCHECK制約。\n- `bs_member_plan_change_log` は INSERTまたはplan更新後に監査関数を実行するトリガー。`touch_bs_member_profiles_updated_at` はUPDATE前に更新日時関数を実行するトリガー。これらは特権列の自己変更を防ぐ保証にはならない。\n\n## 再現前の調査手順（すべて読み取り）
 1. `pg_constraint` でPK/FK/CHECK/UNIQUE、`pg_indexes` でインデックスを取得。
 2. `pg_trigger` と `pg_get_triggerdef` で監査/更新/会員生成トリガーを確認。
 3. `pg_policies` と `pg_class.relrowsecurity` でRLSの完全な状態を確認。
