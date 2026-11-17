@@ -15,6 +15,14 @@ WITH days AS (
      SELECT 1 FROM public.bs_race_events e WHERE e.race_date=r.race_date
        AND e.course_code=r.course_code AND e.race_no=r.race_no
     )) AS orphan_result_races,
+  (SELECT count(*) FROM (
+    SELECT DISTINCT en.course_code,en.race_no FROM public.bs_race_entries en
+    WHERE en.race_date=d.race_date AND NOT EXISTS (
+      SELECT 1 FROM public.bs_race_events e
+      WHERE e.race_date=en.race_date AND e.course_code=en.course_code
+        AND e.race_no=en.race_no
+    )
+  ) orphan) AS orphan_entry_races,
   (SELECT count(*) FROM public.bs_race_events e
     WHERE e.race_date=d.race_date AND
      (SELECT count(*) FROM public.bs_race_entries en
@@ -44,11 +52,12 @@ WITH days AS (
  GROUP BY race_date
 )
 SELECT p.race_date,p.events,p.entries,p.results,
- p.orphan_result_races,p.events_without_six_entries,p.invalid_entry_races,
+ p.orphan_result_races,p.orphan_entry_races,p.events_without_six_entries,p.invalid_entry_races,
  coalesce(s.successful_calls,0) AS successful_calls,
  s.max_reported_events,s.max_reported_entries,
  CASE
   WHEN p.orphan_result_races>0 THEN 'HOLD: orphan result keys'
+  WHEN p.orphan_entry_races>0 THEN 'HOLD: orphan entry keys'
   WHEN p.events_without_six_entries>0 THEN 'HOLD: event missing six entries'
   WHEN p.invalid_entry_races>0 THEN 'HOLD: invalid per-race boat identities'
   WHEN p.events>0 AND p.entries<>6*p.events THEN 'HOLD: aggregate count mismatch'
