@@ -60,3 +60,13 @@ test('Cron cutover preflight fails closed on changed job identity, schedule or c
  assert.doesNotMatch(preflight,/command\s*~\*/);
  assert.doesNotMatch(preflight,/\b(?:UPDATE|INSERT|DELETE|ALTER|DROP|TRUNCATE)\s+(?:cron\.|public\.|\w+)/i);
 });
+
+const triggerDrift = readFileSync(new URL('./PR298-PRODUCTION-TRIGGER-DRIFT-READONLY.sql',import.meta.url),'utf8');
+test('production trigger drift probe is read-only and fails closed on metadata drift',()=>{
+ assert.match(triggerDrift,/trg_ichika_escape_surge_on_exhibition_update/);
+ assert.match(triggerDrift,/nine_triggers_present/);
+ assert.match(triggerDrift,/entries_fk_baseline/);
+ assert.match(triggerDrift,/three_tables_rls_enabled/);
+ assert.match(triggerDrift,/HOLD: production trigger\/constraint\/RLS drift/);
+ assert.doesNotMatch(triggerDrift,/\b(?:INSERT|UPDATE|DELETE|TRUNCATE|CREATE|ALTER|DROP|GRANT|REVOKE)\s+(?:INTO\s+|FROM\s+|TABLE\s+|FUNCTION\s+)?(?:public\.|cron\.)/i);
+});
