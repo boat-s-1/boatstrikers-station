@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {classifyNewsInsertOutcome as classify} from './news-insert-outcome.mjs';
+test('23505 means conflict review not replay',()=>{const x=classify({errorCode:'23505',attemptedCount:4});assert.equal(x.assessment,'unique_conflict_review');assert.equal(x.automatic_retry_allowed,false)});
+test('non-unique errors are distinct',()=>assert.equal(classify({errorCode:'42501',attemptedCount:4}).assessment,'insert_error_review'));
+test('all inserted is reported not proof of publication',()=>{const x=classify({insertedCount:4,attemptedCount:4});assert.equal(x.assessment,'insert_count_reported');assert.equal(x.automatic_republish_allowed,false)});
+test('partial inserted count requires review',()=>assert.equal(classify({insertedCount:2,attemptedCount:4}).assessment,'partial_count_review'));
+test('missing response remains unconfirmed',()=>{const x=classify({attemptedCount:4});assert.equal(x.assessment,'unconfirmed');assert.equal(x.no_side_effects_proven,false)});
+test('zero attempted and zero inserted is not replay approval',()=>assert.equal(classify({attemptedCount:0,insertedCount:0}).automatic_retry_allowed,false));
+test('no overwrite in any result',()=>assert.equal(classify({errorCode:'23505',attemptedCount:2}).safe_to_overwrite,false));
+test('reject count exceeding attempts',()=>assert.throws(()=>classify({attemptedCount:1,insertedCount:2}),/invalid inserted count/));
+test('reject negative attempts',()=>assert.throws(()=>classify({attemptedCount:-1}),/invalid attempted count/));
+test('reject raw error messages',()=>assert.throws(()=>classify({attemptedCount:1,errorCode:'duplicate key value violates unique constraint'}),/invalid error code/));
+test('reject error and inserted count together',()=>assert.throws(()=>classify({attemptedCount:2,insertedCount:1,errorCode:'23505'}),/conflicting outcome evidence/));
+test('reject fractional counts',()=>assert.throws(()=>classify({attemptedCount:2.5}),/invalid attempted count/));
