@@ -133,3 +133,11 @@ This is a static SQL-text inventory, not proof that all 95 are missing from ever
 ## Conclusion
 
 The original user-approved isolation branch did its job: it exposed that BoatStrikers' recorded migrations are not a self-contained fresh-install bootstrap. The failure is broader than one table. The next safe step is recovery and reconciliation of the authoritative baseline, not hand-writing a replacement table or skipping migrations.
+
+## 9. Earliest GitHub history cross-check
+
+- PR #1 (`AI v2 shadow development`) was opened 2026-08-19. Its base was main commit `401e98a6251a64cbee53aee0c4b9b3f40dae45bb`.
+- The recursive Git tree at that base commit contained 853 entries. The only `.sql` file under `supabase/migrations/` was `20260821_ai_v2_public_character_stats.sql`; there was no tracked schema dump or baseline migration directory in that base tree.
+- PR #1's own description says duplicate-key checks were run against existing `bs_race_entries`, `bs_race_results`, and `bs_race_result_entries`. This is evidence those canonical tables already existed by the time the first AI v2 work was proposed, before the later AI v2 migration chain.
+- This strongly supports that the core race schema predates the tracked migration history and was provisioned through an earlier path not represented by the current migration files. It does not prove whether that path was manual Dashboard SQL, an older repository state, a backup restore, or another deployment mechanism.
+- The authoritative DDL source is still unresolved; obtain a schema-only backup/export or recover the original deployment artifact before creating a bootstrap migration.
