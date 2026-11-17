@@ -75,6 +75,19 @@ BEGIN
       GROUP BY r.sk,r.rk,p.value->>'place_number' HAVING count(*)>1)
    OR EXISTS(SELECT 1 FROM boats WHERE bv->>'weight' IS NOT NULL
       AND bv->>'weight' !~ '^[0-9]+([.][0-9]+)?$')
+   -- Existing single-value result columns cannot represent dead-heat
+   -- multi-combination payouts. Reject rather than silently truncate.
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL
+      (VALUES ('trifecta'),('exacta'),('quinella'),('trio')) kinds(kind)
+      WHERE jsonb_typeof(r.rv #> ARRAY['result','payouts',kinds.kind])='array'
+        AND jsonb_array_length(r.rv #> ARRAY['result','payouts',kinds.kind])>1)
+   -- A result with multiple boats sharing a finish place cannot be
+   -- represented by scalar first_boat/second_boat/third_boat fields.
+   OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL jsonb_each(
+      CASE WHEN jsonb_typeof(r.rv #> '{result,racers}')='object'
+       THEN r.rv #> '{result,racers}' ELSE '{}'::jsonb END) p
+      WHERE p.value->>'place_number' IN ('1','2','3')
+      GROUP BY r.sk,r.rk,p.value->>'place_number' HAVING count(*)>1)
    -- Validate all four mapped payout types before calling the atomic writer.
    OR EXISTS(SELECT 1 FROM race r CROSS JOIN LATERAL
       (VALUES ('trifecta'),('exacta'),('quinella'),('trio')) kinds(kind)
