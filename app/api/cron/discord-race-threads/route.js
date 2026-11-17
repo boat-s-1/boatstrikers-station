@@ -23,6 +23,9 @@ const CHARACTERS={
 };
 
 const webhookCache=new Map();
+const DISCORD_SEND_TIMEOUT_MS=10_000;
+const MAX_RACES_PER_RUN=2;
+const RUN_BUDGET_MS=20_000;
 
 function authorized(request){
   return isDiscordAlertsCronAuthorized(request);
@@ -107,6 +110,7 @@ async function sendCharacterThreadMessage(parentChannelId,threadId,roleKey,conte
   const {hook,spec}=await getCharacterWebhook(parentChannelId,roleKey);
   const response=await fetch(`https://discord.com/api/v10/webhooks/${hook.id}/${hook.token}?wait=true&thread_id=${threadId}`,{
     method:"POST",
+    signal:AbortSignal.timeout(DISCORD_SEND_TIMEOUT_MS),
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       username:spec.name,
@@ -119,7 +123,9 @@ async function sendCharacterThreadMessage(parentChannelId,threadId,roleKey,conte
     const text=await response.text().catch(()=>"");
     throw new Error(`${spec.name}実況投稿に失敗しました: ${response.status} ${text}`.slice(0,1200));
   }
-  return response.json().catch(()=>null);
+  const message=await response.json().catch(()=>null);
+  if(!message?.id)throw new Error(`${spec.name}実況投稿のDiscordメッセージIDを確認できませんでした`);
+  return message;
 }
 
 function characterOpening(roleKey,alert,signalRoles){
@@ -139,45 +145,136 @@ function characterOpening(roleKey,alert,signalRoles){
     :`🚨 アタシは穴目線でチェック！ 人気薄や外枠に妙味が出る展開がないか見ていくね。`;
 }
 
-async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles){
+async function postOpeningCharacters(parentChannelId,thread,alert,signalRoles,admin){
+  let posted=0;
   for(const roleKey of ["ichika","hatsune","kiina"]){
-    await sendCharacterThreadMessage(
-      parentChannelId,
-      thread.id,
-      roleKey,
-      characterOpening(roleKey,alert,signalRoles),
-    );
+    const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:roleKey};
+    const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+      p_race_date:identity.race_date,p_course_code:identity.course_code,
+      p_race_no:identity.race_no,p_message_key:identity.message_key,
+    });
+    if(claimError)throw claimError;
+    if(!claimed)continue;
+    try{
+      const message=await sendCharacterThreadMessage(parentChannelId,thread.id,roleKey,characterOpening(roleKey,alert,signalRoles));
+      const {data:savedRows,error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"sent",discord_thread_id:thread.id,discord_message_id:message.id,updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending").select("id");
+      if(saveError)throw saveError;
+      if(savedRows?.length!==1)throw new Error("Discord delivery confirmation did not update exactly one row");
+      posted+=1;
+    }catch(error){
+      // A timeout or DB error may occur after Discord accepted the message.
+      // Never retry automatically; require reconciliation against Discord.
+      const {error:markError}=await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending");
+      if(markError)console.error("discord delivery unknown-state update failed",String(markError.message).slice(0,300));
+      // Preserve confirmed posts from earlier characters when a later send fails.
+      error.confirmedCharacterPosts=posted;
+      throw error;
+    }
+  }
+  return posted;
+}
+
+async function postStarterOnce(thread,alert,admin){
+  const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:"starter"};
+  const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+    p_race_date:identity.race_date,p_course_code:identity.course_code,
+    p_race_no:identity.race_no,p_message_key:"starter",
+  });
+  if(claimError)throw claimError;
+  if(!claimed)return false;
+  const starter=[
+    "🏁 **BoatStrikers 注目レース実況**",
+    `${alert.course_name} ${alert.race_no}R｜〆切 ${closeText(alert)}`,
+    "このスレッドで一果・初音・キイナと一緒にレースを追います。",
+    "予想・展示後の変化・実況・結果振り返りをここにまとめていきます。",
+    `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`,
+  ].join("\n");
+  try{
+    const message=await sendDiscordMessage(thread.id,starter);
+    if(!message?.id)throw new Error("Starter message ID not confirmed");
+    const {data:rows,error}=await admin.from("bs_discord_race_thread_deliveries")
+      .update({state:"sent",discord_thread_id:thread.id,discord_message_id:message.id,updated_at:new Date().toISOString()})
+      .match(identity).eq("state","sending").select("id");
+    if(error||rows?.length!==1)throw error||new Error("Starter confirmation did not update exactly one row");
+    return true;
+  }catch(error){
+    const {error:markError}=await admin.from("bs_discord_race_thread_deliveries")
+      .update({state:"unknown",discord_thread_id:thread.id,last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+      .match(identity).eq("state","sending");
+    if(markError)console.error("starter unknown-state update failed",String(markError.message).slice(0,300));
+    throw error;
   }
 }
 
-async function ensureRaceThread(channel,record,activeThreads){
+async function ensureRaceThread(channel,record,activeThreads,admin){
   const {alert,signalRoles}=record;
   const name=threadName(alert);
-  const existing=activeThreads.find(t=>t.parent_id===channel.id&&t.name===name);
-  if(existing)return {thread:existing,created:false};
-
-  const thread=await discordApi(`/channels/${channel.id}/threads`,{
-    method:"POST",
-    body:{
-      name,
-      type:11,
-      auto_archive_duration:1440,
-      rate_limit_per_user:0,
-    },
-  });
-  if(!thread?.id)throw new Error(`実況スレッドを作成できませんでした: ${name}`);
-
-  const starter=[
-    `🏁 **BoatStrikers 注目レース実況**`,
-    `${alert.course_name} ${alert.race_no}R｜〆切 ${closeText(alert)}`,
-    `このスレッドで一果・初音・キイナと一緒にレースを追います。`,
-    `予想・展示後の変化・実況・結果振り返りをここにまとめていきます。`,
-    `https://www.boat-strike.online/races/${alert.course_code}/${alert.race_no}`,
-  ].join("\n");
-  await sendDiscordMessage(thread.id,starter);
-  await postOpeningCharacters(channel.id,thread,alert,signalRoles);
-  activeThreads.push(thread);
-  return {thread,created:true};
+  const identity={race_date:alert.race_date,course_code:alert.course_code,race_no:alert.race_no,message_key:"thread"};
+  // History is authoritative. Never trust an active-thread name alone.
+  const {data:history,error:historyError}=await admin.from("bs_discord_race_thread_deliveries")
+    .select("state,discord_thread_id").match(identity).maybeSingle();
+  if(historyError)throw historyError;
+  let existing=null;
+  let wasExisting=false;
+  if(history){
+    if(history.state!=="sent"||!history.discord_thread_id){
+      console.warn(JSON.stringify({level:"warn",message:"discord thread history unresolved",race:raceKey(alert)}));
+      return {thread:null,created:false,deferred:true};
+    }
+    try{
+      // Read only. Archived threads may still be fetched by their channel ID.
+      const verified=await discordApi(`/channels/${encodeURIComponent(history.discord_thread_id)}`);
+      if(String(verified?.id)!==String(history.discord_thread_id)||
+         String(verified?.parent_id)!==String(channel.id)||
+         verified?.name!==name||verified?.type!==11||
+         verified?.thread_metadata?.archived!==false){
+        console.warn(JSON.stringify({level:"warn",message:"discord thread requires manual reconciliation",race:raceKey(alert)}));
+        return {thread:null,created:false,deferred:true};
+      }
+      existing=verified;
+      wasExisting=true;
+    }catch(error){
+      console.warn(JSON.stringify({level:"warn",message:"discord thread lookup failed; manual reconciliation required",race:raceKey(alert),error:String(error?.message||error).slice(0,200)}));
+      return {thread:null,created:false,deferred:true};
+    }
+  }else{
+    // A pre-existing thread with the same name is not proof of identity.
+    if(activeThreads.some(t=>t.parent_id===channel.id&&t.name===name)){
+      console.warn(JSON.stringify({level:"warn",message:"untracked Discord thread; manual reconciliation required",race:raceKey(alert)}));
+      return {thread:null,created:false,deferred:true};
+    }
+    const {data:claimed,error:claimError}=await admin.rpc("bs_claim_discord_race_delivery",{
+      p_race_date:identity.race_date,p_course_code:identity.course_code,
+      p_race_no:identity.race_no,p_message_key:"thread",
+    });
+    if(claimError)throw claimError;
+    if(!claimed)return {thread:null,created:false,deferred:true};
+    try{
+      existing=await discordApi(`/channels/${channel.id}/threads`,{
+        method:"POST",
+        body:{name,type:11,auto_archive_duration:1440,rate_limit_per_user:0},
+      });
+      if(!existing?.id)throw new Error("Discord thread creation returned no ID");
+      const {data:rows,error:saveError}=await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"sent",discord_thread_id:existing.id,updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending").select("id");
+      if(saveError||rows?.length!==1)throw saveError||new Error("Thread state confirmation failed");
+      activeThreads.push(existing);
+    }catch(error){
+      await admin.from("bs_discord_race_thread_deliveries")
+        .update({state:"unknown",last_error:String(error?.message||error).slice(0,500),updated_at:new Date().toISOString()})
+        .match(identity).eq("state","sending");
+      throw error;
+    }
+  }
+  await postStarterOnce(existing,alert,admin);
+  // Existing thread is safe to reuse. Pending character messages are claimed individually.
+  const characterPosts=await postOpeningCharacters(channel.id,existing,alert,signalRoles,admin);
+  return {thread:existing,created:!wasExisting,deferred:false,characterPosts};
 }
 
 export async function GET(request){
@@ -185,7 +282,8 @@ export async function GET(request){
 
   const raceDate=jstToday();
   const admin=getAdminClient();
-  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0};
+  const summary={raceDate,created:0,existing:0,failed:0,races:0,characterPosts:0,deferred:0};
+  const startedAt=Date.now();
 
   try{
     const channel=await findRaceChatChannel();
@@ -213,14 +311,16 @@ export async function GET(request){
     summary.races=unique.size;
     const activeThreads=await getActiveThreads();
     for(const record of unique.values()){
+      if(summary.created>=MAX_RACES_PER_RUN||Date.now()-startedAt>=RUN_BUDGET_MS){summary.deferred+=1;continue;}
       try{
-        const result=await ensureRaceThread(channel,record,activeThreads);
-        if(result.created){
+        const result=await ensureRaceThread(channel,record,activeThreads,admin);
+        summary.characterPosts+=result.characterPosts||0;
+        if(result.deferred){summary.deferred+=1;}else if(result.created){
           summary.created+=1;
-          summary.characterPosts+=3;
         }else summary.existing+=1;
       }catch(error){
         summary.failed+=1;
+        summary.characterPosts+=Number.isInteger(error?.confirmedCharacterPosts)?error.confirmedCharacterPosts:0;
         console.error(JSON.stringify({
           level:"error",
           message:"discord race thread create failed",
