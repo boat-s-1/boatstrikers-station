@@ -1,0 +1,30 @@
+name: PR301 Isolated HTTP Preflight (No Secrets)
+on:
+  workflow_dispatch:
+    inputs:
+      branch_ref:
+        description: 'Disposable Supabase branch project ref (20 lowercase letters); NEVER production'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Validate isolated ref without contacting Supabase
+        shell: bash
+        env:
+          BRANCH_REF: ${{ inputs.branch_ref }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$BRANCH_REF" =~ ^[a-z]{20}$ ]]; then
+            echo "::error::Invalid disposable branch ref format"
+            exit 1
+          fi
+          if [[ "$BRANCH_REF" == "rzosrbkyniyedolhkgxo" ]]; then
+            echo "::error::Production project is forbidden"
+            exit 1
+          fi
+          echo "PASS: non-production ref format; NO HTTP, NO credentials, NO checkout"
