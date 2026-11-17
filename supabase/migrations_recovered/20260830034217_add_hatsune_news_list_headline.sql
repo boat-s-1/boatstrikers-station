@@ -1,0 +1,1 @@
+alter table public.hatsune_news add column if not exists list_headline text;

@@ -1,0 +1,2 @@
+ALTER TABLE public.hatsune_news DROP CONSTRAINT IF EXISTS hatsune_news_category_check;
+ALTER TABLE public.hatsune_news ADD CONSTRAINT hatsune_news_category_check CHECK (category = ANY (ARRAY['result'::text,'women'::text,'suijinsai'::text,'win'::text,'grade'::text,'motor'::text,'tomorrow'::text,'topic'::text,'女子戦'::text,'A1/A2・級別'::text]));
