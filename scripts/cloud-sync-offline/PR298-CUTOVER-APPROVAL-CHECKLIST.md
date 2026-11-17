@@ -1,6 +1,6 @@
 # PR298 — pre-cutover approval checklist (HOLD)
 
-Updated 2026-11-17. This is a decision checklist, not an authorization to deploy.
+Updated 2026-11-17 (post-CI review). This is a decision checklist, not an authorization to deploy.
 
 ## Verified in disposable CI
 
@@ -8,7 +8,10 @@ Updated 2026-11-17. This is a decision checklist, not an authorization to deploy
 - Simulated 1-race/6-boat payload maps to one event and six entries.
 - Synthetic preview, four payout types and settled race positions are asserted.
 - Malformed numeric program, preview, result and payout inputs fail before writer call.
-- A new HTTP 503 failure case is committed at `367ed47a`, with CI pending.
+- HTTP 429/500/503, invalid JSON, malformed root shapes, multi-race invalid input, preview/result identity mismatch, dead-heat/multi-payout, and payout shape negative cases have isolated coverage.
+- At `40cd4198`, both CI workflows PASS: offline `44100687169`, PostgreSQL `44100687175`.
+- The published schema locates `stadium_number` inside each race; the SQL and all known runtime/negative/settled fixtures were aligned, with both workflows passing at `131cf3d9`.
+- **Caution:** full-day fail-closed validation rejects an entire batch when any one race has an unrepresentable tied result or multi-payout. This protects consistency but can block otherwise valid program updates. Before deployment decide on an explicit quarantine/split-batch strategy with observability, not silent dropping.
 - No network request is made by these CI fixtures; HTTP responses are stubbed.
 
 ## Production read-only evidence
