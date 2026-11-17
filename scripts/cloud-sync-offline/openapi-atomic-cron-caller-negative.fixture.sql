@@ -40,7 +40,9 @@ BEGIN
   'preview_racers_array','result_racers_array',
   'boat_scalar','race_scalar','stadium_scalar',
   'payout_without_result_racers','preview_boat_scalar','result_boat_scalar',
-  'five_digit_nonzero_registration'
+  'five_digit_nonzero_registration','unknown_stadium_25',
+  'invalid_race_13','empty_races','wrong_preview_date',
+  'invalid_preview_numeric'
  ] LOOP
   invalid:=original;
   IF scenario='missing_boat' THEN
@@ -80,6 +82,18 @@ BEGIN
     '{"racers":{"1":42}}'::jsonb);
   ELSIF scenario='five_digit_nonzero_registration' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,number}','"12345"'::jsonb);
+  ELSIF scenario='unknown_stadium_25' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,25}',invalid #> '{programs,stadiums,1}');
+  ELSIF scenario='invalid_race_13' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,13}',invalid #> '{programs,stadiums,1,races,1}');
+  ELSIF scenario='empty_races' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races}','{}'::jsonb);
+  ELSIF scenario='wrong_preview_date' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"date":"1999-01-01"}'::jsonb);
+  ELSIF scenario='invalid_preview_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"wind_speed":"not-a-number"}'::jsonb);
   END IF;
   UPDATE pr298_document SET doc=invalid;
   UPDATE pr298_atomic_calls SET n=0;
