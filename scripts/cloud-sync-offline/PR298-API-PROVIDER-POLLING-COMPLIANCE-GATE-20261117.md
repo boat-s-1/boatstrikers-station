@@ -19,3 +19,13 @@
 
 ## Status
 HOLD: do not deploy candidate, restart Windows scheduler, increase polling, or perform live probing of the potentially restricted endpoint. No production modifications made by this PR.
+
+## 2026-11-18: provider email screenshot directly supplied by operator
+
+The operator supplied an image of the November 11 email, subject BRDB-APIのご利用について, sent by team-nave support. The text explicitly identifies a RACEDTL query filtered only by OPDT='20261111' and ordered by RCOURSECD, RNO, TEINO. It requests a fix using official Q011 and says the BRDB data updates morning and night twice per day, asking to refrain from high-volume access every five minutes.
+
+**Scope clarification:** The email explicitly concerns BRDB-API. It does NOT establish that boatraceopenapi.github.io is operated by the same provider or that its three-minute production Cron is covered by the BRDB request. Do not conflate those endpoints. Independently confirm the public OpenAPI source's terms and acceptable cadence before cutover.
+
+**Operator-safe actions:** Keep Windows BRDB five-minute polling disabled; use the already documented Q011 SOPDT >= D-10 plus OPDT = D query design only after verifying the actual implementation and parameter dialect; plan a low-frequency BRDB refresh consistent with provider guidance and obtain approval before enabling it. Do not run a live BRDB query as part of this review.
+
+**Production safety:** Existing OpenAPI Cron jobid 1 remains a separate unresolved compliance and writer-cutover issue; no inference of blanket prohibition or blanket permission from this email. No production Cron or API schedule modified.
