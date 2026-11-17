@@ -39,6 +39,6 @@ jobs:
         run: |
           test "$PGHOST" = "127.0.0.1"
           test "$PGDATABASE" = "agent_controller_ci"
-          psql -X -v ON_ERROR_STOP=1 -qAt -c 'SELECT current_setting('"'server_version'"');'
+          psql -X -v ON_ERROR_STOP=1 -qAt -c 'SELECT version();'
       - name: Exercise two-session unique constraints
         run: bash tools/agent-controller/isolated-postgres-race-ci.sh
