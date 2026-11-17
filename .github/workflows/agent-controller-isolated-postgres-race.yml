@@ -18,6 +18,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-replay-audit-ci.sh'
       - 'tools/agent-controller/isolated-postgres-audit-append-only-ci.sh'
       - 'tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-concurrent-replay-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -87,3 +88,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-audit-append-only-ci.sh
       - name: Detect synthetic audit alteration with Node SHA256 chain
         run: node tools/agent-controller/isolated-node-audit-hash-chain-ci.mjs
+      - name: Race conflicting receipt identities across two PostgreSQL sessions
+        run: bash tools/agent-controller/isolated-postgres-concurrent-replay-ci.sh
