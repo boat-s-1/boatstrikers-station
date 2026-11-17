@@ -64,7 +64,7 @@ export async function GET(request) {
   try {
     logContext = await startHatsuneCronRun("pipeline");
   } catch (error) {
-    console.error("Hatsune cron log start failed", error);
+    console.error("Hatsune cron log start failed", { code: error?.code || "START_FAILURE" });
   }
 
   try {
