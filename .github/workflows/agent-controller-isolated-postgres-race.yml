@@ -10,6 +10,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-receipt-ci.sh'
       - 'tools/agent-controller/isolated-postgres-lifecycle-ci.sh'
       - 'tools/agent-controller/isolated-postgres-transition-ci.sh'
+      - 'tools/agent-controller/isolated-node-db-adapter-ci.mjs'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -63,3 +64,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-lifecycle-ci.sh
       - name: Reject invalid outbox transitions in PostgreSQL
         run: bash tools/agent-controller/isolated-postgres-transition-ci.sh
+      - name: Exercise Node worker to disposable PostgreSQL integration
+        run: node tools/agent-controller/isolated-node-db-adapter-ci.mjs
