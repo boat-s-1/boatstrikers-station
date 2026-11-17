@@ -36,7 +36,7 @@ for(const [scenario,expectedData,expectedError] of [
  test('supabase-js single '+scenario,async()=>{
   mode=scenario;
   const {data,error}=await client.from('hatsune_news_cron_runs')
-   .update({status:'success',inserted_count:2}).eq('id',42).select('id').maybeSingle();
+   .update({status:'success',inserted_count:2}).eq('id',42).select('id').single();
   assert.deepEqual(data,expectedData);
   assert.equal(Boolean(error),expectedError);
   if(error)assert.equal(error.code,scenario==='missing'?'PGRST116':'42501');
