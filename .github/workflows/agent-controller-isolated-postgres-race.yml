@@ -14,6 +14,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-receipt-guard-ci.sh'
       - 'tools/agent-controller/isolated-node-signed-receipt-ci.mjs'
       - 'tools/agent-controller/isolated-postgres-receipt-replay-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-replay-classifier-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -75,3 +76,5 @@ jobs:
         run: node tools/agent-controller/isolated-node-signed-receipt-ci.mjs
       - name: Reject duplicate and conflicting receipt replay identities
         run: bash tools/agent-controller/isolated-postgres-receipt-replay-ci.sh
+      - name: Distinguish identical receipt replay from conflicting payload
+        run: bash tools/agent-controller/isolated-postgres-replay-classifier-ci.sh
