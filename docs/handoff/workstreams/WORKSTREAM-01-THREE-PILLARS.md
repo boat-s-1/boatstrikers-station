@@ -51,3 +51,14 @@ This workstream goal is a documented synthesis of the user's supplied first-chat
 - Report VERIFIED DONE / IN PROGRESS / BLOCKED / UNKNOWN before coding.
 - Retain this fixed workstream goal. Update status evidence with timestamp and commit/PR references; do not overwrite prior facts with unsupported claims.
 - Avoid concurrent changes to shared DB/schema without cross-workstream coordination.
+
+## 2026-11-18 follow-up: user-supplied continuation audit
+
+- Continuation conversation supplied: https://chatgpt.com/c/6afc60d1-ea08-83ee-b82d-d1ebdb5090ea
+- Source: user-uploaded `BoatStrikers開発 総合引き継ぎ・最終目標確認書` (2026-11-18), reviewed in chat. This is a **secondary audit report**, not direct access to the full prior conversations. Its claims about other PRs/DB are not automatically current and must be verified before actions.
+- Audit conclusion: no evidence of authorized scope reduction, but full identity of original goal remains unproven because complete original conversation/goal history was not available.
+- Preserve three levels: (1) approved platform-wide charter v1.0, (2) this workstream's race/blog/community integration, (3) individual PRs such as #300/#301. Completion of PR #300 is **not** completion of WS-01 or platform.
+- Scope safeguard: race (24 venues, entries/exhibition/results/payout/history and prediction), blog (character articles, editor, AI quality-gated publishing), community (official threads, member replies, 12R live), account and tier permissions, notifications, AI/TRINITY, educational content, reliable cloud collection/monitoring all remain within platform-wide completion. Not all are owned solely by WS-01; cross-workstream ownership must be reconciled.
+- Audit cites PR #295/#296 blog, #297 DATA LAB, #298 cloud sync, #300 forum, #301 Cron, #303 HTTP workflow, plus TRINITY. These are **audit-reported snapshots**; re-fetch current GitHub status before treating as verified.
+- Open: clarify full original goal from available artifacts, exact paid membership/payment scope, distribution form, acceptance thresholds, and PR overlap; do not silently narrow scope to forum.
+- Audit reports an hourly isolation branch associated with PR #301 may still exist. This is **unverified current state**; check with Supabase before any delete/charge-related action. Never confuse it with the already deleted PR #300 test branch.
