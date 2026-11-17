@@ -7,7 +7,7 @@ Status: **schema-level parity checked; deployment remains HOLD**. No SQL write, 
 Inspected `information_schema.columns` for the existing `public.bs_race_entries`, `public.bs_race_events` and `public.bs_race_results` tables. All result-conflict guard columns referenced by `openapi-atomic-ingest.candidate.sql` were present:
 
 - Entries: `actual_course`, `actual_st`, `actual_start_timing`, `arrival_order`, `finish_place`, `racer_registration_no`, `result_note`.
-- Events: `exacta`, `exacta_payout`, `quinella`, `quinella_payout`, `trifecta_payout`, `trio`, `trio_payout`, `winning_technique_code`. The candidate additionally references `trifecta`, previously inspected in the production trigger/function audit; verify explicitly again before installation.
+- Events: `exacta`, `exacta_payout`, `quinella`, `quinella_payout`, `trifecta_payout`, `trio`, `trio_payout`, `winning_technique_code`. A separate read-only query also confirmed `bs_race_events.trifecta` exists with type `text`.
 - Results: `first_boat`, `second_boat`, `third_boat`, `trifecta_result`, `trifecta_payout`, `winning_method`.
 
 Read-only `pg_proc` check confirmed the four existing writer signatures and return types:
@@ -23,4 +23,4 @@ The candidate calls these four functions in the expected order with matching arg
 
 ## Release decision
 
-**HOLD**. No production installation, Cron change, historical repair or paid Supabase branch creation authorized by this read-only check. Before deployment, verify all referenced columns (including `bs_race_events.trifecta`), function execution role, RLS/grants, and run a realistic isolated database test.
+**HOLD**. No production installation, Cron change, historical repair or paid Supabase branch creation authorized by this read-only check. Before deployment, verify remaining non-guard referenced columns, function execution role, RLS/grants, and run a realistic isolated database test.
