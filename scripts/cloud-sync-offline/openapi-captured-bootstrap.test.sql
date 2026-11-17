@@ -9,6 +9,11 @@ CREATE TABLE public.bs_race_events (
  race_no smallint NOT NULL, course_name text, race_name text,
  deadline_time time, closing_time time, distance integer, race_day_no integer,
  race_status text, program_available boolean, api_synced_at timestamptz,
+ result_available boolean, trifecta text, trifecta_payout integer,
+ exacta text, exacta_payout integer, quinella text, quinella_payout integer,
+ trio text, trio_payout integer, winning_technique_code text,
+ result_source text, result_synced_at timestamptz, payout_source text,
+ payout_synced_at timestamptz,
  api_preview_synced_at timestamptz, api_wind_speed numeric, api_wind_direction_code text,
  api_wave_height numeric, api_weather_code text, api_air_temperature numeric,
  api_water_temperature numeric, wind_speed numeric, wind_direction_code text,
@@ -25,6 +30,9 @@ CREATE TABLE public.bs_race_entries (
  boat_machine_no smallint, race_boat_number smallint, boat_2_rate numeric,
  race_boat_top2_rate numeric, racer_weight numeric, weight numeric,
  data_source text, api_synced_at timestamptz, synced_at timestamptz,
+ arrival_order integer, finish_place text, actual_course integer,
+ actual_start_timing numeric, actual_st numeric, result_note text,
+ api_result_synced_at timestamptz,
  api_preview_synced_at timestamptz, api_exhibition_time numeric, api_exhibition_st numeric,
  api_exhibition_course smallint, api_tilt numeric, api_preview_source text,
  exhibition_time numeric, exhibition_st numeric, exhibition_course smallint, tilt numeric,
@@ -33,5 +41,12 @@ CREATE TABLE public.bs_race_entries (
  UNIQUE(race_date,course_code,race_no,boat_no),
  FOREIGN KEY(race_date,course_code,race_no)
  REFERENCES public.bs_race_events(race_date,course_code,race_no));
+CREATE TABLE public.bs_race_results (
+ race_date date NOT NULL, course_code smallint NOT NULL, race_no smallint NOT NULL,
+ winning_method text, trifecta_result text, trifecta_payout integer,
+ result_status text, synced_at timestamptz, first_boat integer,
+ second_boat integer, third_boat integer, winning_trifecta text,
+ winning_technique text, race_status text, api_result_synced_at timestamptz,
+ api_result_source text, UNIQUE(race_date,course_code,race_no));
 COMMIT;
 -- The actual function is loaded by CI between setup and assertions.
