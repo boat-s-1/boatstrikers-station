@@ -29,7 +29,7 @@ WITH days AS (
     OR count(*) FILTER (WHERE en.boat_no NOT BETWEEN 1 AND 6
       OR en.racer_registration_no IS NULL
       OR en.racer_registration_no IN ('0000','00000')
-      OR en.racer_registration_no !~ '^(0[0-9]{4}|[0-9]{4})
+      OR en.racer_registration_no NOT SIMILAR TO '(0[0-9]{4}|[0-9]{4})'
   ) bad) AS invalid_entry_races
  FROM days d
 ), sync AS (
