@@ -17,3 +17,14 @@ test('no secret or raw article columns',()=>assert.doesNotMatch(sql,/\b(api_key|
 
 test('schema event and attempt identifiers match safe string IDs',()=>{assert.match(sql,/event_id text PRIMARY KEY CHECK/);assert.match(sql,/attempt_id text NOT NULL CHECK/);assert.doesNotMatch(sql,/\b(event_id|attempt_id|outbox_id) uuid\b/)});
 test('outbox identifier matches safe string ID',()=>assert.match(sql,/outbox_id text PRIMARY KEY CHECK/));
+
+test('draft has exactly one transaction and three table declarations',()=>{
+ assert.equal((sql.match(/^BEGIN;$/gm)||[]).length,1);
+ assert.equal((sql.match(/^ROLLBACK;$/gm)||[]).length,1);
+ assert.equal((sql.match(/^CREATE TABLE agent_monitor\./gm)||[]).length,3);
+});
+test('identifier checks have closed regex strings and parentheses',()=>{
+ const idChecks=sql.match(/(?:event_id|attempt_id|incident_key|outbox_id) (?:text PRIMARY KEY|text NOT NULL) CHECK \([^\n]+/g)||[];
+ assert.equal(idChecks.length,5);
+ for(const line of idChecks)assert.ok(line.endsWith(String.raw`{8,80}$')`),'invalid ID check: '+line);
+});
