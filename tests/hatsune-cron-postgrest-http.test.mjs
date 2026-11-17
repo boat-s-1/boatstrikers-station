@@ -14,6 +14,7 @@ const cases=[
  ['singular missing response is not 406','bad-singular-zero',1,['POST','PATCH','PATCH','PATCH','PATCH','DELETE']],
  ['anonymous update unexpectedly permitted','bad-anon',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
  ['cleanup HTTP failure is fatal','bad-delete',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
+ ['cleanup success with zero deleted rows is fatal','empty-delete',1,['POST','PATCH','PATCH','PATCH','PATCH','PATCH','DELETE']],
 ];
 for(const [name,mode,expectedExit,methods] of cases){
  test(name,()=>{
@@ -34,7 +35,7 @@ globalThis.fetch=async(url,opts)=>{
   else if(patch===4){status=process.env.MOCK_MODE==='bad-singular-zero'?200:406;data={code:'PGRST116'};}
   else{status=process.env.MOCK_MODE==='bad-anon'?200:403;}
  }
- if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:200;data=process.env.MOCK_MODE==='bad-delete'?{code:'42501'}:[{id:42}];}
+ if(method==='DELETE'){status=process.env.MOCK_MODE==='bad-delete'?403:200;data=process.env.MOCK_MODE==='bad-delete'?{code:'42501'}:process.env.MOCK_MODE==='empty-delete'?[]:[{id:42}];}
  return {status,text:async()=>data===null?'':JSON.stringify(data)};
 };`);
   try{
