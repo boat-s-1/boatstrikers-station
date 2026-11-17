@@ -1,3 +1,4 @@
+import CommunityLatest from "../components/CommunityLatest";
 import ResponsiblePlayNotice from "../components/ResponsiblePlayNotice";
 import BlogReadingBridge from '../components/BlogReadingBridge';
 import Image from "next/image";
@@ -285,6 +286,7 @@ export default async function IchikaPage() {
           <img src="/1946131E-2FFC-48F9-B850-AB6164F6220C-copy-v2.png" alt="公式LINE登録" className="lineBannerImage" />
         </a>
       </section>
+    <CommunityLatest characterKey="ichika" heading="一果の公式掲示板" />
     <BlogReadingBridge character="ichika"/>
 </main>
   );
