@@ -24,3 +24,17 @@ count=$("${PSQL[@]}" -c "SELECT count(*) FROM agent_monitor.incident_reservation
 count=$("${PSQL[@]}" -c "SELECT count(*) FROM agent_monitor.incident_reservations WHERE incident_key='incident_crash_01'")
 [[ "$count" == "1" ]] || { echo "Expected one retried reservation, got $count" >&2; exit 1; }
 echo 'PASS: killed uncommitted backend rolls back; retry creates exactly one reservation'
+
+# Crash AFTER commit: a retry must preserve the committed reservation and owner.
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.incident_reservations VALUES ('incident_committed_01','attempt_original','reserved')"
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.incident_reservations VALUES ('incident_committed_01','attempt_retry_01','reserved') ON CONFLICT DO NOTHING"
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.incident_reservations VALUES ('incident_committed_01','attempt_retry_02','reserved') ON CONFLICT DO NOTHING"
+count=$("${PSQL[@]}" -c "SELECT count(*) FROM agent_monitor.incident_reservations WHERE incident_key='incident_committed_01'")
+owner=$("${PSQL[@]}" -c "SELECT attempt_id FROM agent_monitor.incident_reservations WHERE incident_key='incident_committed_01'")
+[[ "$count" == "1" && "$owner" == "attempt_original" ]] || { echo 'Committed reservation overwritten or duplicated' >&2; exit 1; }
+# A committed outbox item must remain unique under repeated worker starts.
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.notification_outbox VALUES ('outbox_committed_01','incident_committed_01','pending_review')"
+"${PSQL[@]}" -c "INSERT INTO agent_monitor.notification_outbox VALUES ('outbox_retry_01','incident_committed_01','pending_review') ON CONFLICT DO NOTHING"
+count=$("${PSQL[@]}" -c "SELECT count(*) FROM agent_monitor.notification_outbox WHERE incident_key='incident_committed_01'")
+[[ "$count" == "1" ]] || { echo 'Committed outbox item duplicated' >&2; exit 1; }
+echo 'PASS: committed reservation/outbox remain unique on replay'
