@@ -1,0 +1,1 @@
+alter table public.seminar_magazine_issues add column if not exists article jsonb;
