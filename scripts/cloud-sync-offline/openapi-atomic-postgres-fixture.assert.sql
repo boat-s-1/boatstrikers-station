@@ -166,7 +166,7 @@ BEGIN
  END IF;
  -- Compact event-side exacta/quinella must compare equal to hyphenated
  -- incoming combinations, just like the trifecta normalization.
- UPDATE public.bs_race_events SET exacta='12',quinella='12'
+ UPDATE public.bs_race_events SET exacta='12',quinella='12',trio='123'
  WHERE race_date=d AND course_code=9 AND race_no=1;
  -- Identical already-persisted values must remain acceptable for
  -- idempotent retries; the fixture writers are deliberately stubbed.
@@ -176,6 +176,7 @@ BEGIN
       'trifecta_result','1-2-3','trifecta_payout',1200,
       'exacta','1-2','exacta_payout',550,
       'quinella','1-2','quinella_payout',420,
+      'trio','1-2-3',
       'first_boat',1,'winning_method','escape','technique_code','1')),
    jsonb_build_array(jsonb_build_object(
       'race_date',d,'course_code',9,'race_no',1,'boat_no',1,
