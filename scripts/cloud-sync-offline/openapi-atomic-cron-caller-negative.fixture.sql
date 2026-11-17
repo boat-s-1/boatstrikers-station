@@ -16,10 +16,10 @@ END $$;
 CREATE TABLE public.pr298_document (doc jsonb NOT NULL, http_status integer NOT NULL DEFAULT 200, raw_body text);
 INSERT INTO pr298_document
 SELECT jsonb_build_object('programs',jsonb_build_object('stadiums',
- jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
+ jsonb_build_object('1',jsonb_build_object('races',
  jsonb_build_object('1',jsonb_build_object(
  'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
- 'race_number',1,
+ 'stadium_number',1,'race_number',1,
  'racers',(SELECT jsonb_object_agg(i::text,jsonb_build_object(
   'entry_number',i,'number',(4000+i)::text)) FROM generate_series(1,6) i)
  ))))));
@@ -139,7 +139,7 @@ BEGIN
   ELSIF scenario='missing_registration' THEN
    invalid:=invalid #- '{programs,stadiums,1,races,1,racers,1,number}';
   ELSIF scenario='wrong_stadium_number' THEN
-   invalid:=jsonb_set(invalid,'{programs,stadiums,1,stadium_number}','2'::jsonb);
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,stadium_number}','2'::jsonb);
   ELSIF scenario='wrong_race_number' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,race_number}','2'::jsonb);
   ELSIF scenario='wrong_preview_date' THEN
