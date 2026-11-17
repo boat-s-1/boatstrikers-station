@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { loadVerifiedNotificationMember } from '../../../../lib/community/notificationMemberServer';
-import { notificationAuthProbe } from '../../../../lib/community/notificationAuthProbe.mjs';
+import { loadVerifiedNotificationMember } from '../../../../../lib/community/notificationMemberServer';
+import { notificationAuthProbe } from '../../../../../lib/community/notificationAuthProbe.mjs';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
