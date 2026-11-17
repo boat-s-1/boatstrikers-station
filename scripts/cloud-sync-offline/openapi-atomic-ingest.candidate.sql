@@ -109,6 +109,16 @@ BEGIN
  IF NOT pg_try_advisory_xact_lock(298, (p_date - DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'OpenAPI atomic ingestion already running for %',p_date;
  END IF;
+ -- Theory settlement can be triggered by an event trifecta alone and
+ -- treats a missing payout as zero. Never submit an incomplete winning
+ -- combination to the legacy result writer.
+ IF EXISTS (
+   SELECT 1 FROM jsonb_to_recordset(p_results)
+     AS x(trifecta_result text,trifecta_payout integer)
+   WHERE x.trifecta_result IS NOT NULL AND x.trifecta_payout IS NULL
+ ) THEN
+   RAISE EXCEPTION 'OpenAPI trifecta without payout risks premature settlement';
+ END IF;
  -- Fail closed if the provider contradicts a previously stored result.
  -- Check BOTH result and event surfaces before any of the four writers run.
  -- Null incoming values do not authorize clearing existing results.
