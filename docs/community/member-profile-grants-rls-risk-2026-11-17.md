@@ -3,7 +3,7 @@
 ## 本番読み取り専用SQLで確定
 - `public.bs_member_profiles` のRLSポリシーは2件だけ：authenticated SELECT `auth.uid()=user_id`、authenticated UPDATE `USING auth.uid()=user_id WITH CHECK auth.uid()=user_id`。INSERT/DELETEポリシーは確認できなかった。
 - `information_schema.role_table_grants` では **anon と authenticated の両方に SELECT/INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER** のテーブルGRANTが列挙された。
-- RLSが有効な場合、通常のINSERT/DELETEは適合するポリシーがなければ拒否される。ただし **TRUNCATEはRLSの対象外**。テーブルGRANTが実効的なら、公開API以外の経路を含めて危険性がある。PostgREST経由で実行可能と断定はしない。
+- `pg_class` で `relrowsecurity=true`、`relforcerowsecurity=false`。anon/authenticatedの `rolbypassrls=false` を確認。\n- `has_table_privilege('anon',..., 'TRUNCATE')` と `has_table_privilege('authenticated',..., 'TRUNCATE')` が**両方true**であることを直接確認。\n- RLSが有効な場合、通常のINSERT/DELETEは適合するポリシーがなければ拒否される。ただし **TRUNCATEはRLSの対象外**。テーブルGRANTが実効的なら、公開API以外の経路を含めて危険性がある。PostgREST経由で実行可能と断定はしない。
 - UPDATEは自己行RLSだけで、`plan`、`is_admin`、`premium_until` 等の列を制限していない。
 - 既存の新規会員作成は `auth.users` の AFTER INSERT → SECURITY DEFINER `handle_boatstrikers_member_signup()`。この経路を壊さないことが必須。
 
