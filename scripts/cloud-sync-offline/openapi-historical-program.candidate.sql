@@ -79,6 +79,34 @@ BEGIN
  IF NOT pg_try_advisory_xact_lock(299,(p_date-DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'historical program repair already running';
  END IF;
+ -- Reject partial pre-existing programs. Only a completely empty target or
+ -- an already complete six-boat replay is eligible; never silently repair
+ -- a partially populated historical race without separate investigation.
+ IF EXISTS (
+   WITH ev AS (
+     SELECT x.race_date,x.course_code,x.race_no
+     FROM jsonb_to_recordset(p_events)
+       x(race_date date,course_code int,race_no int)
+   )
+   SELECT 1 FROM ev v
+   WHERE (
+     EXISTS (SELECT 1 FROM public.bs_race_events actual
+       WHERE (actual.race_date,actual.course_code,actual.race_no)=
+         (v.race_date,v.course_code,v.race_no))
+     OR EXISTS (SELECT 1 FROM public.bs_race_entries actual
+       WHERE (actual.race_date,actual.course_code,actual.race_no)=
+         (v.race_date,v.course_code,v.race_no))
+   ) AND (
+     NOT EXISTS (SELECT 1 FROM public.bs_race_events actual
+       WHERE (actual.race_date,actual.course_code,actual.race_no)=
+         (v.race_date,v.course_code,v.race_no))
+     OR (SELECT count(*) FROM public.bs_race_entries actual
+       WHERE (actual.race_date,actual.course_code,actual.race_no)=
+         (v.race_date,v.course_code,v.race_no))<>6
+   )
+ ) THEN
+   RAISE EXCEPTION 'historical repair refuses partial existing program';
+ END IF;
  v_written:=public.bs_apply_openapi_bootstrap(p_events,p_entries,p_synced_at);
  IF EXISTS (
    WITH ev AS (
