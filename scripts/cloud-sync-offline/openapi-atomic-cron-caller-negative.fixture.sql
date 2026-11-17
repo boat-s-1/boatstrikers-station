@@ -1,7 +1,7 @@
 -- Synthetic, network-free negative cases for PR298 Cron candidate.
 -- Requires the CI-only noon-JST candidate and runtime fixture HTTP mock.
 -- Every malformed payload must fail BEFORE invoking the atomic RPC.
-CREATE TEMP TABLE pr298_atomic_calls (n integer NOT NULL);
+CREATE TEMP TABLE pr298_atomic_calls (n integer NOT NULL, events jsonb, entries jsonb, preview_events jsonb, preview_entries jsonb, results jsonb, result_entries jsonb);
 INSERT INTO pr298_atomic_calls VALUES (0);
 CREATE OR REPLACE FUNCTION public.bs_apply_openapi_atomic_candidate(
  p_date date,p_events jsonb,p_entries jsonb,p_preview_entries jsonb,
@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.bs_apply_openapi_atomic_candidate(
  p_synced_at timestamptz)
 RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN
- UPDATE pg_temp.pr298_atomic_calls SET n=n+1;
+ UPDATE pg_temp.pr298_atomic_calls SET n=n+1, events=p_events, entries=p_entries, preview_events=p_preview_events, preview_entries=p_preview_entries, results=p_results, result_entries=p_result_entries;
  RETURN jsonb_build_object('ok',true);
 END $$;
 -- The HTTP mock reads a session-local document; no real network is possible.
@@ -130,6 +130,18 @@ BEGIN
    IF response->>'ok' IS DISTINCT FROM 'true' THEN
     RAISE EXCEPTION 'valid program rejected: %',response;
    END IF;
+   IF (SELECT jsonb_array_length(events) FROM pr298_atomic_calls)<>1
+    OR (SELECT jsonb_array_length(entries) FROM pr298_atomic_calls)<>6
+    OR (SELECT jsonb_array_length(preview_events) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(preview_entries) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(results) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(result_entries) FROM pr298_atomic_calls)<>0
+    OR (SELECT count(*) FROM pr298_atomic_calls a,
+      jsonb_array_elements(a.entries) e
+      WHERE e->>'racer_registration_no' IS NOT NULL
+        AND (e->>'boat_no')::int BETWEEN 1 AND 6)<>6
+    OR (SELECT events->0->>'course_name' FROM pr298_atomic_calls) IS DISTINCT FROM '桐生'
+   THEN RAISE EXCEPTION 'valid source mapped to wrong atomic payload'; END IF;
   ELSE
    BEGIN
     PERFORM public.bs_sync_openapi_today_atomic_candidate();
