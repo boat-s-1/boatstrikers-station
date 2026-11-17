@@ -45,7 +45,7 @@ BEGIN
   'invalid_preview_numeric','invalid_bootstrap_numeric',
   'invalid_result_payout_numeric','invalid_exacta_payout_numeric',
   'invalid_quinella_payout_numeric','invalid_trio_payout_numeric','missing_registration',
-  'wrong_stadium_number','wrong_race_number','http_503',
+  'wrong_stadium_number','wrong_race_number','http_503','http_429','http_500',
   'invalid_program_win_rate','invalid_preview_exhibition_st',
   'invalid_result_actual_course'
  ] LOOP
@@ -112,8 +112,6 @@ BEGIN
        ELSE 'trio' END,
       jsonb_build_array(jsonb_build_object('combination','1-2',
        'amount','not-a-number')))));
-  ELSIF scenario='http_503' THEN
-   UPDATE pr298_document SET http_status=503;
   ELSIF scenario='invalid_program_win_rate' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,national_win_rate}','"not-a-number"'::jsonb);
   ELSIF scenario='invalid_preview_exhibition_st' THEN
@@ -135,7 +133,7 @@ BEGIN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
     '{"wind_speed":"not-a-number"}'::jsonb);
   END IF;
-  UPDATE pr298_document SET doc=invalid, http_status=CASE WHEN scenario='http_503' THEN 503 ELSE 200 END;
+  UPDATE pr298_document SET doc=invalid, http_status=CASE scenario WHEN 'http_503' THEN 503 WHEN 'http_429' THEN 429 WHEN 'http_500' THEN 500 ELSE 200 END;
   UPDATE pr298_atomic_calls SET n=0;
   IF scenario='valid' THEN
    response:=public.bs_sync_openapi_today_atomic_candidate();
