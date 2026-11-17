@@ -5,7 +5,8 @@
     "start": "next start",
     "shorts:render": "node scripts/render-short.mjs",
     "hatsune:render": "node scripts/render-hatsune-news.mjs",
-    "racers:sync": "node scripts/sync-racer-profiles.mjs"
+    "racers:sync": "node scripts/sync-racer-profiles.mjs",
+    "test:community": "node --test tests/community-*.test.mjs"
   },
   "dependencies": {
     "@next/third-parties": "latest",
