@@ -23,3 +23,10 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - Read-only cross-table comparison for 2026-11-13 through 2026-11-16: 156, 168, 156, and 120 result rows respectively; every one of these 600 results lacks a corresponding bs_race_events row.
 - This provides a concrete mechanism for result-only records, but historical attribution still requires logs and other ingestion-path checks.
 - Do NOT backfill blindly or switch Cron before trigger fan-out, payload completeness, and safe rollback have been verified.
+
+
+## Production sync log cross-check (read-only, 2026-11-17)
+- For race dates Nov 13, 14, 15, 16: each had 310 successful live_all calls and zero partial calls by race_date. Max reported event payload counts were 156, 168, 156, 120 respectively, yet all corresponding race results lacked bs_race_events rows. Thus 'success' and event_rows indicate parsed/processed payload, NOT confirmed event insertion.
+- Maximum entry payloads were 935, 1003, 935, 718 for those dates; these are exhibition/preview entry rows, not proof of a complete six-boat bootstrap.
+- The legacy live function does not invoke bootstrap. This aligns with missing events and is a strong root-cause candidate; do not attribute every historical record solely to this path without cross-checking other writers.
+- Release gate must check persisted race-event count and six valid bootstrap entries per race, not merely Cron success or nonzero payload counts.
