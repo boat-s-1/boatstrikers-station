@@ -1,0 +1,541 @@
+{
+ "post_id": "c3acd1ae-05a6-46a0-b82e-9886810ec66e",
+ "slug": "stadium-basics-kiryu-course-v12",
+ "revision_id": "5555d926-e84e-4d35-b004-4660b1418fb3",
+ "prompt_version": "blog-ai-v12",
+ "model": "gpt-5.6-luna",
+ "generated_at": "2026-10-18 12:10:52.416732+00",
+ "edit_version": 1,
+ "preview_commit": "40c592b152fd4279e89d8594e67607686a75ff0f",
+ "md5": {
+  "source_pack": "b0dba202f3785f47f701ffbc5e5e554e",
+  "validation": "e08c87809491184c487e618c273ca9c9",
+  "seo": "352a2eef3a3ecda1e48c7cdadc3dfaa1",
+  "blocks": [
+   "ac928d0b28c9e9d156cbc57dd56da817",
+   "d191c2eb740fa7766e5258b3863487c3",
+   "493a3e631e29892bbd6052ab466f4c53",
+   "358071c059dd100f29400840dc231a90",
+   "c4565678e3faca14cb5fce81081396d4",
+   "43fb434a238afe114da1e6e91a283785",
+   "7ed8322dc1bfcc5b2e3fcf1477fb6a7b",
+   "c4ffa1c511cf9e38ecfdda87ef2bff47",
+   "2527d97538289667cb1b6f07e07cf56f",
+   "112881afaebbd9d987de6a23305ed03e",
+   "1f49ebd90d22036cbc0ca5676c02707a",
+   "02401a96ab8b5bda4525608dd83db36f",
+   "94bc9d38aa4207e2b126075b339c00cf",
+   "7746eb0c20f0fa0f54453e44e0ba0ebb",
+   "2b58f4b3e704a56d13e35619fe388a20"
+  ]
+ },
+ "title": "桐生の1コースは半分超、近い数字のコースにも注目",
+ "excerpt": "桐生のコース別1着率を、号艇と進入コースの違いから初心者向けに解説。1コースの数字が示すことや、2コースと3コースの読み方、当日に確認したい情報を整理します。",
+ "seo": {
+  "title": "桐生のコース別1着率の読み方",
+  "og_alt": "一果のイラストと記事タイトル「桐生の1コースは半分超、近い数字のコースにも注目」",
+  "description": "桐生のコース別1着率を初心者向けに解説します。1コースが半分を超える数字の意味、2コースと3コースの近い数値の見方、当日に確認する情報を紹介します。",
+  "og_media_id": "1b0981f4-9cfd-4bbf-b174-1e61daf08712",
+  "stadium_slug": "kiryu"
+ },
+ "blocks": [
+  {
+   "id": "e358db68-c9df-46f2-9769-8bd565c1f699",
+   "data": {
+    "items": [
+     "桐生のコース別1着率の見方",
+     "1コースの数字が示すこと",
+     "当日に確認したい出走表と展示情報"
+    ],
+    "placement": "takeaways"
+   },
+   "type": "LIST"
+  },
+  {
+   "id": "13f7ed6e-5df3-4f51-ba13-75ab3f60095b",
+   "data": {
+    "text": "桐生の水質は淡水で、干満差はありません。2コースと3コースの数字を見比べると、何が分かるでしょうか。",
+    "placement": "lead",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "4b8831a6-18ac-4f9a-880f-1dd88861182f",
+   "data": {
+    "text": "コース別1着率は実際の進入位置で見る",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "1f701ce7-a574-4d7f-8d08-59d9c7f0bc8f",
+   "data": {
+    "text": "出走表の号艇は、レースごとに決まる各艇の番号です。一方、進入コースはスタートのときに艇が実際に入った位置で、号艇と同じとは限りません。コース別1着率は、そのコースから進入した艇が1着になった割合です。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "9fdc05eb-bb57-46fe-8323-f5e346460437",
+   "data": {
+    "rows": [
+     [
+      "コース",
+      "1着率"
+     ],
+     [
+      "1コース",
+      "54.7%"
+     ],
+     [
+      "2コース",
+      "13.2%"
+     ],
+     [
+      "3コース",
+      "13.4%"
+     ],
+     [
+      "4コース",
+      "9.4%"
+     ],
+     [
+      "5コース",
+      "6.8%"
+     ],
+     [
+      "6コース",
+      "3.0%"
+     ]
+    ],
+    "header": true,
+    "caption": "桐生のコース別1着率（集計期間 2026/07/01〜2026/09/30）",
+    "generated": "rate_table",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "TABLE"
+  },
+  {
+   "id": "b41febaf-828b-49f2-a984-88d741a95aae",
+   "data": {
+    "text": "1コースの1着率は半分を超える数字",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "7e5fede9-5e0d-4af6-b63b-70d9b94359e5",
+   "data": {
+    "text": "2026/07/01〜2026/09/30の集計では、1コースの1着率は54.7%でした。この期間に1コースから進入した艇が、半分を超えるレースで1着になったことを示します。なお、3コースの1着率は13.4%で、1コース以外では最も高い数字です。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "4eba0506-db1e-4d3a-b3f3-7cbcfedc2ddd",
+   "data": {
+    "text": "2コースと3コースの数字は近い水準",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "19836a4c-012e-4f72-902c-c1d6f891a2a8",
+   "data": {
+    "label": "",
+    "turns": [
+     {
+      "id": "a4922dcd-5923-42ea-842c-a19c50269e83",
+      "pose": "pose3",
+      "text": "2コースは13.2%、3コースは13.4%ですね。順位は違いますが、数字の差は小さく見えます。表からはどう読めばよいのでしょうか？",
+      "alignment": "auto",
+      "character": "hatsune"
+     },
+     {
+      "id": "b269663b-f5c3-4ff4-8766-42c3df1a2592",
+      "pose": "pose1",
+      "text": "この集計期間の数字はほぼ並んでいるけれど、同じ数字ではないよ。順番だけで差の大きさを決めず、13.2%と13.4%という数値そのものを見比べるんだ。",
+      "alignment": "auto",
+      "character": "ichika"
+     }
+    ],
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "DIALOGUE_SCENE"
+  },
+  {
+   "id": "bc10a59d-8223-4c39-9708-0a11805e8c6d",
+   "data": {
+    "text": "当日に出走表と展示後の情報を確認する",
+    "level": 2
+   },
+   "type": "HEADING"
+  },
+  {
+   "id": "6c6fd8d7-78c3-42e7-afd3-538f1fe9633d",
+   "data": {
+    "text": "・出走表の号艇と選手 ― 号艇と進入コースは同じとは限らないので、まず出走表で各号艇の選手を知る\n・スタート展示の進入コース ― 本番の進入を考えるときの参考になる（本番で変わることもある）\n・展示後の直前情報 ― 展示のあとに公開される情報も合わせて見る\n・当日の水面と天候 ― 集計期間の数字には当日の条件が含まれないので、別に確かめる",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "DATA_CHECK"
+  },
+  {
+   "id": "93abdd5c-96bc-4741-bc6c-57fcb118075f",
+   "data": {
+    "text": "コース別1着率は過去の集計期間の数字で、これからのレースで勝つ確率ではありません。",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "WARNING"
+  },
+  {
+   "id": "40c68a5f-9b44-459d-bc41-f016e98a099f",
+   "data": {
+    "text": "この期間は、1コースから進入した艇の1着率が54.7%で、半分を超えていました。また、2コースは13.2%、3コースは13.4%と、ほぼ並んでいます。表を見るときは、順位だけでなく各コースの数字の大きさも分けて読み取ります。",
+    "placement": "summary",
+    "source_ids": [
+     "S2"
+    ],
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "TEXT"
+  },
+  {
+   "id": "6cdee65e-eeda-4140-9a51-bbd870b391fa",
+   "data": {
+    "text": "この記事は、出典欄の公式情報・収録データをもとに作成しています。開催・施設・メニューなどの最新情報は各公式サイトでご確認ください。舟券の購入はご自身の判断でお願いします。",
+    "system": true,
+    "placement": "notes"
+   },
+   "type": "WARNING"
+  },
+  {
+   "id": "93e7c140-ed82-482c-9ab9-52bb78fa3937",
+   "data": {
+    "text": "BOAT RACE公式 ボートレース場データ（桐生）｜集計期間 2026/07/01〜2026/09/30｜取得日時 2026/10/10 17:22",
+    "system": true,
+    "placement": "sources",
+    "source_url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "source_label": "BOAT RACE公式 ボートレース場データ（桐生）"
+   },
+   "type": "QUOTE"
+  }
+ ],
+ "validation": [
+  {
+   "code": "auto_cited",
+   "level": "warning",
+   "message": "ブロック2（TEXT）：比較・事実の出典を自動で設定しました（S2）。内容と出典が合っているか確認してください。"
+  },
+  {
+   "code": "auto_cited",
+   "level": "warning",
+   "message": "ブロック13（TEXT）：数値・日付の出典を自動で設定しました（S2）。内容と出典が合っているか確認してください。"
+  },
+  {
+   "code": "comparison_draft",
+   "level": "blocking",
+   "message": "比較用に再生成した下書きです。承認・公開・予約公開はできません（正式に採用するには、別途の採用操作が必要です）。元記事：/stadium-basics-kiryu-course（blog-ai-v3）。"
+  },
+  {
+   "code": "summary_without_finding",
+   "level": "warning",
+   "message": "ブロック13（TEXT）：まとめに、この記事で分かったデータ上の発見がありません。重要な発見を1〜2個取り上げてください。"
+  },
+  {
+   "code": "summary_repeats_definition",
+   "level": "warning",
+   "message": "ブロック13（TEXT）：まとめが定義や一般的な心がけの言い直しになっています。発見と、その読み方を書いてください。"
+  }
+ ],
+ "source_pack": {
+  "gaps": [],
+  "facts": [
+   {
+    "id": "F1",
+    "unit": "%",
+    "label": "桐生の1コース1着率",
+    "value": "54.7",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F2",
+    "unit": "%",
+    "label": "桐生の2コース1着率",
+    "value": "13.2",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F3",
+    "unit": "%",
+    "label": "桐生の3コース1着率",
+    "value": "13.4",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F4",
+    "unit": "%",
+    "label": "桐生の4コース1着率",
+    "value": "9.4",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F5",
+    "unit": "%",
+    "label": "桐生の5コース1着率",
+    "value": "6.8",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F6",
+    "unit": "%",
+    "label": "桐生の6コース1着率",
+    "value": "3.0",
+    "period": "2026/07/01〜2026/09/30",
+    "source_id": "S2"
+   },
+   {
+    "id": "F7",
+    "unit": "",
+    "label": "桐生の水質",
+    "value": "淡水",
+    "source_id": "S2"
+   },
+   {
+    "id": "F8",
+    "unit": "",
+    "label": "桐生の干満差",
+    "value": "なし",
+    "source_id": "S2"
+   }
+  ],
+  "topic": {
+   "angle": "course",
+   "topic_key": "stadium-basics:kiryu:course",
+   "title_hint": "桐生のコース別1着率を確認する",
+   "stadium_slug": "kiryu",
+   "category_slug": "stadium-basics",
+   "character_key": "ichika"
+  },
+  "sources": [
+   {
+    "id": "S2",
+    "url": "https://www.boatrace.jp/owpc/pc/data/stadium?jcd=01",
+    "kind": "official_data",
+    "label": "BOAT RACE公式 ボートレース場データ（桐生）",
+    "tables": [
+     {
+      "label": "最近3ヶ月",
+      "period": "2026/07/01〜2026/09/30"
+     },
+     {
+      "label": "春季",
+      "period": "2026/03/01〜2026/05/31"
+     },
+     {
+      "label": "夏季",
+      "period": "2026/06/01〜2026/08/31"
+     },
+     {
+      "label": "秋季",
+      "period": "2025/09/01〜2025/11/30"
+     },
+     {
+      "label": "冬季",
+      "period": "2025/12/01〜2026/02/28"
+     }
+    ],
+    "fetched_at": "2026-10-10T08:22:28.799+00:00",
+    "page_title": "ボートレース場データ｜BOAT RACE オフィシャルウェブサイト",
+    "content_sha256": "a51f97c414bf3532fbb19cb5d07c92f0974fa98b2714076bc7d13edb75dc21d4"
+   }
+  ],
+  "stadium": {
+   "name": "桐生",
+   "slug": "kiryu",
+   "course_code": 1
+  },
+  "version": 5,
+  "built_at": "2026-10-18T12:10:37.741Z",
+  "official": {
+   "period": "2026/07/01〜2026/09/30",
+   "status": "parsed",
+   "skipped": [],
+   "source_id": "S2",
+   "placements": [
+    {
+     "rates": [
+      "54.7",
+      "17.1",
+      "7.6",
+      "8.4",
+      "6.9",
+      "5.0"
+     ],
+     "course": 1
+    },
+    {
+     "rates": [
+      "13.2",
+      "23.3",
+      "18.8",
+      "15.0",
+      "17.0",
+      "12.3"
+     ],
+     "course": 2
+    },
+    {
+     "rates": [
+      "13.4",
+      "20.2",
+      "22.9",
+      "15.9",
+      "15.2",
+      "12.1"
+     ],
+     "course": 3
+    },
+    {
+     "rates": [
+      "9.4",
+      "18.6",
+      "22.0",
+      "20.9",
+      "13.2",
+      "15.7"
+     ],
+     "course": 4
+    },
+    {
+     "rates": [
+      "6.8",
+      "14.4",
+      "17.5",
+      "20.2",
+      "20.4",
+      "20.4"
+     ],
+     "course": 5
+    },
+    {
+     "rates": [
+      "3.0",
+      "7.2",
+      "12.1",
+      "20.4",
+      "27.8",
+      "29.2"
+     ],
+     "course": 6
+    }
+   ]
+  },
+  "readings": [
+   {
+    "id": "R1",
+    "key": "top:1:高",
+    "kind": "top",
+    "text": "1コースの1着率（54.7%）が6つのコースの中で最も高い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R2",
+    "key": "half:1",
+    "kind": "half",
+    "text": "1コースの1着率（54.7%）は半分を超えている",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   },
+   {
+    "id": "R3",
+    "key": "top:6:低",
+    "kind": "bottom",
+    "text": "6コースの1着率（3.0%）が最も低い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   },
+   {
+    "id": "R4",
+    "key": "except:3:高",
+    "kind": "except_top",
+    "text": "3コースの1着率（13.4%）は1コース以外で最も高い",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   },
+   {
+    "id": "R5",
+    "key": "near:2:3",
+    "kind": "near",
+    "text": "2コース（13.2%）と3コース（13.4%）の1着率はほぼ同じ水準（わずかに3コースが高い）",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": true,
+    "source_id": "S2"
+   },
+   {
+    "id": "R6",
+    "key": "order",
+    "kind": "order",
+    "text": "1着率の高い順：1コース→3コース→2コース→4コース→5コース→6コース",
+    "period": "2026/07/01〜2026/09/30",
+    "featured": false,
+    "source_id": "S2"
+   }
+  ],
+  "comparison": {
+   "of_slug": "stadium-basics-kiryu-course",
+   "topic_key": "stadium-basics:kiryu:course",
+   "created_at": "2026-10-18T12:10:37.741Z",
+   "of_post_id": "b86916c4-624d-4acb-852f-44187f2e2d98",
+   "prompt_version": "blog-ai-v12",
+   "of_prompt_version": "blog-ai-v3"
+  },
+  "stadium_count": 1,
+  "documents": [
+   {
+    "title": "ボートレース場データ｜BOAT RACE オフィシャルウェブサイト",
+    "excerpt": "ボートレース場データ|BOAT RACE オフィシャルウェブサイト\nネット投票会員登録\nログイン\n知る楽しむ レーサー検索\nEnglish\n中文简体\n中文繁體\n한국어\nメインメニュー\n本日のレース\n本日の払戻金一覧\nレーサー検索\nライブ\nリプレイ\nメディア情報\nレーススケジュール\n月間スケジュール\nSG・PG1\nG1・G2\nG3\nヴィーナスシリーズ\nルーキーシリーズ\nマスターズリーグ\nデータファイル\nレース場データ\nSG・PG1・G1記録集\n高配当ベスト10\n優勝レーサー一覧\nダウンロード・他\nレース場・\nチケットショップ\nボートレース場\nチケットショップ\nテレボート\n(ネット投票)\nネット投票会員登録\n各種サービス\nマイページ\n投票結果\nログイン情報をお忘れの方\nお客様情報の照会・変更\nFAQ・お問い合わせ\n会員限定キャンペーン\nテレボートリンク\n投票\nHOME\nデータファイル\nボートレース場データ\n桐 生ボートレース場\n桐 生ボートレース場\n最近3ヶ月のデータ\nコース別入着率&決まり手\nコース\n1着\n2着\n3着\n4着\n5着\n6着\nコース別決まり手\n逃げ\n捲り\n差し\n捲り差し\n抜き\n恵まれ\n枠番別コース取得率\n枠\n1コース\n2コース\n3コース\n4コース\n5コース\n6コース\nMEMO\n所在地\n群馬県\nモーター\n減音\n水質\n淡水\n干満差\nなし\nレコード\n1.42.8 石田 章央 2004/10/27\n(2026/06/30現在)\n季節別データ\n春季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n秋季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n夏季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n冬季 のコース別入着率\nコース\n1着\n2着\n3着\n4着\n5着\n6着\n水面図\n(2023/01/01現在)\n情報につきましては主催者発表のものとご照合ください。\n関連リンク\nレース場・チケットショップに行く(桐 生ボートレース場)\nボートレース場データ\n関東地区\n桐 生(群馬県)\n戸 田(埼玉県)\n江戸川(東京都)\n平和島(東京都)\n多摩川(東京都)\n東海地区\n浜名湖(静岡県)\n蒲 郡(愛知県)\n常 滑(愛知県)\n津 (三重県)\n近畿地区\n三 国(福井県)\nびわこ(滋賀県)\n住之江(大阪府)\n尼 崎(兵庫県)\n四国地区\n鳴 門(徳島県)\n丸 亀(香川県)\n中国地区\n児 島(岡山県)\n宮 島(広島県)\n徳 山(山口県)\n下 関(山口県)\n九州地区\n若 松(福岡県)\n芦 屋(福岡県)\n福 岡(福岡県)\n唐 津(佐賀県)\n大 村(長崎県)\nスマートフォン版へ\nPAGE TOP\n■ボートレースを知る楽しむ\n■レーススケジュール\n本日のレース\n本日の払戻金一覧\n月間スケジュール\nSG・PG1スケジュール\nG1・G2スケジュール\nG3スケジュール\nヴィーナスシリーズ\nルーキーシリーズ\nマスターズリーグ\nメディア情報\n■データファイル\nボートレーサー検索\nボートレース場データ\nSG・PG1・G1記録集\n高配当ベスト10\n優勝レーサー一覧\nダウンロード・他\n■レース場・チケットショップ\nボートレース場\nチケットショップ\n■テレボート\nネット投票会員登録\n各種サービス\nマイページ\n投票結果\nログイン情報をお忘れの方\nお客様情報の照会・変更\nFAQ・お問い合わせ\nテレボート会員限定キャンペーン\nテレボートリンク\n本サイトについて\nサイトポリシー\nプライバシーポリシー\nサイトマップ\nご意見・ご要望\nボートレース関係団体\nメールマガジン購読\nテレボートリンク\nCOPYRIGHT © BOAT RACE OFFICIAL WEB ALL\nRIGHTS RESERVED.",
+    "source_id": "S2"
+   }
+  ]
+ }
+}

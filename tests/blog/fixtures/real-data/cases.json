@@ -1,0 +1,73 @@
+[
+ {
+  "name": "ichika-kiryu-inside",
+  "character": "ichika",
+  "export": "kiryu-20261004-20261102.json",
+  "definition": "inside_escape",
+  "period": {
+   "from": "2026-10-04",
+   "to": "2026-10-26"
+  },
+  "params": {
+   "scope_name": "桐生",
+   "course_code": 1
+  },
+  "topic": {
+   "id": "t1",
+   "topic_key": "inside-course:kiryu:escape-365",
+   "category_slug": "inside-course",
+   "stadium_slug": "kiryu",
+   "angle": "escape-365",
+   "title_hint": "桐生のイン逃げ率",
+   "character_key": "ichika"
+  },
+  "mock": "../mock-ai/ichika-kiryu-inside-escape.json"
+ },
+ {
+  "name": "hatsune-women",
+  "character": "hatsune",
+  "export": "women-national-20261013-20261026.json",
+  "definition": "women_inside_escape",
+  "period": {
+   "from": "2026-10-13",
+   "to": "2026-10-26"
+  },
+  "params": {
+   "scope_name": "全国"
+  },
+  "topic": {
+   "id": "t2",
+   "topic_key": "women:all:women-escape-national-90",
+   "category_slug": "women",
+   "stadium_slug": null,
+   "angle": "women-escape-national-90",
+   "title_hint": "女子戦のイン逃げ率",
+   "character_key": "hatsune"
+  },
+  "mock": "../mock-ai/hatsune-women-inside-escape.json"
+ },
+ {
+  "name": "kiina-kiryu-boat5",
+  "character": "kiina",
+  "export": "kiryu-20261004-20261102.json",
+  "definition": "boat5_win",
+  "period": {
+   "from": "2026-10-04",
+   "to": "2026-10-26"
+  },
+  "params": {
+   "scope_name": "桐生",
+   "course_code": 1
+  },
+  "topic": {
+   "id": "t3",
+   "topic_key": "longshot:kiryu:boat5-365",
+   "category_slug": "longshot",
+   "stadium_slug": "kiryu",
+   "angle": "boat5-365",
+   "title_hint": "桐生の5号艇1着率",
+   "character_key": "kiina"
+  },
+  "mock": "../mock-ai/kiina-kiryu-boat5.json"
+ }
+]

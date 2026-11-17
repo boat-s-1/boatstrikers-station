@@ -31,7 +31,16 @@ const stadiumRedirects = [
   permanent: true,
 }));
 
+// AI cover rendering (lib/blog/ai/cover.mjs) reads character art with readFile(process.cwd()/public/...),
+// which makes the file tracer copy all of public/ (~500MB) into every AI function. Exclude public/ there and
+// ship only the art covers can use (every pose of the three guide characters).
+// tests/blog/aiFollowups.test.mjs checks every coverable pose is still included.
+const AI_FUNCTIONS = ['/admin/blog/ai', '/api/admin/blog/ai/**', '/api/cron/blog-ai-drafts'];
+const AI_COVER_IMAGES = ['ichika', 'hatsune', 'kiina'].map(character => `public/anime/${character}/*.png`);
+
 const nextConfig = {
+  outputFileTracingExcludes: Object.fromEntries(AI_FUNCTIONS.map(route => [route, ['public/**']])),
+  outputFileTracingIncludes: Object.fromEntries(AI_FUNCTIONS.map(route => [route, AI_COVER_IMAGES])),
   async headers() {
     const isolation = ['/blog/preview/:path*', '/blog-preview/:path*'];
     if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') isolation.push('/blog', '/blog/:path*');
