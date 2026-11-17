@@ -28,3 +28,10 @@ test('database Cron bootstrap includes all fields emitted by Next.js bootstrap m
   for(const key of keys) assert.ok(sql.includes("'"+key+"'"),name+' field missing: '+key);
  }
 });
+
+test('all four payout types have intact fail-closed numeric validation',()=>{
+ assert.match(sql,/VALUES \('trifecta'\),\('exacta'\),\('quinella'\),\('trio'\)/);
+ assert.match(sql,/kinds\.kind,'0','amount'\] !~ '\^\[0-9\]\+\$'\)/);
+ assert.match(sql,/bv->>'weight' !~ '\^\[0-9\]\+\(\[\.\]\[0-9\]\+\)\?\$'\)/);
+ assert.equal((sql.match(/\$fn\$/g)||[]).length,2);
+});
