@@ -21,8 +21,8 @@ const fakeFetch=async (url,options)=>{
   assert.equal(u.searchParams.get('select'),'id');
   assert.equal(new Headers(options.headers).get('prefer'),'return=representation');
   calls.push({method,mode});
-  const status=mode==='denied'?403:200;
-  const payload=mode==='matched'?[{id:42}]:mode==='missing'?[]:{code:'42501',message:'permission denied'};
+  const status=mode==='denied'?403:mode==='missing'?406:200;
+  const payload=mode==='matched'?{id:42}:mode==='missing'?{code:'PGRST116',message:'The result contains 0 rows'}:{code:'42501',message:'permission denied'};
   return new Response(JSON.stringify(payload),{status,headers:{'content-type':'application/json'}});
 };
 const client=createClient('https://example.supabase.co','offline-test-key',{
@@ -30,16 +30,16 @@ const client=createClient('https://example.supabase.co','offline-test-key',{
 });
 for(const [scenario,expectedData,expectedError] of [
  ['matched',{id:42},false],
- ['missing',null,false],
+ ['missing',null,true],
  ['denied',null,true]
 ]){
- test('supabase-js maybeSingle '+scenario,async()=>{
+ test('supabase-js single '+scenario,async()=>{
   mode=scenario;
   const {data,error}=await client.from('hatsune_news_cron_runs')
    .update({status:'success',inserted_count:2}).eq('id',42).select('id').maybeSingle();
   assert.deepEqual(data,expectedData);
   assert.equal(Boolean(error),expectedError);
-  if(error)assert.equal(error.code,'42501');
+  if(error)assert.equal(error.code,scenario==='missing'?'PGRST116':'42501');
   assert.equal(calls.at(-1).mode,scenario);
  });
 }
