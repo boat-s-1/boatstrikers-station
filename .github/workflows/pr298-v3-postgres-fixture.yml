@@ -9,6 +9,7 @@ on:
       - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
       - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-preview*.sql'
+      - 'scripts/cloud-sync-offline/openapi-captured-results*.sql'
       - '.github/workflows/pr298-v3-postgres-fixture.yml'
   workflow_dispatch:
 permissions:
@@ -53,6 +54,8 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview-functions.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results-function.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results.assert.sql
       - name: Install disposable fixture schema
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
       - name: Install candidate functions in isolated PostgreSQL
