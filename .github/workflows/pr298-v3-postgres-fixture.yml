@@ -7,6 +7,7 @@ on:
       - 'scripts/cloud-sync-offline/openapi-real-ichika-evaluator.fixture.sql'
       - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
       - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
+      - 'scripts/cloud-sync-offline/audit-repository-schema-genesis.py'
       - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
       - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql'
@@ -52,6 +53,8 @@ jobs:
           persist-credentials: false
       - name: Verify isolation trigger inventory against production read-only catalog
         run: python3 scripts/cloud-sync-offline/check-isolation-trigger-parity.py
+      - name: Audit full checked-out repository for core table genesis DDL
+        run: python3 scripts/cloud-sync-offline/audit-repository-schema-genesis.py
       - name: Check PostgreSQL client
         run: psql --version
       - name: Install disposable fixture schema
