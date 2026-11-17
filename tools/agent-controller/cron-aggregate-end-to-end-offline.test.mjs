@@ -30,7 +30,7 @@ test('notification record does not prove external delivery',()=>{
 });
 test('recovery requires operator review and cannot republish',()=>{
  const observations=[9,10,11].map(h=>({at:`2026-11-17T${String(h).padStart(2,'0')}:00:00Z`,healthy:true,authenticated:true}));
- const r=assessCronIncidentRecovery({observations});
+ const r=assessCronIncidentRecovery({observations,referenceAt:'2026-11-17T11:05:00Z'});
  assert.equal(r.recovery_proposal,'manual_close_review');assert.equal(r.automatic_republish_allowed,false);
 });
 test('historical aggregate cannot be current production proof',()=>{
