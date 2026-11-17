@@ -1,0 +1,1 @@
+alter table public.ai_v2_daily_rankings add column if not exists social_comment text;
