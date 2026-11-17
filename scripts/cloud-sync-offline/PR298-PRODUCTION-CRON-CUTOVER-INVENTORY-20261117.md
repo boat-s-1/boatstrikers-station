@@ -62,3 +62,7 @@ The result backfill's direct definition has no textual `pg_advisory` call. The p
 5. Keep jobs 19, 20 and 24 active unless a specific, tested dependency requires a narrowly scoped pause.
 
 **Decision: HOLD.** These findings refine the writer inventory but do not authorize pausing production Cron.
+
+### Backfill predicate screening
+
+A read-only textual screen of the live `bs_backfill_missing_results` definition confirms it contains `ON CONFLICT`, `result_status`, `confirmed`, `COALESCE`, `api_result_source`, and `synced_at`, but no textual `pg_advisory`. **Keyword presence does not establish that a confirmed result is immutable** or that source priority is correct. Exact assignment/predicate review and a conflict fixture remain required.
