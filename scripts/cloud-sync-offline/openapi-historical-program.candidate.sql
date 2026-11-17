@@ -62,6 +62,19 @@ BEGIN
  ) THEN
    RAISE EXCEPTION 'invalid historical program keys or boat identities';
  END IF;
+ -- Require every requested race to have an existing settled result. This
+ -- prevents the repair endpoint from creating arbitrary historical programs.
+ IF EXISTS (
+   SELECT 1 FROM jsonb_to_recordset(p_events)
+     AS requested(race_date date,course_code int,race_no int)
+   WHERE NOT EXISTS (
+     SELECT 1 FROM public.bs_race_results r
+     WHERE (r.race_date,r.course_code,r.race_no)=
+       (requested.race_date,requested.course_code,requested.race_no)
+   )
+ ) THEN
+   RAISE EXCEPTION 'historical repair requires existing result for every race';
+ END IF;
  IF NOT pg_try_advisory_xact_lock(299,(p_date-DATE '2000-01-01')::integer) THEN
    RAISE EXCEPTION 'historical program repair already running';
  END IF;
