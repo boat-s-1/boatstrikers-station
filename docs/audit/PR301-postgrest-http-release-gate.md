@@ -12,7 +12,7 @@ Status: **HOLD until a real HTTP test passes**. Offline CI and isolated SQL test
    - `PR301_BRANCH_REF`: disposable branch project ref
    - `PR301_BRANCH_SERVICE_KEY`: branch-only service-role credential
    - `PR301_BRANCH_ANON_KEY`: optional branch anon key (required to exercise the anon-denied test)
-6. Verify successful HTTP POST, PATCH with `Prefer: return=representation`, no-matching-row PATCH, and (when supplied) denied anon PATCH. Confirm the test row was removed; query the branch table to ensure zero rows.
+6. Verify successful HTTP POST, plural PATCH with `Prefer: return=representation`, no-matching-row plural PATCH, singular PATCH with `Accept: application/vnd.pgrst.object+json` returning an object, singular zero-match returning HTTP 406 / `PGRST116`, and (when supplied) denied anon PATCH. Confirm the test row was removed; query the branch table to ensure zero rows.
 7. Delete the paid branch immediately and verify it is absent from the branch listing, **including on test failure**.
 
 ## Failure handling
@@ -21,7 +21,7 @@ Status: **HOLD until a real HTTP test passes**. Offline CI and isolated SQL test
 - If the script fails before cleanup, remove test data **only on the disposable branch**, then delete the branch.
 - Do not invoke the Hatsune cron route, change production tables or policies, merge the PR, or deploy.
 - Record the branch creation/deletion, HTTP status outcomes (without secrets or raw sensitive responses), and CI result in PR #301.
-- A successful raw REST PATCH confirms PostgREST wire behavior; it is **not by itself** proof that the application `supabase-js` `.single()` call behaves correctly against live PostgREST. Offline real-library integration now passes, but live authenticated HTTP remains a separate required gate.
+- A successful singular REST PATCH confirms the PostgREST wire contract used by `.single()`; it is **not by itself** proof that the application `supabase-js` `.single()` call behaves correctly against live PostgREST. Offline real-library integration now passes, but live authenticated HTTP remains a separate required gate.
 
 ## Current evidence
 
