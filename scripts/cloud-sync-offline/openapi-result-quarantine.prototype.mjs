@@ -38,7 +38,8 @@ export function classifyResultLayer(race) {
         return { status: 'QUARANTINE', reason: 'INCOMPLETE_PAYOUT', field: kind };
       }
       if (amount !== undefined && amount !== null &&
-          !/^[0-9]+$/.test(String(amount))) {
+          (!/^[0-9]+$/.test(String(amount)) ||
+           !Number.isSafeInteger(Number(amount)))) {
         return { status: 'QUARANTINE', reason: 'PAYOUT_AMOUNT_INVALID', field: kind };
       }
     }
@@ -52,6 +53,12 @@ export function classifyResultLayer(race) {
     return { status: 'QUARANTINE', reason: 'FINISH_BOAT_INVALID' };
   }
   const places = Object.values(finish ?? {}).map(v => String(v.place_number ?? ''));
+  if (finish && Object.keys(finish).some(k => !/^[1-6]$/.test(k))) {
+    return { status: 'QUARANTINE', reason: 'FINISH_BOAT_KEY_INVALID' };
+  }
+  if (places.some(p => p !== '' && !/^[1-6]$/.test(p))) {
+    return { status: 'QUARANTINE', reason: 'FINISH_PLACE_INVALID' };
+  }
   if (['1','2','3'].some(p => places.filter(v => v === p).length > 1)) {
     return { status: 'QUARANTINE', reason: 'TIED_FINISH' };
   }
