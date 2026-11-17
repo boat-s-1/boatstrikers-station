@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {classifyHatsuneCronRun as classify} from './cron-monitor-hatsune-status-classifier.mjs';
+const now='2026-11-17T12:00:00Z';
+const base={started_at:'2026-11-17T11:58:00Z'};
+test('missing row cannot establish failure',()=>assert.equal(classify(null,{now}).reason,'missing_or_unknown_status'));
+test('unknown status holds',()=>assert.equal(classify({...base,status:'broken'},{now}).classification,'verification_required'));
+test('fresh running remains unverified',()=>assert.equal(classify({...base,status:'running'},{now}).reason,'still_within_observation_window'));
+test('stale running is not confirmed failure',()=>{const r=classify({...base,status:'running'},{now,maxRunningMs:60000});assert.equal(r.reason,'completion_unverified_stale');assert.equal(r.confirmedFailure,false);assert.equal(r.alertEligible,false)});
+test('running with finished marker is inconsistent',()=>assert.equal(classify({...base,status:'running',finished_at:now},{now}).reason,'inconsistent_running_finished'));
+test('partial is reported partial, not confirmed failure',()=>{const r=classify({...base,status:'partial',finished_at:now},{now});assert.equal(r.classification,'reported_partial');assert.equal(r.confirmedFailure,false)});
+test('error is reported error, not independently verified',()=>{const r=classify({...base,status:'error',finished_at:now},{now});assert.equal(r.classification,'reported_error');assert.equal(r.alertEligible,false)});
+test('success is reported success',()=>assert.equal(classify({...base,status:'success',finished_at:now},{now}).classification,'reported_success'));
+test('missing finish time holds',()=>assert.equal(classify({...base,status:'success'},{now}).reason,'invalid_completion_timestamp'));
+test('future start holds',()=>assert.equal(classify({...base,status:'running'},{now:'2026-11-17T11:00:00Z'}).reason,'invalid_time_or_threshold'));
+test('invalid threshold holds',()=>assert.equal(classify({...base,status:'running'},{now,maxRunningMs:0}).reason,'invalid_time_or_threshold'));
