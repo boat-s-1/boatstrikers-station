@@ -10,6 +10,7 @@ on:
       - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql'
       - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-incomplete-negative.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.candidate.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-preview*.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-results*.sql'
       - 'scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql'
@@ -60,6 +61,7 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-bootstrap-incomplete-negative.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.candidate.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview-functions.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview.assert.sql
           psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results-function.sql
