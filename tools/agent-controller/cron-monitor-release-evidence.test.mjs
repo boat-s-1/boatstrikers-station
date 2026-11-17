@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessCronMonitorReleaseEvidence as assess} from './cron-monitor-release-evidence.mjs';
+import {CRON_MONITOR_EVIDENCE_KEYS} from './cron-monitor-evidence-manifest.mjs';
+const reference='https://github.com/boat-s-1/boatstrikers-station/pull/299';
+const entry=(environment='isolated',status='verified')=>({reference,environment,status});
+test('default is hold and all evidence missing',()=>{const r=assess();assert.equal(r.decision,'hold');assert.equal(r.evidence_missing.length,10)});
+test('claimed atomic race without evidence is unsupported',()=>{const r=assess({claims:{atomicRacePassed:true}});assert.deepEqual(r.unsupported_claims,[{claim:'atomicRacePassed',missing_evidence:'parallel_race'}])});
+test('sequential uniqueness does not prove parallel race',()=>{const r=assess({claims:{atomicRacePassed:true},manifest:{evidence:{sequential_uniqueness:entry()}}});assert.equal(r.unsupported_claims.length,1)});
+test('offline evidence cannot support isolated race claim',()=>{const r=assess({claims:{atomicRacePassed:true},manifest:{evidence:{parallel_race:entry('offline')}}});assert.equal(r.unsupported_claims.length,1)});
+test('isolated verified evidence supports a claim but not production',()=>{const r=assess({claims:{atomicRacePassed:true},manifest:{evidence:{parallel_race:entry()}}});assert.equal(r.unsupported_claims.length,0);assert.equal(r.production_deployment_allowed,false)});
+test('failed evidence cannot support a claim',()=>{const r=assess({claims:{crashRecoveryPassed:true},manifest:{evidence:{crash_recovery:entry('isolated','failed')}}});assert.equal(r.unsupported_claims.length,1)});
+test('multiple unsupported claims reported',()=>{const r=assess({claims:{atomicRacePassed:true,receiptSandboxPassed:true}});assert.equal(r.unsupported_claims.length,2)});
+test('all evidence and all claims still HOLD',()=>{
+ const claims=Object.fromEntries(['isolatedProjectVerified','billingCeilingVerified','testWriteAuthorization','leastPrivilegeVerified','atomicRacePassed','crashRecoveryPassed','receiptSandboxPassed','queryLatencyMeasured','retentionApproved','rollbackRehearsed','productionChangeApproved'].map(k=>[k,true]));
+ const evidence=Object.fromEntries(CRON_MONITOR_EVIDENCE_KEYS.map(k=>[k,entry('independent')]));
+ const r=assess({claims,manifest:{evidence}});
+ assert.equal(r.unsupported_claims.length,0);assert.equal(r.decision,'hold');assert.equal(r.production_deployment_allowed,false);assert.equal(r.notification_delivery_allowed,false);assert.equal(r.independently_authenticated,false);
+});
+test('invalid claims rejected',()=>assert.throws(()=>assess({claims:{atomicRacePassed:'yes'}})));
+test('invalid manifest rejected',()=>assert.throws(()=>assess({manifest:{evidence:{parallel_race:{status:'verified',reference:'bad',environment:'isolated'}}}})));
