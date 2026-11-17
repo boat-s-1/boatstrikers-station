@@ -113,3 +113,41 @@ BEGIN
  END IF;
  RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts, unrelated updates, monitored replay, failure rollback, clean retry and conflict-safe replay';
 END $t$;
+
+-- Synthetic full-day fan-out: 20 courses x 12 races x six boats.
+-- The evaluator is deliberately stubbed, so this measures trigger call
+-- cardinality and rollback behavior, NOT production evaluator runtime.
+DO $load$
+DECLARE d date := (now() AT TIME ZONE 'Asia/Tokyo')::date;
+        before_calls bigint; after_calls bigint;
+        inserted bigint; started timestamptz := clock_timestamp();
+BEGIN
+ SELECT count(*) INTO before_calls FROM public.atomic_ichika_evaluation_calls;
+ INSERT INTO public.atomic_trigger_events(race_date,course_code,race_no)
+ SELECT d,c,r FROM generate_series(1,20) c CROSS JOIN generate_series(1,12) r
+ ON CONFLICT DO NOTHING;
+ INSERT INTO public.atomic_trigger_entries(race_date,course_code,race_no,boat_no)
+ SELECT d,c,r,b FROM generate_series(1,20) c
+ CROSS JOIN generate_series(1,12) r CROSS JOIN generate_series(1,6) b
+ ON CONFLICT DO NOTHING;
+ GET DIAGNOSTICS inserted = ROW_COUNT;
+ SELECT count(*) INTO after_calls FROM public.atomic_ichika_evaluation_calls;
+ IF inserted <> 1440 OR after_calls-before_calls <> 1440 THEN
+   RAISE EXCEPTION 'full-day insert trigger fan-out mismatch: inserted %, evaluations %',
+      inserted,after_calls-before_calls;
+ END IF;
+ RAISE NOTICE 'SYNTHETIC_240_RACE_TRIGGER_CALLS=%, stub_elapsed_ms=%',
+    after_calls-before_calls,
+    round(extract(epoch FROM clock_timestamp()-started)*1000,1);
+ -- Exact same input must be idempotent without a second evaluation wave.
+ INSERT INTO public.atomic_trigger_entries(race_date,course_code,race_no,boat_no)
+ SELECT d,c,r,b FROM generate_series(1,20) c
+ CROSS JOIN generate_series(1,12) r CROSS JOIN generate_series(1,6) b
+ ON CONFLICT DO NOTHING;
+ GET DIAGNOSTICS inserted = ROW_COUNT;
+ IF inserted <> 0 OR
+   (SELECT count(*) FROM public.atomic_ichika_evaluation_calls) <> after_calls THEN
+   RAISE EXCEPTION 'full-day replay caused inserts or trigger evaluation';
+ END IF;
+ RAISE NOTICE 'SYNTHETIC_240_RACE_CONFLICT_REPLAY_PASS';
+END $load$;
