@@ -23,3 +23,14 @@ test('expired, boundary, malformed, and absent expiry fail closed', () => {
   assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt:null},now),false);
   assert.equal(hasVerifiedPaidEntitlement(null,now),false);
 });
+
+test('ambiguous local-time or trailing-garbage expiry is denied', () => {
+  for (const expiresAt of [
+    '2026-12-17T12:00:00',
+    '2026-12-17T12:00:00+09:00',
+    '2026-12-17T12:00:00.000Zgarbage',
+    '2026-12-17',
+  ]) {
+    assert.equal(hasVerifiedPaidEntitlement({...valid,expiresAt},now),false);
+  }
+});
