@@ -49,3 +49,9 @@ test('missing reply policy defaults to disabled', () => {
   assert.equal(canReply({audience:'public'},'paid'),false);
   assert.equal(canReply({audience:'public',replyPolicy:'paid'},'paid'),true);
 });
+
+test('database reply_policy accepted; conflicting alias rejected', () => {
+  assert.equal(canReply({audience:'public',reply_policy:'paid'},'paid'),true);
+  assert.equal(canReply({audience:'public',reply_policy:'disabled'},'paid'),false);
+  assert.equal(canReply({audience:'public',reply_policy:'disabled',replyPolicy:'paid'},'paid'),false);
+});
