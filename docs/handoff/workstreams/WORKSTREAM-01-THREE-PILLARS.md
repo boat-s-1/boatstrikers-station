@@ -20,7 +20,7 @@ This workstream goal is a documented synthesis of the user's supplied first-chat
 - Homepage: 5 most recent publicly displayable official threads; each Ichika/Hatsune/Kiina page: 3 character-matching items.
 - Community homepage, character categories, live race category, thread URL, event page containing 12 race threads.
 - Official/admin-controlled thread creation/editing and moderation; eligible signed-in members can reply to official threads; initial release disallows member-to-member threading at database layer.
-- Visibility: public_all / public_post_members_replies / members_only. Server, DB, API, HTML, caching and Realtime must enforce membership/visibility, not only UI.
+- **Superseding approved design (2026-11-17):** `audience=public|members|paid`, `reply_policy=paid|disabled`, and separate `status`. Initial reply permission is active paid members only, including on public threads. Previous `visibility=public_all|public_post_members_replies|members_only` was provisional scaffold design and MUST NOT be deployed unchanged. Server, DB, API, HTML, caching, SEO and Realtime enforce this consistently. Source: `docs/community/official-post-visibility-contract-2026-11-17.md` at PR #300 head.
 - 12R generation idempotent, search/indexing safeguards, mobile usability, report/abuse controls, prior race/blog/member routes regression-free.
 - Existing LINE/Discord outbound messaging must not be disabled as part of early staged migration.
 
@@ -62,3 +62,15 @@ This workstream goal is a documented synthesis of the user's supplied first-chat
 - Audit cites PR #295/#296 blog, #297 DATA LAB, #298 cloud sync, #300 forum, #301 Cron, #303 HTTP workflow, plus TRINITY. These are **audit-reported snapshots**; re-fetch current GitHub status before treating as verified.
 - Open: clarify full original goal from available artifacts, exact paid membership/payment scope, distribution form, acceptance thresholds, and PR overlap; do not silently narrow scope to forum.
 - Audit reports an hourly isolation branch associated with PR #301 may still exist. This is **unverified current state**; check with Supabase before any delete/charge-related action. Never confuse it with the already deleted PR #300 test branch.
+
+## 2026-11-18 second supplied audit — comparison and scope control
+
+- Second chat supplied as user-identified "2つ目": https://chatgpt.com/c/6afc7abb-d820-83ee-a48e-b73804012123
+- User pasted `BoatStrikers開発 — 最終目標・引き継ぎ内容の統合確認書`. Its subject is **the same** platform charter and race/blog/community workstream, rather than evidence establishing a distinct independent goal. Register as another evidence source for WS-01 pending explicit chat-lineage verification; do not silently create a separate WS-02 from the ordinal "second".
+- Cross-audit convergence: no recorded formally approved reduction of approved platform scope; PR #300 is not complete site or platform; full chat-original equivalence remains unproven.
+- Material confirmed discrepancy: initial forum scaffold `visibility` taxonomy conflicts with later contract in `docs/community/official-post-visibility-contract-2026-11-17.md`. Latter says `audience=public|members|paid`, `reply_policy=paid|disabled`; paid members can reply, free members only read eligible content, and initial member-to-member threading remains disabled. The old scaffold requires migration before production.
+- Verified via connected GitHub at 2026-11-18: PR #300 head `bbed67b1e80c086e02c6c38a0efd9f9b84c57dff`, branch `codex/community-three-pillars-design-20261117`; later contract file fetched successfully. The second report's claimed inability to identify PR branch is not a remaining unknown.
+- Notifications: `docs/community/unified-notification-app-migration-plan-2026-11-17.md` confirms common BoatStrikers Auth identity, server-authorized notification event vs transport separation, inbox as source of truth, optional PWA Push and staged LINE/Discord coexistence. These are **design decisions**, not deployed implementations.
+- Reported PR #294/#295/#296/#297/#298/#299/#300, SEO #274 and cross-PR overlaps need independent current status verification before release; not completed by preserving this record.
+- Native iOS/Android release, exact payment scope and all acceptance thresholds remain unverified as v1.0 initial release commitments; preserve future-facing intent without asserting those are shipped or mandatory for initial milestone.
+- No production, database, deployment or merge modifications made for this audit. Documentation-only correction on existing PR #304 working branch.
