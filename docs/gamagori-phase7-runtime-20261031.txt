@@ -1,0 +1,38 @@
+## Runtime Logs
+
+**Project:** prj_iKWrqS29BRLCIWKHoDe1SFOTH8Y2
+**Deployment:** dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT
+**Time range:** 2026-10-30T16:35:05.211Z → 2026-10-30T16:50:05.211Z
+
+### 2026-10-30T16:49:31.626Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=jrhvs-1793378970079-d03ec9cec466 domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":1,"status":"skipped_existing","upstream_attempts":0},{"race":2,"status":"skipped_existing","upstream_attempts":0},{"race":3,"status":"skipped_existing","upstream_attempts":0}],"nextRace":4}
+
+### 2026-10-30T16:47:46.094Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=7cgzt-1793378864480-6c950de848e1 domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":1,"status":"skipped_existing","upstream_attempts":0},{"race":2,"status":"skipped_existing","upstream_attempts":0},{"race":3,"status":"skipped_existing","upstream_attempts":0}],"nextRace":4}
+
+### 2026-10-30T16:45:43.630Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=cvbpx-1793378740093-5414e57eee99 domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":3,"status":"saved","inserted":6,"upstream_attempts":1},{"race":4,"status":"saved","inserted":6,"upstream_attempts":1}],"nextRace":5}
+
+### 2026-10-30T16:44:55.442Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=tcxzp-1793378693196-404a93e3a8cd domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2026-10-31","results":[{"race":1,"status":"failed","reason":"invalid_chart","upstream_attempts":1}],"nextRace":2}
+
+### 2026-10-30T16:44:47.541Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=2cbpd-1793378686430-11700f9fbc7e domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":2,"status":"skipped_existing","upstream_attempts":0}],"nextRace":3}
+
+### 2026-10-30T16:43:59.810Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=hccq2-1793378637071-475e24d82bc7 domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":2,"status":"saved","inserted":6,"upstream_attempts":1}],"nextRace":3}
+
+### 2026-10-30T16:43:58.582Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=v99lz-1793378637071-8b12e00e7d6f domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","status":"collector_busy"}
+
+### 2026-10-30T16:43:24.463Z GET /api/cron/gamagori-chart-collect [info/function]
+dep=dpl_8Z7seShxFnEHfCxFzmKeNr9yxCwT branch=feature/gamagori-chart-collector request=sqq9m-1793378602591-392ecd0740bd domain=boatstrikers-station-n68uivh10-boat-s-1s-projects.vercel.app environment=preview region=cle1 runtime=nodejs24.x stream=stdout
+    gamagori_chart_collect {"date":"2025-08-09","results":[{"race":1,"status":"skipped_existing","upstream_attempts":0}],"nextRace":2}
+

@@ -1,0 +1,74 @@
+✔ three races max, serial spacing, six-row inserts (7.074997ms)
+✔ existing and partial races never fetched or written (0.917745ms)
+✔ no event never fetched (0.466524ms)
+✔ invalid chart never saved (7.949578ms)
+✔ temporary failure retried once (1.199501ms)
+✔ 403 and 429 stop entire batch without retry (3.12092ms)
+✔ 404 not retried; network retried once; oversized body rejected (12.822601ms)
+✔ Cron auth accepts either configured secret, rejects empty/wrong credentials without DB work (4.637759ms)
+✔ lease blocks concurrent work and releases only the matching owner (6.661034ms)
+✔ work error still releases; acquire error never starts work (1.253762ms)
+✔ JST day boundary and official held/non-meeting fixtures; malformed calendars fail closed (4.052987ms)
+✔ one invocation selects max 3, shared deadline and durable claims before fetch (2.547445ms)
+✔ official non-meeting and unknown calendar never fetch charts even with DB events (0.591413ms)
+✔ unpublished/future/unknown-deadline/cancellation and retry backoff are excluded from due set (0.257869ms)
+✔ invalid chart stays retryable and never prevents later ready races from progressing (0.910214ms)
+✔ save followed by checkpoint crash resumes from saved chart without overwriting (0.924766ms)
+✔ 403/429 halt the batch and future invocations observe cooldown (3.868479ms)
+✔ calendar held but event sync missing is distinct from non-meeting (0.216156ms)
+✔ past-day backfill can proceed when historical deadline time is missing (8.763229ms)
+(node:39) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ parser contract: full chart, up/down arrows, and invalid input (5.591579ms)
+✔ official HTML: 2025-08-09 1R matches six stored ratings (1.035443ms)
+✔ official HTML: arrows 2026-10-29 5R (0.644153ms)
+✔ reject missing, duplicate boats, missing chart, extra chart and malformed grid (6.478332ms)
+✔ filenames in text/comments do not count as boats; conflicting image alt is rejected (1.310908ms)
+(node:40) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP 503 retries once and parses official fixture before six-row insert (1525.834044ms)
+✔ real HTTP default 8s timeout aborts twice and writes zero rows (16005.069294ms)
+(node:41) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/app/lib/trinityShadowCoverage.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ counts launch period separately and requires both models with matching contemporaneous input (2.873316ms)
+(node:76) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/app/lib/discordAlertDelivery.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 締切前の当日分だけ送る。締切後・別の日は送らない。締切が無いものは検出15分以内だけ (20.818624ms)
+✔ 停止中に溜まった過去の未送信114件は、1件も送らない (16.629246ms)
+✔ 1回目は送って記録する。2回目以降は送らない (16.610715ms)
+✔ 同時に5本動いても1回だけ送る（初回・再送の両方） (45.026298ms)
+✔ 失敗は最大3回まで。それ以降は送らない (3.19361ms)
+✔ 変更前の形式の失敗は1回失敗として扱い、残り2回まで再送する (3.096073ms)
+✔ 処理中の印は期限内なら他の実行は触らない。期限切れは「結果不明」として二度と送らない (0.888982ms)
+✔ 送信済みの行は、失敗の記録で上書きしない（処理中の印が一致する場合だけ更新） (0.828451ms)
+✔ discord-alerts route：送信前に判定と配信の権利の取得を行い、当日分だけを読む。キャラ別通知先とロールを維持する (1.079609ms)
+✔ 送信の失敗の分類：429・5xx は再送、4xx は恒久的な拒否、応答なし（通信断・タイムアウト）は結果不明 (0.580436ms)
+✔ 応答が無い失敗（届いた可能性がある）は再送しない (1.153331ms)
+✔ 恒久的な拒否（403 など）は1回で打ち切る (0.517481ms)
+✔ 送信は成功したが記録に失敗した場合：その後は期限内も期限後も再送しない（重複より取りこぼしを選ぶ） (1.03362ms)
+✔ 権利の取得で DB エラー：送らず、例外も投げず、回数にも数えない（次の実行で取り直す） (0.862512ms)
+✔ 判定後、送る直前に締切を過ぎていたら送らず、以後も送らない (1.14623ms)
+✔ 先読み：送信済み・確定・結果不明・上限到達だけを「完了」とし、取得に失敗したら空集合 (0.98729ms)
+✔ discord-alerts route：送信直前の再判定・時間の予算・Webhook のタイムアウト (0.29828ms)
+✔ 管理者向けデータ欠損通知：Bot のメッセージで管理者チャンネルへ送る。明示された管理者チャンネルが無ければ送らない (0.366513ms)
+✔ 管理者向けデータ欠損通知：翌日に前日の日付で作られるため、前日分と当日分だけを読む（それより古いものは読まない） (0.170577ms)
+✔ DiscordがメッセージIDを返さない場合は成功扱いせず再送もしない (2.202775ms)
+✔ 全体通知は送信対象から除外しキャラ別Webhook送信は維持する (0.585854ms)
+✔ 一果の生成買い目は1号艇1着固定で、1号艇が最上位でない場合は見送る (7.609563ms)
+✔ 公式買い目凍結にも一果1アタマのDBガードがある (4.972996ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17822.631552

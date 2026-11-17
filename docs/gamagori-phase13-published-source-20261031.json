@@ -1,0 +1,177 @@
+{
+  "mode": "ARCHIVED_READ_ONLY_CAPTURE_TIMESTAMP_REPLAY",
+  "date": "2026-10-31",
+  "race": 1,
+  "captured_at": "2026-10-31T06:28:34.162Z",
+  "sources": [
+    {
+      "kind": "program",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/syusso/syusso202610310701.htm",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:27:58 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:27:59.576947+00:00",
+      "html_sha256": "f4e4adef15bba92a4a626943f2a49be970c68867207d10ee27589ee02eb5e4e9",
+      "bytes": 553451
+    },
+    {
+      "kind": "index",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2026103107.htm",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:28:06 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:28:06.143916+00:00",
+      "html_sha256": "1c478297b38c8be95a559a623e9a8642bba9b6ebea7d185289c030d3083ca10a",
+      "bytes": 164831
+    },
+    {
+      "kind": "choku",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610310701.htm",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:28:12 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:28:12.815418+00:00",
+      "html_sha256": "677408f7a50f9d4c006e5e01d85c35d9810ed04ff23e22f127c888f8adfebba5",
+      "bytes": 92840
+    },
+    {
+      "kind": "chart",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202610310701.htm",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:28:19 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:28:19.451655+00:00",
+      "html_sha256": "c83c165ec65e2f0cd5a5eb94b3092a36deb2df9eb5c29f61a01e2cd58bd51238",
+      "bytes": 269926
+    },
+    {
+      "kind": "openapi",
+      "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:28:26 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:28:26.259741+00:00",
+      "html_sha256": "91eea712b01096103df2859814132429bb225ad477bb7a2a985a860144ac3900",
+      "bytes": 1425157
+    },
+    {
+      "kind": "sale",
+      "url": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261031",
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 06:28:34 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T06:28:34.162088+00:00",
+      "html_sha256": "6affd48fcae89621c0b4dd659fa9c8338c11fe9654c15819677c34ece4996214",
+      "bytes": 58265
+    }
+  ],
+  "content": {
+    "validation_result": "verified_content",
+    "reason": "content_verified_sale_unknown",
+    "boats": [
+      {
+        "boat_no": 1,
+        "registration": 5321,
+        "exhibition_time": 6.82,
+        "course": 1
+      },
+      {
+        "boat_no": 2,
+        "registration": 3747,
+        "exhibition_time": 6.83,
+        "course": 2
+      },
+      {
+        "boat_no": 3,
+        "registration": 3905,
+        "exhibition_time": 6.86,
+        "course": 3
+      },
+      {
+        "boat_no": 4,
+        "registration": 3696,
+        "exhibition_time": 6.92,
+        "course": 4
+      },
+      {
+        "boat_no": 5,
+        "registration": 4094,
+        "exhibition_time": 6.93,
+        "course": 5
+      },
+      {
+        "boat_no": 6,
+        "registration": 3303,
+        "exhibition_time": 6.93,
+        "course": 6
+      }
+    ]
+  },
+  "sale": {
+    "state": "unknown",
+    "reason": "target_sale_not_explicit",
+    "collection_permitted": false
+  },
+  "chart": {
+    "state": "six_way_identity_matched",
+    "boats": [
+      {
+        "boat_no": 1,
+        "registration": 5321,
+        "exhibition_time": 6.82,
+        "course": 1,
+        "slit_rating": 4,
+        "turn_rating": 5,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 2,
+        "registration": 3747,
+        "exhibition_time": 6.83,
+        "course": 2,
+        "slit_rating": 5,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 3,
+        "registration": 3905,
+        "exhibition_time": 6.86,
+        "course": 3,
+        "slit_rating": 3,
+        "turn_rating": 4,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 4,
+        "registration": 3696,
+        "exhibition_time": 6.92,
+        "course": 4,
+        "slit_rating": 4,
+        "turn_rating": 4,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 5,
+        "registration": 4094,
+        "exhibition_time": 6.93,
+        "course": 5,
+        "slit_rating": 3,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      },
+      {
+        "boat_no": 6,
+        "registration": 3303,
+        "exhibition_time": 6.93,
+        "course": 6,
+        "slit_rating": 4,
+        "turn_rating": 3,
+        "arrow_direction": "none"
+      }
+    ]
+  },
+  "chart_saves": 0,
+  "database_writes": 0,
+  "collection_permitted": false
+}

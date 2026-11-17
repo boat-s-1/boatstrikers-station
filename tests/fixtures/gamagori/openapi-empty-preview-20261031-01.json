@@ -1,0 +1,185 @@
+{
+  "provenance": {
+    "kind": "observed_raw_payload_subset",
+    "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+    "headers": {
+      "Date": "Sat, 31 Oct 2026 04:38:00 GMT",
+      "Last-Modified": "Sat, 31 Oct 2026 04:33:34 GMT",
+      "Age": "34",
+      "ETag": "\"6ae56f9e-1566e2\""
+    },
+    "source_sha256": "56a990114683629fe99a46725ef72f2c928a128598d81a31eb33ef50e28efab6"
+  },
+  "race": {
+    "date": "2026-10-31",
+    "stadium_number": 7,
+    "race_number": 1,
+    "racers": {
+      "1": {
+        "entry_number": 1,
+        "number": 5321
+      },
+      "2": {
+        "entry_number": 2,
+        "number": 3747
+      },
+      "3": {
+        "entry_number": 3,
+        "number": 3905
+      },
+      "4": {
+        "entry_number": 4,
+        "number": 3696
+      },
+      "5": {
+        "entry_number": 5,
+        "number": 4094
+      },
+      "6": {
+        "entry_number": 6,
+        "number": 3303
+      }
+    },
+    "preview": {
+      "date": "2026-10-31",
+      "stadium_number": 7,
+      "race_number": 1,
+      "wind_speed_source": null,
+      "wind_speed": null,
+      "wind_direction_number_source": null,
+      "wind_direction_number": null,
+      "wave_height_source": null,
+      "wave_height": null,
+      "weather_number_source": null,
+      "weather_number": null,
+      "air_temperature_source": null,
+      "air_temperature": null,
+      "water_temperature_source": null,
+      "water_temperature": null,
+      "racers": {
+        "1": {
+          "entry_number": 1,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        },
+        "2": {
+          "entry_number": 2,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        },
+        "3": {
+          "entry_number": 3,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        },
+        "4": {
+          "entry_number": 4,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        },
+        "5": {
+          "entry_number": 5,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        },
+        "6": {
+          "entry_number": 6,
+          "course_number": null,
+          "start_timing_source": null,
+          "start_timing": null,
+          "weight_source": null,
+          "weight": null,
+          "weight_adjustment_source": null,
+          "weight_adjustment": null,
+          "exhibition_time_source": null,
+          "exhibition_time": null,
+          "tilt_adjustment_source": null,
+          "tilt_adjustment": null,
+          "propeller": null,
+          "parts": []
+        }
+      }
+    }
+  },
+  "db_entries": [
+    {
+      "boat_no": 1,
+      "registration": "05321"
+    },
+    {
+      "boat_no": 2,
+      "registration": "03747"
+    },
+    {
+      "boat_no": 3,
+      "registration": "03905"
+    },
+    {
+      "boat_no": 4,
+      "registration": "03696"
+    },
+    {
+      "boat_no": 5,
+      "registration": "04094"
+    },
+    {
+      "boat_no": 6,
+      "registration": "03303"
+    }
+  ]
+}

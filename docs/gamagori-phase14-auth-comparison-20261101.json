@@ -1,0 +1,61 @@
+{
+  "baseline_commit": "e9b1d034811d674d4adc07d7f00b57b450b3b3f5",
+  "verdict": "HOLD",
+  "read_only": true,
+  "changes": {
+    "legacy_revoked": false,
+    "previous_hs256_retired": false,
+    "key_created": false,
+    "edge_function_invoked": false,
+    "edge_function_changed": false,
+    "production_changed": false
+  },
+  "negative_control": {
+    "method": "GET",
+    "origin": "https://rdqnqvafsponsoetnezv.supabase.co",
+    "path": "/auth/v1/settings",
+    "credential": "none",
+    "status": 401
+  },
+  "credential_comparison": {
+    "project_ref": "rdqnqvafsponsoetnezv",
+    "origin": "https://rdqnqvafsponsoetnezv.supabase.co",
+    "path": "/auth/v1/settings",
+    "method": "GET",
+    "phase": "baseline",
+    "checked_at": "2026-11-01T03:09:08.697170+00:00",
+    "results": [
+      {
+        "kind": "legacy_anon",
+        "status": 200,
+        "outcome": "accepted",
+        "credential_fingerprint": "799ceda00ec41538497f732a0701dae45df5266471663cd1b108e5c1c8070935"
+      },
+      {
+        "kind": "legacy_service_role",
+        "status": null,
+        "outcome": "not_tested"
+      },
+      {
+        "kind": "modern_secret",
+        "status": null,
+        "outcome": "not_tested"
+      }
+    ],
+    "baseline_complete": false,
+    "api_comparison": "HOLD",
+    "revocation_verified": false,
+    "scope_note": "API-key gate only; signing-key revocation, Edge entry auth and production readiness are separate."
+  },
+  "security_fixture_tests": {
+    "passed": 8,
+    "failed": 0,
+    "live_credentials": false
+  },
+  "limitations": [
+    "Legacy service_role and modern Secret were not retrieved or used: no supported secret-preserving browser-to-HTTP-client transfer path.",
+    "Supabase connector exposes publishable keys only, not service_role or modern Secret.",
+    "Management browser has no WebMCP tools for this request; browser-context secret-key HTTP is not a substitute for server-side validation.",
+    "Auth settings validates API-key gate only; previous signing-key revocation and Edge authorization are separate."
+  ]
+}

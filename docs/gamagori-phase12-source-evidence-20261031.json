@@ -1,0 +1,176 @@
+{
+  "measurement": "read-only workspace proxy; not Vercel; classification replayed at captured timestamp",
+  "sale_source": {
+    "url": "https://www.boatrace.jp/owpc/pc/race/index?hd=20261031",
+    "status": 200,
+    "bytes": 58623,
+    "sha256": "bf5040dc1237d248c3021cbc99676529058f0bd49eb81c22b60562d845ca1e28",
+    "received_at": "2026-10-31T05:18:21.892780+00:00",
+    "date": "Sat, 31 Oct 2026 05:18:21 GMT",
+    "age": null,
+    "last-modified": null
+  },
+  "sale": {
+    "state": "sale_open_observed",
+    "race_from": 1,
+    "page_updated_at": "2026-10-31T05:18:00.000Z",
+    "checked_race": 1,
+    "collection_permitted": false,
+    "limitation": "venue_sale_display_is_not_six_boat_or_no_withdrawal_proof"
+  },
+  "chart": {
+    "state": "unpublished_or_invalid",
+    "boats": 0,
+    "source_manifest": {
+      "name": "chart",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/recomend/recomend202610310701.htm",
+      "fetched_at": "2026-10-31T05:11:15.147738+00:00",
+      "status": 200,
+      "bytes": 233266,
+      "sha256": "6b1ce659c29d2d5514a242d0436fa8291133260f502f1b295e7cf914dc74b2d7",
+      "date": null,
+      "age": null,
+      "last_modified": null
+    },
+    "http_date_note": "Initial research probe did not capture header case correctly; no freshness proof asserted for this sample."
+  },
+  "official_choku": {
+    "state": "no_exhibition_values",
+    "exhibition_time_count": 0,
+    "entries": [
+      {
+        "boat_no": 1,
+        "registration": "5321",
+        "exhibition_time": null
+      },
+      {
+        "boat_no": 2,
+        "registration": "3747",
+        "exhibition_time": null
+      },
+      {
+        "boat_no": 3,
+        "registration": "3905",
+        "exhibition_time": null
+      },
+      {
+        "boat_no": 4,
+        "registration": "3696",
+        "exhibition_time": null
+      },
+      {
+        "boat_no": 5,
+        "registration": "4094",
+        "exhibition_time": null
+      },
+      {
+        "boat_no": 6,
+        "registration": "3303",
+        "exhibition_time": null
+      }
+    ],
+    "collection_permitted": false
+  },
+  "upstream": {
+    "state": "empty_preview_shell",
+    "preview_slots": 6,
+    "sync_input_rows": 0,
+    "complete_preview_values": 0,
+    "per_race_updated_at": null,
+    "collection_permitted": false
+  },
+  "source_manifests": [
+    {
+      "kind": "program",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/syusso/syusso202610310701.htm",
+      "bytes": 553451,
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 05:17:57 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T05:17:58.101978+00:00",
+      "html_sha256": "a58063d1d3c387ba353aa8d063107c76d2d1aaa91b5f1e27bb47bb902aacc920"
+    },
+    {
+      "kind": "index",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/index/index2026103107.htm",
+      "bytes": 164831,
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 05:18:05 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T05:18:05.291169+00:00",
+      "html_sha256": "2f478993daf48d52757d271348036894ebb54adde782ec6f03c86755f7672e73"
+    },
+    {
+      "kind": "choku",
+      "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/choku/choku202610310701.htm",
+      "bytes": 87738,
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 05:18:13 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T05:18:13.638883+00:00",
+      "html_sha256": "8e3e7417bb3fc2ffd4e16ae47811b7abee10d7ab91104b7c2fd0e53de49df873"
+    },
+    {
+      "kind": "openapi",
+      "url": "https://boatraceopenapi.github.io/api/v1/today.json",
+      "bytes": 1412454,
+      "http_status": 200,
+      "http_date": "Sat, 31 Oct 2026 05:18:19 GMT",
+      "age": 0,
+      "received_at": "2026-10-31T05:18:19.819310+00:00",
+      "html_sha256": "99b26716a03d6058358ce5b720101ae5e6aaa840fe633d2a68bcf5c93feb8e62"
+    }
+  ],
+  "db_measured_at": "2026-10-31 05:18:32.374438+00",
+  "db_preview_boats": [
+    {
+      "race": 1,
+      "preview_boats": 0
+    },
+    {
+      "race": 2,
+      "preview_boats": 0
+    },
+    {
+      "race": 3,
+      "preview_boats": 0
+    },
+    {
+      "race": 4,
+      "preview_boats": 0
+    },
+    {
+      "race": 5,
+      "preview_boats": 0
+    },
+    {
+      "race": 6,
+      "preview_boats": 0
+    },
+    {
+      "race": 7,
+      "preview_boats": 0
+    },
+    {
+      "race": 8,
+      "preview_boats": 0
+    },
+    {
+      "race": 9,
+      "preview_boats": 0
+    },
+    {
+      "race": 10,
+      "preview_boats": 0
+    },
+    {
+      "race": 11,
+      "preview_boats": 0
+    },
+    {
+      "race": 12,
+      "preview_boats": 0
+    }
+  ],
+  "production_writes": 0
+}

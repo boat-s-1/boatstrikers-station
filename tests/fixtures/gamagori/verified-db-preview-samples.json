@@ -1,0 +1,137 @@
+{
+  "provenance": "Actual read-only Supabase rows, cross-checked against dated official choku/result pages; not raw historical OpenAPI JSON",
+  "samples": [
+    {
+      "entries": [
+        {
+          "course": 1,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 1,
+          "preview_at": "2026-10-07T08:42:00.645163+00:00",
+          "result_code": "01",
+          "result_note": "【返還艇あり】",
+          "registration": "03779",
+          "exhibition_time": 6.64
+        },
+        {
+          "course": 2,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 2,
+          "preview_at": "2026-10-07T08:42:00.645163+00:00",
+          "result_code": "04",
+          "result_note": "【返還艇あり】",
+          "registration": "03664",
+          "exhibition_time": 6.74
+        },
+        {
+          "course": 3,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 3,
+          "preview_at": "2026-10-07T08:42:00.645163+00:00",
+          "result_code": "03",
+          "result_note": "【返還艇あり】",
+          "registration": "04134",
+          "exhibition_time": 6.71
+        },
+        {
+          "course": null,
+          "source": null,
+          "boat_no": 4,
+          "preview_at": null,
+          "result_code": "K0",
+          "result_note": "【返還艇あり】",
+          "registration": "04979",
+          "exhibition_time": null
+        },
+        {
+          "course": 4,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 5,
+          "preview_at": "2026-10-07T08:42:00.645163+00:00",
+          "result_code": "02",
+          "result_note": "【返還艇あり】",
+          "registration": "05206",
+          "exhibition_time": 6.63
+        },
+        {
+          "course": 5,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 6,
+          "preview_at": "2026-10-07T08:42:00.645163+00:00",
+          "result_code": "05",
+          "result_note": "【返還艇あり】",
+          "registration": "05467",
+          "exhibition_time": 6.71
+        }
+      ],
+      "race_no": 7,
+      "race_date": "2026-10-07"
+    },
+    {
+      "entries": [
+        {
+          "course": 1,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 1,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "01",
+          "result_note": null,
+          "registration": "05338",
+          "exhibition_time": 6.94
+        },
+        {
+          "course": 2,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 2,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "02",
+          "result_note": null,
+          "registration": "05382",
+          "exhibition_time": 6.96
+        },
+        {
+          "course": 3,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 3,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "05",
+          "result_note": null,
+          "registration": "03957",
+          "exhibition_time": 7.04
+        },
+        {
+          "course": 4,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 4,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "04",
+          "result_note": null,
+          "registration": "05371",
+          "exhibition_time": 6.97
+        },
+        {
+          "course": 5,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 5,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "03",
+          "result_note": null,
+          "registration": "03905",
+          "exhibition_time": 7.02
+        },
+        {
+          "course": 6,
+          "source": "boatraceopenapi/v1",
+          "boat_no": 6,
+          "preview_at": "2026-10-30T06:15:00.264602+00:00",
+          "result_code": "06",
+          "result_note": null,
+          "registration": "04327",
+          "exhibition_time": 6.92
+        }
+      ],
+      "race_no": 1,
+      "race_date": "2026-10-30"
+    }
+  ]
+}

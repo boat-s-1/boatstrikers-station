@@ -1,0 +1,175 @@
+{
+  "baseline_commit": "ecb74bd014482a758a95d15567574b88b2d29e44",
+  "verdict": "HOLD",
+  "key_change_executed": false,
+  "previous_hs256_retired": false,
+  "edge_function_invoked": false,
+  "edge_function_changed": false,
+  "log_window": {
+    "start": "2026-10-31T06:00:00Z",
+    "end": "2026-11-01T02:01:36.950Z"
+  },
+  "isolated": {
+    "edge_records": 11,
+    "hs256_records": 3,
+    "hs256_role": "supabase_admin",
+    "hs256_path": "/admin/v1/network-bans/retrieve",
+    "service_role_or_anon_edge_records": 0,
+    "function_log_sources_present": false,
+    "auth_users": 0,
+    "auth_sessions": 0,
+    "refresh_tokens": 0,
+    "storage_buckets": 0,
+    "storage_objects": 0,
+    "vault_secrets": 0,
+    "cron_catalog": false,
+    "hooks": 0,
+    "http_webhook_triggers": 0,
+    "charts": 0,
+    "runtime_secret_bindings_verified": false,
+    "legacy_anon_disabled": false
+  },
+  "functions": [
+    {
+      "slug": "collect-boatstrikers-news",
+      "version": 13,
+      "verify_jwt": true,
+      "bundle_sha256": "3754d0d199bab8ac757c07427836678ee481c5ffb3650026bc088cc16c94bf3e"
+    },
+    {
+      "slug": "collect-boatstrikers-media",
+      "version": 2,
+      "verify_jwt": true,
+      "bundle_sha256": "9d7d1acfd18f974e3f9eeb8895ca164e9335591e8fc7d198b6db5d220473623b"
+    }
+  ],
+  "production": {
+    "cron_jobs": 24,
+    "cron_jobs_with_literal_isolated_ref": 0,
+    "news_edge_records": 3,
+    "media_edge_records": 3,
+    "caller_role": "anon",
+    "algorithm": "HS256",
+    "races": 198,
+    "boats": 1188,
+    "duplicates": 0,
+    "incomplete": 0
+  },
+  "repository": {
+    "recursive_tree_entries": 2254,
+    "truncated": false,
+    "additional_files": [
+      {
+        "path": ".github/workflows/build-course-card-jpegs.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/discord-pr289-checks.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        ],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/hatsune-news-daily.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [
+          "CRON_SECRET"
+        ],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/phase1-supabase-readonly-check.yml",
+        "isolated_ref": false,
+        "production_ref": true,
+        "edge_slugs": [],
+        "envNames": [
+          "SUPABASE_ACCESS_TOKEN"
+        ],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/racer-profile-dry-run.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/today-birthday-build-check.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        ],
+        "scheduleCount": 0
+      },
+      {
+        "path": ".github/workflows/trinity-official-previous-day.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [
+          "CRON_SECRET"
+        ],
+        "scheduleCount": 2
+      },
+      {
+        "path": ".github/workflows/view-security-check.yml",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [],
+        "scheduleCount": 0
+      },
+      {
+        "path": "lib/newsCandidateAutoPublisher.js",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "SUPABASE_URL",
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ],
+        "scheduleCount": 0
+      },
+      {
+        "path": "supabase/migrations/20260829_hatsune_news_supabase_cron.sql",
+        "isolated_ref": false,
+        "production_ref": false,
+        "edge_slugs": [],
+        "envNames": [],
+        "scheduleCount": 0
+      }
+    ]
+  },
+  "vercel": {
+    "env_count": 75,
+    "temporary_variables": 0,
+    "metadata_unchanged_during_audit": true,
+    "old_preview_get_status": 404,
+    "protection_enabled": true
+  },
+  "pr_draft": true,
+  "unverified": [
+    "all external callers",
+    "runtime secret binding and validity",
+    "current previous HS256 state",
+    "revocation and post-revocation behavior"
+  ],
+  "new_test_pass_count": null
+}

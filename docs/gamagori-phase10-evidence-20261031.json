@@ -1,0 +1,1038 @@
+{
+  "verified_at": "2026-10-31 12:56:23 JST",
+  "code_commit": "1004d0a47397b567a11af94e4cc6511de3a4e029",
+  "tests": {
+    "pass": 69,
+    "fail": 0,
+    "skipped": 0
+  },
+  "actual_db_snapshot": {
+    "now": "2026-10-31 03:53:07.269068+00",
+    "evidence": {
+      "date": "2026-10-31",
+      "races": [
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05321",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03747",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03905",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03696",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04094",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03303",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 1,
+          "deadline": "15:21:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03550",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04411",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04857",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05382",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04417",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04518",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 2,
+          "deadline": "15:48:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03463",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03854",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04327",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04700",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03957",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04504",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 3,
+          "deadline": "16:16:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04424",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04677",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04302",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04813",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04336",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05371",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 4,
+          "deadline": "16:43:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04656",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04094",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04148",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04271",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05084",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05294",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 5,
+          "deadline": "17:10:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04743",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05382",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04430",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04422",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05421",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03960",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 6,
+          "deadline": "17:37:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04538",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03303",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05289",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04228",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04327",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05449",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 7,
+          "deadline": "18:04:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04411",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05338",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04106",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04757",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03463",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03696",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 8,
+          "deadline": "18:33:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04504",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05084",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04700",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05321",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04302",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04857",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 9,
+          "deadline": "19:04:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04518",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04743",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04677",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04656",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03854",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03747",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 10,
+          "deadline": "19:36:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03960",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03550",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04228",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04148",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04424",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04538",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 11,
+          "deadline": "20:07:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        },
+        {
+          "boats": 6,
+          "cancel": null,
+          "status": "scheduled",
+          "entries": [
+            {
+              "course": null,
+              "boat_no": 1,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04757",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 2,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04813",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 3,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03957",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 4,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "03905",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 5,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "05289",
+              "preview_source": null,
+              "exhibition_time": null
+            },
+            {
+              "course": null,
+              "boat_no": 6,
+              "preview_at": null,
+              "result_code": null,
+              "result_note": null,
+              "registration": "04430",
+              "preview_source": null,
+              "exhibition_time": null
+            }
+          ],
+          "program": true,
+          "race_no": 12,
+          "deadline": "20:38:00",
+          "finished": null,
+          "preview_at": "2026-10-31T03:51:00.259023+00:00",
+          "preview_boats": 0,
+          "entry_preview_at": null
+        }
+      ],
+      "live_sync": "2026-10-31T03:51:00.259023+00:00"
+    },
+    "totals": {
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238"
+    },
+    "partial": 0,
+    "duplicates": 0
+  },
+  "final_totals": [
+    {
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238"
+    }
+  ],
+  "rpc_privileges": [
+    {
+      "prosecdef": false,
+      "anon_exec": false,
+      "authenticated_exec": false,
+      "service_exec": true
+    }
+  ],
+  "table_permissions": [
+    {
+      "relname": "bsc_gamagori_chart_ratings",
+      "relrowsecurity": true,
+      "anon_select": false,
+      "auth_select": false,
+      "service_select": true
+    },
+    {
+      "relname": "bsc_gamagori_collection_days",
+      "relrowsecurity": true,
+      "anon_select": false,
+      "auth_select": false,
+      "service_select": true
+    },
+    {
+      "relname": "bsc_gamagori_collection_runs",
+      "relrowsecurity": true,
+      "anon_select": false,
+      "auth_select": false,
+      "service_select": true
+    },
+    {
+      "relname": "bsc_gamagori_collection_tasks",
+      "relrowsecurity": true,
+      "anon_select": false,
+      "auth_select": false,
+      "service_select": true
+    },
+    {
+      "relname": "bsc_gamagori_collector_lease",
+      "relrowsecurity": true,
+      "anon_select": false,
+      "auth_select": false,
+      "service_select": true
+    }
+  ],
+  "migration": [
+    {
+      "version": "20261031034601",
+      "name": "gamagori_meeting_evidence_active_roster"
+    }
+  ],
+  "local_production_module_with_actual_db": {
+    "execution": "local production module + actual Supabase snapshot; no database writes",
+    "at": "2026-10-31 03:53:07.269068+00",
+    "proof": {
+      "status": "unknown"
+    },
+    "outcome": "waiting_fresh_evidence",
+    "source": "db_safety_gate",
+    "safety_reason": "fresh_six_boat_evidence_required",
+    "charts": 0,
+    "calendars": 0,
+    "program": {
+      "source": "gamagori_official_program",
+      "html_sha256": "785039f414bfd70e7814c3b6c833ea71bbc5e7d76290d33e80cf33610bd13b50"
+    },
+    "status": "program_status_unknown",
+    "totals": {
+      "boats": 1188,
+      "races": 198,
+      "digest": "c22b73061091abe02167d6b0f22ae238"
+    },
+    "partial": 0,
+    "duplicates": 0
+  },
+  "alternative_path_proxy_measurements": [
+    {
+      "path": "/owpc/pc/race/index?hd=20261031",
+      "via_environment_proxy": true,
+      "exit": 0,
+      "status_dns_connect_tls_ttfb": "200 0.000034 0.000889 5.887090 7.309510",
+      "timeout": false
+    },
+    {
+      "path": "/owsp/sp/race/index?hd=20261031",
+      "via_environment_proxy": true,
+      "exit": 0,
+      "status_dns_connect_tls_ttfb": "200 0.000038 0.000227 5.918684 7.220292",
+      "timeout": false
+    }
+  ],
+  "official_status": {
+    "url": "https://www.gamagori-kyotei.com/asp/gamagori/sp/kyogi/kyogihtml/js/ticker07.js",
+    "http_status": 200,
+    "body_bytes": 0,
+    "decision": "program_status_unknown; absence is not negative proof"
+  },
+  "preview_build": {
+    "id": "dpl_8AZBfeYDDJ3Fv8VHhv42h3Kh6512",
+    "state": "READY",
+    "sha": "1004d0a47397b567a11af94e4cc6511de3a4e029"
+  },
+  "preview_authenticated_execution": {
+    "status": "not_executed",
+    "reason": "New PHASE10 protection-bypass issuance rejected by automatic approval review; no key created and no workaround used."
+  },
+  "vercel_plan": {
+    "verified_by": "Vercel get_git_deployment_context",
+    "plan": "pro",
+    "existing_crons": 20,
+    "limit": 100,
+    "minimum_interval": "1 minute",
+    "proposal": "*/5 5-13 * * *",
+    "proposed_invocations_daily": 108,
+    "production_cron_registered": false
+  },
+  "verdict": "HOLD",
+  "current_day_calendar_cache": "not used for either authorization or veto"
+}

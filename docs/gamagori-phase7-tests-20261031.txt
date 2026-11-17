@@ -1,0 +1,31 @@
+✔ three races max, serial spacing, six-row inserts (3.977382ms)
+✔ existing and partial races never fetched or written (0.354495ms)
+✔ no event never fetched (0.142145ms)
+✔ invalid chart never saved (1.097746ms)
+✔ temporary failure retried once (0.756301ms)
+✔ 403 and 429 stop entire batch without retry (0.562269ms)
+✔ 404 not retried; network retried once; oversized body rejected (2.170676ms)
+✔ lease blocks concurrent work and releases only the matching owner (3.436917ms)
+✔ work error still releases; acquire error never starts work (0.848461ms)
+(node:15) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ parser contract: full chart, up/down arrows, and invalid input (2.877603ms)
+✔ official HTML: 2025-08-09 1R matches six stored ratings (0.501818ms)
+✔ official HTML: arrows 2026-10-29 5R (0.31842ms)
+✔ reject missing, duplicate boats, missing chart, extra chart and malformed grid (1.545773ms)
+(node:16) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///workspace/scratch/2d69aedf8ee5/phase7/lib/gamagori-chart-parser.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /workspace/scratch/2d69aedf8ee5/phase7/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP 503 retries once and parses official fixture before six-row insert (1514.48788ms)
+✔ real HTTP default 8s timeout aborts twice and writes zero rows (16005.769312ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17674.118154
