@@ -1,3 +1,4 @@
+import CommunityLatest from "./components/CommunityLatest";
 import Image from "next/image";
 import Parser from "rss-parser";
 import { unstable_cache } from "next/cache";
@@ -534,6 +535,8 @@ export default async function Home() {
     </div>
   </div>
 </section>
+
+<CommunityLatest />
 
 {/* ========================================
     通常フッターサイトマップ
