@@ -18,7 +18,8 @@ CREATE TABLE public.bs_race_entries (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  race_date date NOT NULL,course_code smallint NOT NULL,race_no smallint NOT NULL,
  boat_no smallint NOT NULL,racer_registration_no text,official_exhibition_time numeric,exhibition_time numeric,
- actual_start_timing numeric,actual_st numeric,
+ actual_start_timing numeric,actual_st numeric,arrival_order integer,
+ finish_place text,actual_course integer,result_note text,
  UNIQUE(race_date,course_code,race_no,boat_no));
 CREATE TABLE public.bs_race_data_quality_alerts (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
