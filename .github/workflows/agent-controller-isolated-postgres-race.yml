@@ -11,6 +11,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-lifecycle-ci.sh'
       - 'tools/agent-controller/isolated-postgres-transition-ci.sh'
       - 'tools/agent-controller/isolated-node-db-adapter-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-receipt-guard-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -66,3 +67,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-transition-ci.sh
       - name: Exercise Node worker to disposable PostgreSQL integration
         run: node tools/agent-controller/isolated-node-db-adapter-ci.mjs
+      - name: Enforce receipt requirement at database transition boundary
+        run: bash tools/agent-controller/isolated-postgres-receipt-guard-ci.sh
