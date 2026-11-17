@@ -29,3 +29,18 @@ test('handler accepts production-compatible zero-prefixed five-digit racer IDs',
  assert.match(route,/\^\(\?:\[0-9\]\{4\}\|0\[0-9\]\{4\}\)\$/);
  assert.doesNotMatch(route,/\/\^\[0-9\]\{4\}\$\/\.test\(String\(entry\.racer_registration_no/);
 });
+
+test('historical requests cannot invoke current-day bootstrap or atomic writer',()=>{
+ const atomic=route.match(/if \(date === jstDate\(\) &&\s*process\.env\.BS_OPENAPI_ATOMIC_SYNC_ENABLED === "true"\)/);
+ assert.ok(atomic,'atomic branch must remain current-day only');
+ assert.match(route,/if \(date === jstDate\(\) && bootstrapEventRows\.length && bootstrapEntryRows\.length\)/,
+  'legacy bootstrap must remain current-day only');
+ assert.match(route,/if \(date === jstDate\(\)\) \{\s*if \(bootstrapEventRows\.length === 0/,
+  'strict program validation must remain current-day gated');
+});
+test('GET and POST share authenticated write handler, never a read-only probe',()=>{
+ assert.match(route,/if \(!secret \|\| request\.headers\.get\("authorization"\) !== `Bearer \$\{secret\}`\)/);
+ assert.match(route,/export async function GET\(request\) \{\s*return handler\(request\);\s*\}/);
+ assert.match(route,/export async function POST\(request\) \{\s*return handler\(request\);\s*\}/);
+ assert.match(route,/const result = await syncPreview\(date\);/);
+});
