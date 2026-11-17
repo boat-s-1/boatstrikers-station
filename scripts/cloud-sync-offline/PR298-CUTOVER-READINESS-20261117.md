@@ -30,3 +30,12 @@ No production DB, Cron, Vercel, paid branch or merge was changed.
 - Maximum entry payloads were 935, 1003, 935, 718 for those dates; these are exhibition/preview entry rows, not proof of a complete six-boat bootstrap.
 - The legacy live function does not invoke bootstrap. This aligns with missing events and is a strong root-cause candidate; do not attribute every historical record solely to this path without cross-checking other writers.
 - Release gate must check persisted race-event count and six valid bootstrap entries per race, not merely Cron success or nonzero payload counts.
+
+## Persisted-table count spot check (2026-11-17 read-only)
+- Nov 13: events 0 / entries 0 / results 156.
+- Nov 14: events 0 / entries 0 / results 168.
+- Nov 15: events 0 / entries 0 / results 156.
+- Nov 16: events 0 / entries 0 / results 120.
+- Nov 17 (intraday snapshot, incomplete day): events 0 / entries 0 / results 111.
+- Current-day results count is time-dependent; do not treat 111 as final.
+- Confirm six entries per race with an actual persisted join after any eventual cutover, and stop/rollback on a mismatch.
