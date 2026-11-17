@@ -37,6 +37,43 @@ BEGIN
    IF SQLERRM='invalid boats accepted' THEN RAISE; END IF;
    IF SQLERRM NOT LIKE '%program count invalid%' THEN RAISE; END IF;
  END;
+ -- A conflicting incoming trifecta must be rejected before any writer,
+ -- preserving the existing confirmed result and phase-call count.
+ INSERT INTO public.bs_race_results(race_date,course_code,race_no,
+   trifecta_result,trifecta_payout)
+ VALUES(d,9,1,'1-2-3',1200);
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,
+       'trifecta_result','1-3-2','trifecta_payout',1200)),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'contradictory confirmed result accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory confirmed result accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT trifecta_result FROM public.bs_race_results
+    WHERE race_date=d AND course_code=9 AND race_no=1)<>'1-2-3'
+    OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+   RAISE EXCEPTION 'confirmed-result conflict mutated database or called writer';
+ END IF;
+ BEGIN
+   PERFORM bs_apply_openapi_atomic_candidate(d,ev,en,'[]'::jsonb,
+     '[]'::jsonb,jsonb_build_array(jsonb_build_object(
+       'race_date',d,'course_code',9,'race_no',1,
+       'trifecta_result','1-2-3','trifecta_payout',9999)),
+     '[]'::jsonb,now());
+   RAISE EXCEPTION 'contradictory confirmed payout accepted';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM='contradictory confirmed payout accepted' THEN RAISE; END IF;
+   IF SQLERRM NOT LIKE '%result conflicts with persisted result%' THEN RAISE; END IF;
+ END;
+ IF (SELECT trifecta_payout FROM public.bs_race_results
+    WHERE race_date=d AND course_code=9 AND race_no=1)<>1200
+    OR (SELECT count(*) FROM atomic_fixture_writes)<>4 THEN
+   RAISE EXCEPTION 'confirmed-payout conflict mutated database or called writer';
+ END IF;
  -- NULL and malformed registration IDs must fail before any RPC.
  BEGIN
    PERFORM bs_apply_openapi_atomic_candidate(d,ev,
