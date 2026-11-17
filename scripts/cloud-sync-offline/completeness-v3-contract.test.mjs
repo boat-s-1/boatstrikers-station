@@ -1,0 +1,25 @@
+// Offline structural regression checks; does not connect to Supabase.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const dir=dirname(fileURLToPath(import.meta.url));
+const read=(name)=>readFileSync(join(dir,name),'utf8');
+const recorder=read('completeness-v3-recorder.candidate.sql');
+const rows=read('completeness-v3-unified-quality-rows.candidate.sql');
+const summary=read('completeness-v3-summary.candidate.sql');
+const cron=read('completeness-v3-cron-cutover.GATED-DO-NOT-RUN.sql');
+const backfill=read('completeness-v3-historical-backfill.GATED-DO-NOT-RUN.sql');
+const before=(s,a,b)=>{assert.ok(s.includes(a),a);assert.ok(s.includes(b),b);assert.ok(s.indexOf(a)<s.indexOf(b),a+' must precede '+b);};
+test('empty-day guard precedes all writes',()=>before(recorder,'V3 quality has no race keys','INSERT INTO public.bs_race_data_quality_alerts'));
+test('disappearing active key guard precedes all writes',()=>before(recorder,'V3 source race key disappeared','INSERT INTO public.bs_race_data_quality_alerts'));
+test('unified V3 source used for guard, insert, resolution',()=>assert.ok((recorder.match(/bs_race_data_quality_rows_v3_candidate\(p_date\)/g)||[]).length>=3));
+test('upsert preserves first_detected_at',()=>assert.doesNotMatch(recorder.split('ON CONFLICT (race_date,course_code,race_no) DO UPDATE SET')[1].split('GET DIAGNOSTICS')[0],/first_detected_at\s*=/));
+test('notification follows log insertion',()=>before(recorder,'INSERT INTO public.bs_live_source_sync_logs',"pg_notify('boatstrikers_data_quality_alert'"));
+test('result-only anchor detects missing base event',()=>{assert.match(rows,/FROM public\.bs_race_results r/);assert.match(rows,/'base_event'::text/);});
+test('empty-day summary is incomplete',()=>assert.match(summary,/races>0 AND issue_count=0/));
+test('Cron verifies execution username',()=>assert.match(cron,/v_username<>'postgres'/));
+test('Cron checks all three function privileges',()=>assert.equal((cron.match(/has_function_privilege\('postgres'/g)||[]).length,3));
+test('backfill checks drift before recorder write',()=>before(backfill,'Source drift on','bs_record_race_data_completeness_v3_candidate(d)'));
+test('entry-only race key fails closed before alert mutation',()=>before(recorder,'V3 uncovered entry-only race key','INSERT INTO public.bs_race_data_quality_alerts'));

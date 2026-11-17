@@ -1,0 +1,131 @@
+name: PR298 V3 PostgreSQL fixture
+on:
+  pull_request:
+    paths:
+      - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
+      - 'scripts/cloud-sync-offline/openapi-atomic-*.sql'
+      - 'scripts/cloud-sync-offline/openapi-real-ichika-evaluator.fixture.sql'
+      - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
+      - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
+      - 'scripts/cloud-sync-offline/audit-repository-schema-genesis.py'
+      - 'scripts/cloud-sync-offline/pr298-rls-select-only-negative.fixture.sql'
+      - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
+      - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-bootstrap-incomplete-negative.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.candidate.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.runtime.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.batch-rollback.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-historical-program.privileges.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-captured-preview*.sql'
+      - 'scripts/cloud-sync-offline/openapi-captured-results*.sql'
+      - 'scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql'
+      - 'scripts/cloud-sync-offline/openapi-captured-atomic-privileges.assert.sql'
+      - '.github/workflows/pr298-v3-postgres-fixture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fixture"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGDATABASE: fixture
+      PGUSER: postgres
+      PGPASSWORD: fixture-only
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify isolation trigger inventory against production read-only catalog
+        run: python3 scripts/cloud-sync-offline/check-isolation-trigger-parity.py
+      - name: Audit full checked-out repository for core table genesis DDL
+        run: python3 scripts/cloud-sync-offline/audit-repository-schema-genesis.py
+      - name: Check PostgreSQL client
+        run: psql --version
+      - name: Install disposable fixture schema
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
+      - name: Verify SELECT-only RLS rejects anonymous and authenticated inserts
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/pr298-rls-select-only-negative.fixture.sql
+      - name: Verify captured production bootstrap RPC in separate disposable database
+        run: |
+          python3 scripts/cloud-sync-offline/extract-isolation-bootstrap.py
+          psql -X -v ON_ERROR_STOP=1 -d postgres -c 'CREATE DATABASE pr298_bootstrap_fixture'
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.test.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f /tmp/pr298-captured-bootstrap.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-bootstrap-preserve-results.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-bootstrap-incomplete-negative.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.runtime.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.batch-rollback.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.privileges.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-historical-program.mixed-status.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview-functions.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-preview.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results-function.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-results.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-four-writer-atomic.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-silent-trigger.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-atomic-racer-mismatch.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-atomic-privileges.assert.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -c "SELECT has_function_privilege('service_role','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS service_role_execute, has_function_privilege('anon','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS anon_execute, has_function_privilege('authenticated','public.bs_apply_openapi_atomic_candidate(date,jsonb,jsonb,jsonb,jsonb,jsonb,jsonb,timestamptz)','EXECUTE') AS authenticated_execute;"
+      - name: Install candidate functions in isolated PostgreSQL
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-unified-quality-rows.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-summary.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-recorder.candidate.sql
+      - name: Verify runtime alert lifecycle and guards
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.test.sql
+      - name: Verify 240-race load, replay and complete repair
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-load.test.sql
+      - name: Verify four simultaneous recorder sessions
+        run: bash scripts/cloud-sync-offline/completeness-v3-postgres-concurrency.sh
+      - name: Install atomic OpenAPI RPC stubs and candidate
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.test.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
+      - name: Verify atomic rollback and input validation
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-postgres-fixture.assert.sql
+      - name: Verify production Ichika trigger fan-out in isolated fixture
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-trigger-fanout.test.sql
+      - name: Verify real-query Ichika evaluator under 144-race isolated load
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-real-ichika-evaluator.fixture.sql
+      - name: Compile database-side atomic Cron caller with network-free HTTP stub
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT has_function_privilege('service_role','public.bs_sync_openapi_today_atomic_candidate()','EXECUTE') AS service_role_only"
+      - name: Run atomic Cron synthetic runtime fixture (time-window-aware)
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller.runtime-fixture.sql
+      - name: Verify Cron active path with deterministic noon-JST fixture clock
+        run: |
+          python3 scripts/cloud-sync-offline/openapi-atomic-cron-caller-midday-fixture.py
+          psql -X -v ON_ERROR_STOP=1 -f /tmp/pr298-openapi-atomic-cron-midday.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller-midday.assert.sql
+      - name: Verify mocked Cron through real atomic validation and four transactional writers
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-real-rpc.assert.sql
+      - name: Prove Cron real RPC rollback and clean retry
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-rollback.assert.sql
+      - name: Reject malformed Cron program before atomic write
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-caller-negative.fixture.sql
+      - name: Assert settled result and program numeric value parity
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/openapi-atomic-cron-settled.fixture.sql

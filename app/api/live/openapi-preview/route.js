@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { buildAtomicResultPayload } from "../../../../lib/openapi-atomic-results.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +32,9 @@ function jstDate() {
 
 function normalizeDate(value) {
   const date = String(value || jstDate()).trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(parsed.getTime())
+    || parsed.toISOString().slice(0, 10) !== date) {
     throw new Error("date must be YYYY-MM-DD");
   }
   return date;
@@ -192,14 +195,134 @@ async function syncPreview(date) {
   }
 
   const apiJson = await response.json();
+  if (date === jstDate()) {
+    const stadiums = apiJson?.programs?.stadiums;
+    if (!stadiums || typeof stadiums !== "object" || Array.isArray(stadiums)
+      || Object.keys(stadiums).length === 0) {
+      throw new Error("missing OpenAPI program stadiums");
+    }
+    for (const [stadiumKey, stadium] of Object.entries(stadiums)) {
+      const courseCode = Number(stadium?.stadium_number ?? stadiumKey);
+      const races = stadium?.races;
+      if (!/^(?:[1-9]|1[0-9]|2[0-4])$/.test(stadiumKey) || Number(stadiumKey) !== courseCode
+        || !Number.isInteger(courseCode) || courseCode < 1 || courseCode > 24
+        || !races || typeof races !== "object" || Array.isArray(races)
+        || Object.keys(races).length === 0) {
+        throw new Error("invalid OpenAPI program stadium");
+      }
+      for (const [raceKey, race] of Object.entries(races)) {
+        const raceNo = Number(race?.race_number ?? raceKey);
+        const racers = race?.racers;
+        if (!/^(?:[1-9]|1[0-2])$/.test(raceKey) || Number(raceKey) !== raceNo
+          || !Number.isInteger(raceNo) || raceNo < 1 || raceNo > 12
+          || race?.date !== date || !racers || typeof racers !== "object"
+          || Array.isArray(racers) || Object.keys(racers).length !== 6) {
+          throw new Error("invalid or incomplete OpenAPI program race");
+        }
+        for (const [boatKey, racer] of Object.entries(racers)) {
+          const boatNo = Number(racer?.entry_number ?? boatKey);
+          if (!/^[1-6]$/.test(boatKey) || Number(boatKey) !== boatNo) {
+            throw new Error("OpenAPI program boat identity mismatch");
+          }
+        }
+        // Preview boat identities must match the program boats before preview RPCs.
+        const preview = race?.preview;
+        if (preview !== null && preview !== undefined) {
+          if (typeof preview !== "object" || Array.isArray(preview)
+            || (preview.date !== null && preview.date !== undefined && preview.date !== date)) {
+            throw new Error("invalid OpenAPI preview date or shape");
+          }
+          if (preview.racers !== null && preview.racers !== undefined) {
+            if (typeof preview.racers !== "object" || Array.isArray(preview.racers)) {
+              throw new Error("invalid OpenAPI preview racers");
+            }
+            for (const [boatKey, racer] of Object.entries(preview.racers)) {
+              const boatNo = Number(racer?.entry_number ?? boatKey);
+              if (!/^[1-6]$/.test(boatKey) || Number(boatKey) !== boatNo
+                || !Object.prototype.hasOwnProperty.call(racers, boatKey)) {
+                throw new Error("OpenAPI preview boat identity mismatch");
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   const {
     bootstrapEntryRows,
     bootstrapEventRows,
     previewEntryRows,
     previewEventRows,
   } = buildPayload(apiJson, date);
+  if (date === jstDate()) {
+    if (bootstrapEventRows.length === 0 || bootstrapEntryRows.length !== bootstrapEventRows.length * 6) {
+      throw new Error("incomplete OpenAPI program: event/boat count mismatch");
+    }
+    const grouped = new Map();
+    for (const event of bootstrapEventRows) {
+      const key = `${event.race_date}/${event.course_code}/${event.race_no}`;
+      if (event.race_date !== date || grouped.has(key)) {
+        throw new Error("invalid or duplicate OpenAPI program race");
+      }
+      grouped.set(key, new Set());
+    }
+    for (const entry of bootstrapEntryRows) {
+      const key = `${entry.race_date}/${entry.course_code}/${entry.race_no}`;
+      const boats = grouped.get(key);
+      if (!boats || !Number.isInteger(entry.boat_no) || entry.boat_no < 1 || entry.boat_no > 6
+        || boats.has(entry.boat_no) || !/^(?:[0-9]{4}|0[0-9]{4})$/.test(String(entry.racer_registration_no ?? ""))
+        || Number(entry.racer_registration_no) === 0) {
+        throw new Error("invalid or duplicate OpenAPI program boat");
+      }
+      boats.add(entry.boat_no);
+    }
+    if ([...grouped.values()].some((boats) => boats.size !== 6)) {
+      throw new Error("incomplete OpenAPI program race");
+    }
+    // A single racer cannot occupy two boats in the same race.
+    const racersByRace = new Map();
+    for (const entry of bootstrapEntryRows) {
+      const key = `${entry.race_date}/${entry.course_code}/${entry.race_no}`;
+      if (!racersByRace.has(key)) racersByRace.set(key, new Set());
+      const seen = racersByRace.get(key);
+      if (seen.has(entry.racer_registration_no)) {
+        throw new Error("duplicate racer registration in OpenAPI program race");
+      }
+      seen.add(entry.racer_registration_no);
+    }
+  }
+
   const syncedAt = new Date().toISOString();
   const supabase = getSupabase();
+
+  // PR #298 candidate: disabled unless BOTH independent switches are enabled.
+  // Single RPC call makes bootstrap/preview/results one database transaction.
+  // Do not enable before production trigger and official schedule parity gates.
+  if (date === jstDate() &&
+      process.env.BS_OPENAPI_ATOMIC_SYNC_ENABLED === "true") {
+    const { results, entries: resultEntries } = buildAtomicResultPayload(apiJson, date);
+    const { data, error } = await supabase.rpc("bs_apply_openapi_atomic_candidate", {
+      p_date: date,
+      p_events: bootstrapEventRows,
+      p_entries: bootstrapEntryRows,
+      p_preview_entries: previewEntryRows,
+      p_preview_events: previewEventRows,
+      p_results: results,
+      p_result_entries: resultEntries,
+      p_synced_at: syncedAt,
+    });
+    if (error) throw error;
+    return {
+      date, endpoint, mode: "atomic_candidate",
+      fetched_program_entry_rows: bootstrapEntryRows.length,
+      fetched_program_event_rows: bootstrapEventRows.length,
+      fetched_entry_rows: previewEntryRows.length,
+      fetched_event_rows: previewEventRows.length,
+      fetched_result_rows: results.length,
+      fetched_result_entry_rows: resultEntries.length,
+      atomic: data,
+    };
+  }
 
   // Emergency bootstrap is current-day only. The RPC inserts missing rows only,
   // so existing BRDB/PC-KYOTEI rows are never overwritten.
@@ -214,19 +337,20 @@ async function syncPreview(date) {
     bootstrapResult = data;
   }
 
-  const [{ data: entryResult, error: entryError }, { data: eventResult, error: eventError }] =
-    await Promise.all([
-      supabase.rpc("bs_apply_openapi_preview", {
-        p_rows: previewEntryRows,
-        p_synced_at: syncedAt,
-      }),
-      supabase.rpc("bs_apply_openapi_preview_events", {
-        p_rows: previewEventRows,
-        p_synced_at: syncedAt,
-      }),
-    ]);
-
+  // Run dependent write phases in order. A failed entry-preview RPC must not
+  // start the event-preview RPC. These RPCs are still separate DB transactions.
+  const { data: entryResult, error: entryError } =
+    await supabase.rpc("bs_apply_openapi_preview", {
+      p_rows: previewEntryRows,
+      p_synced_at: syncedAt,
+    });
   if (entryError) throw entryError;
+
+  const { data: eventResult, error: eventError } =
+    await supabase.rpc("bs_apply_openapi_preview_events", {
+      p_rows: previewEventRows,
+      p_synced_at: syncedAt,
+    });
   if (eventError) throw eventError;
 
   return {
@@ -248,9 +372,19 @@ async function syncPreview(date) {
 }
 
 async function handler(request) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const date = normalizeDate(searchParams.get("date") || undefined);
+    // Current-day bootstrap has row-level alert side effects. Explicitly opt in only
+    // after isolated trigger/load verification and official schedule parity review.
+    if (date === jstDate() && process.env.BS_OPENAPI_TODAY_SYNC_ENABLED !== "true") {
+      return NextResponse.json({ ok: false, error: "current-day OpenAPI sync disabled" }, { status: 503 });
+    }
     const result = await syncPreview(date);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {

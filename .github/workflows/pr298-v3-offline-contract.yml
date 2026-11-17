@@ -1,0 +1,31 @@
+name: PR298 V3 offline contract
+on:
+  pull_request:
+    paths:
+      - 'scripts/cloud-sync-offline/completeness-v3-*.sql'
+      - 'scripts/cloud-sync-offline/completeness-v3-contract.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-results.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-sql-safety-contract.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-ingest.candidate.sql'
+      - 'supabase/migrations/20260923133500_add_openapi_bootstrap_rpc.sql'
+      - 'scripts/cloud-sync-offline/openapi-atomic-route-contract.test.mjs'
+      - 'scripts/cloud-sync-offline/openapi-atomic-cron-caller.candidate.sql'
+      - 'scripts/cloud-sync-offline/openapi-atomic-cron-caller-contract.test.mjs'
+      - 'app/api/live/openapi-preview/route.js'
+      - 'lib/openapi-atomic-results.mjs'
+      - '.github/workflows/pr298-v3-offline-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check Node version
+        run: node --version
+      - name: Validate V3 and OpenAPI parser contracts without external services
+        run: node --test scripts/cloud-sync-offline/completeness-v3-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-results.test.mjs scripts/cloud-sync-offline/openapi-atomic-route-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-cron-caller-contract.test.mjs scripts/cloud-sync-offline/openapi-atomic-sql-safety-contract.test.mjs

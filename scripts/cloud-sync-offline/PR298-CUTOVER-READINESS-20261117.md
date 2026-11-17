@@ -1,0 +1,101 @@
+# PR #298 — production cutover readiness (2026-11-17, read-only)
+
+Status: HOLD. No production installation, Cron cutover, or PR merge authorized.
+
+## Verified
+- Four production-captured writer definitions execute through the atomic candidate in disposable PostgreSQL; replay and late failure rollback passed at d4dc55b4.
+- Production writers: SECURITY DEFINER, owner postgres, search_path public, EXECUTE grants postgres and service_role only (read-only catalog).
+- Production Cron jobid 1: boatstrikers-openapi-live-3m; schedule */3 23,0-14 * * *; command select public.bs_sync_openapi_today(); (read-only query).
+- Production bs_race_events, bs_race_entries and bs_race_results have 9 non-internal triggers, all enabled (read-only catalog).
+- The isolated four-writer test uses minimal tables, NOT the full nine production triggers or external alert delivery.
+
+## Release blockers
+1. Confirm the latest CI ACL assertion passes.
+2. Test real writers with production-equivalent trigger graph, permissions and representative existing data.
+3. Verify offline Cron payload parsing and 24-course completeness; synthetic fixtures do not prove live HTTP.
+4. Investigate historical result-only rows with missing events/entries and plan a separate safe repair.
+5. Review rollback and monitoring, then obtain explicit production-change approval.
+
+No production DB, Cron, Vercel, paid branch or merge was changed.
+
+## Confirmed legacy Cron bootstrap gap (read-only function definition)
+- The deployed bs_sync_openapi_today() calls bs_apply_openapi_preview(), bs_apply_openapi_preview_events(), and bs_apply_openapi_results(), but does NOT call bs_apply_openapi_bootstrap().
+- Read-only cross-table comparison for 2026-11-13 through 2026-11-16: 156, 168, 156, and 120 result rows respectively; every one of these 600 results lacks a corresponding bs_race_events row.
+- This provides a concrete mechanism for result-only records, but historical attribution still requires logs and other ingestion-path checks.
+- Do NOT backfill blindly or switch Cron before trigger fan-out, payload completeness, and safe rollback have been verified.
+
+
+## Production sync log cross-check (read-only, 2026-11-17)
+- For race dates Nov 13, 14, 15, 16: each had 310 successful live_all calls and zero partial calls by race_date. Max reported event payload counts were 156, 168, 156, 120 respectively, yet all corresponding race results lacked bs_race_events rows. Thus 'success' and event_rows indicate parsed/processed payload, NOT confirmed event insertion.
+- Maximum entry payloads were 935, 1003, 935, 718 for those dates; these are exhibition/preview entry rows, not proof of a complete six-boat bootstrap.
+- The legacy live function does not invoke bootstrap. This aligns with missing events and is a strong root-cause candidate; do not attribute every historical record solely to this path without cross-checking other writers.
+- Release gate must check persisted race-event count and six valid bootstrap entries per race, not merely Cron success or nonzero payload counts.
+
+## Persisted-table count spot check (2026-11-17 read-only)
+- Nov 13: events 0 / entries 0 / results 156.
+- Nov 14: events 0 / entries 0 / results 168.
+- Nov 15: events 0 / entries 0 / results 156.
+- Nov 16: events 0 / entries 0 / results 120.
+- Nov 17 (intraday snapshot, incomplete day): events 0 / entries 0 / results 111.
+- Current-day results count is time-dependent; do not treat 111 as final.
+- Confirm six entries per race with an actual persisted join after any eventual cutover, and stop/rollback on a mismatch.
+
+## 2026-11-17 subsequent validation
+- Commit 9d56e632: both PR298 V3 offline contract and PostgreSQL fixture CI completed SUCCESS. The isolated fixture now includes persisted six-boat identity checking and silent trigger-discard rollback.
+- Read-only production catalog rechecked all nine triggers. Of particular note, the exhibition-column INSERT trigger calls the Ichika evaluator for each current-day entry; a six-boat bootstrap can cause six evaluations per race. An isolated stub test confirms fan-out, but production evaluator latency/side effects remain unverified.
+- Current-day read-only spot check (intraday): bs_race_events=0, bs_race_entries=0, bs_race_results=113. The 113 result count is not final.
+- Added PR298-PRODUCTION-READONLY-READINESS.sql to compare persisted counts with sync logs; it is a diagnostic artifact, not a migration.
+- Gate 1 (CI) is now satisfied. Gates 2-5 remain HOLD. No production writes.
+
+## Final intraday read-only comparison (2026-11-17)
+- Latest verified head 48990726: PR298 V3 PostgreSQL fixture SUCCESS (run 44052684765); PR298 V3 offline contract SUCCESS (run 44052684771).
+- Read-only production query at inspection: 204 successful `live_all` sync log rows for 2026-11-17, but persisted `bs_race_events=0`, `bs_race_entries=0`, `bs_race_results=113`. These intraday counts can change.
+- Decision: **HOLD**. Log success must not be used as the cutover success criterion. Require persisted six-boat identity parity, result association, representative production trigger graph test, safe rollback, and explicit change approval.
+- PR298-PRODUCTION-READONLY-READINESS.sql is a preflight probe, not an authorized production change. Its count-only PASS must not substitute for payload/identity and trigger verification.
+
+## Executed read-only readiness probe (2026-11-17, intraday)
+- Verified `bs_live_source_sync_logs` schema in `information_schema.columns`: `race_date`, `sync_kind`, `status`, `event_rows`, `entry_rows` all exist with expected types.
+- Ran the exact `PR298-PRODUCTION-READONLY-READINESS.sql` query against production (read-only). It executed successfully and returned five **HOLD** rows.
+- 11/13: 310 success logs, 0 events, 0 entries, 156 results, max payload 156 events/935 entries.
+- 11/14: 310 success logs, 0 events, 0 entries, 168 results, max payload 168 events/1003 entries.
+- 11/15: 310 success logs, 0 events, 0 entries, 156 results, max payload 156 events/935 entries.
+- 11/16: 310 success logs, 0 events, 0 entries, 120 results, max payload 120 events/718 entries.
+- 11/17: 209 success logs, 0 events, 0 entries, 116 results, max payload 132 events/720 entries **at query time only**.
+- The probe's `incomplete_six_boat_races=0` for all five dates is vacuous because no entry rows exist; it is **not** a completeness PASS.
+- CI at `3e4aa803`: both PostgreSQL fixture (44054935827) and offline contract (44054935875) completed SUCCESS.
+- No production changes. Full-schema trigger benchmark, live official payload parity, and safe canary still HOLD.
+
+## Source cardinality transition investigation (read-only, 2026-11-17)
+- New read-only audit: `PR298-PRODUCTION-READONLY-SOURCE-CARDINALITY.sql`; executed against production.
+- 11/11 persisted 144 events / 864 entries; 11/12 persisted 156 / 936. From 11/13 onward, both tables have zero daily rows despite results being present.
+- On 11/11 and 11/12, **62 of 310** successful `live_all` calls per day reported the full six-boat count; 248 calls per day reported incomplete/zero entry counts. The successful log count by itself is not a validity metric.
+- On 11/13, 11/14, 11/15 and 11/16, **0 of 310** successful calls per day reported `entry_rows = 6*event_rows` (max entries 935/1003/935/718 for 156/168/156/120 events).
+- On 11/17, 0 of 214 successful calls at the observation time reported full six-boat counts; max 726 entries for 132 events. This day is intraday.
+- The change is temporally between 11/12 and 11/13; no root cause proven. In particular, source-reported counts do not establish that the *same race* has six valid racer identities. Do not infer cause from aggregate numbers.
+- The current candidate's strict six-boat requirement would reject incomplete snapshots, which is safer than silently claiming success, but may leave all races unavailable until the upstream payload is complete. Determine source completeness behavior and fallback strategy before any cutover.
+
+## 2026-11-18 follow-up: live read-only production recheck
+
+This is evidence only; no production installation, backfill, Cron change or merge is authorized.
+
+- Existing active Cron: jobid 1, boatstrikers-openapi-live-3m, schedule */3 23,0-14 * * *, calling public.bs_sync_openapi_today(). Never activate a second writer concurrently.
+- Five existing OpenAPI SECURITY DEFINER RPCs are owned by postgres; four set search_path=public and Cron sets search_path=public,extensions. PUBLIC EXECUTE is false; service_role EXECUTE is observed.
+- Six inspected public race/result tables have RLS enabled. Table-level INSERT grants exist for anon/authenticated/service_role, but zero INSERT/ALL RLS policies were found. This is not proof of safety of all indirect write paths.
+
+| Race date | Events | Entries | Results |
+|---|---:|---:|---:|
+| 2026-11-13 | 0 | 0 | 156 |
+| 2026-11-14 | 0 | 0 | 168 |
+| 2026-11-15 | 0 | 0 | 156 |
+| 2026-11-16 | 0 | 0 | 120 |
+| 2026-11-17 | 0 | 0 | 132 |
+| 2026-11-18 | 0 | 0 | 0 |
+
+The 2026-11-18 row is intraday, not a final completeness judgment. Across Nov 13-17, 732 result rows coexist with zero program/event and entry rows. Never synthesize official programs from results.
+
+- At GitHub HEAD 257bb8c71247da85392effba7ad17e1b6089adfe, offline contract run 44121784474 and disposable PostgreSQL fixture run 44121784773 both completed SUCCESS, including atomic rollback and retry steps.
+- Existing development branch gamagori-pr294-phase13 reports MIGRATIONS_FAILED; do not treat it as clean PR298 integration environment.
+
+Remaining HOLD gates: live upstream six-boat payload completeness and provider rights; approved clean isolated environment with migration/trigger parity; actual DB rollback and competing writer tests; privately captured exact legacy Cron rollback command; exclusive cutover and persisted six-boat assertions; separate approval for production changes and historical repairs.
+
+No production writes, paid resources, Cron changes or merge performed.

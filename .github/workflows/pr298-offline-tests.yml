@@ -1,0 +1,23 @@
+name: PR298 offline OpenAPI safety tests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout requested branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Execute offline tests (no application dependencies or secrets)
+        run: node --test scripts/cloud-sync-offline/*.test.mjs

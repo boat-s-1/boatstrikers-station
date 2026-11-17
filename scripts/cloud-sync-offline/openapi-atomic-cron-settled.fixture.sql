@@ -1,0 +1,95 @@
+-- CI-only settled-race value parity. Uses network-free HTTP mock from negative fixture.
+-- Verifies actual SQL Cron mapper values, not just row counts.
+CREATE TEMP TABLE pr298_settled_capture (results jsonb, entries jsonb, program jsonb, preview_events jsonb, preview_entries jsonb);
+CREATE OR REPLACE FUNCTION public.bs_apply_openapi_atomic_candidate(
+ p_date date,p_events jsonb,p_entries jsonb,p_preview_entries jsonb,
+ p_preview_events jsonb,p_results jsonb,p_result_entries jsonb,
+ p_synced_at timestamptz)
+RETURNS jsonb LANGUAGE plpgsql AS $$
+BEGIN
+ INSERT INTO pg_temp.pr298_settled_capture VALUES (p_results,p_result_entries,p_entries,p_preview_events,p_preview_entries);
+ RETURN jsonb_build_object('ok',true,'captured',true);
+END $$;
+DO $$
+DECLARE d jsonb; r jsonb; e jsonb; program jsonb; pe jsonb; pb jsonb; response jsonb;
+BEGIN
+ SELECT doc INTO d FROM public.pr298_document;
+ -- Negative fixture ends with malformed stadium. Restore a known-good program.
+ d:=jsonb_build_object('programs',jsonb_build_object('stadiums',
+  jsonb_build_object('1',jsonb_build_object('races',
+   jsonb_build_object('1',jsonb_build_object(
+    'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
+    'stadium_number',1,'race_number',1,
+    'racers',(SELECT jsonb_object_agg(i::text,jsonb_build_object(
+      'entry_number',i,'number',(4000+i)::text,
+      'national_top_2_percent',42.5,'local_top_2_percent',37.2,
+      'flying_count',1,'late_count',2,'motor_top_2_percent',45.5,
+      'boat_top_2_percent',33.3,'weight',52.4)) FROM generate_series(1,6) i),
+    'preview',jsonb_build_object(
+      'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
+      'wind_speed',3,'wind_direction_number',2,'wave_height',5,
+      'weather_number',1,'air_temperature',22.5,'water_temperature',21.3,
+      'racers',jsonb_build_object(
+       '1',jsonb_build_object('entry_number',1,'exhibition_time',6.72,
+        'start_timing',0.11,'course_number',1,'tilt_adjustment',-0.5),
+       '2',jsonb_build_object('entry_number',2,'exhibition_time',6.81,
+        'start_timing',0.15,'course_number',2,'tilt_adjustment',0))),
+    'result',jsonb_build_object(
+      'technique_number_source','逃げ','technique_number',1,'remarks','fixture-note',
+      'payouts',jsonb_build_object(
+       'trifecta',jsonb_build_array(jsonb_build_object('combination','2-1-3','amount',12340)),
+       'exacta',jsonb_build_array(jsonb_build_object('combination','2-1','amount',1500)),
+       'quinella',jsonb_build_array(jsonb_build_object('combination','1=2','amount',700)),
+       'trio',jsonb_build_array(jsonb_build_object('combination','1=2=3','amount',900))),
+      'racers',jsonb_build_object(
+       '1',jsonb_build_object('entry_number',1,'place_number',2,'place_number_source','2着','course_number',1,'start_timing',0.13),
+       '2',jsonb_build_object('entry_number',2,'place_number',1,'place_number_source','1着','course_number',2,'start_timing',0.11),
+       '3',jsonb_build_object('entry_number',3,'place_number',3,'place_number_source','3着','course_number',3,'start_timing',0.15)
+      ))
+   ))))));
+ UPDATE public.pr298_document SET doc=d;
+ response:=public.bs_sync_openapi_today_atomic_candidate();
+ IF response->>'captured' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'settled capture not invoked'; END IF;
+ SELECT t.results,t.entries,t.program,t.preview_events,t.preview_entries INTO r,e,program,pe,pb FROM pg_temp.pr298_settled_capture t LIMIT 1;
+ IF jsonb_array_length(pe)<>1 OR jsonb_array_length(pb)<>2
+  OR pe->0->>'wind_speed' IS DISTINCT FROM '3'
+  OR pe->0->>'wind_direction_code' IS DISTINCT FROM '2'
+  OR pe->0->>'wave_height' IS DISTINCT FROM '5'
+  OR pe->0->>'weather_code' IS DISTINCT FROM '1'
+  OR pe->0->>'air_temperature' IS DISTINCT FROM '22.5'
+  OR pe->0->>'water_temperature' IS DISTINCT FROM '21.3'
+  OR NOT EXISTS (SELECT 1 FROM jsonb_array_elements(pb) x
+    WHERE x->>'boat_no'='1' AND x->>'exhibition_time'='6.72'
+    AND x->>'exhibition_st'='0.11' AND x->>'exhibition_course'='1'
+    AND x->>'tilt'='-0.5')
+ THEN RAISE EXCEPTION 'preview value mapping mismatch: %, %',pe,pb; END IF;
+ IF jsonb_array_length(r) <> 1 OR jsonb_array_length(e) <> 3
+ OR r->0->>'first_boat' IS DISTINCT FROM '2'
+ OR r->0->>'second_boat' IS DISTINCT FROM '1'
+ OR r->0->>'third_boat' IS DISTINCT FROM '3'
+ OR r->0->>'winning_method' IS DISTINCT FROM '逃げ'
+ OR r->0->>'technique_code' IS DISTINCT FROM '1'
+ OR r->0->>'trifecta_result' IS DISTINCT FROM '2-1-3'
+ OR r->0->>'trifecta_payout' IS DISTINCT FROM '12340'
+ OR r->0->>'exacta' IS DISTINCT FROM '2-1'
+ OR r->0->>'exacta_payout' IS DISTINCT FROM '1500'
+ OR r->0->>'quinella' IS DISTINCT FROM '1=2'
+ OR r->0->>'quinella_payout' IS DISTINCT FROM '700'
+ OR r->0->>'trio' IS DISTINCT FROM '1=2=3'
+ OR r->0->>'trio_payout' IS DISTINCT FROM '900'
+ THEN RAISE EXCEPTION 'settled result field mapping mismatch: %',r; END IF;
+ IF NOT EXISTS (SELECT 1 FROM jsonb_array_elements(e) x
+   WHERE x->>'boat_no'='2' AND x->>'arrival_order'='1'
+   AND x->>'finish_place'='1着' AND x->>'actual_course'='2'
+   AND x->>'actual_st'='0.11' AND x->>'result_note'='fixture-note') THEN
+  RAISE EXCEPTION 'settled boat entry mapping mismatch: %',e;
+ END IF;
+ IF NOT EXISTS (SELECT 1 FROM jsonb_array_elements(program) x
+   WHERE x->>'boat_no'='1' AND x->>'national_2_rate'='42.5'
+   AND x->>'local_2_rate'='37.2' AND x->>'flying_count'='1'
+   AND x->>'late_count'='2' AND x->>'motor_2_rate'='45.5'
+   AND x->>'boat_2_rate'='33.3' AND x->>'racer_weight'='52.4') THEN
+  RAISE EXCEPTION 'program numeric value mapping mismatch: %',program;
+ END IF;
+ RAISE NOTICE 'CRON_SETTLED_VALUE_PARITY=PASS (preview, result payout, placing, boat telemetry, program numeric fields)';
+END $$;

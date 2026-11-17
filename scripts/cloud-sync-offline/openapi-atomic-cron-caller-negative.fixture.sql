@@ -1,0 +1,223 @@
+-- Synthetic, network-free negative cases for PR298 Cron candidate.
+-- Requires the CI-only noon-JST candidate and runtime fixture HTTP mock.
+-- Every malformed payload must fail BEFORE invoking the atomic RPC.
+CREATE TEMP TABLE pr298_atomic_calls (n integer NOT NULL, events jsonb, entries jsonb, preview_events jsonb, preview_entries jsonb, results jsonb, result_entries jsonb);
+INSERT INTO pr298_atomic_calls VALUES (0);
+CREATE OR REPLACE FUNCTION public.bs_apply_openapi_atomic_candidate(
+ p_date date,p_events jsonb,p_entries jsonb,p_preview_entries jsonb,
+ p_preview_events jsonb,p_results jsonb,p_result_entries jsonb,
+ p_synced_at timestamptz)
+RETURNS jsonb LANGUAGE plpgsql AS $$
+BEGIN
+ UPDATE pg_temp.pr298_atomic_calls SET n=n+1, events=p_events, entries=p_entries, preview_events=p_preview_events, preview_entries=p_preview_entries, results=p_results, result_entries=p_result_entries;
+ RETURN jsonb_build_object('ok',true);
+END $$;
+-- The HTTP mock reads a session-local document; no real network is possible.
+CREATE TABLE public.pr298_document (doc jsonb NOT NULL, http_status integer NOT NULL DEFAULT 200, raw_body text);
+INSERT INTO pr298_document
+SELECT jsonb_build_object('programs',jsonb_build_object('stadiums',
+ jsonb_build_object('1',jsonb_build_object('races',
+ jsonb_build_object('1',jsonb_build_object(
+ 'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
+ 'stadium_number',1,'race_number',1,
+ 'racers',(SELECT jsonb_object_agg(i::text,jsonb_build_object(
+  'entry_number',i,'number',(4000+i)::text)) FROM generate_series(1,6) i)
+ ))))));
+CREATE OR REPLACE FUNCTION extensions.http_get(url text)
+RETURNS extensions.http_response LANGUAGE plpgsql AS $$
+DECLARE d jsonb; status_code integer; body_override text;
+BEGIN
+ SELECT doc,http_status,raw_body INTO d,status_code,body_override FROM public.pr298_document LIMIT 1;
+ RETURN ROW(status_code,'application/json','{}'::jsonb,coalesce(body_override,d::text))::extensions.http_response;
+END $$;
+DO $$
+DECLARE original jsonb; invalid jsonb; response jsonb; calls integer; scenario text;
+BEGIN
+ SELECT doc INTO original FROM pr298_document;
+ FOREACH scenario IN ARRAY ARRAY[
+  'valid','missing_boat','non_numeric_registration','duplicate_registration',
+  'wrong_date','preview_wrong_boat','result_duplicate_places',
+  'preview_racers_array','result_racers_array',
+  'boat_scalar','race_scalar','stadium_scalar',
+  'payout_without_result_racers','preview_boat_scalar','result_boat_scalar',
+  'five_digit_nonzero_registration','unknown_stadium_25',
+  'invalid_race_13','empty_races','empty_stadiums','wrong_preview_date',
+  'invalid_preview_numeric','invalid_bootstrap_numeric',
+  'invalid_result_payout_numeric','invalid_exacta_payout_numeric',
+  'invalid_quinella_payout_numeric','invalid_trio_payout_numeric','missing_registration',
+  'wrong_stadium_number','wrong_race_number','http_503','http_429','http_500','invalid_json_body',
+  'invalid_program_win_rate','invalid_preview_exhibition_st',
+  'invalid_result_actual_course','missing_programs','stadiums_array',
+  'empty_document','null_document','second_race_invalid_boat',
+  'preview_wrong_stadium','preview_wrong_race','result_wrong_date',
+  'result_wrong_stadium','result_wrong_race',
+  'multiple_trifecta_payouts','multiple_exacta_payouts','tied_first_place',
+  'payout_collection_object','payout_collection_null','payout_element_scalar'
+ ] LOOP
+  invalid:=original;
+  IF scenario='missing_programs' THEN
+   invalid:=invalid - 'programs';
+  ELSIF scenario='stadiums_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums}','[]'::jsonb);
+  ELSIF scenario='empty_document' THEN
+   invalid:='{}'::jsonb;
+  ELSIF scenario='null_document' THEN
+   invalid:='null'::jsonb;
+  ELSIF scenario='second_race_invalid_boat' THEN
+   -- A valid first race must not be partially written when a later race fails.
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,2}',
+    jsonb_set(original #> '{programs,stadiums,1,races,1}',
+     '{race_number}','2'::jsonb));
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,2,racers,1,number}',
+    '"not-a-registration"'::jsonb);
+  ELSIF scenario='preview_wrong_stadium' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"stadium_number":2}'::jsonb);
+  ELSIF scenario='preview_wrong_race' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"race_number":2}'::jsonb);
+  ELSIF scenario='result_wrong_date' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"date":"1999-01-01"}'::jsonb);
+  ELSIF scenario='result_wrong_stadium' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"stadium_number":2}'::jsonb);
+  ELSIF scenario='result_wrong_race' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"race_number":2}'::jsonb);
+  ELSIF scenario='multiple_trifecta_payouts' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":[{"combination":"1-2-3","amount":1000},{"combination":"1-3-2","amount":1200}]},"racers":{"1":{"entry_number":1,"place_number":1}}}'::jsonb);
+  ELSIF scenario='multiple_exacta_payouts' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"exacta":[{"combination":"1-2","amount":1000},{"combination":"1-3","amount":1200}]},"racers":{"1":{"entry_number":1,"place_number":1}}}'::jsonb);
+  ELSIF scenario='tied_first_place' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":{"1":{"entry_number":1,"place_number":1},"2":{"entry_number":2,"place_number":1}}}'::jsonb);
+  ELSIF scenario='payout_collection_object' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":{"combination":"1-2-3","amount":1000}}}'::jsonb);
+  ELSIF scenario='payout_collection_null' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":null}}'::jsonb);
+  ELSIF scenario='payout_element_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":[42]}}'::jsonb);
+  ELSIF scenario='missing_boat' THEN
+   invalid:=invalid #- '{programs,stadiums,1,races,1,racers,6}';
+  ELSIF scenario='non_numeric_registration' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,number}','"40A1"'::jsonb);
+  ELSIF scenario='duplicate_registration' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,2,number}','"4001"'::jsonb);
+  ELSIF scenario='wrong_date' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,date}','"1999-01-01"'::jsonb);
+  ELSIF scenario='preview_wrong_boat' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"racers":{"1":{"entry_number":2}}}'::jsonb);
+  ELSIF scenario='result_duplicate_places' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":{"1":{"entry_number":1,"place_number":1},"2":{"entry_number":2,"place_number":1}}}'::jsonb);
+  ELSIF scenario='preview_racers_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"racers":[{"entry_number":1}]}'::jsonb);
+  ELSIF scenario='result_racers_array' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":[{"entry_number":1,"place_number":1}]}'::jsonb);
+  ELSIF scenario='boat_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1}','42'::jsonb);
+  ELSIF scenario='race_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1}','42'::jsonb);
+  ELSIF scenario='stadium_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1}','42'::jsonb);
+  ELSIF scenario='payout_without_result_racers' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":[{"combination":"1-2-3","amount":1000}]},"racers":{}}'::jsonb);
+  ELSIF scenario='preview_boat_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"racers":{"1":42}}'::jsonb);
+  ELSIF scenario='result_boat_scalar' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":{"1":42}}'::jsonb);
+  ELSIF scenario='five_digit_nonzero_registration' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,number}','"12345"'::jsonb);
+  ELSIF scenario='unknown_stadium_25' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,25}',invalid #> '{programs,stadiums,1}');
+  ELSIF scenario='invalid_race_13' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,13}',invalid #> '{programs,stadiums,1,races,1}');
+  ELSIF scenario='empty_races' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races}','{}'::jsonb);
+  ELSIF scenario='empty_stadiums' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums}','{}'::jsonb);
+  ELSIF scenario='invalid_bootstrap_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,weight}','"not-a-number"'::jsonb);
+  ELSIF scenario='invalid_result_payout_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"payouts":{"trifecta":[{"combination":"1-2-3","amount":"not-a-number"}]},"racers":{"1":{"entry_number":1,"place_number":1}}}'::jsonb);
+  ELSIF scenario IN ('invalid_exacta_payout_numeric',
+    'invalid_quinella_payout_numeric','invalid_trio_payout_numeric') THEN
+   invalid:=jsonb_set(invalid,
+    ARRAY['programs','stadiums','1','races','1','result'],
+    jsonb_build_object('racers',jsonb_build_object('1',
+     jsonb_build_object('entry_number',1,'place_number',1)),
+     'payouts',jsonb_build_object(
+      CASE scenario WHEN 'invalid_exacta_payout_numeric' THEN 'exacta'
+       WHEN 'invalid_quinella_payout_numeric' THEN 'quinella'
+       ELSE 'trio' END,
+      jsonb_build_array(jsonb_build_object('combination','1-2',
+       'amount','not-a-number')))));
+  ELSIF scenario='invalid_program_win_rate' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,national_win_rate}','"not-a-number"'::jsonb);
+  ELSIF scenario='invalid_preview_exhibition_st' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"racers":{"1":{"entry_number":1,"start_timing":"not-a-number"}}}'::jsonb);
+  ELSIF scenario='invalid_result_actual_course' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
+    '{"racers":{"1":{"entry_number":1,"place_number":1,"course_number":"not-a-number"}}}'::jsonb);
+  ELSIF scenario='missing_registration' THEN
+   invalid:=invalid #- '{programs,stadiums,1,races,1,racers,1,number}';
+  ELSIF scenario='wrong_stadium_number' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,stadium_number}','2'::jsonb);
+  ELSIF scenario='wrong_race_number' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,race_number}','2'::jsonb);
+  ELSIF scenario='wrong_preview_date' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"date":"1999-01-01"}'::jsonb);
+  ELSIF scenario='invalid_preview_numeric' THEN
+   invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
+    '{"wind_speed":"not-a-number"}'::jsonb);
+  END IF;
+  UPDATE pr298_document SET doc=invalid, http_status=CASE scenario WHEN 'http_503' THEN 503 WHEN 'http_429' THEN 429 WHEN 'http_500' THEN 500 ELSE 200 END,
+   raw_body=CASE WHEN scenario='invalid_json_body' THEN '{not-valid-json' ELSE NULL END;
+  UPDATE pr298_atomic_calls SET n=0;
+  IF scenario='valid' THEN
+   response:=public.bs_sync_openapi_today_atomic_candidate();
+   IF response->>'ok' IS DISTINCT FROM 'true' THEN
+    RAISE EXCEPTION 'valid program rejected: %',response;
+   END IF;
+   IF (SELECT jsonb_array_length(events) FROM pr298_atomic_calls)<>1
+    OR (SELECT jsonb_array_length(entries) FROM pr298_atomic_calls)<>6
+    OR (SELECT jsonb_array_length(preview_events) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(preview_entries) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(results) FROM pr298_atomic_calls)<>0
+    OR (SELECT jsonb_array_length(result_entries) FROM pr298_atomic_calls)<>0
+    OR (SELECT count(*) FROM pr298_atomic_calls a,
+      jsonb_array_elements(a.entries) e
+      WHERE e->>'racer_registration_no' IS NOT NULL
+        AND (e->>'boat_no')::int BETWEEN 1 AND 6)<>6
+    OR (SELECT events->0->>'course_name' FROM pr298_atomic_calls) IS DISTINCT FROM '桐生'
+   THEN RAISE EXCEPTION 'valid source mapped to wrong atomic payload'; END IF;
+  ELSE
+   BEGIN
+    PERFORM public.bs_sync_openapi_today_atomic_candidate();
+    RAISE EXCEPTION 'negative case % was accepted',scenario;
+   EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'negative case % was accepted' THEN RAISE; END IF;
+   END;
+  END IF;
+  SELECT n INTO calls FROM pr298_atomic_calls;
+  IF calls <> (CASE WHEN scenario='valid' THEN 1 ELSE 0 END) THEN
+   RAISE EXCEPTION 'atomic call count mismatch in %: %',scenario,calls;
+  END IF;
+  RAISE NOTICE 'CRON_NEGATIVE_CASE=% PASS',scenario;
+ END LOOP;
+END $$;

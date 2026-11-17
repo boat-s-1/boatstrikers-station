@@ -1,0 +1,14 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {inspectArchiveProgram} from "./archive-program-gate.mjs";
+const date="2026-11-13", manifest=[{race_date:date,course_code:2,race_no:1}];
+const racers=Object.fromEntries(Array.from({length:6},(_,i)=>[String(i+1),{entry_number:i+1,number:4001+i}]));
+const archive={programs:{stadiums:{"2":{stadium_number:2,races:{"1":{date,race_number:1,racers}}}}}};
+const inspect=(x,m=manifest)=>inspectArchiveProgram(x,date,m);
+test("realistic archive program passes against independent manifest",()=>assert.equal(inspect(archive).status,"PASS_OFFLINE_ONLY"));
+test("missing stadiums rejected",()=>assert.equal(inspect({}).status,"HOLD"));
+test("missing racers rejected",()=>assert.equal(inspect({programs:{stadiums:{"2":{races:{"1":{date,race_number:1}}}}}}).status,"HOLD"));
+test("incomplete six boats rejected",()=>assert.equal(inspect({programs:{stadiums:{"2":{races:{"1":{date,race_number:1,racers:{"1":racers["1"]}}}}}}}).status,"HOLD"));
+test("archive date mismatch rejected",()=>assert.equal(inspect({programs:{stadiums:{"2":{races:{"1":{date:"2026-11-14",race_number:1,racers}}}}}}).status,"HOLD"));
+test("independent manifest mismatch rejected",()=>assert.equal(inspect(archive,[{...manifest[0],race_no:2}]).status,"HOLD"));
+test("invalid racer registration rejected",()=>assert.equal(inspect({programs:{stadiums:{"2":{races:{"1":{date,race_number:1,racers:{"1":{entry_number:1,number:null},...Object.fromEntries(Object.entries(racers).filter(([k])=>k!=="1"))}}}}}}}).status,"HOLD"));
