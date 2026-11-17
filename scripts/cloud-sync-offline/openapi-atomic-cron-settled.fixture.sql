@@ -16,10 +16,10 @@ BEGIN
  SELECT doc INTO d FROM public.pr298_document;
  -- Negative fixture ends with malformed stadium. Restore a known-good program.
  d:=jsonb_build_object('programs',jsonb_build_object('stadiums',
-  jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
+  jsonb_build_object('1',jsonb_build_object('races',
    jsonb_build_object('1',jsonb_build_object(
     'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
-    'race_number',1,
+    'stadium_number',1,'race_number',1,
     'racers',(SELECT jsonb_object_agg(i::text,jsonb_build_object(
       'entry_number',i,'number',(4000+i)::text,
       'national_top_2_percent',42.5,'local_top_2_percent',37.2,
