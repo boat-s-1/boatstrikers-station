@@ -5,6 +5,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-race-ci.sh'
       - 'tools/agent-controller/isolated-postgres-crash-ci.sh'
       - 'tools/agent-controller/isolated-postgres-claim-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-lease-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -48,3 +49,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-crash-ci.sh
       - name: Exercise competing claim and stale-token fencing
         run: bash tools/agent-controller/isolated-postgres-claim-ci.sh
+      - name: Exercise lease expiry and monotonic fencing
+        run: bash tools/agent-controller/isolated-postgres-lease-ci.sh
