@@ -13,7 +13,12 @@ CREATE TABLE public.atomic_trigger_entries(
 CREATE TABLE public.atomic_ichika_evaluation_calls(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
 CREATE OR REPLACE FUNCTION public.evaluate_ichika_escape_surge_alerts()
 RETURNS void LANGUAGE plpgsql AS $$
-BEGIN INSERT INTO public.atomic_ichika_evaluation_calls DEFAULT VALUES; END $$;
+BEGIN
+ IF current_setting('bs_fixture.fail_ichika',true)='yes' THEN
+   RAISE EXCEPTION 'fixture injected Ichika evaluator failure';
+ END IF;
+ INSERT INTO public.atomic_ichika_evaluation_calls DEFAULT VALUES;
+END $;
 CREATE OR REPLACE FUNCTION public.trigger_evaluate_ichika_escape_surge_alerts()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public'
 AS $$
@@ -72,5 +77,21 @@ BEGIN
  IF (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>12 THEN
    RAISE EXCEPTION 'historical exhibition update invoked current-day evaluator';
  END IF;
- RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts 6, unrelated update 0, monitored replay +6, rollback, historical no-call';
+ -- Failure inside the evaluator must reject the entry statement and roll back
+ -- the parent event plus all six entries when the caller uses one transaction.
+ BEGIN
+   PERFORM set_config('bs_fixture.fail_ichika','yes',true);
+   INSERT INTO atomic_trigger_events VALUES (d,9,4);
+   INSERT INTO atomic_trigger_entries(race_date,course_code,race_no,boat_no)
+   SELECT d,9,4,b FROM generate_series(1,6) b;
+   RAISE EXCEPTION 'expected evaluator failure was not raised';
+ EXCEPTION WHEN raise_exception THEN
+   IF SQLERRM <> 'fixture injected Ichika evaluator failure' THEN RAISE; END IF;
+ END;
+ IF EXISTS (SELECT 1 FROM atomic_trigger_events WHERE race_no=4)
+    OR EXISTS (SELECT 1 FROM atomic_trigger_entries WHERE race_no=4)
+    OR (SELECT count(*) FROM atomic_ichika_evaluation_calls)<>12 THEN
+   RAISE EXCEPTION 'evaluator failure leaked event, entries or side effects';
+ END IF;
+ RAISE NOTICE 'Production Ichika trigger body fixture PASS: inserts 6, unrelated update 0, monitored replay +6, rollback, evaluator failure atomic, historical no-call';
 END $t$;
