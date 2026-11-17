@@ -43,7 +43,8 @@ BEGIN
   'five_digit_nonzero_registration','unknown_stadium_25',
   'invalid_race_13','empty_races','empty_stadiums','wrong_preview_date',
   'invalid_preview_numeric','invalid_bootstrap_numeric',
-  'invalid_result_payout_numeric','missing_registration',
+  'invalid_result_payout_numeric','invalid_exacta_payout_numeric',
+  'invalid_quinella_payout_numeric','invalid_trio_payout_numeric','missing_registration',
   'wrong_stadium_number','wrong_race_number'
  ] LOOP
   invalid:=original;
@@ -97,6 +98,18 @@ BEGIN
   ELSIF scenario='invalid_result_payout_numeric' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,result}',
     '{"payouts":{"trifecta":[{"combination":"1-2-3","amount":"not-a-number"}]},"racers":{"1":{"entry_number":1,"place_number":1}}}'::jsonb);
+  ELSIF scenario IN ('invalid_exacta_payout_numeric',
+    'invalid_quinella_payout_numeric','invalid_trio_payout_numeric') THEN
+   invalid:=jsonb_set(invalid,
+    ARRAY['programs','stadiums','1','races','1','result'],
+    jsonb_build_object('racers',jsonb_build_object('1',
+     jsonb_build_object('entry_number',1,'place_number',1)),
+     'payouts',jsonb_build_object(
+      CASE scenario WHEN 'invalid_exacta_payout_numeric' THEN 'exacta'
+       WHEN 'invalid_quinella_payout_numeric' THEN 'quinella'
+       ELSE 'trio' END,
+      jsonb_build_array(jsonb_build_object('combination','1-2',
+       'amount','not-a-number')))));
   ELSIF scenario='missing_registration' THEN
    invalid:=invalid #- '{programs,stadiums,1,races,1,racers,1,number}';
   ELSIF scenario='wrong_stadium_number' THEN
