@@ -24,10 +24,10 @@ CREATE OR REPLACE FUNCTION extensions.http_get(url text)
 RETURNS extensions.http_response LANGUAGE sql AS $$
  SELECT ROW(200,'application/json','{}'::jsonb,
  jsonb_build_object('programs',jsonb_build_object('stadiums',
-  jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
+  jsonb_build_object('1',jsonb_build_object('races',
    jsonb_build_object('1',jsonb_build_object(
     'date',(now() AT TIME ZONE 'Asia/Tokyo')::date::text,
-    'race_number',1,'subtitle','fixture',
+    'stadium_number',1,'race_number',1,'subtitle','fixture',
     'racers',(SELECT jsonb_object_agg(i::text,
       jsonb_build_object('entry_number',i,'number',(4000+i)::text,
        'name','Fixture','national_top_2_percent',40,
