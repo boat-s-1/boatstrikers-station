@@ -9,6 +9,7 @@ on:
       - 'tools/agent-controller/isolated-postgres-atomic-outbox-ci.sh'
       - 'tools/agent-controller/isolated-postgres-receipt-ci.sh'
       - 'tools/agent-controller/isolated-postgres-lifecycle-ci.sh'
+      - 'tools/agent-controller/isolated-postgres-transition-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -60,3 +61,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-receipt-ci.sh
       - name: Verify DB-only synthetic incident to receipt lifecycle
         run: bash tools/agent-controller/isolated-postgres-lifecycle-ci.sh
+      - name: Reject invalid outbox transitions in PostgreSQL
+        run: bash tools/agent-controller/isolated-postgres-transition-ci.sh
