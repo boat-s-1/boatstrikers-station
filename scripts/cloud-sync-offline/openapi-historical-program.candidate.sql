@@ -75,6 +75,11 @@ BEGIN
     FROM jsonb_to_recordset(p_entries) x(
       race_date date,course_code int,race_no int,boat_no int,racer_registration_no text)
    )
+   SELECT 1 FROM ev want WHERE
+      (SELECT count(*) FROM public.bs_race_entries actual WHERE
+        (actual.race_date,actual.course_code,actual.race_no)=
+        (want.race_date,want.course_code,want.race_no)) <> 6
+   UNION ALL
    SELECT 1 FROM en want WHERE NOT EXISTS (
     SELECT 1 FROM public.bs_race_entries actual WHERE
       (actual.race_date,actual.course_code,actual.race_no,actual.boat_no,actual.racer_registration_no)=
