@@ -13,6 +13,7 @@ on:
       - 'tools/agent-controller/isolated-node-db-adapter-ci.mjs'
       - 'tools/agent-controller/isolated-postgres-receipt-guard-ci.sh'
       - 'tools/agent-controller/isolated-node-signed-receipt-ci.mjs'
+      - 'tools/agent-controller/isolated-postgres-receipt-replay-ci.sh'
       - '.github/workflows/agent-controller-isolated-postgres-race.yml'
   workflow_dispatch:
 permissions:
@@ -72,3 +73,5 @@ jobs:
         run: bash tools/agent-controller/isolated-postgres-receipt-guard-ci.sh
       - name: Verify synthetic signature before isolated DB receipt commit
         run: node tools/agent-controller/isolated-node-signed-receipt-ci.mjs
+      - name: Reject duplicate and conflicting receipt replay identities
+        run: bash tools/agent-controller/isolated-postgres-receipt-replay-ci.sh
