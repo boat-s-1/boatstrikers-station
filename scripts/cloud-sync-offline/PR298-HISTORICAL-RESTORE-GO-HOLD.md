@@ -3,6 +3,7 @@
 **State: HOLD.** This is an operator checklist, not an authorization to deploy or execute. Do not run the candidate against production until each independent gate has evidence and explicit approval.
 
 ## Source gate
+- [ ] Complete `PR298-HISTORICAL-SOURCE-EVIDENCE-MANIFEST.md` for every original archive file and require per-file GO before any write.
 - [ ] Identify the authoritative historical *program* archive for each requested race (not today's OpenAPI endpoint and not results-only data).
 - [ ] Record source URL/provider, capture timestamp, original immutable file hash (SHA-256), collection method and license/permission for storage, processing and use.
 - [ ] Verify that a pre-race capture is allowed: archived program files may legitimately be captured **before** race day. The candidate accepts any non-null capture timestamp not over five minutes in the future; this does not prove provenance.
