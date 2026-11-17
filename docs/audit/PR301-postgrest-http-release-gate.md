@@ -42,3 +42,14 @@ The previous approved paid branch attempt was deleted without HTTP execution bec
 ### Attempt log — 2026-11-18 JST
 
 User approved US$0.01344/hour. Created `pr301-http-isolated-20261118-b` (ref `oomwtipsfpevfdxaazlw`, no production data). Confirmed `ACTIVE_HEALTHY`; no branch credential injection route was available, so **no fixture or HTTP test was run**. Deleted branch ID `6116af99-0988-4217-a023-6b3b47f5509e` and verified absence in branch list. Production untouched.
+
+## GitHub environment configuration reported by operator
+
+The operator reports creating the GitHub environment `pr301-isolated-http`, restricting it to the PR branch, leaving Required reviewers and Wait timer unset (only one account available), disabling administrator bypass, and saving protection rules. **These settings were reported in chat and are not independently verified by the current GitHub connector.** Without Required reviewers, this environment does **not** provide a human approval gate; branch restrictions alone are insufficient to protect a service-role secret from malicious edits on an allowed branch.
+
+### Additional gate before injecting a branch service-role secret
+
+- Do not add a secret to the environment while the allowed PR branch can freely edit workflow files or test scripts. A workflow on the allowed branch could exfiltrate the secret. Establish a trusted immutable execution ref or independently protected code path first, with access to the secret only after code review. A manual-only trigger does not eliminate this risk.
+- `workflow_dispatch` workflows generally must be present on the repository default branch to be discoverable for manual dispatch; adding one only to this Draft PR branch is not a complete runnable solution. Do not push a secret-bearing workflow to the default branch without explicit authorization and review.
+- Current GitHub connector cannot administer environment secrets, environment protection settings, or dispatch a workflow. Do not claim any of those operations are complete.
+- Use the existing no-secret offline CI while planning the trusted runner. Never register production service-role keys in this environment.
