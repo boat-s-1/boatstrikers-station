@@ -20,11 +20,11 @@ test('fail closed on unknown roles and audiences', () => {
   assert.equal(canReadAudience('public','admin'),false);
 });
 test('replies paid-only and lock overrides', () => {
-  assert.equal(canReply({audience:'public'},'free'),false);
-  assert.equal(canReply({audience:'public'},'paid'),true);
-  assert.equal(canReply({audience:'members'},'paid'),true);
-  assert.equal(canReply({audience:'paid'},'paid'),true);
-  assert.equal(canReply({audience:'public',locked:true},'paid'),false);
+  assert.equal(canReply({audience:'public',replyPolicy:'paid'},'free'),false);
+  assert.equal(canReply({audience:'public',replyPolicy:'paid'},'paid'),true);
+  assert.equal(canReply({audience:'members',replyPolicy:'paid'},'paid'),true);
+  assert.equal(canReply({audience:'paid',replyPolicy:'paid'},'paid'),true);
+  assert.equal(canReply({audience:'public',replyPolicy:'paid',locked:true},'paid'),false);
   assert.equal(canReply({audience:'public',replyPolicy:'disabled'},'paid'),false);
 });
 test('public search visibility excludes member-only', () => {
@@ -43,4 +43,9 @@ test('reply rejects null thread and ambiguous lock state', () => {
   assert.equal(canReply(null,'paid'),false);
   assert.equal(canReply(undefined,'paid'),false);
   assert.equal(canReply({audience:'public',locked:'false'},'paid'),false);
+});
+
+test('missing reply policy defaults to disabled', () => {
+  assert.equal(canReply({audience:'public'},'paid'),false);
+  assert.equal(canReply({audience:'public',replyPolicy:'paid'},'paid'),true);
 });
