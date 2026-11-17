@@ -1,0 +1,23 @@
+name: Hatsune Cron Log Finish Guard Offline
+on:
+  push:
+    branches:
+      - codex/hatsune-cron-log-finish-guard-20261117
+  pull_request:
+    paths:
+      - lib/hatsuneCronLog.js
+      - tests/hatsune-cron-log-finish-contract.test.mjs
+      - .github/workflows/hatsune-cron-log-finish-guard.yml
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Offline source contract (no secrets or network fetch)
+        run: node --test tests/hatsune-cron-log-finish-contract.test.mjs
