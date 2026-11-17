@@ -4,7 +4,7 @@ test('empty deterministic head',()=>assert.equal(build([]).head_hash,'0'.repeat(
 test('chain contains records',()=>assert.equal(build([a,b]).chain.length,2));
 test('chain verifies unchanged',()=>assert.equal(verify([a,b],build([a,b]).head_hash).matches,true));
 test('tampered record fails verification',()=>assert.equal(verify([{...a,code:'ok'},b],build([a,b]).head_hash).matches,false));
-test('reordered records fail verification',()=>assert.equal(verify([b,a],build([a,b]).head_hash).matches,false));
+test('reordered records are rejected',()=>assert.throws(()=>verify([b,a],build([a,b]).head_hash),/out of order evidence/));
 test('removed record fails verification',()=>assert.equal(verify([a],build([a,b]).head_hash).matches,false));
 test('origin not authenticated',()=>assert.equal(build([a]).origin_authenticated,false));
 test('storage not proven immutable',()=>assert.equal(build([a]).immutable_storage_verified,false));
@@ -14,3 +14,5 @@ test('reject article body',()=>assert.throws(()=>build([{...a,article_body:'body
 test('reject invalid id',()=>assert.throws(()=>build([{...a,event_id:'bad'}]),/invalid record/));
 test('reject invalid timestamp',()=>assert.throws(()=>build([{...a,at:'now'}]),/invalid record/));
 test('reject invalid hash',()=>assert.throws(()=>verify([a],'bad'),/invalid expected hash/));
+
+test('duplicate evidence IDs rejected',()=>assert.throws(()=>build([a,{...b,event_id:a.event_id}]),/duplicate evidence id/));
