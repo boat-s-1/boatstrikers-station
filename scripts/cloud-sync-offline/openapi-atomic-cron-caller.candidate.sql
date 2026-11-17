@@ -50,9 +50,9 @@ BEGIN
   SELECT 1 WHERE
    (SELECT count(*)=0 FROM race)
    OR EXISTS(SELECT 1 FROM stadium WHERE sk !~ '^(?:[1-9]|1[0-9]|2[0-4])$'
-      OR sv->>'stadium_number' IS DISTINCT FROM sk
       OR jsonb_typeof(sv->'races') IS DISTINCT FROM 'object')
    OR EXISTS(SELECT 1 FROM race WHERE rk !~ '^(?:[1-9]|1[0-2])$'
+      OR rv->>'stadium_number' IS DISTINCT FROM sk
       OR rv->>'race_number' IS DISTINCT FROM rk
       OR rv->>'date' IS DISTINCT FROM v_date::text
       OR jsonb_typeof(rv->'racers') IS DISTINCT FROM 'object'
