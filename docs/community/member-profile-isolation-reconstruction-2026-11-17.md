@@ -21,3 +21,13 @@
 
 ## 実施条件
 隔離ブランチは前回削除済み。再作成は別途コスト確認が必要。今回の文書は読み取り専用調査に基づき、DB変更を伴わない。
+
+## 追加確定：新規登録の実経路と監査トリガー
+
+- `auth.users` の AFTER INSERT トリガー `on_boatstrikers_member_signup` は、SECURITY DEFINER 関数 `public.handle_boatstrikers_member_signup()` を呼ぶ。
+- 登録関数は `bs_member_profiles` に `user_id`、`email`、`display_name`、`plan='beta_premium'`、`membership_status='active'`、`beta_member=true`、規約・プライバシー同意時刻を設定する。
+- 重複時の `ON CONFLICT (user_id) DO UPDATE` は email/display_name/同意時刻/updated_at を更新し、プランや管理者フラグを変更しない。
+- `bs_log_member_plan_change()` はプラン変更を `bs_member_plan_events` に**記録するだけ**で拒否しない。
+- `touch_bs_member_profiles_updated_at()` は updated_at を更新するだけで特権列を保護しない。
+- したがって、通常会員に対する INSERT/UPDATE 権限を絞る場合も、SECURITY DEFINER の登録経路を維持できるかを隔離で検証する。新規登録を停止させないことが必須。
+- 現行の新規登録処理は全員を beta_premium / active / beta_member に初期化する。掲示板の「有料会員」をこれらの値だけで判定すると、課金済みユーザーと区別できない可能性がある。課金の正本とベータ特典の取り扱いは**未確定**。
