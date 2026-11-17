@@ -66,3 +66,15 @@ The result backfill's direct definition has no textual `pg_advisory` call. The p
 ### Backfill predicate screening
 
 A read-only textual screen of the live `bs_backfill_missing_results` definition confirms it contains `ON CONFLICT`, `result_status`, `confirmed`, `COALESCE`, `api_result_source`, and `synced_at`, but no textual `pg_advisory`. **Keyword presence does not establish that a confirmed result is immutable** or that source priority is correct. Exact assignment/predicate review and a conflict fixture remain required.
+
+## Full live backfill function review (read-only, 2026-11-17)
+
+Inspected the complete production definition of `public.bs_backfill_missing_results(p_date date)`. This **narrows** the earlier provisional risk statement: the function does **not** overwrite an existing `bs_race_results` row in its direct SQL.
+
+- Candidate selection joins `bs_race_events` to `bs_race_results` and requires `r.id IS NULL`; it also requires no cancellation, three valid trifecta digits, non-null payout, six entries and six non-null actual start timings.
+- It inserts `bs_race_results` with `result_status='confirmed'`, `api_result_source='event_auto_backfill'`, and `ON CONFLICT (race_date,course_code,race_no) DO NOTHING`. Concurrent insertion of the same result key therefore does not update an existing result via this statement.
+- It separately updates `bs_race_events.result_available = true` when a matching confirmed, finished result exists. This is an event flag update, not a result-value overwrite.
+- It accepts a supplied date between 2024-01-01 and current JST date, inclusive; the **scheduled** calls pass previous JST date. Other callers could supply current date.
+- It has no explicit advisory lock. Trigger side effects, stale source data and simultaneous candidate writes still need an isolated test. The earlier statement that this backfill is a same-table writer remains true, but **it should not be characterized as a confirmed-result overwriter** based on its current definition.
+
+This review changes no production functions or schedules. Continue HOLD until source-priority, trigger fan-out, in-flight jobs and rollback are verified.
