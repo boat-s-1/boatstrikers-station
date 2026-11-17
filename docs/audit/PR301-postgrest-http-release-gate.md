@@ -53,3 +53,13 @@ The operator reports creating the GitHub environment `pr301-isolated-http`, rest
 - `workflow_dispatch` workflows generally must be present on the repository default branch to be discoverable for manual dispatch; adding one only to this Draft PR branch is not a complete runnable solution. Do not push a secret-bearing workflow to the default branch without explicit authorization and review.
 - Current GitHub connector cannot administer environment secrets, environment protection settings, or dispatch a workflow. Do not claim any of those operations are complete.
 - Use the existing no-secret offline CI while planning the trusted runner. Never register production service-role keys in this environment.
+
+## Secure runner design decision (no production changes)
+
+**Recommended approach: trusted default-branch runner, not a PR-branch workflow with secrets.** The trusted runner must be reviewed separately before it is installed on the default branch; this PR does not authorize a default-branch change. A manually dispatched job can use a protected environment, but its executable script and dependencies must come from a reviewed, pinned commit rather than checking out a mutable PR head. Restrict the job to an explicit allowlist of the expected test script SHA and branch ref, refuse the production project ref, and reject missing/empty branch-only credentials before network access.
+
+Before the protected secret is registered, confirm that users able to modify the trusted workflow, its reusable actions, or its checked-out script cannot use that privilege to expose it. A single-account repository without required reviewers cannot provide independent human approval; if this trust boundary cannot be established, **HOLD** and run the branch-only HTTP test interactively through an authenticated trusted browser or an alternative isolated runner instead. No automated path should silently promote this PR to main.
+
+The test itself must remain bounded to the branch-only table: verify the fixture's table identity and zero-row baseline before testing; record only HTTP status codes and schema-safe assertions; verify final zero rows; delete the disposable branch even on test failure. Keep branch credentials out of stdout, artifacts, PR comments, and version control. The environment `pr301-isolated-http` is **not yet approved for secret registration**.
+
+**Release evidence still missing:** actual branch-only service-role credential injection, successful singular PATCH HTTP 200/object and 406/PGRST116 responses, cleanup and deletion confirmation. Until all are observed, retain Draft/HOLD.
