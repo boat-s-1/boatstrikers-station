@@ -23,3 +23,7 @@ test('returns article windows',()=>assert.match(executable,/AS windows_with_arti
 test('returns temporal article matches',()=>assert.match(executable,/AS temporal_article_matches/));
 test('does not select article body',()=>assert.doesNotMatch(executable,/\b(n\.body|n\.content|n\.title)\b/i));
 test('does not expose raw run identifiers',()=>assert.doesNotMatch(executable,/\b(r\.id|n\.id)\b/i));
+
+test('bounded articles materialized once',()=>assert.match(executable,/bounded_articles AS MATERIALIZED/));
+test('run windows materialized',()=>assert.match(executable,/run_windows AS MATERIALIZED/));
+test('article scan bounded by window',()=>assert.match(executable,/n\.created_at >= b\.window_start/));
