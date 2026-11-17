@@ -8,6 +8,7 @@ on:
       - lib/hatsuneCronLog.js
       - app/api/cron/hatsune-news-pipeline/route.js
       - tests/hatsune-cron-log-*.test.mjs
+      - tests/hatsune-cron-postgrest-http.mjs
       - tests/sql/hatsune-cron-log-*.sql
       - .github/workflows/hatsune-cron-log-finish-guard.yml
 permissions:
@@ -23,6 +24,8 @@ jobs:
           node-version: '22'
       - name: Offline source contract (no secrets or network fetch)
         run: node --test tests/hatsune-cron-log-*.test.mjs
+      - name: Syntax check of isolated HTTP verification (no HTTP performed)
+        run: node --check tests/hatsune-cron-postgrest-http.mjs
   isolated-postgres:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
