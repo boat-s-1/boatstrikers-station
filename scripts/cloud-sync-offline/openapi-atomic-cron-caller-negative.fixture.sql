@@ -13,7 +13,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true);
 END $$;
 -- The HTTP mock reads a session-local document; no real network is possible.
-CREATE TABLE public.pr298_document (doc jsonb NOT NULL);
+CREATE TABLE public.pr298_document (doc jsonb NOT NULL, http_status integer NOT NULL DEFAULT 200);
 INSERT INTO pr298_document
 SELECT jsonb_build_object('programs',jsonb_build_object('stadiums',
  jsonb_build_object('1',jsonb_build_object('stadium_number',1,'races',
@@ -25,10 +25,10 @@ SELECT jsonb_build_object('programs',jsonb_build_object('stadiums',
  ))))));
 CREATE OR REPLACE FUNCTION extensions.http_get(url text)
 RETURNS extensions.http_response LANGUAGE plpgsql AS $$
-DECLARE d jsonb;
+DECLARE d jsonb; status_code integer;
 BEGIN
- SELECT doc INTO d FROM public.pr298_document LIMIT 1;
- RETURN ROW(200,'application/json','{}'::jsonb,d::text)::extensions.http_response;
+ SELECT doc,http_status INTO d,status_code FROM public.pr298_document LIMIT 1;
+ RETURN ROW(status_code,'application/json','{}'::jsonb,d::text)::extensions.http_response;
 END $$;
 DO $$
 DECLARE original jsonb; invalid jsonb; response jsonb; calls integer; scenario text;
@@ -45,7 +45,7 @@ BEGIN
   'invalid_preview_numeric','invalid_bootstrap_numeric',
   'invalid_result_payout_numeric','invalid_exacta_payout_numeric',
   'invalid_quinella_payout_numeric','invalid_trio_payout_numeric','missing_registration',
-  'wrong_stadium_number','wrong_race_number',
+  'wrong_stadium_number','wrong_race_number','http_503',
   'invalid_program_win_rate','invalid_preview_exhibition_st',
   'invalid_result_actual_course'
  ] LOOP
@@ -112,6 +112,8 @@ BEGIN
        ELSE 'trio' END,
       jsonb_build_array(jsonb_build_object('combination','1-2',
        'amount','not-a-number')))));
+  ELSIF scenario='http_503' THEN
+   UPDATE pr298_document SET http_status=503;
   ELSIF scenario='invalid_program_win_rate' THEN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,racers,1,national_win_rate}','"not-a-number"'::jsonb);
   ELSIF scenario='invalid_preview_exhibition_st' THEN
@@ -133,7 +135,7 @@ BEGIN
    invalid:=jsonb_set(invalid,'{programs,stadiums,1,races,1,preview}',
     '{"wind_speed":"not-a-number"}'::jsonb);
   END IF;
-  UPDATE pr298_document SET doc=invalid;
+  UPDATE pr298_document SET doc=invalid, http_status=CASE WHEN scenario='http_503' THEN 503 ELSE 200 END;
   UPDATE pr298_atomic_calls SET n=0;
   IF scenario='valid' THEN
    response:=public.bs_sync_openapi_today_atomic_candidate();
