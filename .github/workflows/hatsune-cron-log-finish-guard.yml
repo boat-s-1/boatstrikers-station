@@ -8,6 +8,7 @@ on:
       - lib/hatsuneCronLog.js
       - tests/hatsune-cron-log-finish-contract.test.mjs
       - tests/hatsune-cron-log-finish-behavior.test.mjs
+      - tests/hatsune-cron-log-finish-stateful.test.mjs
       - .github/workflows/hatsune-cron-log-finish-guard.yml
 permissions:
   contents: read
