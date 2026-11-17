@@ -43,3 +43,14 @@ Date: 2026-11-17. Design only; **no production changes authorized**.
 ## Decision
 
 Keep current strict **fail-closed** candidate unchanged until the quarantine ledger, transactional semantics, and downstream settlement invariants are implemented and proven. Do not deploy a split-batch shortcut. **HOLD** production DB/Cron/Vercel/Windows and paid infrastructure.
+
+## Additional production function evidence (read-only, 2026-11-17)
+
+Inspected `pg_get_functiondef` for `public.bs_apply_openapi_results` and `public.bs_settle_theory_recommendations_from_event` (no execution or write).
+
+- `bs_apply_openapi_results` upserts `bs_race_results` using `coalesce(excluded.trifecta_result, bs_race_results.trifecta_result)` and analogous expressions for payout and finishing boats. **An incoming non-null result can overwrite an existing confirmed result**, even though `result_status` retains the existing value. A blanket claim that historical/confirmed results cannot be overwritten is **not established**.
+- It also updates `bs_race_events.trifecta` and `trifecta_payout`, potentially firing the recommendation settlement trigger.
+- `bs_settle_theory_recommendations_from_event` skips only when `new.trifecta IS NULL`; otherwise it calls `bs_settle_theory_recommendation` for non-settled recommendations. Its called function and any external side effects still require inspection.
+- A quarantined result omitted from `p_results` will not directly invoke result updates for that race in this function, but consumers may still see an older confirmed result; **quarantine cannot be represented merely by absence**.
+
+**New mandatory gate:** implement and test an explicit immutable-confirmed-result conflict policy, including comparison of existing confirmed values and provider capture timestamp. Reject conflicts without rewriting historical outcomes; record an observable conflict. Test one existing confirmed result with contradictory incoming non-null result and verify no change, including downstream settlement. Do not deploy until this is resolved.
