@@ -50,3 +50,9 @@ test('public thread detail handles failed database requests without rendering co
   assert.match(code, /if \(error \|\| !isPublicThread\(data\)\) return null/);
   assert.match(code, /if \(!thread\) notFound\(\)/);
 });
+
+test('official post composer defaults to replies disabled', () => {
+  const code = read('app/community/admin/PostComposer.jsx');
+  assert.match(code, /\[reply_policy, setReplyPolicy\] = useState\('disabled'\)/);
+  assert.doesNotMatch(code, /\[reply_policy, setReplyPolicy\] = useState\('paid'\)/);
+});
