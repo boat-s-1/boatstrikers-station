@@ -6,6 +6,8 @@ on:
       - 'scripts/cloud-sync-offline/openapi-atomic-*.sql'
       - 'scripts/cloud-sync-offline/SIX-TABLE-ISOLATION-CANDIDATE.sql'
       - 'scripts/cloud-sync-offline/check-isolation-trigger-parity.py'
+      - 'scripts/cloud-sync-offline/extract-isolation-bootstrap.py'
+      - 'scripts/cloud-sync-offline/openapi-captured-bootstrap.*.sql'
       - '.github/workflows/pr298-v3-postgres-fixture.yml'
   workflow_dispatch:
 permissions:
@@ -41,6 +43,13 @@ jobs:
         run: python3 scripts/cloud-sync-offline/check-isolation-trigger-parity.py
       - name: Check PostgreSQL client
         run: psql --version
+      - name: Verify captured production bootstrap RPC in separate disposable database
+        run: |
+          python3 scripts/cloud-sync-offline/extract-isolation-bootstrap.py
+          psql -X -v ON_ERROR_STOP=1 -d postgres -c 'CREATE DATABASE pr298_bootstrap_fixture'
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.test.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f /tmp/pr298-captured-bootstrap.sql
+          psql -X -v ON_ERROR_STOP=1 -d pr298_bootstrap_fixture -f scripts/cloud-sync-offline/openapi-captured-bootstrap.assert.sql
       - name: Install disposable fixture schema
         run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/completeness-v3-postgres-fixture.setup.sql
       - name: Install candidate functions in isolated PostgreSQL
