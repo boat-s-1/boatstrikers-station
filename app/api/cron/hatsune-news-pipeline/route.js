@@ -144,7 +144,8 @@ export async function GET(request) {
     const ok = errorCount === 0;
 
     if (logContext) {
-      await finishHatsuneCronRun({
+      try {
+        await finishHatsuneCronRun({
         ...logContext,
         status: ok ? "success" : "partial",
         metrics: {
@@ -163,7 +164,14 @@ export async function GET(request) {
           [...collectionErrors, ...mediaErrors, ...generalErrors].map((x) => x?.message || String(x)).join(" | ") ||
           null,
         details: { collection, media, mediaError, general, generalError, fallback, fallbackError, aiErrors },
-      });
+        });
+      } catch (finishError) {
+        // Publishing may already have committed: do not convert a completed run
+        // into an HTTP 500 merely because its diagnostic log could not be saved.
+        console.error("Hatsune cron log finish transport failed", {
+          code: finishError?.code || "TRANSPORT_FAILURE",
+        });
+      }
     }
 
     return NextResponse.json({
