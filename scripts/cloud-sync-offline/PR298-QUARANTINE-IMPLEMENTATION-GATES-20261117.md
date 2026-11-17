@@ -64,3 +64,7 @@ A SELECT-only query of `pg_tables` confirms `rowsecurity=true` on all four relat
 Files `openapi-result-quarantine.prototype.mjs` and `openapi-result-quarantine.prototype.test.mjs` were added on the Draft PR branch (commits `9de474ca`, `5293b92a`, `58557069`). They implement a **pure, offline result-layer classifier** and synthetic tests for pending, accepted, multi-payout, malformed payout, missing finish, tied finish, mixed good/bad results and non-mutation. The test workflow is configured to run `scripts/cloud-sync-offline/*.test.mjs`; verify CI status before claiming PASS.
 
 **Not implemented:** full race/program gate, strict source identity/date validation, canonical payout combination validation, quarantine ledger/DDL/RLS, transactional writer integration, triggers/settlement suppression, replay, concurrency control and real provider data. The classifier must **not** be used to bypass the existing fail-closed caller. A returned `ACCEPT` is not authorization to write without the other gates. Q01–Q12 remain unproven end-to-end.
+
+## Classifier hardening (2026-11-17)
+
+Pure prototype now rejects payout values outside JavaScript's safe integer range and finish racer keys/positions outside 1–6. Commits `b1a4c7a2` and `19e3a340` add implementation and tests. This remains an **offline prototype**. It is not the SQL caller's canonical validator, is not integrated with an atomic quarantine ledger, and does not validate every possible provider field. Its ACCEPT result is not a standalone production-write permission.
