@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reconcileRunArticleWindow as reconcile} from './cron-article-window-reconciliation.mjs';
+test('running with articles is temporal evidence only',()=>{const x=reconcile({runStatus:'running',articleCount:12,markedPublishedCount:11});assert.equal(x.evidence_kind,'temporal_only');assert.equal(x.attribution,'unproven');assert.equal(x.completion,'unknown')});
+test('zero articles cannot prove no side effects',()=>{const x=reconcile({runStatus:'running',articleCount:0,markedPublishedCount:0});assert.equal(x.no_side_effects_proven,false);assert.equal(x.automatic_replay_allowed,false)});
+test('partial records cannot authorize replay',()=>assert.equal(reconcile({runStatus:'partial',articleCount:3,markedPublishedCount:2}).automatic_replay_allowed,false));
+test('published flag does not authorize republish',()=>assert.equal(reconcile({runStatus:'success',articleCount:1,markedPublishedCount:1}).automatic_republish_allowed,false));
+test('unpublished record still cannot be attributed',()=>assert.equal(reconcile({runStatus:'error',articleCount:1,markedPublishedCount:0}).attribution,'unproven'));
+test('reject negative article count',()=>assert.throws(()=>reconcile({runStatus:'running',articleCount:-1,markedPublishedCount:0}),/invalid article count/));
+test('reject published greater than articles',()=>assert.throws(()=>reconcile({runStatus:'running',articleCount:1,markedPublishedCount:2}),/invalid published count/));
+test('reject fractional counts',()=>assert.throws(()=>reconcile({runStatus:'running',articleCount:1.5,markedPublishedCount:1}),/invalid article count/));
+test('reject unrecognized run status',()=>assert.throws(()=>reconcile({runStatus:'stalled',articleCount:0,markedPublishedCount:0}),/invalid run status/));
