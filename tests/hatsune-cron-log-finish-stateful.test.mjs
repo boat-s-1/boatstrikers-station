@@ -15,10 +15,10 @@ function harness(rows,{deny=false}={}){
     assert.equal(column,'id');
     return {select(fields){
      assert.equal(fields,'id');
-     return {async maybeSingle(){
+     return {async single(){
       if(deny)return {data:null,error:{code:'42501',message:'private-db-details'}};
       const row=rows.find(x=>x.id===id);
-      if(!row)return {data:null,error:null};
+      if(!row)return {data:null,error:{code:'PGRST116',message:'zero rows'}};
       Object.assign(row,patch);
       return {data:{id:row.id},error:null};
      }};
@@ -38,7 +38,7 @@ test('existing running row becomes partial and retains counters',async()=>{
 });
 test('unknown id leaves existing rows unchanged and emits missing-row log',async()=>{
  const rows=[{id:1,status:'running'}],h=harness(rows);await h.run(999);
- assert.equal(rows[0].status,'running');assert.equal(h.logs[0][1].code,'NO_MATCHING_ROW');
+ assert.equal(rows[0].status,'running');assert.equal(h.logs[0][1].code,'PGRST116');
 });
 test('RLS-like denial leaves row running and emits code without error details',async()=>{
  const rows=[{id:1,status:'running'}],h=harness(rows,{deny:true});await h.run(1);
