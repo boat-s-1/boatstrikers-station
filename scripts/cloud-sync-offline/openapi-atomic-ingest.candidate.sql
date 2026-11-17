@@ -153,6 +153,36 @@ BEGIN
  ) THEN
    RAISE EXCEPTION 'OpenAPI result conflicts with persisted result: no writes';
  END IF;
+ -- Guard already persisted boat-level finish data as well. A conflicting
+ -- non-null value is not an update: it requires explicit reconciliation.
+ IF EXISTS (
+   WITH incoming AS (
+    SELECT x.race_date,x.course_code,x.race_no,x.boat_no,
+      x.arrival_order,x.finish_place,x.actual_course,x.actual_st,x.result_note
+    FROM jsonb_to_recordset(p_result_entries) AS x(
+     race_date date,course_code smallint,race_no smallint,boat_no smallint,
+     arrival_order integer,finish_place text,actual_course integer,
+     actual_st numeric,result_note text)
+   )
+   SELECT 1 FROM incoming i
+   JOIN public.bs_race_entries e ON
+    e.race_date=i.race_date AND e.course_code=i.course_code
+    AND e.race_no=i.race_no AND e.boat_no=i.boat_no
+   WHERE (i.arrival_order IS NOT NULL AND e.arrival_order IS NOT NULL
+       AND i.arrival_order<>e.arrival_order)
+      OR (i.finish_place IS NOT NULL AND e.finish_place IS NOT NULL
+       AND i.finish_place<>e.finish_place)
+      OR (i.actual_course IS NOT NULL AND e.actual_course IS NOT NULL
+       AND i.actual_course<>e.actual_course)
+      OR (i.actual_st IS NOT NULL AND (
+       (e.actual_st IS NOT NULL AND i.actual_st<>e.actual_st)
+       OR (e.actual_start_timing IS NOT NULL
+           AND i.actual_st<>e.actual_start_timing)))
+      OR (i.result_note IS NOT NULL AND e.result_note IS NOT NULL
+       AND i.result_note<>e.result_note)
+ ) THEN
+   RAISE EXCEPTION 'OpenAPI boat result conflicts with persisted result: no writes';
+ END IF;
  v_bootstrap:=public.bs_apply_openapi_bootstrap(p_events,p_entries,p_synced_at);
  v_preview_entries:=public.bs_apply_openapi_preview(p_preview_entries,p_synced_at);
  v_preview_events:=public.bs_apply_openapi_preview_events(p_preview_events,p_synced_at);
