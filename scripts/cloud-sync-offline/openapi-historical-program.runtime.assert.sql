@@ -7,7 +7,7 @@ DECLARE
 BEGIN
  INSERT INTO public.bs_race_results
   (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
- VALUES(d,10,10,'2-1-4',9450,'settled',now());
+ VALUES(d,10,10,'2-1-4',9450,'confirmed',now());
  SELECT to_jsonb(r) INTO before_result FROM public.bs_race_results r
  WHERE (race_date,course_code,race_no)=(d,10,10);
  ev:=jsonb_build_array(jsonb_build_object('race_date',d,'course_code',10,'race_no',10));
@@ -96,7 +96,7 @@ BEGIN
  -- roll back attempted changes to this race.
  INSERT INTO public.bs_race_results
   (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
- VALUES (DATE '2026-11-13',10,9,'1-2-3',1000,'settled',now());
+ VALUES (DATE '2026-11-13',10,9,'1-2-3',1000,'confirmed',now());
  INSERT INTO public.bs_race_events(id,race_date,course_code,race_no)
  VALUES (991101,DATE '2026-11-13',10,9);
  INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
@@ -118,7 +118,7 @@ BEGIN
  -- A one-boat partial existing program must never be silently completed.
  INSERT INTO public.bs_race_results
   (race_date,course_code,race_no,trifecta_result,trifecta_payout,result_status,synced_at)
- VALUES (DATE '2026-11-13',10,8,'1-2-3',1000,'settled',now());
+ VALUES (DATE '2026-11-13',10,8,'1-2-3',1000,'confirmed',now());
  INSERT INTO public.bs_race_events(id,race_date,course_code,race_no)
  VALUES (991103,DATE '2026-11-13',10,8);
  INSERT INTO public.bs_race_entries(id,race_date,course_code,race_no,boat_no,racer_registration_no)
