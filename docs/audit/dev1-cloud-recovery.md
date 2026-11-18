@@ -307,3 +307,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 同一レースキーの一意インデックスがeventsに4本、entriesに3本ある（PKを除く）。INSERT性能は合成スキーマより重くなる可能性があり、変更せず隔離環境で計測が必要。
 - 実トリガーを確認。出走行のAFTER INSERTには `trg_bs_track_entry_first_seen` と `trg_ichika_escape_surge_on_exhibition_update` が、開催行のAFTER INSERTには `trg_settle_theory_recommendations` が含まれる。合成PGlite fixtureはこれらの本番関数の挙動・通知や負荷を再現していない。実トリガーを含む隔離試験と停止条件が本番切替前の必須ゲート。
 - この確認はカタログ読み取りのみ。制約の存在は統合SQLが実DBで動作する証拠ではない。本番DB/Cron/Vercelに変更なし。
+
+## 前日一括投入のトリガー評価条件 2026-11-19 JST
+
+- PR #298 の既存監査 `PR298-ICHIKA-TRIGGER-FANOUT-AUDIT-20261118.md` を照合。`trg_ichika_escape_surge_on_exhibition_update` は出走行のAFTER INSERTにも発火するが、ラッパーは投入行が**現在JST日付**のときだけ全日アラート評価を実行すると記録されている。前日投入候補は翌日のレースのみ受け付けるため、通常時はこの分岐に入らない見込み。ただしローカル合成fixtureに本番ラッパーはなく、実負荷・日付境界は隔離再生で証明が必要。
+- 他に出走行のfirst-seen記録、開催行の理論精算、展示ガードがINSERT時に発火する。前日候補は結果・払戻・展示値を書かない設計だが、実関数の副作用とトランザクション巻戻しを隔離環境で計測するまで本番設置しない。
+- サポートSU-557322に新たな人手診断返信なし。課金する隔離環境の再試行は、出典ある初期スキーマと失敗点の確認後に範囲・時間上限を示して再承認する。
