@@ -24,7 +24,11 @@ export function assessExhibitionDeadline({ event, entries, now }) {
       return { status: "INVALID" };
     }
     boats.add(row.boat_no);
-    if (row.exhibition_synced_at == null) continue;
+    // A general row sync must never stand in for an actual exhibition value.
+    if (row.exhibition_time == null || row.exhibition_time === "" ||
+        row.exhibition_synced_at == null) continue;
+    const exhibitionTime = Number(row.exhibition_time);
+    if (!Number.isFinite(exhibitionTime) || exhibitionTime <= 0) return { status: "INVALID" };
     const syncedMs = Date.parse(row.exhibition_synced_at);
     if (!explicitZone(row.exhibition_synced_at) || !Number.isFinite(syncedMs) ||
         syncedMs > nowMs || jstDate(syncedMs) !== raceDate) return { status: "INVALID" };
