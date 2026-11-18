@@ -45,6 +45,7 @@ const RACE_STATUS_LABELS = {
 };
 
 function getRaceStatusLabel(event) {
+  if (event?.program_source === "previous_day_snapshot") return "前日出走表";
   const rawStatus = event?.race_status ?? event?.status ?? null;
   if (!rawStatus) return null;
   return RACE_STATUS_LABELS[String(rawStatus).trim().toLowerCase()] ?? null;
