@@ -248,3 +248,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - [Draft #306](https://github.com/boat-s-1/boatstrikers-station/pull/306) の `site-previous-day-save-plan.mjs` に、独立した `expectedRaces` / `expectedEntries` を必須とする照合を追加。候補が自己申告する `PASS_OFFLINE_ONLY` と自身のレース一覧だけでは追加行を返さない。公式一覧の別レース、5艇、登録番号不一致はHOLD。
 - ローカルNodeの対象テスト4件成功（新規1件を含む）。この実行は模擬入力のみで、フルスイート・GitHub Actions・実DB・公式APIの合格証拠ではない。実書込の前には照合済み一覧を信頼された取得処理から渡す接続と全件検証が必要。
 - PR #306 HEAD `259baf9ad173fe3dbea7479bc21009027f02eba4`。本番環境の変更なし。
+
+## 前日保存ゲート変更後の全件再試験 2026-11-18 JST
+
+- GitHubのDraft #306 HEAD `259baf9ad173fe3dbea7479bc21009027f02eba4` を取得し、`node --test scripts/cloud-sync-offline/*.test.mjs` を実行。**156件成功、失敗・スキップ0**。公式一覧ゲート追加後の全オフラインNodeテストを再確認した。
+- SQL候補 `site-previous-day-program.candidate.sql` のPGlite隔離試験は、環境に `@electric-sql/pglite` がなく未実施。Nodeの合格をSQL関数や実Supabaseでの書込保証と扱わない。
+- 公式データの実取得・提供元許諾、前夜全件反映、展示の締切10分前到達、移行全履歴の隔離再生は未完了。本番DB/Cron/Vercelへの変更なし。
