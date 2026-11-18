@@ -229,3 +229,10 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - Supabase project `rzosrbkyniyedolhkgxo` の開発ブランチ一覧を読み取りで確認。`gamagori-pr294-phase13` は `MIGRATIONS_FAILED`、`pr301-http-isolated-20261118-c` も `MIGRATIONS_FAILED`。いずれも `ACTIVE_HEALTHY` のプレビュー参照を持つ。後者は開発②に属するため、この開発①で変更・削除しない。前者も所有・課金・利用状況を確認するまで操作しない。
 - サポート SU-557322 をメール検索。確認できた返信は受付とアカウント連携依頼の自動返信まで。最初に失敗したMigrationの診断記録はまだ得られていない。
 - この確認は読み取りのみ。本番DB、Cron、Vercel、隔離ブランチには変更なし。
+
+## Migrationと提供元の停止条件の再照合 2026-11-18 JST
+
+- [PR #298 隔離ブランチ障害記録](https://github.com/boat-s-1/boatstrikers-station/pull/298) によれば、承認済みの `pr298-atomic-isolation-20261118` は `MIGRATIONS_FAILED` となり、削除済み。実際に失敗したMigration名・SQLSTATE・ログは未取得で、隔離DBへのSQL試験は実行できなかった。別の古いブランチの `20260820210127` における `bs_race_results` 不在は参考証拠であり、PR #298の原因と断定しない。
+- 本番の保存済みMigrationは2026-08-19からで、最初の12件が既存の主要テーブルを参照する。元の作成時点を証明する初期スキーマは未発見。現行カタログから作った隔離候補は歴史的な初期状態の証拠にはならない。日付とハッシュで追跡できる当時のバックアップ・Git履歴等を探し、隔離PostgreSQLで初期状態から全Migrationを順番に再生することが先決。
+- 2026-11-11付の提供元メールで問題になったのは BRDB-API の日付だけで絞る `RACEDTL` の5分間隔大量取得。公式Q011を指定し、提供データの更新は朝・夜の1日2回と説明された。停止済みWindows側BRDBの取得をそのままクラウドに移さない。既存のSupabase OpenAPI 3分Cronは別のエンドポイントであり、同じ制限と断定せず、独自の取得条件を確認する。両方のCron/APIに変更なし。
+- 次に必要な証拠は、サポート SU-557322 の正確な失敗ログ、由来を証明できる初期スキーマ、Q011の実パラメータと許容利用条件。これらを確認した後、課金上限と削除条件を付けた隔離環境の再試行案を提示する。本番Cron切替・DB書き込み・Vercel公開は各々別の承認対象。
