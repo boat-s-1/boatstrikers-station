@@ -260,3 +260,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - ローカルの一時的なPGlite PostgreSQL 18.6で `node scripts/cloud-sync-offline/site-previous-day-program.pglite-fixture.mjs` がPASS。前日候補SQLの構造、JST日替わり、6艇欠損・登録衝突でのロールバック、完全保存後の追加0件、関数実行権限を検証。
 - Draft #306のfixtureに、1Rと6艇が既にある状態で2Rと6艇だけが追加される再開、予定外3Rの存在時に追加を止めるケース、既存 `WINDOWS_EXISTING` 出典を保持する検証を追加。最新HEAD `f35a098e2b2fdbafdc68c84ac570b559bcd44a82`。Node全156件成功、PGlite fixture PASS、`git diff --check` PASS。
 - PGliteは隔離した合成スキーマ。実Supabaseの全Migration、実トリガー、権限、提供元データや本番書込を検証したものではない。依存資材はローカルに一時導入し、repoのpackage/lockfileに変更なし。本番DB/Cron/Vercelの変更なし。
+
+## 展示の締切10分前を測るオフラインゲート 2026-11-18 JST
+
+- Draft #306 HEAD `644055a23a3f29feefc3bb06edf37b82b75eff62` に `site-exhibition-deadline.mjs` を追加。各レースの締切時刻から10分を引き、同一日・場・レースの6艇すべての `exhibition_synced_at` の最大時刻で `ON_TIME` / `LATE` を判定。未揃いは境界まで `PENDING`、超過後 `MISSED`。キー重複、別レース、時刻の矛盾は `INVALID`。
+- Node全159件成功、失敗・スキップ0。これは日時・入力の合成試験であり、実際の展示取得時刻・提供元の許容頻度・Cron遅延・公開画面到達を測ったものではない。監視への接続・通知は未実装。本番環境の変更なし。
