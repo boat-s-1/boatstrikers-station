@@ -242,3 +242,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 保存候補 `site-previous-day-save-plan.mjs` はJST前日・未来取得でないこと、6艇・キーの整合、既存登録番号との衝突を調べ、追加対象だけを返す。既存行の登録番号が違えば追加対象を返さず保留する。再実行時は追加0行の模擬テストがある。
 - この保存候補は渡された `batch.status` と `batch.events` 自体を独立の公式一覧として再検査する設計。実行者は `prepareSiteOfficialProgram` で独立した公式開催一覧・登録番号と各レースHTMLを照合した結果に限定して渡す必要がある。信頼された取得元、全開催場の網羅、同時実行・途中失敗の実DB検証は未実装・未完了。保存候補だけを本番書込に接続しない。
 - PR #306の最新HEAD `b6bf80efd2c6f515ec6bc9a40c214b9101067193` のGitHubコミットstatusとPR起動Actionsを読み取り確認したが、該当するstatus・workflow runは0件。155件成功はローカルの模擬試験であり、GitHub CIの合格証拠ではない。
+
+## 前日保存候補の公式一覧ゲート 2026-11-18 JST
+
+- [Draft #306](https://github.com/boat-s-1/boatstrikers-station/pull/306) の `site-previous-day-save-plan.mjs` に、独立した `expectedRaces` / `expectedEntries` を必須とする照合を追加。候補が自己申告する `PASS_OFFLINE_ONLY` と自身のレース一覧だけでは追加行を返さない。公式一覧の別レース、5艇、登録番号不一致はHOLD。
+- ローカルNodeの対象テスト4件成功（新規1件を含む）。この実行は模擬入力のみで、フルスイート・GitHub Actions・実DB・公式APIの合格証拠ではない。実書込の前には照合済み一覧を信頼された取得処理から渡す接続と全件検証が必要。
+- PR #306 HEAD `259baf9ad173fe3dbea7479bc21009027f02eba4`。本番環境の変更なし。
