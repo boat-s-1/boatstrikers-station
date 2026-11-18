@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "codex/dev1-cloud-recovery-ledger-20261118": false
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/elimination-odds-snapshots",
