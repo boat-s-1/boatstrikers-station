@@ -283,3 +283,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 開発①の依存元 Draft #298 `codex/cloud-sync-offline-gate-20261116` のGit履歴を読み取り。repository root commit `6f676e6b1d6521644af78a8f177fd4736d68769c` は2026-06-27、ファイルは `app/page.js`。2026-08-19のコミット `22815f9c` のツリーには `.sql` ファイル0件。`supabase/migrations` に対する最初のGitコミットは `bc2cd1b0`（2026-08-21）、`20260821_ai_v2_public_character_stats.sql` を追加。その時点のツリーにSQLは1件。
 - 本番の保存済みMigrationは2026-08-19に始まり、初期5テーブルを既存と仮定する。少なくとも上記Gitツリーに当時の初期スキーマSQLはない。これだけではGit外バックアップや別ブランチの存在を否定できず、正確なPR #298の失敗箇所を確定しない。
 - サポート SU-557322のメールを再確認したが、受付・連携依頼・AI担当の案内だけで、人手による失敗Migration診断は未着。追加の有料ブランチ再作成は行わない。
+
+## 二つ目の失敗ブランチでの初期依存エラー 2026-11-19 JST
+
+- 本番の変更を伴わないSupabaseログ読み取り。既存の別開発②ブランチ `pr301-http-isolated-20261118-c` (`hmlnimttgfjrvvoedygr`) は2026-11-17 20:14:35.775 UTCに `create or replace function public.ai_v2_public_character_stats` を実行し、直後20:14:35.776 UTCに `relation "public.bs_race_results" does not exist`。先行するAI V2 Migration処理の実行ログも確認できる。
+- 2026-10-31の古い別ブランチ `gamagori-pr294-phase13` にも同じテーブル不在エラー（06:28:01 UTC）がある。二つの異なる既存ブランチで同じ初期依存不足が見え、Git履歴にも当初の初期スキーマSQLを確認できないため、Migration再生の共通関門という確度は上がった。ただし削除済みPR #298隔離ブランチ自身の最初の失敗ログは未取得で、同一原因と断定しない。
+- 次は出典を持つ歴史的初期スキーマ（バックアップまたは当時のDDL）を確保してから、順序どおりの隔離再生と比較を行う。開発②ブランチの変更・削除、追加有料ブランチの作成は行わない。
