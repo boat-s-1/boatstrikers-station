@@ -1,0 +1,37 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { assessExhibitionDeadline } from "./site-exhibition-deadline.mjs";
+
+const event = { race_date: "2026-11-19", course_code: 1, race_no: 1, closing_time: "15:00:00" };
+const entries = Array.from({ length: 6 }, (_, i) => ({
+  race_date: event.race_date, course_code: 1, race_no: 1, boat_no: i + 1,
+  exhibition_synced_at: "2026-11-19T14:49:59+09:00",
+}));
+const check = (changes = {}) => assessExhibitionDeadline({ event, entries, now: "2026-11-19T14:55:00+09:00", ...changes });
+
+test("all six exhibition rows must arrive by closing minus ten minutes", () => {
+  assert.deepEqual(check(), { status: "ON_TIME", cutoffAt: "2026-11-19T05:50:00.000Z",
+    completedAt: "2026-11-19T05:49:59.000Z" });
+  assert.equal(check({ entries: entries.map((row, i) => i === 5
+    ? { ...row, exhibition_synced_at: "2026-11-19T14:50:01+09:00" } : row) }).status, "LATE");
+  assert.equal(check({ entries: entries.map((row, i) => i === 5
+    ? { ...row, exhibition_synced_at: "2026-11-19T14:50:00+09:00" } : row) }).status, "ON_TIME");
+});
+
+test("missing boat is pending until cutoff and missed afterward", () => {
+  const incomplete = entries.map((row, i) => i === 5 ? { ...row, exhibition_synced_at: null } : row);
+  assert.equal(check({ entries: incomplete, now: "2026-11-19T14:50:00+09:00" }).status, "PENDING");
+  assert.equal(check({ entries: incomplete }).status, "MISSED");
+});
+
+test("rejects duplicate or unrelated boats, future and timezone-free timestamps", () => {
+  for (const changes of [
+    { entries: [...entries.slice(0, 5), entries[0]] },
+    { entries: entries.slice(0, 5) },
+    { entries: entries.map((row, i) => i === 5 ? { ...row, race_no: 2 } : row) },
+    { entries: entries.map((row, i) => i === 5
+      ? { ...row, exhibition_synced_at: "2026-11-19T15:01:00+09:00" } : row) },
+    { now: "2026-11-19T14:55:00" },
+    { event: { ...event, closing_time: "25:00" } },
+  ]) assert.equal(check(changes).status, "INVALID");
+});
