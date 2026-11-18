@@ -58,3 +58,46 @@ test("race detail keeps the ordinary live path for a verified complete race", as
   assert.equal(outcome.data.entries[0].exhibition_time, 6.8);
   assert.equal(outcome.data.event.program_source, undefined);
 });
+
+const indexCode = readFileSync(new URL("../../app/lib/racesIndexLight.js", import.meta.url), "utf8")
+  .replace(/^import .*;$/gm, "").replace(/^export /gm, "");
+
+test("tomorrow date, day index, venue list and detail agree on one verified program", async () => {
+  const secondEvent = { ...event, course_code: 2 };
+  const staged = { ...snapshot, program: { events: [event, secondEvent],
+    entries: [...boats, ...boats.map(boat => ({ ...boat, course_code: 2 }))] } };
+  let reads = 0;
+  const client = { rpc: async (_name, parameters) => {
+    reads++;
+    assert.deepEqual(parameters, { p_date: raceDate });
+    return { data: staged };
+  } };
+  class FixtureDate extends Date {
+    constructor(...args) { super(...(args.length ? args : [now])); }
+    static now() { return Date.parse(now); }
+  }
+  const { readTomorrowSiteProgram, tomorrowProgramDate } = await import("./site-program-server-read.mjs");
+  const globals = {
+    Date: FixtureDate, process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+      SUPABASE_SERVICE_ROLE_KEY: "fixture", BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: "true" } },
+    createClient: () => client, readTomorrowSiteProgram, tomorrowProgramDate, resolveExhibition, console,
+  };
+  const platform = runInNewContext(code + "\n({getCourseRaces, getCourseName, normalizeDate})", globals);
+  const index = runInNewContext(indexCode + "\n({getCoursesForRacesIndex, getAvailableTomorrowProgramDate})", {
+    ...globals, getCourseName: platform.getCourseName, normalizeDate: platform.normalizeDate,
+  });
+  assert.equal(await index.getAvailableTomorrowProgramDate(), raceDate);
+  const courses = await index.getCoursesForRacesIndex(raceDate);
+  assert.equal(courses.length, 2);
+  assert.equal(courses[0].raceDate, raceDate);
+  assert.equal(courses[0].races[0].programAvailable, true);
+  assert.equal(courses[0].races[0].entries.length, 6);
+  assert.equal(courses[0].resultCount, 0);
+  const venue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(venue.length, 1);
+  assert.equal(venue[0].race_no, 1);
+  assert.equal(venue[0].entries.length, 6);
+  assert.equal(venue[0].result, null);
+  assert.equal((await detail({ enabled: true })).data.event.race_date, raceDate);
+  assert.equal(reads, 3);
+});

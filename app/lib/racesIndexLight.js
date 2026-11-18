@@ -1,4 +1,5 @@
 import "server-only";
+import { readTomorrowSiteProgram, tomorrowProgramDate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 
 import { createClient } from "@supabase/supabase-js";
 import { getCourseName, normalizeDate } from "./boatstrikersPlatform";
@@ -111,15 +112,24 @@ function mapLightEntry(row) {
   };
 }
 
+export async function getAvailableTomorrowProgramDate() {
+  if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED !== "true") return null;
+  const now = new Date().toISOString();
+  const date = tomorrowProgramDate(now);
+  return await readTomorrowSiteProgram(getSupabaseServerClient(), date, now, true) ? date : null;
+}
+
 export async function getCoursesForRacesIndex(raceDate) {
   const normalizedDate = normalizeDate(raceDate);
   const supabase = getSupabaseServerClient();
 
+  const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(),
+    process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true");
   const [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
-  ] = await Promise.all([
+  ] = staged ? [{ data: staged.events }, { data: staged.entries }, { data: [] }] : await Promise.all([
     supabase
       .from("bs_race_events")
       .select(

@@ -18,3 +18,19 @@ export async function readSiteProgramCandidate(client, { raceDate, now, live, ra
   const input = { raceDate, now, live, snapshot: result.data };
   return race ? selectSiteRaceProgram(input, race) : selectSiteProgram(input);
 }
+
+export function tomorrowProgramDate(now) {
+  return new Date(Date.parse(now) + 33 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+export async function readTomorrowSiteProgram(client, raceDate, now, enabled) {
+  if (!enabled || raceDate !== tomorrowProgramDate(now)) return null;
+  const selection = await readSiteProgramCandidate(client, { raceDate, now });
+  if (selection.status !== "READY" || selection.source !== "previous_day_snapshot") return null;
+  return {
+    events: selection.events.map(row => ({
+      ...row, program_available: true, race_status: "scheduled", program_source: selection.source,
+    })),
+    entries: selection.entries,
+  };
+}

@@ -1,5 +1,5 @@
 import "server-only";
-import { readSiteProgramCandidate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
+import { readSiteProgramCandidate, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -962,12 +962,18 @@ export async function getCourseRaces(raceDate, courseCode) {
 
   const supabase = getSupabaseServerClient();
 
+  const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(),
+    process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true");
   const [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
     { data: resultEntryRows, error: resultEntryError },
-  ] = await Promise.all([
+  ] = staged ? [
+    { data: staged.events.filter(row => row.course_code === normalizedCourseCode) },
+    { data: staged.entries.filter(row => row.course_code === normalizedCourseCode) },
+    { data: [] }, { data: [] },
+  ] : await Promise.all([
     supabase
       .from("bs_race_events")
       .select("*")
