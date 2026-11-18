@@ -28,8 +28,20 @@ export function planPreviousDayProgramSave({ raceDate, capturedAt, now, batch, e
   }));
   const officialRegistration = new Map(officialEntries.map(row =>
     [entryKey(row), row.racer_registration_no]));
+  const uniqueRacersByRace = rows => {
+    const racers = new Map();
+    for (const row of rows) {
+      const key = raceKey(row);
+      if (!racers.has(key)) racers.set(key, new Set());
+      const seen = racers.get(key);
+      if (seen.has(row.racer_registration_no)) return false;
+      seen.add(row.racer_registration_no);
+    }
+    return true;
+  };
   if (inspectBatch(expectedRaces, officialEntries, expectedRaces, raceDate).status !== "PASS_OFFLINE_ONLY" ||
       inspectBatch(batch.events, entries, expectedRaces, raceDate).status !== "PASS_OFFLINE_ONLY" ||
+      !uniqueRacersByRace(officialEntries) || !uniqueRacersByRace(entries) ||
       entries.some(row => officialRegistration.get(entryKey(row)) !== row.racer_registration_no)) {
     return { status: "HOLD", reason: "invalid_candidate_batch" };
   }
