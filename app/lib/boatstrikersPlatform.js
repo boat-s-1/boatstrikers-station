@@ -1,4 +1,5 @@
 import "server-only";
+import { readSiteProgramCandidate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -1220,6 +1221,32 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", normalizedRaceNo)
       .order("boat_no", { ascending: true }),
   ]);
+
+  if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && !eventError && !entryError) {
+    const selection = await readSiteProgramCandidate(supabase, {
+      raceDate: normalizedDate,
+      now: new Date().toISOString(),
+      live: { events: eventRow ? [eventRow] : [], entries: entryRows ?? [] },
+      race: { courseCode: normalizedCourseCode, raceNo: normalizedRaceNo },
+    });
+    if (selection.status === "READY" && selection.source === "previous_day_snapshot") {
+      return {
+        event: mapEvent({
+          ...selection.events[0],
+          race_status: "scheduled",
+          program_available: true,
+          program_source: "previous_day_snapshot",
+        }),
+        entries: selection.entries.map(mapEntry),
+        venueBaselines: {},
+        result: null,
+        resultEntries: [],
+      };
+    }
+    if (selection.reason === "live_registration_conflict") {
+      throw new Error("公式の出走表を確認しています。");
+    }
+  }
 
   if (eventError) {
     throw new Error(`レース情報の取得に失敗しました: ${eventError.message}`);
