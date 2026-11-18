@@ -42,3 +42,34 @@ export function assessExhibitionDeadline({ event, entries, now }) {
   return { status: completedMs <= cutoffMs ? "ON_TIME" : "LATE",
     cutoffAt: new Date(cutoffMs).toISOString(), completedAt: new Date(completedMs).toISOString() };
 }
+
+// Separate site evidence from DB storage evidence. The caller must supply an
+// observed public-page timestamp and six values parsed from that response.
+export function assessExhibitionSiteDeadline({ event, entries, now, siteVisibleAt, visibleEntries }) {
+  const stored = assessExhibitionDeadline({ event, entries, now });
+  if (stored.status === "INVALID") return { status: "INVALID" };
+  if (stored.status === "PENDING" || stored.status === "MISSED") {
+    return { status: stored.status, cutoffAt: stored.cutoffAt };
+  }
+  if (siteVisibleAt == null || visibleEntries == null) {
+    return { status: "SITE_UNVERIFIED", cutoffAt: stored.cutoffAt,
+      storedAt: stored.completedAt };
+  }
+  const visibleMs = Date.parse(siteVisibleAt);
+  const nowMs = Date.parse(now);
+  const storedMs = Date.parse(stored.completedAt);
+  if (!explicitZone(siteVisibleAt) || !Number.isFinite(visibleMs) ||
+      visibleMs < storedMs || visibleMs > nowMs ||
+      jstDate(visibleMs) !== event.race_date || !Array.isArray(visibleEntries) ||
+      visibleEntries.length !== 6 || new Set(visibleEntries.map(row => row?.boat_no)).size !== 6 ||
+      visibleEntries.some(row => !Number.isInteger(row?.boat_no) || row.boat_no < 1 ||
+        row.boat_no > 6 || !Number.isFinite(Number(row.exhibition_time)) ||
+        Number(row.exhibition_time) <= 0 ||
+        Number(entries.find(entry => entry.boat_no === row.boat_no)?.exhibition_time) !==
+          Number(row.exhibition_time))) {
+    return { status: "INVALID" };
+  }
+  return { status: visibleMs <= Date.parse(stored.cutoffAt) ? "SITE_ON_TIME" : "SITE_LATE",
+    cutoffAt: stored.cutoffAt, storedAt: stored.completedAt,
+    siteVisibleAt: new Date(visibleMs).toISOString() };
+}
