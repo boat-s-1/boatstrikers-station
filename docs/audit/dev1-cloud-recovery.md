@@ -289,3 +289,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 本番の変更を伴わないSupabaseログ読み取り。既存の別開発②ブランチ `pr301-http-isolated-20261118-c` (`hmlnimttgfjrvvoedygr`) は2026-11-17 20:14:35.775 UTCに `create or replace function public.ai_v2_public_character_stats` を実行し、直後20:14:35.776 UTCに `relation "public.bs_race_results" does not exist`。先行するAI V2 Migration処理の実行ログも確認できる。
 - 2026-10-31の古い別ブランチ `gamagori-pr294-phase13` にも同じテーブル不在エラー（06:28:01 UTC）がある。二つの異なる既存ブランチで同じ初期依存不足が見え、Git履歴にも当初の初期スキーマSQLを確認できないため、Migration再生の共通関門という確度は上がった。ただし削除済みPR #298隔離ブランチ自身の最初の失敗ログは未取得で、同一原因と断定しない。
 - 次は出典を持つ歴史的初期スキーマ（バックアップまたは当時のDDL）を確保してから、順序どおりの隔離再生と比較を行う。開発②ブランチの変更・削除、追加有料ブランチの作成は行わない。
+
+## 展示到達判定の空値誤判定修正 2026-11-19 JST
+
+- Draft #306 HEAD `f1f35bfd8a3f5c4b50eb4f54e9ff95d14ab846b4`。`exhibition_synced_at` が存在しても `exhibition_time` が空なら6艇の到達完了とみなさない。境界前はPENDING、境界後はMISSED、0や不正な展示値はINVALID。一般の同期時刻のみでON_TIMEになる誤判定を防ぐ。
+- 変更後のオフラインNode全160件成功、失敗・スキップ0、差分検査PASS。実取得の時刻・公開画面到達・提供元の許容頻度は未検証。GitHub CI実行なし、本番環境の変更なし。
