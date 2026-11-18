@@ -101,3 +101,21 @@ test("tomorrow date, day index, venue list and detail agree on one verified prog
   assert.equal((await detail({ enabled: true })).data.event.race_date, raceDate);
   assert.equal(reads, 3);
 });
+
+test("an official cancellation takes priority over the previous-day program", async () => {
+  const outcome = await detail({ enabled: true, clock: "2026-11-19T12:00:00+09:00",
+    liveEvent: { ...event, race_status: "cancelled", race_cancel_code: "official_cancelled" },
+    liveEntries: [],
+  });
+  assert.equal(outcome.reads, 0);
+  assert.equal(outcome.data.officialCancellation, true);
+  assert.equal(outcome.data.entries.length, 0);
+});
+
+test("a registered substitution holds the detail even when live entries are incomplete", async () => {
+  const outcome = await detail({ enabled: true, clock: "2026-11-19T12:00:00+09:00", liveEvent: event,
+    liveEntries: [{ ...boats[0], racer_registration_no: "4999" }],
+  });
+  assert.equal(outcome.data.programReviewRequired, true);
+  assert.equal(outcome.data.entries.length, 0);
+});

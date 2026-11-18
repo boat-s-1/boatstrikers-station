@@ -164,6 +164,10 @@ export default async function RaceDetailPage({
           <div className={styles.messageCard}>
             {loadError}
           </div>
+        ) : data?.officialCancellation ? (
+          <div className={styles.messageCard}>このレースは中止されました。</div>
+        ) : data?.programReviewRequired ? (
+          <div className={styles.messageCard}>公式の出走表を確認しています。</div>
         ) : !data?.event ||
           displayEntries.length === 0 ? (
           <div className={styles.messageCard}>

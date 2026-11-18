@@ -1228,7 +1228,13 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .order("boat_no", { ascending: true }),
   ]);
 
-  if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && !eventError && !entryError) {
+  const previousDayDetailEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
+  if (previousDayDetailEnabled && !eventError && eventRow?.race_status === "cancelled" &&
+      ["official_cancelled", "weather_postponed"].includes(eventRow.race_cancel_code)) {
+    return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
+  }
+
+  if (previousDayDetailEnabled && !eventError && !entryError) {
     const selection = await readSiteProgramCandidate(supabase, {
       raceDate: normalizedDate,
       now: new Date().toISOString(),
@@ -1250,7 +1256,7 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       };
     }
     if (selection.reason === "live_registration_conflict") {
-      throw new Error("公式の出走表を確認しています。");
+      return { event: eventRow ? mapEvent(eventRow) : null, entries: [], resultEntries: [], programReviewRequired: true };
     }
   }
 

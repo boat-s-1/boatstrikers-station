@@ -30,13 +30,17 @@ export function selectSiteProgram({ raceDate, now, snapshot, live }) {
     events: staged.events, entries: staged.entries };
   if (jstDate(currentTime) !== raceDate) return snapshotProgram;
 
+  const registrations = new Map(staged.entries.map(row => [key(row), registration(row.racer_registration_no)]));
+  if (Array.isArray(live?.entries) && live.entries.some(row => {
+    const expected = row && registrations.get(key(row));
+    const actual = row && registration(row.racer_registration_no);
+    return expected && actual && expected !== actual;
+  })) {
+    return { status: "HOLD", reason: "live_registration_conflict" };
+  }
   if (!Array.isArray(live?.entries) ||
       inspectBatch(live.events, normalize(live.entries), staged.events, raceDate).status !== "PASS_OFFLINE_ONLY") {
     return { ...snapshotProgram, pendingLive: true };
-  }
-  const registrations = new Map(staged.entries.map(row => [key(row), registration(row.racer_registration_no)]));
-  if (live.entries.some(row => registrations.get(key(row)) !== registration(row.racer_registration_no))) {
-    return { status: "HOLD", reason: "live_registration_conflict" };
   }
   return { status: "READY", source: "live", events: live.events, entries: live.entries };
 }
