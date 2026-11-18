@@ -17,4 +17,5 @@ test('partial, duplicated, mismatched and impossible roster fails closed', () =>
   assert.equal(mapBrdbProgramRoster(sample.map((r,i)=>i===1?{...r,ENTNO:sample[0].ENTNO}:r),'20261120').status,'HOLD_INCOMPLETE_ROSTER');
   assert.equal(mapBrdbProgramRoster(sample.map((r,i)=>i===1?{...r,OPDT:'20261121'}:r),'20261120').status,'HOLD_INVALID_ROW');
   assert.equal(mapBrdbProgramRoster(sample.map((r,i)=>i===1?{...r,TEINO:'7'}:r),'20261120').status,'HOLD_INVALID_ROW');
+  assert.equal(mapBrdbProgramRoster(sample.map((r,i)=>i===1?{...r,SOPDT:'20261109'}:r),'20261120').status,'HOLD_INVALID_ROW');
 });
