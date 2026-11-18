@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { selectSiteProgram } from "./site-program-handoff.mjs";
+import { selectSiteProgram, selectSiteRaceProgram } from "./site-program-handoff.mjs";
 
 const raceDate = "2026-11-19";
 const event = { race_date: raceDate, course_code: 1, race_no: 1 };
@@ -44,4 +44,32 @@ test("rejects stale, mislabeled and incomplete snapshots", () => {
     { snapshot: { ...snapshot, captured_at: "2026-11-19T00:00:00+09:00" } },
     { snapshot: { ...snapshot, program: { events: [event], entries: entries.slice(1) } } },
   ]) assert.equal(selectSiteProgram({ ...after, ...change }).status, "HOLD");
+});
+
+test("one fully matched race can display live even if another race is incomplete", () => {
+  const otherEvent = { ...event, race_no: 2 };
+  const otherBoats = entries.map(row => ({ ...row, race_no: 2 }));
+  const twoRaces = {
+    ...after,
+    snapshot: { ...snapshot, program: {
+      events: [event, otherEvent], entries: [...entries, ...otherBoats],
+    } },
+    live: { events: [...live.events, otherEvent], entries: [...live.entries, ...otherBoats.slice(0, 5)] },
+  };
+  assert.equal(selectSiteProgram(twoRaces).pendingLive, true);
+  const ready = selectSiteRaceProgram(twoRaces, { courseCode: 1, raceNo: 1 });
+  assert.equal(ready.source, "live");
+  assert.equal(ready.entries.length, 6);
+  assert.equal(ready.entries[0].exhibition_time, 6.8);
+  assert.equal(selectSiteRaceProgram(twoRaces, { courseCode: 1, raceNo: 2 }).source, "previous_day_snapshot");
+  assert.deepEqual(selectSiteRaceProgram(twoRaces, { courseCode: 1, raceNo: 3 }), { status: "NO_RACE" });
+});
+
+test("a race with inconsistent live identities or duplicate keys stays isolated", () => {
+  const key = { courseCode: 1, raceNo: 1 };
+  const conflict = [{ ...live.entries[0], racer_registration_no: "4999" }, ...live.entries.slice(1)];
+  assert.deepEqual(selectSiteRaceProgram({ ...after, live: { ...live, entries: conflict } }, key),
+    { status: "HOLD", reason: "live_registration_conflict" });
+  assert.equal(selectSiteRaceProgram({ ...after, live: { ...live, events: [event, event] } }, key).pendingLive, true);
+  assert.equal(selectSiteRaceProgram(before, key).source, "previous_day_snapshot");
 });
