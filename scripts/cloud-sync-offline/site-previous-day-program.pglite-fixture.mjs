@@ -50,15 +50,29 @@ await db.exec(`
 await assert.rejects(() => save(), /postcondition/);
 assert.deepEqual(await counts(), {events:0,entries:0});
 await db.exec("DROP TRIGGER skip_boat ON bs_race_entries");
-assert.deepEqual(await save(), {events_inserted:2,entries_inserted:12});
+// A previous interrupted writer may have committed a complete subset of races.
+await db.query(`INSERT INTO bs_race_events (id,race_date,course_code,race_no,closing_time)
+  VALUES (1,$1,1,1,'15:00')`, [next]);
+for (let i = 0; i < 6; i++) {
+  await db.query(`INSERT INTO bs_race_entries
+    (id,race_date,course_code,race_no,boat_no,racer_registration_no,data_source)
+    VALUES ($1,$2,1,1,$3,$4,'WINDOWS_EXISTING')`, [i + 1,next,i + 1,String(4000 + i).padStart(5,"0")]);
+}
+assert.deepEqual(await save(), {events_inserted:1,entries_inserted:6});
 assert.deepEqual(await save(), {events_inserted:0,entries_inserted:0});
+await db.query(`INSERT INTO bs_race_events (id,race_date,course_code,race_no,closing_time)
+  VALUES (3,$1,1,3,'16:00')`, [next]);
+await assert.rejects(() => save(), /conflicts/);
+assert.deepEqual(await counts(), {events:3,entries:12});
+await db.query("DELETE FROM bs_race_events WHERE id = 3");
 await assert.rejects(() => save(events, entries.map((e,i) => i===0 ? {...e,racer_registration_no:"04998"} : e)), /conflicts/);
 assert.deepEqual(await counts(), {events:2,entries:12});
-assert.deepEqual((await db.query("SELECT DISTINCT data_source FROM bs_race_entries")).rows,[{data_source:"BOATRACE_OFFICIAL_PREVIOUS_DAY"}]);
+assert.deepEqual((await db.query("SELECT DISTINCT data_source FROM bs_race_entries ORDER BY data_source")).rows,
+  [{data_source:"BOATRACE_OFFICIAL_PREVIOUS_DAY"},{data_source:"WINDOWS_EXISTING"}]);
 const permissions = (await db.query(`SELECT r, has_function_privilege(r,
   'bs_apply_site_previous_day_program_candidate(date,timestamptz,jsonb,jsonb)', 'EXECUTE') allowed
   FROM unnest(ARRAY['anon','authenticated','service_role']) r`)).rows;
 assert.deepEqual(permissions.map(row=>row.allowed),[false,false,true]);
-console.log("PostgreSQL fixture passed: structure, rollover, rollback, clean retry, replay, conflict, source, ACL");
+console.log("PostgreSQL fixture passed: structure, rollover, rollback, partial retry, replay, unexpected race, conflict, source, ACL");
 console.log((await db.query("SELECT current_setting('server_version') AS version")).rows[0]);
 await db.close();
