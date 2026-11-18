@@ -234,6 +234,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       race_kind_code: row.race_kind_code,
       closing_time: row.closing_time,
       program_available: toDbBoolean(row.program_available),
+      program_source: row.program_source,
       result_available: resultAvailable,
       synced_at: syncedAt,
       api_synced_at: syncedAt,
