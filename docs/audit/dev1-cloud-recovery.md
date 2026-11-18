@@ -294,3 +294,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - Draft #306 HEAD `f1f35bfd8a3f5c4b50eb4f54e9ff95d14ab846b4`。`exhibition_synced_at` が存在しても `exhibition_time` が空なら6艇の到達完了とみなさない。境界前はPENDING、境界後はMISSED、0や不正な展示値はINVALID。一般の同期時刻のみでON_TIMEになる誤判定を防ぐ。
 - 変更後のオフラインNode全160件成功、失敗・スキップ0、差分検査PASS。実取得の時刻・公開画面到達・提供元の許容頻度は未検証。GitHub CI実行なし、本番環境の変更なし。
+
+## 前日保存と表示スナップショットの一体化 2026-11-19 JST
+
+- Draft #306 HEAD `dfee88009c422473367dda62c25a0c44582eacb8` に `bs_publish_site_previous_day_program_candidate` を追加。既存の開催・6艇保存候補と不変な前日スナップショット候補を**一つのSQL関数呼出し**のトランザクションで順に実行し、いずれかの例外時には両方をロールバックする。権限はservice_roleのみ。
+- ローカルのPGlite PostgreSQL 18.6 fixtureで、スナップショット衝突時に先行する開催・出走行が0件へ戻ること、途中保存からの再実行で残りの1R・6艇だけが追加されること、同一入力再実行が追加0件、予定外レースや登録差異で保留、既存出典維持を確認。Node全160件成功、差分検査PASS。
+- SQL候補は**未設置**。実Supabaseのスキーマ、トリガー・RLS・負荷・API提供条件、公式前夜全件と展示の締切10分前到達は未検証。初期Migration依存と隔離環境の関門は継続。本番DB/Cron/Vercelに変更なし。
