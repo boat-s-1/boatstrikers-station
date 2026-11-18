@@ -34,3 +34,8 @@ export async function readTomorrowSiteProgram(client, raceDate, now, enabled) {
     entries: selection.entries,
   };
 }
+
+export function hasOfficialRaceCancellation(event) {
+  return event?.race_status === "cancelled" &&
+    ["official_cancelled", "weather_postponed"].includes(event.race_cancel_code);
+}

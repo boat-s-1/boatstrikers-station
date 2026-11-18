@@ -62,7 +62,7 @@ function buildFallbackPickups(courses, raceDate) {
 
   for (const course of courses ?? []) {
     for (const race of course.races ?? []) {
-      if (race.resultAvailable) continue;
+      if (race.resultAvailable || race.raceStatus === "cancelled") continue;
       if (raceDate === today && race.closingAt) {
         const closing = new Date(race.closingAt).getTime();
         if (Number.isFinite(closing) && closing <= now) continue;
@@ -199,7 +199,7 @@ export default async function RacesPage({ searchParams }) {
   for (const course of courses) {
     for (const race of course.races ?? []) {
       const key = `${Number(course.courseCode)}:${Number(race.raceNo)}`;
-      if (race.resultAvailable) continue;
+      if (race.resultAvailable || race.raceStatus === "cancelled") continue;
       if (raceDate === getJstDateString() && race.closingAt) {
         const closing = new Date(race.closingAt).getTime();
         if (Number.isFinite(closing) && closing <= Date.now()) continue;

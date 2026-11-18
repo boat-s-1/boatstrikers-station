@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { resolveExhibition } from "../../lib/exhibitionDisplay.js";
-import { readSiteProgramCandidate } from "./site-program-server-read.mjs";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate } from "./site-program-server-read.mjs";
 
 const code = readFileSync(new URL("../../app/lib/boatstrikersPlatform.js", import.meta.url), "utf8")
   .replace(/^import .*;$/gm, "").replace(/^export /gm, "");
@@ -33,7 +33,7 @@ async function detail({ enabled, clock = now, liveEntries = [], liveEvent = null
     Date: FixtureDate, process: { env: {
       NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "fixture",
       BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: enabled ? "true" : "false",
-    } }, createClient: () => client, readSiteProgramCandidate, resolveExhibition,
+    } }, createClient: () => client, readSiteProgramCandidate, hasOfficialRaceCancellation, resolveExhibition,
     buildPhase2Predictions: () => ({}), console,
   });
   const data = await getRaceDetail(raceDate, 1, 1);
@@ -80,7 +80,7 @@ test("tomorrow date, day index, venue list and detail agree on one verified prog
   const globals = {
     Date: FixtureDate, process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
       SUPABASE_SERVICE_ROLE_KEY: "fixture", BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: "true" } },
-    createClient: () => client, readTomorrowSiteProgram, tomorrowProgramDate, resolveExhibition, console,
+    createClient: () => client, readTomorrowSiteProgram, tomorrowProgramDate, hasOfficialRaceCancellation, resolveExhibition, console,
   };
   const platform = runInNewContext(code + "\n({getCourseRaces, getCourseName, normalizeDate})", globals);
   const index = runInNewContext(indexCode + "\n({getCoursesForRacesIndex, getAvailableTomorrowProgramDate})", {

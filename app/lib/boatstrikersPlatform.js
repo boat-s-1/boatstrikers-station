@@ -1,5 +1,5 @@
 import "server-only";
-import { readSiteProgramCandidate, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -1044,6 +1044,10 @@ export async function getCourseRaces(raceDate, courseCode) {
   return (eventRows ?? []).map((rawEvent) => {
     const event = mapEvent(rawEvent);
     const raceNo = Number(event.race_no);
+    if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && hasOfficialRaceCancellation(rawEvent)) {
+      return { ...event, raceStatus: "cancelled", race_status: "cancelled",
+        hasExhibition: false, resultAvailable: false, entries: [], result: null, resultEntries: [] };
+    }
     const baseEntries = entriesByRace.get(raceNo) ?? [];
     const result = resultByRace.get(raceNo) ?? null;
     const resultEntries = resultEntriesByRace.get(raceNo) ?? [];
@@ -1229,8 +1233,7 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
   ]);
 
   const previousDayDetailEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
-  if (previousDayDetailEnabled && !eventError && eventRow?.race_status === "cancelled" &&
-      ["official_cancelled", "weather_postponed"].includes(eventRow.race_cancel_code)) {
+  if (previousDayDetailEnabled && !eventError && hasOfficialRaceCancellation(eventRow)) {
     return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
   }
 

@@ -103,7 +103,9 @@ export default async function CoursePage({ params, searchParams }) {
   </div>
 </div>
                   <b className={styles.statusBadge}>
-                    {race.race_status === "exhibition"
+                    {race.race_status === "cancelled"
+                      ? "中止"
+                      : race.race_status === "exhibition"
                       ? "展示公開"
                       : "出走表公開"}
                   </b>
@@ -181,7 +183,7 @@ export default async function CoursePage({ params, searchParams }) {
   )}/${race.race_no}?date=${raceDate}`}
   className={styles.primaryButton}
 >
-  <span>出走表・AI情報を見る</span>
+  <span>{race.race_status === "cancelled" ? "中止情報を見る" : "出走表・AI情報を見る"}</span>
   <span>→</span>
 </Link>
               </article>
