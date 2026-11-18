@@ -222,7 +222,10 @@ export default async function RacesPage({ searchParams }) {
     .filter(Boolean)
     .filter((item) => item.diagnosis_code !== "skip");
 
-  const fallbackPickups = buildFallbackPickups(courses, raceDate);
+  const usesPreviousDayProgram = courses.some(course =>
+    course.races.some(race => race.event?.program_source === "previous_day_snapshot")
+  );
+  const fallbackPickups = usesPreviousDayProgram ? [] : buildFallbackPickups(courses, raceDate);
   const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
 
   let insidePickups = pickupPool
