@@ -24,3 +24,7 @@
 ## 別ブランチの初期DDL探索（2026-11-19 JST）
 
 GitHubのブランチ名を schema / baseline / migration / bootstrap / initial / supabase で探索。該当した `chore/phase1-supabase-readonly-check`（migrations 32件）、`fix/bootstrap-reconcile-result-provenance`（46件）、`codex/migration-recovery-audit-20261118`（57件）の各 `supabase/migrations` を読み取り、いずれも最早ファイルが `20260821_ai_v2_public_character_stats.sql`。名前に initial / baseline / core / race_results / schema を含むMigrationも見つからなかった。従って確認した3ブランチのMigrationディレクトリからは2026-08-19以前の初期DDLを回収できない。別形式のファイルや調査していないブランチの可能性は残る。
+
+## Supabaseダッシュボードのバックアップ確認（2026-11-19 JST）
+
+認証済みの本番プロジェクト `rzosrbkyniyedolhkgxo` の Database Backups を読み取りのみで確認。Scheduled backups には 2026-11-11 18:20:55 UTCから11-17 18:20:53 UTCまでの物理バックアップ7件が表示された。2026-08-19以前のバックアップはこの一覧にはない。Point in Timeページは「Point in Time Recovery is available as an add-on / Enable the add-on」と表示され、現在有効ではない。復元、アドオン有効化、ダウンロード、本番変更は未実施。このUI範囲では歴史的初期DDLを回収できない。Supabase側の非表示の保存資料やサポート側の記録は未否定。
