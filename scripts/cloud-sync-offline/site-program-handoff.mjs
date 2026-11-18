@@ -40,3 +40,26 @@ export function selectSiteProgram({ raceDate, now, snapshot, live }) {
   }
   return { status: "READY", source: "live", events: live.events, entries: live.entries };
 }
+
+// The day view stays complete while an independently matched race can use live fields.
+export function selectSiteRaceProgram(options, { courseCode, raceNo }) {
+  const fullDay = selectSiteProgram({ ...options, live: undefined });
+  if (fullDay.status !== "READY") return fullDay;
+  const matches = row => row?.race_date === options.raceDate &&
+    row.course_code === courseCode && row.race_no === raceNo;
+  const stagedRace = {
+    events: fullDay.events.filter(matches),
+    entries: fullDay.entries.filter(matches),
+  };
+  if (stagedRace.events.length !== 1) return { status: "NO_RACE" };
+
+  const { live, snapshot } = options;
+  const liveRace = Array.isArray(live?.events) && Array.isArray(live?.entries)
+    ? { events: live.events.filter(matches), entries: live.entries.filter(matches) }
+    : undefined;
+  return selectSiteProgram({
+    ...options,
+    snapshot: { ...snapshot, program: stagedRace },
+    live: liveRace,
+  });
+}
