@@ -20,3 +20,7 @@
 - 既存の `CORE-TABLES-REVIEW-DRAFT.sql` と `SIX-TABLE-ISOLATION-CANDIDATE.sql` は現在の本番カタログから後日抽出・組立した候補。後者は6テーブル・トリガー・RLSを含むが、2026年8月の初期状態を証明しない。CIの合格を全Migration再生の証明とは扱わない。
 - デフォルトブランチのコード検索で `CREATE TABLE public.bs_race_results` は該当なし。ローカル作業ブランチのファイル検索では直接CREATEは候補・試験フィクスチャ内のみ。別ブランチやGit外バックアップは未否定。
 - Supabaseサポート SU-557322 のメール検索では自動受付のみで、初期DDLの出典についての回答は未着。
+
+## 別ブランチの初期DDL探索（2026-11-19 JST）
+
+GitHubのブランチ名を schema / baseline / migration / bootstrap / initial / supabase で探索。該当した `chore/phase1-supabase-readonly-check`（migrations 32件）、`fix/bootstrap-reconcile-result-provenance`（46件）、`codex/migration-recovery-audit-20261118`（57件）の各 `supabase/migrations` を読み取り、いずれも最早ファイルが `20260821_ai_v2_public_character_stats.sql`。名前に initial / baseline / core / race_results / schema を含むMigrationも見つからなかった。従って確認した3ブランチのMigrationディレクトリからは2026-08-19以前の初期DDLを回収できない。別形式のファイルや調査していないブランチの可能性は残る。
