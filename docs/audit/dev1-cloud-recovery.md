@@ -277,3 +277,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - Vercel `boatstrikers-station` project `prj_iKWrqS29BRLCIWKHoDe1SFOTH8Y2` のproduction直近5件を読み取り。最新は `READY`、GitHub `main` のSHA `9904ef5c5f7f5111414c458673e5c4ca2c390668`（deployment `dpl_7jpsK16A8WbiNeJixysGs462eTmq`）。これはプラットフォーム上のビルド状態であり、出走表表示や取得元の健全性を証明しない。開発①のDraft #306は未デプロイ。
 - Supabase本番の11/18〜20の開催・出走行0、11/13〜18の結果829行に対応開催行なしという読み取り結果と併せ、アプリの表示復旧にはデータ供給・保存・公開画面の整合が必要。Vercelに変更なし。
+
+## Git履歴からの初期スキーマ出典確認 2026-11-19 JST
+
+- 開発①の依存元 Draft #298 `codex/cloud-sync-offline-gate-20261116` のGit履歴を読み取り。repository root commit `6f676e6b1d6521644af78a8f177fd4736d68769c` は2026-06-27、ファイルは `app/page.js`。2026-08-19のコミット `22815f9c` のツリーには `.sql` ファイル0件。`supabase/migrations` に対する最初のGitコミットは `bc2cd1b0`（2026-08-21）、`20260821_ai_v2_public_character_stats.sql` を追加。その時点のツリーにSQLは1件。
+- 本番の保存済みMigrationは2026-08-19に始まり、初期5テーブルを既存と仮定する。少なくとも上記Gitツリーに当時の初期スキーマSQLはない。これだけではGit外バックアップや別ブランチの存在を否定できず、正確なPR #298の失敗箇所を確定しない。
+- サポート SU-557322のメールを再確認したが、受付・連携依頼・AI担当の案内だけで、人手による失敗Migration診断は未着。追加の有料ブランチ再作成は行わない。
