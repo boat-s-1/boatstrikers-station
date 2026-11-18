@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { selectSiteProgram, selectSiteRaceProgram } from "./site-program-handoff.mjs";
 
+import { readSiteProgramCandidate } from "./site-program-server-read.mjs";
 const raceDate = "2026-11-19";
 const event = { race_date: raceDate, course_code: 1, race_no: 1 };
 const entries = Array.from({ length: 6 }, (_, i) => ({
@@ -72,4 +73,24 @@ test("a race with inconsistent live identities or duplicate keys stays isolated"
     { status: "HOLD", reason: "live_registration_conflict" });
   assert.equal(selectSiteRaceProgram({ ...after, live: { ...live, events: [event, event] } }, key).pendingLive, true);
   assert.equal(selectSiteRaceProgram(before, key).source, "previous_day_snapshot");
+});
+
+test("server reader passes only the requested date and selects the matched race", async () => {
+  const client = { async rpc(name, parameters) {
+    assert.equal(name, "bs_read_site_previous_day_program_candidate");
+    assert.deepEqual(parameters, { p_date: raceDate });
+    return { data: snapshot, error: null };
+  } };
+  const read = await readSiteProgramCandidate(client, { ...after, race: { courseCode: 1, raceNo: 1 } });
+  assert.equal(read.source, "live");
+  assert.equal(read.entries.length, 6);
+});
+
+test("server reader distinguishes absence from failed DB queries", async () => {
+  const noSnapshot = await readSiteProgramCandidate({ rpc: async () => ({ data: null }) }, after);
+  assert.deepEqual(noSnapshot, { status: "NO_SNAPSHOT" });
+  for (const rpc of [async () => ({ error: {} }), async () => { throw new Error(); }]) {
+    assert.deepEqual(await readSiteProgramCandidate({ rpc }, after),
+      { status: "HOLD", reason: "snapshot_read_failed" });
+  }
 });
