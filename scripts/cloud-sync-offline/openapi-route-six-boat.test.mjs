@@ -12,7 +12,7 @@ const source = readFileSync(path, "utf8").replace(/^import .*;$/gm, "")
   + "\nglobalThis.handlers = { GET, POST };";
 const date = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 function fixture(boats) {
-  return { programs: { stadiums: { 2: { races: { 1: {
+  return { programs: { stadiums: { 2: { stadium_number: 2, races: { 1: {
     date, stadium_number: 2, race_number: 1,
     racers: Object.fromEntries(boats.map((boat) => [String(boat), { entry_number: boat, number: 4000 + boat }]))
   } } } } } };
@@ -20,7 +20,12 @@ function fixture(boats) {
 async function invoke(boats, mutate = () => {}) {
   let dbCalls = 0;
   const context = {
-    process: { env: { CRON_SECRET: "test-secret", NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "dummy" } },
+    process: { env: {
+      BS_OPENAPI_TODAY_SYNC_ENABLED: "true",
+      CRON_SECRET: "test-secret",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+      SUPABASE_SERVICE_ROLE_KEY: "dummy",
+    } },
     NextResponse: { json: (body, options = {}) => ({ body, status: options.status ?? 200 }) },
     createClient: () => { dbCalls++; throw Error("DB reached"); },
     fetch: async () => ({ ok: true, json: async () => { const data = fixture(boats); mutate(data); return data; } }),
