@@ -32,3 +32,7 @@ GitHubのブランチ名を schema / baseline / migration / bootstrap / initial 
 ## サポートアカウント紐付け（2026-11-19 JST）
 
 利用者の今回の承認を受け、Supabaseダッシュボードのチケット紐付け画面で conversation `cnv_1p24sbby` / SU-557322 を組織 boat-strike、project `rzosrbkyniyedolhkgxo`、区分 Other に紐付けた。画面に「Support ticket linked / Your support conversation has been linked to your account.」および成功通知を確認。追加の「Allow support access to your project (Human support and AI diagnostic access)」は既定でONだったが、紐付け前にOFFにして確認した。診断アクセスの拡大は承認対象に含めず実施していない。メール検索時点では人手の新しい回答は未着。実DB/本番Cron/Vercelは変更なし。
+
+## Supabaseサポートへの追送（2026-11-19 JST）
+
+今回の利用者承認に基づき、既存チケット SU-557322 のメールスレッドに、今回確定した `20260820210127` / `42P01` と初期スキーマの復元方法の質問を返信。Gmail送信ID `1a1efcf29d1e935d`、thread `1a1ec4e7d9794537`、SENTを再読で確認。送信文は `docs/audit/dev1-supabase-support-followup-draft-20261119.md` に対応。プロジェクト診断アクセスはOFFのままで、必要な場合は範囲の説明を先に依頼した。本番変更・新規課金なし。回答待ち。
