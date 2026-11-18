@@ -5,6 +5,7 @@ import { assessExhibitionDeadline } from "./site-exhibition-deadline.mjs";
 const event = { race_date: "2026-11-19", course_code: 1, race_no: 1, closing_time: "15:00:00" };
 const entries = Array.from({ length: 6 }, (_, i) => ({
   race_date: event.race_date, course_code: 1, race_no: 1, boat_no: i + 1,
+  exhibition_time: 6.8,
   exhibition_synced_at: "2026-11-19T14:49:59+09:00",
 }));
 const check = (changes = {}) => assessExhibitionDeadline({ event, entries, now: "2026-11-19T14:55:00+09:00", ...changes });
@@ -22,6 +23,14 @@ test("missing boat is pending until cutoff and missed afterward", () => {
   const incomplete = entries.map((row, i) => i === 5 ? { ...row, exhibition_synced_at: null } : row);
   assert.equal(check({ entries: incomplete, now: "2026-11-19T14:50:00+09:00" }).status, "PENDING");
   assert.equal(check({ entries: incomplete }).status, "MISSED");
+});
+
+test("a sync timestamp without an exhibition value cannot satisfy the deadline", () => {
+  const noValue = entries.map((row, i) => i === 5 ? { ...row, exhibition_time: null } : row);
+  assert.equal(check({ entries: noValue, now: "2026-11-19T14:50:00+09:00" }).status, "PENDING");
+  assert.equal(check({ entries: noValue }).status, "MISSED");
+  assert.equal(check({ entries: entries.map((row, i) => i === 5
+    ? { ...row, exhibition_time: 0 } : row) }).status, "INVALID");
 });
 
 test("rejects duplicate or unrelated boats, future and timezone-free timestamps", () => {
