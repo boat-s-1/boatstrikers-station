@@ -14,6 +14,10 @@ BRDB documentation: https://www.team-nave.com/system/jp/products/brdbapi/help_db
 
 `brdb-q011-query.mjs` constructs the provider's indexed query shape for a strictly validated target date, including the ten-day meeting-start bound. It performs no network I/O. It is a candidate, not a credential-bearing client or approved schedule. No requests to BRDB or PC-KYOTEI are part of this work.
 
+The provider documents an asynchronous `select` → `state` → `geturl`/`getcsv` protocol. Each request must use HTTPS **POST**; its published GET URLs are examples only. `state` code 0/1 means waiting/running, 2 means complete, and 4/6/8/9 means failure, SQL error, cancellation or deletion. `brdb-protocol-gate.mjs` classifies these responses offline and stops on unknown/error states. A future live client must bound queue polling, stop on provider errors, keep CLUB credentials in server-only secrets and exclude request bodies, download URLs, CSV contents and credentials from logs. Never send credentials as a URL query. Source: https://www.team-nave.com/system/jp/products/brdbapi/help_function.html .
+
+The published general terms do not by themselves establish a right to republish the data on BoatStrikers. The device restriction and no-heavy-SQL rule remain in the product-specific limits: https://www.team-nave.com/system/jp/products/brdbapi/help_limit.html .
+
 1. Confirm BRDB terms and device cutover with provider. Locate the old Windows extraction script/SQL offline and map its program and result columns. Never run two devices under the same license simultaneously.
 2. Stage a single cloud fetcher without production credentials; inspect one permitted sample against the official meeting list and six registration numbers per race. Reject missing, duplicated, cancelled/mismatched or stale races; preserve provenance and stronger existing rows.
 3. Save a complete preceding-day program only after independent manifest/roster parity and transaction rollback/replay tests. Schedule no more frequently than the provider confirms; avoid its 06:00–08:00 maintenance period. The provider's twice-daily *data update* is not an authorized polling limit.
