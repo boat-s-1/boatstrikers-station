@@ -28,3 +28,7 @@ GitHubのブランチ名を schema / baseline / migration / bootstrap / initial 
 ## Supabaseダッシュボードのバックアップ確認（2026-11-19 JST）
 
 認証済みの本番プロジェクト `rzosrbkyniyedolhkgxo` の Database Backups を読み取りのみで確認。Scheduled backups には 2026-11-11 18:20:55 UTCから11-17 18:20:53 UTCまでの物理バックアップ7件が表示された。2026-08-19以前のバックアップはこの一覧にはない。Point in Timeページは「Point in Time Recovery is available as an add-on / Enable the add-on」と表示され、現在有効ではない。復元、アドオン有効化、ダウンロード、本番変更は未実施。このUI範囲では歴史的初期DDLを回収できない。Supabase側の非表示の保存資料やサポート側の記録は未否定。
+
+## サポートアカウント紐付け（2026-11-19 JST）
+
+利用者の今回の承認を受け、Supabaseダッシュボードのチケット紐付け画面で conversation `cnv_1p24sbby` / SU-557322 を組織 boat-strike、project `rzosrbkyniyedolhkgxo`、区分 Other に紐付けた。画面に「Support ticket linked / Your support conversation has been linked to your account.」および成功通知を確認。追加の「Allow support access to your project (Human support and AI diagnostic access)」は既定でONだったが、紐付け前にOFFにして確認した。診断アクセスの拡大は承認対象に含めず実施していない。メール検索時点では人手の新しい回答は未着。実DB/本番Cron/Vercelは変更なし。
