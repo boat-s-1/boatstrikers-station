@@ -1,4 +1,5 @@
 import { inspectBatch } from "./batch-gate.mjs";
+import { parseSiteOfficialRacelist } from "./site-official-racelist.mjs";
 
 const key = row => `${row.race_date}/${row.course_code}/${row.race_no}/${row.boat_no}`;
 const registration = value => /^0?\d{4}$/.test(String(value ?? "")) && Number(value) > 0
@@ -46,7 +47,7 @@ export function selectSiteProgram({ raceDate, now, snapshot, live }) {
 }
 
 // The day view stays complete while an independently matched race can use live fields.
-export function selectSiteRaceProgram(options, { courseCode, raceNo }) {
+export function selectSiteRaceProgram(options, { courseCode, raceNo }, officialCorrection) {
   const fullDay = selectSiteProgram({ ...options, live: undefined });
   if (fullDay.status !== "READY") return fullDay;
   const matches = row => row?.race_date === options.raceDate &&
@@ -61,9 +62,29 @@ export function selectSiteRaceProgram(options, { courseCode, raceNo }) {
   const liveRace = Array.isArray(live?.events) && Array.isArray(live?.entries)
     ? { events: live.events.filter(matches), entries: live.entries.filter(matches) }
     : undefined;
-  return selectSiteProgram({
-    ...options,
-    snapshot: { ...snapshot, program: stagedRace },
-    live: liveRace,
+  const input = { ...options, snapshot: { ...snapshot, program: stagedRace }, live: liveRace };
+  const selection = selectSiteProgram(input);
+  if (selection.reason !== "live_registration_conflict" || !officialCorrection) return selection;
+
+  // Only server-verified official HTML may be supplied by a future correction collector.
+  const capturedAt = Date.parse(officialCorrection.capturedAt);
+  if (!hasTimezone(officialCorrection.capturedAt) || !Number.isFinite(capturedAt) ||
+      capturedAt > Date.parse(options.now) || jstDate(capturedAt) !== options.raceDate) return selection;
+
+  let corrected;
+  try {
+    corrected = parseSiteOfficialRacelist(officialCorrection.html, {
+      raceDate: options.raceDate, courseCode, raceNo,
+    });
+  } catch {
+    return selection;
+  }
+  const event = { ...stagedRace.events[0], closing_time: corrected.closing_time };
+  const correctedEntries = corrected.entries.map(entry => ({ ...event, ...entry }));
+  const verifiedLive = selectSiteProgram({
+    ...input,
+    snapshot: { ...snapshot, program: { events: [event], entries: correctedEntries } },
   });
+  if (verifiedLive.source !== "live") return selection;
+  return { ...verifiedLive, correctionVerified: true };
 }
