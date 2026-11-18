@@ -39,6 +39,10 @@ test("requires an independent complete official manifest before returning save r
     { expectedEntries: entries.map((row, index) => index === 0
       ? { ...row, racer_registration_no: "4999" } : row) },
     { expectedEntries: entries.slice(0, 5) },
+    { expectedEntries: entries.map((row, index) => index === 1
+      ? { ...row, racer_registration_no: entries[0].racer_registration_no } : row),
+      batch: { ...options.batch, entries: entries.map((row, index) => index === 1
+        ? { ...row, racer_registration_no: entries[0].racer_registration_no } : row) } },
   ]) {
     const result = planPreviousDayProgramSave({ ...options, ...change });
     assert.equal(result.status, "HOLD");
