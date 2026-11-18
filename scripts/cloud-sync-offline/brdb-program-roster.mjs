@@ -8,6 +8,9 @@ export function mapBrdbProgramRoster(records, targetDate) {
   if (!validDate(targetDate) || !Array.isArray(records) || records.length === 0) {
     return { status: 'HOLD_INVALID_INPUT' };
   }
+  const earliestStart = new Date(`${targetDate.slice(0,4)}-${targetDate.slice(4,6)}-${targetDate.slice(6)}T00:00:00Z`);
+  earliestStart.setUTCDate(earliestStart.getUTCDate() - 10);
+  const lowerBound = earliestStart.toISOString().slice(0,10).replaceAll('-', '');
   const rows = [];
   const seen = new Set();
   for (const source of records) {
@@ -17,7 +20,7 @@ export function mapBrdbProgramRoster(records, targetDate) {
     const race = Number(source?.RNO);
     const boat = Number(source?.TEINO);
     const registration = String(source?.ENTNO ?? '').trim();
-    if (date !== targetDate || !validDate(start) || start > targetDate ||
+    if (date !== targetDate || !validDate(start) || start < lowerBound || start > targetDate ||
         !Number.isInteger(course) || course < 1 || course > 24 ||
         !Number.isInteger(race) || race < 1 || race > 12 ||
         !Number.isInteger(boat) || boat < 1 || boat > 6 ||
