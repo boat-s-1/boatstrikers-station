@@ -13,3 +13,10 @@
 1. 2026年8月19日以前の初期テーブルDDLの由来を Git履歴・バックアップ・Supabaseサポート SU-557322 で探索する。現在の本番カタログを当時のDDLと同一とみなさない。
 2. 由来を確定した初期DDLとMigration全件を分離PostgreSQLで順に再生し、同じ失敗を再現・解消する。
 3. 隔離Supabaseに保存候補を設置する実SQL試験と前夜全件の公式照合は別途費用・書込条件を確認する。今回の診断だけでサイト復旧や本番切替を合格とはしない。
+
+## 原本探索の追加確認（2026-11-19 JST）
+
+- GitHub上の回収済み `supabase/migrations_recovered` は2026-08-19以降のMigrationであり、初期の主要レーステーブルのCREATEを含む原本とは確認できない。
+- 既存の `CORE-TABLES-REVIEW-DRAFT.sql` と `SIX-TABLE-ISOLATION-CANDIDATE.sql` は現在の本番カタログから後日抽出・組立した候補。後者は6テーブル・トリガー・RLSを含むが、2026年8月の初期状態を証明しない。CIの合格を全Migration再生の証明とは扱わない。
+- デフォルトブランチのコード検索で `CREATE TABLE public.bs_race_results` は該当なし。ローカル作業ブランチのファイル検索では直接CREATEは候補・試験フィクスチャ内のみ。別ブランチやGit外バックアップは未否定。
+- Supabaseサポート SU-557322 のメール検索では自動受付のみで、初期DDLの出典についての回答は未着。
