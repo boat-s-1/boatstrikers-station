@@ -1,6 +1,6 @@
 # BoatStrikers 開発① クラウド化・サイト復旧台帳
 
-最終更新 2026-11-18 10:20 JST。担当範囲は取得、API連携、保存、自動更新、サイト表示、監視、復旧。開発②のエージェントと開発③の掲示板は各系統の台帳で管理する。
+最終更新 2026-11-18 10:25 JST。担当範囲は取得、API連携、保存、自動更新、サイト表示、監視、復旧。開発②のエージェントと開発③の掲示板は各系統の台帳で管理する。
 
 ## 最終目標と判定
 
@@ -27,6 +27,12 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - [#297](https://github.com/boat-s-1/boatstrikers-station/pull/297) は隔離検証、収集診断、RSS表示とMigration関連の証拠。専用CI 130件成功は隔離環境の結果。#86はVercelの負荷とCron、#148は選手マスター同期、#294は蒲郡の収集経路を確認する際の関連候補。#301・#303の実装は開発②側。
 - [#298契約CI](https://github.com/boat-s-1/boatstrikers-station/actions/runs/44167141216) と [PostgreSQL fixture CI](https://github.com/boat-s-1/boatstrikers-station/actions/runs/44167141222) は上記先端で成功。今回、同じ契約テスト5ファイルをローカルで44件再実行し全件成功。過去復元ZIP v5のPython検証10件も全件成功。本番同等Migration・本番API・認証済み画面は別途検証する。
 - 監査CSVやRunbookの数値は、それぞれの取得日時・対象範囲を残して詳細資料に保持する。次回はこの台帳の状態、証拠、次の作業、更新日時を更新する。
+
+## 追加検証 2026-11-18 10:25 JST
+
+- [Draft PR #306](https://github.com/boat-s-1/boatstrikers-station/pull/306) を #298 の作業ブランチに向けて作成。既存の全オフラインテストを実行し、128成功・4失敗を再現。6艇テストのモックに当日同期の許可と開催場番号を追加し、132成功・失敗／スキップ0を確認。本番ルートと有効化条件は維持。このコミットのActionsとVercelデプロイは確認時点で0件。
+- [既存のPostgreSQL 17 CI](https://github.com/boat-s-1/boatstrikers-station/actions/runs/44167141222) の個別ステップを確認。模擬HTTPから4つの保存処理への連携、異常時のロールバックと再試行、権限、確定結果の保持をフィクスチャで確認済み。本番相当の空DBからのMigration再生は未実施。
+- 初期スキーマの探索は [既存の復旧監査ブランチ](https://github.com/boat-s-1/boatstrikers-station/tree/fbf8ad5a/supabase/migrations_recovered) に集約する。mainの取得済み履歴のSQLを検索した範囲では、対象3テーブルの直接CREATEに該当する差分なし。別形式・別ブランチ・当時の保存物は引き続き候補。旧ブランチのログか2026年8月19日以前のスキーマ原本が、次の隔離再現に必要。
 
 ## 次の作業と完了条件
 
