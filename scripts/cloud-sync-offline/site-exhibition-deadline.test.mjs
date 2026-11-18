@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assessExhibitionDeadline } from "./site-exhibition-deadline.mjs";
+import { assessExhibitionDeadline, assessExhibitionSiteDeadline } from "./site-exhibition-deadline.mjs";
 
 const event = { race_date: "2026-11-19", course_code: 1, race_no: 1, closing_time: "15:00:00" };
 const entries = Array.from({ length: 6 }, (_, i) => ({
@@ -43,4 +43,20 @@ test("rejects duplicate or unrelated boats, future and timezone-free timestamps"
     { now: "2026-11-19T14:55:00" },
     { event: { ...event, closing_time: "25:00" } },
   ]) assert.equal(check(changes).status, "INVALID");
+});
+
+test("storage alone does not prove site visibility before the deadline", () => {
+  const base = { event, entries, now: "2026-11-19T14:55:00+09:00" };
+  assert.equal(assessExhibitionSiteDeadline(base).status, "SITE_UNVERIFIED");
+  const visibleEntries = entries.map(({ boat_no, exhibition_time }) => ({ boat_no, exhibition_time }));
+  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
+    siteVisibleAt: "2026-11-19T14:50:00+09:00" }).status, "SITE_ON_TIME");
+  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
+    siteVisibleAt: "2026-11-19T14:50:01+09:00" }).status, "SITE_LATE");
+  for (const change of [
+    { visibleEntries: [...visibleEntries.slice(0, 5), visibleEntries[0]], siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries: visibleEntries.map((row, index) => index === 5
+      ? { ...row, exhibition_time: 6.9 } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries, siteVisibleAt: "2026-11-19T14:49:58+09:00" },
+  ]) assert.equal(assessExhibitionSiteDeadline({ ...base, ...change }).status, "INVALID");
 });
