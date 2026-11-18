@@ -254,3 +254,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - GitHubのDraft #306 HEAD `259baf9ad173fe3dbea7479bc21009027f02eba4` を取得し、`node --test scripts/cloud-sync-offline/*.test.mjs` を実行。**156件成功、失敗・スキップ0**。公式一覧ゲート追加後の全オフラインNodeテストを再確認した。
 - SQL候補 `site-previous-day-program.candidate.sql` のPGlite隔離試験は、環境に `@electric-sql/pglite` がなく未実施。Nodeの合格をSQL関数や実Supabaseでの書込保証と扱わない。
 - 公式データの実取得・提供元許諾、前夜全件反映、展示の締切10分前到達、移行全履歴の隔離再生は未完了。本番DB/Cron/Vercelへの変更なし。
+
+## SQL隔離試験と途中保存の再開 2026-11-18 JST
+
+- ローカルの一時的なPGlite PostgreSQL 18.6で `node scripts/cloud-sync-offline/site-previous-day-program.pglite-fixture.mjs` がPASS。前日候補SQLの構造、JST日替わり、6艇欠損・登録衝突でのロールバック、完全保存後の追加0件、関数実行権限を検証。
+- Draft #306のfixtureに、1Rと6艇が既にある状態で2Rと6艇だけが追加される再開、予定外3Rの存在時に追加を止めるケース、既存 `WINDOWS_EXISTING` 出典を保持する検証を追加。最新HEAD `f35a098e2b2fdbafdc68c84ac570b559bcd44a82`。Node全156件成功、PGlite fixture PASS、`git diff --check` PASS。
+- PGliteは隔離した合成スキーマ。実Supabaseの全Migration、実トリガー、権限、提供元データや本番書込を検証したものではない。依存資材はローカルに一時導入し、repoのpackage/lockfileに変更なし。本番DB/Cron/Vercelの変更なし。
