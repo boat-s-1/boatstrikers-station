@@ -1,3 +1,4 @@
+import { selectSiteRaceProgram } from "./site-program-handoff.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { parseSiteOfficialRacelist } from "./site-official-racelist.mjs";
@@ -70,4 +71,30 @@ test("prepares a full independent manifest, with no rows on any hold", () => {
     assert.equal(rejected.reason, reason);
     assert.equal("events" in rejected || "entries" in rejected, false);
   }
+});
+
+
+test("only matching current official HTML restores a changed live roster", () => {
+  const event = { race_date: race.raceDate, course_code: race.courseCode, race_no: 1 };
+  const entries = Array.from({ length: 6 }, (_, i) => ({
+    ...event, boat_no: i + 1, racer_registration_no: String(4000 + i),
+  }));
+  const options = { raceDate: race.raceDate, now: "2026-11-18T14:50:00+09:00",
+    snapshot: { race_date: race.raceDate, captured_at: "2026-11-17T23:00:00+09:00",
+      program: { events: [event], entries } },
+    live: { events: [event], entries: entries.map((row, index) => index
+      ? row : { ...row, racer_registration_no: "4999" }) },
+  };
+  const key = { courseCode: 1, raceNo: 1 };
+  const correction = { html: page.replace("4000 /", "4999 /"), capturedAt: "2026-11-18T14:40:00+09:00" };
+  assert.equal(selectSiteRaceProgram(options, key).reason, "live_registration_conflict");
+  assert.equal(selectSiteRaceProgram(options, key, correction).correctionVerified, true);
+  for (const evidence of [
+    { ...correction, html: page },
+    { ...correction, html: correction.html.replace("jcd=01", "jcd=02") },
+    { ...correction, capturedAt: "2026-11-17T23:59:00+09:00" },
+    { ...correction, capturedAt: "2026-11-18T14:51:00+09:00" },
+  ]) assert.equal(selectSiteRaceProgram(options, key, evidence).reason, "live_registration_conflict");
+  const partial = { ...options, live: { ...options.live, entries: options.live.entries.slice(0, 5) } };
+  assert.equal(selectSiteRaceProgram(partial, key, correction).reason, "live_registration_conflict");
 });
