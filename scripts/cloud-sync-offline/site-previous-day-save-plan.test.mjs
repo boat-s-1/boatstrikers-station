@@ -11,6 +11,8 @@ const options = {
   capturedAt: "2026-11-18T14:50:00Z",
   now: "2026-11-18T23:59:00+09:00",
   batch: { status: "PASS_OFFLINE_ONLY", events: [event], entries },
+  expectedRaces: [event],
+  expectedEntries: entries,
   existingEvents: [],
   existingEntries: [],
 };
@@ -26,6 +28,22 @@ test("plans all missing or only missing entries and leaves replays empty", () =>
   assert.deepEqual(partial.missingEntries, entries.slice(1));
   const replay = planPreviousDayProgramSave({ ...options, existingEvents: [event], existingEntries: entries });
   assert.deepEqual(replay, { status: "PASS_OFFLINE_ONLY", missingEvents: [], missingEntries: [] });
+});
+
+test("requires an independent complete official manifest before returning save rows", () => {
+  for (const change of [
+    { expectedRaces: undefined },
+    { expectedEntries: undefined },
+    { expectedRaces: [{ ...event, race_no: 2 }],
+      expectedEntries: entries.map(row => ({ ...row, race_no: 2 })) },
+    { expectedEntries: entries.map((row, index) => index === 0
+      ? { ...row, racer_registration_no: "4999" } : row) },
+    { expectedEntries: entries.slice(0, 5) },
+  ]) {
+    const result = planPreviousDayProgramSave({ ...options, ...change });
+    assert.equal(result.status, "HOLD");
+    assert.equal("missingEntries" in result, false);
+  }
 });
 
 test("rejects a conflicting existing registration without exposing save rows", () => {
