@@ -5,7 +5,7 @@ const entryKey = row => `${raceKey(row)}/${row.boat_no}`;
 const registration = value => /^0?\d{4}$/.test(String(value)) && Number(value) > 0 ? Number(value) : null;
 const jstDate = timestamp => new Date(timestamp + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-export function planPreviousDayProgramSave({ raceDate, capturedAt, now, batch, existingEvents, existingEntries }) {
+export function planPreviousDayProgramSave({ raceDate, capturedAt, now, batch, expectedRaces, expectedEntries, existingEvents, existingEntries }) {
   const capturedMs = Date.parse(capturedAt);
   const nowMs = Date.parse(now);
   const explicitZone = value => /(?:Z|[+-]\d{2}:\d{2})$/i.test(value ?? "");
@@ -15,6 +15,7 @@ export function planPreviousDayProgramSave({ raceDate, capturedAt, now, batch, e
     return { status: "HOLD", reason: "not_previous_jst_day" };
   }
   if (batch?.status !== "PASS_OFFLINE_ONLY" || !Array.isArray(batch.entries) ||
+      !Array.isArray(expectedRaces) || !Array.isArray(expectedEntries) ||
       !Array.isArray(existingEvents) || !Array.isArray(existingEntries)) {
     return { status: "HOLD", reason: "invalid_save_inputs" };
   }
@@ -22,7 +23,14 @@ export function planPreviousDayProgramSave({ raceDate, capturedAt, now, batch, e
   const entries = batch.entries.map(row => ({
     ...row, racer_registration_no: registration(row?.racer_registration_no),
   }));
-  if (inspectBatch(batch.events, entries, batch.events, raceDate).status !== "PASS_OFFLINE_ONLY") {
+  const officialEntries = expectedEntries.map(row => ({
+    ...row, racer_registration_no: registration(row?.racer_registration_no),
+  }));
+  const officialRegistration = new Map(officialEntries.map(row =>
+    [entryKey(row), row.racer_registration_no]));
+  if (inspectBatch(expectedRaces, officialEntries, expectedRaces, raceDate).status !== "PASS_OFFLINE_ONLY" ||
+      inspectBatch(batch.events, entries, expectedRaces, raceDate).status !== "PASS_OFFLINE_ONLY" ||
+      entries.some(row => officialRegistration.get(entryKey(row)) !== row.racer_registration_no)) {
     return { status: "HOLD", reason: "invalid_candidate_batch" };
   }
 
