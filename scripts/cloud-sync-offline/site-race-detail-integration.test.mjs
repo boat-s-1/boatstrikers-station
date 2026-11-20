@@ -92,6 +92,9 @@ test("tomorrow date, day index, venue list and detail agree on one verified prog
   assert.equal(courses[0].raceDate, raceDate);
   assert.equal(courses[0].races[0].programAvailable, true);
   assert.equal(courses[0].races[0].entries.length, 6);
+  assert.equal(courses[0].exhibitionCount, 0);
+  assert.equal(courses[0].races[0].entries[0].exhibition_time, null);
+  assert.equal(courses[0].races[0].entries[0].average_st, null);
   assert.equal(courses[0].resultCount, 0);
   const venue = await platform.getCourseRaces(raceDate, 1);
   assert.equal(venue.length, 1);
