@@ -34,3 +34,18 @@ test("page mismatch, missing boat, and existing conflict never expose save rows"
     assert.equal("missingEvents" in result || "missingEntries" in result, false);
   }
 });
+
+test("a missing optional ST preserves a display-only program but never invents a prediction value", () => {
+  const profiled = html.replace(/<td><\/td><td>(\d{4}) \/ B1/g,
+    (_match, registration) => `<td><a href="/owpc/pc/data/racersearch/profile?toban=${registration}">photo</a></td><td>${registration} / B1`);
+  const withDash = profiled.replace(/(<td>4005 \/ B1[\s\S]*?<td>)0\.15(<\/td>)/, "$1-$2");
+  const result = planVerifiedSitePreviousDayIngest({ ...input, pages: [{ ...race, html: withDash }] });
+  assert.equal(result.status, "PASS_OFFLINE_ONLY");
+  assert.equal(result.missingEntries.length, 6);
+  assert.equal(result.missingEntries[0].average_st, 0.15);
+  assert.equal(result.missingEntries[5].average_st, null);
+  const mismatch = planVerifiedSitePreviousDayIngest({ ...input,
+    pages: [{ ...race, html: withDash.replace("toban=4005", "toban=4999") }] });
+  assert.equal(mismatch.status, "HOLD");
+  assert.equal("missingEntries" in mismatch, false);
+});
