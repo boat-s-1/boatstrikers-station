@@ -6,6 +6,7 @@ const event = { race_date: "2026-11-19", course_code: 1, race_no: 1, closing_tim
 const entries = Array.from({ length: 6 }, (_, i) => ({
   race_date: event.race_date, course_code: 1, race_no: 1, boat_no: i + 1,
   exhibition_time: 6.8,
+  racer_registration_no: String(4000 + i),
   exhibition_synced_at: "2026-11-19T14:49:59+09:00",
 }));
 const check = (changes = {}) => assessExhibitionDeadline({ event, entries, now: "2026-11-19T14:55:00+09:00", ...changes });
@@ -48,7 +49,8 @@ test("rejects duplicate or unrelated boats, future and timezone-free timestamps"
 test("storage alone does not prove site visibility before the deadline", () => {
   const base = { event, entries, now: "2026-11-19T14:55:00+09:00" };
   assert.equal(assessExhibitionSiteDeadline(base).status, "SITE_UNVERIFIED");
-  const visibleEntries = entries.map(({ boat_no, exhibition_time }) => ({ boat_no, exhibition_time }));
+  const visibleEntries = entries.map(({ boat_no, exhibition_time, racer_registration_no }) =>
+    ({ boat_no, exhibition_time, racer_registration_no }));
   assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
     siteVisibleAt: "2026-11-19T14:50:00+09:00" }).status, "SITE_ON_TIME");
   assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
@@ -57,6 +59,10 @@ test("storage alone does not prove site visibility before the deadline", () => {
     { visibleEntries: [...visibleEntries.slice(0, 5), visibleEntries[0]], siteVisibleAt: "2026-11-19T14:50:00+09:00" },
     { visibleEntries: visibleEntries.map((row, index) => index === 5
       ? { ...row, exhibition_time: 6.9 } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries: visibleEntries.map((row, index) => index === 5
+      ? { ...row, racer_registration_no: visibleEntries[0].racer_registration_no } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries: visibleEntries.map((row, index) => index === 5
+      ? { ...row, racer_registration_no: null } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
     { visibleEntries, siteVisibleAt: "2026-11-19T14:49:58+09:00" },
   ]) assert.equal(assessExhibitionSiteDeadline({ ...base, ...change }).status, "INVALID");
 });
