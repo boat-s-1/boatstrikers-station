@@ -356,3 +356,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - 運用者の今回の明示承認後、既存のTeam-Nave返信スレッドに、ビジネスプランの正式見積（税込月額・初期費用・期間・解約条件）、Supabase保存と一般公開／将来有料表示の権利範囲、前日番組の配信時刻、CSV仕様を問い合わせ。Gmail送信ID `1a1f72288b087e05`、thread `1a1efea3eab5d81b`。送信済み本文と宛先 `support@team-nave.com` を再読確認。
 - 返信待ち。メールには認証情報・実データなし。見積依頼は契約・課金の承認ではなく、ビジネスプランへの変更、BRDB実アクセス、公開サイトへの取り込みは引き続きHOLD。本番DB、Cron、Vercel、既存PRのマージは行っていない。
+
+## サイト展示の6艇同一性ゲート 2026-11-20 JST
+
+- Draft [#306](https://github.com/boat-s-1/boatstrikers-station/pull/306) のオフライン `assessExhibitionSiteDeadline` に、サイト表示で観測した艇番1～6の選手登録番号を保存済み出走行と艇番ごとに照合する条件を追加。6艇の番号が欠損・重複・相違なら、展示タイムと表示時刻が揃っていても `SITE_ON_TIME` にならず `INVALID`。異なるレースの展示を同値タイムで誤って合格させる経路を閉じる。
+- `node --test scripts/cloud-sync-offline/*.test.mjs` 全172件PASS、失敗・スキップ0。差分検査PASS。実サイトからの表示値取得、保存済み6艇・公開時刻の実測はまだなく、10分前表示の完成を証明しない。
+- Team-Naveの追加見積回答は確認時点で未着。現契約のBRDBデータは一般公開利用不可。PC-KYOTEI公式フォーラムへの投稿も未完了。本番DB、Cron、Vercel、実APIへの追加リクエストなし。
