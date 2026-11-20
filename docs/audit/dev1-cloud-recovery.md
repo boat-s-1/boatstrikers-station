@@ -362,3 +362,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - Draft [#306](https://github.com/boat-s-1/boatstrikers-station/pull/306) のオフライン `assessExhibitionSiteDeadline` に、サイト表示で観測した艇番1～6の選手登録番号を保存済み出走行と艇番ごとに照合する条件を追加。6艇の番号が欠損・重複・相違なら、展示タイムと表示時刻が揃っていても `SITE_ON_TIME` にならず `INVALID`。異なるレースの展示を同値タイムで誤って合格させる経路を閉じる。
 - `node --test scripts/cloud-sync-offline/*.test.mjs` 全172件PASS、失敗・スキップ0。差分検査PASS。実サイトからの表示値取得、保存済み6艇・公開時刻の実測はまだなく、10分前表示の完成を証明しない。
 - Team-Naveの追加見積回答は確認時点で未着。現契約のBRDBデータは一般公開利用不可。PC-KYOTEI公式フォーラムへの投稿も未完了。本番DB、Cron、Vercel、実APIへの追加リクエストなし。
+
+### 2026-11-20 JST 追加のオフライン表示ゲート
+
+#306の展示サイト判定は、公開ページから観測した対象日・開催場・Rが保存レースと一致することも要求する。別レースの6艇の登録番号・展示タイムが偶然一致しても合格にせず、識別情報を確認できない場合は `SITE_UNVERIFIED`。Node全172件PASS、差分検査PASS。実サイトの表示時刻・公式の前日公開・商用利用許諾は未検証であり、運用GOとはしない。
