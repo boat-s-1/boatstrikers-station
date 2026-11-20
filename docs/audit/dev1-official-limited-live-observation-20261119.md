@@ -43,5 +43,5 @@ HTTPエラー、アクセス制限、利用条件の不明点、公式の未公�
 - 今回の承認上限はBOAT RACE公式HTTP GET合計3回、再試行なし。実施済み2回、翌朝残枠1回。curl `--max-redirs 0` でリダイレクトなし。両応答HTTP 200。
 - GET 1: 公式開催一覧 `https://www.boatrace.jp/owpc/pc/race/index?hd=20261121`、終了JST 2026-11-20 23:56:38、57,985 bytes、SHA-256 `1872c80be1ae1fbd00e69a6ddc295f9a704d5e9eee9ed88a0ee057447ad95916`。ページ見出し「11月21日のレース情報」に多摩川 `jcd=05` の開催・出走表リンクがある。
 - GET 2: 同日多摩川2R `https://www.boatrace.jp/owpc/pc/race/racelist?rno=2&jcd=05&hd=20261121`、終了JST 2026-11-20 23:56:57、67,511 bytes、SHA-256 `d45b7579bfb71c5480e8417f2c796d3402d4b41e2709539f8d3709a4f95538d6`。当該ページの選択中2Rと場05、日付20261121を照合。公式締切11:01 JST。艇番1→登録4139、2→5308、3→5195、4→4539、5→4951、6→5487。6件重複なし。公式一覧は開催場を示すが独立した6艇登録番号一覧は含まないため、別ソースとの6艇一致は未証明。
-- 既存オフライン `parseSiteOfficialRacelist` はこの実HTMLで `Official racelist boat 6 is incomplete` を返した。実HTMLの艇番表記が全角数字、行が複数行・rowspan構成であることを確認した。HTML取得と手動抽出成功をパーサー合格や前日全件反映の証明と混同しない。欠陥修正は別途オフラインで行う。
+- 既存オフライン `parseSiteOfficialRacelist` はこの実HTMLで `Official racelist boat 6 is incomplete` を返した。欠損項目は6号艇の `average_st` で、公式セル自体が `F1 / L0 / -` と表示する。全角艇番やHTML行構造は停止理由ではない。登録番号6件は確認できたが、必須の予想入力が揃わないため一括保存候補としてはHOLDを維持する。欠損を推定値で埋めない。
 - 翌朝の直前情報対象は**この多摩川2Rのみ**。GET開始が2026-11-21 10:51:00 JSTより前で、上記記録をGitHubで再読でき、同一日・場・Rを維持できる場合だけ公式 beforeinfo を最大1 GET。目標10:50 JST。遅延、未記録、条件不一致は0 GETでHOLD。取得後は展示タイム・登録番号・取得終了時刻・HTTP状態・締切残分を追記する。別レース代替・再試行なし。本番DB/Cron/Vercelは変更しない。
