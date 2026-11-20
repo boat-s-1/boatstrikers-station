@@ -7,6 +7,11 @@ test("six boats accepted",()=>assert.equal(inspectSixBoatEntries(good,day).statu
 test("missing boat rejected",()=>assert.ok(inspectSixBoatEntries(good.slice(1),day).issues.includes("incomplete_race")));
 test("duplicate boat rejected",()=>assert.ok(inspectSixBoatEntries([...good,good[0]],day).issues.includes("duplicate_boat")));
 test("bad registration rejected",()=>assert.equal(inspectSixBoatEntries([{...good[0],racer_registration_no:null},...good.slice(1)],day).status,"HOLD"));
+test("a duplicate racer or zero identity cannot form a complete race",()=>{
+  const duplicate=[...good.slice(0,5),{...good[5],racer_registration_no:good[0].racer_registration_no}];
+  assert.ok(inspectSixBoatEntries(duplicate,day).issues.includes("duplicate_registration"));
+  assert.ok(inspectSixBoatEntries([{...good[0],racer_registration_no:"0000"},...good.slice(1)],day).issues.includes("invalid_entry_key"));
+});
 test("date mismatch rejected",()=>assert.equal(inspectSixBoatEntries(good,"2026-11-14").status,"HOLD"));
 test("invalid calendar date rejected",()=>assert.equal(inspectSixBoatEntries(good,"2026-02-30").status,"HOLD"));
 test("non-array rejected",()=>assert.equal(inspectSixBoatEntries(null,day).status,"HOLD"));
