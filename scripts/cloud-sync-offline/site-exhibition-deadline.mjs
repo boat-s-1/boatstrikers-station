@@ -45,13 +45,13 @@ export function assessExhibitionDeadline({ event, entries, now }) {
 
 // Separate site evidence from DB storage evidence. The caller must supply an
 // observed public-page timestamp and six values parsed from that response.
-export function assessExhibitionSiteDeadline({ event, entries, now, siteVisibleAt, visibleEntries }) {
+export function assessExhibitionSiteDeadline({ event, entries, now, siteVisibleAt, visibleEvent, visibleEntries }) {
   const stored = assessExhibitionDeadline({ event, entries, now });
   if (stored.status === "INVALID") return { status: "INVALID" };
   if (stored.status === "PENDING" || stored.status === "MISSED") {
     return { status: stored.status, cutoffAt: stored.cutoffAt };
   }
-  if (siteVisibleAt == null || visibleEntries == null) {
+  if (siteVisibleAt == null || visibleEntries == null || visibleEvent == null) {
     return { status: "SITE_UNVERIFIED", cutoffAt: stored.cutoffAt,
       storedAt: stored.completedAt };
   }
@@ -62,6 +62,9 @@ export function assessExhibitionSiteDeadline({ event, entries, now, siteVisibleA
   const storedRegistrations = entries.map(row => Number(row.racer_registration_no));
   if (!explicitZone(siteVisibleAt) || !Number.isFinite(visibleMs) ||
       visibleMs < storedMs || visibleMs > nowMs ||
+      visibleEvent.race_date !== event.race_date ||
+      visibleEvent.course_code !== event.course_code ||
+      visibleEvent.race_no !== event.race_no ||
       jstDate(visibleMs) !== event.race_date || !Array.isArray(visibleEntries) ||
       storedRegistrations.some(number => !Number.isSafeInteger(number) || number <= 0) ||
       new Set(storedRegistrations).size !== 6 ||
