@@ -345,3 +345,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 提供元推奨の広範囲取得時刻は00:30、05:30、10:30。低負荷SQLなら30分単位程度の再試行も可との回答。これらは対象日当日の推奨であり、運用者目標の**前日全件反映**を証明しない。06:00～08:00保守帯を避ける。実運用Cronは追加しない。
 - `RACEMST`も`RACEDTL`と同様のSOPDT下限とOPDT対象日を推奨。OPDT単独にも二次キーがあるとの説明。CSV列見出し・文字コード・空値形式、前日番組の公開時刻への回答はなし。Draft [#306](https://github.com/boat-s-1/boatstrikers-station/pull/306)にRACEMSTのオフラインSQL候補と試験を追加し、全Node172件PASS、差分検査PASS。実BRDBアクセス0回、GitHub CI・実DB検証は未実施。
 - 11/19夜・11/20朝の承認済み少数公式実測は、前夜結果が指定台帳へ記録されなかったため後半GETを0回でHOLD。前夜のGET数や内容は未証明。『明日開催場の許可状況』タスクは再開し、11/21 00:00 JSTの次回予定を確認。詳細は[少数実測台帳](./dev1-official-limited-live-observation-20261119.md)。
+
+## 承認・問い合わせの残状態 2026-11-20 JST
+
+- Team-Naveビジネスプランの正式見積、公開範囲、前日番組の公開時刻、CSV形式を確かめる[返信文案](https://github.com/boat-s-1/boatstrikers-station/blob/codex/dev1-openapi-offline-fix-20261118/scripts/cloud-sync-offline/DEV1-PROVIDER-QUESTIONS-20261119.md)をDraft #306に用意。未送信であり、見積依頼も契約・課金の承認とは別。正式金額がない状態でプラン変更しない。
+- PC-KYOTEI公式フォーラムへのログインと公開質問は運用者が11/19に承認したが、安全な認証入力の要求が中断され、ログイン成功・投稿完了の証拠はない。投稿済みとして扱わない。再開時には現行セッションの状態を確認し、秘密情報はチャット・台帳へ載せない。
+- 本番サイト復旧の現状はHOLD。BRDBの現プランを一般公開経路に接続できず、公式少数実測の前夜証拠も未保存。出走表の前日一括反映と展示の10分前表示は、実測・権利・隔離DB・サイト結合の各関門を通過してから判定する。
