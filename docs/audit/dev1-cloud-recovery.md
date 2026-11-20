@@ -351,3 +351,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - Team-Naveビジネスプランの正式見積、公開範囲、前日番組の公開時刻、CSV形式を確かめる[返信文案](https://github.com/boat-s-1/boatstrikers-station/blob/codex/dev1-openapi-offline-fix-20261118/scripts/cloud-sync-offline/DEV1-PROVIDER-QUESTIONS-20261119.md)をDraft #306に用意。未送信であり、見積依頼も契約・課金の承認とは別。正式金額がない状態でプラン変更しない。
 - PC-KYOTEI公式フォーラムへのログインと公開質問は運用者が11/19に承認したが、安全な認証入力の要求が中断され、ログイン成功・投稿完了の証拠はない。投稿済みとして扱わない。再開時には現行セッションの状態を確認し、秘密情報はチャット・台帳へ載せない。
 - 本番サイト復旧の現状はHOLD。BRDBの現プランを一般公開経路に接続できず、公式少数実測の前夜証拠も未保存。出走表の前日一括反映と展示の10分前表示は、実測・権利・隔離DB・サイト結合の各関門を通過してから判定する。
+
+## Team-Nave見積・権利照会の送信 2026-11-20 JST
+
+- 運用者の今回の明示承認後、既存のTeam-Nave返信スレッドに、ビジネスプランの正式見積（税込月額・初期費用・期間・解約条件）、Supabase保存と一般公開／将来有料表示の権利範囲、前日番組の配信時刻、CSV仕様を問い合わせ。Gmail送信ID `1a1f72288b087e05`、thread `1a1efea3eab5d81b`。送信済み本文と宛先 `support@team-nave.com` を再読確認。
+- 返信待ち。メールには認証情報・実データなし。見積依頼は契約・課金の承認ではなく、ビジネスプランへの変更、BRDB実アクセス、公開サイトへの取り込みは引き続きHOLD。本番DB、Cron、Vercel、既存PRのマージは行っていない。
