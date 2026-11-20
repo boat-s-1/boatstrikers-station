@@ -382,3 +382,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-21 JST 表示用保存計画の統合確認
 
 #306に模擬1Rの6艇HTMLから前日表示用保存計画までの統合テストを追加。平均ST未掲載の1艇は`null`のまま、登録番号不一致はHOLD。Node全175件PASS。実DBとサイトは未検証、商用権利と全場独立一覧は引き続き関門。
+
+### 2026-11-21 JST 欠損統計のDB候補整合性
+
+`CORE-TABLES-REVIEW-DRAFT.sql` と `SIX-TABLE-ISOLATION-CANDIDATE.sql` の `bs_race_entries.average_st` はnullableとして記述され、#306の前日保存SQL候補も数値型のNULLを受け取る形。これは現在の本番スキーマ・トリガー・RLSを実行検証した証拠ではない。実DB接続前に隔離環境でのschema parityと書込ロールバックが必要。#306最新HEADのGitHub Action `TODAY Birthday Build Check` は成功したが、Node175件のCI実行ではない。
