@@ -58,14 +58,22 @@ export function assessExhibitionSiteDeadline({ event, entries, now, siteVisibleA
   const visibleMs = Date.parse(siteVisibleAt);
   const nowMs = Date.parse(now);
   const storedMs = Date.parse(stored.completedAt);
+  const storedBoats = new Map(entries.map(row => [row.boat_no, row]));
+  const storedRegistrations = entries.map(row => Number(row.racer_registration_no));
   if (!explicitZone(siteVisibleAt) || !Number.isFinite(visibleMs) ||
       visibleMs < storedMs || visibleMs > nowMs ||
       jstDate(visibleMs) !== event.race_date || !Array.isArray(visibleEntries) ||
+      storedRegistrations.some(number => !Number.isSafeInteger(number) || number <= 0) ||
+      new Set(storedRegistrations).size !== 6 ||
       visibleEntries.length !== 6 || new Set(visibleEntries.map(row => row?.boat_no)).size !== 6 ||
       visibleEntries.some(row => !Number.isInteger(row?.boat_no) || row.boat_no < 1 ||
         row.boat_no > 6 || !Number.isFinite(Number(row.exhibition_time)) ||
         Number(row.exhibition_time) <= 0 ||
-        Number(entries.find(entry => entry.boat_no === row.boat_no)?.exhibition_time) !==
+        !Number.isSafeInteger(Number(row.racer_registration_no)) ||
+        Number(row.racer_registration_no) <= 0 ||
+        Number(row.racer_registration_no) !==
+          Number(storedBoats.get(row.boat_no)?.racer_registration_no) ||
+        Number(storedBoats.get(row.boat_no)?.exhibition_time) !==
           Number(row.exhibition_time))) {
     return { status: "INVALID" };
   }
