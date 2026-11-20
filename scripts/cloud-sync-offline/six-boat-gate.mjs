@@ -8,13 +8,15 @@ export function inspectSixBoatEntries(entries, expectedDate) {
   for (const row of entries) {
     if (!row || typeof row !== "object" || Array.isArray(row)) {issues.push("invalid_entry");continue;}
     const {race_date,course_code,race_no,boat_no,racer_registration_no}=row;
-    if (race_date!==expectedDate || !Number.isInteger(course_code) || course_code<1 || course_code>24 || !Number.isInteger(race_no) || race_no<1 || race_no>12 || !Number.isInteger(boat_no) || boat_no<1 || boat_no>6 || !/^[0-9]{4}$/.test(String(racer_registration_no??""))) {issues.push("invalid_entry_key");continue;}
+    if (race_date!==expectedDate || !Number.isInteger(course_code) || course_code<1 || course_code>24 || !Number.isInteger(race_no) || race_no<1 || race_no>12 || !Number.isInteger(boat_no) || boat_no<1 || boat_no>6 || !/^[0-9]{4}$/.test(String(racer_registration_no??"")) || String(racer_registration_no)==="0000") {issues.push("invalid_entry_key");continue;}
     const key=`${race_date}/${course_code}/${race_no}`;
-    if(!groups.has(key)) groups.set(key,new Set());
-    const boats=groups.get(key);
+    if(!groups.has(key)) groups.set(key,{boats:new Set(),registrations:new Set()});
+    const {boats,registrations}=groups.get(key);
     if(boats.has(boat_no)) issues.push("duplicate_boat");
+    if(registrations.has(String(racer_registration_no))) issues.push("duplicate_registration");
     boats.add(boat_no);
+    registrations.add(String(racer_registration_no));
   }
-  for(const boats of groups.values()) if(boats.size!==6) issues.push("incomplete_race");
+  for(const {boats} of groups.values()) if(boats.size!==6) issues.push("incomplete_race");
   return {status:issues.length?"HOLD":"PASS_OFFLINE_ONLY",issues,races:groups.size};
 }

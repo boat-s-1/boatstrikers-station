@@ -156,7 +156,9 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
       </div>
 
       <div className={styles.raceRow}>
-        {finished ? (
+        {course.cancelledCount > 0 && course.cancelledCount === course.raceCount ? (
+          <div className={styles.statusLine}>全レース中止</div>
+        ) : finished ? (
           <div className={`${styles.statusLine} ${styles.finished}`}>本日終了</div>
         ) : nextRaceNo ? (
           <>
@@ -179,6 +181,9 @@ export default function CoursePortalCard({ course, raceDate, noteCount = 0 }) {
           <span className={styles.direct}>⚡ {directRace.raceNo}R 直前更新</span>
         ) : (
           <span className={styles.hint}>タップして出走表を見る</span>
+        )}
+        {course.cancelledCount > 0 && course.cancelledCount < course.raceCount && (
+          <span className={styles.hint}>{course.cancelledCount}R中止</span>
         )}
         {noteCount > 0 && <span className={styles.newspaper}>📰 {noteCount}</span>}
       </div>

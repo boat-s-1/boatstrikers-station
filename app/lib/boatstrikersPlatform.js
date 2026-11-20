@@ -1,4 +1,5 @@
 import "server-only";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -961,12 +962,18 @@ export async function getCourseRaces(raceDate, courseCode) {
 
   const supabase = getSupabaseServerClient();
 
+  const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(),
+    process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true");
   const [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
     { data: resultEntryRows, error: resultEntryError },
-  ] = await Promise.all([
+  ] = staged ? [
+    { data: staged.events.filter(row => row.course_code === normalizedCourseCode) },
+    { data: staged.entries.filter(row => row.course_code === normalizedCourseCode) },
+    { data: [] }, { data: [] },
+  ] : await Promise.all([
     supabase
       .from("bs_race_events")
       .select("*")
@@ -1037,6 +1044,10 @@ export async function getCourseRaces(raceDate, courseCode) {
   return (eventRows ?? []).map((rawEvent) => {
     const event = mapEvent(rawEvent);
     const raceNo = Number(event.race_no);
+    if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && hasOfficialRaceCancellation(rawEvent)) {
+      return { ...event, raceStatus: "cancelled", race_status: "cancelled",
+        hasExhibition: false, resultAvailable: false, entries: [], result: null, resultEntries: [] };
+    }
     const baseEntries = entriesByRace.get(raceNo) ?? [];
     const result = resultByRace.get(raceNo) ?? null;
     const resultEntries = resultEntriesByRace.get(raceNo) ?? [];
@@ -1220,6 +1231,37 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", normalizedRaceNo)
       .order("boat_no", { ascending: true }),
   ]);
+
+  const previousDayDetailEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
+  if (previousDayDetailEnabled && !eventError && hasOfficialRaceCancellation(eventRow)) {
+    return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
+  }
+
+  if (previousDayDetailEnabled && !eventError && !entryError) {
+    const selection = await readSiteProgramCandidate(supabase, {
+      raceDate: normalizedDate,
+      now: new Date().toISOString(),
+      live: { events: eventRow ? [eventRow] : [], entries: entryRows ?? [] },
+      race: { courseCode: normalizedCourseCode, raceNo: normalizedRaceNo },
+    });
+    if (selection.status === "READY" && selection.source === "previous_day_snapshot") {
+      return {
+        event: mapEvent({
+          ...selection.events[0],
+          race_status: "scheduled",
+          program_available: true,
+          program_source: "previous_day_snapshot",
+        }),
+        entries: selection.entries.map(mapEntry),
+        venueBaselines: {},
+        result: null,
+        resultEntries: [],
+      };
+    }
+    if (selection.reason === "live_registration_conflict") {
+      return { event: eventRow ? mapEvent(eventRow) : null, entries: [], resultEntries: [], programReviewRequired: true };
+    }
+  }
 
   if (eventError) {
     throw new Error(`レース情報の取得に失敗しました: ${eventError.message}`);
