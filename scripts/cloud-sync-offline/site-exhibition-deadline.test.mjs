@@ -51,11 +51,14 @@ test("storage alone does not prove site visibility before the deadline", () => {
   assert.equal(assessExhibitionSiteDeadline(base).status, "SITE_UNVERIFIED");
   const visibleEntries = entries.map(({ boat_no, exhibition_time, racer_registration_no }) =>
     ({ boat_no, exhibition_time, racer_registration_no }));
-  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
+  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEvent: event, visibleEntries,
     siteVisibleAt: "2026-11-19T14:50:00+09:00" }).status, "SITE_ON_TIME");
-  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
+  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEvent: event, visibleEntries,
     siteVisibleAt: "2026-11-19T14:50:01+09:00" }).status, "SITE_LATE");
   for (const change of [
+    { visibleEntries, visibleEvent: { ...event, race_no: 2 }, siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries, visibleEvent: { ...event, course_code: 2 }, siteVisibleAt: "2026-11-19T14:50:00+09:00" },
+    { visibleEntries, visibleEvent: { ...event, race_date: "2026-11-20" }, siteVisibleAt: "2026-11-19T14:50:00+09:00" },
     { visibleEntries: [...visibleEntries.slice(0, 5), visibleEntries[0]], siteVisibleAt: "2026-11-19T14:50:00+09:00" },
     { visibleEntries: visibleEntries.map((row, index) => index === 5
       ? { ...row, exhibition_time: 6.9 } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
@@ -64,5 +67,7 @@ test("storage alone does not prove site visibility before the deadline", () => {
     { visibleEntries: visibleEntries.map((row, index) => index === 5
       ? { ...row, racer_registration_no: null } : row), siteVisibleAt: "2026-11-19T14:50:00+09:00" },
     { visibleEntries, siteVisibleAt: "2026-11-19T14:49:58+09:00" },
-  ]) assert.equal(assessExhibitionSiteDeadline({ ...base, ...change }).status, "INVALID");
+  ]) assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEvent: event, ...change }).status, "INVALID");
+  assert.equal(assessExhibitionSiteDeadline({ ...base, visibleEntries,
+    siteVisibleAt: "2026-11-19T14:50:00+09:00" }).status, "SITE_UNVERIFIED");
 });
