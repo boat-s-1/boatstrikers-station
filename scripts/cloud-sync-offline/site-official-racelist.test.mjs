@@ -43,6 +43,22 @@ test("rejects duplicate registrations and invalid calendar dates", () => {
   assert.throws(() => parseSiteOfficialRacelist(page, { ...race, raceDate: "2026-02-30" }), /Invalid official race key/);
 });
 
+test("a dash in an optional statistic keeps the six-boat display program without inventing a value", () => {
+  const withProfiles = page.replace(/<td><\/td>\s*<td>(\d{4}) \/ B1/g,
+    (_match, registration) => `<td><a href="/owpc/pc/data/racersearch/profile?toban=${registration}">photo</a></td><td>${registration} / B1`);
+  const rookie = withProfiles.replace(/(<td>4005 \/ B1[\s\S]*?<td>)0\.15(<\/td>)/, "$1-$2");
+  const result = parseSiteOfficialRacelist(rookie, race);
+  assert.equal(result.program_only, true);
+  assert.equal(result.entries.length, 6);
+  assert.equal(result.entries[0].average_st, 0.15);
+  assert.equal(result.entries[5].average_st, null);
+  assert.equal(result.entries[5].racer_registration_no, "04005");
+  assert.throws(() => parseSiteOfficialRacelist(rookie.replace("toban=4005", "toban=4999"), race),
+    /identity is incomplete/);
+  assert.throws(() => parseSiteOfficialRacelist(rookie.replace("4005 / B1", "4004 / B1"), race),
+    /identity is incomplete/);
+});
+
 test("prepares a full independent manifest, with no rows on any hold", () => {
   const key = { race_date: race.raceDate, course_code: race.courseCode, race_no: race.raceNo };
   const second = { ...key, course_code: 2 };
