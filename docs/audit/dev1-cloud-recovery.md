@@ -386,3 +386,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-21 JST 欠損統計のDB候補整合性
 
 `CORE-TABLES-REVIEW-DRAFT.sql` と `SIX-TABLE-ISOLATION-CANDIDATE.sql` の `bs_race_entries.average_st` はnullableとして記述され、#306の前日保存SQL候補も数値型のNULLを受け取る形。これは現在の本番スキーマ・トリガー・RLSを実行検証した証拠ではない。実DB接続前に隔離環境でのschema parityと書込ロールバックが必要。#306最新HEADのGitHub Action `TODAY Birthday Build Check` は成功したが、Node175件のCI実行ではない。
+
+### 2026-11-21 JST サイト一覧の未取得値の誤変換修正
+
+#306で`racesIndexLight`の数値変換を修正。以前は`Number(null) === 0`により、未取得の展示を展示済みとして集計し、平均ST未掲載を0に表示する恐れがあった。修正後は`null`を保ち、模擬翌日一覧で展示件数0・平均ST欠損を検証。Node全175件PASS。実サイト確認は未実施。
