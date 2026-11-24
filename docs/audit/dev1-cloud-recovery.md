@@ -409,3 +409,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-24 JST 当日朝の保存・表示候補
 
 #306に当日朝専用のスナップショットSQL候補、前日分と分離したRPC読取、既定OFFのサイト日別一覧・詳細分岐を追加。取得元で検証済みの全開催・6艇・公式締切を入力とする前提。JST当日、最初の公式締切前だけ不変のスナップショットを作り、展示未取得はNULLに保つ。模擬DBでレース詳細6艇表示を確認し、Node全180件PASS。SQLは実PostgreSQL・Supabase未実行、日別一覧の実ブラウザ確認も未実施。初期Migration再生、提供元の公開条件、朝の到達時刻を確認するまでフラグ有効化・本番設置しない。展示10分前の目標は別途未完了。
+
+### 2026-11-24 JST 開発①隔離CI
+
+#306のHEAD `e8d1bdefea464ba16dec6905894970a97d4782c5`で[Dev1 program isolated gate run 45326632605](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45326632605)成功。Node全180件とPostgreSQL 17の使い捨てDBで当日朝スナップショットfixtureを実行した。実Supabase/Migration、公式全件取得、公開権利、実サイトでの表示時刻は未検証。CIに秘密情報・本番接続なし。Windows・本番DB/Cron/Vercel・既存自動タスクは未変更。
