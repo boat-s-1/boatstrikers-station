@@ -1,0 +1,49 @@
+name: Dev1 program isolated gate
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/cloud-sync-offline/site-*.mjs'
+      - 'scripts/cloud-sync-offline/site-*.sql'
+      - 'app/lib/racesIndexLight.js'
+      - 'app/lib/boatstrikersPlatform.js'
+      - '.github/workflows/dev1-program-isolated.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-program:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fixture"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGDATABASE: fixture
+      PGUSER: postgres
+      PGPASSWORD: fixture-only
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Offline program tests
+        run: node --test scripts/cloud-sync-offline/*.test.mjs
+      - name: Disposable PostgreSQL morning snapshot
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/cloud-sync-offline/site-race-day-morning.fixture.sql
