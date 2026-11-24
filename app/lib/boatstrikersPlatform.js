@@ -1262,7 +1262,8 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
 
   if ((previousDayDetailEnabled || morningDetailEnabled) && !eventError && !entryError &&
       !resultError && !resultEntryError) {
-    if (!eventRow && morningDetailEnabled && String(resultRow?.race_status ?? "").toLowerCase() === "cancelled") {
+    if (!eventRow && morningDetailEnabled && ["cancelled", "postponed"]
+      .includes(String(resultRow?.race_status ?? "").toLowerCase())) {
       return { event: null, entries: [], resultEntries: [], programReviewRequired: true };
     }
     const selection = await readSiteProgramCandidate(supabase, {
