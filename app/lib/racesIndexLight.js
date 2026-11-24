@@ -1,5 +1,5 @@
 import "server-only";
-import { hasOfficialRaceCancellation, readTomorrowSiteProgram, tomorrowProgramDate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
+import { hasOfficialRaceCancellation, readTodayMorningSiteProgram, readTomorrowSiteProgram, tomorrowProgramDate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 
 import { createClient } from "@supabase/supabase-js";
 import { getCourseName, normalizeDate } from "./boatstrikersPlatform";
@@ -126,7 +126,7 @@ export async function getCoursesForRacesIndex(raceDate) {
 
   const previousDayEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
   const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(), previousDayEnabled);
-  const [
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
@@ -161,6 +161,15 @@ export async function getCoursesForRacesIndex(raceDate) {
   if (eventError) throw new Error(`開催一覧の取得に失敗しました: ${eventError.message}`);
   if (entryError) throw new Error(`出走艇一覧の取得に失敗しました: ${entryError.message}`);
   if (resultError) throw new Error(`レース結果一覧の取得に失敗しました: ${resultError.message}`);
+
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events;
+      entryRows = morning.entries;
+    }
+  }
 
   const entriesByRace = new Map();
   for (const row of entryRows ?? []) {
