@@ -222,10 +222,11 @@ export default async function RacesPage({ searchParams }) {
     .filter(Boolean)
     .filter((item) => item.diagnosis_code !== "skip");
 
-  const usesPreviousDayProgram = courses.some(course =>
-    course.races.some(race => race.event?.program_source === "previous_day_snapshot")
+  const usesSnapshotProgram = courses.some(course =>
+    course.races.some(race => ["previous_day_snapshot", "race_day_morning_snapshot"]
+      .includes(race.event?.program_source))
   );
-  const fallbackPickups = usesPreviousDayProgram ? [] : buildFallbackPickups(courses, raceDate);
+  const fallbackPickups = usesSnapshotProgram ? [] : buildFallbackPickups(courses, raceDate);
   const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
 
   let insidePickups = pickupPool
@@ -267,7 +268,7 @@ export default async function RacesPage({ searchParams }) {
 
       <div className={styles.portalContent}>
         <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
-          {(tomorrow ? [tomorrow, ...dates.filter(date => date !== tomorrow)] : dates).map((date) => (
+          {[...new Set([...(tomorrow ? [tomorrow] : []), ...(courses.length ? [raceDate] : []), ...dates])].map((date) => (
             <Link key={date} href={`/races?date=${date}`} className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}>
               {String(date).slice(5).replace("-", "/")}
             </Link>
