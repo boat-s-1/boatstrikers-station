@@ -421,3 +421,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-24 JST 結果のみのレース・中止を再検証
 
 当日朝スナップショットの画面経路で、開催行が欠けて結果行だけ残るRの結果を詳細から隠さず、結果側の中止・順延なら古い出走艇を出さないよう#306を修正。模擬日別・場別・詳細試験を追加し、[最新隔離CI run 45348959074](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45348959074)でNode182件とPostgreSQL fixture成功。Team-Naveの見積返信とSupabase SU-557322の新しい診断回答は今回のメール検索で見つからず。実測の新規GETは今回未承認として0、本番変更0。公式データの公開権利と朝の全場到達、実Supabase・実ブラウザは未確認。
+
+### 2026-11-24 JST 本番カタログの読み取り確認
+
+本番Supabaseのpg_catalogをSELECTで照会。public.bs_race_events / bs_race_entries は存在し、いずれもRLS有効。bs_program_stageスキーマと当日朝／前日スナップショット候補RPCは見つからない。#306の隔離CI成功は本番設置の証明ではなく、現サイトはこの候補を読めない。Team-Naveの追加返信、Supabase診断回答は同日のメール再検索でも未確認。新規の公式/API GETは未承認で0回。本番への変更なし。
