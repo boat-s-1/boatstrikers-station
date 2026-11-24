@@ -1,5 +1,5 @@
 import "server-only";
-import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTodayMorningSiteProgram, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -680,7 +680,7 @@ export async function getCoursesByDate(raceDate) {
     normalizedDate
   );
 
-  const [
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
@@ -729,6 +729,15 @@ export async function getCoursesByDate(raceDate) {
 
   if (resultEntryError) {
     throw new Error(`艇別結果一覧の取得に失敗しました: ${resultEntryError.message}`);
+  }
+
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events;
+      entryRows = morning.entries;
+    }
   }
 
   const resultByCourseRace = new Map();
@@ -964,7 +973,7 @@ export async function getCourseRaces(raceDate, courseCode) {
 
   const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(),
     process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true");
-  const [
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
@@ -1018,6 +1027,15 @@ export async function getCourseRaces(raceDate, courseCode) {
 
   if (resultEntryError) {
     throw new Error(`艇別結果一覧の取得に失敗しました: ${resultEntryError.message}`);
+  }
+
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events.filter(row => row.course_code === normalizedCourseCode);
+      entryRows = morning.entries.filter(row => row.course_code === normalizedCourseCode);
+    }
   }
 
   const resultByRace = new Map(
