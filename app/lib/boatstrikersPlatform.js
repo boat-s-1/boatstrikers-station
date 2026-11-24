@@ -1233,24 +1233,28 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
   ]);
 
   const previousDayDetailEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
+  const morningDetailEnabled = process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true";
   if (previousDayDetailEnabled && !eventError && hasOfficialRaceCancellation(eventRow)) {
     return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
   }
 
-  if (previousDayDetailEnabled && !eventError && !entryError) {
+  if ((previousDayDetailEnabled || morningDetailEnabled) && !eventError && !entryError) {
     const selection = await readSiteProgramCandidate(supabase, {
       raceDate: normalizedDate,
       now: new Date().toISOString(),
       live: { events: eventRow ? [eventRow] : [], entries: entryRows ?? [] },
       race: { courseCode: normalizedCourseCode, raceNo: normalizedRaceNo },
+      enableMorning: morningDetailEnabled && !eventRow,
+      morningOnly: !previousDayDetailEnabled,
     });
-    if (selection.status === "READY" && selection.source === "previous_day_snapshot") {
+    if (selection.status === "READY" && (selection.source === "previous_day_snapshot" ||
+      (morningDetailEnabled && !eventRow && selection.source === "race_day_morning_snapshot"))) {
       return {
         event: mapEvent({
           ...selection.events[0],
           race_status: "scheduled",
           program_available: true,
-          program_source: "previous_day_snapshot",
+          program_source: selection.source,
         }),
         entries: selection.entries.map(mapEntry),
         venueBaselines: {},
