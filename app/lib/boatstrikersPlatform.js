@@ -1041,6 +1041,9 @@ export async function getCourseRaces(raceDate, courseCode) {
   const resultByRace = new Map(
     (resultRows ?? []).map((row) => [Number(row.race_no), mapRaceResult(row)])
   );
+  const cancelledResults = new Set((resultRows ?? [])
+    .filter(row => ["cancelled", "postponed"].includes(String(row.race_status ?? "").toLowerCase()))
+    .map(row => Number(row.race_no)));
   const resultEntriesByRace = new Map();
   for (const row of resultEntryRows ?? []) {
     const key = Number(row.race_no);
@@ -1062,7 +1065,8 @@ export async function getCourseRaces(raceDate, courseCode) {
   return (eventRows ?? []).map((rawEvent) => {
     const event = mapEvent(rawEvent);
     const raceNo = Number(event.race_no);
-    if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && hasOfficialRaceCancellation(rawEvent)) {
+    if ((process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && hasOfficialRaceCancellation(rawEvent)) ||
+        (rawEvent.program_source === "race_day_morning_snapshot" && cancelledResults.has(raceNo))) {
       return { ...event, raceStatus: "cancelled", race_status: "cancelled",
         hasExhibition: false, resultAvailable: false, entries: [], result: null, resultEntries: [] };
     }
@@ -1256,7 +1260,11 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
     return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
   }
 
-  if ((previousDayDetailEnabled || morningDetailEnabled) && !eventError && !entryError) {
+  if ((previousDayDetailEnabled || morningDetailEnabled) && !eventError && !entryError &&
+      !resultError && !resultEntryError) {
+    if (!eventRow && morningDetailEnabled && String(resultRow?.race_status ?? "").toLowerCase() === "cancelled") {
+      return { event: null, entries: [], resultEntries: [], programReviewRequired: true };
+    }
     const selection = await readSiteProgramCandidate(supabase, {
       raceDate: normalizedDate,
       now: new Date().toISOString(),
@@ -1276,8 +1284,10 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
         }),
         entries: selection.entries.map(mapEntry),
         venueBaselines: {},
-        result: null,
-        resultEntries: [],
+        result: selection.source === "race_day_morning_snapshot" && resultRow
+          ? mapRaceResult(resultRow) : null,
+        resultEntries: selection.source === "race_day_morning_snapshot"
+          ? (resultEntryRows ?? []).map(mapRaceResultEntry) : [],
       };
     }
     if (selection.reason === "live_registration_conflict") {
