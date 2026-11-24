@@ -401,3 +401,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - Draft #305と#306はともに未マージ。#306 HEAD `6909cfcfd8aa0439abfcdeca7d858932c2a72b14`のPR起動ActionsはTODAY Birthday Build Check 1件のみ成功で、開発①の175件テストをGitHub CIで実施した証拠ではない。作業ツリーで同じ175件を再実行して175件PASS、失敗・スキップ0。実DB・実サイト・前日全場・展示10分前の実測は未完了。
 - 11/21の少数実測は前夜2 GET・後半0 GETで終了。残余の1 GETを別日・別レースへ転用しない。次の公式実測は、対象日・場・R、最大回数、開始締切と遅延HOLDを特定して新たな承認を得る。本番DB、Cron、Vercel、PRマージ、既存自動タスクの変更は未実施。
 - 依存順は①提供元の保存・公開・前日配信条件と費用確定、②前夜全場と直前情報の時刻・6艇の限定実測、③歴史的Migration原本またはサポート診断に基づく隔離DB再生、④隔離サイトの実結合と継続監視、⑤対象操作ごとの本番切替承認。現時点の完成判定はHOLD。
+
+### 2026-11-24 JST 出走表先行の優先順位
+
+運用者は展示タイム等を後続に回し、出走表のサイト表示を先に復旧する方針。当日朝の公開も候補とする。11/24の本番DB読み取り専用照会では11/22～25の開催・出走行が0。#306に[先行復旧の切替条件](https://github.com/boat-s-1/boatstrikers-station/blob/codex/dev1-openapi-offline-fix-20261118/scripts/cloud-sync-offline/DEV1-PROGRAM-FIRST-RECOVERY-20261124.md)と、最初の公式締切前に限る当日朝のオフライン保存前チェックを追加し、Node全177件PASS。現行SQL/RPCとサイト読み取りは前日専用で、当日朝の保存・公開にまだ接続していない。提供元権利、配信時刻、隔離DB、実サイトの関門は継続。展示10分前目標は未完了として残す。本番DB・Cron・Vercel変更なし。
