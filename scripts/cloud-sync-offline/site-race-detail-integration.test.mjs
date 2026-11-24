@@ -16,14 +16,17 @@ const now = "2026-11-18T23:58:00+09:00";
 const snapshot = { race_date: raceDate, captured_at: "2026-11-18T23:55:00+09:00",
   program: { events: [event], entries: boats } };
 async function detail({ enabled, morningEnabled = false, morningSnapshot = null,
-  clock = now, liveEntries = [], liveEvent = null }) {
+  clock = now, liveEntries = [], liveEvent = null, raceResult = null, raceResultEntries = [] }) {
   let reads = 0;
   const client = {
     rpc: async name => { reads++; return { data: morningSnapshot &&
       name === "bs_read_site_race_day_program_candidate" ? morningSnapshot :
       morningSnapshot ? null : snapshot }; },
     from(table) {
-      const data = table === "bs_race_events" ? liveEvent : table === "bs_race_entries" ? liveEntries : null;
+      const data = table === "bs_race_events" ? liveEvent :
+        table === "bs_race_entries" ? liveEntries :
+        table === "bs_race_results" ? raceResult :
+        table === "bs_race_result_entries" ? raceResultEntries : null;
       const result = { data, error: null };
       return { select(){ return this; }, eq(){ return this; }, order(){ return this; },
         maybeSingle: async () => result, then: resolve => resolve(result) };
@@ -58,16 +61,34 @@ test("race-day morning detail can show six boats without exhibition when enabled
   assert.equal(outcome.data.entries.length, 6);
   assert.equal(outcome.data.entries[0].exhibition_time, null);
 });
+test("morning program does not hide a result-only race or display a cancelled roster", async () => {
+  const morningSnapshot = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  const options = { enabled: false, morningEnabled: true, morningSnapshot,
+    clock: "2026-11-19T16:00:00+09:00" };
+  const confirmed = await detail({ ...options, raceResult: {
+    race_date: raceDate, course_code: 1, race_no: 1, result_status: "confirmed",
+    trifecta_result: "1-2-3", trifecta_payout: 1200,
+  } });
+  assert.ok(confirmed.data.result);
+  assert.equal(confirmed.data.entries.length, 6);
+  const cancelled = await detail({ ...options, raceResult: { race_status: "cancelled" } });
+  assert.equal(cancelled.data.programReviewRequired, true);
+  assert.equal(cancelled.data.entries.length, 0);
+});
 test("race-day morning index and venue use the same six boats when live events are absent", async () => {
   const morning = { ...snapshot, capture_timing: "race_day_morning",
     captured_at: "2026-11-18T23:30:00Z" };
+  let cancelled = false;
   const client = {
     rpc: async name => {
       assert.equal(name, "bs_read_site_race_day_program_candidate");
       return { data: morning };
     },
-    from() {
-      const result = { data: [], error: null };
+    from(table) {
+      const data = cancelled && table === "bs_race_results"
+        ? [{ race_date: raceDate, course_code: 1, race_no: 1, race_status: "cancelled" }] : [];
+      const result = { data, error: null };
       return { select(){ return this; }, eq(){ return this; }, order(){ return this; },
         then: resolve => resolve(result) };
     },
@@ -91,6 +112,13 @@ test("race-day morning index and venue use the same six boats when live events a
   assert.equal(courses[0].exhibitionCount, 0);
   assert.equal(venue[0].entries.length, 6);
   assert.equal(venue[0].entries[0].boat_no, courses[0].races[0].entries[0].boat_no);
+  cancelled = true;
+  const cancelledCourses = await index(raceDate);
+  const cancelledVenue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(cancelledCourses[0].cancelledCount, 1);
+  assert.equal(cancelledCourses[0].races[0].entries.length, 0);
+  assert.equal(cancelledVenue[0].raceStatus, "cancelled");
+  assert.equal(cancelledVenue[0].entries.length, 0);
 });
 test("race detail can render mapped previous-day event and six boats with no result", async () => {
   const outcome = await detail({ enabled: true });
