@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { planVerifiedSitePreviousDayIngest } from "./site-previous-day-ingest-plan.mjs";
+import { planVerifiedSitePreviousDayIngest, planVerifiedSiteRaceDayMorningIngest } from "./site-previous-day-ingest-plan.mjs";
 
 const race = { race_date: "2026-11-19", course_code: 1, race_no: 1 };
 const entries = Array.from({ length: 6 }, (_, index) => ({
@@ -48,4 +48,19 @@ test("a missing optional ST preserves a display-only program but never invents a
     pages: [{ ...race, html: withDash.replace("toban=4005", "toban=4999") }] });
   assert.equal(mismatch.status, "HOLD");
   assert.equal("missingEntries" in mismatch, false);
+});
+
+test("race-day morning official program is held if the first closing or roster cannot be verified", () => {
+  const morning = { ...input, expectedRaces: [{ ...race, closing_time: "15:22" }],
+    capturedAt: "2026-11-18T23:30:00Z", now: "2026-11-19T08:31:00+09:00" };
+  assert.equal(planVerifiedSiteRaceDayMorningIngest(morning).status, "PASS_OFFLINE_ONLY");
+  for (const change of [
+    { now: "2026-11-19T15:22:00+09:00" },
+    { expectedRaces: [{ ...race, closing_time: "15:21" }] },
+    { expectedEntries: entries.slice(0, 5) },
+  ]) {
+    const outcome = planVerifiedSiteRaceDayMorningIngest({ ...morning, ...change });
+    assert.equal(outcome.status, "HOLD");
+    assert.equal("missingEntries" in outcome, false);
+  }
 });
