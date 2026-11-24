@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { resolveExhibition } from "../../lib/exhibitionDisplay.js";
-import { hasOfficialRaceCancellation, readSiteProgramCandidate } from "./site-program-server-read.mjs";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTodayMorningSiteProgram } from "./site-program-server-read.mjs";
 
 const code = readFileSync(new URL("../../app/lib/boatstrikersPlatform.js", import.meta.url), "utf8")
   .replace(/^import .*;$/gm, "").replace(/^export /gm, "");
@@ -57,6 +57,40 @@ test("race-day morning detail can show six boats without exhibition when enabled
   assert.equal(outcome.data.event.program_source, "race_day_morning_snapshot");
   assert.equal(outcome.data.entries.length, 6);
   assert.equal(outcome.data.entries[0].exhibition_time, null);
+});
+test("race-day morning index and venue use the same six boats when live events are absent", async () => {
+  const morning = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  const client = {
+    rpc: async name => {
+      assert.equal(name, "bs_read_site_race_day_program_candidate");
+      return { data: morning };
+    },
+    from() {
+      const result = { data: [], error: null };
+      return { select(){ return this; }, eq(){ return this; }, order(){ return this; },
+        then: resolve => resolve(result) };
+    },
+  };
+  class FixtureDate extends Date {
+    constructor(...args) { super(...(args.length ? args : ["2026-11-19T08:31:00+09:00"])); }
+  }
+  const globals = { Date: FixtureDate, process: { env: {
+    NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "fixture",
+    BS_RACE_DAY_PROGRAM_ENABLED: "true", BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: "false",
+  } }, createClient: () => client, readTodayMorningSiteProgram, readTomorrowSiteProgram: async () => null,
+  hasOfficialRaceCancellation, readSiteProgramCandidate, resolveExhibition,
+  buildPhase2Predictions: () => ({}), console };
+  const platform = runInNewContext(code + "\n({getCourseRaces, getCourseName, normalizeDate})", globals);
+  const index = runInNewContext(indexCode + "\ngetCoursesForRacesIndex", {
+    ...globals, getCourseName: platform.getCourseName, normalizeDate: platform.normalizeDate,
+  });
+  const courses = await index(raceDate);
+  const venue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(courses[0].races[0].entries.length, 6);
+  assert.equal(courses[0].exhibitionCount, 0);
+  assert.equal(venue[0].entries.length, 6);
+  assert.equal(venue[0].entries[0].boat_no, courses[0].races[0].entries[0].boat_no);
 });
 test("race detail can render mapped previous-day event and six boats with no result", async () => {
   const outcome = await detail({ enabled: true });
