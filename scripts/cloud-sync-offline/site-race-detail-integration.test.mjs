@@ -15,10 +15,13 @@ const boats = Array.from({ length: 6 }, (_, i) => ({
 const now = "2026-11-18T23:58:00+09:00";
 const snapshot = { race_date: raceDate, captured_at: "2026-11-18T23:55:00+09:00",
   program: { events: [event], entries: boats } };
-async function detail({ enabled, clock = now, liveEntries = [], liveEvent = null }) {
+async function detail({ enabled, morningEnabled = false, morningSnapshot = null,
+  clock = now, liveEntries = [], liveEvent = null }) {
   let reads = 0;
   const client = {
-    rpc: async () => { reads++; return { data: snapshot }; },
+    rpc: async name => { reads++; return { data: morningSnapshot &&
+      name === "bs_read_site_race_day_program_candidate" ? morningSnapshot :
+      morningSnapshot ? null : snapshot }; },
     from(table) {
       const data = table === "bs_race_events" ? liveEvent : table === "bs_race_entries" ? liveEntries : null;
       const result = { data, error: null };
@@ -33,6 +36,7 @@ async function detail({ enabled, clock = now, liveEntries = [], liveEvent = null
     Date: FixtureDate, process: { env: {
       NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "fixture",
       BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: enabled ? "true" : "false",
+      BS_RACE_DAY_PROGRAM_ENABLED: morningEnabled ? "true" : "false",
     } }, createClient: () => client, readSiteProgramCandidate, hasOfficialRaceCancellation, resolveExhibition,
     buildPhase2Predictions: () => ({}), console,
   });
@@ -43,6 +47,16 @@ test("normal race detail makes no snapshot requests while feature is disabled", 
   const outcome = await detail({ enabled: false });
   assert.equal(outcome.reads, 0);
   assert.equal(outcome.data, null);
+});
+test("race-day morning detail can show six boats without exhibition when enabled", async () => {
+  const morningSnapshot = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  const outcome = await detail({ enabled: false, morningEnabled: true, morningSnapshot,
+    clock: "2026-11-19T08:31:00+09:00" });
+  assert.equal(outcome.reads, 1);
+  assert.equal(outcome.data.event.program_source, "race_day_morning_snapshot");
+  assert.equal(outcome.data.entries.length, 6);
+  assert.equal(outcome.data.entries[0].exhibition_time, null);
 });
 test("race detail can render mapped previous-day event and six boats with no result", async () => {
   const outcome = await detail({ enabled: true });
