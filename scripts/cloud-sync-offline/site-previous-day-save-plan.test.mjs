@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { planPreviousDayProgramSave } from "./site-previous-day-save-plan.mjs";
+import { planPreviousDayProgramSave, planRaceDayMorningProgramSave } from "./site-previous-day-save-plan.mjs";
 
 const event = { race_date: "2026-11-19", course_code: 1, race_no: 1 };
 const entries = Array.from({ length: 6 }, (_, i) => ({
@@ -66,4 +66,24 @@ test("fails closed at JST midnight, on future capture, or when a date lacks a ti
   ]) {
     assert.equal(planPreviousDayProgramSave({ ...options, ...change }).reason, "not_previous_jst_day");
   }
+});
+
+test("race-day morning plan requires a complete program before the earliest official closing", () => {
+  const morning = { ...options, capturedAt: "2026-11-18T23:30:00Z",
+    now: "2026-11-19T08:31:00+09:00",
+    expectedRaces: [{ ...event, closing_time: "08:35" }] };
+  assert.equal(planRaceDayMorningProgramSave(morning).status, "PASS_OFFLINE_ONLY");
+  for (const change of [
+    { now: "2026-11-19T08:35:00+09:00" },
+    { now: "2026-11-19T08:36:00+09:00" },
+    { capturedAt: "2026-11-18T14:50:00Z" },
+    { expectedRaces: [{ ...event }] },
+    { expectedEntries: entries.slice(0, 5) },
+    { existingEvents: [event], existingEntries: [{ ...entries[0], racer_registration_no: "4999" }] },
+  ]) {
+    const result = planRaceDayMorningProgramSave({ ...morning, ...change });
+    assert.equal(result.status, "HOLD");
+    assert.equal("missingEntries" in result, false);
+  }
+  assert.equal(planPreviousDayProgramSave(morning).status, "HOLD");
 });
