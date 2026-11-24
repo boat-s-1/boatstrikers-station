@@ -43,8 +43,27 @@ test("rejects stale, mislabeled and incomplete snapshots", () => {
   for (const change of [
     { now: "2026-11-20T00:00:00+09:00" },
     { snapshot: { ...snapshot, captured_at: "2026-11-19T00:00:00+09:00" } },
+    { snapshot: { ...snapshot, captured_at: "invalid" } },
     { snapshot: { ...snapshot, program: { events: [event], entries: entries.slice(1) } } },
   ]) assert.equal(selectSiteProgram({ ...after, ...change }).status, "HOLD");
+});
+
+test("race-day morning snapshot is displayable only for the same day and before the first closing", () => {
+  const staged = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z", program: {
+      events: [{ ...event, closing_time: "08:35" }], entries,
+    } };
+  const options = { ...after, now: "2026-11-19T08:31:00+09:00", snapshot: staged, live: undefined };
+  assert.equal(selectSiteProgram(options).source, "race_day_morning_snapshot");
+  assert.equal(selectSiteRaceProgram(options, { courseCode: 1, raceNo: 1 }).source,
+    "race_day_morning_snapshot");
+  for (const change of [
+    { now: "2026-11-18T23:40:00+09:00" },
+    { now: "2026-11-20T00:00:00+09:00" },
+    { snapshot: { ...staged, captured_at: "2026-11-18T23:36:00Z" } },
+    { snapshot: { ...staged, capture_timing: "unknown" } },
+    { snapshot: { ...staged, program: { events: [event], entries } } },
+  ]) assert.equal(selectSiteProgram({ ...options, ...change }).status, "HOLD");
 });
 
 test("one fully matched race can display live even if another race is incomplete", () => {
