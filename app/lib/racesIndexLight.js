@@ -184,6 +184,9 @@ export async function getCoursesForRacesIndex(raceDate) {
       .filter(isConfirmedResult)
       .map((row) => `${Number(row.course_code)}:${Number(row.race_no)}`)
   );
+  const cancelledResultKeys = new Set((resultRows ?? [])
+    .filter(row => ["cancelled", "postponed"].includes(String(row.race_status ?? "").toLowerCase()))
+    .map(row => `${Number(row.course_code)}:${Number(row.race_no)}`));
 
   const courseMap = new Map();
 
@@ -191,7 +194,8 @@ export async function getCoursesForRacesIndex(raceDate) {
     const courseCode = Number(row.course_code);
     const raceNo = Number(row.race_no);
     const key = `${courseCode}:${raceNo}`;
-    const cancelled = previousDayEnabled && hasOfficialRaceCancellation(row);
+    const cancelled = (previousDayEnabled && hasOfficialRaceCancellation(row)) ||
+      (row.program_source === "race_day_morning_snapshot" && cancelledResultKeys.has(key));
     const entries = cancelled ? [] : entriesByRace.get(key) ?? [];
     const closingAt = createClosingAt(normalizedDate, row.closing_time);
     const resultAvailable = !cancelled && confirmedResultKeys.has(key);
