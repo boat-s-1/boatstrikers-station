@@ -75,6 +75,8 @@ test("morning program does not hide a result-only race or display a cancelled ro
   const cancelled = await detail({ ...options, raceResult: { race_status: "cancelled" } });
   assert.equal(cancelled.data.programReviewRequired, true);
   assert.equal(cancelled.data.entries.length, 0);
+  const postponed = await detail({ ...options, raceResult: { race_status: "postponed" } });
+  assert.equal(postponed.data.programReviewRequired, true);
 });
 test("race-day morning index and venue use the same six boats when live events are absent", async () => {
   const morning = { ...snapshot, capture_timing: "race_day_morning",
