@@ -413,3 +413,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-24 JST 開発①隔離CI
 
 #306のHEAD `e8d1bdefea464ba16dec6905894970a97d4782c5`で[Dev1 program isolated gate run 45326632605](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45326632605)成功。Node全180件とPostgreSQL 17の使い捨てDBで当日朝スナップショットfixtureを実行した。実Supabase/Migration、公式全件取得、公開権利、実サイトでの表示時刻は未検証。CIに秘密情報・本番接続なし。Windows・本番DB/Cron/Vercel・既存自動タスクは未変更。
+
+### 2026-11-24 JST 画面経路とCI再確認
+
+当日朝専用フラグOFFのまま、開催行がない日の日別・場別・詳細へ専用スナップショットを渡す候補を#306に追加。模擬DBで同一Rの6艇・展示未取得を確認。実ブラウザのナビゲーション、推定AIカードの非表示、Next.jsビルドは未検証。[隔離CI run 45327209640](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45327209640)はNode181件とPostgreSQL fixture成功。公式全件の朝の到達時刻、利用許諾、実Supabase、実サイト連続運用は未確認。展示目標は後続。本番変更なし。
