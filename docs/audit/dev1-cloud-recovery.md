@@ -425,3 +425,7 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ### 2026-11-24 JST 本番カタログの読み取り確認
 
 本番Supabaseのpg_catalogをSELECTで照会。public.bs_race_events / bs_race_entries は存在し、いずれもRLS有効。bs_program_stageスキーマと当日朝／前日スナップショット候補RPCは見つからない。#306の隔離CI成功は本番設置の証明ではなく、現サイトはこの候補を読めない。Team-Naveの追加返信、Supabase診断回答は同日のメール再検索でも未確認。新規の公式/API GETは未承認で0回。本番への変更なし。
+
+### 2026-11-24 JST 新規承認と翌朝の少数実測予約
+
+運用者が11/25 JST対象の公式一覧・1R出走表・OpenAPI today.jsonの合計最大3 GETを明示承認。08:31 JSTの一回限りの実測タスクを作成（IDは自動化管理側）。開始が08:34以降なら0 GETでHOLD、リダイレクト・再試行・代替レースなし。公式一覧の最小場コード1Rと候補の6艇を照合し、全場一致や前日公開の証拠とはしない。HTTP・時刻・SHA256・GET計数を追記予定。現時点の新規実GETは0、DB保存・Cron/Vercel/本番DB変更なし。既存の自動タスクは停止していない。
