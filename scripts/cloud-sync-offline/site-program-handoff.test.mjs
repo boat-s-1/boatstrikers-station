@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { selectSiteProgram, selectSiteRaceProgram } from "./site-program-handoff.mjs";
 
-import { readSiteProgramCandidate } from "./site-program-server-read.mjs";
+import { readSiteProgramCandidate, readTodayMorningSiteProgram } from "./site-program-server-read.mjs";
 const raceDate = "2026-11-19";
 const event = { race_date: raceDate, course_code: 1, race_no: 1 };
 const entries = Array.from({ length: 6 }, (_, i) => ({
@@ -112,4 +112,34 @@ test("server reader distinguishes absence from failed DB queries", async () => {
     assert.deepEqual(await readSiteProgramCandidate({ rpc }, after),
       { status: "HOLD", reason: "snapshot_read_failed" });
   }
+});
+
+test("morning reader uses the separate RPC only when enabled and the previous-day snapshot is absent", async () => {
+  const morning = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z",
+    program: { events: [{ ...event, closing_time: "08:35" }], entries } };
+  const calls = [];
+  const client = { async rpc(name) {
+    calls.push(name);
+    return { data: name === "bs_read_site_race_day_program_candidate" ? morning : null };
+  } };
+  const options = { raceDate, now: "2026-11-19T08:31:00+09:00" };
+  assert.equal((await readSiteProgramCandidate(client, options)).status, "NO_SNAPSHOT");
+  assert.deepEqual(calls, ["bs_read_site_previous_day_program_candidate"]);
+  const result = await readSiteProgramCandidate(client, { ...options, enableMorning: true });
+  assert.equal(result.source, "race_day_morning_snapshot");
+  assert.deepEqual(calls.slice(1), ["bs_read_site_previous_day_program_candidate",
+    "bs_read_site_race_day_program_candidate"]);
+  const bad = await readSiteProgramCandidate({ rpc: async name => ({ data:
+    name === "bs_read_site_previous_day_program_candidate" ? null : snapshot }) },
+  { ...options, enableMorning: true });
+  assert.equal(bad.reason, "invalid_morning_snapshot_source");
+  const only = await readTodayMorningSiteProgram({ rpc: async name => {
+    assert.equal(name, "bs_read_site_race_day_program_candidate");
+    return { data: morning };
+  } }, raceDate, options.now, true);
+  assert.equal(only.events[0].program_source, "race_day_morning_snapshot");
+  assert.equal(only.entries.length, 6);
+  assert.equal(await readTodayMorningSiteProgram({ rpc: async () => { throw Error("not called"); } },
+    raceDate, "2026-11-18T23:00:00+09:00", true), null);
 });
