@@ -14,10 +14,15 @@ export function selectSiteProgram({ raceDate, now, snapshot, live }) {
   if (!snapshot) return { status: "NO_SNAPSHOT" };
   const currentTime = Date.parse(now);
   const capturedTime = Date.parse(snapshot.captured_at);
+  const morning = snapshot.capture_timing === "race_day_morning";
+  const expectedCaptureDate = Number.isFinite(capturedTime)
+    ? (morning ? jstDate(capturedTime) : jstDate(capturedTime + 86400000)) : null;
   if (!hasTimezone(now) || !hasTimezone(snapshot.captured_at) ||
       !Number.isFinite(currentTime) || !Number.isFinite(capturedTime) ||
       capturedTime > currentTime || snapshot.race_date !== raceDate ||
-      jstDate(capturedTime + 86400000) !== raceDate ||
+      (snapshot.capture_timing && !["previous_day", "race_day_morning"].includes(snapshot.capture_timing)) ||
+      expectedCaptureDate !== raceDate ||
+      (morning && jstDate(currentTime) !== raceDate) ||
       ![jstDate(currentTime), jstDate(currentTime + 86400000)].includes(raceDate)) {
     return { status: "HOLD", reason: "invalid_snapshot_time" };
   }
@@ -27,7 +32,18 @@ export function selectSiteProgram({ raceDate, now, snapshot, live }) {
       inspectBatch(staged.events, normalize(staged.entries), staged.events, raceDate).status !== "PASS_OFFLINE_ONLY") {
     return { status: "HOLD", reason: "invalid_snapshot_program" };
   }
-  const snapshotProgram = { status: "READY", source: "previous_day_snapshot",
+  if (morning) {
+    const closings = staged.events.map(event => {
+      const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(event.closing_time ?? "");
+      return match && Number(match[1]) <= 23 && Number(match[2]) <= 59
+        ? Date.parse(`${raceDate}T${match[1].padStart(2, "0")}:${match[2]}:00+09:00`) : NaN;
+    });
+    if (!closings.length || closings.some(value => !Number.isFinite(value)) ||
+        capturedTime >= Math.min(...closings)) {
+      return { status: "HOLD", reason: "invalid_morning_snapshot_deadline" };
+    }
+  }
+  const snapshotProgram = { status: "READY", source: morning ? "race_day_morning_snapshot" : "previous_day_snapshot",
     events: staged.events, entries: staged.entries };
   if (jstDate(currentTime) !== raceDate) return snapshotProgram;
 
