@@ -43,6 +43,7 @@ try {
   for (let boat = 1; boat <= 6; boat++) assert.equal(data.entries[boat - 1].boat, boat);
   assert.match(allowed.headers.get("cache-control") ?? "", /no-store/);
   const anonymousPage = await timedFetch(base + "/admin/program-preview");
+  assert.equal(anonymousPage.status, 404);
   const anonymousHtml = await anonymousPage.text();
   assert.doesNotMatch(anonymousHtml, /検証用選手[1-6]|900[1-6]|模擬データです/);
   const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
