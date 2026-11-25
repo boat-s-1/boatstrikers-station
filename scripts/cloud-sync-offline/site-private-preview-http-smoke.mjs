@@ -25,7 +25,7 @@ async function ready() {
 }
 try {
   await ready();
-  const denied = await fetch(base + "/api/admin/program-preview");
+  const denied = await timedFetch(base + "/api/admin/program-preview");
   assert.equal(denied.status, 404, "anonymous access must be denied");
   const login = await timedFetch(base + "/api/admin/sync/login", {
     method: "POST",
@@ -37,11 +37,12 @@ try {
   assert.match(cookie ?? "", /^bs_admin_sync=/);
   const allowed = await timedFetch(base + "/api/admin/program-preview", { headers: { cookie } });
   assert.equal(allowed.status, 200);
-  const html = await allowed.text();
-  assert.match(html, /模擬データです/);
-  for (let boat = 1; boat <= 6; boat++) assert.match(html, new RegExp(`検証用選手${boat}`));
-  assert.doesNotMatch(html, /BRDB-APIの実データ/);
-  process.stdout.write("Private synthetic preview: anonymous 404, admin 200, six boats present.\n");
+  const data = await allowed.json();
+  assert.equal(data.synthetic, true);
+  assert.equal(data.entries.length, 6);
+  for (let boat = 1; boat <= 6; boat++) assert.equal(data.entries[boat - 1].boat, boat);
+  assert.match(allowed.headers.get("cache-control") ?? "", /no-store/);
+  process.stdout.write("Private synthetic API: anonymous 404, admin 200, six boats present.\\n");
 } finally {
   server.kill("SIGTERM");
 }
