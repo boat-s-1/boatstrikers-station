@@ -5,12 +5,15 @@ const base = "http://127.0.0.1:33221";
 const timedFetch = (url, options = {}) => fetch(url, { ...options, signal: AbortSignal.timeout(3000) });
 const server = spawn("node", ["node_modules/next/dist/bin/next", "start", "-p", "33221", "-H", "127.0.0.1"], {
   env: { ...process.env, BS_ADMIN_PROGRAM_PREVIEW_ENABLED: "true", ADMIN_DASHBOARD_PASSWORD: "ci-only-private-preview" },
-  stdio: "ignore",
+  stdio: ["ignore", "pipe", "pipe"],
 });
+let serverOutput = "";
+server.stdout.on("data", (chunk) => { serverOutput = (serverOutput + chunk.toString()).slice(-1500); });
+server.stderr.on("data", (chunk) => { serverOutput = (serverOutput + chunk.toString()).slice(-1500); });
 async function ready() {
   let lastStatus = "no response";
   for (let attempt = 0; attempt < 20; attempt++) {
-    if (server.exitCode !== null) throw new Error("server exited before readiness");
+    if (server.exitCode !== null || server.signalCode !== null) throw new Error(`server exited: ${serverOutput}`);
     try {
       lastStatus = (await timedFetch(base + "/admin/program-preview")).status;
       if (lastStatus === 404) return;
@@ -18,7 +21,7 @@ async function ready() {
     catch { /* Starting. */ }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(`server readiness timeout; last status: ${lastStatus}`);
+  throw new Error(`server readiness timeout; last status: ${lastStatus}; server output: ${serverOutput}`);
 }
 try {
   await ready();
