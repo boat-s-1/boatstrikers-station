@@ -468,3 +468,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - `/api/admin/program-preview`: 未認証404、管理者Cookieで200・合成6艇・no-store。
 - `/admin/program-preview`: 管理者Cookieで200、模擬6艇のHTMLを確認。未認証はNext.jsストリーミングのためHTTP 200だが、本文に模擬6艇の選手名・登録番号・案内文は含まれない。したがってデータ遮断は確認したが、HTMLのHTTP 404までは達成していない。SEOはnoindex/nofollow設定。テストの確認はHTML文字列であり、ブラウザでの視覚・操作確認は別途。
 - この検証は合成データ限定。BRDB実データ、実Supabase、実サイトへのデプロイ・管理者ログインは未実施。通常プランによる管理者限定の実データ利用は提供元許諾確認待ち。本番DB/Cron/Vercel、既存自動タスクは変更なし。
+
+## BRDB CSV受入れ候補・許諾確認待ち 2026-11-25 JST
+
+- Team-Nave最新返信は11/24 19:40 JST、PC-KYOTEIから11/18以降の返信は検索範囲でなし。通常プランで「単一クラウド実行環境から低負荷の少数取得、隔離環境保存、管理者だけの非公開画面表示」が許されるか明示回答なし。問い合わせ文案を#306の `DEV1-CONTRACTED-SOURCES-GATE-20261119.md` に保存。送信・実APIアクセスなし。
+- #306にShift-JIS CSVのオフライン読込候補を追加。合成データで「識別名」列見出し、空文字、引用符内カンマ・改行、日本語、重複・欠落列、不正文字・行幅・容量の拒否を3件確認し、既存の6艇候補変換へ通した。ローカル3/3 PASS。実提供元CSVの方言・列と照合していないため保存・公開には使わない。
+- [隔離CI run 45561731721](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45561731721)で全Nodeテスト（従来186件＋新規3件）、使い捨てPostgreSQL fixture、Next.jsビルド、管理者限定の模擬API/HTML HTTPスモークが成功。実DB・実API・本番サイトへの接続なし。
