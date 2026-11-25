@@ -455,3 +455,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - #306に `site-private-program-gate.mjs` を追加し、既定OFF・管理者認証失敗・認証処理の例外ではプライベートデータ読取を呼ばないことを4件のNodeテストで確認。許可時だけ1回読む。ローカル4/4 PASS。[隔離CI run 45553923728](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45553923728)はHEAD abc6896884de7f44f5530baddf4be46c439283feで成功（Node全186件・使い捨てPostgreSQL fixture）。CI対象にプレビューページを追加。
 - これはサーバー側の認証順と合成データの検証。Next.jsページの実ビルド・HTTP/ブラウザ、実BRDBデータの通常プラン非公開利用許諾、実Supabase、実サイトは未検証。フラグOFF、本番未デプロイ。
+
+## 管理者限定プレビューのビルドとHTTP検証 2026-11-25 JST
+
+- #306 HEAD fd5347884d829941bb28e29a776c4b06c202c588 の[隔離CI run 45556058182](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45556058182)成功。Node全186件と使い捨てPostgreSQL fixture、Next.js本体ビルド、ローカルHTTPスモークに合格。模擬データ専用 `/api/admin/program-preview` は未認証404、既存管理者ログインCookieで200・6艇・no-storeを確認。外部実データ接続なし。
+- 管理者ページ `/admin/program-preview` はビルド成功。ただし共通サイトレイアウトが隔離CIのダミー接続先を読み込み続けるため、同ページのHTML HTTP応答・実ブラウザ表示は未合格。先のHTTPスモーク失敗は[run 45555633693](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45555633693)に残す。管理者APIの合格をページ表示の合格と取り違えない。
+- 提供元が通常プランでの管理者限定実データ検証を許すか未回答。フラグOFF、本番DB/Cron/Vercel変更なし、BRDB実アクセスなし。次は共通レイアウトの隔離HTTPテストを外部I/Oなしで成立させ、管理者HTMLの遮断・6艇表示を確認し、契約許諾後に実データの出典と6艇を照合する。
