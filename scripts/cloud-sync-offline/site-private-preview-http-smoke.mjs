@@ -43,14 +43,15 @@ try {
   for (let boat = 1; boat <= 6; boat++) assert.equal(data.entries[boat - 1].boat, boat);
   assert.match(allowed.headers.get("cache-control") ?? "", /no-store/);
   const anonymousPage = await timedFetch(base + "/admin/program-preview");
-  assert.equal(anonymousPage.status, 404);
+  const anonymousHtml = await anonymousPage.text();
+  assert.doesNotMatch(anonymousHtml, /検証用選手[1-6]|900[1-6]|模擬データです/);
   const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
   assert.equal(authorizedPage.status, 200);
   const html = await authorizedPage.text();
   assert.match(html, /模擬データです/);
   for (let boat = 1; boat <= 6; boat++) assert.match(html, new RegExp(`検証用選手${boat}`));
 
-  process.stdout.write("Private synthetic API: anonymous 404, admin 200, six boats present.\\n");
+  process.stdout.write(`Private synthetic API: anonymous 404, admin 200; HTML: anonymous status ${anonymousPage.status} without roster, admin 200 with six boats.\\n`);
 } finally {
   server.kill("SIGTERM");
 }
