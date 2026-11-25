@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 const base = "http://127.0.0.1:33221";
 const timedFetch = (url, options = {}) => fetch(url, { ...options, signal: AbortSignal.timeout(3000) });
 const server = spawn("node", ["node_modules/next/dist/bin/next", "start", "-p", "33221", "-H", "127.0.0.1"], {
-  env: { ...process.env, BS_ADMIN_PROGRAM_PREVIEW_ENABLED: "true", ADMIN_DASHBOARD_PASSWORD: "ci-only-private-preview" },
+  env: { ...process.env, BS_ADMIN_PROGRAM_PREVIEW_ENABLED: "true", ADMIN_DASHBOARD_PASSWORD: "ci-only-private-preview", NODE_OPTIONS: `--require ${process.cwd()}/scripts/cloud-sync-offline/site-private-preview-network-mock.cjs` },
   stdio: ["ignore", "pipe", "pipe"],
 });
 let serverOutput = "";
@@ -42,6 +42,14 @@ try {
   assert.equal(data.entries.length, 6);
   for (let boat = 1; boat <= 6; boat++) assert.equal(data.entries[boat - 1].boat, boat);
   assert.match(allowed.headers.get("cache-control") ?? "", /no-store/);
+  const anonymousPage = await timedFetch(base + "/admin/program-preview");
+  assert.equal(anonymousPage.status, 404);
+  const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
+  assert.equal(authorizedPage.status, 200);
+  const html = await authorizedPage.text();
+  assert.match(html, /模擬データです/);
+  for (let boat = 1; boat <= 6; boat++) assert.match(html, new RegExp(`検証用選手${boat}`));
+
   process.stdout.write("Private synthetic API: anonymous 404, admin 200, six boats present.\\n");
 } finally {
   server.kill("SIGTERM");
