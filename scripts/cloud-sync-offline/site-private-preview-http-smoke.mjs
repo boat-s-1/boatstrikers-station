@@ -15,7 +15,7 @@ async function ready() {
   for (let attempt = 0; attempt < 20; attempt++) {
     if (server.exitCode !== null || server.signalCode !== null) throw new Error(`server exited: ${serverOutput}`);
     try {
-      lastStatus = (await timedFetch(base + "/admin/program-preview")).status;
+      lastStatus = (await timedFetch(base + "/api/admin/program-preview")).status;
       if (lastStatus === 404) return;
     }
     catch { /* Starting. */ }
@@ -25,7 +25,7 @@ async function ready() {
 }
 try {
   await ready();
-  const denied = await fetch(base + "/admin/program-preview");
+  const denied = await fetch(base + "/api/admin/program-preview");
   assert.equal(denied.status, 404, "anonymous access must be denied");
   const login = await timedFetch(base + "/api/admin/sync/login", {
     method: "POST",
@@ -35,7 +35,7 @@ try {
   assert.equal(login.status, 303);
   const cookie = login.headers.get("set-cookie")?.split(";")[0];
   assert.match(cookie ?? "", /^bs_admin_sync=/);
-  const allowed = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
+  const allowed = await timedFetch(base + "/api/admin/program-preview", { headers: { cookie } });
   assert.equal(allowed.status, 200);
   const html = await allowed.text();
   assert.match(html, /模擬データです/);
