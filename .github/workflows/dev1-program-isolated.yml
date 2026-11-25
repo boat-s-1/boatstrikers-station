@@ -10,6 +10,7 @@ on:
       - 'app/lib/boatstrikersPlatform.js'
       - 'app/races/page.js'
       - 'app/admin/program-preview/page.js'
+      - 'proxy.js'
       - 'scripts/cloud-sync-offline/site-private-preview-http-smoke.mjs'
       - '.github/workflows/dev1-program-isolated.yml'
   workflow_dispatch:
