@@ -8,6 +8,7 @@ on:
       - 'app/lib/racesIndexLight.js'
       - 'app/lib/boatstrikersPlatform.js'
       - 'app/races/page.js'
+      - 'app/admin/program-preview/page.js'
       - '.github/workflows/dev1-program-isolated.yml'
   workflow_dispatch:
 
