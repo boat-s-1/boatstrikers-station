@@ -8,13 +8,17 @@ const server = spawn("node", ["node_modules/next/dist/bin/next", "start", "-p", 
   stdio: "ignore",
 });
 async function ready() {
-  for (let attempt = 0; attempt < 80; attempt++) {
+  let lastStatus = "no response";
+  for (let attempt = 0; attempt < 20; attempt++) {
     if (server.exitCode !== null) throw new Error("server exited before readiness");
-    try { if ((await timedFetch(base + "/admin/program-preview")).status === 404) return; }
+    try {
+      lastStatus = (await timedFetch(base + "/admin/program-preview")).status;
+      if (lastStatus === 404) return;
+    }
     catch { /* Starting. */ }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error("server readiness timeout");
+  throw new Error(`server readiness timeout; last status: ${lastStatus}`);
 }
 try {
   await ready();
@@ -38,3 +42,4 @@ try {
 } finally {
   server.kill("SIGTERM");
 }
+process.exit(0);
