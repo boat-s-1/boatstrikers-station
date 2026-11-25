@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'scripts/cloud-sync-offline/site-*.mjs'
+      - 'scripts/cloud-sync-offline/brdb-*.mjs'
       - 'scripts/cloud-sync-offline/site-*.sql'
       - 'app/lib/racesIndexLight.js'
       - 'app/lib/boatstrikersPlatform.js'
