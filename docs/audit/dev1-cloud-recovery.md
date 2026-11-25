@@ -474,3 +474,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - Team-Nave最新返信は11/24 19:40 JST、PC-KYOTEIから11/18以降の返信は検索範囲でなし。通常プランで「単一クラウド実行環境から低負荷の少数取得、隔離環境保存、管理者だけの非公開画面表示」が許されるか明示回答なし。問い合わせ文案を#306の `DEV1-CONTRACTED-SOURCES-GATE-20261119.md` に保存。送信・実APIアクセスなし。
 - #306にShift-JIS CSVのオフライン読込候補を追加。合成データで「識別名」列見出し、空文字、引用符内カンマ・改行、日本語、重複・欠落列、不正文字・行幅・容量の拒否を3件確認し、既存の6艇候補変換へ通した。ローカル3/3 PASS。実提供元CSVの方言・列と照合していないため保存・公開には使わない。
 - [隔離CI run 45561731721](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45561731721)で全Nodeテスト（従来186件＋新規3件）、使い捨てPostgreSQL fixture、Next.jsビルド、管理者限定の模擬API/HTML HTTPスモークが成功。実DB・実API・本番サイトへの接続なし。
+
+## 管理者プレビューの早期404 2026-11-25 JST
+
+- #306に `proxy.js` のプレビュー経路限定matcherを追加。フラグがOFF、管理者署名Cookieが欠落・不正・期限切れの場合は共通レイアウトのストリーミング前に404/no-store。ページとAPIのデータ読取時の認証も残し、多層で遮断。一般向けレース経路と本番環境は未変更。
+- [隔離CI run 45574127749](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45574127749)成功。Node189件、使い捨てPostgreSQL fixture、Next.jsビルド、ローカルHTTP。未認証API 404、管理者API 200・模擬6艇、未認証HTML 404・6艇なし、管理者HTML 200・模擬6艇を確認。外部通信はCIモック、実BRDBデータは未取得。
+- 実ブラウザ視覚検証、既存管理者アカウントによる実ログイン、通常プランでの実データ非公開表示の提供元許諾、本番デプロイは未実施。これらを本番復旧の合格と混同しない。
