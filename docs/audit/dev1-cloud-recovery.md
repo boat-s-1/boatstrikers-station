@@ -461,3 +461,10 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - #306 HEAD fd5347884d829941bb28e29a776c4b06c202c588 の[隔離CI run 45556058182](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45556058182)成功。Node全186件と使い捨てPostgreSQL fixture、Next.js本体ビルド、ローカルHTTPスモークに合格。模擬データ専用 `/api/admin/program-preview` は未認証404、既存管理者ログインCookieで200・6艇・no-storeを確認。外部実データ接続なし。
 - 管理者ページ `/admin/program-preview` はビルド成功。ただし共通サイトレイアウトが隔離CIのダミー接続先を読み込み続けるため、同ページのHTML HTTP応答・実ブラウザ表示は未合格。先のHTTPスモーク失敗は[run 45555633693](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45555633693)に残す。管理者APIの合格をページ表示の合格と取り違えない。
 - 提供元が通常プランでの管理者限定実データ検証を許すか未回答。フラグOFF、本番DB/Cron/Vercel変更なし、BRDB実アクセスなし。次は共通レイアウトの隔離HTTPテストを外部I/Oなしで成立させ、管理者HTMLの遮断・6艇表示を確認し、契約許諾後に実データの出典と6艇を照合する。
+
+## 管理者HTMLの隔離HTTP検証 2026-11-25 JST
+
+- #306 HEAD f4213248f03130b4cf25020cbb74bd0b1773c303 の[隔離CI run 45557695641](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45557695641)成功。Node186件、PostgreSQL fixture、Next.js本体ビルド、ローカルHTTPスモーク。CI専用のfetchモックによりダミーSupabaseへ空配列を返し、外部への実通信を禁止して共通レイアウトを完了させた。
+- `/api/admin/program-preview`: 未認証404、管理者Cookieで200・合成6艇・no-store。
+- `/admin/program-preview`: 管理者Cookieで200、模擬6艇のHTMLを確認。未認証はNext.jsストリーミングのためHTTP 200だが、本文に模擬6艇の選手名・登録番号・案内文は含まれない。したがってデータ遮断は確認したが、HTMLのHTTP 404までは達成していない。SEOはnoindex/nofollow設定。テストの確認はHTML文字列であり、ブラウザでの視覚・操作確認は別途。
+- この検証は合成データ限定。BRDB実データ、実Supabase、実サイトへのデプロイ・管理者ログインは未実施。通常プランによる管理者限定の実データ利用は提供元許諾確認待ち。本番DB/Cron/Vercel、既存自動タスクは変更なし。
