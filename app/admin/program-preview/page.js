@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { isAdminAuthenticated } from "../sync/_lib/adminAuth";
+import { loadPrivateProgram } from "../../../scripts/cloud-sync-offline/site-private-program-gate.mjs";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,8 +15,12 @@ const demoEntries = Array.from({ length: 6 }, (_, index) => ({
 }));
 
 export default async function PrivateProgramPreviewPage() {
-  if (process.env.BS_ADMIN_PROGRAM_PREVIEW_ENABLED !== "true") notFound();
-  if (!(await isAdminAuthenticated())) notFound();
+  const privateProgram = await loadPrivateProgram({
+    enabled: process.env.BS_ADMIN_PROGRAM_PREVIEW_ENABLED === "true",
+    authenticate: isAdminAuthenticated,
+    load: () => demoEntries,
+  });
+  if (!privateProgram.allowed) notFound();
 
   return (
     <main style={{ maxWidth: 780, margin: "2rem auto", padding: "1rem", fontFamily: "sans-serif" }}>
@@ -25,7 +30,7 @@ export default async function PrivateProgramPreviewPage() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <caption>検証用1R（実開催ではありません）</caption>
         <thead><tr><th scope="col">艇番</th><th scope="col">登録番号</th><th scope="col">選手</th><th scope="col">展示タイム</th></tr></thead>
-        <tbody>{demoEntries.map((entry) => (
+        <tbody>{privateProgram.data.map((entry) => (
           <tr key={entry.boat}>
             <th scope="row">{entry.boat}</th>
             <td>{entry.registration}</td>
