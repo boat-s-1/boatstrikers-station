@@ -450,3 +450,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - Draft #306に `app/admin/program-preview/page.js` を追加（commit d408ecf132883e81078ea46d3da74ca955bffd1f）。環境変数 `BS_ADMIN_PROGRAM_PREVIEW_ENABLED` が明示的に `true` かつ既存管理者署名Cookieが有効な場合だけ、模擬6艇ページを返す。それ以外は404。動的・再検証0・robots noindex/nofollow。BRDB認証情報、実データ、DB・ネットワーク読み込みなし。既存の一般向けレースページは変更しない。
 - GitHub上の作成ファイルを再読し、機能フラグと管理者判定がデータ表示より先、外部読み込みコードなし、6艇の模擬入力であることを静的確認。Next.jsビルド、ログイン/非ログインのHTTP・ブラウザ検証は未実施。フラグは本番未設定、画面はデプロイされていない。通常プラン実データの非公開表示可否は提供元へ要確認。実データ利用前には独立した管理者認証・キャッシュ・API応答・サイト全経路の漏洩検証を要する。
+
+## 管理者限定プレビューの認証前データ遮断 2026-11-25 JST
+
+- #306に `site-private-program-gate.mjs` を追加し、既定OFF・管理者認証失敗・認証処理の例外ではプライベートデータ読取を呼ばないことを4件のNodeテストで確認。許可時だけ1回読む。ローカル4/4 PASS。[隔離CI run 45553923728](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45553923728)はHEAD abc6896884de7f44f5530baddf4be46c439283feで成功（Node全186件・使い捨てPostgreSQL fixture）。CI対象にプレビューページを追加。
+- これはサーバー側の認証順と合成データの検証。Next.jsページの実ビルド・HTTP/ブラウザ、実BRDBデータの通常プラン非公開利用許諾、実Supabase、実サイトは未検証。フラグOFF、本番未デプロイ。
