@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   private-trial:
-    if: ${{ inputs.approval_phrase == 'APPROVED_PRIVATE_ONE_SHOT' }}
+    if: ${{ github.ref == 'refs/heads/codex/dev1-openapi-offline-fix-20261118' && inputs.approval_phrase == 'APPROVED_PRIVATE_ONE_SHOT' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     environment: dev1-brdb-private-trial
