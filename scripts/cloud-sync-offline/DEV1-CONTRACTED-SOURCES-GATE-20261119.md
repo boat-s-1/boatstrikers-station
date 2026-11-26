@@ -35,3 +35,9 @@ The provider contracts make cloud program ingestion plausible. Written provider 
 ## Non-public test clarification to request from provider
 
 Before using existing-plan credentials or obtained rows in the admin-only preview, ask Team-Nave: “Under our current general plan, may we retrieve a small, Q011-bounded RACEMST/RACEDTL sample once from a single cloud environment, save it in a disposable private test environment, and display it only to an authenticated internal administrator? The public site, paid users and search engines cannot access this data; there is no redistribution or recurring polling. If permitted, please specify retention/deletion and rate restrictions.” Do not treat this draft as permission or send it without the operator's explicit authorization to contact the provider.
+
+## 2026-11-27 JST 管理者限定の復旧準備
+
+PC-KYOTEI公式マニュアルは、自動更新の起動をアプリ内の「通常データ登録」画面に限定し、当日のレースのみ取得すると記載する。これだけでクラウドネイティブな代替取得口や再配信許諾は確認できない。従来の値は `bs_race_entries` の `exhibition_source`／`official_exhibition_source` にPC-KYOTEI出典として残り得るが、更新停止後の新しい値は作れない。展示ページを実データ取得済みと表示する前に6艇の出典と同期時刻を照合する。
+
+Draft #306では既存の `/admin/exhibition-data-status` が認証前にservice-role DBを読んでいたため、認証失敗時は読取前に404とし、proxyでも早期404にした。両出典列でPC-KYOTEI行を集計し、隔離HTTPスモークに匿名遮断と管理者表示を追加。外部取得、DB保存、公開画面への接続は追加していない。CIの実行結果と管理者実ログインの実画面は未確認。PC-KYOTEIで前夜出走表を埋める想定はせず、出走表のBRDB経路と分ける。
