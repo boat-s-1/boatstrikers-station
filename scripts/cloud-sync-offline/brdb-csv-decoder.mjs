@@ -1,6 +1,6 @@
 // Offline-only decoder for BRDB CSV candidates. Never fetches or publishes data.
 const REQUIRED = ["SOPDT", "OPDT", "RCOURSECD", "RNO", "TEINO", "ENTNO"];
-export function decodeBrdbCsv(bytes, { maxBytes = 5_000_000 } = {}) {
+export function decodeBrdbCsv(bytes, { maxBytes = 5_000_000, requiredColumns = REQUIRED } = {}) {
   if (!(bytes instanceof Uint8Array) || bytes.length === 0 || bytes.length > maxBytes) {
     return { status: "HOLD_CSV_SIZE" };
   }
@@ -29,7 +29,7 @@ export function decodeBrdbCsv(bytes, { maxBytes = 5_000_000 } = {}) {
   if (lines.length < 2) return { status: "HOLD_CSV_EMPTY" };
   const headers = lines.shift();
   if (new Set(headers).size !== headers.length || headers.some(h => h === "") ||
-      REQUIRED.some(h => !headers.includes(h))) return { status: "HOLD_CSV_HEADER" };
+      !Array.isArray(requiredColumns) || requiredColumns.some(h => !headers.includes(h))) return { status: "HOLD_CSV_HEADER" };
   const records = [];
   for (const values of lines) {
     if (values.length !== headers.length) return { status: "HOLD_CSV_WIDTH" };
