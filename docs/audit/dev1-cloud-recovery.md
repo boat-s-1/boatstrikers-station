@@ -540,3 +540,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 江戸川は独自オリ展なし、常滑は一時休止後の提供再開との運用者情報を採用。常滑公式の現行掲載と取得アダプターの動作は未実測、PC-KYOTEIの旧取得不能記録と区別する。
 - Draft #306で場ごとに通常展示・一周・回り足・直線それぞれ「6艇揃ったレース数」を表示。江戸川の独自項目は欠損ではなく対象外。常滑は提供再開・取得検証中。出典1行だけで完全取得と表示しない。
 - [隔離CI run 45877742686](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45877742686) のオフライン試験と管理者HTML HTTP検証は成功。実データの新規取得、24場の時刻到達、管理者実ログイン、本番公開は未検証。本番変更なし。
+
+### 2026-11-27 JST 管理画面の主導線と外部取得遮断
+
+- 主導線は `/admin/alerts/collection`（保存済み24場）と `/admin/alerts/exhibition`（場別診断）。前回手を入れた `/admin/exhibition-data-status` は別画面だったため、主導線も修正。前者は認証前のservice-role DB読取を遮断し、場別・項目別6艇画面へのリンクを追加。台帳の常滑「公式休止中」を「提供再開・取得検証中」へ訂正、江戸川は独自オリ展対象外。既存の照合付き取得分岐17場・旧分岐5場に一致させた。
+- `/api/admin/verified-exhibition-check` は認証前に外部公式へアクセス可能だったため認証必須へ。最大24場へ展開し得る `/api/admin/exhibition-source-diagnostic` は認証必須かつ専用フラグ既定OFF。匿名・無承認の外部取得を遮断。
+- [隔離CI run 45878643478](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45878643478) はオフラインテスト、Next.jsビルド、模擬HTTPで匿名遮断・管理者表示・一括診断既定OFFが成功。外部ネットワークはモックで遮断。本番デプロイ・実取得・DB保存は未実施。
