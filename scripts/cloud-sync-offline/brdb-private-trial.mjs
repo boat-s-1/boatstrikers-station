@@ -29,7 +29,7 @@ export async function runBrdbPrivateTrial({ date, course, race, request }) {
   if (!complete) return stop("HOLD_TIMEOUT");
   const master = await call("getcsv", { qid: ids[0] });
   const detail = await call("getcsv", { qid: ids[1] });
-  const a = decodeBrdbCsv(master);
+  const a = decodeBrdbCsv(master, { requiredColumns: ["SOPDT", "OPDT", "RCOURSECD", "RNO", "CLOSETM"] });
   const b = decodeBrdbCsv(detail);
   if (a.status !== "CANDIDATE_ONLY" || b.status !== "CANDIDATE_ONLY") return stop("HOLD_CSV");
   if (a.records.length !== 1) return stop("HOLD_MASTER");
