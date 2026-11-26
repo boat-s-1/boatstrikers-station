@@ -496,3 +496,10 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 運用者の試験継続指示により、#306に1日・1場・1Rへ限定するRACEMST/RACEDTLのQ011 SQL候補と入力検証を追加。合成テストで対象外場・R、不正日付を拒否。[隔離CI run 45783668974](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45783668974)でNode全190件、使い捨てPostgreSQL fixture、Next.jsビルド、管理者限定模擬HTTPが成功。
 - `DEV1-BRDB-PRIVATE-TRIAL-20261126.md` に一回の選択、状態確認最大3、CSV取得最大2、合計最大6 HTTP要求・再試行なしという候補と、秘匿ログ・隔離保存条件を記録。これは実行用クライアントやワークフローではない。GitHub Secretsの確認・登録と新規手動ワークフローの安全な実行経路は未確立。このWork環境にBRDB認証情報なし。
 - 実API要求0、実データ保存0、公開0。本番APIへの実測は対象日・場・Rと保存／削除先を固定した具体的承認の後で行う。従来の最大3 GET承認は流用しない。
+
+## BRDB非公開単発クライアント候補 2026-11-26 JST
+
+- #306に `brdb-private-trial.mjs`、手動実行ラッパー、`dev1-brdb-private-one-shot.yml` を追加。2本の限定SQLを1回のselectへ送り、state最大3回（最大5秒間隔）、getcsv最大2回、HTTP合計最大6回。非200・リダイレクト・不正応答・CSV不正・6艇欠損はHOLD。ログは状態と件数のみ。DB保存・artifactなし。合成テスト3件とローカル再実行成功。
+- 最初の隔離CIでRACEMSTに明細用列を誤要求するテスト失敗を確認し修正。[修正後の隔離CI run 45784931605](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45784931605)でNode全193件、使い捨てPostgreSQL fixture、Next.jsビルド、管理者模擬HTTPが成功。
+- 新規手動ワークフローはDraftブランチのみにあり、既定ブランチで見つからないことを確認。現状GitHub UIから起動できるとは判定しない。専用Environment `dev1-brdb-private-trial` のSecrets `BRDB_TNC_ID` と `BRDB_TNC_PASSWORD` は未設定／この連携で存在確認不可。値をチャット・PR・ログに出さない。実行経路を有効化する変更と、対象日・場・R・最大6 POST・保持なしの実測について、別途具体的承認が必要。
+- 本番API要求0、実データ保存0、本番DB/Cron/Vercel変更なし。
