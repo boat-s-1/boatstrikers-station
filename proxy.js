@@ -23,4 +23,4 @@ export function proxy(request) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/program-preview/:path*", "/admin/exhibition-data-status/:path*"] };
+export const config = { matcher: ["/admin/program-preview/:path*", "/admin/exhibition-data-status/:path*", "/admin/alerts/collection/:path*", "/admin/alerts/exhibition/:path*"] };
