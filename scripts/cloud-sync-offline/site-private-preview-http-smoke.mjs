@@ -52,6 +52,11 @@ try {
   const authorizedStatus = await timedFetch(base + "/admin/exhibition-data-status", { headers: { cookie } });
   assert.equal(authorizedStatus.status, 200);
   assert.match(await authorizedStatus.text(), /展示データ判定状況/);
+  const anonymousCollection = await timedFetch(base + "/admin/alerts/collection");
+  assert.equal(anonymousCollection.status, 404);
+  const authorizedCollection = await timedFetch(base + "/admin/alerts/collection", { headers: { cookie } });
+  assert.equal(authorizedCollection.status, 200);
+  assert.match(await authorizedCollection.text(), /24場のオリ展収集状況/);
   const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
   assert.equal(authorizedPage.status, 200);
   const html = await authorizedPage.text();
