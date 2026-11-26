@@ -508,3 +508,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - 運用者のGitHub設定画面で `dev1-brdb-private-trial` Environmentと、`BRDB_TNC_ID`／`BRDB_TNC_PASSWORD` の2つのEnvironment secret名を確認。値は表示・取得していない。Secretsが有効な値かは未検証。
 - 画面時点ではRequired reviewers未設定、Allow administrators to bypass protection rulesがON、Deployment branches and tagsはNo restriction。実試験前に選択ブランチ制限とレビュー保護を設定する候補。新規workflow_dispatchファイルはDraftブランチにのみ存在し、GitHubの既定ブランチにないため手動起動不可。実API要求0。
+
+## Environment保護の画面確認 2026-11-27 JST
+
+- 運用者画面でRequired reviewers=boat-s-1、Prevent self-review=OFF、administrators bypass=OFF、Selected branches and tagsに1ブランチ（現在1 branchに適用）を確認。Secrets名2件は維持。画像では枝名が省略表示され、Save protection rulesの保存後再読込の証拠は未確認。実行前に完全一致する枝名と保存状態を検証する。
+- 既定ブランチに候補手動workflowは存在しない。GitHubのworkflow_dispatchは既定ブランチに同名workflowが必要。既存PRのマージなしで起動経路を作る場合、既定ブランチへ秘密を一切参照しない不活性な同名スタブのみ置き、Draft枝を選んだ実行でレビュー済み実体を使う案を検討。既定ブランチへの直接変更はまだ行わず、GitHubの実際のref解決・環境枝制限を確認した後に具体的承認を得る。
