@@ -26,3 +26,21 @@ export function buildBrdbRaceMasterQuery(targetDate) {
   const start = meetingStartBound(targetDate);
   return `SELECT * FROM RACEMST WHERE SOPDT >= '${start}' AND OPDT = '${targetDate}' ORDER BY RCOURSECD, RNO`;
 }
+
+function singleRaceCode(course, race) {
+  if (!Number.isInteger(course) || course < 1 || course > 24 ||
+      !Number.isInteger(race) || race < 1 || race > 12) {
+    throw new RangeError('one course (1-24) and one race (1-12) required');
+  }
+  return { course, race };
+}
+
+export function buildBrdbSingleRaceQueries(targetDate, courseCode, raceNo) {
+  const start = meetingStartBound(targetDate);
+  const { course, race } = singleRaceCode(courseCode, raceNo);
+  const where = `SOPDT >= '${start}' AND OPDT = '${targetDate}' AND RCOURSECD = ${course} AND RNO = ${race}`;
+  return {
+    master: `SELECT SOPDT, OPDT, RCOURSECD, RNO, CLOSETM, PRGF FROM RACEMST WHERE ${where} ORDER BY RCOURSECD, RNO`,
+    detail: `SELECT SOPDT, OPDT, RCOURSECD, RNO, TEINO, ENTNO FROM RACEDTL WHERE ${where} ORDER BY RCOURSECD, RNO, TEINO`,
+  };
+}
