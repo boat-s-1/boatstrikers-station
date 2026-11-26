@@ -14,8 +14,15 @@ export async function runBrdbPrivateTrial({ date, course, race, request, pollDel
     return request(prccd, params);
   };
   const stop = (reason) => ({ status: reason, calls });
+  // Record only a bounded numeric return code. Provider messages may contain private data.
+  const providerCode = value => {
+    if (typeof value !== "string" && typeof value !== "number") return null;
+    if (!/^-?(0|[1-9]\\d{0,3})$/.test(String(value))) return null;
+    const code = Number(value);
+    return code <= 0 && code >= -9999 ? code : null;
+  };
   const select = await call("select", { cmd1: queries.master, cmd2: queries.detail });
-  if (Number(select?.ret) !== 0) return stop("HOLD_SELECT");
+  if (providerCode(select?.ret) !== 0) return { ...stop("HOLD_SELECT"), providerCode: providerCode(select?.ret) };
   if (select.ret1 == null || select.ret2 == null) return stop("HOLD_QUEUE_ID");
   const ids = [select.ret1, select.ret2].map(String);
   if (ids.some(id => !/^[A-Za-z0-9_-]{1,128}$/.test(id))) return stop("HOLD_QUEUE_ID");
