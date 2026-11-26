@@ -520,5 +520,10 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - [Secrets不要の事前確認](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45857777276) は成功し、実測ジョブはスキップ。
 - 運用者の承認を受けて2026-11-21・多摩川05・2Rの[一回限りの実測 #45860078766](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45860078766)を申請。2026-11-27 01:46 JSTに運用者がEnvironmentを承認。実行コミット `564fbdf55085cb15b81fba0d8c54efa78960f7ae`。
 - 結果は **HOLD_SELECT**。select POST試行 **1回**、state 0回、getcsv 0回、合計1/6回。HTTP層はエラー判定されず、返されたselectの`ret`が0と判定できなかった。返答コード・メッセージ本文はログ化していないため、認証、契約、端末制限、SQLのどれが原因かは未確定。再試行しない。CSV/6艇取得なし、DB保存・サイト表示なし。
-- 提供元の公開仕様に照らし、selectのPOST形式、cmd1/cmd2、対象カラムは文書上は整合。ただしライセンスは1台の端末からのアクセスという利用制限がある。原因断定や再実測の前に、安全な数値コード診断と提供元への確認が必要。参照：https://www.team-nave.com/system/jp/products/brdbapi/help_function.html および https://www.team-nave.com/system/jp/products/brdbapi/help_limit.html 。
+- 提供元の公開仕様に照らし、selectのPOST形式、cmd1/cmd2、対象カラムは文書上は整合。なお、Team-Naveは2026-11-19の返信で、Windowsから単一クラウド実行環境へ移し、GitHub Actionsの実行元が変動する構成について「特に問題ございません」と回答済み。端末制限を今回の原因と推定しない。返却ret/msgを記録していないため、原因断定や再実測の前に安全な診断方法を確認する。参照：https://www.team-nave.com/system/jp/products/brdbapi/help_function.html および https://www.team-nave.com/system/jp/products/brdbapi/help_limit.html 。
 - 本番DB、Cron、Vercel、既存自動タスク、PRマージの変更なし。実データの管理者画面表示は未完成。次の外部POSTは今回の承認範囲外として保留。
+
+
+## 2026-11-27 JST 照会整理
+
+- 11/19のクラウド／GitHub Actions許可、11/24のビジネスプラン料金・保存と表示条件、11/26の非公開少数テスト許可を再確認。実測失敗の原因は未確定。重複質問を除いた送信前文案と、別契約のPC-KYOTEIへの確認項目を[Draft #306の照会文](https://github.com/boat-s-1/boatstrikers-station/blob/codex/dev1-openapi-offline-fix-20261118/scripts/cloud-sync-offline/DEV1-BRDB-HOLD-SELECT-INQUIRY-20261127.md)へ整理。メール未送信、追加POSTなし。
