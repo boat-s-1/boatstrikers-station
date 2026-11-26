@@ -46,6 +46,12 @@ try {
   assert.equal(anonymousPage.status, 404);
   const anonymousHtml = await anonymousPage.text();
   assert.doesNotMatch(anonymousHtml, /検証用選手[1-6]|900[1-6]|模擬データです/);
+  const anonymousStatus = await timedFetch(base + "/admin/exhibition-data-status");
+  assert.equal(anonymousStatus.status, 404, "exhibition status must deny anonymous requests before DB read");
+  assert.doesNotMatch(await anonymousStatus.text(), /PC-KYOTEI取得済み|BOATERS取得済み/);
+  const authorizedStatus = await timedFetch(base + "/admin/exhibition-data-status", { headers: { cookie } });
+  assert.equal(authorizedStatus.status, 200);
+  assert.match(await authorizedStatus.text(), /展示データ判定状況/);
   const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
   assert.equal(authorizedPage.status, 200);
   const html = await authorizedPage.text();
