@@ -37,7 +37,11 @@ test("pending job stops at three state checks without downloading", async () => 
 });
 test("provider failure, partial roster and invalid target fail closed", async () => {
   const fail = await runBrdbPrivateTrial({ ...target, request: async () => ({ ret: -1 }) });
-  assert.deepEqual(fail, { status: "HOLD_SELECT", calls: 1 });
+  assert.deepEqual(fail, { status: "HOLD_SELECT", calls: 1, providerCode: -1 });
+  const missing = await runBrdbPrivateTrial({ ...target, request: async () => ({ ret: null }) });
+  assert.deepEqual(missing, { status: "HOLD_SELECT", calls: 1, providerCode: null });
+  const unsafe = await runBrdbPrivateTrial({ ...target, request: async () => ({ ret: "private-error" }) });
+  assert.deepEqual(unsafe, { status: "HOLD_SELECT", calls: 1, providerCode: null });
   const partial = await runBrdbPrivateTrial({ ...target, pollDelayMs: 0, request: async (op, params) =>
     op === "select" ? { ret: 0, ret1: "q1", ret2: "q2" } :
     op === "state" ? { ret: 0, ret1: 2, ret2: 2 } :
