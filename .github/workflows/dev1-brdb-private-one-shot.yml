@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       approval_phrase:
-        description: 'Enter APPROVED_PRIVATE_ONE_SHOT after the concrete trial is approved'
+        description: 'DRY_RUN_ONLY for no-secret preflight; live phrase requires concrete approval'
         required: true
         type: string
 
@@ -28,6 +28,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  no-secret-preflight:
+    if: ${{ github.ref == 'refs/heads/codex/dev1-openapi-offline-fix-20261118' && inputs.approval_phrase == 'DRY_RUN_ONLY' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Confirm selected branch without checkout, secrets or provider traffic
+        run: |
+          test "$GITHUB_REF" = "refs/heads/codex/dev1-openapi-offline-fix-20261118"
+          echo "Selected Draft branch; no provider request."
+
   private-trial:
     if: ${{ github.ref == 'refs/heads/codex/dev1-openapi-offline-fix-20261118' && inputs.approval_phrase == 'APPROVED_PRIVATE_ONE_SHOT' }}
     runs-on: ubuntu-24.04
