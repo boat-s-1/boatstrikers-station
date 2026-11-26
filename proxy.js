@@ -15,11 +15,12 @@ function validAdminCookie(value) {
 }
 
 export function proxy(request) {
-  if (process.env.BS_ADMIN_PROGRAM_PREVIEW_ENABLED !== "true" ||
+  const preview = request.nextUrl.pathname.startsWith("/admin/program-preview");
+  if ((preview && process.env.BS_ADMIN_PROGRAM_PREVIEW_ENABLED !== "true") ||
       !validAdminCookie(request.cookies.get("bs_admin_sync")?.value)) {
     return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
   }
   return NextResponse.next();
 }
 
-export const config = { matcher: "/admin/program-preview/:path*" };
+export const config = { matcher: ["/admin/program-preview/:path*", "/admin/exhibition-data-status/:path*"] };
