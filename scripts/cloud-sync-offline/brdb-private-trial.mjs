@@ -15,6 +15,7 @@ export async function runBrdbPrivateTrial({ date, course, race, request }) {
   const stop = (reason) => ({ status: reason, calls });
   const select = await call("select", { cmd1: queries.master, cmd2: queries.detail });
   if (Number(select?.ret) !== 0) return stop("HOLD_SELECT");
+  if (select.ret1 == null || select.ret2 == null) return stop("HOLD_QUEUE_ID");
   const ids = [select.ret1, select.ret2].map(String);
   if (ids.some(id => !/^[A-Za-z0-9_-]{1,128}$/.test(id))) return stop("HOLD_QUEUE_ID");
   let complete = false;
