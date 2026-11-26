@@ -112,15 +112,17 @@ async function loadStatus() {
   const byVenue = new Map();
   for (const event of events) {
     const key = String(event.course_code);
-    if (!byVenue.has(key)) byVenue.set(key, { name: event.course_name || key, races: 0, standard: 0, detailed: 0, missing: 0 });
+    if (!byVenue.has(key)) byVenue.set(key, { code: Number(event.course_code), name: event.course_name || key, races: 0, standard: 0, lap: 0, turn: 0, straight: 0, missing: 0 });
     const venue = byVenue.get(key);
     venue.races += 1;
     const boats = byRace.get(raceKey(event)) || [];
     const six = boats.length === 6 && new Set(boats.map((row) => Number(row.boat_no))).size === 6;
     const standard = six && boats.every((row) => row.exhibition_time != null || row.official_exhibition_time != null);
-    const detailed = six && boats.every((row) => [row.official_lap, row.lap_time, row.official_turn, row.turn_time, row.official_straight, row.straight_time].some((value) => value != null));
+    const complete = (primary, fallback) => six && boats.every((row) => row[primary] != null || row[fallback] != null);
     if (standard) venue.standard += 1;
-    if (detailed) venue.detailed += 1;
+    if (complete("official_lap", "lap_time")) venue.lap += 1;
+    if (complete("official_turn", "turn_time")) venue.turn += 1;
+    if (complete("official_straight", "straight_time")) venue.straight += 1;
     if (!standard) venue.missing += 1;
   }
   const venues = [...byVenue.values()];
@@ -192,12 +194,12 @@ export default async function ExhibitionDataStatusPage() {
             <section style={{ ...card, marginBottom: 18 }}>
               <h2 style={{ margin: "0 0 12px", fontSize: 20 }}>場別の取得状況（本日）</h2>
               {s.venues?.length ? <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-                <thead><tr><th scope="col">場</th><th scope="col">開催</th><th scope="col">通常展示6艇</th><th scope="col">詳細展示6艇</th><th scope="col">通常展示不足</th></tr></thead>
+                <thead><tr><th scope="col">場</th><th scope="col">開催</th><th scope="col">通常展示6艇</th><th scope="col">一周6艇</th><th scope="col">回り足6艇</th><th scope="col">直線6艇</th><th scope="col">通常展示不足</th></tr></thead>
                 <tbody>{s.venues.map((venue) => <tr key={venue.name} style={{ borderTop: "1px solid #e2e8f0" }}>
-                  <th scope="row">{venue.name}</th><td>{venue.races}R</td><td>{venue.standard}R</td><td>{venue.detailed}R</td><td>{venue.missing}R</td>
+                  <th scope="row">{venue.name}{venue.code === 3 ? "（独自オリ展対象外）" : venue.code === 8 ? "（提供再開・取得検証中）" : ""}</th><td>{venue.races}R</td><td>{venue.standard}R</td><td>{venue.code === 3 ? "対象外" : `${venue.lap}R`}</td><td>{venue.code === 3 ? "対象外" : `${venue.turn}R`}</td><td>{venue.code === 3 ? "対象外" : `${venue.straight}R`}</td><td>{venue.missing}R</td>
                 </tr>)}</tbody>
               </table></div> : <p>本日の開催行がありません。展示の取得状況は判定できません。</p>}
-              <p style={{ fontSize: 13, color: "#617184" }}>詳細展示は提供項目が場ごとに異なります。江戸川は独自オリ展対象外。常滑の提供再開は利用者情報を受けて確認中。締切10分前の到達は別途時刻照合が必要です。</p>
+              <p style={{ fontSize: 13, color: "#617184" }}>一周・回り足・直線はそれぞれ6艇揃いを別に数えます。江戸川は独自オリ展対象外。常滑は提供再開の情報があり、取得経路は検証中。締切10分前の到達は別途時刻照合が必要です。</p>
             </section>
 
             {s.straightPartial ? (
