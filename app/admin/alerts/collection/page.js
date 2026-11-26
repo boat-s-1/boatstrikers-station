@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { isAdminAuthenticated } from '../../sync/_lib/adminAuth';
 import { createClient } from '@supabase/supabase-js';
 import { buildCollectionStatus, normalizeCollectionDate } from '../../../../lib/exhibitionCollectionStatus';
 import CollectionRefresh from './CollectionRefresh';
@@ -7,6 +9,8 @@ import { summarizeVenueAttempts } from '../../../../lib/exhibitionSyncHealth';
 import styles from '../alerts.module.css';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const metadata = { robots: { index: false, follow: false } };
 
 function jstTime(value) {
   return new Date(value).toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
@@ -34,6 +38,9 @@ async function loadCollection(date) {
 }
 
 export default async function CollectionPage({ searchParams }) {
+  // Protect the service-role reads before building any collection query.
+  const authenticated = await isAdminAuthenticated().catch(() => false);
+  if (!authenticated) notFound();
   const query = await searchParams;
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
   const date = normalizeCollectionDate(query?.date, today);
