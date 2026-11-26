@@ -513,3 +513,12 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 
 - 運用者画面でRequired reviewers=boat-s-1、Prevent self-review=OFF、administrators bypass=OFF、Selected branches and tagsに1ブランチ（現在1 branchに適用）を確認。Secrets名2件は維持。画像では枝名が省略表示され、Save protection rulesの保存後再読込の証拠は未確認。実行前に完全一致する枝名と保存状態を検証する。
 - 既定ブランチに候補手動workflowは存在しない。GitHubのworkflow_dispatchは既定ブランチに同名workflowが必要。既存PRのマージなしで起動経路を作る場合、既定ブランチへ秘密を一切参照しない不活性な同名スタブのみ置き、Draft枝を選んだ実行でレビュー済み実体を使う案を検討。既定ブランチへの直接変更はまだ行わず、GitHubの実際のref解決・環境枝制限を確認した後に具体的承認を得る。
+
+## BRDB管理者限定・一回限りの実測 2026-11-27 JST
+
+- GitHub Environment `dev1-brdb-private-trial` の保護を確認：Required reviewers=`boat-s-1`、管理者バイパスOFF、許可ブランチは `codex/dev1-openapi-offline-fix-20261118` の1件、環境Secret名2件。Secret値は確認・記録しない。
+- [Secrets不要の事前確認](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45857777276) は成功し、実測ジョブはスキップ。
+- 運用者の承認を受けて2026-11-21・多摩川05・2Rの[一回限りの実測 #45860078766](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45860078766)を申請。2026-11-27 01:46 JSTに運用者がEnvironmentを承認。実行コミット `564fbdf55085cb15b81fba0d8c54efa78960f7ae`。
+- 結果は **HOLD_SELECT**。select POST試行 **1回**、state 0回、getcsv 0回、合計1/6回。HTTP層はエラー判定されず、返されたselectの`ret`が0と判定できなかった。返答コード・メッセージ本文はログ化していないため、認証、契約、端末制限、SQLのどれが原因かは未確定。再試行しない。CSV/6艇取得なし、DB保存・サイト表示なし。
+- 提供元の公開仕様に照らし、selectのPOST形式、cmd1/cmd2、対象カラムは文書上は整合。ただしライセンスは1台の端末からのアクセスという利用制限がある。原因断定や再実測の前に、安全な数値コード診断と提供元への確認が必要。参照：https://www.team-nave.com/system/jp/products/brdbapi/help_function.html および https://www.team-nave.com/system/jp/products/brdbapi/help_limit.html 。
+- 本番DB、Cron、Vercel、既存自動タスク、PRマージの変更なし。実データの管理者画面表示は未完成。次の外部POSTは今回の承認範囲外として保留。
