@@ -66,11 +66,12 @@ async function loadStatus() {
   async function allRows(table, columns) {
     const result = [];
     for (let offset = 0; offset < 5000; offset += 1000) {
-      const { data, error } = await client.from(table).select(columns)
+      let query = client.from(table).select(columns)
         .eq("race_date", date)
         .order("course_code", { ascending: true })
-        .order("race_no", { ascending: true })
-        .range(offset, offset + 999);
+        .order("race_no", { ascending: true });
+      if (table === "bs_race_entries") query = query.order("boat_no", { ascending: true });
+      const { data, error } = await query.range(offset, offset + 999);
       if (error) throw error;
       result.push(...(data || []));
       if ((data || []).length < 1000) return result;
