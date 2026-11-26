@@ -57,6 +57,12 @@ try {
   const authorizedCollection = await timedFetch(base + "/admin/alerts/collection", { headers: { cookie } });
   assert.equal(authorizedCollection.status, 200);
   assert.match(await authorizedCollection.text(), /24場のオリ展収集状況/);
+  const anonymousVerified = await timedFetch(base + "/api/admin/verified-exhibition-check?course=5&date=2026-11-21&race=2");
+  assert.equal(anonymousVerified.status, 401);
+  const anonymousBulk = await timedFetch(base + "/api/admin/exhibition-source-diagnostic");
+  assert.equal(anonymousBulk.status, 401);
+  const disabledBulk = await timedFetch(base + "/api/admin/exhibition-source-diagnostic", { headers: { cookie } });
+  assert.equal(disabledBulk.status, 404);
   const authorizedPage = await timedFetch(base + "/admin/program-preview", { headers: { cookie } });
   assert.equal(authorizedPage.status, 200);
   const html = await authorizedPage.text();
