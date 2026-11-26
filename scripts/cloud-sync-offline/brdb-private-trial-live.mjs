@@ -11,9 +11,12 @@ if (process.argv[2] !== "--live" || process.env.BRDB_TRIAL_ONE_SHOT !== "YES" ||
     !id || !password) {
   throw new Error("HOLD_CONFIG: manual live flag and secret environment required");
 }
+let actualCalls = 0;
 async function request(operation, parameters) {
+  if (actualCalls >= 6) throw new Error("HOLD_CALL_LIMIT");
   const form = new URLSearchParams({ prccd: operation, tncid: id, tncpw: password, ...parameters });
   if (operation !== "getcsv") form.set("format", "json");
+  actualCalls++;
   const response = await fetch(ENDPOINT, {
     method: "POST",
     body: form,
@@ -35,12 +38,12 @@ try {
   // Never print credentials, SQL, queue identifiers, CSV, or racer identities.
   process.stdout.write(JSON.stringify({
     status: result.status,
-    calls: result.calls,
+    calls: actualCalls,
     masterCount: result.masterCount ?? 0,
     boatCount: result.boatCount ?? 0,
   }) + "\n");
   if (result.status !== "CANDIDATE_PRIVATE_ONLY") process.exitCode = 2;
 } catch {
-  process.stderr.write("HOLD_TRANSPORT_OR_CONFIG: no result accepted\n");
+  process.stderr.write(JSON.stringify({ status: "HOLD_TRANSPORT_OR_CONFIG", calls: actualCalls }) + "\n");
   process.exitCode = 2;
 }
