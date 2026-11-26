@@ -10,9 +10,9 @@ Team-Naveは11/26 13:28 JSTに、照会した「単一クラウド実行環境�
 - CSV本体、会員ID・パスワード、SQL本文、ダウンロードURL、Queue IDをActionsログ・artifact・PRへ出さない。ログはHTTP状態、件数、HOLD理由と取得時刻だけ。結果を保持するなら暗号化・アクセス制限・削除時刻を決めた専用隔離ストアを先に用意する。
 
 ## 現在の実行阻害
-- このWork実行環境にはBRDB認証情報が設定されていない。GitHub connectorはActions Secretsの存在確認・登録と手動workflow_dispatchを提供しない。ローカルghも未認証。
-- Draftブランチの新規workflow_dispatchだけでは安全な実行経路が確定しない。既存本番ワークフローや本番DBへ秘密を流さず、隔離クラウド実行環境とログ秘匿を確認する。
-- 認証情報はチャット、PR、ソースに貼らない。所有者が専用のGitHub Environment Secretsへ team-nave CLUB IDとパスワードを登録し、環境保護・実行権限を確認する。実際のsecret名とワークフローは候補実装のレビュー後に固定する。
+- このWork実行環境にはBRDB認証情報が設定されていない。GitHub connectorはActions Secretsの存在確認・登録と手動workflow_dispatchを提供しない。ローカルghも未認証。候補workflowは `.github/workflows/dev1-brdb-private-one-shot.yml`、secret名は `BRDB_TNC_ID` と `BRDB_TNC_PASSWORD`。専用GitHub Environment `dev1-brdb-private-trial` に置く想定。
+- Draftブランチに新設したworkflow_dispatchは現時点で手動起動できると確認していない。GitHubでは通常、新規workflowは既定ブランチに存在する必要があり、候補を置いただけでは実行できない。既存PRのマージは禁止のまま。実行経路の設置は別の具体的承認と確認を要する。既存本番ワークフローや本番DBへ秘密を流さず、隔離クラウド実行環境とログ秘匿を確認する。
+- 認証情報はチャット、PR、ソースに貼らない。所有者がGitHubのSettings → Environmentsで `dev1-brdb-private-trial` を作り、Environment secretsとして `BRDB_TNC_ID` と `BRDB_TNC_PASSWORD` を登録し、実行者制限と承認保護を確認する。値をこの会話へ送らない。Actionsの実行ログやCSV artifactも公開しない。
 - 本番API負荷を伴う実行そのものは、対象日・場・R、HTTP上限、保存先と削除時刻、実行者を示した一回限りの承認を得てから行う。過去の最大3 GET承認は使わない。
 
-状態: コード候補と合成テストのみ。実API要求0、実データ保存0、公開0。
+状態: 手動候補クライアント／workflowと合成テストのみ。実行環境のsecret登録とworkflowの起動可能性は未確認。実API要求0、実データ保存0、公開0。
