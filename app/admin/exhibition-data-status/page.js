@@ -62,18 +62,30 @@ async function loadStatus() {
   const date = jstToday();
   if (!client) return { date, error: "Supabase環境変数が未設定です" };
 
-  const [{ data: events, error: eventError }, { data: entries, error: entryError }] = await Promise.all([
-    client.from("bs_race_events")
-      .select("course_code,course_name,race_no,closing_time")
-      .eq("race_date", date),
-    client.from("bs_race_entries")
-      .select("course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at")
-      .eq("race_date", date),
-  ]);
-
-  if (eventError || entryError) return { date, error: eventError?.message || entryError?.message || "取得失敗" };
-
-  const rows = entries || [];
+  // PostgREST defaults to a 1000-row limit; a full 24-venue day can exceed it.
+  async function allRows(table, columns) {
+    const result = [];
+    for (let offset = 0; offset < 5000; offset += 1000) {
+      const { data, error } = await client.from(table).select(columns)
+        .eq("race_date", date)
+        .order("course_code", { ascending: true })
+        .order("race_no", { ascending: true })
+        .range(offset, offset + 999);
+      if (error) throw error;
+      result.push(...(data || []));
+      if ((data || []).length < 1000) return result;
+    }
+    throw new Error("展示集計の取得上限に達しました");
+  }
+  let events, rows;
+  try {
+    [events, rows] = await Promise.all([
+      allRows("bs_race_events", "course_code,course_name,race_no,closing_time"),
+      allRows("bs_race_entries", "course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at"),
+    ]);
+  } catch {
+    return { date, error: "展示集計を取得できませんでした" };
+  }
   const official = rows.filter((r) => r.official_exhibition_time != null || r.official_lap != null || r.official_turn != null || r.official_straight != null);
   const boatersRows = rows.filter((r) => String(r.official_exhibition_source || "").toLowerCase().includes("boaters")).length;
   const pcRows = rows.filter((r) => [r.official_exhibition_source, r.exhibition_source].some((source) => String(source || "").toLowerCase().includes("pc-kyotei"))).length;
@@ -86,10 +98,31 @@ async function loadStatus() {
   const source = sourceLabel({ boatersRows, pcRows, detailedRows: official.length, lapRows, straightRows });
   const straightPartial = lapRows > 0 && straightRows < lapRows;
   const latest = rows
-    .map((r) => r.official_exhibition_synced_at)
+    .flatMap((r) => [r.official_exhibition_synced_at, r.exhibition_synced_at])
     .filter(Boolean)
     .sort()
     .at(-1) || null;
+  const byRace = new Map();
+  for (const row of rows) {
+    const key = raceKey(row);
+    if (!byRace.has(key)) byRace.set(key, []);
+    byRace.get(key).push(row);
+  }
+  const byVenue = new Map();
+  for (const event of events) {
+    const key = String(event.course_code);
+    if (!byVenue.has(key)) byVenue.set(key, { name: event.course_name || key, races: 0, standard: 0, detailed: 0, missing: 0 });
+    const venue = byVenue.get(key);
+    venue.races += 1;
+    const boats = byRace.get(raceKey(event)) || [];
+    const six = boats.length === 6 && new Set(boats.map((row) => Number(row.boat_no))).size === 6;
+    const standard = six && boats.every((row) => row.exhibition_time != null || row.official_exhibition_time != null);
+    const detailed = six && boats.every((row) => [row.official_lap, row.lap_time, row.official_turn, row.turn_time, row.official_straight, row.straight_time].some((value) => value != null));
+    if (standard) venue.standard += 1;
+    if (detailed) venue.detailed += 1;
+    if (!standard) venue.missing += 1;
+  }
+  const venues = [...byVenue.values()];
 
   return {
     date,
@@ -107,6 +140,7 @@ async function loadStatus() {
     source,
     straightPartial,
     latest,
+    venues,
   };
 }
 
@@ -139,6 +173,7 @@ export default async function ExhibitionDataStatusPage() {
                 </div>
                 <span style={pillStyle(s.source?.tone)}>{s.source?.label}</span>
               </div>
+              <div style={{ marginTop: 10, color: "#92400e", fontSize: 13 }}>開催・出走表の基礎行がないレースは展示を表示できません。取得元の履歴だけで本日の取得成功とは判定しません。</div>
               <div style={{ marginTop: 14, color: "#617184", fontSize: 14 }}>
                 最終詳細同期: {s.latest ? new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(s.latest)) : "未取得"}
               </div>
@@ -151,6 +186,17 @@ export default async function ExhibitionDataStatusPage() {
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>PC-KYOTEI詳細</div><strong style={{ fontSize: 28 }}>{s.pcRows}艇</strong></div>
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>1周</div><strong style={{ fontSize: 28 }}>{s.lapRows}艇</strong></div>
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>直線</div><strong style={{ fontSize: 28 }}>{s.straightRows}艇</strong></div>
+            </section>
+
+            <section style={{ ...card, marginBottom: 18 }}>
+              <h2 style={{ margin: "0 0 12px", fontSize: 20 }}>場別の取得状況（本日）</h2>
+              {s.venues?.length ? <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <thead><tr><th scope="col">場</th><th scope="col">開催</th><th scope="col">通常展示6艇</th><th scope="col">詳細展示6艇</th><th scope="col">通常展示不足</th></tr></thead>
+                <tbody>{s.venues.map((venue) => <tr key={venue.name} style={{ borderTop: "1px solid #e2e8f0" }}>
+                  <th scope="row">{venue.name}</th><td>{venue.races}R</td><td>{venue.standard}R</td><td>{venue.detailed}R</td><td>{venue.missing}R</td>
+                </tr>)}</tbody>
+              </table></div> : <p>本日の開催行がありません。展示の取得状況は判定できません。</p>}
+              <p style={{ fontSize: 13, color: "#617184" }}>詳細展示は提供項目が場ごとに異なります。江戸川は独自オリ展対象外。常滑の提供再開は利用者情報を受けて確認中。締切10分前の到達は別途時刻照合が必要です。</p>
             </section>
 
             {s.straightPartial ? (
