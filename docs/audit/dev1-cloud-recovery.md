@@ -503,3 +503,8 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 最初の隔離CIでRACEMSTに明細用列を誤要求するテスト失敗を確認し修正。[修正後の隔離CI run 45784931605](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45784931605)でNode全193件、使い捨てPostgreSQL fixture、Next.jsビルド、管理者模擬HTTPが成功。
 - 新規手動ワークフローはDraftブランチのみにあり、既定ブランチで見つからないことを確認。現状GitHub UIから起動できるとは判定しない。専用Environment `dev1-brdb-private-trial` のSecrets `BRDB_TNC_ID` と `BRDB_TNC_PASSWORD` は未設定／この連携で存在確認不可。値をチャット・PR・ログに出さない。実行経路を有効化する変更と、対象日・場・R・最大6 POST・保持なしの実測について、別途具体的承認が必要。
 - 本番API要求0、実データ保存0、本番DB/Cron/Vercel変更なし。
+
+## GitHub Environment設定の画面確認 2026-11-26 JST
+
+- 運用者のGitHub設定画面で `dev1-brdb-private-trial` Environmentと、`BRDB_TNC_ID`／`BRDB_TNC_PASSWORD` の2つのEnvironment secret名を確認。値は表示・取得していない。Secretsが有効な値かは未検証。
+- 画面時点ではRequired reviewers未設定、Allow administrators to bypass protection rulesがON、Deployment branches and tagsはNo restriction。実試験前に選択ブランチ制限とレビュー保護を設定する候補。新規workflow_dispatchファイルはDraftブランチにのみ存在し、GitHubの既定ブランチにないため手動起動不可。実API要求0。
