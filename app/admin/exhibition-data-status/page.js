@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
+import { isAdminAuthenticated } from "../sync/_lib/adminAuth";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const metadata = { robots: { index: false, follow: false } };
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -63,7 +67,7 @@ async function loadStatus() {
       .select("course_code,course_name,race_no,closing_time")
       .eq("race_date", date),
     client.from("bs_race_entries")
-      .select("course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at")
+      .select("course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at")
       .eq("race_date", date),
   ]);
 
@@ -72,7 +76,7 @@ async function loadStatus() {
   const rows = entries || [];
   const official = rows.filter((r) => r.official_exhibition_time != null || r.official_lap != null || r.official_turn != null || r.official_straight != null);
   const boatersRows = rows.filter((r) => String(r.official_exhibition_source || "").toLowerCase().includes("boaters")).length;
-  const pcRows = rows.filter((r) => String(r.official_exhibition_source || "").toLowerCase().includes("pc-kyotei")).length;
+  const pcRows = rows.filter((r) => [r.official_exhibition_source, r.exhibition_source].some((source) => String(source || "").toLowerCase().includes("pc-kyotei"))).length;
   const lapRows = rows.filter((r) => r.official_lap != null).length;
   const turnRows = rows.filter((r) => r.official_turn != null).length;
   const straightRows = rows.filter((r) => r.official_straight != null).length;
@@ -107,6 +111,9 @@ async function loadStatus() {
 }
 
 export default async function ExhibitionDataStatusPage() {
+  // Authenticate before creating a service-role client or reading any race data.
+  const authenticated = await isAdminAuthenticated().catch(() => false);
+  if (!authenticated) notFound();
   const s = await loadStatus();
   const totalBoatSlots = Math.max(0, Number(s.events || 0) * 6);
   const ichikaReady = Number(s.lapReadyRaces || 0) > 0;
