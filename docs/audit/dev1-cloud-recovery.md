@@ -527,3 +527,10 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 ## 2026-11-27 JST 照会整理
 
 - 11/19のクラウド／GitHub Actions許可、11/24のビジネスプラン料金・保存と表示条件、11/26の非公開少数テスト許可を再確認。実測失敗の原因は未確定。重複質問を除いた送信前文案と、別契約のPC-KYOTEIへの確認項目を[Draft #306の照会文](https://github.com/boat-s-1/boatstrikers-station/blob/codex/dev1-openapi-offline-fix-20261118/scripts/cloud-sync-offline/DEV1-BRDB-HOLD-SELECT-INQUIRY-20261127.md)へ整理。メール未送信、追加POSTなし。
+
+## 2026-11-27 JST 展示取得状況の管理者画面
+
+- 運用者訂正：江戸川は独自オリ展なし。常滑は設備整備による一時休止後に提供再開との報告。PC-KYOTEIの旧マニュアルにはサイト刷新後の取得不能記録が残り、公式提供再開と同アプリの取得復旧は別判定。
+- Draft #306の管理者限定 `/admin/exhibition-data-status` を修正。認証前のservice-role読取を遮断し、場別に開催R、通常展示6艇、詳細展示6艇、通常展示不足Rを表示する候補。1,000行超のページングと安定ソート、部分的な取得元の「取得済み」誤表示防止を追加。DB欠損時は取得済みとみなさない。
+- [隔離CI run 45877184306](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45877184306)でオフライン試験と、外部通信を遮断した管理者HTML／未認証404のHTTP試験が成功。実PC-KYOTEI・各場公式の新規取得、締切10分前の全場検証、実ログイン画面、本番表示は未完了。
+- 本番SupabaseはSELECT集計のみ。保存、新規公式GET、Cron／本番Vercel変更、PRマージなし。提供元の利用条件と負荷、常滑の現行公式ページの6艇、隔離データの受入れを検証後に段階的な実測を計画する。
