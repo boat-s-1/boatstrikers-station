@@ -17,7 +17,7 @@ export async function runBrdbPrivateTrial({ date, course, race, request, pollDel
   // Record only a bounded numeric return code. Provider messages may contain private data.
   const providerCode = value => {
     if (typeof value !== "string" && typeof value !== "number") return null;
-    if (!/^-?(0|[1-9]\\d{0,3})$/.test(String(value))) return null;
+    if (!/^-?(0|[1-9]\d{0,3})$/.test(String(value))) return null;
     const code = Number(value);
     return code <= 0 && code >= -9999 ? code : null;
   };
