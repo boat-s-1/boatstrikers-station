@@ -57,6 +57,7 @@ export default async function CollectionPage({ searchParams }) {
         <button className={styles.button} type="submit">表示</button>
       </form>
       <CollectionRefresh />
+      <Link href="/admin/exhibition-data-status">通常展示・項目別の6艇状況 →</Link>
       <Link href="/admin/alerts/exhibition">取得元の接続状況・個別診断 →</Link>
     </div>
     <p>画面読込：{jstTime(checkedAt)} JST · 表示中は30秒ごとに保存データを再読込</p>
