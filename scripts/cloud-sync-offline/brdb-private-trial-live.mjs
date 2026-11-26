@@ -41,6 +41,7 @@ try {
     calls: actualCalls,
     masterCount: result.masterCount ?? 0,
     boatCount: result.boatCount ?? 0,
+    providerCode: result.providerCode ?? null,
   }) + "\n");
   if (result.status !== "CANDIDATE_PRIVATE_ONLY") process.exitCode = 2;
 } catch {
