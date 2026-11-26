@@ -1,23 +1,39 @@
-# BRDB private trial HOLD_SELECT — provider inquiry draft (not sent)
+# Team-Naveへの統合照会文（送信前・2026-11-27 JST）
 
-Updated: 2026-11-27 JST. This is a draft for the account owner to review. Do not include the account ID, password, response body, queue IDs, or raw CSV in public GitHub material.
+対象: BoatStrikers開発①。送信前に契約者が確認する文案。GitHubにはID、パスワード、応答本文、キューID、CSVを載せない。これはメール送信済みの記録ではない。
 
-## Observed
+## 確認済みで再質問しない事項
 
-- GitHub Actions [run 45860078766](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45860078766), approved protected Environment, one-off request for 2026-11-21 Tamagawa (05) 2R.
-- Exactly one HTTPS POST `prccd=select` to the documented BRDB endpoint. HTTP 200 with JSON decoding succeeded; application returned nonzero or missing `ret` (old code collapsed both). Classified `HOLD_SELECT`. No state/getcsv requests, no retry, DB write or display.
-- The two bounded SELECTs target RACEMST and RACEDTL with `SOPDT >= '20261111'`, `OPDT = '20261121'`, `RCOURSECD = 5`, `RNO = 2`; projected columns are in the published schema. Do not paste credentials or raw response to GitHub.
-- Provider docs describe `ret`, `ret1/ret2`, and `msg` separately. This run did not record the return code or messages, so no root cause is established.
-- Provider limit describes one terminal per licence. Ask whether an ephemeral GitHub-hosted runner counts as an unauthorized additional terminal and whether a fixed cloud runtime is allowed.
+- 2026-11-19回答：Windowsから単一クラウド実行環境へ移し、GitHub Actionsの実行元が変わる構成は「特に問題ございません」。公開・営利表示はビジネスプランが必要。翌日・当日の低負荷取得は指定された時刻と約30分間隔の再照会を参考にする。RACEMSTにもSOPDT/OPDTの条件を付ける。
+- 2026-11-24回答：翌日分は通常23:30 JST頃更新。ビジネスプランは初期50,000円＋税、BRDB API月30,000円＋税、サーバー月5,000円＋税、従量課金なし・随時解約可。ビジネスプランではDB保存とサイト表示に特別な制限・出典表記義務なし。解約後の一般公開・営利利用は不可。CSV列名は識別名、Shift-JIS、欠損は空文字。
+- 2026-11-26回答：一場一レースの少数取得、隔離保存、認証済み管理者限定表示は検証・テストとして問題なし。
 
-## Proposed question to provider (Japanese, review before sending)
+## 送信する文案
 
-> BRDB-API契約者です。事前にご回答いただいた非公開・少数テストの範囲で、GitHub Actionsの一時的なLinux実行環境から、2026年11月21日・多摩川2RのRACEMST/RACEDTLを対象に、SOPDTを10日前から指定したselectを1回だけPOSTしました。HTTP 200でしたが、APIの全体retが成功として認識できず、後続のstate/getcsvは実行していません。認証情報・応答本文はこの文面に含めていません。
+件名：BRDB-API 非公開検証のselect失敗とクラウド継続運用の確認（BoatStrikers）
+
+> team-nave サポートご担当者様
 >
-> 1ライセンス1台の端末制限について、一時的なGitHub-hosted runnerからのアクセスは許容されますか。許容されない場合、Windowsを使わない固定クラウド実行環境で利用するための条件（端末・IP登録、契約変更の要否など）を教えてください。また、こちらから安全に共有すべき診断項目（ret数値、msgの一部、時刻など）と、メール以外の安全な提出方法があればご指定ください。ご回答まで追加のアクセスは行いません。
+> お世話になっております。BRDB-API契約者です。11月19日のクラウド／GitHub Actions利用、11月24日のビジネスプランと翌日更新、11月26日の非公開少数テストに関するご回答、ありがとうございました。重複を避け、実装判断に残る点をまとめて伺います。
+>
+> 11月27日JST、承認された非公開テストで、2026年11月21日・多摩川（05）2RのRACEMST/RACEDTLを限定するselectを1回だけ送信しました。HTTP 200でJSONを受信しましたが、全体のretを成功と判定できず処理を停止しました。state/getcsv、再試行、DB保存、公開表示は行っていません。今回のログにはretの値・msgを残していないため、原因は断定していません。SOPDTは対象の10日前から、OPDT・場・Rを限定しています。
+>
+> 1. **今回の診断**：ret、ret1/ret2、msg、送信時刻など、どの項目をどの安全な窓口から送れば原因調査ができますか。認証・SQL条件・処理待ち／障害の切り分けに必要な情報と、ログに残してはいけない項目も教えてください。11月19日にGitHub Actions運用は問題ないと回答いただいており、その前提で確認しています。追加の実リクエストは別途準備してから行います。
+> 2. **前夜出走表の完成判定**：23:30頃の更新後、翌日分の開催場・全R・6艇が揃ったと判定するためのテーブル／列／フラグ（PRGF等）と推奨照会時刻を教えてください。追加・変更・欠場・中止・順延を検出する方法と、訂正が反映される時刻の目安も知りたいです。
+> 3. **展示と結果の鮮度**：当サイトでは展示等を各R締切10分前までに反映したいと考えています。BRDB-APIで展示タイム、直前の変更、確定結果・払戻を取得できる場合、対象テーブル、更新頻度、照会開始の目安を教えてください。配信頻度上この目標に届かない項目は、その旨を教えてください。
+> 4. **定常取得の負荷**：Windowsを使わず全開催場の翌日出走表を一括取得し、当日は変更分だけ確認する場合、推奨するSQLの絞り方、照会回数・時刻、同時実行数、失敗時の待機／再照会、障害・メンテナンス情報の確認先を教えてください。11月19日に教えていただいた00:30／05:30／10:30と低負荷時の約30分間隔を踏まえています。
+> 5. **ビジネスプランの用途**：契約切替後、取得元データを保存し、会員向け出走表・結果とAI予想／統計の派生表示に使い、過去データを分析・モデル学習に使用してよいでしょうか。生データの第三者向けダウンロードは予定していません。契約終了後に残せる内部データ／派生物の範囲も教えてください。
+> 6. **切替の事務条件**：現行契約からビジネスプランへ変更する際、初期費用の再発生、既払料金との相殺、日割り、適用開始日、利用可能なAPI権限・端末設定の変更があれば教えてください。今回は契約変更の申込みではありません。
+>
+> 認証情報や応答本文は通常メールに記載していません。調査に必要な情報を安全に送る手順をご案内いただけますと幸いです。
 
-## Next gate
+## 別契約 PC-KYOTEI に確認する事項（このメールには含めない）
 
-- New Draft code logs only a strict bounded numeric `ret` code on a future separately approved run. It does not log `msg`, credentials, SQL, queue IDs, or CSV.
-- Wait for provider guidance before proposing another live request; do not rerun this failed Action.
-- This trial does not implement storage, private real-data display, or daily cloud ingestion.
+- クラウド上での非対話実行、提供ファイル／APIの取得方法、固定IPや端末登録条件、Windows専用機能の有無。
+- 前夜に全開催・6艇を確定できる時刻と更新通知。展示・直前変更が締切10分前に届くか、結果・払戻・過去データの範囲。
+- 非公開管理者表示、DB保存・AI分析、一般公開・会員向け公開・商用利用の許諾とプラン／料金。BRDBとは別の権利条件として確認。
+- レート上限、障害時の再取得、データ訂正・中止への追随、解約後の保持条件。
+
+## 内部の次の関門
+
+現行の一回限りの[Actions実測](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45860078766)はselect POST 1、state/getcsv 0、CSVと実データ保存0のHOLD_SELECT。返却コード未記録。別途承認されるまでは実POSTを増やさない。回答後、診断用の最小単発実測、前夜全場照合、隔離DB保存、管理者限定の実画面表示、許諾に応じた公開切替をそれぞれ検証する。本番DB／Cron／Vercel変更、PRマージ、契約変更は行わない。
