@@ -44,5 +44,5 @@ test("provider failure, partial roster and invalid target fail closed", async ()
     params.qid === "q1" ? master : encode("SOPDT,OPDT,RCOURSECD,RNO,TEINO,ENTNO\r\n20261125,20261126,05,02,1,04101\r\n") });
   assert.equal(partial.status, "HOLD_ROSTER");
   assert.equal(partial.calls, 4);
-  assert.throws(() => runBrdbPrivateTrial({ ...target, date: "2026-11-26", request: async () => {} }));
+  await assert.rejects(runBrdbPrivateTrial({ ...target, date: "2026-11-26", request: async () => {} }));
 });
