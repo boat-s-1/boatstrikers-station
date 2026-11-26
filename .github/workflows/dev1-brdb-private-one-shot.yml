@@ -1,0 +1,31 @@
+name: Dev1 BRDB private one-shot (candidate)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'JST race date YYYYMMDD'
+        required: true
+        type: string
+      course_code:
+        description: 'One venue code 1-24'
+        required: true
+        type: string
+      race_no:
+        description: 'One race number 1-12'
+        required: true
+        type: string
+      approval_phrase:
+        description: 'DRY_RUN_ONLY for no-secret preflight; live phrase requires concrete approval'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  unavailable-on-main:
+    if: ${{ github.ref != 'refs/heads/main' && false }}
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo 'This inert default-branch stub does not access BRDB.'
