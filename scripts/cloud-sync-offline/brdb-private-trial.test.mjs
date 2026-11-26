@@ -19,7 +19,7 @@ test("private trial completes once with six candidates and no implicit retries",
     if (op === "state") return { ret: 0, ret1: 2, ret2: 2 };
     return params.qid === "q1" ? master : detail;
   };
-  const result = await runBrdbPrivateTrial({ ...target, request });
+  const result = await runBrdbPrivateTrial({ ...target, request, pollDelayMs: 0 });
   assert.equal(result.status, "CANDIDATE_PRIVATE_ONLY");
   assert.equal(result.calls, 4);
   assert.equal(result.boatCount, 6);
@@ -27,7 +27,7 @@ test("private trial completes once with six candidates and no implicit retries",
 });
 test("pending job stops at three state checks without downloading", async () => {
   const seen = [];
-  const result = await runBrdbPrivateTrial({ ...target, request: async op => {
+  const result = await runBrdbPrivateTrial({ ...target, pollDelayMs: 0, request: async op => {
     seen.push(op);
     return op === "select" ? { ret: 0, ret1: "q1", ret2: "q2" } : { ret: 0, ret1: 1, ret2: 0 };
   } });
@@ -38,7 +38,7 @@ test("pending job stops at three state checks without downloading", async () => 
 test("provider failure, partial roster and invalid target fail closed", async () => {
   const fail = await runBrdbPrivateTrial({ ...target, request: async () => ({ ret: -1 }) });
   assert.deepEqual(fail, { status: "HOLD_SELECT", calls: 1 });
-  const partial = await runBrdbPrivateTrial({ ...target, request: async (op, params) =>
+  const partial = await runBrdbPrivateTrial({ ...target, pollDelayMs: 0, request: async (op, params) =>
     op === "select" ? { ret: 0, ret1: "q1", ret2: "q2" } :
     op === "state" ? { ret: 0, ret1: 2, ret2: 2 } :
     params.qid === "q1" ? master : encode("SOPDT,OPDT,RCOURSECD,RNO,TEINO,ENTNO\r\n20261125,20261126,05,02,1,04101\r\n") });
