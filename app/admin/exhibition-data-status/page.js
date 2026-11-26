@@ -41,10 +41,10 @@ function countReadyRaces(rows, field) {
 }
 
 function sourceLabel({ boatersRows, pcRows, detailedRows, lapRows, straightRows }) {
-  if (boatersRows > 0) return { label: "BOATERS取得済み", tone: "good" };
-  if (pcRows > 0) return { label: "PC-KYOTEI取得済み", tone: "good" };
-  if (detailedRows > 0) return { label: "詳細展示取得済み", tone: "good" };
-  if (lapRows === 0 && straightRows === 0) return { label: "BOATERS未公開 / 詳細展示未取得", tone: "warn" };
+  if (boatersRows > 0) return { label: "BOATERS記録あり（一部を含む）", tone: "warn" };
+  if (pcRows > 0) return { label: "PC-KYOTEI記録あり（一部を含む）", tone: "warn" };
+  if (detailedRows > 0) return { label: "詳細展示記録あり（一部を含む）", tone: "warn" };
+  if (lapRows === 0 && straightRows === 0) return { label: "詳細展示の記録なし", tone: "warn" };
   return { label: "詳細展示一部取得", tone: "warn" };
 }
 
