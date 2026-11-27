@@ -19,7 +19,7 @@ export async function runBrdbPrivateTrial({ date, course, race, request, pollDel
     if (typeof value !== "string" && typeof value !== "number") return null;
     if (!/^-?(0|[1-9]\d{0,3})$/.test(String(value))) return null;
     const code = Number(value);
-    return code <= 0 && code >= -9999 ? code : null;
+    return code >= -9999 && code <= 9999 ? code : null;
   };
   const select = await call("select", { cmd1: queries.master, cmd2: queries.detail });
   if (providerCode(select?.ret) !== 0) return { ...stop("HOLD_SELECT"), providerCode: providerCode(select?.ret) };
