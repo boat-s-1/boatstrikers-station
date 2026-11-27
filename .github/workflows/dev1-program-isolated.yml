@@ -16,6 +16,7 @@ on:
       - 'lib/exhibitionStatusCatalog.js'
       - 'app/api/admin/verified-exhibition-check/route.js'
       - 'app/api/admin/exhibition-source-diagnostic/route.js'
+      - 'app/api/admin/national-beforeinfo-check/route.js'
       - 'proxy.js'
       - 'scripts/cloud-sync-offline/site-private-preview-http-smoke.mjs'
       - '.github/workflows/dev1-program-isolated.yml'
