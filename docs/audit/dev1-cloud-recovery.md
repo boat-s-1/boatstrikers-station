@@ -546,3 +546,9 @@ OpenAPI → Supabase Cron → preview／確定結果。Windows v7 → BRDB／PC-
 - 主導線は `/admin/alerts/collection`（保存済み24場）と `/admin/alerts/exhibition`（場別診断）。前回手を入れた `/admin/exhibition-data-status` は別画面だったため、主導線も修正。前者は認証前のservice-role DB読取を遮断し、場別・項目別6艇画面へのリンクを追加。台帳の常滑「公式休止中」を「提供再開・取得検証中」へ訂正、江戸川は独自オリ展対象外。既存の照合付き取得分岐17場・旧分岐5場に一致させた。
 - `/api/admin/verified-exhibition-check` は認証前に外部公式へアクセス可能だったため認証必須へ。最大24場へ展開し得る `/api/admin/exhibition-source-diagnostic` は認証必須かつ専用フラグ既定OFF。匿名・無承認の外部取得を遮断。
 - [隔離CI run 45878643478](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45878643478) はオフラインテスト、Next.jsビルド、模擬HTTPで匿名遮断・管理者表示・一括診断既定OFFが成功。外部ネットワークはモックで遮断。本番デプロイ・実取得・DB保存は未実施。
+
+### 2026-11-27 JST 管理者の通常展示1R確認候補
+
+- Draft #306に `/api/admin/national-beforeinfo-check` を追加。管理者認証とサーバー側専用フラグ（既定OFF）を先に判定し、当日の指定1場1Rのみ、全国公式の6艇登録番号・展示タイムを既存照合器で検査。読取のみ・DB保存なし・定期取得なし。管理画面の個別診断は6艇の値と失敗理由を分けて表示。任意の過去日・複数R・リダイレクト追跡は拒否。
+- [隔離CI run 45921434182](https://github.com/boat-s-1/boatstrikers-station/actions/runs/45921434182) でオフライン試験、ビルド、匿名401・管理者でもフラグOFFなら404を確認。外部通信はCIモックで遮断。実公式ページ取得・公開権利・締切10分前の達成・実ブラウザは未検証。
+- 11/28 JSTの常滑1Rに限る公式出走表1回・公式直前情報1回の最大2 GETについて、運用者へ具体的承認を依頼中。回答までは0 GET。以前の別日・別対象の承認を流用しない。PRマージ、本番DB／Cron／Vercel変更なし。
