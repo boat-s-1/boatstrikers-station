@@ -1,0 +1,61 @@
+name: Dev1 BRDB private one-shot (candidate)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'JST race date YYYYMMDD'
+        required: true
+        type: string
+      course_code:
+        description: 'One venue code 1-24'
+        required: true
+        type: string
+      race_no:
+        description: 'One race number 1-12'
+        required: true
+        type: string
+      approval_phrase:
+        description: 'DRY_RUN_ONLY for no-secret preflight; live phrase requires concrete approval'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dev1-brdb-private-one-shot
+  cancel-in-progress: false
+
+jobs:
+  no-secret-preflight:
+    if: ${{ github.ref == 'refs/heads/codex/dev1-openapi-offline-fix-20261118' && inputs.approval_phrase == 'DRY_RUN_ONLY' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Confirm selected branch without checkout, secrets or provider traffic
+        run: |
+          test "$GITHUB_REF" = "refs/heads/codex/dev1-openapi-offline-fix-20261118"
+          echo "Selected Draft branch; no provider request."
+
+  private-trial:
+    if: ${{ github.ref == 'refs/heads/codex/dev1-openapi-offline-fix-20261118' && inputs.approval_phrase == 'APPROVED_PRIVATE_ONE_SHOT' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    environment: dev1-brdb-private-trial
+    env:
+      BRDB_TNC_ID: ${{ secrets.BRDB_TNC_ID }}
+      BRDB_TNC_PASSWORD: ${{ secrets.BRDB_TNC_PASSWORD }}
+      BRDB_TRIAL_DATE: ${{ inputs.target_date }}
+      BRDB_TRIAL_COURSE: ${{ inputs.course_code }}
+      BRDB_TRIAL_RACE: ${{ inputs.race_no }}
+      BRDB_TRIAL_ONE_SHOT: 'YES'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: One bounded private trial without DB writes or artifacts
+        run: node scripts/cloud-sync-offline/brdb-private-trial-live.mjs --live

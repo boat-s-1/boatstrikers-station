@@ -1,4 +1,5 @@
 import "server-only";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTodayMorningSiteProgram, readTomorrowSiteProgram } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 import { resolveExhibition } from "../../lib/exhibitionDisplay";
 
 import { createClient } from "@supabase/supabase-js";
@@ -679,7 +680,7 @@ export async function getCoursesByDate(raceDate) {
     normalizedDate
   );
 
-  const [
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
@@ -728,6 +729,15 @@ export async function getCoursesByDate(raceDate) {
 
   if (resultEntryError) {
     throw new Error(`艇別結果一覧の取得に失敗しました: ${resultEntryError.message}`);
+  }
+
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events;
+      entryRows = morning.entries;
+    }
   }
 
   const resultByCourseRace = new Map();
@@ -961,12 +971,18 @@ export async function getCourseRaces(raceDate, courseCode) {
 
   const supabase = getSupabaseServerClient();
 
-  const [
+  const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(),
+    process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true");
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
     { data: resultEntryRows, error: resultEntryError },
-  ] = await Promise.all([
+  ] = staged ? [
+    { data: staged.events.filter(row => row.course_code === normalizedCourseCode) },
+    { data: staged.entries.filter(row => row.course_code === normalizedCourseCode) },
+    { data: [] }, { data: [] },
+  ] : await Promise.all([
     supabase
       .from("bs_race_events")
       .select("*")
@@ -1013,9 +1029,21 @@ export async function getCourseRaces(raceDate, courseCode) {
     throw new Error(`艇別結果一覧の取得に失敗しました: ${resultEntryError.message}`);
   }
 
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events.filter(row => row.course_code === normalizedCourseCode);
+      entryRows = morning.entries.filter(row => row.course_code === normalizedCourseCode);
+    }
+  }
+
   const resultByRace = new Map(
     (resultRows ?? []).map((row) => [Number(row.race_no), mapRaceResult(row)])
   );
+  const cancelledResults = new Set((resultRows ?? [])
+    .filter(row => ["cancelled", "postponed"].includes(String(row.race_status ?? "").toLowerCase()))
+    .map(row => Number(row.race_no)));
   const resultEntriesByRace = new Map();
   for (const row of resultEntryRows ?? []) {
     const key = Number(row.race_no);
@@ -1037,6 +1065,11 @@ export async function getCourseRaces(raceDate, courseCode) {
   return (eventRows ?? []).map((rawEvent) => {
     const event = mapEvent(rawEvent);
     const raceNo = Number(event.race_no);
+    if ((process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true" && hasOfficialRaceCancellation(rawEvent)) ||
+        (rawEvent.program_source === "race_day_morning_snapshot" && cancelledResults.has(raceNo))) {
+      return { ...event, raceStatus: "cancelled", race_status: "cancelled",
+        hasExhibition: false, resultAvailable: false, entries: [], result: null, resultEntries: [] };
+    }
     const baseEntries = entriesByRace.get(raceNo) ?? [];
     const result = resultByRace.get(raceNo) ?? null;
     const resultEntries = resultEntriesByRace.get(raceNo) ?? [];
@@ -1220,6 +1253,48 @@ export async function getRaceDetail(raceDate, courseCode, raceNo) {
       .eq("race_no", normalizedRaceNo)
       .order("boat_no", { ascending: true }),
   ]);
+
+  const previousDayDetailEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
+  const morningDetailEnabled = process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true";
+  if (previousDayDetailEnabled && !eventError && hasOfficialRaceCancellation(eventRow)) {
+    return { event: mapEvent(eventRow), entries: [], resultEntries: [], officialCancellation: true };
+  }
+
+  if ((previousDayDetailEnabled || morningDetailEnabled) && !eventError && !entryError &&
+      !resultError && !resultEntryError) {
+    if (!eventRow && morningDetailEnabled && ["cancelled", "postponed"]
+      .includes(String(resultRow?.race_status ?? "").toLowerCase())) {
+      return { event: null, entries: [], resultEntries: [], programReviewRequired: true };
+    }
+    const selection = await readSiteProgramCandidate(supabase, {
+      raceDate: normalizedDate,
+      now: new Date().toISOString(),
+      live: { events: eventRow ? [eventRow] : [], entries: entryRows ?? [] },
+      race: { courseCode: normalizedCourseCode, raceNo: normalizedRaceNo },
+      enableMorning: morningDetailEnabled && !eventRow,
+      morningOnly: !previousDayDetailEnabled,
+    });
+    if (selection.status === "READY" && (selection.source === "previous_day_snapshot" ||
+      (morningDetailEnabled && !eventRow && selection.source === "race_day_morning_snapshot"))) {
+      return {
+        event: mapEvent({
+          ...selection.events[0],
+          race_status: "scheduled",
+          program_available: true,
+          program_source: selection.source,
+        }),
+        entries: selection.entries.map(mapEntry),
+        venueBaselines: {},
+        result: selection.source === "race_day_morning_snapshot" && resultRow
+          ? mapRaceResult(resultRow) : null,
+        resultEntries: selection.source === "race_day_morning_snapshot"
+          ? (resultEntryRows ?? []).map(mapRaceResultEntry) : [],
+      };
+    }
+    if (selection.reason === "live_registration_conflict") {
+      return { event: eventRow ? mapEvent(eventRow) : null, entries: [], resultEntries: [], programReviewRequired: true };
+    }
+  }
 
   if (eventError) {
     throw new Error(`レース情報の取得に失敗しました: ${eventError.message}`);

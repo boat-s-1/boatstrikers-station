@@ -1,4 +1,5 @@
 import "server-only";
+import { hasOfficialRaceCancellation, readTodayMorningSiteProgram, readTomorrowSiteProgram, tomorrowProgramDate } from "../../scripts/cloud-sync-offline/site-program-server-read.mjs";
 
 import { createClient } from "@supabase/supabase-js";
 import { getCourseName, normalizeDate } from "./boatstrikersPlatform";
@@ -24,6 +25,7 @@ function getSupabaseServerClient() {
 }
 
 function toNumber(value, fallback = null) {
+  if (value === null || value === undefined || value === "") return fallback;
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
@@ -111,19 +113,28 @@ function mapLightEntry(row) {
   };
 }
 
+export async function getAvailableTomorrowProgramDate() {
+  if (process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED !== "true") return null;
+  const now = new Date().toISOString();
+  const date = tomorrowProgramDate(now);
+  return await readTomorrowSiteProgram(getSupabaseServerClient(), date, now, true) ? date : null;
+}
+
 export async function getCoursesForRacesIndex(raceDate) {
   const normalizedDate = normalizeDate(raceDate);
   const supabase = getSupabaseServerClient();
 
-  const [
+  const previousDayEnabled = process.env.BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED === "true";
+  const staged = await readTomorrowSiteProgram(supabase, normalizedDate, new Date().toISOString(), previousDayEnabled);
+  let [
     { data: eventRows, error: eventError },
     { data: entryRows, error: entryError },
     { data: resultRows, error: resultError },
-  ] = await Promise.all([
+  ] = staged ? [{ data: staged.events }, { data: staged.entries }, { data: [] }] : await Promise.all([
     supabase
       .from("bs_race_events")
       .select(
-        "race_date,course_code,course_name,race_no,race_day_no,race_kind_code,opening_date,closing_time,program_available,api_synced_at,synced_at,updated_at"
+        "race_date,course_code,course_name,race_no,race_day_no,race_kind_code,opening_date,closing_time,program_available,api_synced_at,synced_at,updated_at" + (previousDayEnabled ? ",race_status,race_cancel_code" : "")
       )
       .eq("race_date", normalizedDate)
       .order("course_code", { ascending: true })
@@ -151,6 +162,15 @@ export async function getCoursesForRacesIndex(raceDate) {
   if (entryError) throw new Error(`出走艇一覧の取得に失敗しました: ${entryError.message}`);
   if (resultError) throw new Error(`レース結果一覧の取得に失敗しました: ${resultError.message}`);
 
+  if (!eventRows?.length && process.env.BS_RACE_DAY_PROGRAM_ENABLED === "true") {
+    const morning = await readTodayMorningSiteProgram(supabase, normalizedDate,
+      new Date().toISOString(), true);
+    if (morning) {
+      eventRows = morning.events;
+      entryRows = morning.entries;
+    }
+  }
+
   const entriesByRace = new Map();
   for (const row of entryRows ?? []) {
     const key = `${Number(row.course_code)}:${Number(row.race_no)}`;
@@ -164,6 +184,9 @@ export async function getCoursesForRacesIndex(raceDate) {
       .filter(isConfirmedResult)
       .map((row) => `${Number(row.course_code)}:${Number(row.race_no)}`)
   );
+  const cancelledResultKeys = new Set((resultRows ?? [])
+    .filter(row => ["cancelled", "postponed"].includes(String(row.race_status ?? "").toLowerCase()))
+    .map(row => `${Number(row.course_code)}:${Number(row.race_no)}`));
 
   const courseMap = new Map();
 
@@ -171,9 +194,11 @@ export async function getCoursesForRacesIndex(raceDate) {
     const courseCode = Number(row.course_code);
     const raceNo = Number(row.race_no);
     const key = `${courseCode}:${raceNo}`;
-    const entries = entriesByRace.get(key) ?? [];
+    const cancelled = (previousDayEnabled && hasOfficialRaceCancellation(row)) ||
+      (row.program_source === "race_day_morning_snapshot" && cancelledResultKeys.has(key));
+    const entries = cancelled ? [] : entriesByRace.get(key) ?? [];
     const closingAt = createClosingAt(normalizedDate, row.closing_time);
-    const resultAvailable = confirmedResultKeys.has(key);
+    const resultAvailable = !cancelled && confirmedResultKeys.has(key);
     const hasExhibition = entries.some(
       (entry) => entry.exhibition_time != null || entry.exhibition_st != null
     );
@@ -192,6 +217,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       exhibitionCount: 0,
       startedExhibitionCount: 0,
       resultCount: 0,
+      cancelledCount: 0,
       nextRaceNo: null,
       nextClosingTime: null,
       nextClosingAt: null,
@@ -213,6 +239,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       course.startedExhibitionCount += 1;
     }
     if (resultAvailable) course.resultCount += 1;
+    if (cancelled) course.cancelledCount += 1;
 
     const event = {
       race_date: normalizedDate,
@@ -224,6 +251,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       race_kind_code: row.race_kind_code,
       closing_time: row.closing_time,
       program_available: toDbBoolean(row.program_available),
+      program_source: row.program_source,
       result_available: resultAvailable,
       synced_at: syncedAt,
       api_synced_at: syncedAt,
@@ -233,8 +261,8 @@ export async function getCoursesForRacesIndex(raceDate) {
     course.races.push({
       raceNo,
       race_no: raceNo,
-      raceStatus: resultAvailable ? "result" : hasExhibition ? "exhibition" : "scheduled",
-      race_status: resultAvailable ? "result" : hasExhibition ? "exhibition" : "scheduled",
+      raceStatus: cancelled ? "cancelled" : resultAvailable ? "result" : hasExhibition ? "exhibition" : "scheduled",
+      race_status: cancelled ? "cancelled" : resultAvailable ? "result" : hasExhibition ? "exhibition" : "scheduled",
       closingTime: row.closing_time,
       closing_time: row.closing_time,
       closingAt,
@@ -274,7 +302,7 @@ export async function getCoursesForRacesIndex(raceDate) {
       const races = [...course.races].sort((a, b) => a.raceNo - b.raceNo);
       const nextRace = normalizedDate >= today
         ? races.find((race) => {
-            if (race.resultAvailable) return false;
+            if (race.resultAvailable || race.raceStatus === "cancelled") return false;
             if (!race.closingAt) return true;
             const time = new Date(race.closingAt).getTime();
             return !Number.isFinite(time) || time > now;

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { guardAdminRead } from "../../../../lib/adminApiGuard.js";
 import { createClient } from "@supabase/supabase-js";
 import { fetchBoatersOriginalTenji } from "../../../../lib/boatersOriginalTenji";
 import { fetchOfficialOriginalTenji, getOfficialOriginalTenjiSupport } from "../../../../lib/officialOriginalTenji";
@@ -40,6 +41,12 @@ function summarize(result) {
 }
 
 export async function GET(request) {
+  const denied = await guardAdminRead(request);
+  if (denied) return denied;
+  // This endpoint can fan out across every venue. Keep it disabled by default.
+  if (process.env.BS_ADMIN_EXHIBITION_BULK_DIAGNOSTIC_ENABLED !== "true") {
+    return NextResponse.json({ ok: false, error: "bulk_diagnostic_disabled" }, { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
   try {
     const { searchParams } = new URL(request.url);
     const date = String(searchParams.get("date") || jstToday());

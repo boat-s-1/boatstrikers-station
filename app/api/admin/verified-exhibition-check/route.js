@@ -1,4 +1,5 @@
 import { fetchBestOriginalTenji } from '../../../../lib/verifiedOriginalTenjiSource.js';
+import { guardAdminRead } from '../../../../lib/adminApiGuard.js';
 import { validMarugameRace } from '../../../../lib/marugameVerifiedOriginalTenji.js';
 import { validVerifiedRace } from '../../../../lib/narutoKaratsuVerifiedTenji.js';
 import { validTamagawaRace } from '../../../../lib/tamagawaVerifiedTenji.js';
@@ -22,6 +23,8 @@ function validCurrentDayVenue(race) {
 }
 
 export async function GET(request) {
+  const denied = await guardAdminRead(request);
+  if (denied) return denied;
   const q = new URL(request.url).searchParams;
   const race = { courseCode: Number(q.get('course')), raceDate: q.get('date'), raceNo: Number(q.get('race')) };
   const reply = (body, status=200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });

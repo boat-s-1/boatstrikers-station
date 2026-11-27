@@ -9,7 +9,7 @@ import {
   getCourseName,
   normalizeDate,
 } from "../lib/boatstrikersPlatform";
-import { getCoursesForRacesIndex } from "../lib/racesIndexLight";
+import { getAvailableTomorrowProgramDate, getCoursesForRacesIndex } from "../lib/racesIndexLight";
 import styles from "./phase2.module.css";
 import CoursePortalCard from "./components/CoursePortalCard";
 import AlertFlash from "./components/AlertFlash";
@@ -62,7 +62,7 @@ function buildFallbackPickups(courses, raceDate) {
 
   for (const course of courses ?? []) {
     for (const race of course.races ?? []) {
-      if (race.resultAvailable) continue;
+      if (race.resultAvailable || race.raceStatus === "cancelled") continue;
       if (raceDate === today && race.closingAt) {
         const closing = new Date(race.closingAt).getTime();
         if (Number.isFinite(closing) && closing <= now) continue;
@@ -172,15 +172,17 @@ export default async function RacesPage({ searchParams }) {
   let hitFlash = [];
   let aiPickups = [];
   let loadError = null;
+  let tomorrow = null;
 
   try {
-    [courses, dates, noteFeatures, newspapers, hitFlash, aiPickups] = await Promise.all([
+    [courses, dates, noteFeatures, newspapers, hitFlash, aiPickups, tomorrow] = await Promise.all([
       getCoursesForRacesIndex(raceDate),
       getAvailableDates(),
       getPublishedNoteFeaturesByDate(raceDate, false),
       getPublishedNewspapers({ date: raceDate, limit: 30 }),
       getAiBetHitFlashByDate(raceDate, 6),
       getAiPredictionPickupsByDate(raceDate),
+      getAvailableTomorrowProgramDate(),
     ]);
   } catch (error) {
     console.error("出走表トップ取得エラー:", error);
@@ -197,7 +199,7 @@ export default async function RacesPage({ searchParams }) {
   for (const course of courses) {
     for (const race of course.races ?? []) {
       const key = `${Number(course.courseCode)}:${Number(race.raceNo)}`;
-      if (race.resultAvailable) continue;
+      if (race.resultAvailable || race.raceStatus === "cancelled") continue;
       if (raceDate === getJstDateString() && race.closingAt) {
         const closing = new Date(race.closingAt).getTime();
         if (Number.isFinite(closing) && closing <= Date.now()) continue;
@@ -220,7 +222,11 @@ export default async function RacesPage({ searchParams }) {
     .filter(Boolean)
     .filter((item) => item.diagnosis_code !== "skip");
 
-  const fallbackPickups = buildFallbackPickups(courses, raceDate);
+  const usesSnapshotProgram = courses.some(course =>
+    course.races.some(race => ["previous_day_snapshot", "race_day_morning_snapshot"]
+      .includes(race.event?.program_source))
+  );
+  const fallbackPickups = usesSnapshotProgram ? [] : buildFallbackPickups(courses, raceDate);
   const pickupPool = activeAiPickups.length > 0 ? activeAiPickups : fallbackPickups;
 
   let insidePickups = pickupPool
@@ -256,13 +262,13 @@ export default async function RacesPage({ searchParams }) {
 
       <nav className={styles.portalQuickNav} aria-label="出走表トップメニュー">
         <a href="#race-dates"><span className={styles.portalQuickIcon}>📅</span><span className={styles.portalQuickText}><small>日付</small><strong>{formatQuickDate(raceDate)}</strong></span></a>
-        <a href="#todays-courses"><span className={styles.portalQuickIcon}>🚤</span><span className={styles.portalQuickText}><small>本日の開催場</small><strong>{courses.length}場</strong></span></a>
+        <a href="#todays-courses"><span className={styles.portalQuickIcon}>🚤</span><span className={styles.portalQuickText}><small>{raceDate === tomorrow ? "翌日の開催場" : "本日の開催場"}</small><strong>{courses.length}場</strong></span></a>
         <a href="#ai-picks"><span className={styles.portalQuickIcon}>🤖</span><span className={styles.portalQuickText}><small>AI注目</small><strong>{aiRaceKeys.length}R</strong></span></a>
       </nav>
 
       <div className={styles.portalContent}>
         <nav id="race-dates" className={`${styles.portalDateNav} ${styles.portalAnchorTarget}`} aria-label="開催日を選択">
-          {dates.map((date) => (
+          {[...new Set([...(tomorrow ? [tomorrow] : []), ...(courses.length ? [raceDate] : []), ...dates])].map((date) => (
             <Link key={date} href={`/races?date=${date}`} className={`${styles.portalDateLink} ${date === raceDate ? styles.portalDateActive : ""}`}>
               {String(date).slice(5).replace("-", "/")}
             </Link>
@@ -271,7 +277,7 @@ export default async function RacesPage({ searchParams }) {
 
         <section id="todays-courses" className={`${styles.portalSection} ${styles.portalAnchorTarget}`}>
           <div className={styles.portalSectionHead}>
-            <div><span>TODAY&apos;S COURSES</span><h2>🚤 本日の開催場</h2></div><b>{courses.length}場</b>
+            <div><span>TODAY&apos;S COURSES</span><h2>🚤 {raceDate === tomorrow ? "翌日の開催場" : "本日の開催場"}</h2></div><b>{courses.length}場</b>
           </div>
           {loadError ? (
             <div className={styles.portalEmpty}><strong>データを取得できませんでした</strong><p>{loadError}</p></div>

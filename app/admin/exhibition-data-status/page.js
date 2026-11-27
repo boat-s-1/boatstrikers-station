@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
+import { isAdminAuthenticated } from "../sync/_lib/adminAuth";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const metadata = { robots: { index: false, follow: false } };
 
 function getClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -37,10 +41,10 @@ function countReadyRaces(rows, field) {
 }
 
 function sourceLabel({ boatersRows, pcRows, detailedRows, lapRows, straightRows }) {
-  if (boatersRows > 0) return { label: "BOATERS取得済み", tone: "good" };
-  if (pcRows > 0) return { label: "PC-KYOTEI取得済み", tone: "good" };
-  if (detailedRows > 0) return { label: "詳細展示取得済み", tone: "good" };
-  if (lapRows === 0 && straightRows === 0) return { label: "BOATERS未公開 / 詳細展示未取得", tone: "warn" };
+  if (boatersRows > 0) return { label: "BOATERS記録あり（一部を含む）", tone: "warn" };
+  if (pcRows > 0) return { label: "PC-KYOTEI記録あり（一部を含む）", tone: "warn" };
+  if (detailedRows > 0) return { label: "詳細展示記録あり（一部を含む）", tone: "warn" };
+  if (lapRows === 0 && straightRows === 0) return { label: "詳細展示の記録なし", tone: "warn" };
   return { label: "詳細展示一部取得", tone: "warn" };
 }
 
@@ -58,21 +62,34 @@ async function loadStatus() {
   const date = jstToday();
   if (!client) return { date, error: "Supabase環境変数が未設定です" };
 
-  const [{ data: events, error: eventError }, { data: entries, error: entryError }] = await Promise.all([
-    client.from("bs_race_events")
-      .select("course_code,course_name,race_no,closing_time")
-      .eq("race_date", date),
-    client.from("bs_race_entries")
-      .select("course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at")
-      .eq("race_date", date),
-  ]);
-
-  if (eventError || entryError) return { date, error: eventError?.message || entryError?.message || "取得失敗" };
-
-  const rows = entries || [];
+  // PostgREST defaults to a 1000-row limit; a full 24-venue day can exceed it.
+  async function allRows(table, columns) {
+    const result = [];
+    for (let offset = 0; offset < 5000; offset += 1000) {
+      let query = client.from(table).select(columns)
+        .eq("race_date", date)
+        .order("course_code", { ascending: true })
+        .order("race_no", { ascending: true });
+      if (table === "bs_race_entries") query = query.order("boat_no", { ascending: true });
+      const { data, error } = await query.range(offset, offset + 999);
+      if (error) throw error;
+      result.push(...(data || []));
+      if ((data || []).length < 1000) return result;
+    }
+    throw new Error("展示集計の取得上限に達しました");
+  }
+  let events, rows;
+  try {
+    [events, rows] = await Promise.all([
+      allRows("bs_race_events", "course_code,course_name,race_no,closing_time"),
+      allRows("bs_race_entries", "course_code,race_no,boat_no,exhibition_time,official_exhibition_time,official_lap,official_turn,official_straight,official_exhibition_source,official_exhibition_synced_at,exhibition_source,exhibition_synced_at"),
+    ]);
+  } catch {
+    return { date, error: "展示集計を取得できませんでした" };
+  }
   const official = rows.filter((r) => r.official_exhibition_time != null || r.official_lap != null || r.official_turn != null || r.official_straight != null);
   const boatersRows = rows.filter((r) => String(r.official_exhibition_source || "").toLowerCase().includes("boaters")).length;
-  const pcRows = rows.filter((r) => String(r.official_exhibition_source || "").toLowerCase().includes("pc-kyotei")).length;
+  const pcRows = rows.filter((r) => [r.official_exhibition_source, r.exhibition_source].some((source) => String(source || "").toLowerCase().includes("pc-kyotei"))).length;
   const lapRows = rows.filter((r) => r.official_lap != null).length;
   const turnRows = rows.filter((r) => r.official_turn != null).length;
   const straightRows = rows.filter((r) => r.official_straight != null).length;
@@ -82,10 +99,33 @@ async function loadStatus() {
   const source = sourceLabel({ boatersRows, pcRows, detailedRows: official.length, lapRows, straightRows });
   const straightPartial = lapRows > 0 && straightRows < lapRows;
   const latest = rows
-    .map((r) => r.official_exhibition_synced_at)
+    .flatMap((r) => [r.official_exhibition_synced_at, r.exhibition_synced_at])
     .filter(Boolean)
     .sort()
     .at(-1) || null;
+  const byRace = new Map();
+  for (const row of rows) {
+    const key = raceKey(row);
+    if (!byRace.has(key)) byRace.set(key, []);
+    byRace.get(key).push(row);
+  }
+  const byVenue = new Map();
+  for (const event of events) {
+    const key = String(event.course_code);
+    if (!byVenue.has(key)) byVenue.set(key, { code: Number(event.course_code), name: event.course_name || key, races: 0, standard: 0, lap: 0, turn: 0, straight: 0, missing: 0 });
+    const venue = byVenue.get(key);
+    venue.races += 1;
+    const boats = byRace.get(raceKey(event)) || [];
+    const six = boats.length === 6 && new Set(boats.map((row) => Number(row.boat_no))).size === 6;
+    const standard = six && boats.every((row) => row.exhibition_time != null || row.official_exhibition_time != null);
+    const complete = (primary, fallback) => six && boats.every((row) => row[primary] != null || row[fallback] != null);
+    if (standard) venue.standard += 1;
+    if (complete("official_lap", "lap_time")) venue.lap += 1;
+    if (complete("official_turn", "turn_time")) venue.turn += 1;
+    if (complete("official_straight", "straight_time")) venue.straight += 1;
+    if (!standard) venue.missing += 1;
+  }
+  const venues = [...byVenue.values()];
 
   return {
     date,
@@ -103,10 +143,14 @@ async function loadStatus() {
     source,
     straightPartial,
     latest,
+    venues,
   };
 }
 
 export default async function ExhibitionDataStatusPage() {
+  // Authenticate before creating a service-role client or reading any race data.
+  const authenticated = await isAdminAuthenticated().catch(() => false);
+  if (!authenticated) notFound();
   const s = await loadStatus();
   const totalBoatSlots = Math.max(0, Number(s.events || 0) * 6);
   const ichikaReady = Number(s.lapReadyRaces || 0) > 0;
@@ -132,6 +176,7 @@ export default async function ExhibitionDataStatusPage() {
                 </div>
                 <span style={pillStyle(s.source?.tone)}>{s.source?.label}</span>
               </div>
+              <div style={{ marginTop: 10, color: "#92400e", fontSize: 13 }}>開催・出走表の基礎行がないレースは展示を表示できません。取得元の履歴だけで本日の取得成功とは判定しません。</div>
               <div style={{ marginTop: 14, color: "#617184", fontSize: 14 }}>
                 最終詳細同期: {s.latest ? new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(s.latest)) : "未取得"}
               </div>
@@ -144,6 +189,17 @@ export default async function ExhibitionDataStatusPage() {
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>PC-KYOTEI詳細</div><strong style={{ fontSize: 28 }}>{s.pcRows}艇</strong></div>
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>1周</div><strong style={{ fontSize: 28 }}>{s.lapRows}艇</strong></div>
               <div style={card}><div style={{ color: "#718096", fontSize: 13 }}>直線</div><strong style={{ fontSize: 28 }}>{s.straightRows}艇</strong></div>
+            </section>
+
+            <section style={{ ...card, marginBottom: 18 }}>
+              <h2 style={{ margin: "0 0 12px", fontSize: 20 }}>場別の取得状況（本日）</h2>
+              {s.venues?.length ? <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <thead><tr><th scope="col">場</th><th scope="col">開催</th><th scope="col">通常展示6艇</th><th scope="col">一周6艇</th><th scope="col">回り足6艇</th><th scope="col">直線6艇</th><th scope="col">通常展示不足</th></tr></thead>
+                <tbody>{s.venues.map((venue) => <tr key={venue.name} style={{ borderTop: "1px solid #e2e8f0" }}>
+                  <th scope="row">{venue.name}{venue.code === 3 ? "（独自オリ展対象外）" : venue.code === 8 ? "（提供再開・取得検証中）" : ""}</th><td>{venue.races}R</td><td>{venue.standard}R</td><td>{venue.code === 3 ? "対象外" : `${venue.lap}R`}</td><td>{venue.code === 3 ? "対象外" : `${venue.turn}R`}</td><td>{venue.code === 3 ? "対象外" : `${venue.straight}R`}</td><td>{venue.missing}R</td>
+                </tr>)}</tbody>
+              </table></div> : <p>本日の開催行がありません。展示の取得状況は判定できません。</p>}
+              <p style={{ fontSize: 13, color: "#617184" }}>一周・回り足・直線はそれぞれ6艇揃いを別に数えます。江戸川は独自オリ展対象外。常滑は提供再開の情報があり、取得経路は検証中。締切10分前の到達は別途時刻照合が必要です。</p>
             </section>
 
             {s.straightPartial ? (

@@ -1,0 +1,202 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+import { runInNewContext } from "node:vm";
+import { resolveExhibition } from "../../lib/exhibitionDisplay.js";
+import { hasOfficialRaceCancellation, readSiteProgramCandidate, readTodayMorningSiteProgram } from "./site-program-server-read.mjs";
+
+const code = readFileSync(new URL("../../app/lib/boatstrikersPlatform.js", import.meta.url), "utf8")
+  .replace(/^import .*;$/gm, "").replace(/^export /gm, "");
+const raceDate = "2026-11-19";
+const event = { race_date: raceDate, course_code: 1, race_no: 1, closing_time: "15:22" };
+const boats = Array.from({ length: 6 }, (_, i) => ({
+  ...event, boat_no: i + 1, racer_registration_no: String(4000 + i), racer_name: `Sample ${i}`,
+}));
+const now = "2026-11-18T23:58:00+09:00";
+const snapshot = { race_date: raceDate, captured_at: "2026-11-18T23:55:00+09:00",
+  program: { events: [event], entries: boats } };
+async function detail({ enabled, morningEnabled = false, morningSnapshot = null,
+  clock = now, liveEntries = [], liveEvent = null, raceResult = null, raceResultEntries = [] }) {
+  let reads = 0;
+  const client = {
+    rpc: async name => { reads++; return { data: morningSnapshot &&
+      name === "bs_read_site_race_day_program_candidate" ? morningSnapshot :
+      morningSnapshot ? null : snapshot }; },
+    from(table) {
+      const data = table === "bs_race_events" ? liveEvent :
+        table === "bs_race_entries" ? liveEntries :
+        table === "bs_race_results" ? raceResult :
+        table === "bs_race_result_entries" ? raceResultEntries : null;
+      const result = { data, error: null };
+      return { select(){ return this; }, eq(){ return this; }, order(){ return this; },
+        maybeSingle: async () => result, then: resolve => resolve(result) };
+    },
+  };
+  class FixtureDate extends Date {
+    constructor(...args) { super(...(args.length ? args : [clock])); }
+  }
+  const getRaceDetail = runInNewContext(code + "\ngetRaceDetail", {
+    Date: FixtureDate, process: { env: {
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "fixture",
+      BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: enabled ? "true" : "false",
+      BS_RACE_DAY_PROGRAM_ENABLED: morningEnabled ? "true" : "false",
+    } }, createClient: () => client, readSiteProgramCandidate, hasOfficialRaceCancellation, resolveExhibition,
+    buildPhase2Predictions: () => ({}), console,
+  });
+  const data = await getRaceDetail(raceDate, 1, 1);
+  return { data, reads };
+}
+test("normal race detail makes no snapshot requests while feature is disabled", async () => {
+  const outcome = await detail({ enabled: false });
+  assert.equal(outcome.reads, 0);
+  assert.equal(outcome.data, null);
+});
+test("race-day morning detail can show six boats without exhibition when enabled", async () => {
+  const morningSnapshot = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  const outcome = await detail({ enabled: false, morningEnabled: true, morningSnapshot,
+    clock: "2026-11-19T08:31:00+09:00" });
+  assert.equal(outcome.reads, 1);
+  assert.equal(outcome.data.event.program_source, "race_day_morning_snapshot");
+  assert.equal(outcome.data.entries.length, 6);
+  assert.equal(outcome.data.entries[0].exhibition_time, null);
+});
+test("morning program does not hide a result-only race or display a cancelled roster", async () => {
+  const morningSnapshot = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  const options = { enabled: false, morningEnabled: true, morningSnapshot,
+    clock: "2026-11-19T16:00:00+09:00" };
+  const confirmed = await detail({ ...options, raceResult: {
+    race_date: raceDate, course_code: 1, race_no: 1, result_status: "confirmed",
+    trifecta_result: "1-2-3", trifecta_payout: 1200,
+  } });
+  assert.ok(confirmed.data.result);
+  assert.equal(confirmed.data.entries.length, 6);
+  const cancelled = await detail({ ...options, raceResult: { race_status: "cancelled" } });
+  assert.equal(cancelled.data.programReviewRequired, true);
+  assert.equal(cancelled.data.entries.length, 0);
+  const postponed = await detail({ ...options, raceResult: { race_status: "postponed" } });
+  assert.equal(postponed.data.programReviewRequired, true);
+});
+test("race-day morning index and venue use the same six boats when live events are absent", async () => {
+  const morning = { ...snapshot, capture_timing: "race_day_morning",
+    captured_at: "2026-11-18T23:30:00Z" };
+  let cancelled = false;
+  const client = {
+    rpc: async name => {
+      assert.equal(name, "bs_read_site_race_day_program_candidate");
+      return { data: morning };
+    },
+    from(table) {
+      const data = cancelled && table === "bs_race_results"
+        ? [{ race_date: raceDate, course_code: 1, race_no: 1, race_status: "cancelled" }] : [];
+      const result = { data, error: null };
+      return { select(){ return this; }, eq(){ return this; }, order(){ return this; },
+        then: resolve => resolve(result) };
+    },
+  };
+  class FixtureDate extends Date {
+    constructor(...args) { super(...(args.length ? args : ["2026-11-19T08:31:00+09:00"])); }
+  }
+  const globals = { Date: FixtureDate, process: { env: {
+    NEXT_PUBLIC_SUPABASE_URL: "https://example.test", SUPABASE_SERVICE_ROLE_KEY: "fixture",
+    BS_RACE_DAY_PROGRAM_ENABLED: "true", BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: "false",
+  } }, createClient: () => client, readTodayMorningSiteProgram, readTomorrowSiteProgram: async () => null,
+  hasOfficialRaceCancellation, readSiteProgramCandidate, resolveExhibition,
+  buildPhase2Predictions: () => ({}), console };
+  const platform = runInNewContext(code + "\n({getCourseRaces, getCourseName, normalizeDate})", globals);
+  const index = runInNewContext(indexCode + "\ngetCoursesForRacesIndex", {
+    ...globals, getCourseName: platform.getCourseName, normalizeDate: platform.normalizeDate,
+  });
+  const courses = await index(raceDate);
+  const venue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(courses[0].races[0].entries.length, 6);
+  assert.equal(courses[0].exhibitionCount, 0);
+  assert.equal(venue[0].entries.length, 6);
+  assert.equal(venue[0].entries[0].boat_no, courses[0].races[0].entries[0].boat_no);
+  cancelled = true;
+  const cancelledCourses = await index(raceDate);
+  const cancelledVenue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(cancelledCourses[0].cancelledCount, 1);
+  assert.equal(cancelledCourses[0].races[0].entries.length, 0);
+  assert.equal(cancelledVenue[0].raceStatus, "cancelled");
+  assert.equal(cancelledVenue[0].entries.length, 0);
+});
+test("race detail can render mapped previous-day event and six boats with no result", async () => {
+  const outcome = await detail({ enabled: true });
+  assert.equal(outcome.reads, 1);
+  assert.equal(outcome.data.event.program_source, "previous_day_snapshot");
+  assert.equal(outcome.data.entries.length, 6);
+  assert.equal(outcome.data.result, null);
+  assert.equal(outcome.data.event.course_name, "桐生");
+});
+test("race detail keeps the ordinary live path for a verified complete race", async () => {
+  const outcome = await detail({ enabled: true, clock: "2026-11-19T12:00:00+09:00",
+    liveEvent: event, liveEntries: boats.map(row => ({ ...row, exhibition_time: 6.8 })) });
+  assert.equal(outcome.data.entries[0].exhibition_time, 6.8);
+  assert.equal(outcome.data.event.program_source, undefined);
+});
+
+const indexCode = readFileSync(new URL("../../app/lib/racesIndexLight.js", import.meta.url), "utf8")
+  .replace(/^import .*;$/gm, "").replace(/^export /gm, "");
+
+test("tomorrow date, day index, venue list and detail agree on one verified program", async () => {
+  const secondEvent = { ...event, course_code: 2 };
+  const staged = { ...snapshot, program: { events: [event, secondEvent],
+    entries: [...boats, ...boats.map(boat => ({ ...boat, course_code: 2 }))] } };
+  let reads = 0;
+  const client = { rpc: async (_name, parameters) => {
+    reads++;
+    assert.deepEqual(parameters, { p_date: raceDate });
+    return { data: staged };
+  } };
+  class FixtureDate extends Date {
+    constructor(...args) { super(...(args.length ? args : [now])); }
+    static now() { return Date.parse(now); }
+  }
+  const { readTomorrowSiteProgram, tomorrowProgramDate } = await import("./site-program-server-read.mjs");
+  const globals = {
+    Date: FixtureDate, process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://example.test",
+      SUPABASE_SERVICE_ROLE_KEY: "fixture", BS_PREVIOUS_DAY_SITE_DETAIL_ENABLED: "true" } },
+    createClient: () => client, readTomorrowSiteProgram, tomorrowProgramDate, hasOfficialRaceCancellation, resolveExhibition, console,
+  };
+  const platform = runInNewContext(code + "\n({getCourseRaces, getCourseName, normalizeDate})", globals);
+  const index = runInNewContext(indexCode + "\n({getCoursesForRacesIndex, getAvailableTomorrowProgramDate})", {
+    ...globals, getCourseName: platform.getCourseName, normalizeDate: platform.normalizeDate,
+  });
+  assert.equal(await index.getAvailableTomorrowProgramDate(), raceDate);
+  const courses = await index.getCoursesForRacesIndex(raceDate);
+  assert.equal(courses.length, 2);
+  assert.equal(courses[0].raceDate, raceDate);
+  assert.equal(courses[0].races[0].programAvailable, true);
+  assert.equal(courses[0].races[0].entries.length, 6);
+  assert.equal(courses[0].exhibitionCount, 0);
+  assert.equal(courses[0].races[0].entries[0].exhibition_time, null);
+  assert.equal(courses[0].races[0].entries[0].average_st, null);
+  assert.equal(courses[0].resultCount, 0);
+  const venue = await platform.getCourseRaces(raceDate, 1);
+  assert.equal(venue.length, 1);
+  assert.equal(venue[0].race_no, 1);
+  assert.equal(venue[0].entries.length, 6);
+  assert.equal(venue[0].result, null);
+  assert.equal((await detail({ enabled: true })).data.event.race_date, raceDate);
+  assert.equal(reads, 3);
+});
+
+test("an official cancellation takes priority over the previous-day program", async () => {
+  const outcome = await detail({ enabled: true, clock: "2026-11-19T12:00:00+09:00",
+    liveEvent: { ...event, race_status: "cancelled", race_cancel_code: "official_cancelled" },
+    liveEntries: [],
+  });
+  assert.equal(outcome.reads, 0);
+  assert.equal(outcome.data.officialCancellation, true);
+  assert.equal(outcome.data.entries.length, 0);
+});
+
+test("a registered substitution holds the detail even when live entries are incomplete", async () => {
+  const outcome = await detail({ enabled: true, clock: "2026-11-19T12:00:00+09:00", liveEvent: event,
+    liveEntries: [{ ...boats[0], racer_registration_no: "4999" }],
+  });
+  assert.equal(outcome.data.programReviewRequired, true);
+  assert.equal(outcome.data.entries.length, 0);
+});
