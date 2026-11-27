@@ -20,7 +20,7 @@ export async function GET(request) {
   if (process.env.BS_ADMIN_NATIONAL_BEFOREINFO_CHECK_ENABLED !== "true") return reply({ ok: false, error: "disabled" }, 404);
   const q = new URL(request.url).searchParams;
   const date = q.get("date"), course = q.get("course"), raceNo = q.get("race");
-  if (date !== todayJst() || !/^(?:[1-9]|1\\d|2[0-4])$/.test(course || "") ||
+  if (date !== todayJst() || !/^(?:[1-9]|1\d|2[0-4])$/.test(course || "") ||
       !/^(?:[1-9]|1[0-2])$/.test(raceNo || "") || q.getAll("date").length !== 1 ||
       q.getAll("course").length !== 1 || q.getAll("race").length !== 1) return reply({ ok: false, error: "invalid_race" }, 400);
   const race = { raceDate: date, courseCode: Number(course), raceNo: Number(raceNo) };
