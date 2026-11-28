@@ -1,31 +1,67 @@
-name: Dev1 BRDB private one-shot (candidate)
+name: BoatStrikers Tokoname official follow-up
 
 on:
   workflow_dispatch:
     inputs:
       target_date:
-        description: 'JST race date YYYYMMDD'
-        required: true
-        type: string
-      course_code:
-        description: 'One venue code 1-24'
-        required: true
-        type: string
-      race_no:
-        description: 'One race number 1-12'
+        description: 'Current JST date YYYYMMDD'
         required: true
         type: string
       approval_phrase:
-        description: 'DRY_RUN_ONLY for no-secret preflight; live phrase requires concrete approval'
+        description: 'TOKONAME_GET_4_TO_8 only after approval'
         required: true
         type: string
 
 permissions:
   contents: read
+  actions: read
+
+concurrency:
+  group: boatstrikers-official-budget
+  cancel-in-progress: false
 
 jobs:
-  unavailable-on-main:
-    if: ${{ github.ref != 'refs/heads/main' && false }}
+  tokoname:
+    if: >-
+      github.repository == 'boat-s-1/boatstrikers-station' &&
+      github.ref == 'refs/heads/codex/boatstrikers-tokoname-probe-20261128' &&
+      github.run_attempt == '1' &&
+      inputs.approval_phrase == 'TOKONAME_GET_4_TO_8'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - run: echo 'This inert default-branch stub does not access BRDB.'
+      - name: Verify pilot checkpoint and dispatch scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_DATE: ${{ inputs.target_date }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_DATE" = "$(TZ=Asia/Tokyo date +%Y%m%d)"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/46119069502" |
+            jq -e '.conclusion == "success" and .run_attempt == 1 and .head_sha == "a01f7abd6a28d965c8d40ba3ed1e5c39926690d7"' >/dev/null
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs" -f branch="$GITHUB_REF_NAME" -f per_page=10 |
+            jq -e --arg id "$GITHUB_RUN_ID" '
+              .total_count == 1 and (.workflow_runs | length) == 1 and
+              (.workflow_runs[0] | (.id | tostring) == $id and .event == "workflow_dispatch")
+            ' >/dev/null
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Run sequential Tokoname verification
+        env:
+          TARGET_DATE: ${{ inputs.target_date }}
+        run: |
+          set -euo pipefail
+          python3 scripts/cloud-sync-offline/tokoname-pilot.py "$RUNNER_TEMP/tokoname-public" "$TARGET_DATE"
+
+      - name: Publish only sanitized evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: tokoname-pilot-ledger-${{ github.run_id }}
+          path: ${{ runner.temp }}/tokoname-public/get-continuation.jsonl
+          if-no-files-found: ignore
+          retention-days: 1
