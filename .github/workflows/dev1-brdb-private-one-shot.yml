@@ -1,4 +1,4 @@
-name: Dev1 BRDB private one-shot (candidate)
+name: BoatStrikers official HTTPS pilot
 
 on:
   workflow_dispatch:
@@ -8,24 +8,94 @@ on:
         required: true
         type: string
       course_code:
-        description: 'One venue code 1-24'
+        description: 'Use 08 to label this Tokoname follow-up pilot'
         required: true
         type: string
       race_no:
-        description: 'One race number 1-12'
+        description: 'Use 1 to label this pilot'
         required: true
         type: string
       approval_phrase:
-        description: 'DRY_RUN_ONLY for no-secret preflight; live phrase requires concrete approval'
+        description: 'OFFICIAL_INDEX_ONE_GET after maintainer authorizes this run'
         required: true
         type: string
 
 permissions:
   contents: read
+  actions: read
+
+concurrency:
+  group: boatstrikers-official-index-pilot
+  cancel-in-progress: false
 
 jobs:
-  unavailable-on-main:
-    if: ${{ github.ref != 'refs/heads/main' && false }}
+  official-index:
+    if: >-
+      github.repository == 'boat-s-1/boatstrikers-station' &&
+      github.ref == 'refs/heads/codex/boatstrikers-official-probe-20261128' &&
+      github.run_attempt == '1' &&
+      inputs.approval_phrase == 'OFFICIAL_INDEX_ONE_GET' &&
+      inputs.course_code == '08' && inputs.race_no == '1'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - run: echo 'This inert default-branch stub does not access BRDB.'
+      - name: Require first dispatch on this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROBE_REPOSITORY: ${{ github.repository }}
+          PROBE_BRANCH: ${{ github.ref_name }}
+          PROBE_RUN: ${{ github.run_id }}
+          PROBE_TARGET_DATE: ${{ inputs.target_date }}
+        run: |
+          set -euo pipefail
+          test "$PROBE_TARGET_DATE" = "$(TZ=Asia/Tokyo date +%Y%m%d)"
+          response="$(gh api --method GET --hostname github.com \
+            "repos/$PROBE_REPOSITORY/actions/workflows/dev1-brdb-private-one-shot.yml/runs" \
+            -f branch="$PROBE_BRANCH" -f event=workflow_dispatch -f per_page=10)"
+          jq -e --arg run "$PROBE_RUN" '
+            .total_count == 1 and (.workflow_runs | length) == 1 and
+            (.workflow_runs[0].id | tostring) == $run
+          ' <<< "$response" >/dev/null
+
+      - name: Check out the dispatched revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Fetch the national official index once
+        env:
+          PROBE_TARGET_DATE: ${{ inputs.target_date }}
+        run: |
+          set -euo pipefail
+          test "$PROBE_TARGET_DATE" = "$(TZ=Asia/Tokyo date +%Y%m%d)"
+          state="$RUNNER_TEMP/boatstrikers-official-index"
+          mkdir -p "$state"
+          set +e
+          python3 scripts/cloud-sync-offline/official-get-once.py \
+            https://www.boatrace.jp/owpc/pc/race/index \
+            --approved-host www.boatrace.jp --state "$state"
+          result=$?
+          set -e
+          if test -f "$state/get-continuation.jsonl"; then
+            cat "$state/get-continuation.jsonl"
+          fi
+          if test -f "$state/official-03.html"; then
+            (cd "$state" && sha256sum official-03.html > SHA256SUMS)
+          fi
+          test "$result" -eq 0
+          jq -se '
+            length == 2 and .[0].event == "attempt" and
+            .[1].event == "result" and
+            (.[1].timings | startswith("200\t"))
+          ' "$state/get-continuation.jsonl" >/dev/null
+          test -s "$state/official-03.html"
+
+      - name: Retain official response and GET ledger
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: boatstrikers-official-index-${{ github.run_id }}
+          path: ${{ runner.temp }}/boatstrikers-official-index/
+          if-no-files-found: ignore
+          retention-days: 1
